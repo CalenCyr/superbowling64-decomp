@@ -33,6 +33,9 @@ Also record:
 - **Flags** (verified on five game functions): `-c -G0 -mips3 -mgp32 -mfp32 -O2`. `-O3` gave the same bytes on those
   (no static callees); switch a unit to `-O3` only on evidence of inlining. Plain `char` is signed: retail byte
   strings use `lbu`, so they are `u8`.
+  - Per-unit override: `src/libkmc/*.c` (KMC's C runtime) build with `-O` instead of `-O2` (Makefile). Evidence: its
+    code is unscheduled; `rand` stores its state before computing the result and `func_80056690` loads its stack
+    arguments in source order, which `-O2`'s scheduler reorders; every libkmc C function matches at `-O`.
 - **C pipeline:** a C unit is a splat `c` subsegment (`src/<unit>.c`); unmatched functions stay as
   `INCLUDE_ASM("asm/nonmatchings/<unit>", <func>);`. C is compiled by the KMC `gcc` driver, so KMC `as` 2.6
   assembles both compiled code and included asm (modern GAS expands `move` to `or`, KMC to `addu`). Asm-only units
@@ -58,8 +61,13 @@ Also record:
     `osViGetCurrentFramebuffer` 0x8004DFE0 (reads `__osViCurr`); `__osSiRawReadIo`/`__osSiRawWriteIo` (call
     `__osSiDeviceBusy`). `sprite` and `spriteex` (0x8004B2D0) compile to identical bytes and relocations, so the
     ROM cannot decide; `sprite` is linked.
-  - About 50 functions after `ldiv` (0x80055660) are KMC libc/libgcc, not ultralib, and stay asm; `__divdi3`,
-    `__udivdi3`, `__umoddi3` are named from libultra's calls into them.
+  - After `ldiv` (0x80055660) comes KMC's libkmc, not ultralib: `src/libkmc/` (C runtime, libm and the SVID
+    `matherr` hook, ROM 0x30C20-0x320F8; `.data` 0x3A4F0-0x3A7F0, `.rodata` 0x3C1E0-0x3C2A0, `rand`'s `.bss` at
+    0x80066B20; declarations in `include/libc.h`), then the SDK's `rspboot` microcode (a `bin` subsegment,
+    0x32100-0x321D0). libkmc's `llmath.c` (`__divdi3`, `__moddi3`, `__udivdi3`, `__umoddi3`, `__fixdfdi`,
+    `__floatdidf` and three internal division helpers) is hand-written assembly, ORIGINAL-ASM in
+    `config/rules.txt`: GCC 2.7.2's `libgcc2.c` was checked and does not apply (no `__udivmoddi4` structure,
+    non-ABI register conventions), so it is not adopted. `strcat` calls the game's own `strcpy` (0x80029578).
   - objdiff reports each linked member as a `libultra/<dir>/<file>` unit (`tools/objdiff_config.py`).
   Symbols outside every splat segment live in `undefined_syms.txt`. Retail ROM: `rom.z64`, SHA-1
   `56937a9e9536af55ebed06480413265848c4a04a`, F3DEX 2.08, libultra 2.0K.
@@ -175,7 +183,7 @@ Project profile (fill in):
 | item | this project |
 |---|---|
 | compiler dialect: what it accepts and rejects (R22) | GNU C (gcc 2.7.2): C89 plus GNU extensions; `//` comments accepted |
-| naming-style table, one row per module if styles differ (R8); without evidence, start from `style-defaults.md` | Table 1 (Quake III C style) from `decomp-code-rules/references/style-defaults.md`, all modules (user ruling); libultra keeps SDK names |
+| naming-style table, one row per module if styles differ (R8); without evidence, start from `style-defaults.md` | Table 1 (Quake III C style) from `decomp-code-rules/references/style-defaults.md`, all modules (user ruling); libultra keeps SDK names; libkmc keeps ANSI C/SVID names |
 | layout style: braces, indent, line limit, function and section banners (R23, R32, R33) | Table 1 layout: K&R braces with spaces inside parentheses, `/* ===== Name ===== */` banners |
 | placeholder patterns (R7) | `func_8XXXXXXX`, `D_8XXXXXXX`, `jtbl_`, `L8XXXXXXX` (splat defaults); overlay symbols add `_<segment>` |
 | evidence sources for names: strings, symbols, RTTI, sibling source (R7) | ROM strings (e.g. the `BW64FAT` file names); libultra and n_audio SDK names (matched against ultralib, or from the SDK code a function reproduces); no symbols. Provenance: `config/names.txt`, one line per recovered name (name, address or owner, `evidence:` or `invented:` with the reason). Module prefixes: `Snd_` functions and `snd_` globals for the sound driver (`src/166B0.c`) |

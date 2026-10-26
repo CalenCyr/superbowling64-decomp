@@ -261,20 +261,22 @@ segments:
       - [0x30A20, lib, libgultra_rom, dp]
       - [0x30A40, lib, libgultra_rom, si]
       - [0x30A60, lib, libgultra_rom, ldiv]
-      - [0x30C20, asm]
-      - [0x30DA0, asm]
-      - [0x311E0, asm]
-      - [0x313E0, asm]
-      - [0x31620, asm]
-      - [0x31880, asm]
-      - [0x31A90, asm]
-      - [0x31D00, asm]
-      - [0x31E70, asm]
-      - [0x31E90, asm]
-      - [0x31FF0, asm]
-      - [0x320F0, asm]
-      - [0x32100, asm]
-      - [0x32150, data]
+      # KMC libkmc (C runtime and libm) and its hand-written long long helpers, linked after libultra.
+      - [0x30C20, c, libkmc/asin]
+      - [0x30DA0, c, libkmc/atan]
+      - [0x311E0, c, libkmc/atoi]
+      - [0x312A0, c, libkmc/memcmp]
+      - [0x313E0, c, libkmc/memmove]
+      - [0x31620, c, libkmc/rand]
+      - [0x31660, c, libkmc/sqrt]
+      - [0x31880, c, libkmc/strcat]
+      - [0x31930, c, libkmc/strncmp]
+      - [0x31A90, c, libkmc/mathexc]
+      - [0x31B00, c, libkmc/llmath]
+      - [0x320F0, c, libkmc/matherr]
+      # rspboot: the SDK's RSP boot microcode (a binary object), up to rspbootTextEnd
+      - [0x32100, bin, rspboot]
+      - [0x321D0, data]
       - [0x38520, lib, libgultra_rom, pimgr, .data]
       - [0x38550, lib, libgultra_rom, cartrominit, .data]
       - [0x38560, lib, libgultra_rom, piacs, .data]
@@ -307,7 +309,9 @@ segments:
       - [0x3A420, lib, libgultra_rom, vimodepallan1, .data]
       - [0x3A470, lib, libgultra_rom, vimodempallan1, .data]
       - [0x3A4C0, lib, libgultra_rom, xlitob, .data]
-      - [0x3A4F0, data]
+      - [0x3A4F0, .data, libkmc/atan]
+      - [0x3A6F0, .data, libkmc/ctype]
+      - [0x3A7F0, data]
       - [0x3B990, .rodata, 166B0]
       - [0x3BA70, rodata]
       - [0x3BB90, lib, libgultra_rom, setintmask, .rodata]
@@ -330,7 +334,9 @@ segments:
       - [0x3BFE0, lib, libgultra_rom, libm_vals, .rodata]
       - [0x3BFF0, lib, libgultra_rom, xprintf, .rodata]
       - [0x3C170, lib, libgultra_rom, xldtob, .rodata]
-      - [0x3C1E0, rodata]
+      - [0x3C1E0, .rodata, libkmc/asin]
+      - [0x3C220, .rodata, libkmc/atan]
+      - [0x3C280, .rodata, libkmc/sqrt]
       - { type: bss, vram: 0x80060EA0 }
       - { type: lib, vram: 0x800645C0, name: libgultra_rom, object: pimgr, section: .bss }
       - { type: lib, vram: 0x80065790, name: libgultra_rom, object: piacs, section: .bss }
@@ -339,7 +345,8 @@ segments:
       - { type: lib, vram: 0x800657F0, name: libgultra_rom, object: sprite, section: .bss }
       - { type: lib, vram: 0x80065800, name: libgultra_rom, object: vimgr, section: .bss }
       - { type: lib, vram: 0x80066A20, name: libgultra_rom, object: motor, section: .bss }
-      - { type: bss, vram: 0x80066B20, name: 80066B20 }
+      - { type: .bss, vram: 0x80066B20, name: libkmc/rand }
+      - { type: bss, vram: 0x80066B30, name: 80066B30 }
 
   # BW64FAT file table: {name, romStart, romEnd, 0} entries; loaded at boot right after main's bss.
   - name: fat

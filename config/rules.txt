@@ -2,3 +2,16 @@
 #   asm-helper NAME     an inline-asm function or macro the evidence shows the original had (R18); its
 #                       callers still count as matched, and are listed
 #   original-asm NAME   a function the evidence shows was written in assembly: ORIGINAL-ASM, counted neither way
+# KMC libkmc's hand-written long long helpers (src/libkmc/llmath.c): $t9 scratch, `xor r,r,r` clears, $ra saved in
+# $t5, results in non-ABI registers (quotient v0:v1 with remainder a0:a1 or t1), a branch from __divdi3 into
+# __udivdi3; no compiler emits these
+original-asm func_80056700
+original-asm func_80056704
+original-asm func_80056738
+original-asm func_80056834
+original-asm __divdi3
+original-asm __moddi3
+original-asm __udivdi3
+original-asm __umoddi3
+original-asm __fixdfdi
+original-asm __floatdidf

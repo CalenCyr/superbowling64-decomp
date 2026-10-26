@@ -401,8 +401,24 @@ __osPfsPifRam = 0x800EA0E0; // size:0x40
 __osEepromTimerQ = 0x800F7C00; // size:0x18
 __osSiAccessQueue = 0x80102058; // size:0x18
 
-// KMC libgcc (still asm), named from libultra's calls into it
+// KMC libkmc (lane match-libc): C runtime and libm, then the hand-written long long helpers (libultra calls
+// __divdi3, __udivdi3, __umoddi3 by name; the rest are named from behaviour and their matherr name strings)
+asin = 0x80055820; // type:func
+acos = 0x800558F8; // type:func
+atan = 0x80055B58; // type:func
+atan2 = 0x80055C70; // type:func
+atoi = 0x80055DE0; // type:func
+atol = 0x80055DFC; // type:func
+memcmp = 0x80055EA0; // type:func
+memmove = 0x800560E4; // type:func
+memset = 0x80056150; // type:func
+rand = 0x80056220; // type:func
+srand = 0x80056254; // type:func
+sqrt = 0x80056260; // type:func
+strcat = 0x80056480; // type:func
+strncmp = 0x80056530; // type:func
 __divdi3 = 0x80056900; // type:func
+__moddi3 = 0x800569B0; // type:func
 __udivdi3 = 0x80056A70; // type:func
 __umoddi3 = 0x80056A90; // type:func
 
@@ -547,3 +563,12 @@ n_alSynSetPitch = 0x80042540; // type:func
 n_alSynSetVol = 0x800425D0; // type:func
 n_alSynStartVoice = 0x80042680; // type:func
 n_alSynStopVoice = 0x80042710; // type:func
+__fixdfdi = 0x80056AD0; // type:func
+__floatdidf = 0x80056BF0; // type:func
+matherr = 0x80056CF0; // type:func
+rspbootTextStart = 0x80056D00;
+rspbootTextEnd = 0x80056DD0;
+errno = 0x80068210; // size:0x4
+_ctype = 0x8005F2F0; // size:0x100 (name invented)
+// strcat's strcpy resolves to the game's own copy routine in unit 4890
+strcpy = 0x80029578; // type:func
