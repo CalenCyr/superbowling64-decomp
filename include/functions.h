@@ -21,4 +21,6 @@ void func_800425D0( UnkVoice *voice, s32 volume, s32 time );
 void func_80042680( UnkVoice *voice, s32 arg1 );
 void func_80042710( UnkVoice *voice );
 
+f32 __sinf( f32 x );
+
 #endif

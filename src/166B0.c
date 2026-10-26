@@ -577,9 +577,53 @@ f32 func_8003D2B8( UnkChannel *chan ) {
     return chan->unk_D1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D310);
+/*
+================
+func_8003D310
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D374);
+Sets unk_68 to unk_20 * sin( ( unk_AA - unk_B6 ) * unk_DC ) and returns it; 0 while unk_AA has not passed unk_B6.
+================
+*/
+f32 func_8003D310( UnkChannel *chan ) {
+    s32 time;
+
+    time = chan->unk_AA - chan->unk_B6;
+    if ( time > 0 ) {
+        return chan->unk_68 = __sinf( time * chan->unk_DC ) * chan->unk_20;
+    }
+    return 0.0f;
+}
+
+/*
+================
+func_8003D374
+
+Advances unk_14 in steps of 0x100 up to unk_0C, reading a new unk_BC and step length from the unk_38 stream each time unk_A2 runs out.
+================
+*/
+void func_8003D374( UnkChannel *chan ) {
+    u8 value;
+
+    do {
+        chan->unk_14 += 0x100;
+        if ( --chan->unk_A2 == 0 ) {
+            value = *chan->unk_38++;
+            if ( value >= 0x80 ) {
+                chan->unk_BC = value & 0x7F;
+                value = *chan->unk_38++;
+                if ( value >= 0x80 ) {
+                    chan->unk_A2 = ( value & 0x7F ) << 8;
+                    chan->unk_A2 += *chan->unk_38++ + 2;
+                } else {
+                    chan->unk_A2 = value + 2;
+                }
+            } else {
+                chan->unk_BC = value;
+                chan->unk_A2 = 1;
+            }
+        }
+    } while ( chan->unk_14 - chan->unk_0C < 0 );
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D438);
 

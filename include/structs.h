@@ -97,11 +97,12 @@ typedef struct {
     /* 0x008 */ s32 unk_08;
     /* 0x00C */ s32 unk_0C;
     /* 0x010 */ s32 unk_10;          /* -1: none */
-    /* 0x014 */ u8 unk_14[0x1C - 0x14];
+    /* 0x014 */ s32 unk_14;
+    /* 0x018 */ u8 unk_18[0x1C - 0x18];
     /* 0x01C */ u32 unk_1C;
     /* 0x020 */ f32 unk_20;
     /* 0x024 */ f32 unk_24;
-    /* 0x028 */ u8 unk_28[0x2C - 0x28];
+    /* 0x028 */ f32 unk_28;
     /* 0x02C */ f32 unk_2C;
     /* 0x030 */ f32 unk_30;
     /* 0x034 */ u8 *unk_34;
@@ -117,7 +118,7 @@ typedef struct {
     /* 0x05C */ f32 unk_5C;
     /* 0x060 */ f32 unk_60;
     /* 0x064 */ s32 unk_64;
-    /* 0x068 */ s32 unk_68;
+    /* 0x068 */ f32 unk_68;
     /* 0x06C */ f32 unk_6C;
     /* 0x070 */ f32 unk_70;
     /* 0x074 */ UnkSeqHeader *unk_74;
@@ -138,7 +139,7 @@ typedef struct {
     /* 0x0A4 */ u16 unk_A4;
     /* 0x0A6 */ s16 unk_A6;          /* entry of unk_78->unk_18 the channel was started on */
     /* 0x0A8 */ s16 unk_A8;
-    /* 0x0AA */ u8 unk_AA[0xAC - 0xAA];
+    /* 0x0AA */ u16 unk_AA;
     /* 0x0AC */ s16 unk_AC;
     /* 0x0AE */ s16 unk_AE;
     /* 0x0B0 */ s16 unk_B0;
@@ -165,7 +166,9 @@ typedef struct {
     /* 0x0C8 */ u8 unk_C8;
     /* 0x0C9 */ u8 unk_C9;
     /* 0x0CA */ u8 unk_CA;
-    /* 0x0CB */ u8 unk_CB[0xCE - 0xCB];
+    /* 0x0CB */ u8 unk_CB;
+    /* 0x0CC */ u8 unk_CC;
+    /* 0x0CD */ u8 unk_CD;
     /* 0x0CE */ u8 unk_CE;
     /* 0x0CF */ u8 unk_CF;
     /* 0x0D0 */ u8 unk_D0;
