@@ -123,6 +123,12 @@ typedef struct {
     /* 0x2C */ ALWaveTable **waves;
 } waveBank_t;
 
+/* waveBank_t.flags */
+#define WAVEBANK_RELOCATED  0x80000000
+
+/* seTable_t.flags */
+#define SETABLE_RELOCATED   0x00000001
+
 /* Sound effect of an SE table. */
 typedef struct {
     /* 0x00 */ u8 *cmds;            /* command stream; an offset until Snd_LoadSeTable relocates it */
@@ -164,7 +170,29 @@ typedef struct {
     /* 0x40 */ s32 unk_40;
 } sndConfig_t;
 
-#define MAX_LOOP_DEPTH 4            /* entries of the channel loop stack */
+#define NUM_MASTER_CHANNELS 4       /* the first channels: BGM master streams only, no voice */
+#define MAX_LOOP_DEPTH      4       /* entries of the channel loop stack */
+#define FADE_NONE           ( -1 )  /* sndChannel_t.fadeLeft: not fading */
+#define NOTE_LENGTH_HOLD    0x7FFF  /* sndChannel_t.noteLength: the note lasts until a command */
+#define LOOP_FOREVER        0xFF    /* sndChannel_t.loopCount */
+
+/* sndChannel_t.flags */
+#define CHAN_PAUSED         0x00000001  /* skipped by Snd_PlayerHandler; every channel starts paused */
+#define CHAN_MASTER         0x00000002  /* the master stream of a BGM sequence (seqHeader_t.masterCmds) */
+
+/* sndChannel_t.envPhase */
+typedef enum {
+    ENV_OFF,
+    ENV_ATTACK,
+    ENV_DECAY,
+    ENV_SUSTAIN,
+    ENV_RELEASE,
+    ENV_DONE
+} envPhase_t;
+
+/* channel groups, for Snd_SetMasterVolume, Snd_StopAll and Snd_NumActive */
+#define SND_SE              0x00000001  /* channels started from an SE table */
+#define SND_BGM             0x00000002  /* BGM channels */
 
 /*
  * Sequencer channel: one command stream (a BGM track, a BGM master stream or a sound effect) and the state of

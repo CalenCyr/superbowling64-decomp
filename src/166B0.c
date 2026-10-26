@@ -1,4 +1,14 @@
-/* 166B0.c -- sequenced sound channels: channel commands, voice updates and the player callback */
+/*
+ * 166B0.c -- sound driver: a byte-code sequencer for BGM (BGMPTR) and sound effects (SEPTR) that plays wave
+ * banks (BGMWBK, SEWBK) on n_audio voices. The file names are the game's BW64FAT entries; every other name in
+ * this unit is invented (config/names.txt).
+ *
+ * Snd_PlayerHandler runs once a tick (snd_tickRate per second) as the synthesizer's ALPlayer. Each channel
+ * reads one command stream. A byte below CMD_FIRST is a note: the note, then a velocity byte while noteVelocity
+ * is set, then its length in ticks (one byte, or two when the first has bit 7 set) unless fixedLength is set.
+ * A byte from CMD_FIRST on is a command, run by snd_commands[byte - CMD_FIRST] (Snd_Cmd*), which returns the
+ * read position after its operands, or NULL to end the stream.
+ */
 
 #include "common.h"
 #include "ultra64.h"
@@ -9,12 +19,50 @@
 /* The low byte of x as a signed value. */
 #define SEXT8( x ) ( ( ( x ) & 0x80 ) ? ( ( x ) & 0xFF ) - 0x100 : ( ( x ) & 0xFF ) )
 
+/* command stream bytes */
+#define CMD_FIRST           0x80    /* bytes below are notes */
+#define CMD_MARKER          0xAB    /* Snd_CmdMarker */
+#define NOTE_REST           0x60    /* a note that releases the voice */
+#define PROGRAM_NONE        0xFFFF  /* seqHeader_t.programs: no wave, notes rest */
+
+#define TRACK_MASTER        ( -1 )  /* Snd_FindBgmChannel: the master stream */
+#define SE_PRIORITY_DEFAULT ( -1 )  /* Snd_StartSe and Snd_PlaySeEx: the entry's own priority */
+
+#define TICK_RATE_PAL       50      /* ticks per second */
+#define TICK_RATE_NTSC      60
+#define TEMPO_120_BPM       0x6000  /* sequencer time per second at 120 beats per minute (96 steps of 0x100) */
+#define SCALE_ONE           0x80    /* playVolume, playPan and tempoScale: 1 */
+#define VOLUME_MAX          0x7FFF  /* snd_seVolume, snd_bgmVolume and the voice volume */
+#define PAN_CENTRE          0x40
+#define RESEND              0xFF    /* lastPan, lastFxMix: send the next value whatever it is */
+#define RANDOM_SEED         0x12345678
+#define FX_DEFAULT          2       /* snd_fxType until Snd_SetFxType */
+
+/* the message ring buffer */
+#define MIN_MSGS            0x40
+#define MAX_MSGS            0x400
+
+/* sndMsg_t.cmd */
+typedef enum {
+    SNDMSG_PAUSE,                   /* sets CHAN_PAUSED on the channels of arg */
+    SNDMSG_RESUME,                  /* clears it */
+    SNDMSG_SETFX                    /* func_8003F340( arg ) */
+} sndMsgType_t;
+
+/*
+==============================================================================
+
+ENVELOPES
+
+==============================================================================
+*/
+
 /*
 ================
 SetEnvelope
 
-Reads the seven envelope bytes at src into the channel (rates and levels of the attack, decay and release
-phases); returns the position after them. Used by Snd_CmdEnvelopeIndex; Snd_CmdEnvelope repeats its body. The name is invented.
+Reads an envelope_t at src into the channel and derives the slopes of its attack, decay and release; returns
+the position after it. Used by Snd_CmdEnvelopeIndex and Snd_PlayNextNote; Snd_CmdEnvelope repeats its body.
 ================
 */
 static inline u8 *SetEnvelope( sndChannel_t *chan, u8 *src ) {
@@ -48,7 +96,7 @@ static inline u8 *SetEnvelope( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdEnvelopeIndex
 
-Channel command: applies envelope entry (one- or two-byte index) of the channel's header.
+Command 0x90 <index:1-2>: applies envelope index of the channel's sequence (seqHeader_t.envelopes).
 ================
 */
 u8 *Snd_CmdEnvelopeIndex( sndChannel_t *chan, u8 *src ) {
@@ -65,10 +113,20 @@ u8 *Snd_CmdEnvelopeIndex( sndChannel_t *chan, u8 *src ) {
 }
 
 /*
+==============================================================================
+
+SETUP AND SOUND CONTROL
+
+==============================================================================
+*/
+
+/*
 ================
 Snd_Init
 
-Sets up the driver from config: tick rate from the TV type, heap, channel and voice arrays, message queue, default banks, then registers the player and allocates the voices.
+Sets up the driver from config: the tick rate from the TV type, the audio heap, the channel and voice arrays,
+the message ring buffer, the default wave bank and SE table, the synthesizer, full master volumes, then
+registers snd_player and allocates a voice for every channel past the master channels. Called once.
 ================
 */
 void Snd_Init( sndConfig_t *config ) {
@@ -77,18 +135,18 @@ void Snd_Init( sndConfig_t *config ) {
 
     D_800693D8 = config->unk_40;
     D_800DF6B0 = config->unk_00;
-    snd_numChannels = config->numVoices + 4;
+    snd_numChannels = config->numVoices + NUM_MASTER_CHANNELS;
     if ( osTvType == OS_TV_PAL ) {
-        snd_tickRate = 50;
+        snd_tickRate = TICK_RATE_PAL;
     } else {
-        snd_tickRate = 60;
+        snd_tickRate = TICK_RATE_NTSC;
     }
     snd_tickTime = 1000000 / snd_tickRate;
     Snd_InitHeap( config->heapBase, config->heapSize );
     func_8003F7F0( config->unk_08 );
-    snd_voices = Snd_Alloc( ( snd_numChannels - 4 ) * sizeof( N_ALVoice ) );
+    snd_voices = Snd_Alloc( ( snd_numChannels - NUM_MASTER_CHANNELS ) * sizeof( N_ALVoice ) );
     snd_channels = Snd_Alloc( snd_numChannels * sizeof( sndChannel_t ) );
-    snd_voiceChannels = snd_channels + 4;
+    snd_voiceChannels = snd_channels + NUM_MASTER_CHANNELS;
     Snd_InitMessages( config->numMsgs );
     snd_nextWaveBank = NULL;
     snd_defaultWaveBank = NULL;
@@ -101,11 +159,11 @@ void Snd_Init( sndConfig_t *config ) {
         Snd_LoadSeTable( config->seTable );
     }
     snd_markerCallback = NULL;
-    snd_fxType = 2;
+    snd_fxType = FX_DEFAULT;
     func_8003F9A0( config, snd_tickRate, 2 );
-    Snd_SetMasterVolume( 3, 0x7FFF );
+    Snd_SetMasterVolume( SND_SE | SND_BGM, VOLUME_MAX );
     snd_nextId = 1;
-    snd_randomSeed = 0x12345678;
+    snd_randomSeed = RANDOM_SEED;
     snd_player.next = NULL;
     snd_player.handler = Snd_PlayerHandler;
     snd_player.clientData = &snd_player;
@@ -116,25 +174,25 @@ void Snd_Init( sndConfig_t *config ) {
         voiceConfig.unityPitch = 0;
         voiceConfig.priority = config->voicePriority;
         voiceConfig.fxBus = 0;
-        if ( i >= 4 ) {
-            n_alSynAllocVoice( &snd_voices[i - 4], &voiceConfig );
+        if ( i >= NUM_MASTER_CHANNELS ) {
+            n_alSynAllocVoice( &snd_voices[i - NUM_MASTER_CHANNELS], &voiceConfig );
         }
     }
-    Snd_HeapUsed();
+    Snd_HeapUsed();     // NOTE: the result is unused
 }
 
 /*
 ================
 Snd_SetMasterVolume
 
-Sets the volume scale of bank channels (bit 0 of flags) and of the other channels (bit 1).
+Sets the volume scale (VOLUME_MAX: 1) of the channel groups in flags (SND_SE, SND_BGM).
 ================
 */
 void Snd_SetMasterVolume( s32 flags, s16 value ) {
-    if ( flags & 1 ) {
+    if ( flags & SND_SE ) {
         snd_seVolume = value;
     }
-    if ( flags & 2 ) {
+    if ( flags & SND_BGM ) {
         snd_bgmVolume = value;
     }
 }
@@ -143,7 +201,8 @@ void Snd_SetMasterVolume( s32 flags, s16 value ) {
 ================
 Snd_PlayBgm
 
-Starts the channels of hdr through Snd_StartBgm, queues message 1 for them; returns their id.
+Starts BGM sequence hdr (paused) and posts SNDMSG_RESUME for it, so it plays from the next tick. Returns its
+id.
 ================
 */
 s32 Snd_PlayBgm( seqHeader_t *hdr ) {
@@ -158,7 +217,9 @@ s32 Snd_PlayBgm( seqHeader_t *hdr ) {
 ================
 Snd_PlayBgmFromMarker
 
-Starts the channels of hdr like Snd_PlayBgm, but first runs each of them silently up to the marker command 0xAB with the given argument.
+Like Snd_PlayBgm, but first runs each channel of hdr silently, commands and notes, up to its marker command
+(CMD_MARKER) whose value is marker, and starts it there; the marker's length becomes the wait for the next
+event. A channel without that marker runs to its end.
 ================
 */
 s32 Snd_PlayBgmFromMarker( seqHeader_t *hdr, s32 marker ) {
@@ -175,13 +236,13 @@ s32 Snd_PlayBgmFromMarker( seqHeader_t *hdr, s32 marker ) {
         if ( chan->id != id || chan->seq != hdr || chan->cmdPos == NULL ) {
             continue;
         }
-        // RULE-EXCEPTION: R14, a do/while here lets gcc hoist the handler table and 0xAB out of the loop;
+        // RULE-EXCEPTION: R14, a do/while here lets gcc hoist the handler table and CMD_MARKER out of the loop;
         // retail reloads both every pass, so this loop was built from labels.
     next:
         src = chan->cmdPos;
         cmd = *src;
-        if ( cmd >= 0x80 ) {
-            if ( cmd == 0xAB && src[1] == marker ) {
+        if ( cmd >= CMD_FIRST ) {
+            if ( cmd == CMD_MARKER && src[1] == marker ) {
                 goto found;
             }
             chan->cmdPos = snd_commands[cmd & 0x7F]( chan, src + 1 );
@@ -246,27 +307,28 @@ s32 Snd_PlayBgmFromMarker( seqHeader_t *hdr, s32 marker ) {
 ================
 Snd_PlaySe
 
-Starts entry index of the one-shot bank snd_nextSeTable, or else of the default bank snd_seTable, on a free channel; returns the channel id, or 0 without a bank.
+Starts entry index of snd_nextSeTable (used once) or else snd_seTable at full volume and pan scale and the
+entry's own priority, playing from the table's wave table. Returns the id, or 0 without a table or a channel.
 ================
 */
 s32 Snd_PlaySe( s32 index ) {
-    seTable_t *bank;
+    seTable_t *table;
     s32 id;
 
-    bank = snd_nextSeTable;
-    if ( bank != NULL ) {
+    table = snd_nextSeTable;
+    if ( table != NULL ) {
         snd_nextSeTable = NULL;
     } else {
-        bank = snd_seTable;
-        if ( bank == NULL ) {
+        table = snd_seTable;
+        if ( table == NULL ) {
             snd_nextWaveBank = NULL;
             return 0;
         }
     }
     if ( snd_nextWaveBank == NULL ) {
-        snd_nextWaveBank = bank->waveBank;
+        snd_nextWaveBank = table->waveBank;
     }
-    id = Snd_StartSe( bank, index, 0x80, 0x80, -1 );
+    id = Snd_StartSe( table, index, SCALE_ONE, SCALE_ONE, SE_PRIORITY_DEFAULT );
     snd_nextWaveBank = NULL;
     return id;
 }
@@ -275,41 +337,42 @@ s32 Snd_PlaySe( s32 index ) {
 ================
 Snd_PlaySeEx
 
-Like Snd_PlaySe with explicit parameters; with reuse set, a channel already playing the entry from the same bank is restarted instead of taking a free one.
+Snd_PlaySe with a volume and pan scale (SCALE_ONE: 1) and a priority (SE_PRIORITY_DEFAULT: the entry's own).
+With reuse set, a channel already playing this entry of this table is restarted instead of taking another.
 ================
 */
-s32 Snd_PlaySeEx( s32 index, s32 arg1, s32 arg2, s32 reuse, s32 priority ) {
-    seTable_t *bank;
+s32 Snd_PlaySeEx( s32 index, s32 volume, s32 pan, s32 reuse, s32 priority ) {
+    seTable_t *table;
     s32 i;
     sndChannel_t *chan;
     s32 id;
 
     if ( snd_nextSeTable != NULL ) {
-        bank = snd_nextSeTable;
+        table = snd_nextSeTable;
         snd_nextSeTable = NULL;
     } else {
-        bank = snd_seTable;
-        if ( bank == NULL ) {
+        table = snd_seTable;
+        if ( table == NULL ) {
             snd_nextWaveBank = NULL;
             return 0;
         }
     }
     if ( snd_nextWaveBank == NULL ) {
-        snd_nextWaveBank = bank->waveBank;
+        snd_nextWaveBank = table->waveBank;
     }
     if ( reuse ) {
-        for ( i = 4, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
-            if ( chan->seIndex == index && chan->seTable == bank ) {
-                if ( priority == -1 ) {
-                    priority = bank->entries[index].priority;
+        for ( i = NUM_MASTER_CHANNELS, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
+            if ( chan->seIndex == index && chan->seTable == table ) {
+                if ( priority == SE_PRIORITY_DEFAULT ) {
+                    priority = table->entries[index].priority;
                 }
-                id = Snd_StartSeOnChannel( chan, bank, index, arg1, arg2, priority );
+                id = Snd_StartSeOnChannel( chan, table, index, volume, pan, priority );
                 snd_nextWaveBank = NULL;
                 return id;
             }
         }
     }
-    id = Snd_StartSe( bank, index, arg1, arg2, priority );
+    id = Snd_StartSe( table, index, volume, pan, priority );
     snd_nextWaveBank = NULL;
     return id;
 }
@@ -318,28 +381,29 @@ s32 Snd_PlaySeEx( s32 index, s32 arg1, s32 arg2, s32 reuse, s32 priority ) {
 ================
 Snd_StopAll
 
-Starts a fade over value steps (at least 1) on every active channel not fading yet; bit 0 of flags selects bank channels, bit 1 the others. See Snd_Stop.
+Fades out over ticks (at least 1) every active channel of the groups in flags that is not fading yet; a
+paused channel stops on the next tick instead. A faded channel is freed.
 ================
 */
-void Snd_StopAll( s32 flags, s32 value ) {
+void Snd_StopAll( s32 flags, s32 ticks ) {
     s32 i;
     s32 total;
     sndChannel_t *chan;
 
-    total = value;
-    if ( value == 0 ) {
+    total = ticks;
+    if ( ticks == 0 ) {
         total = 1;
     }
     for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
-        if ( chan->seTable != NULL ? flags & 1 : flags & 2 ) {
-            if ( chan->cmdPos != NULL && chan->fadeLeft == -1 ) {
-                if ( chan->flags & 1 ) {
+        if ( chan->seTable != NULL ? flags & SND_SE : flags & SND_BGM ) {
+            if ( chan->cmdPos != NULL && chan->fadeLeft == FADE_NONE ) {
+                if ( chan->flags & CHAN_PAUSED ) {
                     chan->fadeTotal = 1;
                     chan->fadeLeft = 0;
-                    chan->flags &= ~1;
+                    chan->flags &= ~CHAN_PAUSED;
                 } else {
                     chan->fadeTotal = total;
-                    chan->fadeLeft = value;
+                    chan->fadeLeft = ticks;
                 }
             }
         }
@@ -350,7 +414,7 @@ void Snd_StopAll( s32 flags, s32 value ) {
 ================
 Snd_NumActive
 
-Counts the active channels: bit 0 of flags counts those started from a bank, bit 1 the others.
+Counts the active channels of the groups in flags (SND_SE, SND_BGM).
 ================
 */
 s32 Snd_NumActive( s32 flags ) {
@@ -361,7 +425,7 @@ s32 Snd_NumActive( s32 flags ) {
     count = 0;
     for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
         if ( chan->cmdPos != NULL ) {
-            if ( chan->seTable != NULL ? flags & 1 : flags & 2 ) {
+            if ( chan->seTable != NULL ? flags & SND_SE : flags & SND_BGM ) {
                 count++;
             }
         }
@@ -373,10 +437,11 @@ s32 Snd_NumActive( s32 flags ) {
 ================
 Snd_Stop
 
-Starts a fade over value steps (at least 1) on every channel with the given id that is not fading yet; a channel with bit 0 of unk_00 set instead gets a zero-length fade and loses that bit. Returns how many channels it changed.
+Fades out over ticks (at least 1) every channel of sound id that is not fading yet; a paused channel stops on
+the next tick instead and is unpaused. Returns how many channels it changed.
 ================
 */
-s32 Snd_Stop( s32 id, s32 value ) {
+s32 Snd_Stop( s32 id, s32 ticks ) {
     s32 i;
     s32 count;
     s32 total;
@@ -385,20 +450,20 @@ s32 Snd_Stop( s32 id, s32 value ) {
     if ( id == 0 ) {
         return 0;
     }
-    total = value;
-    if ( value == 0 ) {
+    total = ticks;
+    if ( ticks == 0 ) {
         total = 1;
     }
     count = 0;
     for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
-        if ( chan->id == id && chan->fadeLeft == -1 ) {
-            if ( chan->flags & 1 ) {
+        if ( chan->id == id && chan->fadeLeft == FADE_NONE ) {
+            if ( chan->flags & CHAN_PAUSED ) {
                 chan->fadeTotal = 1;
                 chan->fadeLeft = 0;
-                chan->flags &= ~1;
+                chan->flags &= ~CHAN_PAUSED;
             } else {
                 chan->fadeTotal = total;
-                chan->fadeLeft = value;
+                chan->fadeLeft = ticks;
             }
             count++;
         }
@@ -410,7 +475,7 @@ s32 Snd_Stop( s32 id, s32 value ) {
 ================
 Snd_NumChannels
 
-Counts the channels with the given id.
+Counts the channels of sound id.
 ================
 */
 s32 Snd_NumChannels( s32 id ) {
@@ -432,7 +497,7 @@ s32 Snd_NumChannels( s32 id ) {
 ================
 Snd_SetVolume
 
-Sets unk_9E on every channel with the given id; returns how many there were.
+Sets the volume scale (SCALE_ONE: 1) of every channel of sound id; returns how many there were.
 ================
 */
 s32 Snd_SetVolume( s32 id, s32 value ) {
@@ -457,7 +522,8 @@ s32 Snd_SetVolume( s32 id, s32 value ) {
 ================
 Snd_SetPan
 
-Sets unk_B0 and unk_BE = 0xFF on every channel with the given id; returns how many there were.
+Sets the pan scale (SCALE_ONE: 1) of every channel of sound id and has its pan resent; returns how many there
+were.
 ================
 */
 s32 Snd_SetPan( s32 id, s32 value ) {
@@ -473,7 +539,7 @@ s32 Snd_SetPan( s32 id, s32 value ) {
         if ( chan->id == id ) {
             count++;
             chan->playPan = value;
-            chan->lastPan = 0xFF;
+            chan->lastPan = RESEND;
         }
     }
     return count;
@@ -483,7 +549,8 @@ s32 Snd_SetPan( s32 id, s32 value ) {
 ================
 Snd_SetPitchOffset
 
-Sets unk_30 to value + unk_90 on every channel with the given id; returns how many there were.
+Sets the pitch offset (semitones, added to the channel's detune) of every channel of sound id; returns how
+many there were.
 ================
 */
 s32 Snd_SetPitchOffset( s32 id, f32 value ) {
@@ -508,7 +575,8 @@ s32 Snd_SetPitchOffset( s32 id, f32 value ) {
 ================
 Snd_SetTempoScale
 
-Sets the tempo scale unk_98 (clamped to [1, 0x100]) on every channel with the given id and rescales unk_9C from unk_A8; returns how many there were.
+Sets the tempo scale (SCALE_ONE: 1, clamped to [1, 2 * SCALE_ONE]) of every channel of sound id and
+recomputes its tempo from baseTempo; returns how many there were.
 ================
 */
 s32 Snd_SetTempoScale( s32 id, s32 value ) {
@@ -539,7 +607,8 @@ s32 Snd_SetTempoScale( s32 id, s32 value ) {
 ================
 Snd_SetFxBase
 
-Sets unk_CB (clamped to [0, 0x7F]) and unk_CC = 0xFF on every channel with the given id; returns how many there were.
+Sets the minimum FX mix (clamped to [0, 0x7F]) of every channel of sound id and has it resent; returns how
+many there were.
 ================
 */
 s32 Snd_SetFxBase( s32 id, s32 value ) {
@@ -560,21 +629,29 @@ s32 Snd_SetFxBase( s32 id, s32 value ) {
         if ( chan->id == id ) {
             count++;
             chan->fxBase = value;
-            chan->lastFxMix = 0xFF;
+            chan->lastFxMix = RESEND;
         }
     }
     return count;
 }
 
 /*
+==============================================================================
+
+WAVE BANKS
+
+==============================================================================
+*/
+
+/*
 ================
 Snd_LoadWaveBank
 
-Relocates bank to base and makes it the default snd_defaultWaveBank if there is none yet.
+Relocates wave bank bank, whose samples start at ROM address romBase, and makes it the default if there is none.
 ================
 */
-void Snd_LoadWaveBank( waveBank_t *bank, s32 base ) {
-    Snd_RelocateWaveBank( bank, base );
+void Snd_LoadWaveBank( waveBank_t *bank, s32 romBase ) {
+    Snd_RelocateWaveBank( bank, romBase );
     if ( snd_defaultWaveBank == NULL ) {
         snd_defaultWaveBank = bank;
     }
@@ -584,7 +661,7 @@ void Snd_LoadWaveBank( waveBank_t *bank, s32 base ) {
 ================
 Snd_SetNextWaveBank
 
-Makes bank the current snd_nextWaveBank if it is relocated; returns snd_nextWaveBank.
+Makes bank, if it is relocated, the wave bank of the next started sound; returns that bank.
 ================
 */
 waveBank_t *Snd_SetNextWaveBank( waveBank_t *bank ) {
@@ -598,7 +675,7 @@ waveBank_t *Snd_SetNextWaveBank( waveBank_t *bank ) {
 ================
 Snd_SetDefaultWaveBank
 
-Makes bank the default snd_defaultWaveBank if it is relocated.
+Makes bank the default wave bank if it is relocated.
 ================
 */
 void Snd_SetDefaultWaveBank( waveBank_t *bank ) {
@@ -610,8 +687,6 @@ void Snd_SetDefaultWaveBank( waveBank_t *bank ) {
 /*
 ================
 Snd_GetDefaultWaveBank
-
-Returns the default bank snd_defaultWaveBank.
 ================
 */
 waveBank_t *Snd_GetDefaultWaveBank( void ) {
@@ -622,7 +697,7 @@ waveBank_t *Snd_GetDefaultWaveBank( void ) {
 ================
 Snd_GetWaveBank
 
-Returns unk_7C of the first channel with the given id, or 0.
+Returns the wave bank of sound id, or NULL.
 ================
 */
 waveBank_t *Snd_GetWaveBank( s32 id ) {
@@ -641,17 +716,25 @@ waveBank_t *Snd_GetWaveBank( s32 id ) {
 }
 
 /*
+==============================================================================
+
+PAUSE AND EFFECT
+
+==============================================================================
+*/
+
+/*
 ================
 Snd_Pause
 
-Queues message 0 with arg.
+Pauses the channels of sound id from the next tick.
 ================
 */
-void Snd_Pause( s32 arg ) {
+void Snd_Pause( s32 id ) {
     sndMsg_t msg;
 
-    msg.cmd = 0;
-    msg.arg = arg;
+    msg.cmd = SNDMSG_PAUSE;
+    msg.arg = id;
     Snd_PostMessage( &msg );
 }
 
@@ -659,14 +742,14 @@ void Snd_Pause( s32 arg ) {
 ================
 Snd_Resume
 
-Queues message 1 with arg.
+Resumes the channels of sound id from the next tick.
 ================
 */
-void Snd_Resume( s32 arg ) {
+void Snd_Resume( s32 id ) {
     sndMsg_t msg;
 
-    msg.cmd = 1;
-    msg.arg = arg;
+    msg.cmd = SNDMSG_RESUME;
+    msg.arg = id;
     Snd_PostMessage( &msg );
 }
 
@@ -674,15 +757,15 @@ void Snd_Resume( s32 arg ) {
 ================
 Snd_SetFxType
 
-Remembers arg in snd_fxType and queues message 2 with it; returns whether it was queued.
+Remembers the effect setting fxType and posts SNDMSG_SETFX for it; returns 0 if the ring buffer was full.
 ================
 */
-inline s32 Snd_SetFxType( s32 arg ) {
+inline s32 Snd_SetFxType( s32 fxType ) {
     sndMsg_t msg;
 
-    msg.arg = arg;
-    snd_fxType = arg;
-    msg.cmd = 2;
+    msg.arg = fxType;
+    snd_fxType = fxType;
+    msg.cmd = SNDMSG_SETFX;
     return Snd_PostMessage( &msg );
 }
 
@@ -690,42 +773,52 @@ inline s32 Snd_SetFxType( s32 arg ) {
 ================
 Snd_EnableSeqFx
 
-Sets snd_seqFxEnabled to arg; a zero arg first requeues message 2 with snd_fxType and is dropped if that fails.
+Sets snd_seqFxEnabled (1: Snd_CmdFxType may change the effect). Disabling it first restores the effect last
+given to Snd_SetFxType, and is dropped if that cannot be posted.
 ================
 */
-void Snd_EnableSeqFx( s32 arg ) {
+void Snd_EnableSeqFx( s32 enable ) {
     s32 queued;
 
     queued = 1;
-    if ( arg == 0 ) {
+    if ( enable == 0 ) {
         queued = Snd_SetFxType( snd_fxType );
     }
     if ( queued ) {
-        snd_seqFxEnabled = arg;
+        snd_seqFxEnabled = enable;
     }
 }
+
+/*
+==============================================================================
+
+SE TABLES AND QUERIES
+
+==============================================================================
+*/
 
 /*
 ================
 Snd_LoadSeTable
 
-Turns the offsets of bank into pointers, once, and makes it the default snd_seTable if there is none yet.
+Turns the offsets of SE table data into pointers, once, and makes it the default if there is none. Its wave
+table is cleared; Snd_SetSeWaveBank sets it.
 ================
 */
 void Snd_LoadSeTable( void *data ) {
     s32 i;
-    seTable_t *bank;
+    seTable_t *table;
 
-    bank = data;
-    if ( !( bank->flags & 1 ) ) {
+    table = data;
+    if ( !( table->flags & SETABLE_RELOCATED ) ) {
         if ( snd_seTable == NULL ) {
-            snd_seTable = bank;
+            snd_seTable = table;
         }
-        bank->flags = 1;
-        bank->waveBank = 0;
-        bank->programs = (u16 *)( (u8 *)bank + (s32)bank->programs );
-        for ( i = 0; i < bank->numEntries; i++ ) {
-            bank->entries[i].cmds = (u8 *)data + (s32)bank->entries[i].cmds;
+        table->flags = SETABLE_RELOCATED;
+        table->waveBank = 0;
+        table->programs = (u16 *)( (u8 *)table + (s32)table->programs );
+        for ( i = 0; i < table->numEntries; i++ ) {
+            table->entries[i].cmds = (u8 *)data + (s32)table->entries[i].cmds;
         }
     }
 }
@@ -744,30 +837,26 @@ s32 func_8003C1C0( UnkStruct8003C1EC *obj ) {
 /*
 ================
 Snd_SetSeTable
-
-Sets the default bank snd_seTable.
 ================
 */
-void Snd_SetSeTable( seTable_t *bank ) {
-    snd_seTable = bank;
+void Snd_SetSeTable( seTable_t *table ) {
+    snd_seTable = table;
 }
 
 /*
 ================
 Snd_SetNextSeTable
 
-Sets the one-shot bank snd_nextSeTable.
+Sets the SE table of the next Snd_PlaySe only.
 ================
 */
-void Snd_SetNextSeTable( seTable_t *bank ) {
-    snd_nextSeTable = bank;
+void Snd_SetNextSeTable( seTable_t *table ) {
+    snd_nextSeTable = table;
 }
 
 /*
 ================
 Snd_GetSeTable
-
-Returns the default bank snd_seTable.
 ================
 */
 seTable_t *Snd_GetSeTable( void ) {
@@ -778,29 +867,28 @@ seTable_t *Snd_GetSeTable( void ) {
 ================
 Snd_SetSeWaveBank
 
-Sets obj->unk_10.
+Sets the wave bank of an SE table's sounds.
 ================
 */
-void Snd_SetSeWaveBank( UnkStruct8003C1EC *obj, waveBank_t *bank ) {
-    obj->unk_10 = bank;
+void Snd_SetSeWaveBank( UnkStruct8003C1EC *table, waveBank_t *bank ) {
+    table->unk_10 = bank;
 }
 
 /*
 ================
 Snd_GetSeWaveBank
-
-Returns obj->unk_10.
 ================
 */
-waveBank_t *Snd_GetSeWaveBank( UnkStruct8003C1EC *obj ) {
-    return obj->unk_10;
+waveBank_t *Snd_GetSeWaveBank( UnkStruct8003C1EC *table ) {
+    return table->unk_10;
 }
 
 /*
 ================
 func_8003C1FC
 
-Sets D_8005CE4C.
+Sets D_8005CE4C, a pointer to a table of three functions of the synthesizer unit (func_8003F7FC to
+func_8003F8C0); identity unknown.
 ================
 */
 void func_8003C1FC( s32 value ) {
@@ -813,7 +901,7 @@ void func_8003C1FC( s32 value ) {
 ================
 func_8003C208
 
-Returns unk_08 of the header (or else the bank) of the first channel with the given id, or 0.
+Returns unk_08 of the sequence (or else the SE table) of the first channel of sound id, or 0.
 ================
 */
 s32 func_8003C208( s32 id ) {
@@ -842,7 +930,7 @@ INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C208);
 ================
 Snd_GetProgramTable
 
-Returns unk_20 of the header, or unk_14 of the bank, of the first channel with the given id, or NULL.
+Returns the program-to-wave table of the sequence, or else the SE table, of sound id, or NULL.
 ================
 */
 u16 *Snd_GetProgramTable( s32 id ) {
@@ -867,7 +955,7 @@ u16 *Snd_GetProgramTable( s32 id ) {
 ================
 Snd_SetMarkerCallback
 
-Sets the snd_markerCallback callback.
+Sets the function Snd_CmdMarker calls with the sound id and the marker value.
 ================
 */
 void Snd_SetMarkerCallback( void (*callback)( s32 id, s32 value ) ) {
@@ -875,17 +963,25 @@ void Snd_SetMarkerCallback( void (*callback)( s32 id, s32 value ) ) {
 }
 
 /*
+==============================================================================
+
+MESSAGES
+
+==============================================================================
+*/
+
+/*
 ================
 Snd_InitMessages
 
-Allocates the message ring buffer with count entries, clamped to [0x40, 0x400].
+Allocates the message ring buffer with count entries, clamped to [MIN_MSGS, MAX_MSGS].
 ================
 */
 void Snd_InitMessages( s32 count ) {
-    if ( count < 0x40 ) {
-        count = 0x40;
-    } else if ( count > 0x400 ) {
-        count = 0x400;
+    if ( count < MIN_MSGS ) {
+        count = MIN_MSGS;
+    } else if ( count > MAX_MSGS ) {
+        count = MAX_MSGS;
     }
     snd_msgs = Snd_Alloc( count * sizeof( sndMsg_t ) );
     snd_numMsgs = count;
@@ -897,18 +993,18 @@ void Snd_InitMessages( s32 count ) {
 ================
 Snd_HandleMessage
 
-Handles one queued message: 0 and 1 change bit 0 of unk_00 on the channels of msg->arg, 2 calls func_8003F340.
+Runs one posted message.
 ================
 */
 void Snd_HandleMessage( sndMsg_t *msg ) {
     switch ( msg->cmd ) {
-    case 0:
-        Snd_SetChannelFlags( msg->arg, ~1, 1 );
+    case SNDMSG_PAUSE:
+        Snd_SetChannelFlags( msg->arg, ~CHAN_PAUSED, CHAN_PAUSED );
         break;
-    case 1:
-        Snd_SetChannelFlags( msg->arg, ~1, 0 );
+    case SNDMSG_RESUME:
+        Snd_SetChannelFlags( msg->arg, ~CHAN_PAUSED, 0 );
         break;
-    case 2:
+    case SNDMSG_SETFX:
         func_8003F340( msg->arg );
         break;
     }
@@ -918,7 +1014,7 @@ void Snd_HandleMessage( sndMsg_t *msg ) {
 ================
 Snd_PostMessage
 
-Appends msg to the ring buffer; returns 0 if it is full, else 1.
+Appends msg to the ring buffer, to run on the next tick; returns 0 if it is full, else 1.
 ================
 */
 s32 Snd_PostMessage( sndMsg_t *msg ) {
@@ -934,10 +1030,20 @@ s32 Snd_PostMessage( sndMsg_t *msg ) {
 }
 
 /*
+==============================================================================
+
+PLAYER AND VOICES
+
+==============================================================================
+*/
+
+/*
 ================
 Snd_PlayerHandler
 
-Player callback: handles the queued messages, then advances every active channel by one tick (commands, step streams, fade, envelope, modulation, voice update). Returns the time to the next call.
+The synthesizer calls this once a tick: it runs the posted messages, then advances every unpaused channel by
+one tick (pending voice start, notes and commands, step streams, fade out, envelope, auto pan, vibrato, trill,
+then the voice's pitch, volume and pan). Returns the time to the next call, in microseconds.
 ================
 */
 s32 Snd_PlayerHandler( void *clientData ) {
@@ -951,15 +1057,15 @@ s32 Snd_PlayerHandler( void *clientData ) {
             snd_msgRead = 0;
         }
     }
-    for ( i = -4, chan = snd_channels; i < snd_numChannels - 4; i++, chan++ ) {
-        if ( chan->cmdPos == NULL || ( chan->flags & 1 ) ) {
+    for ( i = -NUM_MASTER_CHANNELS, chan = snd_channels; i < snd_numChannels - NUM_MASTER_CHANNELS; i++, chan++ ) {
+        if ( chan->cmdPos == NULL || ( chan->flags & CHAN_PAUSED ) ) {
             continue;
         }
         if ( chan->pendingWave != NULL ) {
             Snd_StartVoice( chan, i );
         }
         chan->time += chan->tempo;
-        if ( chan->noteLength != 0x7FFF ) {
+        if ( chan->noteLength != NOTE_LENGTH_HOLD ) {
             while ( chan->nextNoteTime - chan->time < 0 ) {
                 if ( chan->cmdPos == NULL ) {
                     break;
@@ -976,7 +1082,7 @@ s32 Snd_PlayerHandler( void *clientData ) {
         if ( chan->bendStream != NULL && chan->bendStreamTime - chan->time < 0 ) {
             Snd_StepBendStream( chan );
         }
-        if ( chan->fadeLeft != -1 && --chan->fadeLeft == -1 ) {
+        if ( chan->fadeLeft != FADE_NONE && --chan->fadeLeft == FADE_NONE ) {
             chan->volStream = NULL;
             chan->bendStream = NULL;
             chan->seq = NULL;
@@ -1017,13 +1123,15 @@ s32 Snd_PlayerHandler( void *clientData ) {
 ================
 Snd_PlayNextNote
 
-Runs the channel's commands up to its next note, then plays it: length, velocity, program (or drum map entry), sound, pitch and effect; the rest note 0x60 releases the voice. A channel without commands left stops its voice.
+Runs the channel's commands up to its next note, then plays it: velocity, length, drum map entry, envelope
+and voice restart (unless held), wave, pitch and FX mix. NOTE_REST, or a program without a wave, releases the
+note instead. A channel whose stream ended stops its voice.
 ================
 */
 void Snd_PlayNextNote( sndChannel_t *chan, s32 index ) {
     u8 *src;
     s32 note;
-    // RULE-EXCEPTION: R30, the command, length and detune bytes share one local; separate locals
+    // RULE-EXCEPTION: R30, the command, length and transpose bytes share one local; separate locals
     // change the register allocation.
     u8 byte;
     u8 value;
@@ -1035,7 +1143,7 @@ void Snd_PlayNextNote( sndChannel_t *chan, s32 index ) {
     if ( src != NULL ) {
     next:
         byte = *src;
-        if ( byte >= 0x80 ) {
+        if ( byte >= CMD_FIRST ) {
             src = snd_commands[byte & 0x7F]( chan, src + 1 );
             if ( src != NULL ) {
                 goto next;
@@ -1082,10 +1190,10 @@ void Snd_PlayNextNote( sndChannel_t *chan, s32 index ) {
         chan->noteAge = 0;
         chan->trillPitch = 0;
         chan->trillWait = chan->trillOffTicks;
-        if ( chan->seq != NULL && chan->drumMap == NULL && chan->seq->programs[chan->program] == 0xFFFF ) {
-            note = 0x60;
+        if ( chan->seq != NULL && chan->drumMap == NULL && chan->seq->programs[chan->program] == PROGRAM_NONE ) {
+            note = NOTE_REST;
         }
-        if ( note != 0x60 ) {
+        if ( note != NOTE_REST ) {
             bank = chan->waveBank;
             if ( chan->drumMap != NULL ) {
                 chan->program = chan->drumMap[note].program;
@@ -1122,8 +1230,8 @@ void Snd_PlayNextNote( sndChannel_t *chan, s32 index ) {
                 chan->lastFxMix = fx;
                 n_alSynSetFXMix( &snd_voices[index], chan->fxBase + ( ( ( 0x80 - chan->fxBase ) * fx ) >> 7 ) );
             }
-        } else if ( chan->envPhase < 4 ) {
-            chan->envPhase = 4;
+        } else if ( chan->envPhase < ENV_RELEASE ) {
+            chan->envPhase = ENV_RELEASE;
             chan->envWait = 1;
             chan->releaseTime = chan->time;
             chan->envReleaseLevel = chan->envLevel;
@@ -1139,7 +1247,7 @@ void Snd_PlayNextNote( sndChannel_t *chan, s32 index ) {
 ================
 Snd_StartVoice
 
-Stops voice index if the channel had started it, then starts it again with unk_08 and clears unk_08.
+Stops voice index if the channel had started it, then starts it on the pending wave.
 ================
 */
 void Snd_StartVoice( sndChannel_t *chan, s32 index ) {
@@ -1155,7 +1263,8 @@ void Snd_StartVoice( sndChannel_t *chan, s32 index ) {
 ================
 Snd_UpdateVolumePan
 
-Updates the volume and pan of voice index from the channel, sending only values that changed.
+Sends the volume (track volume * envelope * velocity * volume scale, then the group's master volume and the
+fade) and the pan (pan * pan scale) of voice index, each only when it changed.
 ================
 */
 void Snd_UpdateVolumePan( sndChannel_t *chan, s32 index ) {
@@ -1164,12 +1273,12 @@ void Snd_UpdateVolumePan( sndChannel_t *chan, s32 index ) {
     u32 value;
 
     value = (u32)( chan->trackVolume * chan->envLevel * chan->velocity * chan->playVolume ) >> 13;
-    if ( value > 0x7FFF ) {
-        value = 0x7FFF;
+    if ( value > VOLUME_MAX ) {
+        value = VOLUME_MAX;
     }
     value *= chan->seTable == NULL ? snd_bgmVolume : snd_seVolume;
     value >>= 15;
-    if ( chan->fadeLeft != -1 ) {
+    if ( chan->fadeLeft != FADE_NONE ) {
         value = value * chan->fadeLeft / chan->fadeTotal;
     }
     if ( value != chan->lastVolume ) {
@@ -1187,7 +1296,8 @@ void Snd_UpdateVolumePan( sndChannel_t *chan, s32 index ) {
 ================
 Snd_UpdatePitch
 
-Updates the pitch of voice index: the note unk_2C (gliding from unk_4C over unk_B8 ticks) plus offset and unk_24, in semitones; sent only when it changed, capped at a ratio of 2.
+Sends the pitch of voice index: the note pitch (gliding from glideFrom over the portamento ticks) plus offset
+and the bend, in semitones, as a ratio; only when it changed. A ratio above 2 is clamped and silences the note.
 ================
 */
 void Snd_UpdatePitch( sndChannel_t *chan, s32 index, f32 offset ) {
@@ -1215,14 +1325,23 @@ void Snd_UpdatePitch( sndChannel_t *chan, s32 index, f32 offset ) {
 }
 
 /*
+==============================================================================
+
+ENVELOPE AND MODULATION
+
+==============================================================================
+*/
+
+/*
 ================
 Snd_StartEnvelope
 
-Sets unk_54 from unk_40 and unk_B2, or from unk_3C and unk_B4, or to unk_40 + 0x7FFFFFFF when unk_9A is 0x7FFF; copies unk_C0 and unk_BF to unk_C4 and unk_C5 and sets unk_C3.
+Starts the envelope at the note: the release time from releaseAfter, or else from releaseBefore, or never for
+a held note; then ENV_ATTACK from the start level.
 ================
 */
 void Snd_StartEnvelope( sndChannel_t *chan ) {
-    if ( chan->noteLength != 0x7FFF ) {
+    if ( chan->noteLength != NOTE_LENGTH_HOLD ) {
         if ( chan->releaseAfter != 0 ) {
             chan->releaseTime = chan->noteTime + ( chan->releaseAfter << 8 );
         } else {
@@ -1231,7 +1350,7 @@ void Snd_StartEnvelope( sndChannel_t *chan ) {
     } else {
         chan->releaseTime = chan->noteTime + 0x7FFFFFFF;
     }
-    chan->envPhase = 1;
+    chan->envPhase = ENV_ATTACK;
     chan->envLevel = chan->envStartLevel;
     chan->envWait = chan->envInterval;
 }
@@ -1240,21 +1359,22 @@ void Snd_StartEnvelope( sndChannel_t *chan ) {
 ================
 Snd_UpdateEnvelope
 
-Steps the envelope: phase unk_C3 (1 attack, 2 decay, 3 sustain, 4 release) and level unk_C4, every unk_BF calls; enters release once unk_0C passes unk_54.
+Steps the envelope every envInterval ticks through ENV_ATTACK, ENV_DECAY, ENV_SUSTAIN and ENV_RELEASE, which
+it enters once the release time has passed.
 ================
 */
 void Snd_UpdateEnvelope( sndChannel_t *chan ) {
     s32 time;
 
-    if ( chan->releaseTime - chan->time < 0 && chan->envPhase < 4 ) {
-        chan->envPhase = 4;
+    if ( chan->releaseTime - chan->time < 0 && chan->envPhase < ENV_RELEASE ) {
+        chan->envPhase = ENV_RELEASE;
         chan->envWait = 1;
         chan->envReleaseLevel = chan->envLevel;
     }
     if ( --chan->envWait == 0 ) {
         chan->envWait = chan->envInterval;
         switch ( chan->envPhase ) {
-        case 1:
+        case ENV_ATTACK:
             time = ( (u32)( chan->time - chan->noteTime ) >> 8 ) * chan->envTimeScale >> 10;
             if ( time < chan->envAttackTime ) {
                 chan->envLevel = chan->envStartLevel + (s32)( chan->attackSlope * time );
@@ -1263,7 +1383,7 @@ void Snd_UpdateEnvelope( sndChannel_t *chan ) {
                 chan->envLevel = chan->envPeakLevel;
             }
             break;
-        case 2:
+        case ENV_DECAY:
             time = ( ( (u32)( chan->time - chan->noteTime ) >> 8 ) - chan->envAttackTime ) * chan->envTimeScale >> 10;
             if ( time < chan->envDecayTime ) {
                 chan->envLevel = chan->envPeakLevel + (s32)( chan->decaySlope * time );
@@ -1272,9 +1392,9 @@ void Snd_UpdateEnvelope( sndChannel_t *chan ) {
                 chan->envLevel = chan->envSustainLevel;
             }
             break;
-        case 3:
+        case ENV_SUSTAIN:
             break;
-        case 4:
+        case ENV_RELEASE:
             time = ( (u32)( chan->time - chan->releaseTime ) >> 8 ) * chan->envTimeScale >> 10;
             if ( time < chan->envReleaseTime ) {
                 chan->envLevel = chan->envReleaseLevel - (s32)( chan->releaseSlope * time * chan->envReleaseLevel );
@@ -1291,20 +1411,21 @@ void Snd_UpdateEnvelope( sndChannel_t *chan ) {
 ================
 Snd_StartAutoPan
 
-Copies unk_40 to unk_94, clears unk_D9 and sets unk_DA from bit 6 of unk_BD.
+Restarts the pan sweep at the note, going down if the pan is right of centre.
 ================
 */
 void Snd_StartAutoPan( sndChannel_t *chan ) {
     chan->autoPanFrac = 0;
     chan->autoPanTime = chan->noteTime;
-    chan->autoPanDown = chan->pan & 0x40;
+    chan->autoPanDown = chan->pan & PAN_CENTRE;
 }
 
 /*
 ================
 Snd_UpdateAutoPan
 
-Advances unk_94 in steps of 0x100 up to unk_0C, moving unk_BD up to 0x7F or down to 0 by unk_D4 / 64 per step, reversing at either end.
+Advances the pan sweep, one step per 0x100 of time up to the channel's time, autoPanSpeed / 64 pan units per
+step, turning at 0 and 0x7F.
 ================
 */
 void Snd_UpdateAutoPan( sndChannel_t *chan ) {
@@ -1339,7 +1460,8 @@ void Snd_UpdateAutoPan( sndChannel_t *chan ) {
 ================
 Snd_UpdateTrill
 
-Counts down unk_D0; at zero toggles unk_D1 between 0 (for unk_CF steps) and unk_D8 (for unk_CE steps). Returns unk_D1.
+Counts down the trill; at zero switches between 0 (for trillOffTicks) and trillInterval (for trillOnTicks).
+Returns the trill pitch.
 ================
 */
 f32 Snd_UpdateTrill( sndChannel_t *chan ) {
@@ -1359,7 +1481,8 @@ f32 Snd_UpdateTrill( sndChannel_t *chan ) {
 ================
 Snd_UpdateVibrato
 
-Sets unk_68 to unk_20 * sin( ( unk_AA - unk_B6 ) * unk_DC ) and returns it; 0 while unk_AA has not passed unk_B6.
+Returns the vibrato pitch, depth * sin( ( noteAge - delay ) * step ), and keeps it in vibratoPitch; 0 during the
+delay.
 ================
 */
 f32 Snd_UpdateVibrato( sndChannel_t *chan ) {
@@ -1376,7 +1499,8 @@ f32 Snd_UpdateVibrato( sndChannel_t *chan ) {
 ================
 Snd_StepVolumeStream
 
-Advances unk_14 in steps of 0x100 up to unk_0C, reading a new unk_BC and step length from the unk_38 stream each time unk_A2 runs out.
+Advances the volume stream, one step per 0x100 of time up to the channel's time. Each entry is a track volume,
+held one step; with bit 7 set, a length (one byte, or two when it has bit 7 set) follows, plus 2 steps.
 ================
 */
 void Snd_StepVolumeStream( sndChannel_t *chan ) {
@@ -1407,7 +1531,7 @@ void Snd_StepVolumeStream( sndChannel_t *chan ) {
 ================
 Snd_StepBendStream
 
-Advances unk_18 in steps of 0x100 up to unk_0C, reading a new pitch offset unk_70 (and unk_24) and step length from the unk_34 stream each time unk_A4 runs out.
+Advances the pitch bend stream as Snd_StepVolumeStream does the volume stream; entries are bends, biased by 64.
 ================
 */
 void Snd_StepBendStream( sndChannel_t *chan ) {
@@ -1436,8 +1560,24 @@ void Snd_StepBendStream( sndChannel_t *chan ) {
     } while ( chan->bendStreamTime - chan->time < 0 );
 }
 
+/*
+==============================================================================
+
+UTILITIES
+
+==============================================================================
+*/
+
 #ifdef NON_MATCHING
 // NON_MATCHING: FPU registers: x lives in $f6 in retail, $f14 here, and the x^6 term takes a different register
+/*
+================
+Snd_Exp2
+
+Returns 2 to the power x, from the series sum of ( x ln 2 )^n / n! to n = 6; a negative
+x takes the reciprocal.
+================
+*/
 f32 Snd_Exp2( f32 x ) {
     f32 x2;
     f32 x3;
@@ -1476,10 +1616,12 @@ INCLUDE_ASM("asm/nonmatchings/166B0", Snd_Exp2);
 ================
 Snd_RelocateWaveBank
 
-TODO
+Turns the offsets of wave bank data into pointers, once (WAVEBANK_RELOCATED), converts its tunings to
+semitones, and patches each wave table once: the sample address by romBase (a ROM address), unless its top byte
+is 0xFF, and the loop and ADPCM book by the bank's address. Writes back the data cache.
 ================
 */
-void Snd_RelocateWaveBank( void *data, s32 base ) {
+void Snd_RelocateWaveBank( void *data, s32 romBase ) {
     waveBank_t *bank;
     s32 i;
 
@@ -1487,14 +1629,14 @@ void Snd_RelocateWaveBank( void *data, s32 base ) {
     if ( bank->flags < 0 ) {
         return;
     }
-    bank->flags |= 0x80000000;
+    bank->flags |= WAVEBANK_RELOCATED;
     Snd_RelocateTable( (s32 *)&bank->unk_24, (s32)bank, 3 );
     Snd_RelocateTable( (s32 *)bank->waves, (s32)bank, bank->numWaves );
     for ( i = 0; i < bank->numWaves; i++ ) {
         SetTune( &bank->tunes[i], &bank->unk_24[i] );
         if ( bank->waves[i]->flags == 0 ) {
-            if ( ( bank->waves[i]->base & 0xFF000000 ) != 0xFF000000 ) {
-                bank->waves[i]->base += base;
+            if ( ( bank->waves[i]->romBase & 0xFF000000 ) != 0xFF000000 ) {
+                bank->waves[i]->romBase += romBase;
             }
             bank->waves[i]->flags = 1;
             if ( bank->waves[i]->loop != 0 ) {
@@ -1515,7 +1657,7 @@ INCLUDE_ASM("asm/nonmatchings/166B0", Snd_RelocateWaveBank);
 ================
 Snd_Random
 
-Returns a random number in [0, range), from eight steps of the shift register snd_randomSeed.
+Returns a number in [0, range), from eight steps of the shift register snd_randomSeed.
 ================
 */
 s32 Snd_Random( s32 range ) {
@@ -1532,13 +1674,22 @@ s32 Snd_Random( s32 range ) {
     return range * ( (f32)snd_randomSeed / 65536.0f / 65536.0f );
 }
 
+/*
+==============================================================================
+
+CHANNEL ALLOCATION
+
+==============================================================================
+*/
+
 #ifdef NON_MATCHING
 // NON_MATCHING: registers: retail puts the 0xFF constant in a1, moving chan and started to a2/a3
 /*
 ================
 Snd_ResetChannel
 
-TODO
+Clears data, a channel, to its defaults, keeping only voiceActive: centre pan, full levels, scales of 1, a
+120 bpm tempo, no fade and the next (or default) wave bank.
 ================
 */
 void Snd_ResetChannel( void *data ) {
@@ -1553,14 +1704,14 @@ void Snd_ResetChannel( void *data ) {
     for ( i = 0; i < sizeof( sndChannel_t ); i++ ) {
         *( (u8 *)data )++ = 0;
     }
-    chan->lastFxMix = chan->lastPan = 0xFF;
-    tempo = 0x6000 / snd_tickRate;
+    chan->lastFxMix = chan->lastPan = RESEND;
+    tempo = TEMPO_120_BPM / snd_tickRate;
     chan->fixedVelocity = 0x7F;
     chan->trackVolume = 0x7F;
     chan->envPeakLevel = 0x7F;
     chan->envDecayTime = 0xFF;
     chan->envSustainLevel = 0x7F;
-    chan->pan = 0x40;
+    chan->pan = PAN_CENTRE;
     chan->envInterval = 1;
     chan->envAttackTime = 1;
     chan->envReleaseTime = 15;
@@ -1568,10 +1719,10 @@ void Snd_ResetChannel( void *data ) {
     chan->noteLength = 1;
     chan->volStreamWait = 1;
     chan->bendStreamWait = 1;
-    chan->fadeLeft = -1;
-    chan->playVolume = 0x80;
-    chan->playPan = 0x80;
-    chan->tempoScale = 0x80;
+    chan->fadeLeft = FADE_NONE;
+    chan->playVolume = SCALE_ONE;
+    chan->playPan = SCALE_ONE;
+    chan->tempoScale = SCALE_ONE;
     chan->lastPitch = 99.9f;
     chan->bendRange = 1.0f / 32;
     chan->attackSlope = 1.0f;
@@ -1590,7 +1741,9 @@ INCLUDE_ASM("asm/nonmatchings/166B0", Snd_ResetChannel);
 ================
 Snd_FindBgmChannel
 
-Picks the channel index for track of hdr (-1: the master channel, which prefers the first four). Takes a free channel, else the bank channel of lowest priority, else a channel of another header, else one already on this track, else one by track number.
+Picks the channel for track of hdr (TRACK_MASTER: the master stream, which first tries the master channels).
+Takes a free voice channel, else the SE channel of lowest priority, else a BGM channel of another sequence,
+else the channel already on this track, else one by track number.
 ================
 */
 s32 Snd_FindBgmChannel( seqHeader_t *hdr, s32 track ) {
@@ -1600,38 +1753,38 @@ s32 Snd_FindBgmChannel( seqHeader_t *hdr, s32 track ) {
     sndChannel_t *chan;
 
     if ( track < 0 ) {
-        for ( i = 0, chan = snd_channels; i < 4; i++, chan++ ) {
+        for ( i = 0, chan = snd_channels; i < NUM_MASTER_CHANNELS; i++, chan++ ) {
             if ( chan->cmdPos == NULL ) {
                 return i;
             }
         }
     }
-    for ( i = 4, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
+    for ( i = NUM_MASTER_CHANNELS, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
         if ( chan->cmdPos == NULL ) {
             return i;
         }
     }
-    for ( i = 4, chan = snd_voiceChannels, lowest = 0x7FFFFFFF, best = 3; i < snd_numChannels; i++, chan++ ) {
+    for ( i = NUM_MASTER_CHANNELS, chan = snd_voiceChannels, lowest = 0x7FFFFFFF, best = NUM_MASTER_CHANNELS - 1; i < snd_numChannels; i++, chan++ ) {
         if ( chan->seTable != NULL && chan->priority <= lowest ) {
             lowest = chan->priority;
             best = i;
         }
     }
-    if ( best >= 4 ) {
+    if ( best >= NUM_MASTER_CHANNELS ) {
         return best;
     }
-    // the original never advances chan here, so this tests the first channel each time
-    for ( i = 4, chan = snd_voiceChannels; i < snd_numChannels; i++ ) {
+    // BUG: chan is never advanced here, so every pass tests the first voice channel
+    for ( i = NUM_MASTER_CHANNELS, chan = snd_voiceChannels; i < snd_numChannels; i++ ) {
         if ( chan->seTable == NULL && chan->seq != hdr ) {
             return i;
         }
     }
-    for ( i = 4, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
+    for ( i = NUM_MASTER_CHANNELS, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
         if ( chan->seq == hdr && hdr->trackCmds[track] == chan->cmdStart ) {
             return i;
         }
     }
-    return track % ( snd_numChannels - 4 ) + 4;
+    return track % ( snd_numChannels - NUM_MASTER_CHANNELS ) + NUM_MASTER_CHANNELS;
 }
 
 /*
@@ -1655,21 +1808,22 @@ void Snd_RelocateTable( s32 *table, s32 base, s32 count ) {
 ================
 Snd_StartSeOnChannel
 
-Starts entry index of bank on chan; returns the new channel id.
+Resets chan and starts entry index of SE table table on it with the given volume and pan scales and priority;
+returns the new sound id.
 ================
 */
-s32 Snd_StartSeOnChannel( sndChannel_t *chan, seTable_t *bank, s32 index, s32 arg3, s32 arg4, s32 priority ) {
+s32 Snd_StartSeOnChannel( sndChannel_t *chan, seTable_t *table, s32 index, s32 volume, s32 pan, s32 priority ) {
     Snd_ResetChannel( chan );
     chan->seIndex = index;
-    chan->seTable = bank;
-    chan->playVolume = arg3;
-    chan->playPan = arg4;
+    chan->seTable = table;
+    chan->playVolume = volume;
+    chan->playPan = pan;
     chan->id = snd_nextId++;
     chan->priority = priority;
-    if ( bank->waveBank != 0 ) {
-        chan->waveBank = bank->waveBank;
+    if ( table->waveBank != 0 ) {
+        chan->waveBank = table->waveBank;
     }
-    chan->cmdPos = chan->cmdStart = bank->entries[index].cmds;
+    chan->cmdPos = chan->cmdStart = table->entries[index].cmds;
     return chan->id;
 }
 
@@ -1677,32 +1831,33 @@ s32 Snd_StartSeOnChannel( sndChannel_t *chan, seTable_t *bank, s32 index, s32 ar
 ================
 Snd_StartSe
 
-Starts entry index of bank on a free channel above the first four, or else on the bank channel of lowest priority below priority (-1: the entry's own); returns the channel id, or 0.
+Starts entry index of SE table table on a free voice channel, or else on the SE channel of lowest priority
+below priority (SE_PRIORITY_DEFAULT: the entry's own). Returns the new sound id, or 0.
 ================
 */
-s32 Snd_StartSe( seTable_t *bank, s32 index, s32 arg2, s32 arg3, s32 priority ) {
+s32 Snd_StartSe( seTable_t *table, s32 index, s32 volume, s32 pan, s32 priority ) {
     s32 i;
     s32 lowest;
     sndChannel_t *chan;
     sndChannel_t *victim;
 
-    if ( priority == -1 ) {
-        priority = bank->entries[index].priority;
+    if ( priority == SE_PRIORITY_DEFAULT ) {
+        priority = table->entries[index].priority;
     }
     lowest = priority + 1;
-    for ( i = 4, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
+    for ( i = NUM_MASTER_CHANNELS, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
         if ( chan->cmdPos == NULL ) {
             Snd_ResetChannel( chan );
             chan->seIndex = index;
-            chan->seTable = bank;
-            chan->playVolume = arg2;
-            chan->playPan = arg3;
+            chan->seTable = table;
+            chan->playVolume = volume;
+            chan->playPan = pan;
             chan->priority = priority;
             chan->id = snd_nextId++;
-            if ( bank->waveBank != NULL ) {
-                chan->waveBank = bank->waveBank;
+            if ( table->waveBank != NULL ) {
+                chan->waveBank = table->waveBank;
             }
-            chan->cmdPos = chan->cmdStart = bank->entries[index].cmds;
+            chan->cmdPos = chan->cmdStart = table->entries[index].cmds;
             return chan->id;
         }
         if ( chan->seTable != NULL && chan->priority < lowest ) {
@@ -1713,15 +1868,15 @@ s32 Snd_StartSe( seTable_t *bank, s32 index, s32 arg2, s32 arg3, s32 priority ) 
     if ( lowest < priority ) {
         Snd_ResetChannel( victim );
         victim->seIndex = index;
-        victim->seTable = bank;
-        victim->playVolume = arg2;
-        victim->playPan = arg3;
+        victim->seTable = table;
+        victim->playVolume = volume;
+        victim->playPan = pan;
         victim->priority = priority;
         victim->id = snd_nextId++;
-        if ( bank->waveBank != NULL ) {
-            victim->waveBank = bank->waveBank;
+        if ( table->waveBank != NULL ) {
+            victim->waveBank = table->waveBank;
         }
-        victim->cmdPos = victim->cmdStart = bank->entries[index].cmds;
+        victim->cmdPos = victim->cmdStart = table->entries[index].cmds;
         return victim->id;
     }
     return 0;
@@ -1733,7 +1888,8 @@ s32 Snd_StartSe( seTable_t *bank, s32 index, s32 arg2, s32 arg3, s32 priority ) 
 ================
 Snd_StartBgm
 
-Relocates hdr once, then starts its master channel and one channel per non-empty entry of unk_0C, all under one new id, which it returns.
+Relocates hdr once, then starts its master stream and each of its tracks on a channel, all paused and under one
+new sound id, which it returns.
 ================
 */
 s32 Snd_StartBgm( seqHeader_t *hdr ) {
@@ -1751,11 +1907,11 @@ s32 Snd_StartBgm( seqHeader_t *hdr ) {
         Snd_RelocateTable( (s32 *)hdr->trackBendStreams, (s32)hdr, count );
     }
     id = snd_nextId++;
-    chan = &snd_channels[Snd_FindBgmChannel( hdr, -1 )];
+    chan = &snd_channels[Snd_FindBgmChannel( hdr, TRACK_MASTER )];
     Snd_ResetChannel( chan );
     chan->noteVelocity = 1;
     chan->seq = hdr;
-    chan->flags |= 3;
+    chan->flags |= CHAN_PAUSED | CHAN_MASTER;
     chan->id = id;
     chan->cmdPos = chan->cmdStart = hdr->masterCmds;
     for ( i = 0; i < count; i++ ) {
@@ -1764,7 +1920,7 @@ s32 Snd_StartBgm( seqHeader_t *hdr ) {
             Snd_ResetChannel( chan );
             chan->noteVelocity = 1;
             chan->seq = hdr;
-            chan->flags |= 1;
+            chan->flags |= CHAN_PAUSED;
             chan->volStream = chan->volStreamStart = hdr->trackVolStreams[i];
             chan->bendStream = chan->bendStreamStart = hdr->trackBendStreams[i];
             chan->id = id;
@@ -1782,7 +1938,7 @@ INCLUDE_ASM("asm/nonmatchings/166B0", Snd_StartBgm);
 ================
 Snd_SetChannelFlags
 
-Sets unk_00 to ( unk_00 & mask ) | bits on every channel with the given id.
+Sets flags to ( flags & mask ) | bits on every channel of sound id.
 ================
 */
 void Snd_SetChannelFlags( s32 id, s32 mask, s32 bits ) {
@@ -1797,10 +1953,18 @@ void Snd_SetChannelFlags( s32 id, s32 mask, s32 bits ) {
 }
 
 /*
+==============================================================================
+
+COMMANDS
+
+==============================================================================
+*/
+
+/*
 ================
 Snd_CmdEnd
 
-Channel command: ends the channel's command stream.
+Command 0x80: ends the stream and frees the channel; its voice is stopped by Snd_PlayNextNote.
 ================
 */
 u8 *Snd_CmdEnd( sndChannel_t *chan, u8 *src ) {
@@ -1817,8 +1981,7 @@ u8 *Snd_CmdEnd( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdProgram
 
-Channel command: sets the program unk_AE from a value encoded as one byte, or as two bytes when the first has
-bit 7 set.
+Command 0x81 <program:1-2>.
 ================
 */
 u8 *Snd_CmdProgram( sndChannel_t *chan, u8 *src ) {
@@ -1835,7 +1998,7 @@ u8 *Snd_CmdProgram( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdPortamento
 
-Channel command: sets unk_B8 from one byte; a non-zero value also copies unk_2C to unk_50.
+Command 0x82 <ticks>: glides each note from the previous one over ticks.
 ================
 */
 u8 *Snd_CmdPortamento( sndChannel_t *chan, u8 *src ) {
@@ -1850,7 +2013,7 @@ u8 *Snd_CmdPortamento( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdPortamentoOff
 
-Channel command: clears unk_B8.
+Command 0x83.
 ================
 */
 u8 *Snd_CmdPortamentoOff( sndChannel_t *chan, u8 *src ) {
@@ -1862,7 +2025,7 @@ u8 *Snd_CmdPortamentoOff( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdEnvelope
 
-Channel command: reads an envelope from the command stream.
+Command 0x84 <envelope_t>: an envelope inline.
 ================
 */
 u8 *Snd_CmdEnvelope( sndChannel_t *chan, u8 *src ) {
@@ -1898,7 +2061,8 @@ u8 *Snd_CmdEnvelope( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdTempo
 
-Channel command: sets the tempo from one byte; a bank channel takes it alone, otherwise every channel of the same header does.
+Command 0x85 <bpm>: sets the tempo. An SE channel takes it alone, unscaled; on a BGM channel every channel of
+the sequence takes it, with this channel's tempo scale.
 ================
 */
 u8 *Snd_CmdTempo( sndChannel_t *chan, u8 *src ) {
@@ -1907,7 +2071,7 @@ u8 *Snd_CmdTempo( sndChannel_t *chan, u8 *src ) {
     s32 i;
     sndChannel_t *other;
 
-    tempo = ( *src++ * 0x6000 / 120 ) / snd_tickRate;
+    tempo = ( *src++ * TEMPO_120_BPM / 120 ) / snd_tickRate;
     scaled = ( tempo * chan->tempoScale ) >> 7;
     if ( chan->seTable != NULL ) {
         chan->tempo = tempo;
@@ -1926,7 +2090,7 @@ u8 *Snd_CmdTempo( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdReleaseBefore
 
-Channel command: sets unk_B4 from one byte and clears unk_B2.
+Command 0x87 <ticks>: notes release ticks before they end.
 ================
 */
 u8 *Snd_CmdReleaseBefore( sndChannel_t *chan, u8 *src ) {
@@ -1942,7 +2106,7 @@ u8 *Snd_CmdReleaseBefore( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdReleaseAfter
 
-Channel command: sets unk_B2 from a big-endian 16-bit value and clears unk_B4.
+Command 0x86 <ticks:2>: notes release ticks after they start.
 ================
 */
 u8 *Snd_CmdReleaseAfter( sndChannel_t *chan, u8 *src ) {
@@ -1960,7 +2124,7 @@ u8 *Snd_CmdReleaseAfter( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdVibrato
 
-Channel command: sets unk_B6 and unk_D5 from two bytes, unk_20 to a third byte / 50 and the phase step unk_DC to 2 pi / unk_D5.
+Command 0x88 <delay> <period> <depth>: vibrato after delay ticks, period ticks long, depth / 50 semitones.
 ================
 */
 u8 *Snd_CmdVibrato( sndChannel_t *chan, u8 *src ) {
@@ -1972,12 +2136,12 @@ u8 *Snd_CmdVibrato( sndChannel_t *chan, u8 *src ) {
 }
 
 #ifdef NON_MATCHING
-// NON_MATCHING: schedule: retail reloads unk_D5 right after storing it and interleaves the two divisions
+// NON_MATCHING: schedule: retail reloads vibratoPeriod right after storing it and interleaves the two divisions
 /*
 ================
 Snd_CmdVibratoInverted
 
-TODO
+Command 0x89 <delay> <period> <depth>: as 0x88, starting downwards.
 ================
 */
 u8 *Snd_CmdVibratoInverted( sndChannel_t *chan, u8 *src ) {
@@ -1994,7 +2158,7 @@ INCLUDE_ASM("asm/nonmatchings/166B0", Snd_CmdVibratoInverted);
 ================
 Snd_CmdVibratoOff
 
-Channel command: clears unk_D5 and unk_68.
+Command 0x8A.
 ================
 */
 u8 *Snd_CmdVibratoOff( sndChannel_t *chan, u8 *src ) {
@@ -2007,7 +2171,7 @@ u8 *Snd_CmdVibratoOff( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdFixedLength
 
-Channel command: sets unk_AC from a value encoded as one byte, or as two bytes when the first is 0x80 or more.
+Command 0x8B <ticks:1-2>: notes no longer carry a length and last ticks; 0 ends that.
 ================
 */
 u8 *Snd_CmdFixedLength( sndChannel_t *chan, u8 *src ) {
@@ -2027,7 +2191,7 @@ u8 *Snd_CmdFixedLength( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdExplicitLength
 
-Channel command: sets unk_B7.
+Command 0x8C: the next note carries a length despite a fixed length.
 ================
 */
 u8 *Snd_CmdExplicitLength( sndChannel_t *chan, u8 *src ) {
@@ -2039,7 +2203,7 @@ u8 *Snd_CmdExplicitLength( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdTranspose
 
-Channel command: sets unk_B9 from one byte.
+Command 0x8D <semitones>: signed.
 ================
 */
 u8 *Snd_CmdTranspose( sndChannel_t *chan, u8 *src ) {
@@ -2051,7 +2215,7 @@ u8 *Snd_CmdTranspose( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdTransposeOff
 
-Channel command: sets unk_BA.
+Command 0x8E: notes ignore the transposition from now on.
 ================
 */
 u8 *Snd_CmdTransposeOff( sndChannel_t *chan, u8 *src ) {
@@ -2063,7 +2227,7 @@ u8 *Snd_CmdTransposeOff( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdDetune
 
-Channel command: replaces the offset unk_90 within unk_30 by a signed byte / 100.
+Command 0x8F <hundredths>: signed hundredths of a semitone.
 ================
 */
 u8 *Snd_CmdDetune( sndChannel_t *chan, u8 *src ) {
@@ -2084,7 +2248,7 @@ u8 *Snd_CmdDetune( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdEnvRestartOff
 
-Channel command: sets unk_D6.
+Command 0x91: notes keep the running envelope.
 ================
 */
 u8 *Snd_CmdEnvRestartOff( sndChannel_t *chan, u8 *src ) {
@@ -2096,7 +2260,7 @@ u8 *Snd_CmdEnvRestartOff( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdEnvRestartOn
 
-Channel command: clears unk_D6.
+Command 0x92.
 ================
 */
 u8 *Snd_CmdEnvRestartOn( sndChannel_t *chan, u8 *src ) {
@@ -2108,7 +2272,7 @@ u8 *Snd_CmdEnvRestartOn( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdVoiceRestartOff
 
-Channel command: sets unk_D7.
+Command 0x93: notes keep the running voice and wave.
 ================
 */
 u8 *Snd_CmdVoiceRestartOff( sndChannel_t *chan, u8 *src ) {
@@ -2120,7 +2284,7 @@ u8 *Snd_CmdVoiceRestartOff( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdVoiceRestartOn
 
-Channel command: clears unk_D7.
+Command 0x94.
 ================
 */
 u8 *Snd_CmdVoiceRestartOn( sndChannel_t *chan, u8 *src ) {
@@ -2132,7 +2296,8 @@ u8 *Snd_CmdVoiceRestartOn( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdLoopStart
 
-Channel command: pushes the read position and the channel state onto the repeat stack, with a repeat count from one byte.
+Command 0x95 <count>: pushes a loop of count passes (LOOP_FOREVER: endless), saving the read position and the
+volume and bend streams.
 ================
 */
 u8 *Snd_CmdLoopStart( sndChannel_t *chan, u8 *src ) {
@@ -2155,14 +2320,15 @@ u8 *Snd_CmdLoopStart( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdLoopEnd
 
-Channel command: counts down the top repeat entry; jumps back to it and restores its state unless the count ran out, which pops it.
+Command 0x96: ends a pass of the innermost loop; jumps back to its start and restores the streams unless it was
+the last pass, which pops the loop.
 ================
 */
 u8 *Snd_CmdLoopEnd( sndChannel_t *chan, u8 *src ) {
     s32 depth;
 
     depth = chan->loopDepth - 1;
-    if ( chan->loopCount[depth] != 0xFF ) {
+    if ( chan->loopCount[depth] != LOOP_FOREVER ) {
         if ( --chan->loopCount[depth] == 0 ) {
             chan->loopDepth = depth;
             depth = -1;
@@ -2185,7 +2351,7 @@ u8 *Snd_CmdLoopEnd( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdTrill
 
-Channel command: sets unk_D8, unk_CE and unk_CF from three bytes.
+Command 0x97 <semitones> <on ticks> <off ticks>.
 ================
 */
 u8 *Snd_CmdTrill( sndChannel_t *chan, u8 *src ) {
@@ -2199,7 +2365,7 @@ u8 *Snd_CmdTrill( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdTrillOff
 
-Channel command: clears unk_CE.
+Command 0x98.
 ================
 */
 u8 *Snd_CmdTrillOff( sndChannel_t *chan, u8 *src ) {
@@ -2211,7 +2377,7 @@ u8 *Snd_CmdTrillOff( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdNoteVelocity
 
-Channel command: sets unk_D2.
+Command 0x99: notes carry a velocity byte, until one with bit 7 set makes it the fixed velocity.
 ================
 */
 u8 *Snd_CmdNoteVelocity( sndChannel_t *chan, u8 *src ) {
@@ -2223,7 +2389,7 @@ u8 *Snd_CmdNoteVelocity( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdNoteVelocityOff
 
-Channel command: clears unk_D2.
+Command 0x9A.
 ================
 */
 u8 *Snd_CmdNoteVelocityOff( sndChannel_t *chan, u8 *src ) {
@@ -2235,7 +2401,7 @@ u8 *Snd_CmdNoteVelocityOff( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdVelocity
 
-Channel command: sets unk_D3 from one byte and clears unk_D2.
+Command 0x9B <velocity>: a fixed velocity for the following notes.
 ================
 */
 u8 *Snd_CmdVelocity( sndChannel_t *chan, u8 *src ) {
@@ -2251,7 +2417,7 @@ u8 *Snd_CmdVelocity( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdPan
 
-Channel command: sets unk_BD from half of one byte.
+Command 0x9C <pan>: 0 to 0xFF, halved.
 ================
 */
 u8 *Snd_CmdPan( sndChannel_t *chan, u8 *src ) {
@@ -2263,7 +2429,7 @@ u8 *Snd_CmdPan( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdSkip2
 
-Channel command: skips two bytes.
+Command 0x9D <2 bytes>: ignored.
 ================
 */
 u8 *Snd_CmdSkip2( sndChannel_t *chan, u8 *src ) {
@@ -2274,7 +2440,8 @@ u8 *Snd_CmdSkip2( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdDrumMap
 
-Channel command: selects entry unk_84 of unk_74->unk_1C by a one- or two-byte index.
+Command 0x9E <index:1-2>: selects the drum map from entry index of the sequence's drum maps; each note then
+indexes it.
 ================
 */
 u8 *Snd_CmdDrumMap( sndChannel_t *chan, u8 *src ) {
@@ -2294,7 +2461,7 @@ u8 *Snd_CmdDrumMap( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdDrumMapOff
 
-Channel command: clears unk_84.
+Command 0x9F.
 ================
 */
 u8 *Snd_CmdDrumMapOff( sndChannel_t *chan, u8 *src ) {
@@ -2306,7 +2473,7 @@ u8 *Snd_CmdDrumMapOff( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdSkip1
 
-Channel command: skips one byte.
+Command 0xA0 <1 byte>: ignored.
 ================
 */
 u8 *Snd_CmdSkip1( sndChannel_t *chan, u8 *src ) {
@@ -2317,7 +2484,8 @@ u8 *Snd_CmdSkip1( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdJump
 
-Channel command: reads three big-endian 16-bit offsets; sets unk_38 and unk_34 from the last two and jumps to the first, relative to unk_80.
+Command 0xA1 <cmds:2> <volume:2> <bend:2>: jumps the command, volume and bend streams to the given offsets
+(big-endian) from their starts.
 ================
 */
 u8 *Snd_CmdJump( sndChannel_t *chan, u8 *src ) {
@@ -2341,7 +2509,7 @@ u8 *Snd_CmdJump( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdFxMix
 
-Channel command: sets unk_CA from one byte.
+Command 0xA2 <mix>: the FX mix above the channel's minimum.
 ================
 */
 u8 *Snd_CmdFxMix( sndChannel_t *chan, u8 *src ) {
@@ -2353,7 +2521,7 @@ u8 *Snd_CmdFxMix( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdRandomTranspose
 
-Channel command: sets unk_B9 to a random number below the first byte plus the second byte.
+Command 0xA3 <range> <base>: transposes by base plus a random number below range.
 ================
 */
 u8 *Snd_CmdRandomTranspose( sndChannel_t *chan, u8 *src ) {
@@ -2366,7 +2534,7 @@ u8 *Snd_CmdRandomTranspose( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdRandomVolume
 
-Channel command: sets unk_BC to a random number below the first byte plus the second byte.
+Command 0xA4 <range> <base>: the track volume is base plus a random number below range.
 ================
 */
 u8 *Snd_CmdRandomVolume( sndChannel_t *chan, u8 *src ) {
@@ -2379,7 +2547,7 @@ u8 *Snd_CmdRandomVolume( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdRandomPan
 
-Channel command: sets unk_BD to a random number below the first byte plus the second byte.
+Command 0xA5 <range> <base>: the pan is base plus a random number below range.
 ================
 */
 u8 *Snd_CmdRandomPan( sndChannel_t *chan, u8 *src ) {
@@ -2392,7 +2560,7 @@ u8 *Snd_CmdRandomPan( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdVolume
 
-Channel command: sets unk_BC from one byte.
+Command 0xA6 <volume>: the track volume.
 ================
 */
 u8 *Snd_CmdVolume( sndChannel_t *chan, u8 *src ) {
@@ -2404,7 +2572,8 @@ u8 *Snd_CmdVolume( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdPlaySe
 
-Channel command: starts entry (one- or two-byte index) of the channel's bank on another channel at a higher priority, and gives every channel started under the new id this channel's id and unk_7C.
+Command 0xA7 <index:1-2>: starts entry index of the channel's SE table above this channel's priority, and makes
+it part of this sound (same id and wave bank).
 ================
 */
 u8 *Snd_CmdPlaySe( sndChannel_t *chan, u8 *src ) {
@@ -2435,7 +2604,7 @@ u8 *Snd_CmdPlaySe( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdBendRange
 
-Channel command: sets unk_6C to one byte / 64 and unk_24 to unk_70 * unk_6C.
+Command 0xA8 <range>: semitones per bend unit, in 64ths.
 ================
 */
 u8 *Snd_CmdBendRange( sndChannel_t *chan, u8 *src ) {
@@ -2448,7 +2617,7 @@ u8 *Snd_CmdBendRange( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdAutoPan
 
-Channel command: sets unk_D4 from one byte.
+Command 0xA9 <speed>: sweeps the pan, speed / 64 pan units per tick; 0 stops it.
 ================
 */
 u8 *Snd_CmdAutoPan( sndChannel_t *chan, u8 *src ) {
@@ -2460,7 +2629,7 @@ u8 *Snd_CmdAutoPan( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdFxType
 
-Channel command: passes one byte to func_8003F340 while snd_seqFxEnabled is 1.
+Command 0xAA <setting>: passes setting to func_8003F340 (the effect) while snd_seqFxEnabled is 1.
 ================
 */
 u8 *Snd_CmdFxType( sndChannel_t *chan, u8 *src ) {
@@ -2477,7 +2646,8 @@ u8 *Snd_CmdFxType( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdMarker
 
-Channel command: passes the channel id and one byte to the snd_markerCallback callback when unk_00 & 3 is 2; skips a one- or two-byte value after it.
+Command 0xAB <value> <length:1-2>: on an unpaused master channel, calls the marker callback with the sound id
+and value. Snd_PlayBgmFromMarker seeks these; length is only used there.
 ================
 */
 u8 *Snd_CmdMarker( sndChannel_t *chan, u8 *src ) {
@@ -2489,7 +2659,7 @@ u8 *Snd_CmdMarker( sndChannel_t *chan, u8 *src ) {
     if ( length & 0x80 ) {
         length = ( ( length & 0x7F ) << 8 ) + *src++;
     }
-    if ( ( chan->flags & 3 ) == 2 && snd_markerCallback != NULL ) {
+    if ( ( chan->flags & ( CHAN_PAUSED | CHAN_MASTER ) ) == CHAN_MASTER && snd_markerCallback != NULL ) {
         snd_markerCallback( chan->id, value );
     }
     return src;
@@ -2499,7 +2669,7 @@ u8 *Snd_CmdMarker( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdFixedLengthOff
 
-Channel command: clears unk_AC.
+Command 0xAC: notes carry a length again.
 ================
 */
 u8 *Snd_CmdFixedLengthOff( sndChannel_t *chan, u8 *src ) {

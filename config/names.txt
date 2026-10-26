@@ -316,3 +316,33 @@ loopVolume	sndChannel_t+0x124	invented: saved trackVolume
 loopBend	sndChannel_t+0x128	invented: saved bend
 
 # 166B0.c sound driver: constants (invented)
+NUM_MASTER_CHANNELS	structs.h	invented: 4; the first channels have no voice and take BGM master streams first
+MAX_LOOP_DEPTH	structs.h	invented: 4; size of the sndChannel_t loop stack arrays
+FADE_NONE	structs.h	invented: -1 in sndChannel_t.fadeLeft
+NOTE_LENGTH_HOLD	structs.h	invented: 0x7FFF in sndChannel_t.noteLength; no note events are timed
+LOOP_FOREVER	structs.h	invented: 0xFF loop count that Snd_CmdLoopEnd never counts down
+CHAN_PAUSED	structs.h	invented: sndChannel_t.flags 0x1; set at start, cleared by SNDMSG_RESUME, skipped by the tick
+CHAN_MASTER	structs.h	invented: sndChannel_t.flags 0x2; set only on a sequence's master stream channel
+envPhase_t	structs.h	invented: ENV_OFF to ENV_DONE, the Snd_UpdateEnvelope switch
+SETABLE_RELOCATED	structs.h	invented: seTable_t.flags 0x1
+WAVEBANK_RELOCATED	structs.h	invented: waveBank_t.flags 0x80000000
+SND_SE	structs.h	invented: channel group flag 0x1 (channels with an SE table)
+SND_BGM	structs.h	invented: channel group flag 0x2 (the others)
+CMD_FIRST	166B0.c	invented: 0x80, first command byte; the dispatch tests >= 0x80
+CMD_MARKER	166B0.c	invented: 0xAB, Snd_CmdMarker's byte, sought by Snd_PlayBgmFromMarker
+NOTE_REST	166B0.c	invented: 0x60, the note that releases instead of playing
+PROGRAM_NONE	166B0.c	invented: 0xFFFF entry of seqHeader_t.programs
+TRACK_MASTER	166B0.c	invented: -1 track passed to Snd_FindBgmChannel by Snd_StartBgm
+SE_PRIORITY_DEFAULT	166B0.c	invented: -1 priority meaning seEntry_t.priority
+TICK_RATE_PAL	166B0.c	invented: 50, chosen when osTvType == OS_TV_PAL
+TICK_RATE_NTSC	166B0.c	invented: 60
+TEMPO_120_BPM	166B0.c	invented: 0x6000; Snd_CmdTempo computes bpm * 0x6000 / 120 per second
+SCALE_ONE	166B0.c	invented: 0x80, the reset and default value of the >> 7 scales
+VOLUME_MAX	166B0.c	invented: 0x7FFF master volume and voice volume clamp
+PAN_CENTRE	166B0.c	invented: 0x40 reset pan
+RESEND	166B0.c	invented: 0xFF in lastPan/lastFxMix forces the next send
+RANDOM_SEED	166B0.c	invented: 0x12345678 initial snd_randomSeed
+FX_DEFAULT	166B0.c	invented: 2, the initial snd_fxType
+MIN_MSGS	166B0.c	invented: 0x40 clamp of Snd_InitMessages
+MAX_MSGS	166B0.c	invented: 0x400 clamp of Snd_InitMessages
+sndMsgType_t	166B0.c	invented: SNDMSG_PAUSE, SNDMSG_RESUME, SNDMSG_SETFX, the Snd_HandleMessage switch
