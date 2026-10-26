@@ -718,7 +718,56 @@ void func_8003CF80( UnkChannel *chan ) {
     chan->unk_C5 = chan->unk_BF;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CFF0);
+/*
+================
+func_8003CFF0
+
+Steps the envelope: phase unk_C3 (1 attack, 2 decay, 3 sustain, 4 release) and level unk_C4, every unk_BF calls; enters release once unk_0C passes unk_54.
+================
+*/
+void func_8003CFF0( UnkChannel *chan ) {
+    s32 time;
+
+    if ( chan->unk_54 - chan->unk_0C < 0 && chan->unk_C3 < 4 ) {
+        chan->unk_C3 = 4;
+        chan->unk_C5 = 1;
+        chan->unk_CD = chan->unk_C4;
+    }
+    if ( --chan->unk_C5 == 0 ) {
+        chan->unk_C5 = chan->unk_BF;
+        switch ( chan->unk_C3 ) {
+        case 1:
+            time = ( (u32)( chan->unk_0C - chan->unk_40 ) >> 8 ) * chan->unk_64 >> 10;
+            if ( time < chan->unk_C6 ) {
+                chan->unk_C4 = chan->unk_C0 + (s32)( chan->unk_58 * time );
+            } else {
+                chan->unk_C3++;
+                chan->unk_C4 = chan->unk_C1;
+            }
+            break;
+        case 2:
+            time = ( ( (u32)( chan->unk_0C - chan->unk_40 ) >> 8 ) - chan->unk_C6 ) * chan->unk_64 >> 10;
+            if ( time < chan->unk_C7 ) {
+                chan->unk_C4 = chan->unk_C1 + (s32)( chan->unk_5C * time );
+            } else {
+                chan->unk_C3++;
+                chan->unk_C4 = chan->unk_C2;
+            }
+            break;
+        case 3:
+            break;
+        case 4:
+            time = ( (u32)( chan->unk_0C - chan->unk_54 ) >> 8 ) * chan->unk_64 >> 10;
+            if ( time < chan->unk_C8 ) {
+                chan->unk_C4 = chan->unk_CD - (s32)( chan->unk_60 * time * chan->unk_CD );
+            } else {
+                chan->unk_C3++;
+                chan->unk_C4 = 0;
+            }
+            break;
+        }
+    }
+}
 
 /*
 ================
