@@ -827,11 +827,11 @@ void Snd_LoadSeTable( void *data ) {
 ================
 func_8003C1C0
 
-Returns obj->unk_04.
+Returns table->unk_04.
 ================
 */
-s32 func_8003C1C0( UnkStruct8003C1EC *obj ) {
-    return obj->unk_04;
+s32 func_8003C1C0( seTable_t *table ) {
+    return table->unk_04;
 }
 
 /*
@@ -870,8 +870,8 @@ Snd_SetSeWaveBank
 Sets the wave bank of an SE table's sounds.
 ================
 */
-void Snd_SetSeWaveBank( UnkStruct8003C1EC *table, waveBank_t *bank ) {
-    table->unk_10 = bank;
+void Snd_SetSeWaveBank( seTable_t *table, waveBank_t *bank ) {
+    table->waveBank = bank;
 }
 
 /*
@@ -879,8 +879,8 @@ void Snd_SetSeWaveBank( UnkStruct8003C1EC *table, waveBank_t *bank ) {
 Snd_GetSeWaveBank
 ================
 */
-waveBank_t *Snd_GetSeWaveBank( UnkStruct8003C1EC *table ) {
-    return table->unk_10;
+waveBank_t *Snd_GetSeWaveBank( seTable_t *table ) {
+    return table->waveBank;
 }
 
 /*
@@ -896,7 +896,7 @@ void func_8003C1FC( s32 value ) {
 }
 
 #ifdef NON_MATCHING
-// NON_MATCHING: referent/type: retail reads unk_08 once through one type covering seqHeader_t and seTable_t; the cast leaves a register difference
+// NON_MATCHING: registers: retail loads snd_numChannels into v1 and snd_channels into v0 (swapped here); the seTable_t cast reads unk_08 at the same offset
 /*
 ================
 func_8003C208
@@ -1046,7 +1046,7 @@ one tick (pending voice start, notes and commands, step streams, fade out, envel
 then the voice's pitch, volume and pan). Returns the time to the next call, in microseconds.
 ================
 */
-s32 Snd_PlayerHandler( void *clientData ) {
+ALMicroTime Snd_PlayerHandler( void *clientData ) {
     s32 i;
     sndChannel_t *chan;
     f32 pitch;
@@ -1611,7 +1611,7 @@ INCLUDE_ASM("asm/nonmatchings/166B0", Snd_Exp2);
 #endif
 
 #ifdef NON_MATCHING
-// NON_MATCHING: register/schedule: retail has a 0x30 frame (0x28 here) and reloads tune->value; likely an inlined helper not yet recovered
+// NON_MATCHING: register/schedule: retail has a 0x30 frame (0x28 here), reloads tune->value before the add and copies the digit before SEXT8; an inline SetTune( tune, digit ) helper gave a worse schedule
 /*
 ================
 Snd_RelocateWaveBank
@@ -1624,6 +1624,8 @@ is 0xFF, and the loop and ADPCM book by the bank's address. Writes back the data
 void Snd_RelocateWaveBank( void *data, s32 romBase ) {
     waveBank_t *bank;
     s32 i;
+    s32 value;
+    waveTune_t *tune;
 
     bank = data;
     if ( bank->flags < 0 ) {
@@ -1633,10 +1635,14 @@ void Snd_RelocateWaveBank( void *data, s32 romBase ) {
     Snd_RelocateTable( (s32 *)&bank->unk_24, (s32)bank, 3 );
     Snd_RelocateTable( (s32 *)bank->waves, (s32)bank, bank->numWaves );
     for ( i = 0; i < bank->numWaves; i++ ) {
-        SetTune( &bank->tunes[i], &bank->unk_24[i] );
+        tune = &bank->tunes[i];
+        value = tune->raw;
+        tune->value = (f32)SEXT8( value ) / 100.0;
+        value = bank->unk_24[i] - '0';
+        tune->value += (f32)SEXT8( value );
         if ( bank->waves[i]->flags == 0 ) {
-            if ( ( bank->waves[i]->romBase & 0xFF000000 ) != 0xFF000000 ) {
-                bank->waves[i]->romBase += romBase;
+            if ( ( bank->waves[i]->base & 0xFF000000 ) != 0xFF000000 ) {
+                bank->waves[i]->base += romBase;
             }
             bank->waves[i]->flags = 1;
             if ( bank->waves[i]->loop != 0 ) {
@@ -1692,7 +1698,7 @@ Clears data, a channel, to its defaults, keeping only voiceActive: centre pan, f
 120 bpm tempo, no fade and the next (or default) wave bank.
 ================
 */
-void Snd_ResetChannel( void *data ) {
+void Snd_ResetChannel( sndChannel_t *data ) {
     sndChannel_t *chan;
     u8 started;
     s32 tempo;

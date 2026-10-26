@@ -2,6 +2,7 @@
 #define STRUCTS_H
 
 #include "common.h"
+#include "ultra64.h"
 
 /*
 ==============================================================================
@@ -14,31 +15,6 @@ Volumes, velocities, pans and FX mixes are 0 to 0x7F; pitches are in semitones.
 
 ==============================================================================
 */
-
-/*
- * n_audio voice (the SDK's N_ALVoice: 0x1C bytes). One per channel from snd_voiceChannels on, set up by
- * Snd_Init through n_alSynAllocVoice and owned by the n_audio synthesizer; this unit only passes its address.
- */
-typedef struct {
-    /* 0x00 */ u8 unk_00[0x1C];
-} N_ALVoice;
-
-/* Voice settings passed to n_alSynAllocVoice (the SDK's ALVoiceConfig). */
-typedef struct {
-    /* 0x00 */ s16 priority;        /* sndConfig_t.voicePriority */
-    /* 0x02 */ s16 fxBus;
-    /* 0x04 */ u8 unityPitch;
-} ALVoiceConfig;
-
-/*
- * Synthesizer client (the start of the SDK's ALPlayer). snd_player is registered once by Snd_Init through
- * n_alSynAddPlayer, with Snd_PlayerHandler as the handler and itself as the client data.
- */
-typedef struct ALPlayer_s {
-    /* 0x00 */ struct ALPlayer_s *next;
-    /* 0x04 */ void *clientData;
-    /* 0x08 */ s32 (*handler)( void *clientData );
-} ALPlayer;
 
 /* Message in the snd_msgs ring buffer: posted by Snd_PostMessage, run by Snd_HandleMessage on the next tick. */
 typedef struct {
@@ -96,26 +72,12 @@ typedef union {
 } waveTune_t;
 
 /*
- * Wave table (the SDK's ALWaveTable: base, len, type, flags, then the loop and book of the wave info).
- * Snd_RelocateWaveBank patches it once, as the SDK's alBnkfNew patches its wave tables.
- */
-typedef struct {
-    /* 0x00 */ u32 base;            /* ROM offset of the samples, relocated unless the top byte is 0xFF */
-    /* 0x04 */ u8 unk_04[0x08 - 0x04];
-    /* 0x08 */ u8 type;             /* 0: ADPCM (has a book) */
-    /* 0x09 */ u8 flags;            /* set once relocated */
-    /* 0x0A */ u8 unk_0A[0x0C - 0x0A];
-    /* 0x0C */ s32 loop;            /* offset in the bank, 0: none */
-    /* 0x10 */ s32 book;            /* offset in the bank, ADPCM only */
-} ALWaveTable;
-
-/*
  * Wave bank (BGMWBK or SEWBK control data). Snd_RelocateWaveBank relocates it in place once; its samples stay
  * in ROM. Channels play from sndChannel_t.waveBank.
  */
 typedef struct {
     /* 0x00 */ u8 unk_00[0x10];
-    /* 0x10 */ s32 flags;           /* bit 31: relocated */
+    /* 0x10 */ s32 flags;           /* WAVEBANK_RELOCATED */
     /* 0x14 */ u8 unk_14[0x20 - 0x14];
     /* 0x20 */ s32 numWaves;        /* entries in unk_24, tunes and waves */
     /* 0x24 */ u8 *unk_24;          /* '0'-based digits added to the tunes */
@@ -138,21 +100,13 @@ typedef struct {
 /* SE table (from SEPTR): sound effects started by index (Snd_PlaySe); Snd_LoadSeTable relocates it once. */
 typedef struct {
     /* 0x00 */ s32 numEntries;      /* entries in entries */
-    /* 0x04 */ s32 unk_04;
+    /* 0x04 */ s32 unk_04;          /* returned by func_8003C1C0 */
     /* 0x08 */ s32 unk_08;
-    /* 0x0C */ s32 flags;           /* bit 0: relocated */
+    /* 0x0C */ s32 flags;           /* SETABLE_RELOCATED */
     /* 0x10 */ waveBank_t *waveBank;    /* set by Snd_SetSeWaveBank; NULL: snd_nextWaveBank or the default */
     /* 0x14 */ u16 *programs;       /* wave of each program */
     /* 0x18 */ seEntry_t entries[1];    /* numEntries entries */
 } seTable_t;
-
-/* Object written by Snd_SetSeWaveBank and read by func_8003C1C0 and Snd_GetSeWaveBank; identity unknown. */
-typedef struct {
-    /* 0x00 */ u8 unk_00[0x04];
-    /* 0x04 */ s32 unk_04;
-    /* 0x08 */ u8 unk_08[0x10 - 0x08];
-    /* 0x10 */ waveBank_t *unk_10;
-} UnkStruct8003C1EC;
 
 /* Configuration passed to Snd_Init; filled on the stack by its caller. 0x28 to 0x3C go to func_8003F9A0. */
 typedef struct {

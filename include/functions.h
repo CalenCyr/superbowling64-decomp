@@ -8,7 +8,7 @@ void Snd_LoadWaveBank( waveBank_t *bank, s32 romBase );
 void Snd_Resume( s32 id );
 void Snd_LoadSeTable( void *data );
 void Snd_InitMessages( s32 count );
-s32 Snd_PlayerHandler( void *clientData );
+ALMicroTime Snd_PlayerHandler( void *clientData );
 void Snd_HandleMessage( sndMsg_t *msg );
 s32 Snd_PostMessage( sndMsg_t *msg );
 void Snd_PlayNextNote( sndChannel_t *chan, s32 index );
@@ -40,14 +40,5 @@ void Snd_InitHeap( s32 arg0, s32 arg1 );
 void *Snd_Alloc( s32 size );
 void Snd_MemMove( void *dst, void *src, s32 len );
 s32 Snd_HeapUsed( void );
-void n_alSynAddPlayer( ALPlayer *player );
-void n_alSynAllocVoice( N_ALVoice *voice, ALVoiceConfig *config );
-
-void n_alSynSetFXMix( N_ALVoice *voice, u8 fx );
-void n_alSynSetPan( N_ALVoice *voice, s32 pan );
-void n_alSynSetPitch( N_ALVoice *voice, f32 pitch );
-void n_alSynSetVol( N_ALVoice *voice, s32 volume, s32 time );
-void n_alSynStartVoice( N_ALVoice *voice, ALWaveTable *sound );
-void n_alSynStopVoice( N_ALVoice *voice );
 
 #endif

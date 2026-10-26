@@ -145,10 +145,10 @@ snd_commands	0x8005CB70	invented: command handlers, indexed by command - 0x80
 SetEnvelope	static inline in 166B0.c	invented: reads an envelope_t into the channel
 
 # 166B0.c sound driver: types
-N_ALVoice	structs.h	evidence: n_audio N_ALVoice, 0x1C bytes; the n_alSynAllocVoice offsets
-ALVoiceConfig	structs.h	evidence: SDK ALVoiceConfig { priority, fxBus, unityPitch }, as n_alSynAllocVoice reads it
-ALPlayer	structs.h	evidence: SDK ALPlayer { next, clientData, handler }, as n_alSynAddPlayer links it
-ALWaveTable	structs.h	evidence: SDK ALWaveTable; started by n_alSynStartVoice, patched like alBnkfNew's _bnkfPatchWaveTable
+N_ALVoice	ultra64.h	evidence: n_audio N_ALVoice, 0x1C bytes; the n_alSynAllocVoice offsets
+ALVoiceConfig	ultra64.h	evidence: SDK ALVoiceConfig { priority, fxBus, unityPitch }, as n_alSynAllocVoice reads it
+ALPlayer	ultra64.h	evidence: SDK ALPlayer { next, clientData, handler }, as n_alSynAddPlayer links it
+ALWaveTable	ultra64.h	evidence: SDK ALWaveTable; started by n_alSynStartVoice, patched like alBnkfNew's _bnkfPatchWaveTable
 sndMsg_t	structs.h	invented: message ring buffer entry
 drumEntry_t	structs.h	invented: per-note program/envelope/pan/note override selected by command 0x9E
 envelope_t	structs.h	invented: the seven envelope bytes SetEnvelope reads
