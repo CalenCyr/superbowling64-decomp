@@ -14,10 +14,10 @@
 SetEnvelope
 
 Reads the seven envelope bytes at src into the channel (rates and levels of the attack, decay and release
-phases); returns the position after them. Used by func_8003B2B0; func_8003E1DC repeats its body. The name is invented.
+phases); returns the position after them. Used by Snd_CmdEnvelopeIndex; Snd_CmdEnvelope repeats its body. The name is invented.
 ================
 */
-static inline u8 *SetEnvelope( UnkChannel *chan, u8 *src ) {
+static inline u8 *SetEnvelope( sndChannel_t *chan, u8 *src ) {
     s32 value;
     s32 level;
 
@@ -25,33 +25,33 @@ static inline u8 *SetEnvelope( UnkChannel *chan, u8 *src ) {
     if ( value == 0 ) {
         value = 1;
     }
-    chan->unk_BF = value;
-    chan->unk_64 = 0x400 / value;
-    chan->unk_C0 = *src++;
+    chan->envInterval = value;
+    chan->envTimeScale = 0x400 / value;
+    chan->envStartLevel = *src++;
     value = *src++;
-    chan->unk_C6 = value;
+    chan->envAttackTime = value;
     level = *src++;
-    chan->unk_58 = 1.0 / (f32)value * (f32)( level - chan->unk_C0 );
-    chan->unk_C1 = level;
+    chan->attackSlope = 1.0 / (f32)value * (f32)( level - chan->envStartLevel );
+    chan->envPeakLevel = level;
     value = *src++;
-    chan->unk_C7 = value;
+    chan->envDecayTime = value;
     level = *src++;
-    chan->unk_5C = 1.0 / (f32)value * (f32)( level - chan->unk_C1 );
-    chan->unk_C2 = level;
+    chan->decaySlope = 1.0 / (f32)value * (f32)( level - chan->envPeakLevel );
+    chan->envSustainLevel = level;
     value = *src++;
-    chan->unk_C8 = value;
-    chan->unk_60 = 1.0 / (f32)value;
+    chan->envReleaseTime = value;
+    chan->releaseSlope = 1.0 / (f32)value;
     return src;
 }
 
 /*
 ================
-func_8003B2B0
+Snd_CmdEnvelopeIndex
 
 Channel command: applies envelope entry (one- or two-byte index) of the channel's header.
 ================
 */
-u8 *func_8003B2B0( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdEnvelopeIndex( sndChannel_t *chan, u8 *src ) {
     s32 index;
 
     index = *src++;
@@ -60,286 +60,286 @@ u8 *func_8003B2B0( UnkChannel *chan, u8 *src ) {
         index <<= 8;
         index |= *src++;
     }
-    SetEnvelope( chan, &chan->unk_74->unk_18[index].unk_00 );
+    SetEnvelope( chan, &chan->seq->envelopes[index].interval );
     return src;
 }
 
 /*
 ================
-func_8003B3FC
+Snd_Init
 
 Sets up the driver from config: tick rate from the TV type, heap, channel and voice arrays, message queue, default banks, then registers the player and allocates the voices.
 ================
 */
-void func_8003B3FC( UnkAudioConfig *config ) {
+void Snd_Init( sndConfig_t *config ) {
     s32 i;
-    UnkVoiceConfig voiceConfig;
+    ALVoiceConfig voiceConfig;
 
     D_800693D8 = config->unk_40;
     D_800DF6B0 = config->unk_00;
-    D_80064334 = config->unk_04 + 4;
+    snd_numChannels = config->numVoices + 4;
     if ( osTvType == OS_TV_PAL ) {
-        D_80064344 = 50;
+        snd_tickRate = 50;
     } else {
-        D_80064344 = 60;
+        snd_tickRate = 60;
     }
-    D_80064348 = 1000000 / D_80064344;
-    func_8003FC60( config->unk_10, config->unk_14 );
+    snd_tickTime = 1000000 / snd_tickRate;
+    Snd_InitHeap( config->heapBase, config->heapSize );
     func_8003F7F0( config->unk_08 );
-    D_80064338 = func_8003FCAC( ( D_80064334 - 4 ) * sizeof( UnkVoice ) );
-    D_8006433C = func_8003FCAC( D_80064334 * sizeof( UnkChannel ) );
-    D_80064340 = D_8006433C + 4;
-    func_8003C2F0( config->unk_24 );
-    D_80064358 = NULL;
-    D_8006435C = NULL;
-    if ( config->unk_18 != NULL && config->unk_1C != 0 ) {
-        func_8003BF74( config->unk_18, config->unk_1C );
+    snd_voices = Snd_Alloc( ( snd_numChannels - 4 ) * sizeof( N_ALVoice ) );
+    snd_channels = Snd_Alloc( snd_numChannels * sizeof( sndChannel_t ) );
+    snd_voiceChannels = snd_channels + 4;
+    Snd_InitMessages( config->numMsgs );
+    snd_nextWaveBank = NULL;
+    snd_defaultWaveBank = NULL;
+    if ( config->waveBank != NULL && config->waveRomBase != 0 ) {
+        Snd_LoadWaveBank( config->waveBank, config->waveRomBase );
     }
-    D_8006436C = NULL;
-    D_80064368 = NULL;
-    if ( config->unk_20 != NULL ) {
-        func_8003C13C( config->unk_20 );
+    snd_nextSeTable = NULL;
+    snd_seTable = NULL;
+    if ( config->seTable != NULL ) {
+        Snd_LoadSeTable( config->seTable );
     }
-    D_80064370 = NULL;
-    D_80064364 = 2;
-    func_8003F9A0( config, D_80064344, 2 );
-    func_8003B684( 3, 0x7FFF );
-    D_80064350 = 1;
-    D_80064354 = 0x12345678;
-    D_80064320.unk_00 = NULL;
-    D_80064320.unk_08 = func_8003C46C;
-    D_80064320.unk_04 = &D_80064320;
-    func_800421D0( &D_80064320 );
-    for ( i = 0; i < D_80064334; i++ ) {
-        D_8006433C[i].unk_C9 = 0;
-        func_8003D90C( &D_8006433C[i] );
-        voiceConfig.unk_04 = 0;
-        voiceConfig.unk_00 = config->unk_0C;
-        voiceConfig.unk_02 = 0;
+    snd_markerCallback = NULL;
+    snd_fxType = 2;
+    func_8003F9A0( config, snd_tickRate, 2 );
+    Snd_SetMasterVolume( 3, 0x7FFF );
+    snd_nextId = 1;
+    snd_randomSeed = 0x12345678;
+    snd_player.next = NULL;
+    snd_player.handler = Snd_PlayerHandler;
+    snd_player.clientData = &snd_player;
+    n_alSynAddPlayer( &snd_player );
+    for ( i = 0; i < snd_numChannels; i++ ) {
+        snd_channels[i].voiceActive = 0;
+        Snd_ResetChannel( &snd_channels[i] );
+        voiceConfig.unityPitch = 0;
+        voiceConfig.priority = config->voicePriority;
+        voiceConfig.fxBus = 0;
         if ( i >= 4 ) {
-            func_80042220( &D_80064338[i - 4], &voiceConfig );
+            n_alSynAllocVoice( &snd_voices[i - 4], &voiceConfig );
         }
     }
-    func_8003FCDC();
+    Snd_HeapUsed();
 }
 
 /*
 ================
-func_8003B684
+Snd_SetMasterVolume
 
 Sets the volume scale of bank channels (bit 0 of flags) and of the other channels (bit 1).
 ================
 */
-void func_8003B684( s32 flags, s16 value ) {
+void Snd_SetMasterVolume( s32 flags, s16 value ) {
     if ( flags & 1 ) {
-        D_8006434C = value;
+        snd_seVolume = value;
     }
     if ( flags & 2 ) {
-        D_8006434E = value;
+        snd_bgmVolume = value;
     }
 }
 
 /*
 ================
-func_8003B6B0
+Snd_PlayBgm
 
-Starts the channels of hdr through func_8003DEA0, queues message 1 for them; returns their id.
+Starts the channels of hdr through Snd_StartBgm, queues message 1 for them; returns their id.
 ================
 */
-s32 func_8003B6B0( UnkSeqHeader *hdr ) {
+s32 Snd_PlayBgm( seqHeader_t *hdr ) {
     s32 id;
 
-    id = func_8003DEA0( hdr );
-    func_8003C088( id );
+    id = Snd_StartBgm( hdr );
+    Snd_Resume( id );
     return id;
 }
 
 /*
 ================
-func_8003B6E0
+Snd_PlayBgmFromMarker
 
-Starts the channels of hdr like func_8003B6B0, but first runs each of them silently up to the marker command 0xAB with the given argument.
+Starts the channels of hdr like Snd_PlayBgm, but first runs each of them silently up to the marker command 0xAB with the given argument.
 ================
 */
-s32 func_8003B6E0( UnkSeqHeader *hdr, s32 marker ) {
+s32 Snd_PlayBgmFromMarker( seqHeader_t *hdr, s32 marker ) {
     s32 id;
     s32 i;
-    UnkChannel *chan;
+    sndChannel_t *chan;
     u8 *src;
     u8 cmd;
     u8 value;
     s32 length;
 
-    id = func_8003DEA0( hdr );
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_44 != id || chan->unk_74 != hdr || chan->unk_04 == NULL ) {
+    id = Snd_StartBgm( hdr );
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->id != id || chan->seq != hdr || chan->cmdPos == NULL ) {
             continue;
         }
         // RULE-EXCEPTION: R14, a do/while here lets gcc hoist the handler table and 0xAB out of the loop;
         // retail reloads both every pass, so this loop was built from labels.
     next:
-        src = chan->unk_04;
+        src = chan->cmdPos;
         cmd = *src;
         if ( cmd >= 0x80 ) {
             if ( cmd == 0xAB && src[1] == marker ) {
                 goto found;
             }
-            chan->unk_04 = D_8005CB70[cmd & 0x7F]( chan, src + 1 );
+            chan->cmdPos = snd_commands[cmd & 0x7F]( chan, src + 1 );
         } else {
-            chan->unk_04 = src + 1;
-            if ( chan->unk_D2 ) {
-                chan->unk_04 = src + 2;
+            chan->cmdPos = src + 1;
+            if ( chan->noteVelocity ) {
+                chan->cmdPos = src + 2;
                 value = src[1];
-                chan->unk_BB = value;
+                chan->velocity = value;
                 if ( value >= 0x80 ) {
-                    chan->unk_BB = value & 0x7F;
-                    chan->unk_D2 = 0;
-                    chan->unk_D3 = chan->unk_BB;
+                    chan->velocity = value & 0x7F;
+                    chan->noteVelocity = 0;
+                    chan->fixedVelocity = chan->velocity;
                 }
             } else {
-                chan->unk_BB = chan->unk_D3;
+                chan->velocity = chan->fixedVelocity;
             }
-            if ( chan->unk_AC != 0 && chan->unk_B7 == 0 ) {
-                chan->unk_9A = chan->unk_AC;
+            if ( chan->fixedLength != 0 && chan->explicitLength == 0 ) {
+                chan->noteLength = chan->fixedLength;
             } else {
-                chan->unk_B7 = 0;
-                cmd = *chan->unk_04++;
+                chan->explicitLength = 0;
+                cmd = *chan->cmdPos++;
                 if ( cmd < 0x80 ) {
-                    chan->unk_9A = cmd;
+                    chan->noteLength = cmd;
                 } else {
-                    chan->unk_9A = *chan->unk_04++ + ( ( cmd & 0x7F ) << 8 );
+                    chan->noteLength = *chan->cmdPos++ + ( ( cmd & 0x7F ) << 8 );
                 }
             }
-            chan->unk_0C += chan->unk_9A << 8;
+            chan->time += chan->noteLength << 8;
         }
-        if ( chan->unk_04 != NULL ) {
+        if ( chan->cmdPos != NULL ) {
             goto next;
         }
     found:
-        chan->unk_3C = chan->unk_0C;
-        if ( chan->unk_04 != NULL ) {
-            src = chan->unk_04 + 2;
+        chan->nextNoteTime = chan->time;
+        if ( chan->cmdPos != NULL ) {
+            src = chan->cmdPos + 2;
             length = *src++;
             if ( length >= 0x80 ) {
                 length &= 0x7F;
                 length <<= 8;
                 length |= *src++;
             }
-            chan->unk_AA = 0;
-            chan->unk_9A = length;
-            chan->unk_04 = src;
-            chan->unk_0C -= length << 8;
+            chan->noteAge = 0;
+            chan->noteLength = length;
+            chan->cmdPos = src;
+            chan->time -= length << 8;
         }
-        chan->unk_40 = chan->unk_0C;
-        if ( chan->unk_38 != NULL ) {
-            func_8003D374( chan );
+        chan->noteTime = chan->time;
+        if ( chan->volStream != NULL ) {
+            Snd_StepVolumeStream( chan );
         }
-        if ( chan->unk_34 != NULL ) {
-            func_8003D438( chan );
+        if ( chan->bendStream != NULL ) {
+            Snd_StepBendStream( chan );
         }
     }
-    func_8003C088( id );
+    Snd_Resume( id );
     return id;
 }
 
 /*
 ================
-func_8003B930
+Snd_PlaySe
 
-Starts entry index of the one-shot bank D_8006436C, or else of the default bank D_80064368, on a free channel; returns the channel id, or 0 without a bank.
+Starts entry index of the one-shot bank snd_nextSeTable, or else of the default bank snd_seTable, on a free channel; returns the channel id, or 0 without a bank.
 ================
 */
-s32 func_8003B930( s32 index ) {
-    UnkSeqBank *bank;
+s32 Snd_PlaySe( s32 index ) {
+    seTable_t *bank;
     s32 id;
 
-    bank = D_8006436C;
+    bank = snd_nextSeTable;
     if ( bank != NULL ) {
-        D_8006436C = NULL;
+        snd_nextSeTable = NULL;
     } else {
-        bank = D_80064368;
+        bank = snd_seTable;
         if ( bank == NULL ) {
-            D_80064358 = NULL;
+            snd_nextWaveBank = NULL;
             return 0;
         }
     }
-    if ( D_80064358 == NULL ) {
-        D_80064358 = bank->unk_10;
+    if ( snd_nextWaveBank == NULL ) {
+        snd_nextWaveBank = bank->waveBank;
     }
-    id = func_8003DCF8( bank, index, 0x80, 0x80, -1 );
-    D_80064358 = NULL;
+    id = Snd_StartSe( bank, index, 0x80, 0x80, -1 );
+    snd_nextWaveBank = NULL;
     return id;
 }
 
 /*
 ================
-func_8003B9B0
+Snd_PlaySeEx
 
-Like func_8003B930 with explicit parameters; with reuse set, a channel already playing the entry from the same bank is restarted instead of taking a free one.
+Like Snd_PlaySe with explicit parameters; with reuse set, a channel already playing the entry from the same bank is restarted instead of taking a free one.
 ================
 */
-s32 func_8003B9B0( s32 index, s32 arg1, s32 arg2, s32 reuse, s32 priority ) {
-    UnkSeqBank *bank;
+s32 Snd_PlaySeEx( s32 index, s32 arg1, s32 arg2, s32 reuse, s32 priority ) {
+    seTable_t *bank;
     s32 i;
-    UnkChannel *chan;
+    sndChannel_t *chan;
     s32 id;
 
-    if ( D_8006436C != NULL ) {
-        bank = D_8006436C;
-        D_8006436C = NULL;
+    if ( snd_nextSeTable != NULL ) {
+        bank = snd_nextSeTable;
+        snd_nextSeTable = NULL;
     } else {
-        bank = D_80064368;
+        bank = snd_seTable;
         if ( bank == NULL ) {
-            D_80064358 = NULL;
+            snd_nextWaveBank = NULL;
             return 0;
         }
     }
-    if ( D_80064358 == NULL ) {
-        D_80064358 = bank->unk_10;
+    if ( snd_nextWaveBank == NULL ) {
+        snd_nextWaveBank = bank->waveBank;
     }
     if ( reuse ) {
-        for ( i = 4, chan = D_80064340; i < D_80064334; i++, chan++ ) {
-            if ( chan->unk_A6 == index && chan->unk_78 == bank ) {
+        for ( i = 4, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
+            if ( chan->seIndex == index && chan->seTable == bank ) {
                 if ( priority == -1 ) {
-                    priority = bank->unk_18[index].unk_04;
+                    priority = bank->entries[index].priority;
                 }
-                id = func_8003DC48( chan, bank, index, arg1, arg2, priority );
-                D_80064358 = NULL;
+                id = Snd_StartSeOnChannel( chan, bank, index, arg1, arg2, priority );
+                snd_nextWaveBank = NULL;
                 return id;
             }
         }
     }
-    id = func_8003DCF8( bank, index, arg1, arg2, priority );
-    D_80064358 = NULL;
+    id = Snd_StartSe( bank, index, arg1, arg2, priority );
+    snd_nextWaveBank = NULL;
     return id;
 }
 
 /*
 ================
-func_8003BAC8
+Snd_StopAll
 
-Starts a fade over value steps (at least 1) on every active channel not fading yet; bit 0 of flags selects bank channels, bit 1 the others. See func_8003BC14.
+Starts a fade over value steps (at least 1) on every active channel not fading yet; bit 0 of flags selects bank channels, bit 1 the others. See Snd_Stop.
 ================
 */
-void func_8003BAC8( s32 flags, s32 value ) {
+void Snd_StopAll( s32 flags, s32 value ) {
     s32 i;
     s32 total;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
     total = value;
     if ( value == 0 ) {
         total = 1;
     }
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_78 != NULL ? flags & 1 : flags & 2 ) {
-            if ( chan->unk_04 != NULL && chan->unk_10 == -1 ) {
-                if ( chan->unk_00 & 1 ) {
-                    chan->unk_1C = 1;
-                    chan->unk_10 = 0;
-                    chan->unk_00 &= ~1;
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->seTable != NULL ? flags & 1 : flags & 2 ) {
+            if ( chan->cmdPos != NULL && chan->fadeLeft == -1 ) {
+                if ( chan->flags & 1 ) {
+                    chan->fadeTotal = 1;
+                    chan->fadeLeft = 0;
+                    chan->flags &= ~1;
                 } else {
-                    chan->unk_1C = total;
-                    chan->unk_10 = value;
+                    chan->fadeTotal = total;
+                    chan->fadeLeft = value;
                 }
             }
         }
@@ -348,20 +348,20 @@ void func_8003BAC8( s32 flags, s32 value ) {
 
 /*
 ================
-func_8003BB94
+Snd_NumActive
 
 Counts the active channels: bit 0 of flags counts those started from a bank, bit 1 the others.
 ================
 */
-s32 func_8003BB94( s32 flags ) {
+s32 Snd_NumActive( s32 flags ) {
     s32 i;
     s32 count;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
     count = 0;
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_04 != NULL ) {
-            if ( chan->unk_78 != NULL ? flags & 1 : flags & 2 ) {
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->cmdPos != NULL ) {
+            if ( chan->seTable != NULL ? flags & 1 : flags & 2 ) {
                 count++;
             }
         }
@@ -371,16 +371,16 @@ s32 func_8003BB94( s32 flags ) {
 
 /*
 ================
-func_8003BC14
+Snd_Stop
 
 Starts a fade over value steps (at least 1) on every channel with the given id that is not fading yet; a channel with bit 0 of unk_00 set instead gets a zero-length fade and loses that bit. Returns how many channels it changed.
 ================
 */
-s32 func_8003BC14( s32 id, s32 value ) {
+s32 Snd_Stop( s32 id, s32 value ) {
     s32 i;
     s32 count;
     s32 total;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
     if ( id == 0 ) {
         return 0;
@@ -390,15 +390,15 @@ s32 func_8003BC14( s32 id, s32 value ) {
         total = 1;
     }
     count = 0;
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_44 == id && chan->unk_10 == -1 ) {
-            if ( chan->unk_00 & 1 ) {
-                chan->unk_1C = 1;
-                chan->unk_10 = 0;
-                chan->unk_00 &= ~1;
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->id == id && chan->fadeLeft == -1 ) {
+            if ( chan->flags & 1 ) {
+                chan->fadeTotal = 1;
+                chan->fadeLeft = 0;
+                chan->flags &= ~1;
             } else {
-                chan->unk_1C = total;
-                chan->unk_10 = value;
+                chan->fadeTotal = total;
+                chan->fadeLeft = value;
             }
             count++;
         }
@@ -408,45 +408,45 @@ s32 func_8003BC14( s32 id, s32 value ) {
 
 /*
 ================
-func_8003BCC8
+Snd_NumChannels
 
 Counts the channels with the given id.
 ================
 */
-s32 func_8003BCC8( s32 id ) {
+s32 Snd_NumChannels( s32 id ) {
     s32 i;
-    UnkChannel *chan;
+    sndChannel_t *chan;
     s32 count;
 
     if ( id == 0 ) {
         return 0;
     }
     count = 0;
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        count += chan->unk_44 == id;
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        count += chan->id == id;
     }
     return count;
 }
 
 /*
 ================
-func_8003BD20
+Snd_SetVolume
 
 Sets unk_9E on every channel with the given id; returns how many there were.
 ================
 */
-s32 func_8003BD20( s32 id, s32 value ) {
+s32 Snd_SetVolume( s32 id, s32 value ) {
     s32 i;
     s32 count;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
     if ( id == 0 ) {
         return 0;
     }
     count = 0;
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_44 == id ) {
-            chan->unk_9E = value;
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->id == id ) {
+            chan->playVolume = value;
             count++;
         }
     }
@@ -455,25 +455,25 @@ s32 func_8003BD20( s32 id, s32 value ) {
 
 /*
 ================
-func_8003BD80
+Snd_SetPan
 
 Sets unk_B0 and unk_BE = 0xFF on every channel with the given id; returns how many there were.
 ================
 */
-s32 func_8003BD80( s32 id, s32 value ) {
+s32 Snd_SetPan( s32 id, s32 value ) {
     s32 i;
     s32 count;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
     if ( id == 0 ) {
         return 0;
     }
     count = 0;
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_44 == id ) {
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->id == id ) {
             count++;
-            chan->unk_B0 = value;
-            chan->unk_BE = 0xFF;
+            chan->playPan = value;
+            chan->lastPan = 0xFF;
         }
     }
     return count;
@@ -481,23 +481,23 @@ s32 func_8003BD80( s32 id, s32 value ) {
 
 /*
 ================
-func_8003BDF0
+Snd_SetPitchOffset
 
 Sets unk_30 to value + unk_90 on every channel with the given id; returns how many there were.
 ================
 */
-s32 func_8003BDF0( s32 id, f32 value ) {
+s32 Snd_SetPitchOffset( s32 id, f32 value ) {
     s32 i;
     s32 count;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
     if ( id == 0 ) {
         return 0;
     }
     count = 0;
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_44 == id ) {
-            chan->unk_30 = value + chan->unk_90;
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->id == id ) {
+            chan->pitchOffset = value + chan->detune;
             count++;
         }
     }
@@ -506,15 +506,15 @@ s32 func_8003BDF0( s32 id, f32 value ) {
 
 /*
 ================
-func_8003BE60
+Snd_SetTempoScale
 
 Sets the tempo scale unk_98 (clamped to [1, 0x100]) on every channel with the given id and rescales unk_9C from unk_A8; returns how many there were.
 ================
 */
-s32 func_8003BE60( s32 id, s32 value ) {
+s32 Snd_SetTempoScale( s32 id, s32 value ) {
     s32 i;
     s32 count;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
     if ( id == 0 ) {
         return 0;
@@ -525,11 +525,11 @@ s32 func_8003BE60( s32 id, s32 value ) {
         value = 0x100;
     }
     count = 0;
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_44 == id ) {
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->id == id ) {
             count++;
-            chan->unk_98 = value;
-            chan->unk_9C = ( chan->unk_A8 * value ) >> 7;
+            chan->tempoScale = value;
+            chan->tempo = ( chan->baseTempo * value ) >> 7;
         }
     }
     return count;
@@ -537,15 +537,15 @@ s32 func_8003BE60( s32 id, s32 value ) {
 
 /*
 ================
-func_8003BEEC
+Snd_SetFxBase
 
 Sets unk_CB (clamped to [0, 0x7F]) and unk_CC = 0xFF on every channel with the given id; returns how many there were.
 ================
 */
-s32 func_8003BEEC( s32 id, s32 value ) {
+s32 Snd_SetFxBase( s32 id, s32 value ) {
     s32 i;
     s32 count;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
     if ( id == 0 ) {
         return 0;
@@ -556,11 +556,11 @@ s32 func_8003BEEC( s32 id, s32 value ) {
         value = 0x7F;
     }
     count = 0;
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_44 == id ) {
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->id == id ) {
             count++;
-            chan->unk_CB = value;
-            chan->unk_CC = 0xFF;
+            chan->fxBase = value;
+            chan->lastFxMix = 0xFF;
         }
     }
     return count;
@@ -568,73 +568,73 @@ s32 func_8003BEEC( s32 id, s32 value ) {
 
 /*
 ================
-func_8003BF74
+Snd_LoadWaveBank
 
-Relocates bank to base and makes it the default D_8006435C if there is none yet.
+Relocates bank to base and makes it the default snd_defaultWaveBank if there is none yet.
 ================
 */
-void func_8003BF74( UnkSoundBank *bank, s32 base ) {
-    func_8003D6E0( bank, base );
-    if ( D_8006435C == NULL ) {
-        D_8006435C = bank;
+void Snd_LoadWaveBank( waveBank_t *bank, s32 base ) {
+    Snd_RelocateWaveBank( bank, base );
+    if ( snd_defaultWaveBank == NULL ) {
+        snd_defaultWaveBank = bank;
     }
 }
 
 /*
 ================
-func_8003BFB0
+Snd_SetNextWaveBank
 
-Makes bank the current D_80064358 if it is relocated; returns D_80064358.
+Makes bank the current snd_nextWaveBank if it is relocated; returns snd_nextWaveBank.
 ================
 */
-UnkSoundBank *func_8003BFB0( UnkSoundBank *bank ) {
-    if ( bank != NULL && bank->unk_10 < 0 ) {
-        D_80064358 = bank;
+waveBank_t *Snd_SetNextWaveBank( waveBank_t *bank ) {
+    if ( bank != NULL && bank->flags < 0 ) {
+        snd_nextWaveBank = bank;
     }
-    return D_80064358;
+    return snd_nextWaveBank;
 }
 
 /*
 ================
-func_8003BFD8
+Snd_SetDefaultWaveBank
 
-Makes bank the default D_8006435C if it is relocated.
+Makes bank the default snd_defaultWaveBank if it is relocated.
 ================
 */
-void func_8003BFD8( UnkSoundBank *bank ) {
-    if ( bank != NULL && bank->unk_10 < 0 ) {
-        D_8006435C = bank;
+void Snd_SetDefaultWaveBank( waveBank_t *bank ) {
+    if ( bank != NULL && bank->flags < 0 ) {
+        snd_defaultWaveBank = bank;
     }
 }
 
 /*
 ================
-func_8003BFFC
+Snd_GetDefaultWaveBank
 
-Returns the default bank D_8006435C.
+Returns the default bank snd_defaultWaveBank.
 ================
 */
-UnkSoundBank *func_8003BFFC( void ) {
-    return D_8006435C;
+waveBank_t *Snd_GetDefaultWaveBank( void ) {
+    return snd_defaultWaveBank;
 }
 
 /*
 ================
-func_8003C008
+Snd_GetWaveBank
 
 Returns unk_7C of the first channel with the given id, or 0.
 ================
 */
-UnkSoundBank *func_8003C008( s32 id ) {
+waveBank_t *Snd_GetWaveBank( s32 id ) {
     s32 i;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
     if ( id == 0 ) {
         return NULL;
     }
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_44 == id ) {
-            return chan->unk_7C;
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->id == id ) {
+            return chan->waveBank;
         }
     }
     return NULL;
@@ -642,90 +642,90 @@ UnkSoundBank *func_8003C008( s32 id ) {
 
 /*
 ================
-func_8003C064
+Snd_Pause
 
 Queues message 0 with arg.
 ================
 */
-void func_8003C064( s32 arg ) {
-    UnkMsg8003C3D4 msg;
+void Snd_Pause( s32 arg ) {
+    sndMsg_t msg;
 
     msg.cmd = 0;
     msg.arg = arg;
-    func_8003C3D4( &msg );
+    Snd_PostMessage( &msg );
 }
 
 /*
 ================
-func_8003C088
+Snd_Resume
 
 Queues message 1 with arg.
 ================
 */
-void func_8003C088( s32 arg ) {
-    UnkMsg8003C3D4 msg;
+void Snd_Resume( s32 arg ) {
+    sndMsg_t msg;
 
     msg.cmd = 1;
     msg.arg = arg;
-    func_8003C3D4( &msg );
+    Snd_PostMessage( &msg );
 }
 
 /*
 ================
-func_8003C0B0
+Snd_SetFxType
 
-Remembers arg in D_80064364 and queues message 2 with it; returns whether it was queued.
+Remembers arg in snd_fxType and queues message 2 with it; returns whether it was queued.
 ================
 */
-inline s32 func_8003C0B0( s32 arg ) {
-    UnkMsg8003C3D4 msg;
+inline s32 Snd_SetFxType( s32 arg ) {
+    sndMsg_t msg;
 
     msg.arg = arg;
-    D_80064364 = arg;
+    snd_fxType = arg;
     msg.cmd = 2;
-    return func_8003C3D4( &msg );
+    return Snd_PostMessage( &msg );
 }
 
 /*
 ================
-func_8003C0E0
+Snd_EnableSeqFx
 
-Sets D_80064360 to arg; a zero arg first requeues message 2 with D_80064364 and is dropped if that fails.
+Sets snd_seqFxEnabled to arg; a zero arg first requeues message 2 with snd_fxType and is dropped if that fails.
 ================
 */
-void func_8003C0E0( s32 arg ) {
+void Snd_EnableSeqFx( s32 arg ) {
     s32 queued;
 
     queued = 1;
     if ( arg == 0 ) {
-        queued = func_8003C0B0( D_80064364 );
+        queued = Snd_SetFxType( snd_fxType );
     }
     if ( queued ) {
-        D_80064360 = arg;
+        snd_seqFxEnabled = arg;
     }
 }
 
 /*
 ================
-func_8003C13C
+Snd_LoadSeTable
 
-Turns the offsets of bank into pointers, once, and makes it the default D_80064368 if there is none yet.
+Turns the offsets of bank into pointers, once, and makes it the default snd_seTable if there is none yet.
 ================
 */
-void func_8003C13C( void *data ) {
+void Snd_LoadSeTable( void *data ) {
     s32 i;
-    UnkSeqBank *bank;
+    seTable_t *bank;
 
     bank = data;
-    if ( !( bank->unk_0C & 1 ) ) {
-        if ( D_80064368 == NULL ) {
-            D_80064368 = bank;
+    if ( !( bank->flags & 1 ) ) {
+        if ( snd_seTable == NULL ) {
+            snd_seTable = bank;
         }
-        bank->unk_0C = 1;
-        bank->unk_10 = 0;
-        bank->unk_14 = (u16 *)( (u8 *)bank + (s32)bank->unk_14 );
-        for ( i = 0; i < bank->unk_00; i++ ) {
-            bank->unk_18[i].unk_00 = (u8 *)data + (s32)bank->unk_18[i].unk_00;
+        bank->flags = 1;
+        bank->waveBank = 0;
+        bank->programs = (u16 *)( (u8 *)bank + (s32)bank->programs );
+        for ( i = 0; i < bank->numEntries; i++ ) {
+            bank->entries[i].cmds = (u8 *)data + (s32)bank->entries[i].cmds;
         }
     }
 }
@@ -743,56 +743,56 @@ s32 func_8003C1C0( UnkStruct8003C1EC *obj ) {
 
 /*
 ================
-func_8003C1C8
+Snd_SetSeTable
 
-Sets the default bank D_80064368.
+Sets the default bank snd_seTable.
 ================
 */
-void func_8003C1C8( UnkSeqBank *bank ) {
-    D_80064368 = bank;
+void Snd_SetSeTable( seTable_t *bank ) {
+    snd_seTable = bank;
 }
 
 /*
 ================
-func_8003C1D4
+Snd_SetNextSeTable
 
-Sets the one-shot bank D_8006436C.
+Sets the one-shot bank snd_nextSeTable.
 ================
 */
-void func_8003C1D4( UnkSeqBank *bank ) {
-    D_8006436C = bank;
+void Snd_SetNextSeTable( seTable_t *bank ) {
+    snd_nextSeTable = bank;
 }
 
 /*
 ================
-func_8003C1E0
+Snd_GetSeTable
 
-Returns the default bank D_80064368.
+Returns the default bank snd_seTable.
 ================
 */
-UnkSeqBank *func_8003C1E0( void ) {
-    return D_80064368;
+seTable_t *Snd_GetSeTable( void ) {
+    return snd_seTable;
 }
 
 /*
 ================
-func_8003C1EC
+Snd_SetSeWaveBank
 
 Sets obj->unk_10.
 ================
 */
-void func_8003C1EC( UnkStruct8003C1EC *obj, UnkSoundBank *bank ) {
+void Snd_SetSeWaveBank( UnkStruct8003C1EC *obj, waveBank_t *bank ) {
     obj->unk_10 = bank;
 }
 
 /*
 ================
-func_8003C1F4
+Snd_GetSeWaveBank
 
 Returns obj->unk_10.
 ================
 */
-UnkSoundBank *func_8003C1F4( UnkStruct8003C1EC *obj ) {
+waveBank_t *Snd_GetSeWaveBank( UnkStruct8003C1EC *obj ) {
     return obj->unk_10;
 }
 
@@ -808,7 +808,7 @@ void func_8003C1FC( s32 value ) {
 }
 
 #ifdef NON_MATCHING
-// NON_MATCHING: referent/type: retail reads unk_08 once through one type covering UnkSeqHeader and UnkSeqBank; the cast leaves a register difference
+// NON_MATCHING: referent/type: retail reads unk_08 once through one type covering seqHeader_t and seTable_t; the cast leaves a register difference
 /*
 ================
 func_8003C208
@@ -818,15 +818,15 @@ Returns unk_08 of the header (or else the bank) of the first channel with the gi
 */
 s32 func_8003C208( s32 id ) {
     s32 i;
-    UnkChannel *chan;
-    UnkSeqHeader *hdr;
+    sndChannel_t *chan;
+    seqHeader_t *hdr;
 
     if ( id != 0 ) {
-        for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-            if ( chan->unk_44 == id ) {
-                hdr = chan->unk_74;
+        for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+            if ( chan->id == id ) {
+                hdr = chan->seq;
                 if ( hdr == NULL ) {
-                    hdr = (UnkSeqHeader *)chan->unk_78;
+                    hdr = (seqHeader_t *)chan->seTable;
                 }
                 return hdr->unk_08;
             }
@@ -840,24 +840,24 @@ INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C208);
 
 /*
 ================
-func_8003C26C
+Snd_GetProgramTable
 
 Returns unk_20 of the header, or unk_14 of the bank, of the first channel with the given id, or NULL.
 ================
 */
-u16 *func_8003C26C( s32 id ) {
+u16 *Snd_GetProgramTable( s32 id ) {
     s32 i;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
     if ( id == 0 ) {
         return NULL;
     }
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_44 == id ) {
-            if ( chan->unk_74 != NULL ) {
-                return chan->unk_74->unk_20;
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->id == id ) {
+            if ( chan->seq != NULL ) {
+                return chan->seq->programs;
             }
-            return chan->unk_78->unk_14;
+            return chan->seTable->programs;
         }
     }
     return NULL;
@@ -865,48 +865,48 @@ u16 *func_8003C26C( s32 id ) {
 
 /*
 ================
-func_8003C2E4
+Snd_SetMarkerCallback
 
-Sets the D_80064370 callback.
+Sets the snd_markerCallback callback.
 ================
 */
-void func_8003C2E4( void (*callback)( s32 id, s32 value ) ) {
-    D_80064370 = callback;
+void Snd_SetMarkerCallback( void (*callback)( s32 id, s32 value ) ) {
+    snd_markerCallback = callback;
 }
 
 /*
 ================
-func_8003C2F0
+Snd_InitMessages
 
 Allocates the message ring buffer with count entries, clamped to [0x40, 0x400].
 ================
 */
-void func_8003C2F0( s32 count ) {
+void Snd_InitMessages( s32 count ) {
     if ( count < 0x40 ) {
         count = 0x40;
     } else if ( count > 0x400 ) {
         count = 0x400;
     }
-    D_80064380 = func_8003FCAC( count * sizeof( UnkMsg8003C3D4 ) );
-    D_8006437C = count;
-    D_80064378 = 0;
-    D_80064374 = 0;
+    snd_msgs = Snd_Alloc( count * sizeof( sndMsg_t ) );
+    snd_numMsgs = count;
+    snd_msgWrite = 0;
+    snd_msgRead = 0;
 }
 
 /*
 ================
-func_8003C354
+Snd_HandleMessage
 
 Handles one queued message: 0 and 1 change bit 0 of unk_00 on the channels of msg->arg, 2 calls func_8003F340.
 ================
 */
-void func_8003C354( UnkMsg8003C3D4 *msg ) {
+void Snd_HandleMessage( sndMsg_t *msg ) {
     switch ( msg->cmd ) {
     case 0:
-        func_8003E10C( msg->arg, ~1, 1 );
+        Snd_SetChannelFlags( msg->arg, ~1, 1 );
         break;
     case 1:
-        func_8003E10C( msg->arg, ~1, 0 );
+        Snd_SetChannelFlags( msg->arg, ~1, 0 );
         break;
     case 2:
         func_8003F340( msg->arg );
@@ -916,111 +916,111 @@ void func_8003C354( UnkMsg8003C3D4 *msg ) {
 
 /*
 ================
-func_8003C3D4
+Snd_PostMessage
 
 Appends msg to the ring buffer; returns 0 if it is full, else 1.
 ================
 */
-s32 func_8003C3D4( UnkMsg8003C3D4 *msg ) {
+s32 Snd_PostMessage( sndMsg_t *msg ) {
     s32 next;
 
-    next = ( D_80064378 + 1 ) % D_8006437C;
-    if ( next == D_80064374 ) {
+    next = ( snd_msgWrite + 1 ) % snd_numMsgs;
+    if ( next == snd_msgRead ) {
         return 0;
     }
-    func_8003FD2C( &D_80064380[D_80064378], msg, sizeof( UnkMsg8003C3D4 ) );
-    D_80064378 = next;
+    Snd_MemMove( &snd_msgs[snd_msgWrite], msg, sizeof( sndMsg_t ) );
+    snd_msgWrite = next;
     return 1;
 }
 
 /*
 ================
-func_8003C46C
+Snd_PlayerHandler
 
 Player callback: handles the queued messages, then advances every active channel by one tick (commands, step streams, fade, envelope, modulation, voice update). Returns the time to the next call.
 ================
 */
-s32 func_8003C46C( void *clientData ) {
+s32 Snd_PlayerHandler( void *clientData ) {
     s32 i;
-    UnkChannel *chan;
+    sndChannel_t *chan;
     f32 pitch;
 
-    while ( D_80064374 != D_80064378 ) {
-        func_8003C354( &D_80064380[D_80064374] );
-        if ( ++D_80064374 == D_8006437C ) {
-            D_80064374 = 0;
+    while ( snd_msgRead != snd_msgWrite ) {
+        Snd_HandleMessage( &snd_msgs[snd_msgRead] );
+        if ( ++snd_msgRead == snd_numMsgs ) {
+            snd_msgRead = 0;
         }
     }
-    for ( i = -4, chan = D_8006433C; i < D_80064334 - 4; i++, chan++ ) {
-        if ( chan->unk_04 == NULL || ( chan->unk_00 & 1 ) ) {
+    for ( i = -4, chan = snd_channels; i < snd_numChannels - 4; i++, chan++ ) {
+        if ( chan->cmdPos == NULL || ( chan->flags & 1 ) ) {
             continue;
         }
-        if ( chan->unk_08 != NULL ) {
-            func_8003CCA4( chan, i );
+        if ( chan->pendingWave != NULL ) {
+            Snd_StartVoice( chan, i );
         }
-        chan->unk_0C += chan->unk_9C;
-        if ( chan->unk_9A != 0x7FFF ) {
-            while ( chan->unk_3C - chan->unk_0C < 0 ) {
-                if ( chan->unk_04 == NULL ) {
+        chan->time += chan->tempo;
+        if ( chan->noteLength != 0x7FFF ) {
+            while ( chan->nextNoteTime - chan->time < 0 ) {
+                if ( chan->cmdPos == NULL ) {
                     break;
                 }
-                func_8003C75C( chan, i );
+                Snd_PlayNextNote( chan, i );
             }
-            if ( chan->unk_04 == NULL ) {
+            if ( chan->cmdPos == NULL ) {
                 continue;
             }
         }
-        if ( chan->unk_38 != NULL && chan->unk_14 - chan->unk_0C < 0 ) {
-            func_8003D374( chan );
+        if ( chan->volStream != NULL && chan->volStreamTime - chan->time < 0 ) {
+            Snd_StepVolumeStream( chan );
         }
-        if ( chan->unk_34 != NULL && chan->unk_18 - chan->unk_0C < 0 ) {
-            func_8003D438( chan );
+        if ( chan->bendStream != NULL && chan->bendStreamTime - chan->time < 0 ) {
+            Snd_StepBendStream( chan );
         }
-        if ( chan->unk_10 != -1 && --chan->unk_10 == -1 ) {
-            chan->unk_38 = NULL;
-            chan->unk_34 = NULL;
-            chan->unk_74 = NULL;
-            chan->unk_78 = NULL;
-            chan->unk_44 = 0;
-            chan->unk_08 = NULL;
-            chan->unk_04 = NULL;
-            if ( chan->unk_C9 ) {
-                chan->unk_C9 = 0;
-                func_80042710( &D_80064338[i] );
-            }
-        }
-        if ( chan->unk_C9 ) {
-            if ( chan->unk_C3 ) {
-                func_8003CFF0( chan );
-            }
-            if ( chan->unk_D4 && chan->unk_94 - chan->unk_0C < 0 ) {
-                func_8003D200( chan );
-            }
-            pitch = chan->unk_30;
-            if ( chan->unk_D5 ) {
-                pitch += func_8003D310( chan );
-            }
-            if ( chan->unk_CE ) {
-                pitch += func_8003D2B8( chan );
-            }
-            if ( chan->unk_08 == NULL ) {
-                func_8003CE74( chan, i, pitch );
-                func_8003CD20( chan, i );
+        if ( chan->fadeLeft != -1 && --chan->fadeLeft == -1 ) {
+            chan->volStream = NULL;
+            chan->bendStream = NULL;
+            chan->seq = NULL;
+            chan->seTable = NULL;
+            chan->id = 0;
+            chan->pendingWave = NULL;
+            chan->cmdPos = NULL;
+            if ( chan->voiceActive ) {
+                chan->voiceActive = 0;
+                n_alSynStopVoice( &snd_voices[i] );
             }
         }
-        chan->unk_AA = (u32)( chan->unk_0C - chan->unk_40 ) >> 8;
+        if ( chan->voiceActive ) {
+            if ( chan->envPhase ) {
+                Snd_UpdateEnvelope( chan );
+            }
+            if ( chan->autoPanSpeed && chan->autoPanTime - chan->time < 0 ) {
+                Snd_UpdateAutoPan( chan );
+            }
+            pitch = chan->pitchOffset;
+            if ( chan->vibratoPeriod ) {
+                pitch += Snd_UpdateVibrato( chan );
+            }
+            if ( chan->trillOnTicks ) {
+                pitch += Snd_UpdateTrill( chan );
+            }
+            if ( chan->pendingWave == NULL ) {
+                Snd_UpdatePitch( chan, i, pitch );
+                Snd_UpdateVolumePan( chan, i );
+            }
+        }
+        chan->noteAge = (u32)( chan->time - chan->noteTime ) >> 8;
     }
-    return D_80064348;
+    return snd_tickTime;
 }
 
 /*
 ================
-func_8003C75C
+Snd_PlayNextNote
 
 Runs the channel's commands up to its next note, then plays it: length, velocity, program (or drum map entry), sound, pitch and effect; the rest note 0x60 releases the voice. A channel without commands left stops its voice.
 ================
 */
-void func_8003C75C( UnkChannel *chan, s32 index ) {
+void Snd_PlayNextNote( sndChannel_t *chan, s32 index ) {
     u8 *src;
     s32 note;
     // RULE-EXCEPTION: R30, the command, length and detune bytes share one local; separate locals
@@ -1028,259 +1028,259 @@ void func_8003C75C( UnkChannel *chan, s32 index ) {
     u8 byte;
     u8 value;
     u16 sound;
-    UnkSoundBank *bank;
+    waveBank_t *bank;
     u8 fx;
 
-    src = chan->unk_04;
+    src = chan->cmdPos;
     if ( src != NULL ) {
     next:
         byte = *src;
         if ( byte >= 0x80 ) {
-            src = D_8005CB70[byte & 0x7F]( chan, src + 1 );
+            src = snd_commands[byte & 0x7F]( chan, src + 1 );
             if ( src != NULL ) {
                 goto next;
             }
         }
     }
-    chan->unk_04 = src;
+    chan->cmdPos = src;
     if ( src != NULL ) {
-        chan->unk_4C = chan->unk_50;
-        note = *chan->unk_04++;
-        if ( chan->unk_D2 ) {
-            value = *chan->unk_04++;
-            chan->unk_BB = value;
+        chan->glideFrom = chan->glidePitch;
+        note = *chan->cmdPos++;
+        if ( chan->noteVelocity ) {
+            value = *chan->cmdPos++;
+            chan->velocity = value;
             if ( value >= 0x80 ) {
-                chan->unk_BB = value & 0x7F;
-                chan->unk_D2 = 0;
-                chan->unk_D3 = chan->unk_BB;
+                chan->velocity = value & 0x7F;
+                chan->noteVelocity = 0;
+                chan->fixedVelocity = chan->velocity;
             }
         } else {
-            chan->unk_BB = chan->unk_D3;
+            chan->velocity = chan->fixedVelocity;
         }
-        if ( chan->unk_AC != 0 ) {
-            if ( chan->unk_B7 == 0 ) {
-                chan->unk_9A = chan->unk_AC;
+        if ( chan->fixedLength != 0 ) {
+            if ( chan->explicitLength == 0 ) {
+                chan->noteLength = chan->fixedLength;
             } else {
-                chan->unk_B7 = 0;
-                byte = *chan->unk_04++;
+                chan->explicitLength = 0;
+                byte = *chan->cmdPos++;
                 if ( byte < 0x80 ) {
-                    chan->unk_9A = byte;
+                    chan->noteLength = byte;
                 } else {
-                    chan->unk_9A = *chan->unk_04++ + ( ( byte & 0x7F ) << 8 );
+                    chan->noteLength = *chan->cmdPos++ + ( ( byte & 0x7F ) << 8 );
                 }
             }
         } else {
-            byte = *chan->unk_04++;
+            byte = *chan->cmdPos++;
             if ( byte < 0x80 ) {
-                chan->unk_9A = byte;
+                chan->noteLength = byte;
             } else {
-                chan->unk_9A = *chan->unk_04++ + ( ( byte & 0x7F ) << 8 );
+                chan->noteLength = *chan->cmdPos++ + ( ( byte & 0x7F ) << 8 );
             }
         }
-        chan->unk_40 = chan->unk_3C;
-        chan->unk_3C += chan->unk_9A << 8;
-        chan->unk_AA = 0;
-        chan->unk_D1 = 0;
-        chan->unk_D0 = chan->unk_CF;
-        if ( chan->unk_74 != NULL && chan->unk_84 == NULL && chan->unk_74->unk_20[chan->unk_AE] == 0xFFFF ) {
+        chan->noteTime = chan->nextNoteTime;
+        chan->nextNoteTime += chan->noteLength << 8;
+        chan->noteAge = 0;
+        chan->trillPitch = 0;
+        chan->trillWait = chan->trillOffTicks;
+        if ( chan->seq != NULL && chan->drumMap == NULL && chan->seq->programs[chan->program] == 0xFFFF ) {
             note = 0x60;
         }
         if ( note != 0x60 ) {
-            bank = chan->unk_7C;
-            if ( chan->unk_84 != NULL ) {
-                chan->unk_AE = chan->unk_84[note].unk_00;
-                chan->unk_BD = chan->unk_84[note].unk_04 >> 1;
-                SetEnvelope( chan, &chan->unk_74->unk_18[chan->unk_84[note].unk_02].unk_00 );
-                note = chan->unk_84[note].unk_05;
+            bank = chan->waveBank;
+            if ( chan->drumMap != NULL ) {
+                chan->program = chan->drumMap[note].program;
+                chan->pan = chan->drumMap[note].pan >> 1;
+                SetEnvelope( chan, &chan->seq->envelopes[chan->drumMap[note].envelope].interval );
+                note = chan->drumMap[note].note;
             }
-            if ( !chan->unk_D6 ) {
-                func_8003CF80( chan );
+            if ( !chan->noEnvRestart ) {
+                Snd_StartEnvelope( chan );
             }
-            if ( chan->unk_D4 ) {
-                func_8003D1E4( chan );
+            if ( chan->autoPanSpeed ) {
+                Snd_StartAutoPan( chan );
             }
-            sound = chan->unk_AE;
-            if ( chan->unk_74 != NULL ) {
-                sound = chan->unk_74->unk_20[sound];
+            sound = chan->program;
+            if ( chan->seq != NULL ) {
+                sound = chan->seq->programs[sound];
             } else {
-                sound = chan->unk_78->unk_14[sound];
+                sound = chan->seTable->programs[sound];
             }
-            if ( !chan->unk_D7 ) {
-                chan->unk_08 = bank->unk_2C[sound];
-                if ( chan->unk_C9 && chan->unk_A0 != 0 ) {
-                    chan->unk_A0 = 0;
-                    func_800425D0( &D_80064338[index], 0, D_80064348 );
+            if ( !chan->noVoiceRestart ) {
+                chan->pendingWave = bank->waves[sound];
+                if ( chan->voiceActive && chan->lastVolume != 0 ) {
+                    chan->lastVolume = 0;
+                    n_alSynSetVol( &snd_voices[index], 0, snd_tickTime );
                 } else {
-                    func_8003CCA4( chan, index );
+                    Snd_StartVoice( chan, index );
                 }
             }
-            chan->unk_2C = note + bank->unk_28[sound].value;
-            byte = chan->unk_B9 * ( 1 - chan->unk_BA );
-            chan->unk_2C += SEXT8( byte );
-            fx = chan->unk_CA;
-            if ( fx != chan->unk_CC ) {
-                chan->unk_CC = fx;
-                func_80042410( &D_80064338[index], chan->unk_CB + ( ( ( 0x80 - chan->unk_CB ) * fx ) >> 7 ) );
+            chan->notePitch = note + bank->tunes[sound].value;
+            byte = chan->transpose * ( 1 - chan->transposeOff );
+            chan->notePitch += SEXT8( byte );
+            fx = chan->fxMix;
+            if ( fx != chan->lastFxMix ) {
+                chan->lastFxMix = fx;
+                n_alSynSetFXMix( &snd_voices[index], chan->fxBase + ( ( ( 0x80 - chan->fxBase ) * fx ) >> 7 ) );
             }
-        } else if ( chan->unk_C3 < 4 ) {
-            chan->unk_C3 = 4;
-            chan->unk_C5 = 1;
-            chan->unk_54 = chan->unk_0C;
-            chan->unk_CD = chan->unk_C4;
+        } else if ( chan->envPhase < 4 ) {
+            chan->envPhase = 4;
+            chan->envWait = 1;
+            chan->releaseTime = chan->time;
+            chan->envReleaseLevel = chan->envLevel;
         }
-    } else if ( chan->unk_C9 ) {
-        chan->unk_C9 = 0;
-        func_800425D0( &D_80064338[index], 0, D_80064348 );
-        func_80042710( &D_80064338[index] );
+    } else if ( chan->voiceActive ) {
+        chan->voiceActive = 0;
+        n_alSynSetVol( &snd_voices[index], 0, snd_tickTime );
+        n_alSynStopVoice( &snd_voices[index] );
     }
 }
 
 /*
 ================
-func_8003CCA4
+Snd_StartVoice
 
 Stops voice index if the channel had started it, then starts it again with unk_08 and clears unk_08.
 ================
 */
-void func_8003CCA4( UnkChannel *chan, s32 index ) {
-    if ( chan->unk_C9 ) {
-        func_80042710( &D_80064338[index] );
+void Snd_StartVoice( sndChannel_t *chan, s32 index ) {
+    if ( chan->voiceActive ) {
+        n_alSynStopVoice( &snd_voices[index] );
     }
-    chan->unk_C9 = 1;
-    func_80042680( &D_80064338[index], chan->unk_08 );
-    chan->unk_08 = NULL;
+    chan->voiceActive = 1;
+    n_alSynStartVoice( &snd_voices[index], chan->pendingWave );
+    chan->pendingWave = NULL;
 }
 
 /*
 ================
-func_8003CD20
+Snd_UpdateVolumePan
 
 Updates the volume and pan of voice index from the channel, sending only values that changed.
 ================
 */
-void func_8003CD20( UnkChannel *chan, s32 index ) {
+void Snd_UpdateVolumePan( sndChannel_t *chan, s32 index ) {
     // RULE-EXCEPTION: R30, the volume and the pan share one local; separate locals change the register
     // allocation.
     u32 value;
 
-    value = (u32)( chan->unk_BC * chan->unk_C4 * chan->unk_BB * chan->unk_9E ) >> 13;
+    value = (u32)( chan->trackVolume * chan->envLevel * chan->velocity * chan->playVolume ) >> 13;
     if ( value > 0x7FFF ) {
         value = 0x7FFF;
     }
-    value *= chan->unk_78 == NULL ? D_8006434E : D_8006434C;
+    value *= chan->seTable == NULL ? snd_bgmVolume : snd_seVolume;
     value >>= 15;
-    if ( chan->unk_10 != -1 ) {
-        value = value * chan->unk_10 / chan->unk_1C;
+    if ( chan->fadeLeft != -1 ) {
+        value = value * chan->fadeLeft / chan->fadeTotal;
     }
-    if ( value != chan->unk_A0 ) {
-        chan->unk_A0 = value;
-        func_800425D0( &D_80064338[index], (s16)value, D_80064348 );
+    if ( value != chan->lastVolume ) {
+        chan->lastVolume = value;
+        n_alSynSetVol( &snd_voices[index], (s16)value, snd_tickTime );
     }
-    value = ( ( chan->unk_BD * chan->unk_B0 ) >> 7 ) & 0x7F;
-    if ( value != chan->unk_BE ) {
-        chan->unk_BE = value;
-        func_800424B0( &D_80064338[index], value );
+    value = ( ( chan->pan * chan->playPan ) >> 7 ) & 0x7F;
+    if ( value != chan->lastPan ) {
+        chan->lastPan = value;
+        n_alSynSetPan( &snd_voices[index], value );
     }
 }
 
 /*
 ================
-func_8003CE74
+Snd_UpdatePitch
 
 Updates the pitch of voice index: the note unk_2C (gliding from unk_4C over unk_B8 ticks) plus offset and unk_24, in semitones; sent only when it changed, capped at a ratio of 2.
 ================
 */
-void func_8003CE74( UnkChannel *chan, s32 index, f32 offset ) {
+void Snd_UpdatePitch( sndChannel_t *chan, s32 index, f32 offset ) {
     f32 pitch;
 
-    pitch = chan->unk_2C;
-    if ( chan->unk_B8 != 0 ) {
-        if ( chan->unk_B8 < chan->unk_AA ) {
-            chan->unk_50 = pitch;
+    pitch = chan->notePitch;
+    if ( chan->portamento != 0 ) {
+        if ( chan->portamento < chan->noteAge ) {
+            chan->glidePitch = pitch;
         } else {
-            pitch = chan->unk_4C + ( pitch - chan->unk_4C ) / chan->unk_B8 * chan->unk_AA;
-            chan->unk_50 = pitch;
+            pitch = chan->glideFrom + ( pitch - chan->glideFrom ) / chan->portamento * chan->noteAge;
+            chan->glidePitch = pitch;
         }
     }
-    pitch += offset + chan->unk_24;
-    if ( pitch != chan->unk_28 ) {
-        chan->unk_28 = pitch;
-        pitch = func_8003D54C( pitch * ( 1.0 / 12 ) );
+    pitch += offset + chan->bendPitch;
+    if ( pitch != chan->lastPitch ) {
+        chan->lastPitch = pitch;
+        pitch = Snd_Exp2( pitch * ( 1.0 / 12 ) );
         if ( pitch > 2.0 ) {
             pitch = 2.0f;
-            chan->unk_BB = 0;
+            chan->velocity = 0;
         }
-        func_80042540( &D_80064338[index], pitch );
+        n_alSynSetPitch( &snd_voices[index], pitch );
     }
 }
 
 /*
 ================
-func_8003CF80
+Snd_StartEnvelope
 
 Sets unk_54 from unk_40 and unk_B2, or from unk_3C and unk_B4, or to unk_40 + 0x7FFFFFFF when unk_9A is 0x7FFF; copies unk_C0 and unk_BF to unk_C4 and unk_C5 and sets unk_C3.
 ================
 */
-void func_8003CF80( UnkChannel *chan ) {
-    if ( chan->unk_9A != 0x7FFF ) {
-        if ( chan->unk_B2 != 0 ) {
-            chan->unk_54 = chan->unk_40 + ( chan->unk_B2 << 8 );
+void Snd_StartEnvelope( sndChannel_t *chan ) {
+    if ( chan->noteLength != 0x7FFF ) {
+        if ( chan->releaseAfter != 0 ) {
+            chan->releaseTime = chan->noteTime + ( chan->releaseAfter << 8 );
         } else {
-            chan->unk_54 = chan->unk_3C - ( chan->unk_B4 << 8 );
+            chan->releaseTime = chan->nextNoteTime - ( chan->releaseBefore << 8 );
         }
     } else {
-        chan->unk_54 = chan->unk_40 + 0x7FFFFFFF;
+        chan->releaseTime = chan->noteTime + 0x7FFFFFFF;
     }
-    chan->unk_C3 = 1;
-    chan->unk_C4 = chan->unk_C0;
-    chan->unk_C5 = chan->unk_BF;
+    chan->envPhase = 1;
+    chan->envLevel = chan->envStartLevel;
+    chan->envWait = chan->envInterval;
 }
 
 /*
 ================
-func_8003CFF0
+Snd_UpdateEnvelope
 
 Steps the envelope: phase unk_C3 (1 attack, 2 decay, 3 sustain, 4 release) and level unk_C4, every unk_BF calls; enters release once unk_0C passes unk_54.
 ================
 */
-void func_8003CFF0( UnkChannel *chan ) {
+void Snd_UpdateEnvelope( sndChannel_t *chan ) {
     s32 time;
 
-    if ( chan->unk_54 - chan->unk_0C < 0 && chan->unk_C3 < 4 ) {
-        chan->unk_C3 = 4;
-        chan->unk_C5 = 1;
-        chan->unk_CD = chan->unk_C4;
+    if ( chan->releaseTime - chan->time < 0 && chan->envPhase < 4 ) {
+        chan->envPhase = 4;
+        chan->envWait = 1;
+        chan->envReleaseLevel = chan->envLevel;
     }
-    if ( --chan->unk_C5 == 0 ) {
-        chan->unk_C5 = chan->unk_BF;
-        switch ( chan->unk_C3 ) {
+    if ( --chan->envWait == 0 ) {
+        chan->envWait = chan->envInterval;
+        switch ( chan->envPhase ) {
         case 1:
-            time = ( (u32)( chan->unk_0C - chan->unk_40 ) >> 8 ) * chan->unk_64 >> 10;
-            if ( time < chan->unk_C6 ) {
-                chan->unk_C4 = chan->unk_C0 + (s32)( chan->unk_58 * time );
+            time = ( (u32)( chan->time - chan->noteTime ) >> 8 ) * chan->envTimeScale >> 10;
+            if ( time < chan->envAttackTime ) {
+                chan->envLevel = chan->envStartLevel + (s32)( chan->attackSlope * time );
             } else {
-                chan->unk_C3++;
-                chan->unk_C4 = chan->unk_C1;
+                chan->envPhase++;
+                chan->envLevel = chan->envPeakLevel;
             }
             break;
         case 2:
-            time = ( ( (u32)( chan->unk_0C - chan->unk_40 ) >> 8 ) - chan->unk_C6 ) * chan->unk_64 >> 10;
-            if ( time < chan->unk_C7 ) {
-                chan->unk_C4 = chan->unk_C1 + (s32)( chan->unk_5C * time );
+            time = ( ( (u32)( chan->time - chan->noteTime ) >> 8 ) - chan->envAttackTime ) * chan->envTimeScale >> 10;
+            if ( time < chan->envDecayTime ) {
+                chan->envLevel = chan->envPeakLevel + (s32)( chan->decaySlope * time );
             } else {
-                chan->unk_C3++;
-                chan->unk_C4 = chan->unk_C2;
+                chan->envPhase++;
+                chan->envLevel = chan->envSustainLevel;
             }
             break;
         case 3:
             break;
         case 4:
-            time = ( (u32)( chan->unk_0C - chan->unk_54 ) >> 8 ) * chan->unk_64 >> 10;
-            if ( time < chan->unk_C8 ) {
-                chan->unk_C4 = chan->unk_CD - (s32)( chan->unk_60 * time * chan->unk_CD );
+            time = ( (u32)( chan->time - chan->releaseTime ) >> 8 ) * chan->envTimeScale >> 10;
+            if ( time < chan->envReleaseTime ) {
+                chan->envLevel = chan->envReleaseLevel - (s32)( chan->releaseSlope * time * chan->envReleaseLevel );
             } else {
-                chan->unk_C3++;
-                chan->unk_C4 = 0;
+                chan->envPhase++;
+                chan->envLevel = 0;
             }
             break;
         }
@@ -1289,156 +1289,156 @@ void func_8003CFF0( UnkChannel *chan ) {
 
 /*
 ================
-func_8003D1E4
+Snd_StartAutoPan
 
 Copies unk_40 to unk_94, clears unk_D9 and sets unk_DA from bit 6 of unk_BD.
 ================
 */
-void func_8003D1E4( UnkChannel *chan ) {
-    chan->unk_D9 = 0;
-    chan->unk_94 = chan->unk_40;
-    chan->unk_DA = chan->unk_BD & 0x40;
+void Snd_StartAutoPan( sndChannel_t *chan ) {
+    chan->autoPanFrac = 0;
+    chan->autoPanTime = chan->noteTime;
+    chan->autoPanDown = chan->pan & 0x40;
 }
 
 /*
 ================
-func_8003D200
+Snd_UpdateAutoPan
 
 Advances unk_94 in steps of 0x100 up to unk_0C, moving unk_BD up to 0x7F or down to 0 by unk_D4 / 64 per step, reversing at either end.
 ================
 */
-void func_8003D200( UnkChannel *chan ) {
+void Snd_UpdateAutoPan( sndChannel_t *chan ) {
     u32 step;
 
     do {
-        step = chan->unk_D9 + chan->unk_D4;
-        chan->unk_94 += 0x100;
+        step = chan->autoPanFrac + chan->autoPanSpeed;
+        chan->autoPanTime += 0x100;
         if ( step < 0x40 ) {
-            chan->unk_D9 = step;
+            chan->autoPanFrac = step;
         } else {
-            chan->unk_D9 = step & 0x3F;
+            chan->autoPanFrac = step & 0x3F;
             step >>= 6;
-            if ( !chan->unk_DA ) {
-                chan->unk_BD += step;
-                if ( chan->unk_BD >= 0x80 ) {
-                    chan->unk_BD = 0x7F;
-                    chan->unk_DA = 1;
+            if ( !chan->autoPanDown ) {
+                chan->pan += step;
+                if ( chan->pan >= 0x80 ) {
+                    chan->pan = 0x7F;
+                    chan->autoPanDown = 1;
                 }
             } else {
-                chan->unk_BD -= step;
-                if ( chan->unk_BD >= 0x80 || chan->unk_BD == 0 ) {
-                    chan->unk_BD = 0;
-                    chan->unk_DA = 0;
+                chan->pan -= step;
+                if ( chan->pan >= 0x80 || chan->pan == 0 ) {
+                    chan->pan = 0;
+                    chan->autoPanDown = 0;
                 }
             }
         }
-    } while ( chan->unk_94 - chan->unk_0C < 0 );
+    } while ( chan->autoPanTime - chan->time < 0 );
 }
 
 /*
 ================
-func_8003D2B8
+Snd_UpdateTrill
 
 Counts down unk_D0; at zero toggles unk_D1 between 0 (for unk_CF steps) and unk_D8 (for unk_CE steps). Returns unk_D1.
 ================
 */
-f32 func_8003D2B8( UnkChannel *chan ) {
-    if ( --chan->unk_D0 == 0 ) {
-        if ( chan->unk_D1 == 0 ) {
-            chan->unk_D1 = chan->unk_D8;
-            chan->unk_D0 = chan->unk_CE;
+f32 Snd_UpdateTrill( sndChannel_t *chan ) {
+    if ( --chan->trillWait == 0 ) {
+        if ( chan->trillPitch == 0 ) {
+            chan->trillPitch = chan->trillInterval;
+            chan->trillWait = chan->trillOnTicks;
         } else {
-            chan->unk_D1 = 0;
-            chan->unk_D0 = chan->unk_CF;
+            chan->trillPitch = 0;
+            chan->trillWait = chan->trillOffTicks;
         }
     }
-    return chan->unk_D1;
+    return chan->trillPitch;
 }
 
 /*
 ================
-func_8003D310
+Snd_UpdateVibrato
 
 Sets unk_68 to unk_20 * sin( ( unk_AA - unk_B6 ) * unk_DC ) and returns it; 0 while unk_AA has not passed unk_B6.
 ================
 */
-f32 func_8003D310( UnkChannel *chan ) {
+f32 Snd_UpdateVibrato( sndChannel_t *chan ) {
     s32 time;
 
-    time = chan->unk_AA - chan->unk_B6;
+    time = chan->noteAge - chan->vibratoDelay;
     if ( time > 0 ) {
-        return chan->unk_68 = __sinf( time * chan->unk_DC ) * chan->unk_20;
+        return chan->vibratoPitch = __sinf( time * chan->vibratoStep ) * chan->vibratoDepth;
     }
     return 0.0f;
 }
 
 /*
 ================
-func_8003D374
+Snd_StepVolumeStream
 
 Advances unk_14 in steps of 0x100 up to unk_0C, reading a new unk_BC and step length from the unk_38 stream each time unk_A2 runs out.
 ================
 */
-void func_8003D374( UnkChannel *chan ) {
+void Snd_StepVolumeStream( sndChannel_t *chan ) {
     u8 value;
 
     do {
-        chan->unk_14 += 0x100;
-        if ( --chan->unk_A2 == 0 ) {
-            value = *chan->unk_38++;
+        chan->volStreamTime += 0x100;
+        if ( --chan->volStreamWait == 0 ) {
+            value = *chan->volStream++;
             if ( value >= 0x80 ) {
-                chan->unk_BC = value & 0x7F;
-                value = *chan->unk_38++;
+                chan->trackVolume = value & 0x7F;
+                value = *chan->volStream++;
                 if ( value >= 0x80 ) {
-                    chan->unk_A2 = ( value & 0x7F ) << 8;
-                    chan->unk_A2 += *chan->unk_38++ + 2;
+                    chan->volStreamWait = ( value & 0x7F ) << 8;
+                    chan->volStreamWait += *chan->volStream++ + 2;
                 } else {
-                    chan->unk_A2 = value + 2;
+                    chan->volStreamWait = value + 2;
                 }
             } else {
-                chan->unk_BC = value;
-                chan->unk_A2 = 1;
+                chan->trackVolume = value;
+                chan->volStreamWait = 1;
             }
         }
-    } while ( chan->unk_14 - chan->unk_0C < 0 );
+    } while ( chan->volStreamTime - chan->time < 0 );
 }
 
 /*
 ================
-func_8003D438
+Snd_StepBendStream
 
 Advances unk_18 in steps of 0x100 up to unk_0C, reading a new pitch offset unk_70 (and unk_24) and step length from the unk_34 stream each time unk_A4 runs out.
 ================
 */
-void func_8003D438( UnkChannel *chan ) {
+void Snd_StepBendStream( sndChannel_t *chan ) {
     u8 value;
 
     do {
-        chan->unk_18 += 0x100;
-        if ( --chan->unk_A4 == 0 ) {
-            value = *chan->unk_34++;
+        chan->bendStreamTime += 0x100;
+        if ( --chan->bendStreamWait == 0 ) {
+            value = *chan->bendStream++;
             if ( value >= 0x80 ) {
-                chan->unk_70 = (f32)( value & 0x7F ) - 64.0;
-                chan->unk_24 = chan->unk_70 * chan->unk_6C;
-                value = *chan->unk_34++;
+                chan->bend = (f32)( value & 0x7F ) - 64.0;
+                chan->bendPitch = chan->bend * chan->bendRange;
+                value = *chan->bendStream++;
                 if ( value >= 0x80 ) {
-                    chan->unk_A4 = ( value & 0x7F ) << 8;
-                    chan->unk_A4 += *chan->unk_34++ + 2;
+                    chan->bendStreamWait = ( value & 0x7F ) << 8;
+                    chan->bendStreamWait += *chan->bendStream++ + 2;
                 } else {
-                    chan->unk_A4 = value + 2;
+                    chan->bendStreamWait = value + 2;
                 }
             } else {
-                chan->unk_70 = (f32)value - 64.0;
-                chan->unk_24 = chan->unk_70 * chan->unk_6C;
-                chan->unk_A4 = 1;
+                chan->bend = (f32)value - 64.0;
+                chan->bendPitch = chan->bend * chan->bendRange;
+                chan->bendStreamWait = 1;
             }
         }
-    } while ( chan->unk_18 - chan->unk_0C < 0 );
+    } while ( chan->bendStreamTime - chan->time < 0 );
 }
 
 #ifdef NON_MATCHING
 // NON_MATCHING: FPU registers: x lives in $f6 in retail, $f14 here, and the x^6 term takes a different register
-f32 func_8003D54C( f32 x ) {
+f32 Snd_Exp2( f32 x ) {
     f32 x2;
     f32 x3;
     f32 x4;
@@ -1467,153 +1467,153 @@ f32 func_8003D54C( f32 x ) {
                    + x4 * 0.0096181291076284804 + x5 * 0.00133335581464284 + x6 * 0.000154035303933816 );
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D54C);
+INCLUDE_ASM("asm/nonmatchings/166B0", Snd_Exp2);
 #endif
 
 #ifdef NON_MATCHING
 // NON_MATCHING: register/schedule: retail has a 0x30 frame (0x28 here) and reloads tune->value; likely an inlined helper not yet recovered
 /*
 ================
-func_8003D6E0
+Snd_RelocateWaveBank
 
 TODO
 ================
 */
-void func_8003D6E0( void *data, s32 base ) {
-    UnkSoundBank *bank;
+void Snd_RelocateWaveBank( void *data, s32 base ) {
+    waveBank_t *bank;
     s32 i;
 
     bank = data;
-    if ( bank->unk_10 < 0 ) {
+    if ( bank->flags < 0 ) {
         return;
     }
-    bank->unk_10 |= 0x80000000;
-    func_8003DC10( (s32 *)&bank->unk_24, (s32)bank, 3 );
-    func_8003DC10( (s32 *)bank->unk_2C, (s32)bank, bank->unk_20 );
-    for ( i = 0; i < bank->unk_20; i++ ) {
-        SetTune( &bank->unk_28[i], &bank->unk_24[i] );
-        if ( bank->unk_2C[i]->unk_09 == 0 ) {
-            if ( ( bank->unk_2C[i]->unk_00 & 0xFF000000 ) != 0xFF000000 ) {
-                bank->unk_2C[i]->unk_00 += base;
+    bank->flags |= 0x80000000;
+    Snd_RelocateTable( (s32 *)&bank->unk_24, (s32)bank, 3 );
+    Snd_RelocateTable( (s32 *)bank->waves, (s32)bank, bank->numWaves );
+    for ( i = 0; i < bank->numWaves; i++ ) {
+        SetTune( &bank->tunes[i], &bank->unk_24[i] );
+        if ( bank->waves[i]->flags == 0 ) {
+            if ( ( bank->waves[i]->base & 0xFF000000 ) != 0xFF000000 ) {
+                bank->waves[i]->base += base;
             }
-            bank->unk_2C[i]->unk_09 = 1;
-            if ( bank->unk_2C[i]->unk_0C != 0 ) {
-                bank->unk_2C[i]->unk_0C += (s32)data;
+            bank->waves[i]->flags = 1;
+            if ( bank->waves[i]->loop != 0 ) {
+                bank->waves[i]->loop += (s32)data;
             }
-            if ( bank->unk_2C[i]->unk_08 == 0 ) {
-                bank->unk_2C[i]->unk_10 += (s32)data;
+            if ( bank->waves[i]->type == 0 ) {
+                bank->waves[i]->book += (s32)data;
             }
         }
     }
     osWritebackDCacheAll();
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D6E0);
+INCLUDE_ASM("asm/nonmatchings/166B0", Snd_RelocateWaveBank);
 #endif
 
 /*
 ================
-func_8003D878
+Snd_Random
 
-Returns a random number in [0, range), from eight steps of the shift register D_80064354.
+Returns a random number in [0, range), from eight steps of the shift register snd_randomSeed.
 ================
 */
-s32 func_8003D878( s32 range ) {
+s32 Snd_Random( s32 range ) {
     s32 i;
     s32 bits;
 
     for ( i = 0; i < 8; i++ ) {
-        bits = D_80064354 & 0x48000000;
-        D_80064354 <<= 1;
+        bits = snd_randomSeed & 0x48000000;
+        snd_randomSeed <<= 1;
         if ( bits == 0x48000000 || bits == 0x08000000 ) {
-            D_80064354 |= 1;
+            snd_randomSeed |= 1;
         }
     }
-    return range * ( (f32)D_80064354 / 65536.0f / 65536.0f );
+    return range * ( (f32)snd_randomSeed / 65536.0f / 65536.0f );
 }
 
 #ifdef NON_MATCHING
 // NON_MATCHING: registers: retail puts the 0xFF constant in a1, moving chan and started to a2/a3
 /*
 ================
-func_8003D90C
+Snd_ResetChannel
 
 TODO
 ================
 */
-void func_8003D90C( void *data ) {
-    UnkChannel *chan;
+void Snd_ResetChannel( void *data ) {
+    sndChannel_t *chan;
     u8 started;
     s32 tempo;
     u32 i;
 
     chan = data;
-    started = chan->unk_C9;
-    chan->unk_04 = NULL;
-    for ( i = 0; i < sizeof( UnkChannel ); i++ ) {
+    started = chan->voiceActive;
+    chan->cmdPos = NULL;
+    for ( i = 0; i < sizeof( sndChannel_t ); i++ ) {
         *( (u8 *)data )++ = 0;
     }
-    chan->unk_CC = chan->unk_BE = 0xFF;
-    tempo = 0x6000 / D_80064344;
-    chan->unk_D3 = 0x7F;
-    chan->unk_BC = 0x7F;
-    chan->unk_C1 = 0x7F;
-    chan->unk_C7 = 0xFF;
-    chan->unk_C2 = 0x7F;
-    chan->unk_BD = 0x40;
-    chan->unk_BF = 1;
-    chan->unk_C6 = 1;
-    chan->unk_C8 = 15;
-    chan->unk_A0 = 0xFFFF;
-    chan->unk_9A = 1;
-    chan->unk_A2 = 1;
-    chan->unk_A4 = 1;
-    chan->unk_10 = -1;
-    chan->unk_9E = 0x80;
-    chan->unk_B0 = 0x80;
-    chan->unk_98 = 0x80;
-    chan->unk_28 = 99.9f;
-    chan->unk_6C = 1.0f / 32;
-    chan->unk_58 = 1.0f;
-    chan->unk_5C = 1.0f / 255;
-    chan->unk_60 = 1.0f / 15;
-    chan->unk_A8 = tempo;
-    chan->unk_9C = tempo;
-    chan->unk_7C = D_80064358 != NULL ? D_80064358 : D_8006435C;
-    chan->unk_C9 = started;
+    chan->lastFxMix = chan->lastPan = 0xFF;
+    tempo = 0x6000 / snd_tickRate;
+    chan->fixedVelocity = 0x7F;
+    chan->trackVolume = 0x7F;
+    chan->envPeakLevel = 0x7F;
+    chan->envDecayTime = 0xFF;
+    chan->envSustainLevel = 0x7F;
+    chan->pan = 0x40;
+    chan->envInterval = 1;
+    chan->envAttackTime = 1;
+    chan->envReleaseTime = 15;
+    chan->lastVolume = 0xFFFF;
+    chan->noteLength = 1;
+    chan->volStreamWait = 1;
+    chan->bendStreamWait = 1;
+    chan->fadeLeft = -1;
+    chan->playVolume = 0x80;
+    chan->playPan = 0x80;
+    chan->tempoScale = 0x80;
+    chan->lastPitch = 99.9f;
+    chan->bendRange = 1.0f / 32;
+    chan->attackSlope = 1.0f;
+    chan->decaySlope = 1.0f / 255;
+    chan->releaseSlope = 1.0f / 15;
+    chan->baseTempo = tempo;
+    chan->tempo = tempo;
+    chan->waveBank = snd_nextWaveBank != NULL ? snd_nextWaveBank : snd_defaultWaveBank;
+    chan->voiceActive = started;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D90C);
+INCLUDE_ASM("asm/nonmatchings/166B0", Snd_ResetChannel);
 #endif
 
 /*
 ================
-func_8003DA48
+Snd_FindBgmChannel
 
 Picks the channel index for track of hdr (-1: the master channel, which prefers the first four). Takes a free channel, else the bank channel of lowest priority, else a channel of another header, else one already on this track, else one by track number.
 ================
 */
-s32 func_8003DA48( UnkSeqHeader *hdr, s32 track ) {
+s32 Snd_FindBgmChannel( seqHeader_t *hdr, s32 track ) {
     s32 i;
     s32 best;
     s32 lowest;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
     if ( track < 0 ) {
-        for ( i = 0, chan = D_8006433C; i < 4; i++, chan++ ) {
-            if ( chan->unk_04 == NULL ) {
+        for ( i = 0, chan = snd_channels; i < 4; i++, chan++ ) {
+            if ( chan->cmdPos == NULL ) {
                 return i;
             }
         }
     }
-    for ( i = 4, chan = D_80064340; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_04 == NULL ) {
+    for ( i = 4, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->cmdPos == NULL ) {
             return i;
         }
     }
-    for ( i = 4, chan = D_80064340, lowest = 0x7FFFFFFF, best = 3; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_78 != NULL && chan->unk_48 <= lowest ) {
-            lowest = chan->unk_48;
+    for ( i = 4, chan = snd_voiceChannels, lowest = 0x7FFFFFFF, best = 3; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->seTable != NULL && chan->priority <= lowest ) {
+            lowest = chan->priority;
             best = i;
         }
     }
@@ -1621,27 +1621,27 @@ s32 func_8003DA48( UnkSeqHeader *hdr, s32 track ) {
         return best;
     }
     // the original never advances chan here, so this tests the first channel each time
-    for ( i = 4, chan = D_80064340; i < D_80064334; i++ ) {
-        if ( chan->unk_78 == NULL && chan->unk_74 != hdr ) {
+    for ( i = 4, chan = snd_voiceChannels; i < snd_numChannels; i++ ) {
+        if ( chan->seTable == NULL && chan->seq != hdr ) {
             return i;
         }
     }
-    for ( i = 4, chan = D_80064340; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_74 == hdr && hdr->unk_0C[track] == chan->unk_80 ) {
+    for ( i = 4, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->seq == hdr && hdr->trackCmds[track] == chan->cmdStart ) {
             return i;
         }
     }
-    return track % ( D_80064334 - 4 ) + 4;
+    return track % ( snd_numChannels - 4 ) + 4;
 }
 
 /*
 ================
-func_8003DC10
+Snd_RelocateTable
 
 Adds base to every non-zero entry of a table of count offsets.
 ================
 */
-void func_8003DC10( s32 *table, s32 base, s32 count ) {
+void Snd_RelocateTable( s32 *table, s32 base, s32 count ) {
     s32 i;
 
     for ( i = 0; i < count; i++ ) {
@@ -1653,219 +1653,219 @@ void func_8003DC10( s32 *table, s32 base, s32 count ) {
 
 /*
 ================
-func_8003DC48
+Snd_StartSeOnChannel
 
 Starts entry index of bank on chan; returns the new channel id.
 ================
 */
-s32 func_8003DC48( UnkChannel *chan, UnkSeqBank *bank, s32 index, s32 arg3, s32 arg4, s32 priority ) {
-    func_8003D90C( chan );
-    chan->unk_A6 = index;
-    chan->unk_78 = bank;
-    chan->unk_9E = arg3;
-    chan->unk_B0 = arg4;
-    chan->unk_44 = D_80064350++;
-    chan->unk_48 = priority;
-    if ( bank->unk_10 != 0 ) {
-        chan->unk_7C = bank->unk_10;
+s32 Snd_StartSeOnChannel( sndChannel_t *chan, seTable_t *bank, s32 index, s32 arg3, s32 arg4, s32 priority ) {
+    Snd_ResetChannel( chan );
+    chan->seIndex = index;
+    chan->seTable = bank;
+    chan->playVolume = arg3;
+    chan->playPan = arg4;
+    chan->id = snd_nextId++;
+    chan->priority = priority;
+    if ( bank->waveBank != 0 ) {
+        chan->waveBank = bank->waveBank;
     }
-    chan->unk_04 = chan->unk_80 = bank->unk_18[index].unk_00;
-    return chan->unk_44;
+    chan->cmdPos = chan->cmdStart = bank->entries[index].cmds;
+    return chan->id;
 }
 
 /*
 ================
-func_8003DCF8
+Snd_StartSe
 
 Starts entry index of bank on a free channel above the first four, or else on the bank channel of lowest priority below priority (-1: the entry's own); returns the channel id, or 0.
 ================
 */
-s32 func_8003DCF8( UnkSeqBank *bank, s32 index, s32 arg2, s32 arg3, s32 priority ) {
+s32 Snd_StartSe( seTable_t *bank, s32 index, s32 arg2, s32 arg3, s32 priority ) {
     s32 i;
     s32 lowest;
-    UnkChannel *chan;
-    UnkChannel *victim;
+    sndChannel_t *chan;
+    sndChannel_t *victim;
 
     if ( priority == -1 ) {
-        priority = bank->unk_18[index].unk_04;
+        priority = bank->entries[index].priority;
     }
     lowest = priority + 1;
-    for ( i = 4, chan = D_80064340; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_04 == NULL ) {
-            func_8003D90C( chan );
-            chan->unk_A6 = index;
-            chan->unk_78 = bank;
-            chan->unk_9E = arg2;
-            chan->unk_B0 = arg3;
-            chan->unk_48 = priority;
-            chan->unk_44 = D_80064350++;
-            if ( bank->unk_10 != NULL ) {
-                chan->unk_7C = bank->unk_10;
+    for ( i = 4, chan = snd_voiceChannels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->cmdPos == NULL ) {
+            Snd_ResetChannel( chan );
+            chan->seIndex = index;
+            chan->seTable = bank;
+            chan->playVolume = arg2;
+            chan->playPan = arg3;
+            chan->priority = priority;
+            chan->id = snd_nextId++;
+            if ( bank->waveBank != NULL ) {
+                chan->waveBank = bank->waveBank;
             }
-            chan->unk_04 = chan->unk_80 = bank->unk_18[index].unk_00;
-            return chan->unk_44;
+            chan->cmdPos = chan->cmdStart = bank->entries[index].cmds;
+            return chan->id;
         }
-        if ( chan->unk_78 != NULL && chan->unk_48 < lowest ) {
-            lowest = chan->unk_48;
+        if ( chan->seTable != NULL && chan->priority < lowest ) {
+            lowest = chan->priority;
             victim = chan;
         }
     }
     if ( lowest < priority ) {
-        func_8003D90C( victim );
-        victim->unk_A6 = index;
-        victim->unk_78 = bank;
-        victim->unk_9E = arg2;
-        victim->unk_B0 = arg3;
-        victim->unk_48 = priority;
-        victim->unk_44 = D_80064350++;
-        if ( bank->unk_10 != NULL ) {
-            victim->unk_7C = bank->unk_10;
+        Snd_ResetChannel( victim );
+        victim->seIndex = index;
+        victim->seTable = bank;
+        victim->playVolume = arg2;
+        victim->playPan = arg3;
+        victim->priority = priority;
+        victim->id = snd_nextId++;
+        if ( bank->waveBank != NULL ) {
+            victim->waveBank = bank->waveBank;
         }
-        victim->unk_04 = victim->unk_80 = bank->unk_18[index].unk_00;
-        return victim->unk_44;
+        victim->cmdPos = victim->cmdStart = bank->entries[index].cmds;
+        return victim->id;
     }
     return 0;
 }
 
 #ifdef NON_MATCHING
-// NON_MATCHING: registers: retail keeps a separate base copy per relocation loop (as if func_8003DC10 were inlined) and swaps s1/s2
+// NON_MATCHING: registers: retail keeps a separate base copy per relocation loop (as if Snd_RelocateTable were inlined) and swaps s1/s2
 /*
 ================
-func_8003DEA0
+Snd_StartBgm
 
 Relocates hdr once, then starts its master channel and one channel per non-empty entry of unk_0C, all under one new id, which it returns.
 ================
 */
-s32 func_8003DEA0( UnkSeqHeader *hdr ) {
+s32 Snd_StartBgm( seqHeader_t *hdr ) {
     s32 count;
     s32 id;
     s32 i;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
-    count = hdr->unk_04;
-    if ( hdr->unk_28 == 0 ) {
-        hdr->unk_28 = 1;
-        func_8003DC10( (s32 *)&hdr->unk_0C, (s32)hdr, 7 );
-        func_8003DC10( (s32 *)hdr->unk_0C, (s32)hdr, count );
-        func_8003DC10( (s32 *)hdr->unk_10, (s32)hdr, count );
-        func_8003DC10( (s32 *)hdr->unk_14, (s32)hdr, count );
+    count = hdr->numTracks;
+    if ( hdr->relocated == 0 ) {
+        hdr->relocated = 1;
+        Snd_RelocateTable( (s32 *)&hdr->trackCmds, (s32)hdr, 7 );
+        Snd_RelocateTable( (s32 *)hdr->trackCmds, (s32)hdr, count );
+        Snd_RelocateTable( (s32 *)hdr->trackVolStreams, (s32)hdr, count );
+        Snd_RelocateTable( (s32 *)hdr->trackBendStreams, (s32)hdr, count );
     }
-    id = D_80064350++;
-    chan = &D_8006433C[func_8003DA48( hdr, -1 )];
-    func_8003D90C( chan );
-    chan->unk_D2 = 1;
-    chan->unk_74 = hdr;
-    chan->unk_00 |= 3;
-    chan->unk_44 = id;
-    chan->unk_04 = chan->unk_80 = hdr->unk_24;
+    id = snd_nextId++;
+    chan = &snd_channels[Snd_FindBgmChannel( hdr, -1 )];
+    Snd_ResetChannel( chan );
+    chan->noteVelocity = 1;
+    chan->seq = hdr;
+    chan->flags |= 3;
+    chan->id = id;
+    chan->cmdPos = chan->cmdStart = hdr->masterCmds;
     for ( i = 0; i < count; i++ ) {
-        if ( hdr->unk_0C[i] != NULL ) {
-            chan = &D_8006433C[func_8003DA48( hdr, i )];
-            func_8003D90C( chan );
-            chan->unk_D2 = 1;
-            chan->unk_74 = hdr;
-            chan->unk_00 |= 1;
-            chan->unk_38 = chan->unk_8C = hdr->unk_10[i];
-            chan->unk_34 = chan->unk_88 = hdr->unk_14[i];
-            chan->unk_44 = id;
-            chan->unk_04 = chan->unk_80 = hdr->unk_0C[i];
+        if ( hdr->trackCmds[i] != NULL ) {
+            chan = &snd_channels[Snd_FindBgmChannel( hdr, i )];
+            Snd_ResetChannel( chan );
+            chan->noteVelocity = 1;
+            chan->seq = hdr;
+            chan->flags |= 1;
+            chan->volStream = chan->volStreamStart = hdr->trackVolStreams[i];
+            chan->bendStream = chan->bendStreamStart = hdr->trackBendStreams[i];
+            chan->id = id;
+            chan->cmdPos = chan->cmdStart = hdr->trackCmds[i];
         }
     }
-    D_80064358 = NULL;
+    snd_nextWaveBank = NULL;
     return id;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003DEA0);
+INCLUDE_ASM("asm/nonmatchings/166B0", Snd_StartBgm);
 #endif
 
 /*
 ================
-func_8003E10C
+Snd_SetChannelFlags
 
 Sets unk_00 to ( unk_00 & mask ) | bits on every channel with the given id.
 ================
 */
-void func_8003E10C( s32 id, s32 mask, s32 bits ) {
+void Snd_SetChannelFlags( s32 id, s32 mask, s32 bits ) {
     s32 i;
-    UnkChannel *chan;
+    sndChannel_t *chan;
 
-    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
-        if ( chan->unk_44 == id ) {
-            chan->unk_00 = ( chan->unk_00 & mask ) | bits;
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->id == id ) {
+            chan->flags = ( chan->flags & mask ) | bits;
         }
     }
 }
 
 /*
 ================
-func_8003E160
+Snd_CmdEnd
 
 Channel command: ends the channel's command stream.
 ================
 */
-u8 *func_8003E160( UnkChannel *chan, u8 *src ) {
-    chan->unk_38 = NULL;
-    chan->unk_34 = NULL;
-    chan->unk_74 = NULL;
-    chan->unk_78 = NULL;
-    chan->unk_44 = 0;
-    chan->unk_08 = NULL;
+u8 *Snd_CmdEnd( sndChannel_t *chan, u8 *src ) {
+    chan->volStream = NULL;
+    chan->bendStream = NULL;
+    chan->seq = NULL;
+    chan->seTable = NULL;
+    chan->id = 0;
+    chan->pendingWave = NULL;
     return NULL;
 }
 
 /*
 ================
-func_8003E180
+Snd_CmdProgram
 
 Channel command: sets the program unk_AE from a value encoded as one byte, or as two bytes when the first has
 bit 7 set.
 ================
 */
-u8 *func_8003E180( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdProgram( sndChannel_t *chan, u8 *src ) {
     u32 value = *src++;
 
     if ( value & 0x80 ) {
         value = *src++ | ( ( value & 0x7F ) << 8 );
     }
-    chan->unk_AE = value;
+    chan->program = value;
     return src;
 }
 
 /*
 ================
-func_8003E1B0
+Snd_CmdPortamento
 
 Channel command: sets unk_B8 from one byte; a non-zero value also copies unk_2C to unk_50.
 ================
 */
-u8 *func_8003E1B0( UnkChannel *chan, u8 *src ) {
-    chan->unk_B8 = *src++;
-    if ( chan->unk_B8 != 0 ) {
-        chan->unk_50 = chan->unk_2C;
+u8 *Snd_CmdPortamento( sndChannel_t *chan, u8 *src ) {
+    chan->portamento = *src++;
+    if ( chan->portamento != 0 ) {
+        chan->glidePitch = chan->notePitch;
     }
     return src;
 }
 
 /*
 ================
-func_8003E1D0
+Snd_CmdPortamentoOff
 
 Channel command: clears unk_B8.
 ================
 */
-u8 *func_8003E1D0( UnkChannel *chan, u8 *src ) {
-    chan->unk_B8 = 0;
+u8 *Snd_CmdPortamentoOff( sndChannel_t *chan, u8 *src ) {
+    chan->portamento = 0;
     return src;
 }
 
 /*
 ================
-func_8003E1DC
+Snd_CmdEnvelope
 
 Channel command: reads an envelope from the command stream.
 ================
 */
-u8 *func_8003E1DC( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdEnvelope( sndChannel_t *chan, u8 *src ) {
     s32 value;
     s32 level;
 
@@ -1875,47 +1875,47 @@ u8 *func_8003E1DC( UnkChannel *chan, u8 *src ) {
     if ( value == 0 ) {
         value = 1;
     }
-    chan->unk_BF = value;
-    chan->unk_64 = 0x400 / value;
-    chan->unk_C0 = *src++;
+    chan->envInterval = value;
+    chan->envTimeScale = 0x400 / value;
+    chan->envStartLevel = *src++;
     value = *src++;
-    chan->unk_C6 = value;
+    chan->envAttackTime = value;
     level = *src++;
-    chan->unk_58 = 1.0 / (f32)value * (f32)( level - chan->unk_C0 );
-    chan->unk_C1 = level;
+    chan->attackSlope = 1.0 / (f32)value * (f32)( level - chan->envStartLevel );
+    chan->envPeakLevel = level;
     value = *src++;
-    chan->unk_C7 = value;
+    chan->envDecayTime = value;
     level = *src++;
-    chan->unk_5C = 1.0 / (f32)value * (f32)( level - chan->unk_C1 );
-    chan->unk_C2 = level;
+    chan->decaySlope = 1.0 / (f32)value * (f32)( level - chan->envPeakLevel );
+    chan->envSustainLevel = level;
     value = *src++;
-    chan->unk_C8 = value;
-    chan->unk_60 = 1.0 / (f32)value;
+    chan->envReleaseTime = value;
+    chan->releaseSlope = 1.0 / (f32)value;
     return src;
 }
 
 /*
 ================
-func_8003E304
+Snd_CmdTempo
 
 Channel command: sets the tempo from one byte; a bank channel takes it alone, otherwise every channel of the same header does.
 ================
 */
-u8 *func_8003E304( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdTempo( sndChannel_t *chan, u8 *src ) {
     s32 tempo;
     s32 scaled;
     s32 i;
-    UnkChannel *other;
+    sndChannel_t *other;
 
-    tempo = ( *src++ * 0x6000 / 120 ) / D_80064344;
-    scaled = ( tempo * chan->unk_98 ) >> 7;
-    if ( chan->unk_78 != NULL ) {
-        chan->unk_9C = tempo;
+    tempo = ( *src++ * 0x6000 / 120 ) / snd_tickRate;
+    scaled = ( tempo * chan->tempoScale ) >> 7;
+    if ( chan->seTable != NULL ) {
+        chan->tempo = tempo;
     } else {
-        for ( i = 0, other = D_8006433C; i < D_80064334; i++, other++ ) {
-            if ( other->unk_74 == chan->unk_74 ) {
-                other->unk_A8 = tempo;
-                other->unk_9C = scaled;
+        for ( i = 0, other = snd_channels; i < snd_numChannels; i++, other++ ) {
+            if ( other->seq == chan->seq ) {
+                other->baseTempo = tempo;
+                other->tempo = scaled;
             }
         }
     }
@@ -1924,50 +1924,50 @@ u8 *func_8003E304( UnkChannel *chan, u8 *src ) {
 
 /*
 ================
-func_8003E3E8
+Snd_CmdReleaseBefore
 
 Channel command: sets unk_B4 from one byte and clears unk_B2.
 ================
 */
-u8 *func_8003E3E8( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdReleaseBefore( sndChannel_t *chan, u8 *src ) {
     u8 value;
 
     value = *src++;
-    chan->unk_B2 = 0;
-    chan->unk_B4 = value;
+    chan->releaseAfter = 0;
+    chan->releaseBefore = value;
     return src;
 }
 
 /*
 ================
-func_8003E3FC
+Snd_CmdReleaseAfter
 
 Channel command: sets unk_B2 from a big-endian 16-bit value and clears unk_B4.
 ================
 */
-u8 *func_8003E3FC( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdReleaseAfter( sndChannel_t *chan, u8 *src ) {
     s32 hi;
     s32 lo;
 
     hi = *src++;
     lo = *src++;
-    chan->unk_B4 = 0;
-    chan->unk_B2 = lo | ( hi << 8 );
+    chan->releaseBefore = 0;
+    chan->releaseAfter = lo | ( hi << 8 );
     return src;
 }
 
 /*
 ================
-func_8003E420
+Snd_CmdVibrato
 
 Channel command: sets unk_B6 and unk_D5 from two bytes, unk_20 to a third byte / 50 and the phase step unk_DC to 2 pi / unk_D5.
 ================
 */
-u8 *func_8003E420( UnkChannel *chan, u8 *src ) {
-    chan->unk_B6 = *src++;
-    chan->unk_D5 = *src++;
-    chan->unk_20 = (f32)*src++ / 50.0;
-    chan->unk_DC = 6.2831852 / (f32)chan->unk_D5;
+u8 *Snd_CmdVibrato( sndChannel_t *chan, u8 *src ) {
+    chan->vibratoDelay = *src++;
+    chan->vibratoPeriod = *src++;
+    chan->vibratoDepth = (f32)*src++ / 50.0;
+    chan->vibratoStep = 6.2831852 / (f32)chan->vibratoPeriod;
     return src;
 }
 
@@ -1975,42 +1975,42 @@ u8 *func_8003E420( UnkChannel *chan, u8 *src ) {
 // NON_MATCHING: schedule: retail reloads unk_D5 right after storing it and interleaves the two divisions
 /*
 ================
-func_8003E490
+Snd_CmdVibratoInverted
 
 TODO
 ================
 */
-u8 *func_8003E490( UnkChannel *chan, u8 *src ) {
-    chan->unk_B6 = *src++;
-    chan->unk_DC = 6.2831852 / (f32)( chan->unk_D5 = *src++ );
-    chan->unk_20 = -(f32)*src++ / 50.0;
+u8 *Snd_CmdVibratoInverted( sndChannel_t *chan, u8 *src ) {
+    chan->vibratoDelay = *src++;
+    chan->vibratoStep = 6.2831852 / (f32)( chan->vibratoPeriod = *src++ );
+    chan->vibratoDepth = -(f32)*src++ / 50.0;
     return src;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E490);
+INCLUDE_ASM("asm/nonmatchings/166B0", Snd_CmdVibratoInverted);
 #endif
 
 /*
 ================
-func_8003E504
+Snd_CmdVibratoOff
 
 Channel command: clears unk_D5 and unk_68.
 ================
 */
-u8 *func_8003E504( UnkChannel *chan, u8 *src ) {
-    chan->unk_D5 = 0;
-    chan->unk_68 = 0;
+u8 *Snd_CmdVibratoOff( sndChannel_t *chan, u8 *src ) {
+    chan->vibratoPeriod = 0;
+    chan->vibratoPitch = 0;
     return src;
 }
 
 /*
 ================
-func_8003E514
+Snd_CmdFixedLength
 
 Channel command: sets unk_AC from a value encoded as one byte, or as two bytes when the first is 0x80 or more.
 ================
 */
-u8 *func_8003E514( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdFixedLength( sndChannel_t *chan, u8 *src ) {
     s32 value;
 
     value = *src++;
@@ -2019,54 +2019,54 @@ u8 *func_8003E514( UnkChannel *chan, u8 *src ) {
         value <<= 8;
         value |= *src++;
     }
-    chan->unk_AC = value;
+    chan->fixedLength = value;
     return src;
 }
 
 /*
 ================
-func_8003E544
+Snd_CmdExplicitLength
 
 Channel command: sets unk_B7.
 ================
 */
-u8 *func_8003E544( UnkChannel *chan, u8 *src ) {
-    chan->unk_B7 = 1;
+u8 *Snd_CmdExplicitLength( sndChannel_t *chan, u8 *src ) {
+    chan->explicitLength = 1;
     return src;
 }
 
 /*
 ================
-func_8003E554
+Snd_CmdTranspose
 
 Channel command: sets unk_B9 from one byte.
 ================
 */
-u8 *func_8003E554( UnkChannel *chan, u8 *src ) {
-    chan->unk_B9 = *src++;
+u8 *Snd_CmdTranspose( sndChannel_t *chan, u8 *src ) {
+    chan->transpose = *src++;
     return src;
 }
 
 /*
 ================
-func_8003E564
+Snd_CmdTransposeOff
 
 Channel command: sets unk_BA.
 ================
 */
-u8 *func_8003E564( UnkChannel *chan, u8 *src ) {
-    chan->unk_BA = 1;
+u8 *Snd_CmdTransposeOff( sndChannel_t *chan, u8 *src ) {
+    chan->transposeOff = 1;
     return src;
 }
 
 /*
 ================
-func_8003E574
+Snd_CmdDetune
 
 Channel command: replaces the offset unk_90 within unk_30 by a signed byte / 100.
 ================
 */
-u8 *func_8003E574( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdDetune( sndChannel_t *chan, u8 *src ) {
     s32 value;
     f32 offset;
 
@@ -2075,209 +2075,209 @@ u8 *func_8003E574( UnkChannel *chan, u8 *src ) {
         value |= ~0xFF;
     }
     offset = (f32)value / 100.0;
-    chan->unk_30 = chan->unk_30 - chan->unk_90 + offset;
-    chan->unk_90 = offset;
+    chan->pitchOffset = chan->pitchOffset - chan->detune + offset;
+    chan->detune = offset;
     return src;
 }
 
 /*
 ================
-func_8003E5CC
+Snd_CmdEnvRestartOff
 
 Channel command: sets unk_D6.
 ================
 */
-u8 *func_8003E5CC( UnkChannel *chan, u8 *src ) {
-    chan->unk_D6 = 1;
+u8 *Snd_CmdEnvRestartOff( sndChannel_t *chan, u8 *src ) {
+    chan->noEnvRestart = 1;
     return src;
 }
 
 /*
 ================
-func_8003E5DC
+Snd_CmdEnvRestartOn
 
 Channel command: clears unk_D6.
 ================
 */
-u8 *func_8003E5DC( UnkChannel *chan, u8 *src ) {
-    chan->unk_D6 = 0;
+u8 *Snd_CmdEnvRestartOn( sndChannel_t *chan, u8 *src ) {
+    chan->noEnvRestart = 0;
     return src;
 }
 
 /*
 ================
-func_8003E5E8
+Snd_CmdVoiceRestartOff
 
 Channel command: sets unk_D7.
 ================
 */
-u8 *func_8003E5E8( UnkChannel *chan, u8 *src ) {
-    chan->unk_D7 = 1;
+u8 *Snd_CmdVoiceRestartOff( sndChannel_t *chan, u8 *src ) {
+    chan->noVoiceRestart = 1;
     return src;
 }
 
 /*
 ================
-func_8003E5F8
+Snd_CmdVoiceRestartOn
 
 Channel command: clears unk_D7.
 ================
 */
-u8 *func_8003E5F8( UnkChannel *chan, u8 *src ) {
-    chan->unk_D7 = 0;
+u8 *Snd_CmdVoiceRestartOn( sndChannel_t *chan, u8 *src ) {
+    chan->noVoiceRestart = 0;
     return src;
 }
 
 /*
 ================
-func_8003E604
+Snd_CmdLoopStart
 
 Channel command: pushes the read position and the channel state onto the repeat stack, with a repeat count from one byte.
 ================
 */
-u8 *func_8003E604( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdLoopStart( sndChannel_t *chan, u8 *src ) {
     s32 depth;
 
-    depth = chan->unk_DB;
-    chan->unk_120[depth] = *src++;
-    chan->unk_E0[depth] = src;
-    chan->unk_F0[depth] = chan->unk_38;
-    chan->unk_100[depth] = chan->unk_34;
-    chan->unk_124[depth] = chan->unk_BC;
-    chan->unk_128[depth] = chan->unk_70;
-    chan->unk_110[depth] = chan->unk_A2;
-    chan->unk_118[depth] = chan->unk_A4;
-    chan->unk_DB++;
+    depth = chan->loopDepth;
+    chan->loopCount[depth] = *src++;
+    chan->loopPos[depth] = src;
+    chan->loopVolStream[depth] = chan->volStream;
+    chan->loopBendStream[depth] = chan->bendStream;
+    chan->loopVolume[depth] = chan->trackVolume;
+    chan->loopBend[depth] = chan->bend;
+    chan->loopVolWait[depth] = chan->volStreamWait;
+    chan->loopBendWait[depth] = chan->bendStreamWait;
+    chan->loopDepth++;
     return src;
 }
 
 /*
 ================
-func_8003E670
+Snd_CmdLoopEnd
 
 Channel command: counts down the top repeat entry; jumps back to it and restores its state unless the count ran out, which pops it.
 ================
 */
-u8 *func_8003E670( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdLoopEnd( sndChannel_t *chan, u8 *src ) {
     s32 depth;
 
-    depth = chan->unk_DB - 1;
-    if ( chan->unk_120[depth] != 0xFF ) {
-        if ( --chan->unk_120[depth] == 0 ) {
-            chan->unk_DB = depth;
+    depth = chan->loopDepth - 1;
+    if ( chan->loopCount[depth] != 0xFF ) {
+        if ( --chan->loopCount[depth] == 0 ) {
+            chan->loopDepth = depth;
             depth = -1;
         }
     }
     if ( depth >= 0 ) {
-        src = chan->unk_E0[depth];
-        chan->unk_38 = chan->unk_F0[depth];
-        chan->unk_34 = chan->unk_100[depth];
-        chan->unk_BC = chan->unk_124[depth];
-        chan->unk_70 = chan->unk_128[depth];
-        chan->unk_A2 = chan->unk_110[depth];
-        chan->unk_A4 = chan->unk_118[depth];
-        chan->unk_24 = chan->unk_70 * chan->unk_6C;
+        src = chan->loopPos[depth];
+        chan->volStream = chan->loopVolStream[depth];
+        chan->bendStream = chan->loopBendStream[depth];
+        chan->trackVolume = chan->loopVolume[depth];
+        chan->bend = chan->loopBend[depth];
+        chan->volStreamWait = chan->loopVolWait[depth];
+        chan->bendStreamWait = chan->loopBendWait[depth];
+        chan->bendPitch = chan->bend * chan->bendRange;
     }
     return src;
 }
 
 /*
 ================
-func_8003E70C
+Snd_CmdTrill
 
 Channel command: sets unk_D8, unk_CE and unk_CF from three bytes.
 ================
 */
-u8 *func_8003E70C( UnkChannel *chan, u8 *src ) {
-    chan->unk_D8 = *src++;
-    chan->unk_CE = *src++;
-    chan->unk_CF = *src++;
+u8 *Snd_CmdTrill( sndChannel_t *chan, u8 *src ) {
+    chan->trillInterval = *src++;
+    chan->trillOnTicks = *src++;
+    chan->trillOffTicks = *src++;
     return src;
 }
 
 /*
 ================
-func_8003E734
+Snd_CmdTrillOff
 
 Channel command: clears unk_CE.
 ================
 */
-u8 *func_8003E734( UnkChannel *chan, u8 *src ) {
-    chan->unk_CE = 0;
+u8 *Snd_CmdTrillOff( sndChannel_t *chan, u8 *src ) {
+    chan->trillOnTicks = 0;
     return src;
 }
 
 /*
 ================
-func_8003E740
+Snd_CmdNoteVelocity
 
 Channel command: sets unk_D2.
 ================
 */
-u8 *func_8003E740( UnkChannel *chan, u8 *src ) {
-    chan->unk_D2 = 1;
+u8 *Snd_CmdNoteVelocity( sndChannel_t *chan, u8 *src ) {
+    chan->noteVelocity = 1;
     return src;
 }
 
 /*
 ================
-func_8003E750
+Snd_CmdNoteVelocityOff
 
 Channel command: clears unk_D2.
 ================
 */
-u8 *func_8003E750( UnkChannel *chan, u8 *src ) {
-    chan->unk_D2 = 0;
+u8 *Snd_CmdNoteVelocityOff( sndChannel_t *chan, u8 *src ) {
+    chan->noteVelocity = 0;
     return src;
 }
 
 /*
 ================
-func_8003E75C
+Snd_CmdVelocity
 
 Channel command: sets unk_D3 from one byte and clears unk_D2.
 ================
 */
-u8 *func_8003E75C( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdVelocity( sndChannel_t *chan, u8 *src ) {
     u8 value;
 
     value = *src++;
-    chan->unk_D2 = 0;
-    chan->unk_D3 = value;
+    chan->noteVelocity = 0;
+    chan->fixedVelocity = value;
     return src;
 }
 
 /*
 ================
-func_8003E770
+Snd_CmdPan
 
 Channel command: sets unk_BD from half of one byte.
 ================
 */
-u8 *func_8003E770( UnkChannel *chan, u8 *src ) {
-    chan->unk_BD = *src++ >> 1;
+u8 *Snd_CmdPan( sndChannel_t *chan, u8 *src ) {
+    chan->pan = *src++ >> 1;
     return src;
 }
 
 /*
 ================
-func_8003E784
+Snd_CmdSkip2
 
 Channel command: skips two bytes.
 ================
 */
-u8 *func_8003E784( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdSkip2( sndChannel_t *chan, u8 *src ) {
     return src + 2;
 }
 
 /*
 ================
-func_8003E78C
+Snd_CmdDrumMap
 
 Channel command: selects entry unk_84 of unk_74->unk_1C by a one- or two-byte index.
 ================
 */
-u8 *func_8003E78C( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdDrumMap( sndChannel_t *chan, u8 *src ) {
     s32 index;
 
     index = *src++;
@@ -2286,41 +2286,41 @@ u8 *func_8003E78C( UnkChannel *chan, u8 *src ) {
         index <<= 8;
         index |= *src++;
     }
-    chan->unk_84 = &chan->unk_74->unk_1C[index];
+    chan->drumMap = &chan->seq->drumMaps[index];
     return src;
 }
 
 /*
 ================
-func_8003E7D4
+Snd_CmdDrumMapOff
 
 Channel command: clears unk_84.
 ================
 */
-u8 *func_8003E7D4( UnkChannel *chan, u8 *src ) {
-    chan->unk_84 = NULL;
+u8 *Snd_CmdDrumMapOff( sndChannel_t *chan, u8 *src ) {
+    chan->drumMap = NULL;
     return src;
 }
 
 /*
 ================
-func_8003E7E0
+Snd_CmdSkip1
 
 Channel command: skips one byte.
 ================
 */
-u8 *func_8003E7E0( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdSkip1( sndChannel_t *chan, u8 *src ) {
     return src + 1;
 }
 
 /*
 ================
-func_8003E7E8
+Snd_CmdJump
 
 Channel command: reads three big-endian 16-bit offsets; sets unk_38 and unk_34 from the last two and jumps to the first, relative to unk_80.
 ================
 */
-u8 *func_8003E7E8( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdJump( sndChannel_t *chan, u8 *src ) {
     s32 jump;
     s32 offset;
 
@@ -2328,103 +2328,103 @@ u8 *func_8003E7E8( UnkChannel *chan, u8 *src ) {
     jump += *src++;
     offset = *src++ << 8;
     offset += *src++;
-    chan->unk_A2 = 1;
-    chan->unk_38 = chan->unk_8C + offset;
+    chan->volStreamWait = 1;
+    chan->volStream = chan->volStreamStart + offset;
     offset = *src++ << 8;
     offset += *src++;
-    chan->unk_A4 = 1;
-    chan->unk_34 = chan->unk_88 + offset;
-    return chan->unk_80 + jump;
+    chan->bendStreamWait = 1;
+    chan->bendStream = chan->bendStreamStart + offset;
+    return chan->cmdStart + jump;
 }
 
 /*
 ================
-func_8003E858
+Snd_CmdFxMix
 
 Channel command: sets unk_CA from one byte.
 ================
 */
-u8 *func_8003E858( UnkChannel *chan, u8 *src ) {
-    chan->unk_CA = *src++;
+u8 *Snd_CmdFxMix( sndChannel_t *chan, u8 *src ) {
+    chan->fxMix = *src++;
     return src;
 }
 
 /*
 ================
-func_8003E868
+Snd_CmdRandomTranspose
 
 Channel command: sets unk_B9 to a random number below the first byte plus the second byte.
 ================
 */
-u8 *func_8003E868( UnkChannel *chan, u8 *src ) {
-    chan->unk_B9 = func_8003D878( *src++ );
-    chan->unk_B9 += *src++;
+u8 *Snd_CmdRandomTranspose( sndChannel_t *chan, u8 *src ) {
+    chan->transpose = Snd_Random( *src++ );
+    chan->transpose += *src++;
     return src;
 }
 
 /*
 ================
-func_8003E8B8
+Snd_CmdRandomVolume
 
 Channel command: sets unk_BC to a random number below the first byte plus the second byte.
 ================
 */
-u8 *func_8003E8B8( UnkChannel *chan, u8 *src ) {
-    chan->unk_BC = func_8003D878( *src++ );
-    chan->unk_BC += *src++;
+u8 *Snd_CmdRandomVolume( sndChannel_t *chan, u8 *src ) {
+    chan->trackVolume = Snd_Random( *src++ );
+    chan->trackVolume += *src++;
     return src;
 }
 
 /*
 ================
-func_8003E908
+Snd_CmdRandomPan
 
 Channel command: sets unk_BD to a random number below the first byte plus the second byte.
 ================
 */
-u8 *func_8003E908( UnkChannel *chan, u8 *src ) {
-    chan->unk_BD = func_8003D878( *src++ );
-    chan->unk_BD += *src++;
+u8 *Snd_CmdRandomPan( sndChannel_t *chan, u8 *src ) {
+    chan->pan = Snd_Random( *src++ );
+    chan->pan += *src++;
     return src;
 }
 
 /*
 ================
-func_8003E958
+Snd_CmdVolume
 
 Channel command: sets unk_BC from one byte.
 ================
 */
-u8 *func_8003E958( UnkChannel *chan, u8 *src ) {
-    chan->unk_BC = *src++;
+u8 *Snd_CmdVolume( sndChannel_t *chan, u8 *src ) {
+    chan->trackVolume = *src++;
     return src;
 }
 
 /*
 ================
-func_8003E968
+Snd_CmdPlaySe
 
 Channel command: starts entry (one- or two-byte index) of the channel's bank on another channel at a higher priority, and gives every channel started under the new id this channel's id and unk_7C.
 ================
 */
-u8 *func_8003E968( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdPlaySe( sndChannel_t *chan, u8 *src ) {
     s32 index;
     s32 id;
     s32 i;
-    UnkChannel *other;
+    sndChannel_t *other;
 
     index = *src++;
     if ( index >= 0x80 ) {
         index = ( ( index & 0x7F ) << 8 ) + *src++;
     }
-    chan->unk_48++;
-    id = func_8003DCF8( chan->unk_78, index, chan->unk_9E, chan->unk_B0, chan->unk_48 );
-    chan->unk_48--;
+    chan->priority++;
+    id = Snd_StartSe( chan->seTable, index, chan->playVolume, chan->playPan, chan->priority );
+    chan->priority--;
     if ( id != 0 ) {
-        for ( i = 0, other = D_8006433C; i < D_80064334; i++, other++ ) {
-            if ( other->unk_44 == id ) {
-                other->unk_44 = chan->unk_44;
-                other->unk_7C = chan->unk_7C;
+        for ( i = 0, other = snd_channels; i < snd_numChannels; i++, other++ ) {
+            if ( other->id == id ) {
+                other->id = chan->id;
+                other->waveBank = chan->waveBank;
             }
         }
     }
@@ -2433,41 +2433,41 @@ u8 *func_8003E968( UnkChannel *chan, u8 *src ) {
 
 /*
 ================
-func_8003EA38
+Snd_CmdBendRange
 
 Channel command: sets unk_6C to one byte / 64 and unk_24 to unk_70 * unk_6C.
 ================
 */
-u8 *func_8003EA38( UnkChannel *chan, u8 *src ) {
-    chan->unk_6C = (f32)*src++ * 0.015625;
-    chan->unk_24 = chan->unk_70 * chan->unk_6C;
+u8 *Snd_CmdBendRange( sndChannel_t *chan, u8 *src ) {
+    chan->bendRange = (f32)*src++ * 0.015625;
+    chan->bendPitch = chan->bend * chan->bendRange;
     return src;
 }
 
 /*
 ================
-func_8003EA74
+Snd_CmdAutoPan
 
 Channel command: sets unk_D4 from one byte.
 ================
 */
-u8 *func_8003EA74( UnkChannel *chan, u8 *src ) {
-    chan->unk_D4 = *src++;
+u8 *Snd_CmdAutoPan( sndChannel_t *chan, u8 *src ) {
+    chan->autoPanSpeed = *src++;
     return src;
 }
 
 /*
 ================
-func_8003EA84
+Snd_CmdFxType
 
-Channel command: passes one byte to func_8003F340 while D_80064360 is 1.
+Channel command: passes one byte to func_8003F340 while snd_seqFxEnabled is 1.
 ================
 */
-u8 *func_8003EA84( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdFxType( sndChannel_t *chan, u8 *src ) {
     s32 arg;
 
     arg = *src++;
-    if ( D_80064360 == 1 ) {
+    if ( snd_seqFxEnabled == 1 ) {
         func_8003F340( arg );
     }
     return src;
@@ -2475,12 +2475,12 @@ u8 *func_8003EA84( UnkChannel *chan, u8 *src ) {
 
 /*
 ================
-func_8003EAC8
+Snd_CmdMarker
 
-Channel command: passes the channel id and one byte to the D_80064370 callback when unk_00 & 3 is 2; skips a one- or two-byte value after it.
+Channel command: passes the channel id and one byte to the snd_markerCallback callback when unk_00 & 3 is 2; skips a one- or two-byte value after it.
 ================
 */
-u8 *func_8003EAC8( UnkChannel *chan, u8 *src ) {
+u8 *Snd_CmdMarker( sndChannel_t *chan, u8 *src ) {
     s32 value;
     s32 length;
 
@@ -2489,20 +2489,20 @@ u8 *func_8003EAC8( UnkChannel *chan, u8 *src ) {
     if ( length & 0x80 ) {
         length = ( ( length & 0x7F ) << 8 ) + *src++;
     }
-    if ( ( chan->unk_00 & 3 ) == 2 && D_80064370 != NULL ) {
-        D_80064370( chan->unk_44, value );
+    if ( ( chan->flags & 3 ) == 2 && snd_markerCallback != NULL ) {
+        snd_markerCallback( chan->id, value );
     }
     return src;
 }
 
 /*
 ================
-func_8003EB38
+Snd_CmdFixedLengthOff
 
 Channel command: clears unk_AC.
 ================
 */
-u8 *func_8003EB38( UnkChannel *chan, u8 *src ) {
-    chan->unk_AC = 0;
+u8 *Snd_CmdFixedLengthOff( sndChannel_t *chan, u8 *src ) {
+    chan->fixedLength = 0;
     return src;
 }

@@ -1,0 +1,318 @@
+# Name provenance (decomp-code-rules R7): one line per recovered name.
+# Format: name <TAB> address or owner <TAB> evidence: <source> | invented: <reason>
+# "evidence" names come from the binary or the SDK (ROM strings, libultra/n_audio code); "invented" names are
+# ours, chosen from behaviour, and are not original. Placeholders (func_/D_/unk_) are not listed.
+
+# 166B0.c sound driver: functions and globals
+Snd_CmdEnvelopeIndex	0x8003B2B0	invented: command 0x90 (snd_commands[0x10]); applies seq->envelopes[index]
+Snd_Init	0x8003B3FC	invented: sets up heap, channels, voices, messages, banks; registers the n_audio player
+Snd_SetMasterVolume	0x8003B684	invented: sets the SE (bit 0) and BGM (bit 1) volume scales read by Snd_UpdateVolumePan
+Snd_PlayBgm	0x8003B6B0	invented: starts a BGM sequence (Snd_StartBgm) and resumes it
+Snd_PlayBgmFromMarker	0x8003B6E0	invented: as Snd_PlayBgm after running each channel silently to marker command 0xAB
+Snd_PlaySe	0x8003B930	invented: starts SE table entry index with default volume and pan
+Snd_PlaySeEx	0x8003B9B0	invented: Snd_PlaySe with volume, pan, reuse and priority
+Snd_StopAll	0x8003BAC8	invented: fades out (then frees) every active SE and/or BGM channel
+Snd_NumActive	0x8003BB94	invented: counts active SE and/or BGM channels
+Snd_Stop	0x8003BC14	invented: fades out (then frees) the channels of one id
+Snd_NumChannels	0x8003BCC8	invented: counts the channels of one id
+Snd_SetVolume	0x8003BD20	invented: sets playVolume of the channels of one id
+Snd_SetPan	0x8003BD80	invented: sets playPan of the channels of one id
+Snd_SetPitchOffset	0x8003BDF0	invented: sets pitchOffset (semitones, plus detune) of the channels of one id
+Snd_SetTempoScale	0x8003BE60	invented: sets tempoScale and rescales tempo of the channels of one id
+Snd_SetFxBase	0x8003BEEC	invented: sets fxBase (minimum FX mix) of the channels of one id
+Snd_LoadWaveBank	0x8003BF74	invented: relocates a wave bank to its ROM base; default if none (called with SEWBK's ROM start)
+Snd_SetNextWaveBank	0x8003BFB0	invented: sets snd_nextWaveBank, the bank of the next started channel
+Snd_SetDefaultWaveBank	0x8003BFD8	invented: sets snd_defaultWaveBank
+Snd_GetDefaultWaveBank	0x8003BFFC	invented: returns snd_defaultWaveBank
+Snd_GetWaveBank	0x8003C008	invented: returns the wave bank of the channels of one id
+Snd_Pause	0x8003C064	invented: posts SNDMSG_PAUSE (sets CHAN_PAUSED on the id's channels)
+Snd_Resume	0x8003C088	invented: posts SNDMSG_RESUME (clears CHAN_PAUSED)
+Snd_SetFxType	0x8003C0B0	invented: remembers the effect setting and posts SNDMSG_SETFX, which reaches func_8003F340 (alFxParam)
+Snd_EnableSeqFx	0x8003C0E0	invented: sets snd_seqFxEnabled, which lets command 0xAA change the effect
+Snd_LoadSeTable	0x8003C13C	invented: relocates an SE table (SEPTR) in place; default if none
+Snd_SetSeTable	0x8003C1C8	invented: sets snd_seTable
+Snd_SetNextSeTable	0x8003C1D4	invented: sets snd_nextSeTable, used by the next Snd_PlaySe only
+Snd_GetSeTable	0x8003C1E0	invented: returns snd_seTable
+Snd_SetSeWaveBank	0x8003C1EC	invented: sets an SE table's wave bank (called with the SEPTR table and the SEWBK bank)
+Snd_GetSeWaveBank	0x8003C1F4	invented: returns an SE table's wave bank
+Snd_GetProgramTable	0x8003C26C	invented: returns the program-to-wave table of the id's sequence or SE table
+Snd_SetMarkerCallback	0x8003C2E4	invented: sets snd_markerCallback, called by command 0xAB
+Snd_InitMessages	0x8003C2F0	invented: allocates the message ring buffer
+Snd_HandleMessage	0x8003C354	invented: executes one posted message
+Snd_PostMessage	0x8003C3D4	invented: appends a message to the ring buffer
+Snd_PlayerHandler	0x8003C46C	invented: ALPlayer handler registered by Snd_Init through n_alSynAddPlayer; one sequencer tick
+Snd_PlayNextNote	0x8003C75C	invented: runs commands up to the next note and plays it
+Snd_StartVoice	0x8003CCA4	invented: (re)starts the channel's voice on its pending wave (n_alSynStartVoice)
+Snd_UpdateVolumePan	0x8003CD20	invented: sends volume and pan (n_alSynSetVol, n_alSynSetPan)
+Snd_UpdatePitch	0x8003CE74	invented: sends pitch (n_alSynSetPitch)
+Snd_StartEnvelope	0x8003CF80	invented: computes releaseTime and enters ENV_ATTACK
+Snd_UpdateEnvelope	0x8003CFF0	invented: steps the attack/decay/sustain/release envelope
+Snd_StartAutoPan	0x8003D1E4	invented: restarts the pan sweep at the note
+Snd_UpdateAutoPan	0x8003D200	invented: sweeps pan between 0 and 0x7F
+Snd_UpdateTrill	0x8003D2B8	invented: alternates trillPitch between 0 and trillInterval
+Snd_UpdateVibrato	0x8003D310	invented: depth * sin( phase ) after a delay
+Snd_StepVolumeStream	0x8003D374	invented: reads the per-track volume stream
+Snd_StepBendStream	0x8003D438	invented: reads the per-track pitch-bend stream
+Snd_Exp2	0x8003D54C	invented: 2^x by a Taylor series in ln 2 (coefficients ln2^n/n!); used for semitones/12
+Snd_RelocateWaveBank	0x8003D6E0	invented: turns a wave bank's offsets into pointers, patches each ALWaveTable once
+Snd_Random	0x8003D878	invented: random number in [0, range) from a shift register
+Snd_ResetChannel	0x8003D90C	invented: clears a channel to defaults
+Snd_FindBgmChannel	0x8003DA48	invented: picks the channel for a BGM track
+Snd_RelocateTable	0x8003DC10	invented: adds a base to every non-zero offset of a table
+Snd_StartSeOnChannel	0x8003DC48	invented: starts SE entry on a given channel
+Snd_StartSe	0x8003DCF8	invented: starts SE entry on a free or lower-priority channel
+Snd_StartBgm	0x8003DEA0	invented: relocates a sequence and starts its master and track channels, paused
+Snd_SetChannelFlags	0x8003E10C	invented: flags = ( flags & mask ) | bits on the id's channels
+Snd_CmdEnd	0x8003E160	invented: command 0x80, ends the track
+Snd_CmdProgram	0x8003E180	invented: command 0x81
+Snd_CmdPortamento	0x8003E1B0	invented: command 0x82, glide time
+Snd_CmdPortamentoOff	0x8003E1D0	invented: command 0x83
+Snd_CmdEnvelope	0x8003E1DC	invented: command 0x84, envelope bytes inline
+Snd_CmdTempo	0x8003E304	invented: command 0x85, beats per minute (n * 0x6000 / 120 per second)
+Snd_CmdReleaseAfter	0x8003E3FC	invented: command 0x86, release a fixed time after note on
+Snd_CmdReleaseBefore	0x8003E3E8	invented: command 0x87, release a time before note end
+Snd_CmdVibrato	0x8003E420	invented: command 0x88, delay, period, depth
+Snd_CmdVibratoInverted	0x8003E490	invented: command 0x89, as 0x88 with negative depth
+Snd_CmdVibratoOff	0x8003E504	invented: command 0x8A
+Snd_CmdFixedLength	0x8003E514	invented: command 0x8B, notes stop carrying a length
+Snd_CmdExplicitLength	0x8003E544	invented: command 0x8C, the next note carries a length anyway
+Snd_CmdTranspose	0x8003E554	invented: command 0x8D, semitones
+Snd_CmdTransposeOff	0x8003E564	invented: command 0x8E
+Snd_CmdDetune	0x8003E574	invented: command 0x8F, hundredths of a semitone
+Snd_CmdEnvRestartOff	0x8003E5CC	invented: command 0x91, notes keep the running envelope
+Snd_CmdEnvRestartOn	0x8003E5DC	invented: command 0x92
+Snd_CmdVoiceRestartOff	0x8003E5E8	invented: command 0x93, notes keep the running voice
+Snd_CmdVoiceRestartOn	0x8003E5F8	invented: command 0x94
+Snd_CmdLoopStart	0x8003E604	invented: command 0x95, pushes a loop with a count
+Snd_CmdLoopEnd	0x8003E670	invented: command 0x96
+Snd_CmdTrill	0x8003E70C	invented: command 0x97, interval, on and off ticks
+Snd_CmdTrillOff	0x8003E734	invented: command 0x98
+Snd_CmdNoteVelocity	0x8003E740	invented: command 0x99, each note carries a velocity byte
+Snd_CmdNoteVelocityOff	0x8003E750	invented: command 0x9A
+Snd_CmdVelocity	0x8003E75C	invented: command 0x9B, fixed velocity
+Snd_CmdPan	0x8003E770	invented: command 0x9C, 0-0xFF halved
+Snd_CmdSkip2	0x8003E784	invented: command 0x9D, ignores two bytes
+Snd_CmdDrumMap	0x8003E78C	invented: command 0x9E, selects a drum map entry table
+Snd_CmdDrumMapOff	0x8003E7D4	invented: command 0x9F
+Snd_CmdSkip1	0x8003E7E0	invented: command 0xA0, ignores one byte
+Snd_CmdJump	0x8003E7E8	invented: command 0xA1, jumps the command, volume and bend streams
+Snd_CmdFxMix	0x8003E858	invented: command 0xA2, sent through n_alSynSetFXMix
+Snd_CmdRandomTranspose	0x8003E868	invented: command 0xA3
+Snd_CmdRandomVolume	0x8003E8B8	invented: command 0xA4
+Snd_CmdRandomPan	0x8003E908	invented: command 0xA5
+Snd_CmdVolume	0x8003E958	invented: command 0xA6
+Snd_CmdPlaySe	0x8003E968	invented: command 0xA7, starts an SE entry under this channel's id
+Snd_CmdBendRange	0x8003EA38	invented: command 0xA8, 64ths of a semitone per bend step
+Snd_CmdAutoPan	0x8003EA74	invented: command 0xA9, pan sweep speed
+Snd_CmdFxType	0x8003EA84	invented: command 0xAA, effect setting while snd_seqFxEnabled
+Snd_CmdMarker	0x8003EAC8	invented: command 0xAB, marker value for snd_markerCallback and Snd_PlayBgmFromMarker
+Snd_CmdFixedLengthOff	0x8003EB38	invented: command 0xAC
+n_alSynAddPlayer	0x800421D0	evidence: n_audio (SDK) n_alSynAddPlayer: osSetIntMask, client->samplesLeft = n_syn->curSamples, links client at n_syn->head
+n_alSynAllocVoice	0x80042220	evidence: n_audio n_alSynAllocVoice( N_ALVoice *, ALVoiceConfig * ): copies priority, fxBus, unityPitch to N_ALVoice offsets 0x16/0x18/0x1A
+n_alSynSetFXMix	0x80042410	evidence: n_audio; posts AL_FILTER_SET_FXAMT (16), clamps to 0x7F
+n_alSynSetPan	0x800424B0	evidence: n_audio; posts AL_FILTER_SET_PAN (12)
+n_alSynSetPitch	0x80042540	evidence: n_audio; posts AL_FILTER_SET_PITCH (7) with a float
+n_alSynSetVol	0x800425D0	evidence: n_audio; posts AL_FILTER_SET_VOLUME (11) with _timeToSamples of the time
+n_alSynStartVoice	0x80042680	evidence: n_audio; posts AL_FILTER_START_VOICE (14) with the wave table and unityPitch
+n_alSynStopVoice	0x80042710	evidence: n_audio; posts AL_FILTER_STOP_VOICE (15)
+Snd_InitHeap	0x8003FC60	invented: clears the area, then alHeapInit on the audio heap D_800645A0
+Snd_Alloc	0x8003FCAC	invented: alHeapAlloc( &heap, 1, size ) (alHeapDBAlloc( 0, 0, ... ))
+Snd_HeapUsed	0x8003FCDC	invented: returns heap.cur - heap.base
+Snd_MemMove	0x8003FD2C	invented: overlap-safe byte copy ( dst, src, len )
+snd_player	0x80064320	invented: the ALPlayer Snd_Init registers
+snd_numChannels	0x80064334	invented: channels in snd_channels (voices + NUM_MASTER_CHANNELS)
+snd_voices	0x80064338	invented: N_ALVoice per channel from snd_voiceChannels on
+snd_channels	0x8006433C	invented: the channel array
+snd_voiceChannels	0x80064340	invented: &snd_channels[NUM_MASTER_CHANNELS], the channels with voices
+snd_tickRate	0x80064344	invented: ticks per second (50 PAL, 60 otherwise)
+snd_tickTime	0x80064348	invented: microseconds per tick, returned to the synthesizer
+snd_seVolume	0x8006434C	invented: SE volume scale (0x7FFF: full)
+snd_bgmVolume	0x8006434E	invented: BGM volume scale
+snd_nextId	0x80064350	invented: id of the next started sound
+snd_randomSeed	0x80064354	invented: shift register state of Snd_Random
+snd_nextWaveBank	0x80064358	invented: wave bank of the next started channel, cleared after each start
+snd_defaultWaveBank	0x8006435C	invented: wave bank when snd_nextWaveBank is NULL
+snd_seqFxEnabled	0x80064360	invented: 1 lets command 0xAA change the effect
+snd_fxType	0x80064364	invented: effect setting last given to Snd_SetFxType
+snd_seTable	0x80064368	invented: default SE table
+snd_nextSeTable	0x8006436C	invented: SE table for the next Snd_PlaySe only
+snd_markerCallback	0x80064370	invented: called by command 0xAB on a master channel
+snd_msgRead	0x80064374	invented: ring buffer read index
+snd_msgWrite	0x80064378	invented: ring buffer write index
+snd_numMsgs	0x8006437C	invented: ring buffer size
+snd_msgs	0x80064380	invented: ring buffer storage
+snd_commands	0x8005CB70	invented: command handlers, indexed by command - 0x80
+SetEnvelope	static inline in 166B0.c	invented: reads an envelope_t into the channel
+
+# 166B0.c sound driver: types
+N_ALVoice	structs.h	evidence: n_audio N_ALVoice, 0x1C bytes; the n_alSynAllocVoice offsets
+ALVoiceConfig	structs.h	evidence: SDK ALVoiceConfig { priority, fxBus, unityPitch }, as n_alSynAllocVoice reads it
+ALPlayer	structs.h	evidence: SDK ALPlayer { next, clientData, handler }, as n_alSynAddPlayer links it
+ALWaveTable	structs.h	evidence: SDK ALWaveTable; started by n_alSynStartVoice, patched like alBnkfNew's _bnkfPatchWaveTable
+sndMsg_t	structs.h	invented: message ring buffer entry
+drumEntry_t	structs.h	invented: per-note program/envelope/pan/note override selected by command 0x9E
+envelope_t	structs.h	invented: the seven envelope bytes SetEnvelope reads
+seqHeader_t	structs.h	invented: BGM sequence header; BGMPTR in the BW64FAT file table
+waveTune_t	structs.h	invented: per-wave tuning
+waveBank_t	structs.h	invented: wave bank; Snd_Init relocates it to BGMWBK's ROM start, its caller passes SEWBK's
+seEntry_t	structs.h	invented: SE table entry { cmds, priority }
+seTable_t	structs.h	invented: SE table; the caller of Snd_Init loads it as SEPTR
+sndConfig_t	structs.h	invented: Snd_Init argument
+sndChannel_t	structs.h	invented: sequencer channel, 0x13C bytes
+
+# 166B0.c sound driver: struct members (all invented from use unless the type is an SDK one)
+priority	ALVoiceConfig+0x00	evidence: SDK member name
+fxBus	ALVoiceConfig+0x02	evidence: SDK member name
+unityPitch	ALVoiceConfig+0x04	evidence: SDK member name
+next	ALPlayer+0x00	evidence: SDK member name
+clientData	ALPlayer+0x04	evidence: SDK member name
+cmd	sndMsg_t+0x00	invented: SNDMSG_*
+arg	sndMsg_t+0x04	invented: sound id, or the effect setting for SNDMSG_SETFX
+program	drumEntry_t+0x00	invented: replaces sndChannel_t.program
+envelope	drumEntry_t+0x02	invented: index in seqHeader_t.envelopes
+pan	drumEntry_t+0x04	invented: 0 to 0xFF, halved
+note	drumEntry_t+0x05	invented: the note actually played
+interval	envelope_t+0x00	invented: ticks per envelope step; 0 reads as 1
+startLevel	envelope_t+0x01	invented: from use
+attackTime	envelope_t+0x02	invented: steps from startLevel to peakLevel
+peakLevel	envelope_t+0x03	invented: from use
+decayTime	envelope_t+0x04	invented: steps from peakLevel to sustainLevel
+sustainLevel	envelope_t+0x05	invented: from use
+releaseTime	envelope_t+0x06	invented: steps from the release level to 0
+numTracks	seqHeader_t+0x04	invented: entries in trackCmds, trackVolStreams and trackBendStreams
+trackCmds	seqHeader_t+0x0C	invented: command stream of each track; NULL: unused track
+trackVolStreams	seqHeader_t+0x10	invented: volume step stream of each track (Snd_StepVolumeStream)
+trackBendStreams	seqHeader_t+0x14	invented: pitch bend step stream of each track (Snd_StepBendStream)
+envelopes	seqHeader_t+0x18	invented: selected by command 0x90 and drum maps
+drumMaps	seqHeader_t+0x1C	invented: selected by command 0x9E
+programs	seqHeader_t+0x20	invented: wave of each program; 0xFFFF: none (notes rest)
+masterCmds	seqHeader_t+0x24	invented: command stream of the master channel
+relocated	seqHeader_t+0x28	invented: set once the offsets are pointers
+raw	waveTune_t	invented: byte before relocation
+value	waveTune_t	invented: float after relocation
+base	ALWaveTable+0x00	evidence: SDK member name
+type	ALWaveTable+0x08	evidence: SDK member name
+flags	ALWaveTable+0x09	evidence: SDK member name
+loop	ALWaveTable+0x0C	evidence: SDK member name
+book	ALWaveTable+0x10	evidence: SDK member name
+flags	waveBank_t+0x10	invented: bit 31: relocated
+numWaves	waveBank_t+0x20	invented: entries in unk_24, tunes and waves
+tunes	waveBank_t+0x28	invented: from use
+waves	waveBank_t+0x2C	invented: from use
+cmds	seEntry_t+0x00	invented: command stream; an offset until Snd_LoadSeTable relocates it
+priority	seEntry_t+0x04	invented: default priority of the channel
+numEntries	seTable_t+0x00	invented: entries in entries
+flags	seTable_t+0x0C	invented: bit 0: relocated
+waveBank	seTable_t+0x10	invented: set by Snd_SetSeWaveBank; NULL: snd_nextWaveBank or the default
+programs	seTable_t+0x14	invented: wave of each program
+entries	seTable_t+0x18	invented: numEntries entries
+numVoices	sndConfig_t+0x04	invented: NUM_MASTER_CHANNELS more channels are added
+voicePriority	sndConfig_t+0x0C	invented: from use
+heapBase	sndConfig_t+0x10	invented: audio heap (Snd_InitHeap)
+heapSize	sndConfig_t+0x14	invented: from use
+waveBank	sndConfig_t+0x18	invented: default wave bank, NULL: none
+waveRomBase	sndConfig_t+0x1C	invented: ROM address of its samples
+seTable	sndConfig_t+0x20	invented: default SE table, NULL: none
+numMsgs	sndConfig_t+0x24	invented: message ring buffer size
+flags	sndChannel_t+0x000	invented: CHAN_*
+cmdPos	sndChannel_t+0x004	invented: command read position; NULL: free
+pendingWave	sndChannel_t+0x008	invented: wave to start on the voice next tick, NULL: none
+time	sndChannel_t+0x00C	invented: sequencer clock, + tempo each tick
+fadeLeft	sndChannel_t+0x010	invented: ticks left of the fade out, FADE_NONE: not fading
+volStreamTime	sndChannel_t+0x014	invented: time of the next volume stream step
+bendStreamTime	sndChannel_t+0x018	invented: time of the next bend stream step
+fadeTotal	sndChannel_t+0x01C	invented: ticks of the whole fade
+vibratoDepth	sndChannel_t+0x020	invented: semitones
+bendPitch	sndChannel_t+0x024	invented: bend * bendRange, semitones
+lastPitch	sndChannel_t+0x028	invented: last pitch sent to the voice
+notePitch	sndChannel_t+0x02C	invented: note + wave tuning + transpose
+pitchOffset	sndChannel_t+0x030	invented: detune plus Snd_SetPitchOffset
+bendStream	sndChannel_t+0x034	invented: pitch bend step stream, NULL: none
+volStream	sndChannel_t+0x038	invented: volume step stream, NULL: none
+nextNoteTime	sndChannel_t+0x03C	invented: time of the next note
+noteTime	sndChannel_t+0x040	invented: time the current note started
+id	sndChannel_t+0x044	invented: shared by every channel of one started sound; 0: none
+priority	sndChannel_t+0x048	invented: SE channels: lower ones are taken first
+glideFrom	sndChannel_t+0x04C	invented: portamento start pitch
+glidePitch	sndChannel_t+0x050	invented: portamento pitch reached so far
+releaseTime	sndChannel_t+0x054	invented: time the envelope enters ENV_RELEASE
+attackSlope	sndChannel_t+0x058	invented: level per step
+decaySlope	sndChannel_t+0x05C	invented: from use
+releaseSlope	sndChannel_t+0x060	invented: fraction of the release level per step
+envTimeScale	sndChannel_t+0x064	invented: 0x400 / envInterval: ticks to envelope steps, << 10
+vibratoPitch	sndChannel_t+0x068	invented: last vibrato offset
+bendRange	sndChannel_t+0x06C	invented: semitones per bend unit
+bend	sndChannel_t+0x070	invented: -64 to 63
+seq	sndChannel_t+0x074	invented: BGM channels
+seTable	sndChannel_t+0x078	invented: SE channels; NULL on BGM channels
+waveBank	sndChannel_t+0x07C	invented: from use
+cmdStart	sndChannel_t+0x080	invented: start of the command stream, base of Snd_CmdJump
+drumMap	sndChannel_t+0x084	invented: NULL: none
+bendStreamStart	sndChannel_t+0x088	invented: from use
+volStreamStart	sndChannel_t+0x08C	invented: from use
+detune	sndChannel_t+0x090	invented: semitones, part of pitchOffset
+autoPanTime	sndChannel_t+0x094	invented: time of the next pan sweep step
+tempoScale	sndChannel_t+0x098	invented: 0x80: 1
+noteLength	sndChannel_t+0x09A	invented: ticks; NOTE_LENGTH_HOLD: until the next command
+tempo	sndChannel_t+0x09C	invented: added to time each tick: baseTempo * tempoScale >> 7
+playVolume	sndChannel_t+0x09E	invented: 0x80: 1; set when the sound starts and by Snd_SetVolume
+lastVolume	sndChannel_t+0x0A0	invented: last volume sent to the voice
+volStreamWait	sndChannel_t+0x0A2	invented: steps until the next volume stream entry
+bendStreamWait	sndChannel_t+0x0A4	invented: from use
+seIndex	sndChannel_t+0x0A6	invented: entry of seTable the channel was started on
+baseTempo	sndChannel_t+0x0A8	invented: from Snd_CmdTempo
+noteAge	sndChannel_t+0x0AA	invented: ticks since the note started
+fixedLength	sndChannel_t+0x0AC	invented: note length when notes carry none, 0: they do
+program	sndChannel_t+0x0AE	invented: from use
+playPan	sndChannel_t+0x0B0	invented: pan scale, 0x80: 1; set when the sound starts and by Snd_SetPan
+releaseAfter	sndChannel_t+0x0B2	invented: release this many ticks after note on, 0: use releaseBefore
+releaseBefore	sndChannel_t+0x0B4	invented: release this many ticks before the note ends
+vibratoDelay	sndChannel_t+0x0B6	invented: ticks
+explicitLength	sndChannel_t+0x0B7	invented: the next note carries a length despite fixedLength
+portamento	sndChannel_t+0x0B8	invented: glide ticks, 0: off
+transpose	sndChannel_t+0x0B9	invented: signed semitones
+transposeOff	sndChannel_t+0x0BA	invented: from use
+velocity	sndChannel_t+0x0BB	invented: from use
+trackVolume	sndChannel_t+0x0BC	invented: from use
+pan	sndChannel_t+0x0BD	invented: 0x40: centre
+lastPan	sndChannel_t+0x0BE	invented: last pan sent to the voice, 0xFF: resend
+envInterval	sndChannel_t+0x0BF	invented: from use
+envStartLevel	sndChannel_t+0x0C0	invented: from use
+envPeakLevel	sndChannel_t+0x0C1	invented: from use
+envSustainLevel	sndChannel_t+0x0C2	invented: from use
+envPhase	sndChannel_t+0x0C3	invented: ENV_*
+envLevel	sndChannel_t+0x0C4	invented: from use
+envWait	sndChannel_t+0x0C5	invented: ticks until the next envelope step
+envAttackTime	sndChannel_t+0x0C6	invented: from use
+envDecayTime	sndChannel_t+0x0C7	invented: from use
+envReleaseTime	sndChannel_t+0x0C8	invented: from use
+voiceActive	sndChannel_t+0x0C9	invented: the channel started its voice
+fxMix	sndChannel_t+0x0CA	invented: from Snd_CmdFxMix, scales the part above fxBase
+fxBase	sndChannel_t+0x0CB	invented: minimum FX mix, from Snd_SetFxBase
+lastFxMix	sndChannel_t+0x0CC	invented: last fxMix sent, 0xFF: resend
+envReleaseLevel	sndChannel_t+0x0CD	invented: envLevel when the release started
+trillOnTicks	sndChannel_t+0x0CE	invented: 0: trill off
+trillOffTicks	sndChannel_t+0x0CF	invented: from use
+trillWait	sndChannel_t+0x0D0	invented: from use
+trillPitch	sndChannel_t+0x0D1	invented: 0 or trillInterval
+noteVelocity	sndChannel_t+0x0D2	invented: each note carries a velocity byte; one >= 0x80 fixes it
+fixedVelocity	sndChannel_t+0x0D3	invented: from use
+autoPanSpeed	sndChannel_t+0x0D4	invented: 64ths of a pan unit per tick, 0: off
+vibratoPeriod	sndChannel_t+0x0D5	invented: ticks, 0: vibrato off
+noEnvRestart	sndChannel_t+0x0D6	invented: notes keep the running envelope
+noVoiceRestart	sndChannel_t+0x0D7	invented: notes keep the running voice
+trillInterval	sndChannel_t+0x0D8	invented: semitones
+autoPanFrac	sndChannel_t+0x0D9	invented: 64ths carried to the next step
+autoPanDown	sndChannel_t+0x0DA	invented: sweep direction
+loopDepth	sndChannel_t+0x0DB	invented: entries on the loop stack below
+vibratoStep	sndChannel_t+0x0DC	invented: radians per tick
+loopPos	sndChannel_t+0x0E0	invented: read position after the loop start command
+loopVolStream	sndChannel_t+0x0F0	invented: saved volStream
+loopBendStream	sndChannel_t+0x100	invented: saved bendStream
+loopVolWait	sndChannel_t+0x110	invented: saved volStreamWait
+loopBendWait	sndChannel_t+0x118	invented: saved bendStreamWait
+loopCount	sndChannel_t+0x120	invented: passes left; LOOP_FOREVER repeats forever
+loopVolume	sndChannel_t+0x124	invented: saved trackVolume
+loopBend	sndChannel_t+0x128	invented: saved bend
+
+# 166B0.c sound driver: constants (invented)
