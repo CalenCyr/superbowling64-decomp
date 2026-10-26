@@ -17,12 +17,20 @@ GCC_DIR  := tools/gcc_2.7.2
 CC       := COMPILER_PATH=$(GCC_DIR) $(GCC_DIR)/gcc -B$(GCC_DIR)/
 CFLAGS   := -c -G0 -mips3 -mgp32 -mfp32 -O2 -nostdinc -I include -I src
 
+# libultra: decompals ultralib (git submodule), built as 2.0K libgultra_rom with the same KMC compiler. splat `lib`
+# subsegments place its members; the link pulls them from the archive by symbol, as the original link did.
+# MDEBUG_FILES= assembles monutil.s (IDO-only, unused here) with KMC as instead of IDO.
+ULTRALIB  := lib/ultralib
+LIBULTRA  := $(BUILD)/ultralib/K/libgultra_rom/libgultra_rom.a
+ULTRALIB_FLAGS := TARGET=libgultra_rom VERSION=K COMPARE=0 CROSS=$(CROSS) COMPILER_DIR=$(CURDIR)/$(GCC_DIR) \
+	MDEBUG_FILES= BUILD_ROOT=../../$(BUILD)/ultralib
+
 S_FILES   := $(shell find asm -name '*.s' -not -path 'asm/nonmatchings/*' 2>/dev/null)
 C_FILES   := $(shell find src -name '*.c' 2>/dev/null)
 BIN_FILES := $(shell find assets -name '*.bin' 2>/dev/null)
 O_FILES   := $(S_FILES:%.s=$(BUILD)/%.o) $(C_FILES:%.c=$(BUILD)/%.o) $(BIN_FILES:%.bin=$(BUILD)/%.o)
 
-.PHONY: all split gate clean expected report diff rules rules-test
+.PHONY: all split gate clean expected report diff rules rules-test FORCE
 
 OBJDIFF  := tools/objdiff/objdiff-cli
 
@@ -43,9 +51,12 @@ $(BUILD)/%.o: %.bin
 	@mkdir -p $(dir $@)
 	$(LD) -r -b binary -o $@ $<
 
-$(ELF): $(O_FILES) $(LD_SCRIPT)
+$(LIBULTRA): FORCE
+	$(MAKE) -s --no-print-directory -C $(ULTRALIB) $(ULTRALIB_FLAGS) -j$(shell nproc)
+
+$(ELF): $(O_FILES) $(LIBULTRA) $(LD_SCRIPT)
 	$(LD) -T $(LD_SCRIPT) -T undefined_syms.txt -T undefined_syms_auto.txt -T undefined_funcs_auto.txt \
-		--no-check-sections -Map $(BUILD)/$(BASENAME).map -o $@
+		--no-check-sections -Map $(BUILD)/$(BASENAME).map -o $@ $(LIBULTRA)
 
 $(ROM): $(ELF)
 	$(OBJCOPY) -O binary $< $@
@@ -63,7 +74,7 @@ clean:
 expected: gate
 	rm -rf expected && mkdir -p expected && cp -r $(BUILD) expected/$(BUILD)
 
-objdiff.json: $(C_FILES) tools/objdiff_config.py
+objdiff.json: $(C_FILES) $(LIBULTRA) superbowling.yaml tools/objdiff_config.py
 	python3 tools/objdiff_config.py
 
 report: all objdiff.json

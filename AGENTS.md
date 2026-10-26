@@ -40,14 +40,29 @@ Also record:
   from `asm` to `c` in `superbowling.yaml`, run `make split`, then `make gate`.
 - **Headers:** `include/common.h` (types, `INCLUDE_ASM`), `include/structs.h`, `include/variables.h`,
   `include/functions.h`. Each type and global is declared once there (R1, R2).
-- **libultra:** 2.0K `libgultra_rom`. 153 object files (259 functions) in main match decompals' ultralib built with
-  this compiler; their names are in `symbol_addrs.txt` and their units are named `libultra/<dir>/<file>`.
-  Ambiguous matches resolved by callee or data: `piacs` at 0x80043B40 and `siacs` at 0x8004B1B0;
-  `osViGetCurrentFramebuffer` 0x8004DFE0 (reads `__osViCurr`); `__osSiRawReadIo`/`__osSiRawWriteIo` (call
-  `__osSiDeviceBusy`). `sprite` vs `spriteex` at 0x8004B2D0 is unresolved (chose `sprite`). About 50 functions
-  after `ldiv` (0x80055660) are unidentified, likely KMC libc/libgcc.
-  Symbols outside every splat segment (libultra boot globals at 0x80000300) live in `undefined_syms.txt`. Retail ROM: `rom.z64`, SHA-1 `56937a9e9536af55ebed06480413265848c4a04a`,
-  F3DEX 2.08, libultra 2.0K.
+- **libultra:** 2.0K `libgultra_rom`, linked from source. `lib/ultralib` is decompals' ultralib (git submodule
+  pinned at e24c836; `git submodule update --init`). `make` builds it into
+  `build/ultralib/K/libgultra_rom/libgultra_rom.a` (TARGET=libgultra_rom VERSION=K COMPARE=0, `tools/gcc_2.7.2`;
+  `MDEBUG_FILES=` lets KMC as assemble the unused IDO-only `monutil.s`).
+  In `superbowling.yaml`, splat `lib` subsegments place each member's `.text`, `.data`, `.rodata` and `.bss` at its
+  retail address; the archive goes on the `ld` command line, so the link pulls members by symbol as the original
+  did, and exactly the 161 placed members are pulled (156 with code, plus data-only `vitbl`, `vimodentsclan1`,
+  `vimodepallan1`, `vimodempallan1`, `libm_vals`). Placements come from the ROM: each member's relocated
+  references give its section addresses, and data-only members were found by content; the gate verifies them.
+  - `symbol_addrs.txt` names every member symbol with `defined:True` (so splat emits no absolute copy and asm
+    references bind to the member's definition), including `parameters.o`'s absolute boot globals at 0x80000300.
+  - Commons (tentative definitions such as `__osPiAccessQueue`) were allocated by the original linker among the
+    game's bss; `symbol_addrs.txt` names them, so the bss asm defines their storage at the referenced addresses.
+    `__osEepromTimer` (`controller.o`) is never referenced, so its address is unknown and `ld` drops it.
+  - Ambiguous matches, resolved by callee or data: `piacs` at 0x80043B40 and `siacs` at 0x8004B1B0;
+    `osViGetCurrentFramebuffer` 0x8004DFE0 (reads `__osViCurr`); `__osSiRawReadIo`/`__osSiRawWriteIo` (call
+    `__osSiDeviceBusy`). `sprite` and `spriteex` (0x8004B2D0) compile to identical bytes and relocations, so the
+    ROM cannot decide; `sprite` is linked.
+  - About 50 functions after `ldiv` (0x80055660) are KMC libc/libgcc, not ultralib, and stay asm; `__divdi3`,
+    `__udivdi3`, `__umoddi3` are named from libultra's calls into them.
+  - objdiff reports each linked member as a `libultra/<dir>/<file>` unit (`tools/objdiff_config.py`).
+  Symbols outside every splat segment live in `undefined_syms.txt`. Retail ROM: `rom.z64`, SHA-1
+  `56937a9e9536af55ebed06480413265848c4a04a`, F3DEX 2.08, libultra 2.0K.
 - **ROM map** (from the game's `BW64FAT` file table at ROM 0x3C2A0, which main loads to 0x8010A080 at boot and
   `func_8002889C` searches by 8.3 name):
 

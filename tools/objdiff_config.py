@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Write objdiff.json: one unit per C file (base = build/, target = expected/), plus every asm-only code unit as
-target-only, so progress counts the whole code image."""
-import json
+"""Write objdiff.json: one unit per C file (base = build/, target = expected/), one per libultra archive member that
+superbowling.yaml links (base = build/ultralib/, target = expected/), plus every asm-only code unit as target-only,
+so progress counts the whole code image."""
+import json, re
 from pathlib import Path
+
+ULTRALIB = Path("build/ultralib/K/libgultra_rom/src")
 
 units = []
 for c in sorted(Path("src").rglob("*.c")):
@@ -12,6 +15,16 @@ for c in sorted(Path("src").rglob("*.c")):
         "base_path": str(o),
         "target_path": str(Path("expected") / o),
         "metadata": {"source_path": str(c), "progress_categories": ["libultra" if "libultra" in c.parts else "game"]},
+    })
+# splat `lib` subsegments name archive members by basename; gu/rotate.o and mgu/rotate.o assemble to identical bytes.
+members = sorted(set(re.findall(r"\blib, libgultra_rom, (\w+)|\bobject: (\w+)", Path("superbowling.yaml").read_text())))
+for name in sorted({a or b for a, b in members}):
+    o = sorted(ULTRALIB.rglob(name + ".o"))[0]
+    units.append({
+        "name": "libultra/" + str(o.relative_to(ULTRALIB).with_suffix("")),
+        "base_path": str(o),
+        "target_path": str(Path("expected") / o),
+        "metadata": {"progress_categories": ["libultra"]},
     })
 for s in sorted(Path("asm").rglob("*.s")):
     if "nonmatchings" in s.parts or "data" in s.parts or s.name in ("header.s",):
