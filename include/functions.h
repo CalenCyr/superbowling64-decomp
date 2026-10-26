@@ -3,7 +3,12 @@
 
 #include "structs.h"
 
+void func_8003B684( s32 flags, s16 value );
+void func_8003BF74( UnkSoundBank *bank, s32 base );
 void func_8003C088( s32 arg );
+void func_8003C13C( UnkSeqBank *bank );
+void func_8003C2F0( s32 count );
+s32 func_8003C46C( void *clientData );
 void func_8003C354( UnkMsg8003C3D4 *msg );
 s32 func_8003C3D4( UnkMsg8003C3D4 *msg );
 void func_8003C75C( UnkChannel *chan, s32 index );
@@ -25,15 +30,19 @@ s32 func_8003DEA0( UnkSeqHeader *hdr );
 s32 func_8003DC48( UnkChannel *chan, UnkSeqBank *bank, s32 index, s32 arg3, s32 arg4, s32 priority );
 s32 func_8003DCF8( UnkSeqBank *bank, s32 index, s32 arg2, s32 arg3, s32 priority );
 void func_8003E10C( s32 id, s32 mask, s32 bits );
+void func_8003F7F0( s32 arg );
+void func_8003F9A0( UnkAudioConfig *config, s32 rate, s32 arg2 );
 s32 func_8003F340( s32 arg );
+void func_8003FC60( s32 arg0, s32 arg1 );
 void *func_8003FCAC( s32 size );
 void func_8003FD2C( void *dst, void *src, s32 len );
+s32 func_8003FCDC( void );
+void func_800421D0( UnkPlayer *player );
+void func_80042220( UnkVoice *voice, UnkVoiceConfig *config );
 
 void func_800424B0( UnkVoice *voice, s32 pan );
 void func_800425D0( UnkVoice *voice, s32 volume, s32 time );
 void func_80042680( UnkVoice *voice, s32 arg1 );
 void func_80042710( UnkVoice *voice );
-
-f32 __sinf( f32 x );
 
 #endif

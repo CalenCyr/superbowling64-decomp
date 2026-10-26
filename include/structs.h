@@ -12,6 +12,23 @@ typedef struct {
     /* 0x00 */ u8 unk_00[0x1C];
 } UnkVoice;
 
+/* Voice settings passed to func_80042220; the layout of libultra's ALVoiceConfig. */
+typedef struct {
+    /* 0x00 */ s16 unk_00;          /* from UnkAudioConfig.unk_0C */
+    /* 0x02 */ s16 unk_02;
+    /* 0x04 */ u8 unk_04;
+} UnkVoiceConfig;
+
+/*
+ * D_80064320, registered by func_8003B3FC through func_800421D0 with func_8003C46C as unk_08 and itself as
+ * unk_04; the layout of the start of libultra's ALPlayer (next, clientData, handler); unconfirmed.
+ */
+typedef struct UnkPlayer_s {
+    /* 0x00 */ struct UnkPlayer_s *unk_00;
+    /* 0x04 */ void *unk_04;
+    /* 0x08 */ s32 (*unk_08)( void *clientData );
+} UnkPlayer;
+
 /* Message passed to func_8003C3D4; identity unknown. */
 typedef struct {
     /* 0x00 */ u8 cmd;
@@ -85,6 +102,22 @@ typedef struct {
     /* 0x08 */ u8 unk_08[0x10 - 0x08];
     /* 0x10 */ UnkSoundBank *unk_10;
 } UnkStruct8003C1EC;
+
+/* Configuration passed to func_8003B3FC; identity unknown. */
+typedef struct {
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ s32 unk_04;          /* voices; four more channels are added */
+    /* 0x08 */ s32 unk_08;
+    /* 0x0C */ s32 unk_0C;          /* voice priority */
+    /* 0x10 */ s32 unk_10;
+    /* 0x14 */ s32 unk_14;
+    /* 0x18 */ UnkSoundBank *unk_18;
+    /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ UnkSeqBank *unk_20;
+    /* 0x24 */ s32 unk_24;          /* message queue length */
+    /* 0x28 */ u8 unk_28[0x40 - 0x28];
+    /* 0x40 */ s32 unk_40;
+} UnkAudioConfig;
 
 /*
  * One element of the D_8006433C array (D_80064334 entries, 0x13C bytes each). Its byte-code read position

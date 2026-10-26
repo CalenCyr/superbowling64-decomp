@@ -5,6 +5,9 @@
 #include "structs.h"
 
 extern s32 D_8005CE4C;
+extern s32 D_800693D8;
+extern s32 D_800DF6B0;
+extern UnkPlayer D_80064320;
 extern u16 D_8006434C;             /* scale for bank channels */
 extern u16 D_8006434E;             /* scale for the other channels */
 extern s32 D_80064334;              /* number of entries in D_8006433C */

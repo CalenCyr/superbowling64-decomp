@@ -1,11 +1,69 @@
 #include "common.h"
+#include "ultra64.h"
 #include "functions.h"
 #include "structs.h"
 #include "variables.h"
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003B2B0);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003B3FC);
+/*
+================
+func_8003B3FC
+
+Sets up the driver from config: tick rate from the TV type, heap, channel and voice arrays, message queue, default banks, then registers the player and allocates the voices.
+================
+*/
+void func_8003B3FC( UnkAudioConfig *config ) {
+    s32 i;
+    UnkVoiceConfig voiceConfig;
+
+    D_800693D8 = config->unk_40;
+    D_800DF6B0 = config->unk_00;
+    D_80064334 = config->unk_04 + 4;
+    if ( osTvType == OS_TV_PAL ) {
+        D_80064344 = 50;
+    } else {
+        D_80064344 = 60;
+    }
+    D_80064348 = 1000000 / D_80064344;
+    func_8003FC60( config->unk_10, config->unk_14 );
+    func_8003F7F0( config->unk_08 );
+    D_80064338 = func_8003FCAC( ( D_80064334 - 4 ) * sizeof( UnkVoice ) );
+    D_8006433C = func_8003FCAC( D_80064334 * sizeof( UnkChannel ) );
+    D_80064340 = D_8006433C + 4;
+    func_8003C2F0( config->unk_24 );
+    D_80064358 = NULL;
+    D_8006435C = NULL;
+    if ( config->unk_18 != NULL && config->unk_1C != 0 ) {
+        func_8003BF74( config->unk_18, config->unk_1C );
+    }
+    D_8006436C = NULL;
+    D_80064368 = NULL;
+    if ( config->unk_20 != NULL ) {
+        func_8003C13C( config->unk_20 );
+    }
+    D_80064370 = NULL;
+    D_80064364 = 2;
+    func_8003F9A0( config, D_80064344, 2 );
+    func_8003B684( 3, 0x7FFF );
+    D_80064350 = 1;
+    D_80064354 = 0x12345678;
+    D_80064320.unk_00 = NULL;
+    D_80064320.unk_08 = func_8003C46C;
+    D_80064320.unk_04 = &D_80064320;
+    func_800421D0( &D_80064320 );
+    for ( i = 0; i < D_80064334; i++ ) {
+        D_8006433C[i].unk_C9 = 0;
+        func_8003D90C( &D_8006433C[i] );
+        voiceConfig.unk_04 = 0;
+        voiceConfig.unk_00 = config->unk_0C;
+        voiceConfig.unk_02 = 0;
+        if ( i >= 4 ) {
+            func_80042220( &D_80064338[i - 4], &voiceConfig );
+        }
+    }
+    func_8003FCDC();
+}
 
 void func_8003B684(s32 flags, s16 value) {
     if (flags & 1) {
