@@ -13,3 +13,4 @@ expected/
 report.json
 objdiff.json
 *.d
+.claude/skills/

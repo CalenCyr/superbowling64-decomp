@@ -68,7 +68,9 @@ make expected   # snapshot the matching build as objdiff's target
 2. Replace the line with C, then iterate with `make diff UNIT=src/<unit> FUNC=<func>` until it prints `identical`.
 3. Run `make rules UNIT=src/<unit>` and `make gate` before committing.
 
-Read [AGENTS.md](AGENTS.md) first. It holds the project's conventions: naming and layout style, headers, how to
+Read [AGENTS.md](AGENTS.md) first. The campaign follows the Claude Code skills from
+[Game-Decompilation-Skill-For-Claude](https://github.com/lemiur/Game-Decompilation-Skill-For-Claude) (`matcher`,
+`decomp-code-rules`, `orchestrator` and others); install them from there if you work with Claude Code. It holds the project's conventions: naming and layout style, headers, how to
 convert an assembly unit to C, and what counts as a match.
 
 ## Layout
