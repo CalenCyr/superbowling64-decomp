@@ -32,6 +32,7 @@ typedef volatile s64 vs64;
 #define FALSE 0
 #endif
 
+#include <PR/rcp.h>
 #include <PR/os.h>
 
 #endif
