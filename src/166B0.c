@@ -109,7 +109,18 @@ INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CF80);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CFF0);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D1E4);
+/*
+================
+func_8003D1E4
+
+Copies unk_40 to unk_94, clears unk_D9 and sets unk_DA from bit 6 of unk_BD.
+================
+*/
+void func_8003D1E4( UnkChannel *chan ) {
+    chan->unk_D9 = 0;
+    chan->unk_94 = chan->unk_40;
+    chan->unk_DA = chan->unk_BD & 0x40;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D200);
 
@@ -125,21 +136,91 @@ INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D54C);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D6E0);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D878);
+/*
+================
+func_8003D878
+
+Returns a random number in [0, range), from eight steps of the shift register D_80064354.
+================
+*/
+s32 func_8003D878( s32 range ) {
+    s32 i;
+    s32 bits;
+
+    for ( i = 0; i < 8; i++ ) {
+        bits = D_80064354 & 0x48000000;
+        D_80064354 <<= 1;
+        if ( bits == 0x48000000 || bits == 0x08000000 ) {
+            D_80064354 |= 1;
+        }
+    }
+    return range * ( (f32)D_80064354 / 65536.0f / 65536.0f );
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D90C);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003DA48);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003DC10);
+/*
+================
+func_8003DC10
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003DC48);
+Adds base to every non-zero entry of a table of count offsets.
+================
+*/
+void func_8003DC10( s32 *table, s32 base, s32 count ) {
+    s32 i;
+
+    for ( i = 0; i < count; i++ ) {
+        if ( table[i] != 0 ) {
+            table[i] += base;
+        }
+    }
+}
+
+/*
+================
+func_8003DC48
+
+Starts entry index of bank on chan; returns the new channel id.
+================
+*/
+s32 func_8003DC48( UnkChannel *chan, UnkSeqBank *bank, s32 index, s32 arg3, s32 arg4, s32 priority ) {
+    func_8003D90C( chan );
+    chan->unk_A6 = index;
+    chan->unk_78 = bank;
+    chan->unk_9E = arg3;
+    chan->unk_B0 = arg4;
+    chan->unk_44 = D_80064350++;
+    chan->unk_48 = priority;
+    if ( bank->unk_10 != 0 ) {
+        chan->unk_7C = bank->unk_10;
+    }
+    chan->unk_04 = chan->unk_80 = bank->unk_18[index].unk_00;
+    return chan->unk_44;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003DCF8);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003DEA0);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E10C);
+/*
+================
+func_8003E10C
+
+Sets unk_00 to ( unk_00 & mask ) | bits on every channel with the given id.
+================
+*/
+void func_8003E10C( s32 id, s32 mask, s32 bits ) {
+    s32 i;
+    UnkChannel *chan;
+
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_44 == id ) {
+            chan->unk_00 = ( chan->unk_00 & mask ) | bits;
+        }
+    }
+}
 
 /*
 ================
@@ -151,8 +232,8 @@ Channel command: ends the channel's command stream.
 u8 *func_8003E160( UnkChannel *chan, u8 *src ) {
     chan->unk_38 = NULL;
     chan->unk_34 = NULL;
-    chan->unk_74 = 0;
-    chan->unk_78 = 0;
+    chan->unk_74 = NULL;
+    chan->unk_78 = NULL;
     chan->unk_44 = 0;
     chan->unk_08 = 0;
     return NULL;
@@ -357,9 +438,58 @@ u8 *func_8003E5F8( UnkChannel *chan, u8 *src ) {
     return src;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E604);
+/*
+================
+func_8003E604
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E670);
+Channel command: pushes the read position and the channel state onto the repeat stack, with a repeat count from one byte.
+================
+*/
+u8 *func_8003E604( UnkChannel *chan, u8 *src ) {
+    s32 depth;
+
+    depth = chan->unk_DB;
+    chan->unk_120[depth] = *src++;
+    chan->unk_E0[depth] = src;
+    chan->unk_F0[depth] = chan->unk_38;
+    chan->unk_100[depth] = chan->unk_34;
+    chan->unk_124[depth] = chan->unk_BC;
+    chan->unk_128[depth] = chan->unk_70;
+    chan->unk_110[depth] = chan->unk_A2;
+    chan->unk_118[depth] = chan->unk_A4;
+    chan->unk_DB++;
+    return src;
+}
+
+/*
+================
+func_8003E670
+
+Channel command: counts down the top repeat entry; jumps back to it and restores its state unless the count ran out, which pops it.
+================
+*/
+u8 *func_8003E670( UnkChannel *chan, u8 *src ) {
+    s32 depth;
+
+    depth = chan->unk_DB - 1;
+    if ( chan->unk_120[depth] != 0xFF ) {
+        if ( --chan->unk_120[depth] == 0 ) {
+            chan->unk_DB = depth;
+            depth = -1;
+        }
+    }
+    if ( depth >= 0 ) {
+        src = chan->unk_E0[depth];
+        chan->unk_38 = chan->unk_F0[depth];
+        chan->unk_34 = chan->unk_100[depth];
+        chan->unk_BC = chan->unk_124[depth];
+        chan->unk_70 = chan->unk_128[depth];
+        chan->unk_A2 = chan->unk_110[depth];
+        chan->unk_A4 = chan->unk_118[depth];
+        chan->unk_24 = chan->unk_70 * chan->unk_6C;
+    }
+    return src;
+}
 
 /*
 ================
@@ -450,7 +580,25 @@ u8 *func_8003E784( UnkChannel *chan, u8 *src ) {
     return src + 2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E78C);
+/*
+================
+func_8003E78C
+
+Channel command: selects entry unk_84 of unk_74->unk_1C by a one- or two-byte index.
+================
+*/
+u8 *func_8003E78C( UnkChannel *chan, u8 *src ) {
+    s32 index;
+
+    index = *src++;
+    if ( index >= 0x80 ) {
+        index &= 0x7F;
+        index <<= 8;
+        index |= *src++;
+    }
+    chan->unk_84 = &chan->unk_74->unk_1C[index];
+    return src;
+}
 
 /*
 ================
@@ -460,7 +608,7 @@ Channel command: clears unk_84.
 ================
 */
 u8 *func_8003E7D4( UnkChannel *chan, u8 *src ) {
-    chan->unk_84 = 0;
+    chan->unk_84 = NULL;
     return src;
 }
 
@@ -475,7 +623,29 @@ u8 *func_8003E7E0( UnkChannel *chan, u8 *src ) {
     return src + 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E7E8);
+/*
+================
+func_8003E7E8
+
+Channel command: reads three big-endian 16-bit offsets; sets unk_38 and unk_34 from the last two and jumps to the first, relative to unk_80.
+================
+*/
+u8 *func_8003E7E8( UnkChannel *chan, u8 *src ) {
+    s32 jump;
+    s32 offset;
+
+    jump = *src++ << 8;
+    jump += *src++;
+    offset = *src++ << 8;
+    offset += *src++;
+    chan->unk_A2 = 1;
+    chan->unk_38 = chan->unk_8C + offset;
+    offset = *src++ << 8;
+    offset += *src++;
+    chan->unk_A4 = 1;
+    chan->unk_34 = chan->unk_88 + offset;
+    return chan->unk_80 + jump;
+}
 
 /*
 ================
@@ -489,11 +659,44 @@ u8 *func_8003E858( UnkChannel *chan, u8 *src ) {
     return src;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E868);
+/*
+================
+func_8003E868
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E8B8);
+Channel command: sets unk_B9 to a random number below the first byte plus the second byte.
+================
+*/
+u8 *func_8003E868( UnkChannel *chan, u8 *src ) {
+    chan->unk_B9 = func_8003D878( *src++ );
+    chan->unk_B9 += *src++;
+    return src;
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E908);
+/*
+================
+func_8003E8B8
+
+Channel command: sets unk_BC to a random number below the first byte plus the second byte.
+================
+*/
+u8 *func_8003E8B8( UnkChannel *chan, u8 *src ) {
+    chan->unk_BC = func_8003D878( *src++ );
+    chan->unk_BC += *src++;
+    return src;
+}
+
+/*
+================
+func_8003E908
+
+Channel command: sets unk_BD to a random number below the first byte plus the second byte.
+================
+*/
+u8 *func_8003E908( UnkChannel *chan, u8 *src ) {
+    chan->unk_BD = func_8003D878( *src++ );
+    chan->unk_BD += *src++;
+    return src;
+}
 
 /*
 ================
@@ -507,7 +710,36 @@ u8 *func_8003E958( UnkChannel *chan, u8 *src ) {
     return src;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E968);
+/*
+================
+func_8003E968
+
+Channel command: starts entry (one- or two-byte index) of the channel's bank on another channel at a higher priority, and gives every channel started under the new id this channel's id and unk_7C.
+================
+*/
+u8 *func_8003E968( UnkChannel *chan, u8 *src ) {
+    s32 index;
+    s32 id;
+    s32 i;
+    UnkChannel *other;
+
+    index = *src++;
+    if ( index >= 0x80 ) {
+        index = ( ( index & 0x7F ) << 8 ) + *src++;
+    }
+    chan->unk_48++;
+    id = func_8003DCF8( chan->unk_78, index, chan->unk_9E, chan->unk_B0, chan->unk_48 );
+    chan->unk_48--;
+    if ( id != 0 ) {
+        for ( i = 0, other = D_8006433C; i < D_80064334; i++, other++ ) {
+            if ( other->unk_44 == id ) {
+                other->unk_44 = chan->unk_44;
+                other->unk_7C = chan->unk_7C;
+            }
+        }
+    }
+    return src;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003EA38);
 
@@ -523,9 +755,44 @@ u8 *func_8003EA74( UnkChannel *chan, u8 *src ) {
     return src;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003EA84);
+/*
+================
+func_8003EA84
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003EAC8);
+Channel command: passes one byte to func_8003F340 while D_80064360 is 1.
+================
+*/
+u8 *func_8003EA84( UnkChannel *chan, u8 *src ) {
+    s32 arg;
+
+    arg = *src++;
+    if ( D_80064360 == 1 ) {
+        func_8003F340( arg );
+    }
+    return src;
+}
+
+/*
+================
+func_8003EAC8
+
+Channel command: passes the channel id and one byte to the D_80064370 callback when unk_00 & 3 is 2; skips a one- or two-byte value after it.
+================
+*/
+u8 *func_8003EAC8( UnkChannel *chan, u8 *src ) {
+    s32 value;
+    s32 length;
+
+    value = *src++;
+    length = *src++;
+    if ( length & 0x80 ) {
+        length = ( ( length & 0x7F ) << 8 ) + *src++;
+    }
+    if ( ( chan->unk_00 & 3 ) == 2 && D_80064370 != NULL ) {
+        D_80064370( chan->unk_44, value );
+    }
+    return src;
+}
 
 /*
 ================

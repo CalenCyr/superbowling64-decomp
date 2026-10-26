@@ -9,6 +9,74 @@ typedef struct {
     /* 0x04 */ s32 arg;
 } UnkMsg8003C3D4;
 
+/* 6-byte entry of UnkSeqHeader.unk_1C; identity unknown. */
+typedef struct {
+    /* 0x00 */ u16 unk_00;
+    /* 0x02 */ u16 unk_02;
+    /* 0x04 */ u8 unk_04;
+    /* 0x05 */ u8 unk_05;
+} UnkSeqEntry;
+
+/*
+ * Header that UnkChannel.unk_74 points to. func_8003DEA0 turns its offsets (unk_0C to unk_24) into pointers in
+ * place and starts one channel per entry of unk_0C; identity unknown.
+ */
+typedef struct {
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ s32 unk_04;          /* entries in unk_0C, unk_10 and unk_14 */
+    /* 0x08 */ s32 unk_08;
+    /* 0x0C */ u8 **unk_0C;
+    /* 0x10 */ u8 **unk_10;
+    /* 0x14 */ u8 **unk_14;
+    /* 0x18 */ s32 unk_18;
+    /* 0x1C */ UnkSeqEntry *unk_1C;
+    /* 0x20 */ u16 *unk_20;
+    /* 0x24 */ u8 *unk_24;
+    /* 0x28 */ s32 unk_28;          /* set once the offsets are relocated */
+} UnkSeqHeader;
+
+/* Entry of UnkSeqBank.unk_18. */
+typedef struct {
+    /* 0x00 */ u8 *unk_00;          /* command stream; an offset until func_8003C13C relocates it */
+    /* 0x04 */ s32 unk_04;
+} UnkSeqBankEntry;
+
+/*
+ * Table that UnkChannel.unk_78 points to; func_8003C13C relocates it in place, func_8003DC48 and func_8003DCF8
+ * start a channel on one of its entries; identity unknown.
+ */
+typedef struct {
+    /* 0x00 */ s32 unk_00;          /* entries in unk_18 */
+    /* 0x04 */ s32 unk_04;
+    /* 0x08 */ s32 unk_08;
+    /* 0x0C */ s32 unk_0C;          /* bit 0: relocated */
+    /* 0x10 */ s32 unk_10;
+    /* 0x14 */ u8 *unk_14;
+    /* 0x18 */ UnkSeqBankEntry unk_18[1];  /* unk_00 entries */
+} UnkSeqBank;
+
+/*
+ * Bank that func_8003D6E0 relocates in place (bit 31 of unk_10 marks it done); D_80064358 and D_8006435C point
+ * to one; identity unknown.
+ */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x10];
+    /* 0x10 */ s32 unk_10;          /* bit 31: relocated */
+    /* 0x14 */ u8 unk_14[0x20 - 0x14];
+    /* 0x20 */ s32 unk_20;          /* entries in unk_28 and unk_2C */
+    /* 0x24 */ u8 *unk_24;
+    /* 0x28 */ f32 *unk_28;
+    /* 0x2C */ s32 *unk_2C;
+} UnkSoundBank;
+
+/* Object written by func_8003C1EC and read by func_8003C1C0 and func_8003C1F4; identity unknown. */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x04];
+    /* 0x04 */ s32 unk_04;
+    /* 0x08 */ u8 unk_08[0x10 - 0x08];
+    /* 0x10 */ UnkSoundBank *unk_10;
+} UnkStruct8003C1EC;
+
 /*
  * One element of the D_8006433C array (D_80064334 entries, 0x13C bytes each). Its byte-code read position
  * (unk_04) is advanced by the command handlers in D_8005CB70, so it is a sequence channel of some sort;
@@ -40,11 +108,11 @@ typedef struct {
     /* 0x068 */ s32 unk_68;
     /* 0x06C */ f32 unk_6C;
     /* 0x070 */ f32 unk_70;
-    /* 0x074 */ s32 unk_74;
-    /* 0x078 */ s32 unk_78;
+    /* 0x074 */ UnkSeqHeader *unk_74;
+    /* 0x078 */ UnkSeqBank *unk_78;
     /* 0x07C */ s32 unk_7C;
     /* 0x080 */ u8 *unk_80;
-    /* 0x084 */ s32 unk_84;
+    /* 0x084 */ UnkSeqEntry *unk_84;
     /* 0x088 */ u8 *unk_88;
     /* 0x08C */ u8 *unk_8C;
     /* 0x090 */ f32 unk_90;
@@ -56,7 +124,7 @@ typedef struct {
     /* 0x0A0 */ u8 unk_A0[0xA2 - 0xA0];
     /* 0x0A2 */ u16 unk_A2;
     /* 0x0A4 */ u16 unk_A4;
-    /* 0x0A6 */ u8 unk_A6[0xA8 - 0xA6];
+    /* 0x0A6 */ s16 unk_A6;          /* entry of unk_78->unk_18 the channel was started on */
     /* 0x0A8 */ s16 unk_A8;
     /* 0x0AA */ u8 unk_AA[0xAC - 0xAA];
     /* 0x0AC */ s16 unk_AC;
