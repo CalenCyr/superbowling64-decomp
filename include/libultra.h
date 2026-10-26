@@ -35,6 +35,10 @@ typedef volatile s64 vs64;
 /* the game's microcode is F3DEX 2.08 */
 #define F3DEX_GBI_2
 
+/* libultra 2.0K: selects the SDK's 2.0J-and-later declarations (osMotorStart as a macro, and so on) */
+#include <PR/os_version.h>
+#define BUILD_VERSION VERSION_K
+
 #include <PR/rcp.h>
 #include <PR/os.h>
 #include <PR/mbi.h>
