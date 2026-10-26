@@ -180,7 +180,7 @@ Project profile (fill in):
 | placeholder patterns (R7) | `func_8XXXXXXX`, `D_8XXXXXXX`, `jtbl_`, `L8XXXXXXX` (splat defaults); overlay symbols add `_<segment>` |
 | evidence sources for names: strings, symbols, RTTI, sibling source (R7) | ROM strings; libultra names (matched against ultralib); no symbols |
 | does the binary record source lines? (if yes, layout is [checked]: R23) | No debug info; check for `__FILE__`/`__LINE__` assert strings before relying on that |
-| parking mechanism for unfinished functions (exempt from R37) | `INCLUDE_ASM("asm/nonmatchings/<unit>", <func>);` (`include/include_asm.h`) |
+| parking mechanism for unfinished functions (exempt from R37) | `INCLUDE_ASM("asm/nonmatchings/<unit>", <func>);` (`include/include_asm.h`). A best draft may be kept as `#ifdef NON_MATCHING` / `// NON_MATCHING: <what still differs>` / draft / `#else` / the `INCLUDE_ASM` line / `#endif`; the build never defines `NON_MATCHING`, and `tools/rules.py` skips that branch |
 | rules this project tightens or relaxes, with the reason | |
 
 ## Matching rules that are easy to get wrong

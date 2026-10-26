@@ -807,7 +807,36 @@ void func_8003C1FC( s32 value ) {
     D_8005CE4C = value;
 }
 
+#ifdef NON_MATCHING
+// NON_MATCHING: referent/type: retail reads unk_08 once through one type covering UnkSeqHeader and UnkSeqBank; the cast leaves a register difference
+/*
+================
+func_8003C208
+
+Returns unk_08 of the header (or else the bank) of the first channel with the given id, or 0.
+================
+*/
+s32 func_8003C208( s32 id ) {
+    s32 i;
+    UnkChannel *chan;
+    UnkSeqHeader *hdr;
+
+    if ( id != 0 ) {
+        for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+            if ( chan->unk_44 == id ) {
+                hdr = chan->unk_74;
+                if ( hdr == NULL ) {
+                    hdr = (UnkSeqHeader *)chan->unk_78;
+                }
+                return hdr->unk_08;
+            }
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C208);
+#endif
 
 /*
 ================
@@ -1407,9 +1436,80 @@ void func_8003D438( UnkChannel *chan ) {
     } while ( chan->unk_18 - chan->unk_0C < 0 );
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D54C);
+#ifdef NON_MATCHING
+// NON_MATCHING: FPU registers: x lives in $f6 in retail, $f14 here, and the x^6 term takes a different register
+f32 func_8003D54C( f32 x ) {
+    f32 x2;
+    f32 x3;
+    f32 x4;
+    f32 x5;
+    f32 x6;
 
+    if ( x == 0.0f ) {
+        return 1.0f;
+    }
+    if ( x > 0.0f ) {
+        x2 = x * x;
+        x3 = x2 * x;
+        x4 = x2 * x2;
+        x5 = x4 * x;
+        x6 = x4 * x2;
+        return 1.0 + x * 0.69314718055994495 + x2 * 0.240226506959101 + x3 * 0.0555041086648216
+               + x4 * 0.0096181291076284804 + x5 * 0.00133335581464284 + x6 * 0.000154035303933816;
+    }
+    x = -x;
+    x2 = x * x;
+    x3 = x2 * x;
+    x4 = x2 * x2;
+    x5 = x4 * x;
+    x6 = x4 * x2;
+    return 1.0 / ( 1.0 + x * 0.69314718055994495 + x2 * 0.240226506959101 + x3 * 0.0555041086648216
+                   + x4 * 0.0096181291076284804 + x5 * 0.00133335581464284 + x6 * 0.000154035303933816 );
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D54C);
+#endif
+
+#ifdef NON_MATCHING
+// NON_MATCHING: register/schedule: retail has a 0x30 frame (0x28 here) and reloads tune->value; likely an inlined helper not yet recovered
+/*
+================
+func_8003D6E0
+
+TODO
+================
+*/
+void func_8003D6E0( void *data, s32 base ) {
+    UnkSoundBank *bank;
+    s32 i;
+
+    bank = data;
+    if ( bank->unk_10 < 0 ) {
+        return;
+    }
+    bank->unk_10 |= 0x80000000;
+    func_8003DC10( (s32 *)&bank->unk_24, (s32)bank, 3 );
+    func_8003DC10( (s32 *)bank->unk_2C, (s32)bank, bank->unk_20 );
+    for ( i = 0; i < bank->unk_20; i++ ) {
+        SetTune( &bank->unk_28[i], &bank->unk_24[i] );
+        if ( bank->unk_2C[i]->unk_09 == 0 ) {
+            if ( ( bank->unk_2C[i]->unk_00 & 0xFF000000 ) != 0xFF000000 ) {
+                bank->unk_2C[i]->unk_00 += base;
+            }
+            bank->unk_2C[i]->unk_09 = 1;
+            if ( bank->unk_2C[i]->unk_0C != 0 ) {
+                bank->unk_2C[i]->unk_0C += (s32)data;
+            }
+            if ( bank->unk_2C[i]->unk_08 == 0 ) {
+                bank->unk_2C[i]->unk_10 += (s32)data;
+            }
+        }
+    }
+    osWritebackDCacheAll();
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D6E0);
+#endif
 
 /*
 ================
@@ -1432,7 +1532,59 @@ s32 func_8003D878( s32 range ) {
     return range * ( (f32)D_80064354 / 65536.0f / 65536.0f );
 }
 
+#ifdef NON_MATCHING
+// NON_MATCHING: registers: retail puts the 0xFF constant in a1, moving chan and started to a2/a3
+/*
+================
+func_8003D90C
+
+TODO
+================
+*/
+void func_8003D90C( void *data ) {
+    UnkChannel *chan;
+    u8 started;
+    s32 tempo;
+    u32 i;
+
+    chan = data;
+    started = chan->unk_C9;
+    chan->unk_04 = NULL;
+    for ( i = 0; i < sizeof( UnkChannel ); i++ ) {
+        *( (u8 *)data )++ = 0;
+    }
+    chan->unk_CC = chan->unk_BE = 0xFF;
+    tempo = 0x6000 / D_80064344;
+    chan->unk_D3 = 0x7F;
+    chan->unk_BC = 0x7F;
+    chan->unk_C1 = 0x7F;
+    chan->unk_C7 = 0xFF;
+    chan->unk_C2 = 0x7F;
+    chan->unk_BD = 0x40;
+    chan->unk_BF = 1;
+    chan->unk_C6 = 1;
+    chan->unk_C8 = 15;
+    chan->unk_A0 = 0xFFFF;
+    chan->unk_9A = 1;
+    chan->unk_A2 = 1;
+    chan->unk_A4 = 1;
+    chan->unk_10 = -1;
+    chan->unk_9E = 0x80;
+    chan->unk_B0 = 0x80;
+    chan->unk_98 = 0x80;
+    chan->unk_28 = 99.9f;
+    chan->unk_6C = 1.0f / 32;
+    chan->unk_58 = 1.0f;
+    chan->unk_5C = 1.0f / 255;
+    chan->unk_60 = 1.0f / 15;
+    chan->unk_A8 = tempo;
+    chan->unk_9C = tempo;
+    chan->unk_7C = D_80064358 != NULL ? D_80064358 : D_8006435C;
+    chan->unk_C9 = started;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D90C);
+#endif
 
 /*
 ================
@@ -1575,7 +1727,56 @@ s32 func_8003DCF8( UnkSeqBank *bank, s32 index, s32 arg2, s32 arg3, s32 priority
     return 0;
 }
 
+#ifdef NON_MATCHING
+// NON_MATCHING: registers: retail keeps a separate base copy per relocation loop (as if func_8003DC10 were inlined) and swaps s1/s2
+/*
+================
+func_8003DEA0
+
+Relocates hdr once, then starts its master channel and one channel per non-empty entry of unk_0C, all under one new id, which it returns.
+================
+*/
+s32 func_8003DEA0( UnkSeqHeader *hdr ) {
+    s32 count;
+    s32 id;
+    s32 i;
+    UnkChannel *chan;
+
+    count = hdr->unk_04;
+    if ( hdr->unk_28 == 0 ) {
+        hdr->unk_28 = 1;
+        func_8003DC10( (s32 *)&hdr->unk_0C, (s32)hdr, 7 );
+        func_8003DC10( (s32 *)hdr->unk_0C, (s32)hdr, count );
+        func_8003DC10( (s32 *)hdr->unk_10, (s32)hdr, count );
+        func_8003DC10( (s32 *)hdr->unk_14, (s32)hdr, count );
+    }
+    id = D_80064350++;
+    chan = &D_8006433C[func_8003DA48( hdr, -1 )];
+    func_8003D90C( chan );
+    chan->unk_D2 = 1;
+    chan->unk_74 = hdr;
+    chan->unk_00 |= 3;
+    chan->unk_44 = id;
+    chan->unk_04 = chan->unk_80 = hdr->unk_24;
+    for ( i = 0; i < count; i++ ) {
+        if ( hdr->unk_0C[i] != NULL ) {
+            chan = &D_8006433C[func_8003DA48( hdr, i )];
+            func_8003D90C( chan );
+            chan->unk_D2 = 1;
+            chan->unk_74 = hdr;
+            chan->unk_00 |= 1;
+            chan->unk_38 = chan->unk_8C = hdr->unk_10[i];
+            chan->unk_34 = chan->unk_88 = hdr->unk_14[i];
+            chan->unk_44 = id;
+            chan->unk_04 = chan->unk_80 = hdr->unk_0C[i];
+        }
+    }
+    D_80064358 = NULL;
+    return id;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003DEA0);
+#endif
 
 /*
 ================
@@ -1770,7 +1971,24 @@ u8 *func_8003E420( UnkChannel *chan, u8 *src ) {
     return src;
 }
 
+#ifdef NON_MATCHING
+// NON_MATCHING: schedule: retail reloads unk_D5 right after storing it and interleaves the two divisions
+/*
+================
+func_8003E490
+
+TODO
+================
+*/
+u8 *func_8003E490( UnkChannel *chan, u8 *src ) {
+    chan->unk_B6 = *src++;
+    chan->unk_DC = 6.2831852 / (f32)( chan->unk_D5 = *src++ );
+    chan->unk_20 = -(f32)*src++ / 50.0;
+    return src;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E490);
+#endif
 
 /*
 ================

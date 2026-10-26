@@ -89,13 +89,37 @@ class Tok:
         return f"{self.text}@{self.line}"
 
 
+def blank_non_matching(text):
+    """Blank the `#ifdef NON_MATCHING` branch (the parked draft; the project's parking mechanism, exempt from every
+    rule) up to its `#else` or `#endif`, keeping line numbers. The `#else` branch, normally `INCLUDE_ASM`, stays."""
+    lines = text.split("\n")
+    depth = 0           # nesting inside a blanked branch; 0 = not blanking
+    for i, l in enumerate(lines):
+        d = l.strip()
+        if depth == 0:
+            if re.match(r"#\s*ifdef\s+NON_MATCHING\b", d):
+                depth = 1
+            continue
+        if re.match(r"#\s*if", d):
+            depth += 1
+        elif re.match(r"#\s*endif\b", d):
+            depth -= 1
+            if depth == 0:
+                continue
+        elif depth == 1 and re.match(r"#\s*(else|elif)\b", d):
+            depth = 0
+            continue
+        lines[i] = ""
+    return "\n".join(lines)
+
+
 class Source:
     """A file split into code tokens (preprocessor lines removed), comments by line, and directives."""
 
     def __init__(self, path, text=None):
         self.path = path
         self.rel = rel(path)
-        self.text = path.read_text(errors="replace") if text is None else text
+        self.text = blank_non_matching(path.read_text(errors="replace") if text is None else text)
         self.lines = self.text.split("\n")
         self.comments = {}          # line -> [comment text]
         self.directives = []        # (line, text) with continuations joined
