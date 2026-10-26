@@ -1,0 +1,29 @@
+{
+  "$schema": "https://recomp.fyi/schema/v1.json",
+  "game": "Super Bowling",
+  "wikidata": "Q3504117",
+  "system": "N64",
+  "type": "decomp",
+  "original": {
+    "region": "USA",
+    "revision": "1.0",
+    "serial": "NUS-NBWE-USA",
+    "sha1": "56937a9e9536af55ebed06480413265848c4a04a"
+  },
+  "project": "Super Bowling 64 decompilation",
+  "status": "in-progress",
+  "toolchain": ["splat", "KMC GCC 2.7.2", "objdiff"],
+  "approach": "Matching decompilation: C rebuilt with the original KMC GCC 2.7.2 must reproduce the retail ROM byte for byte",
+  "maintainers": [{ "name": "CalenCyr", "link": "https://github.com/CalenCyr" }],
+  "links": [
+    { "label": "GitHub", "url": "https://github.com/CalenCyr/superbowling64-decomp" },
+    { "label": "Progress (ByteMatch)", "url": "https://bytematch.dev/CalenCyr/superbowling64-decomp" }
+  ],
+  "help": [
+    "Matching game functions",
+    "Naming functions and structs",
+    "Identifying the KMC libc/libgcc functions"
+  ],
+  "tags": ["bowling", "sports", "libultra"],
+  "notes": "The byte gate, CI and progress tracking are in place. libultra 2.0K is fully linked from decompals' ultralib; matching of the game code has started with the sound sequencer."
+}
