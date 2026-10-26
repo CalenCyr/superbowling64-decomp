@@ -19,7 +19,7 @@ extern UnkSoundBank *D_8006435C;
 extern s32 D_80064360;
 extern s32 D_80064364;
 extern UnkSeqBank *D_80064368;
-extern s32 D_8006436C;
+extern UnkSeqBank *D_8006436C;          /* used once, by the next func_8003B930, instead of D_80064368 */
 extern void (*D_80064370)( s32 id, s32 value );
 /* ring buffer of D_8006437C messages: func_8003C3D4 writes at D_80064378 */
 extern s32 D_80064374;

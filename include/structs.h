@@ -35,6 +35,20 @@ typedef struct {
     /* 0x28 */ s32 unk_28;          /* set once the offsets are relocated */
 } UnkSeqHeader;
 
+/*
+ * Bank that func_8003D6E0 relocates in place (bit 31 of unk_10 marks it done); D_80064358 and D_8006435C point
+ * to one; identity unknown.
+ */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x10];
+    /* 0x10 */ s32 unk_10;          /* bit 31: relocated */
+    /* 0x14 */ u8 unk_14[0x20 - 0x14];
+    /* 0x20 */ s32 unk_20;          /* entries in unk_28 and unk_2C */
+    /* 0x24 */ u8 *unk_24;
+    /* 0x28 */ f32 *unk_28;
+    /* 0x2C */ s32 *unk_2C;
+} UnkSoundBank;
+
 /* Entry of UnkSeqBank.unk_18. */
 typedef struct {
     /* 0x00 */ u8 *unk_00;          /* command stream; an offset until func_8003C13C relocates it */
@@ -50,24 +64,10 @@ typedef struct {
     /* 0x04 */ s32 unk_04;
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ s32 unk_0C;          /* bit 0: relocated */
-    /* 0x10 */ s32 unk_10;
+    /* 0x10 */ UnkSoundBank *unk_10;
     /* 0x14 */ u8 *unk_14;
     /* 0x18 */ UnkSeqBankEntry unk_18[1];  /* unk_00 entries */
 } UnkSeqBank;
-
-/*
- * Bank that func_8003D6E0 relocates in place (bit 31 of unk_10 marks it done); D_80064358 and D_8006435C point
- * to one; identity unknown.
- */
-typedef struct {
-    /* 0x00 */ u8 unk_00[0x10];
-    /* 0x10 */ s32 unk_10;          /* bit 31: relocated */
-    /* 0x14 */ u8 unk_14[0x20 - 0x14];
-    /* 0x20 */ s32 unk_20;          /* entries in unk_28 and unk_2C */
-    /* 0x24 */ u8 *unk_24;
-    /* 0x28 */ f32 *unk_28;
-    /* 0x2C */ s32 *unk_2C;
-} UnkSoundBank;
 
 /* Object written by func_8003C1EC and read by func_8003C1C0 and func_8003C1F4; identity unknown. */
 typedef struct {
@@ -110,7 +110,7 @@ typedef struct {
     /* 0x070 */ f32 unk_70;
     /* 0x074 */ UnkSeqHeader *unk_74;
     /* 0x078 */ UnkSeqBank *unk_78;
-    /* 0x07C */ s32 unk_7C;
+    /* 0x07C */ UnkSoundBank *unk_7C;
     /* 0x080 */ u8 *unk_80;
     /* 0x084 */ UnkSeqEntry *unk_84;
     /* 0x088 */ u8 *unk_88;

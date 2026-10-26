@@ -16,25 +16,153 @@ void func_8003B684(s32 flags, s16 value) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003B6B0);
+/*
+================
+func_8003B6B0
+
+Starts the channels of hdr through func_8003DEA0, queues message 1 for them; returns their id.
+================
+*/
+s32 func_8003B6B0( UnkSeqHeader *hdr ) {
+    s32 id;
+
+    id = func_8003DEA0( hdr );
+    func_8003C088( id );
+    return id;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003B6E0);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003B930);
+/*
+================
+func_8003B930
+
+Starts entry index of the one-shot bank D_8006436C, or else of the default bank D_80064368, on a free channel; returns the channel id, or 0 without a bank.
+================
+*/
+s32 func_8003B930( s32 index ) {
+    UnkSeqBank *bank;
+    s32 id;
+
+    bank = D_8006436C;
+    if ( bank != NULL ) {
+        D_8006436C = NULL;
+    } else {
+        bank = D_80064368;
+        if ( bank == NULL ) {
+            D_80064358 = NULL;
+            return 0;
+        }
+    }
+    if ( D_80064358 == NULL ) {
+        D_80064358 = bank->unk_10;
+    }
+    id = func_8003DCF8( bank, index, 0x80, 0x80, -1 );
+    D_80064358 = NULL;
+    return id;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003B9B0);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BAC8);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BB94);
+/*
+================
+func_8003BB94
+
+Counts the active channels: bit 0 of flags counts those started from a bank, bit 1 the others.
+================
+*/
+s32 func_8003BB94( s32 flags ) {
+    s32 i;
+    s32 count;
+    UnkChannel *chan;
+
+    count = 0;
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_04 != NULL ) {
+            if ( chan->unk_78 != NULL ? flags & 1 : flags & 2 ) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BC14);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BCC8);
+/*
+================
+func_8003BCC8
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BD20);
+Counts the channels with the given id.
+================
+*/
+s32 func_8003BCC8( s32 id ) {
+    s32 i;
+    UnkChannel *chan;
+    s32 count;
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BD80);
+    if ( id == 0 ) {
+        return 0;
+    }
+    count = 0;
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        count += chan->unk_44 == id;
+    }
+    return count;
+}
+
+/*
+================
+func_8003BD20
+
+Sets unk_9E on every channel with the given id; returns how many there were.
+================
+*/
+s32 func_8003BD20( s32 id, s32 value ) {
+    s32 i;
+    s32 count;
+    UnkChannel *chan;
+
+    if ( id == 0 ) {
+        return 0;
+    }
+    count = 0;
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_44 == id ) {
+            chan->unk_9E = value;
+            count++;
+        }
+    }
+    return count;
+}
+
+/*
+================
+func_8003BD80
+
+Sets unk_B0 and unk_BE = 0xFF on every channel with the given id; returns how many there were.
+================
+*/
+s32 func_8003BD80( s32 id, s32 value ) {
+    s32 i;
+    s32 count;
+    UnkChannel *chan;
+
+    if ( id == 0 ) {
+        return 0;
+    }
+    count = 0;
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_44 == id ) {
+            count++;
+            chan->unk_B0 = value;
+            chan->unk_BE = 0xFF;
+        }
+    }
+    return count;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BDF0);
 
@@ -101,19 +229,19 @@ func_8003C008
 Returns unk_7C of the first channel with the given id, or 0.
 ================
 */
-s32 func_8003C008( s32 id ) {
+UnkSoundBank *func_8003C008( s32 id ) {
     s32 i;
     UnkChannel *chan;
 
     if ( id == 0 ) {
-        return 0;
+        return NULL;
     }
     for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
         if ( chan->unk_44 == id ) {
             return chan->unk_7C;
         }
     }
-    return 0;
+    return NULL;
 }
 
 /*
@@ -185,11 +313,11 @@ void func_8003C1C8( UnkSeqBank *bank ) {
 ================
 func_8003C1D4
 
-Sets D_8006436C.
+Sets the one-shot bank D_8006436C.
 ================
 */
-void func_8003C1D4( s32 value ) {
-    D_8006436C = value;
+void func_8003C1D4( UnkSeqBank *bank ) {
+    D_8006436C = bank;
 }
 
 /*
@@ -438,7 +566,59 @@ s32 func_8003DC48( UnkChannel *chan, UnkSeqBank *bank, s32 index, s32 arg3, s32 
     return chan->unk_44;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003DCF8);
+/*
+================
+func_8003DCF8
+
+Starts entry index of bank on a free channel above the first four, or else on the bank channel of lowest priority below priority (-1: the entry's own); returns the channel id, or 0.
+================
+*/
+s32 func_8003DCF8( UnkSeqBank *bank, s32 index, s32 arg2, s32 arg3, s32 priority ) {
+    s32 i;
+    s32 lowest;
+    UnkChannel *chan;
+    UnkChannel *victim;
+
+    if ( priority == -1 ) {
+        priority = bank->unk_18[index].unk_04;
+    }
+    lowest = priority + 1;
+    for ( i = 4, chan = D_80064340; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_04 == NULL ) {
+            func_8003D90C( chan );
+            chan->unk_A6 = index;
+            chan->unk_78 = bank;
+            chan->unk_9E = arg2;
+            chan->unk_B0 = arg3;
+            chan->unk_48 = priority;
+            chan->unk_44 = D_80064350++;
+            if ( bank->unk_10 != NULL ) {
+                chan->unk_7C = bank->unk_10;
+            }
+            chan->unk_04 = chan->unk_80 = bank->unk_18[index].unk_00;
+            return chan->unk_44;
+        }
+        if ( chan->unk_78 != NULL && chan->unk_48 < lowest ) {
+            lowest = chan->unk_48;
+            victim = chan;
+        }
+    }
+    if ( lowest < priority ) {
+        func_8003D90C( victim );
+        victim->unk_A6 = index;
+        victim->unk_78 = bank;
+        victim->unk_9E = arg2;
+        victim->unk_B0 = arg3;
+        victim->unk_48 = priority;
+        victim->unk_44 = D_80064350++;
+        if ( bank->unk_10 != NULL ) {
+            victim->unk_7C = bank->unk_10;
+        }
+        victim->unk_04 = victim->unk_80 = bank->unk_18[index].unk_00;
+        return victim->unk_44;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003DEA0);
 
@@ -517,7 +697,33 @@ u8 *func_8003E1D0( UnkChannel *chan, u8 *src ) {
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E1DC);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E304);
+/*
+================
+func_8003E304
+
+Channel command: sets the tempo from one byte; a bank channel takes it alone, otherwise every channel of the same header does.
+================
+*/
+u8 *func_8003E304( UnkChannel *chan, u8 *src ) {
+    s32 tempo;
+    s32 scaled;
+    s32 i;
+    UnkChannel *other;
+
+    tempo = ( *src++ * 0x6000 / 120 ) / D_80064344;
+    scaled = ( tempo * chan->unk_98 ) >> 7;
+    if ( chan->unk_78 != NULL ) {
+        chan->unk_9C = tempo;
+    } else {
+        for ( i = 0, other = D_8006433C; i < D_80064334; i++, other++ ) {
+            if ( other->unk_74 == chan->unk_74 ) {
+                other->unk_A8 = tempo;
+                other->unk_9C = scaled;
+            }
+        }
+    }
+    return src;
+}
 
 /*
 ================
