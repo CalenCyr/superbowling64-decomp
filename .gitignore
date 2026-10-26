@@ -7,3 +7,4 @@ __pycache__/
 *.ld
 undefined_*.txt
 .splache
+tools/gcc_2.7.2/
