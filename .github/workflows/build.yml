@@ -1,0 +1,66 @@
+name: Build
+
+# Push-only: the baserom deploy key must never be exposed to pull-request code.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    env:
+      VERSION: us
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Fetch baserom
+        uses: actions/checkout@v4
+        with:
+          repository: CalenCyr/superbowling64-baserom
+          ssh-key: ${{ secrets.BASEROM_DEPLOY_KEY }}
+          path: baserom
+          persist-credentials: false
+
+      - name: Place baserom
+        run: |
+          mv baserom/rom.z64 rom.z64
+          rm -rf baserom
+          echo "56937a9e9536af55ebed06480413265848c4a04a  rom.z64" | sha1sum -c
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils-mips-linux-gnu
+          pip install splat64==0.41.0 spimdisasm==1.41.0 rabbitizer==1.16.2 n64img==0.3.3 crunch64==0.6.2
+          mkdir -p tools/gcc_2.7.2 tools/objdiff
+          curl -fsSL https://github.com/decompals/mips-gcc-2.7.2/releases/download/v0.1/gcc-2.7.2-linux.tar.gz | tar xz -C tools/gcc_2.7.2
+          curl -fsSL https://github.com/decompals/mips-binutils-2.6/releases/download/v0.3/binutils-2.6-linux.tar.gz | tar xz -C tools/gcc_2.7.2
+          curl -fsSL -o tools/objdiff/objdiff-cli https://github.com/encounter/objdiff/releases/download/v3.8.2/objdiff-cli-linux-x86_64
+          chmod +x tools/objdiff/objdiff-cli
+
+      - name: Split and gate
+        run: |
+          make split
+          make CROSS=mips-linux-gnu- expected
+
+      - name: Progress report
+        run: |
+          python3 tools/objdiff_config.py
+          mkdir -p build/$VERSION
+          tools/objdiff/objdiff-cli report generate -o build/$VERSION/report.json
+          python3 tools/progress.py build/$VERSION/report.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.VERSION }}_report
+          path: build/${{ env.VERSION }}/report.json

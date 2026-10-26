@@ -1,5 +1,9 @@
 # Super Bowling 64 decompilation
 
+[![Build](https://github.com/CalenCyr/superbowling64-decomp/actions/workflows/build.yml/badge.svg)](https://github.com/CalenCyr/superbowling64-decomp/actions/workflows/build.yml)
+[![Code](https://bytematch.dev/CalenCyr/superbowling64-decomp.svg?label=Code&measure=matched_code_percent)](https://bytematch.dev/CalenCyr/superbowling64-decomp)
+[![Functions](https://bytematch.dev/CalenCyr/superbowling64-decomp.svg?label=Functions&measure=matched_functions)](https://bytematch.dev/CalenCyr/superbowling64-decomp)
+
 A work-in-progress matching decompilation of **Super Bowling 64** (Nintendo 64, USA, `NBWE`). The goal is C source
 that, built with the original compiler, reproduces the retail ROM byte for byte.
 
@@ -14,7 +18,8 @@ This repository contains no game code, assets or ROM. You need your own copy of 
 | libultra | 329 / 329 functions | 75,116 / 75,116 bytes (100%) |
 
 "Matched under the rules" counts functions whose bytes match *and* whose source passes the project's code rules
-(no fake matches). Run `make report` for current numbers.
+(no fake matches). Run `make report` for current numbers; live progress is on
+[ByteMatch](https://bytematch.dev/CalenCyr/superbowling64-decomp), updated by CI on every push to `main`.
 
 ## What's known about the ROM
 
