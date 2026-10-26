@@ -89,7 +89,42 @@ s32 func_8003BB94( s32 flags ) {
     return count;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BC14);
+/*
+================
+func_8003BC14
+
+Starts a fade over value steps (at least 1) on every channel with the given id that is not fading yet; a channel with bit 0 of unk_00 set instead gets a zero-length fade and loses that bit. Returns how many channels it changed.
+================
+*/
+s32 func_8003BC14( s32 id, s32 value ) {
+    s32 i;
+    s32 count;
+    s32 total;
+    UnkChannel *chan;
+
+    if ( id == 0 ) {
+        return 0;
+    }
+    total = value;
+    if ( value == 0 ) {
+        total = 1;
+    }
+    count = 0;
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_44 == id && chan->unk_10 == -1 ) {
+            if ( chan->unk_00 & 1 ) {
+                chan->unk_1C = 1;
+                chan->unk_10 = 0;
+                chan->unk_00 &= ~1;
+            } else {
+                chan->unk_1C = total;
+                chan->unk_10 = value;
+            }
+            count++;
+        }
+    }
+    return count;
+}
 
 /*
 ================
@@ -164,11 +199,92 @@ s32 func_8003BD80( s32 id, s32 value ) {
     return count;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BDF0);
+/*
+================
+func_8003BDF0
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BE60);
+Sets unk_30 to value + unk_90 on every channel with the given id; returns how many there were.
+================
+*/
+s32 func_8003BDF0( s32 id, f32 value ) {
+    s32 i;
+    s32 count;
+    UnkChannel *chan;
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BEEC);
+    if ( id == 0 ) {
+        return 0;
+    }
+    count = 0;
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_44 == id ) {
+            chan->unk_30 = value + chan->unk_90;
+            count++;
+        }
+    }
+    return count;
+}
+
+/*
+================
+func_8003BE60
+
+Sets the tempo scale unk_98 (clamped to [1, 0x100]) on every channel with the given id and rescales unk_9C from unk_A8; returns how many there were.
+================
+*/
+s32 func_8003BE60( s32 id, s32 value ) {
+    s32 i;
+    s32 count;
+    UnkChannel *chan;
+
+    if ( id == 0 ) {
+        return 0;
+    }
+    if ( value <= 0 ) {
+        value = 1;
+    } else if ( value > 0x100 ) {
+        value = 0x100;
+    }
+    count = 0;
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_44 == id ) {
+            count++;
+            chan->unk_98 = value;
+            chan->unk_9C = ( chan->unk_A8 * value ) >> 7;
+        }
+    }
+    return count;
+}
+
+/*
+================
+func_8003BEEC
+
+Sets unk_CB (clamped to [0, 0x7F]) and unk_CC = 0xFF on every channel with the given id; returns how many there were.
+================
+*/
+s32 func_8003BEEC( s32 id, s32 value ) {
+    s32 i;
+    s32 count;
+    UnkChannel *chan;
+
+    if ( id == 0 ) {
+        return 0;
+    }
+    if ( value < 0 ) {
+        value = 0;
+    } else if ( value > 0x7F ) {
+        value = 0x7F;
+    }
+    count = 0;
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_44 == id ) {
+            count++;
+            chan->unk_CB = value;
+            chan->unk_CC = 0xFF;
+        }
+    }
+    return count;
+}
 
 /*
 ================
