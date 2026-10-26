@@ -5,7 +5,7 @@
 typedef struct {
     u8 cmd;
     s32 arg;
-} UnkMsg8003C3D4; // expect: R1
+} sndMsg_t; // expect: R1
 
 typedef struct Whole {
     s32 count;

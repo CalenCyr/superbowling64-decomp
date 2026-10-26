@@ -40,5 +40,5 @@ s32 func_80000064(Derived *d, u8 *buf) {
     s32 x = *(s32 *)(buf + 8);
 
     tmp = b->kind;
-    return tmp + x + d->extra + D_80064364;
+    return tmp + x + d->extra + snd_fxType;
 }
