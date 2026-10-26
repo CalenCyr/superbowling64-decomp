@@ -41,7 +41,7 @@ options:
   rodata_string_guesser_level: 2
   data_string_guesser_level: 2
   libultra_symbols: True
-  hardware_regs: True
+  # hardware_regs: True
   gfx_ucode: f3dex
 segments:
   - name: header

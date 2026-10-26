@@ -16,19 +16,21 @@ This file is project-independent. Fill in the **Project adapter** section once p
 
 | verb | meaning | this project's command |
 |---|---|---|
-| `build` | compile every unit, compare every annotated function | TODO (needs compiler + binutils) |
+| `build` | compile every unit, compare every annotated function | `make` |
 | `match <unit>` | compile and compare one unit quickly (the inner loop) | TODO |
 | `diff <function>` | side-by-side disassembly: compiled vs retail | TODO (objdiff / asm-differ) |
 | `report` | refresh the progress report (objdiff or similar) | TODO |
-| `gate` | the checks that must stay green before a commit or merge | TODO: clean rebuild, `sha1sum -c` against `56937a9e9536af55ebed06480413265848c4a04a` |
-| `disasm` / `xref` / `class` | retail assembly, callers and callees, vtable and hierarchy evidence | `python3 -m splat split superbowling.yaml` → `asm/` |
+| `gate` | the checks that must stay green before a commit or merge | `make gate`: deletes `build/`, rebuilds, checks SHA-1 `56937a9e9536af55ebed06480413265848c4a04a`; success line starts `GATE OK` |
+| `disasm` / `xref` / `class` | retail assembly, callers and callees, vtable and hierarchy evidence | `make split` (splat) → `asm/`, `assets/` |
 | `permute <function>` | the permuter, if there is one | TODO (decomp-permuter) |
 | `rules [<unit>]` | the rule checker: [match] findings (`MATCH-PENDING`) and advisory findings (naming, readability) | TODO |
 
 Also record:
 - **Toolchain (this project):** KMC GCC 2.7.2 (N64 SDK), user ruling. Evidence: epilogues place `addiu sp` in the
   `jr ra` delay slot throughout, including the libultra region (KMC `libgultra`); splat also detects KMC.
-  Optimisation flags not yet determined. Retail ROM: `rom.z64`, SHA-1 `56937a9e9536af55ebed06480413265848c4a04a`,
+  Compiler: `tools/gcc_2.7.2/` (decompals build of KMC gcc 2.7.2 + KMC as 2.6). Linker and objcopy: system
+  `mips64-linux-gnu-*` (binutils 2.46), `ld -m elf32btsmip`. Optimisation flags not yet determined.
+  Symbols outside every splat segment (libultra boot globals at 0x80000300) live in `undefined_syms.txt`. Retail ROM: `rom.z64`, SHA-1 `56937a9e9536af55ebed06480413265848c4a04a`,
   F3DEX 2.08, libultra 2.0K. Main segment ROM 0x1060 at VRAM 0x80025C60, BSS ends 0x8010A080; code past ROM
   0x3C2A0 runs at 0x801xxxxx (overlays, boundaries not yet mapped).
 - **Toolchain:** compiler and linker version and build, flags, per-unit flag overrides.
