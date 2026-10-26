@@ -4,7 +4,60 @@
 #include "structs.h"
 #include "variables.h"
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003B2B0);
+/*
+================
+SetEnvelope
+
+Reads the seven envelope bytes at src into the channel (rates and levels of the attack, decay and release
+phases); returns the position after them. Used by func_8003B2B0; func_8003E1DC repeats its body. The name is invented.
+================
+*/
+static inline u8 *SetEnvelope( UnkChannel *chan, u8 *src ) {
+    s32 value;
+    s32 level;
+
+    value = *src++;
+    if ( value == 0 ) {
+        value = 1;
+    }
+    chan->unk_BF = value;
+    chan->unk_64 = 0x400 / value;
+    chan->unk_C0 = *src++;
+    value = *src++;
+    chan->unk_C6 = value;
+    level = *src++;
+    chan->unk_58 = 1.0 / (f32)value * (f32)( level - chan->unk_C0 );
+    chan->unk_C1 = level;
+    value = *src++;
+    chan->unk_C7 = value;
+    level = *src++;
+    chan->unk_5C = 1.0 / (f32)value * (f32)( level - chan->unk_C1 );
+    chan->unk_C2 = level;
+    value = *src++;
+    chan->unk_C8 = value;
+    chan->unk_60 = 1.0 / (f32)value;
+    return src;
+}
+
+/*
+================
+func_8003B2B0
+
+Channel command: applies envelope entry (one- or two-byte index) of the channel's header.
+================
+*/
+u8 *func_8003B2B0( UnkChannel *chan, u8 *src ) {
+    s32 index;
+
+    index = *src++;
+    if ( index & 0x80 ) {
+        index &= 0x7F;
+        index <<= 8;
+        index |= *src++;
+    }
+    SetEnvelope( chan, &chan->unk_74->unk_18[index].unk_00 );
+    return src;
+}
 
 /*
 ================
@@ -1352,7 +1405,41 @@ u8 *func_8003E1D0( UnkChannel *chan, u8 *src ) {
     return src;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E1DC);
+/*
+================
+func_8003E1DC
+
+Channel command: reads an envelope from the command stream.
+================
+*/
+u8 *func_8003E1DC( UnkChannel *chan, u8 *src ) {
+    s32 value;
+    s32 level;
+
+    // RULE-EXCEPTION: R16, SetEnvelope( chan, src ) inlined here folds the read position into offsets;
+    // retail advances src byte by byte, so this copy of the helper's body was written out.
+    value = *src++;
+    if ( value == 0 ) {
+        value = 1;
+    }
+    chan->unk_BF = value;
+    chan->unk_64 = 0x400 / value;
+    chan->unk_C0 = *src++;
+    value = *src++;
+    chan->unk_C6 = value;
+    level = *src++;
+    chan->unk_58 = 1.0 / (f32)value * (f32)( level - chan->unk_C0 );
+    chan->unk_C1 = level;
+    value = *src++;
+    chan->unk_C7 = value;
+    level = *src++;
+    chan->unk_5C = 1.0 / (f32)value * (f32)( level - chan->unk_C1 );
+    chan->unk_C2 = level;
+    value = *src++;
+    chan->unk_C8 = value;
+    chan->unk_60 = 1.0 / (f32)value;
+    return src;
+}
 
 /*
 ================
