@@ -351,3 +351,31 @@ FX_DEFAULT	166B0.c	invented: 2, the initial snd_fxType
 MIN_MSGS	166B0.c	invented: 0x40 clamp of Snd_InitMessages
 MAX_MSGS	166B0.c	invented: 0x400 clamp of Snd_InitMessages
 sndMsgType_t	166B0.c	invented: SNDMSG_PAUSE, SNDMSG_RESUME, SNDMSG_SETFX, the Snd_HandleMessage switch
+
+# libkmc (KMC C runtime and libm) and llmath, units src/libkmc/*.c
+asin	0x80055820	evidence: passes "asin" to the matherr path; returns atan2(x, sqrt(1-x*x)), DOMAIN outside [-1,1]
+acos	0x800558F8	evidence: passes "acos" to the matherr path; returns pi/2 - asin(x)
+atan	0x80055B58	evidence: behaviour (odd function, CORDIC on x or 1/x); called by atan2 with y/x
+atan2	0x80055C70	evidence: passes "atan2" to the matherr path; quadrant correction by +-pi, +-pi/2 on x == 0
+atoi	0x80055DE0	evidence: wraps atol (ANSI pairing)
+atol	0x80055DFC	evidence: behaviour: skip ctype space, optional sign, decimal digits
+memcmp	0x80055EA0	evidence: behaviour matches ANSI memcmp (unsigned byte difference, length-bounded, no terminator)
+memmove	0x800560E4	evidence: forward copy via libultra memcpy when src >= dst, else backward copy
+memset	0x80056150	evidence: behaviour matches ANSI memset (byte replicated to words), returns dst
+rand	0x80056220	evidence: 1103515245/12345 LCG returning 15 bits
+srand	0x80056254	evidence: stores its argument into rand's state
+sqrt	0x80056260	evidence: passes "sqrt" to the matherr path; called by GCC's inline sqrt.d NaN fallback
+strcat	0x80056480	evidence: finds dst's terminator then calls strcpy(end, src), returns dst
+strncmp	0x80056530	evidence: behaviour matches ANSI strncmp (stops at terminator, n-bounded); called with n=11 by the FAT lookup func_8002889C
+__divdi3	0x80056900	evidence: called by libultra (ldiv.o) under this name
+__moddi3	0x800569B0	evidence: signed counterpart of __divdi3 returning the remainder; branches to __umoddi3
+__udivdi3	0x80056A70	evidence: called by libultra under this name
+__umoddi3	0x80056A90	evidence: called by libultra under this name
+__fixdfdi	0x80056AD0	evidence: double in $f12 to long long in v0:v1; atan's double-to-long-long libcall
+__floatdidf	0x80056BF0	evidence: long long a0:a1 to double in $f0; the CORDIC kernel's long-long-to-double libcall
+matherr	0x80056CF0	evidence: SVID hook called with struct exception by the libm error path; default returns 0
+rspbootTextStart	0x80056D00	evidence: start of RSP boot microcode; game code computes TextEnd - TextStart as the boot size
+rspbootTextEnd	0x80056DD0	evidence: end of rspboot (0xD0 bytes), used as the boot microcode's end
+errno	0x80068210	evidence: set to 33/34 (EDOM/ERANGE) by the libm error path
+_ctype	0x8005F2F0	invented: 256-byte ctype class table used by atol (space bit 0x01, digit bit 0x08)
+strcpy	0x80029578	evidence: libkmc strcat calls strcpy by name; this routine copies a string with its terminator
