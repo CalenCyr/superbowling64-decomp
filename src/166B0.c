@@ -1503,7 +1503,20 @@ u8 *func_8003E3FC( UnkChannel *chan, u8 *src ) {
     return src;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E420);
+/*
+================
+func_8003E420
+
+Channel command: sets unk_B6 and unk_D5 from two bytes, unk_20 to a third byte / 50 and the phase step unk_DC to 2 pi / unk_D5.
+================
+*/
+u8 *func_8003E420( UnkChannel *chan, u8 *src ) {
+    chan->unk_B6 = *src++;
+    chan->unk_D5 = *src++;
+    chan->unk_20 = (f32)*src++ / 50.0;
+    chan->unk_DC = 6.2831852 / (f32)chan->unk_D5;
+    return src;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E490);
 
@@ -1576,7 +1589,26 @@ u8 *func_8003E564( UnkChannel *chan, u8 *src ) {
     return src;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E574);
+/*
+================
+func_8003E574
+
+Channel command: replaces the offset unk_90 within unk_30 by a signed byte / 100.
+================
+*/
+u8 *func_8003E574( UnkChannel *chan, u8 *src ) {
+    s32 value;
+    f32 offset;
+
+    value = *src++;
+    if ( value & 0x80 ) {
+        value |= ~0xFF;
+    }
+    offset = (f32)value / 100.0;
+    chan->unk_30 = chan->unk_30 - chan->unk_90 + offset;
+    chan->unk_90 = offset;
+    return src;
+}
 
 /*
 ================
@@ -1929,7 +1961,18 @@ u8 *func_8003E968( UnkChannel *chan, u8 *src ) {
     return src;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003EA38);
+/*
+================
+func_8003EA38
+
+Channel command: sets unk_6C to one byte / 64 and unk_24 to unk_70 * unk_6C.
+================
+*/
+u8 *func_8003EA38( UnkChannel *chan, u8 *src ) {
+    chan->unk_6C = (f32)*src++ * 0.015625;
+    chan->unk_24 = chan->unk_70 * chan->unk_6C;
+    return src;
+}
 
 /*
 ================
