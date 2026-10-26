@@ -173,7 +173,7 @@ typedef struct {
     /* 0x0A6 */ u16 unk_A6;          /* entry of unk_78->unk_18 the channel was started on */
     /* 0x0A8 */ u16 unk_A8;
     /* 0x0AA */ u16 unk_AA;
-    /* 0x0AC */ s16 unk_AC;
+    /* 0x0AC */ u16 unk_AC;
     /* 0x0AE */ s16 unk_AE;
     /* 0x0B0 */ s16 unk_B0;
     /* 0x0B2 */ u16 unk_B2;

@@ -89,7 +89,93 @@ s32 func_8003B6B0( UnkSeqHeader *hdr ) {
     return id;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003B6E0);
+/*
+================
+func_8003B6E0
+
+Starts the channels of hdr like func_8003B6B0, but first runs each of them silently up to the marker command 0xAB with the given argument.
+================
+*/
+s32 func_8003B6E0( UnkSeqHeader *hdr, s32 marker ) {
+    s32 id;
+    s32 i;
+    UnkChannel *chan;
+    u8 *src;
+    u8 cmd;
+    u8 value;
+    s32 length;
+
+    id = func_8003DEA0( hdr );
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_44 != id || chan->unk_74 != hdr || chan->unk_04 == NULL ) {
+            continue;
+        }
+        // RULE-EXCEPTION: R14, a do/while here lets gcc hoist the handler table and 0xAB out of the loop;
+        // retail reloads both every pass, so this loop was built from labels.
+    next:
+        src = chan->unk_04;
+        cmd = *src;
+        if ( cmd >= 0x80 ) {
+            if ( cmd == 0xAB && src[1] == marker ) {
+                goto found;
+            }
+            chan->unk_04 = D_8005CB70[cmd & 0x7F]( chan, src + 1 );
+        } else {
+            chan->unk_04 = src + 1;
+            if ( chan->unk_D2 ) {
+                chan->unk_04 = src + 2;
+                value = src[1];
+                chan->unk_BB = value;
+                if ( value >= 0x80 ) {
+                    chan->unk_BB = value & 0x7F;
+                    chan->unk_D2 = 0;
+                    chan->unk_D3 = chan->unk_BB;
+                }
+            } else {
+                chan->unk_BB = chan->unk_D3;
+            }
+            if ( chan->unk_AC != 0 && chan->unk_B7 == 0 ) {
+                chan->unk_9A = chan->unk_AC;
+            } else {
+                chan->unk_B7 = 0;
+                cmd = *chan->unk_04++;
+                if ( cmd < 0x80 ) {
+                    chan->unk_9A = cmd;
+                } else {
+                    chan->unk_9A = *chan->unk_04++ + ( ( cmd & 0x7F ) << 8 );
+                }
+            }
+            chan->unk_0C += chan->unk_9A << 8;
+        }
+        if ( chan->unk_04 != NULL ) {
+            goto next;
+        }
+    found:
+        chan->unk_3C = chan->unk_0C;
+        if ( chan->unk_04 != NULL ) {
+            src = chan->unk_04 + 2;
+            length = *src++;
+            if ( length >= 0x80 ) {
+                length &= 0x7F;
+                length <<= 8;
+                length |= *src++;
+            }
+            chan->unk_AA = 0;
+            chan->unk_9A = length;
+            chan->unk_04 = src;
+            chan->unk_0C -= length << 8;
+        }
+        chan->unk_40 = chan->unk_0C;
+        if ( chan->unk_38 != NULL ) {
+            func_8003D374( chan );
+        }
+        if ( chan->unk_34 != NULL ) {
+            func_8003D438( chan );
+        }
+    }
+    func_8003C088( id );
+    return id;
+}
 
 /*
 ================

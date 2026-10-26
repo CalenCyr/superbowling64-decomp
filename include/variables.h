@@ -4,6 +4,7 @@
 #include "common.h"
 #include "structs.h"
 
+extern u8 *(*D_8005CB70[])( UnkChannel *chan, u8 *src );  /* channel command handlers, by command & 0x7F */
 extern s32 D_8005CE4C;
 extern s32 D_800693D8;
 extern s32 D_800DF6B0;
