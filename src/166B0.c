@@ -274,16 +274,40 @@ void func_8003C088( s32 arg ) {
     func_8003C3D4( &msg );
 }
 
-void func_8003C0B0(s32 arg) {
+/*
+================
+func_8003C0B0
+
+Remembers arg in D_80064364 and queues message 2 with it; returns whether it was queued.
+================
+*/
+inline s32 func_8003C0B0( s32 arg ) {
     UnkMsg8003C3D4 msg;
 
     msg.arg = arg;
     D_80064364 = arg;
     msg.cmd = 2;
-    func_8003C3D4(&msg);
+    return func_8003C3D4( &msg );
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C0E0);
+/*
+================
+func_8003C0E0
+
+Sets D_80064360 to arg; a zero arg first requeues message 2 with D_80064364 and is dropped if that fails.
+================
+*/
+void func_8003C0E0( s32 arg ) {
+    s32 queued;
+
+    queued = 1;
+    if ( arg == 0 ) {
+        queued = func_8003C0B0( D_80064364 );
+    }
+    if ( queued ) {
+        D_80064360 = arg;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C13C);
 
