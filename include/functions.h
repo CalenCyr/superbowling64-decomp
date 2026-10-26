@@ -10,6 +10,7 @@ s32 func_8003D878( s32 range );
 void func_8003D90C( UnkChannel *chan );
 void func_8003DC10( s32 *table, s32 base, s32 count );
 s32 func_8003DEA0( UnkSeqHeader *hdr );
+s32 func_8003DC48( UnkChannel *chan, UnkSeqBank *bank, s32 index, s32 arg3, s32 arg4, s32 priority );
 s32 func_8003DCF8( UnkSeqBank *bank, s32 index, s32 arg2, s32 arg3, s32 priority );
 void func_8003E10C( s32 id, s32 mask, s32 bits );
 s32 func_8003F340( s32 arg );

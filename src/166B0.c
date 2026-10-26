@@ -62,9 +62,80 @@ s32 func_8003B930( s32 index ) {
     return id;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003B9B0);
+/*
+================
+func_8003B9B0
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BAC8);
+Like func_8003B930 with explicit parameters; with reuse set, a channel already playing the entry from the same bank is restarted instead of taking a free one.
+================
+*/
+s32 func_8003B9B0( s32 index, s32 arg1, s32 arg2, s32 reuse, s32 priority ) {
+    UnkSeqBank *bank;
+    s32 i;
+    UnkChannel *chan;
+    s32 id;
+
+    if ( D_8006436C != NULL ) {
+        bank = D_8006436C;
+        D_8006436C = NULL;
+    } else {
+        bank = D_80064368;
+        if ( bank == NULL ) {
+            D_80064358 = NULL;
+            return 0;
+        }
+    }
+    if ( D_80064358 == NULL ) {
+        D_80064358 = bank->unk_10;
+    }
+    if ( reuse ) {
+        for ( i = 4, chan = D_80064340; i < D_80064334; i++, chan++ ) {
+            if ( chan->unk_A6 == index && chan->unk_78 == bank ) {
+                if ( priority == -1 ) {
+                    priority = bank->unk_18[index].unk_04;
+                }
+                id = func_8003DC48( chan, bank, index, arg1, arg2, priority );
+                D_80064358 = NULL;
+                return id;
+            }
+        }
+    }
+    id = func_8003DCF8( bank, index, arg1, arg2, priority );
+    D_80064358 = NULL;
+    return id;
+}
+
+/*
+================
+func_8003BAC8
+
+Starts a fade over value steps (at least 1) on every active channel not fading yet; bit 0 of flags selects bank channels, bit 1 the others. See func_8003BC14.
+================
+*/
+void func_8003BAC8( s32 flags, s32 value ) {
+    s32 i;
+    s32 total;
+    UnkChannel *chan;
+
+    total = value;
+    if ( value == 0 ) {
+        total = 1;
+    }
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_78 != NULL ? flags & 1 : flags & 2 ) {
+            if ( chan->unk_04 != NULL && chan->unk_10 == -1 ) {
+                if ( chan->unk_00 & 1 ) {
+                    chan->unk_1C = 1;
+                    chan->unk_10 = 0;
+                    chan->unk_00 &= ~1;
+                } else {
+                    chan->unk_1C = total;
+                    chan->unk_10 = value;
+                }
+            }
+        }
+    }
+}
 
 /*
 ================
