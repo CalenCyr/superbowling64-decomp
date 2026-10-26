@@ -73,6 +73,26 @@ typedef struct {
 } UnkSeqHeader;
 
 /*
+ * Entry of UnkSoundBank.unk_28: a signed byte (hundredths) that func_8003D6E0 turns in place into a float, adding
+ * the matching digit of unk_24.
+ */
+typedef union {
+    u8 raw;
+    f32 value;
+} UnkSoundTune;
+
+/* Entry that UnkSoundBank.unk_2C points to; func_8003D6E0 relocates it once (unk_09). Identity unknown. */
+typedef struct {
+    /* 0x00 */ u32 unk_00;          /* ROM offset, relocated unless the top byte is 0xFF */
+    /* 0x04 */ u8 unk_04[0x08 - 0x04];
+    /* 0x08 */ u8 unk_08;
+    /* 0x09 */ u8 unk_09;           /* set once relocated */
+    /* 0x0A */ u8 unk_0A[0x0C - 0x0A];
+    /* 0x0C */ s32 unk_0C;          /* offset in the bank, 0: none */
+    /* 0x10 */ s32 unk_10;          /* offset in the bank, unless unk_08 is set */
+} UnkSoundEntry;
+
+/*
  * Bank that func_8003D6E0 relocates in place (bit 31 of unk_10 marks it done); D_80064358 and D_8006435C point
  * to one; identity unknown.
  */
@@ -80,10 +100,10 @@ typedef struct {
     /* 0x00 */ u8 unk_00[0x10];
     /* 0x10 */ s32 unk_10;          /* bit 31: relocated */
     /* 0x14 */ u8 unk_14[0x20 - 0x14];
-    /* 0x20 */ s32 unk_20;          /* entries in unk_28 and unk_2C */
-    /* 0x24 */ u8 *unk_24;
-    /* 0x28 */ f32 *unk_28;
-    /* 0x2C */ s32 *unk_2C;
+    /* 0x20 */ s32 unk_20;          /* entries in unk_24, unk_28 and unk_2C */
+    /* 0x24 */ u8 *unk_24;          /* '0'-based digits */
+    /* 0x28 */ UnkSoundTune *unk_28;
+    /* 0x2C */ UnkSoundEntry **unk_2C;
 } UnkSoundBank;
 
 /* Entry of UnkSeqBank.unk_18. */

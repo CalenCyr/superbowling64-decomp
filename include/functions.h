@@ -22,7 +22,7 @@ f32 func_8003D310( UnkChannel *chan );
 void func_8003D374( UnkChannel *chan );
 void func_8003D438( UnkChannel *chan );
 f32 func_8003D54C( f32 x );
-void func_8003D6E0( UnkSoundBank *bank, s32 base );
+void func_8003D6E0( void *data, s32 base );
 s32 func_8003D878( s32 range );
 void func_8003D90C( UnkChannel *chan );
 s32 func_8003DA48( UnkSeqHeader *hdr, s32 track );
