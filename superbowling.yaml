@@ -67,14 +67,14 @@ segments:
     follows_vram: entry
     bss_size: 0xA91E0
     subsegments:
-      - [0x1060, asm]
-      - [0x2DF0, asm]
-      - [0x3990, asm]
-      - [0x3D50, asm]
-      - [0x47E0, asm]
-      - [0x4890, asm]
-      - [0x4DC0, asm]
-      - [0x51F0, asm]
+      - [0x1060, c]
+      - [0x2DF0, c]
+      - [0x3990, c]
+      - [0x3D50, c]
+      - [0x47E0, c]
+      - [0x4890, c]
+      - [0x4DC0, c]
+      - [0x51F0, c]
       - [0x53B0, asm]
       - [0x7250, asm]
       - [0xBEF0, asm]
