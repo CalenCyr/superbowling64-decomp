@@ -43,6 +43,17 @@ typedef struct {
     /* 0x05 */ u8 unk_05;
 } UnkSeqEntry;
 
+/* 7-byte envelope entry of UnkSeqHeader.unk_18, applied by func_8003B2B0; identity unknown. */
+typedef struct {
+    /* 0x00 */ u8 unk_00;           /* -> UnkChannel.unk_BF */
+    /* 0x01 */ u8 unk_01;           /* -> unk_C0 */
+    /* 0x02 */ u8 unk_02;           /* -> unk_C6 */
+    /* 0x03 */ u8 unk_03;           /* -> unk_C1 */
+    /* 0x04 */ u8 unk_04;           /* -> unk_C7 */
+    /* 0x05 */ u8 unk_05;           /* -> unk_C2 */
+    /* 0x06 */ u8 unk_06;           /* -> unk_C8 */
+} UnkEnvelope;
+
 /*
  * Header that UnkChannel.unk_74 points to. func_8003DEA0 turns its offsets (unk_0C to unk_24) into pointers in
  * place and starts one channel per entry of unk_0C; identity unknown.
@@ -54,7 +65,7 @@ typedef struct {
     /* 0x0C */ u8 **unk_0C;
     /* 0x10 */ u8 **unk_10;
     /* 0x14 */ u8 **unk_14;
-    /* 0x18 */ s32 unk_18;
+    /* 0x18 */ UnkEnvelope *unk_18;
     /* 0x1C */ UnkSeqEntry *unk_1C;
     /* 0x20 */ u16 *unk_20;
     /* 0x24 */ u8 *unk_24;
