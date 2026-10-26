@@ -6,7 +6,7 @@
 void func_8003B684( s32 flags, s16 value );
 void func_8003BF74( UnkSoundBank *bank, s32 base );
 void func_8003C088( s32 arg );
-void func_8003C13C( UnkSeqBank *bank );
+void func_8003C13C( void *data );
 void func_8003C2F0( s32 count );
 s32 func_8003C46C( void *clientData );
 void func_8003C354( UnkMsg8003C3D4 *msg );

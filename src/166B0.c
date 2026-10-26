@@ -705,7 +705,30 @@ void func_8003C0E0( s32 arg ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C13C);
+/*
+================
+func_8003C13C
+
+Turns the offsets of bank into pointers, once, and makes it the default D_80064368 if there is none yet.
+================
+*/
+void func_8003C13C( void *data ) {
+    s32 i;
+    UnkSeqBank *bank;
+
+    bank = data;
+    if ( !( bank->unk_0C & 1 ) ) {
+        if ( D_80064368 == NULL ) {
+            D_80064368 = bank;
+        }
+        bank->unk_0C = 1;
+        bank->unk_10 = 0;
+        bank->unk_14 = (u16 *)( (u8 *)bank + (s32)bank->unk_14 );
+        for ( i = 0; i < bank->unk_00; i++ ) {
+            bank->unk_18[i].unk_00 = (u8 *)data + (s32)bank->unk_18[i].unk_00;
+        }
+    }
+}
 
 /*
 ================
