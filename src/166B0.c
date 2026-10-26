@@ -141,10 +141,25 @@ INCLUDE_ASM("asm/nonmatchings/166B0", func_8003DEA0);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E10C);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E160);
+/*
+================
+func_8003E160
+
+Channel command: ends the channel's command stream.
+================
+*/
+u8 *func_8003E160( UnkChannel *chan, u8 *src ) {
+    chan->unk_38 = NULL;
+    chan->unk_34 = NULL;
+    chan->unk_74 = 0;
+    chan->unk_78 = 0;
+    chan->unk_44 = 0;
+    chan->unk_08 = 0;
+    return NULL;
+}
 
 /* Reads a value encoded as one byte, or as two bytes when the first has bit 7 set; returns the next read position. */
-u8 *func_8003E180(UnkObj8003E180 *obj, u8 *src) {
+u8 *func_8003E180(UnkChannel *obj, u8 *src) {
     u32 value = *src++;
 
     if (value & 0x80) {
@@ -154,69 +169,325 @@ u8 *func_8003E180(UnkObj8003E180 *obj, u8 *src) {
     return src;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E1B0);
+/*
+================
+func_8003E1B0
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E1D0);
+Channel command: sets unk_B8 from one byte; a non-zero value also copies unk_2C to unk_50.
+================
+*/
+u8 *func_8003E1B0( UnkChannel *chan, u8 *src ) {
+    chan->unk_B8 = *src++;
+    if ( chan->unk_B8 != 0 ) {
+        chan->unk_50 = chan->unk_2C;
+    }
+    return src;
+}
+
+/*
+================
+func_8003E1D0
+
+Channel command: clears unk_B8.
+================
+*/
+u8 *func_8003E1D0( UnkChannel *chan, u8 *src ) {
+    chan->unk_B8 = 0;
+    return src;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E1DC);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E304);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E3E8);
+/*
+================
+func_8003E3E8
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E3FC);
+Channel command: sets unk_B4 from one byte and clears unk_B2.
+================
+*/
+u8 *func_8003E3E8( UnkChannel *chan, u8 *src ) {
+    u8 value;
+
+    value = *src++;
+    chan->unk_B2 = 0;
+    chan->unk_B4 = value;
+    return src;
+}
+
+/*
+================
+func_8003E3FC
+
+Channel command: sets unk_B2 from a big-endian 16-bit value and clears unk_B4.
+================
+*/
+u8 *func_8003E3FC( UnkChannel *chan, u8 *src ) {
+    s32 hi;
+    s32 lo;
+
+    hi = *src++;
+    lo = *src++;
+    chan->unk_B4 = 0;
+    chan->unk_B2 = lo | ( hi << 8 );
+    return src;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E420);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E490);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E504);
+/*
+================
+func_8003E504
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E514);
+Channel command: clears unk_D5 and unk_68.
+================
+*/
+u8 *func_8003E504( UnkChannel *chan, u8 *src ) {
+    chan->unk_D5 = 0;
+    chan->unk_68 = 0;
+    return src;
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E544);
+/*
+================
+func_8003E514
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E554);
+Channel command: sets unk_AC from a value encoded as one byte, or as two bytes when the first is 0x80 or more.
+================
+*/
+u8 *func_8003E514( UnkChannel *chan, u8 *src ) {
+    s32 value;
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E564);
+    value = *src++;
+    if ( value >= 0x80 ) {
+        value &= 0x7F;
+        value <<= 8;
+        value |= *src++;
+    }
+    chan->unk_AC = value;
+    return src;
+}
+
+/*
+================
+func_8003E544
+
+Channel command: sets unk_B7.
+================
+*/
+u8 *func_8003E544( UnkChannel *chan, u8 *src ) {
+    chan->unk_B7 = 1;
+    return src;
+}
+
+/*
+================
+func_8003E554
+
+Channel command: sets unk_B9 from one byte.
+================
+*/
+u8 *func_8003E554( UnkChannel *chan, u8 *src ) {
+    chan->unk_B9 = *src++;
+    return src;
+}
+
+/*
+================
+func_8003E564
+
+Channel command: sets unk_BA.
+================
+*/
+u8 *func_8003E564( UnkChannel *chan, u8 *src ) {
+    chan->unk_BA = 1;
+    return src;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E574);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E5CC);
+/*
+================
+func_8003E5CC
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E5DC);
+Channel command: sets unk_D6.
+================
+*/
+u8 *func_8003E5CC( UnkChannel *chan, u8 *src ) {
+    chan->unk_D6 = 1;
+    return src;
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E5E8);
+/*
+================
+func_8003E5DC
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E5F8);
+Channel command: clears unk_D6.
+================
+*/
+u8 *func_8003E5DC( UnkChannel *chan, u8 *src ) {
+    chan->unk_D6 = 0;
+    return src;
+}
+
+/*
+================
+func_8003E5E8
+
+Channel command: sets unk_D7.
+================
+*/
+u8 *func_8003E5E8( UnkChannel *chan, u8 *src ) {
+    chan->unk_D7 = 1;
+    return src;
+}
+
+/*
+================
+func_8003E5F8
+
+Channel command: clears unk_D7.
+================
+*/
+u8 *func_8003E5F8( UnkChannel *chan, u8 *src ) {
+    chan->unk_D7 = 0;
+    return src;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E604);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E670);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E70C);
+/*
+================
+func_8003E70C
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E734);
+Channel command: sets unk_D8, unk_CE and unk_CF from three bytes.
+================
+*/
+u8 *func_8003E70C( UnkChannel *chan, u8 *src ) {
+    chan->unk_D8 = *src++;
+    chan->unk_CE = *src++;
+    chan->unk_CF = *src++;
+    return src;
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E740);
+/*
+================
+func_8003E734
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E750);
+Channel command: clears unk_CE.
+================
+*/
+u8 *func_8003E734( UnkChannel *chan, u8 *src ) {
+    chan->unk_CE = 0;
+    return src;
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E75C);
+/*
+================
+func_8003E740
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E770);
+Channel command: sets unk_D2.
+================
+*/
+u8 *func_8003E740( UnkChannel *chan, u8 *src ) {
+    chan->unk_D2 = 1;
+    return src;
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E784);
+/*
+================
+func_8003E750
+
+Channel command: clears unk_D2.
+================
+*/
+u8 *func_8003E750( UnkChannel *chan, u8 *src ) {
+    chan->unk_D2 = 0;
+    return src;
+}
+
+/*
+================
+func_8003E75C
+
+Channel command: sets unk_D3 from one byte and clears unk_D2.
+================
+*/
+u8 *func_8003E75C( UnkChannel *chan, u8 *src ) {
+    u8 value;
+
+    value = *src++;
+    chan->unk_D2 = 0;
+    chan->unk_D3 = value;
+    return src;
+}
+
+/*
+================
+func_8003E770
+
+Channel command: sets unk_BD from half of one byte.
+================
+*/
+u8 *func_8003E770( UnkChannel *chan, u8 *src ) {
+    chan->unk_BD = *src++ >> 1;
+    return src;
+}
+
+/*
+================
+func_8003E784
+
+Channel command: skips two bytes.
+================
+*/
+u8 *func_8003E784( UnkChannel *chan, u8 *src ) {
+    return src + 2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E78C);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E7D4);
+/*
+================
+func_8003E7D4
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E7E0);
+Channel command: clears unk_84.
+================
+*/
+u8 *func_8003E7D4( UnkChannel *chan, u8 *src ) {
+    chan->unk_84 = 0;
+    return src;
+}
+
+/*
+================
+func_8003E7E0
+
+Channel command: skips one byte.
+================
+*/
+u8 *func_8003E7E0( UnkChannel *chan, u8 *src ) {
+    return src + 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E7E8);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E858);
+/*
+================
+func_8003E858
+
+Channel command: sets unk_CA from one byte.
+================
+*/
+u8 *func_8003E858( UnkChannel *chan, u8 *src ) {
+    chan->unk_CA = *src++;
+    return src;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E868);
 
@@ -224,16 +495,46 @@ INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E8B8);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E908);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E958);
+/*
+================
+func_8003E958
+
+Channel command: sets unk_BC from one byte.
+================
+*/
+u8 *func_8003E958( UnkChannel *chan, u8 *src ) {
+    chan->unk_BC = *src++;
+    return src;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003E968);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003EA38);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003EA74);
+/*
+================
+func_8003EA74
+
+Channel command: sets unk_D4 from one byte.
+================
+*/
+u8 *func_8003EA74( UnkChannel *chan, u8 *src ) {
+    chan->unk_D4 = *src++;
+    return src;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003EA84);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003EAC8);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003EB38);
+/*
+================
+func_8003EB38
+
+Channel command: clears unk_AC.
+================
+*/
+u8 *func_8003EB38( UnkChannel *chan, u8 *src ) {
+    chan->unk_AC = 0;
+    return src;
+}
