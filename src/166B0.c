@@ -672,7 +672,85 @@ s32 func_8003C3D4( UnkMsg8003C3D4 *msg ) {
     return 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C46C);
+/*
+================
+func_8003C46C
+
+Player callback: handles the queued messages, then advances every active channel by one tick (commands, step streams, fade, envelope, modulation, voice update). Returns the time to the next call.
+================
+*/
+s32 func_8003C46C( void *clientData ) {
+    s32 i;
+    UnkChannel *chan;
+    f32 pitch;
+
+    while ( D_80064374 != D_80064378 ) {
+        func_8003C354( &D_80064380[D_80064374] );
+        if ( ++D_80064374 == D_8006437C ) {
+            D_80064374 = 0;
+        }
+    }
+    for ( i = -4, chan = D_8006433C; i < D_80064334 - 4; i++, chan++ ) {
+        if ( chan->unk_04 == NULL || ( chan->unk_00 & 1 ) ) {
+            continue;
+        }
+        if ( chan->unk_08 != 0 ) {
+            func_8003CCA4( chan, i );
+        }
+        chan->unk_0C += chan->unk_9C;
+        if ( chan->unk_9A != 0x7FFF ) {
+            while ( chan->unk_3C - chan->unk_0C < 0 ) {
+                if ( chan->unk_04 == NULL ) {
+                    break;
+                }
+                func_8003C75C( chan, i );
+            }
+            if ( chan->unk_04 == NULL ) {
+                continue;
+            }
+        }
+        if ( chan->unk_38 != NULL && chan->unk_14 - chan->unk_0C < 0 ) {
+            func_8003D374( chan );
+        }
+        if ( chan->unk_34 != NULL && chan->unk_18 - chan->unk_0C < 0 ) {
+            func_8003D438( chan );
+        }
+        if ( chan->unk_10 != -1 && --chan->unk_10 == -1 ) {
+            chan->unk_38 = NULL;
+            chan->unk_34 = NULL;
+            chan->unk_74 = NULL;
+            chan->unk_78 = NULL;
+            chan->unk_44 = 0;
+            chan->unk_08 = 0;
+            chan->unk_04 = NULL;
+            if ( chan->unk_C9 ) {
+                chan->unk_C9 = 0;
+                func_80042710( &D_80064338[i] );
+            }
+        }
+        if ( chan->unk_C9 ) {
+            if ( chan->unk_C3 ) {
+                func_8003CFF0( chan );
+            }
+            if ( chan->unk_D4 && chan->unk_94 - chan->unk_0C < 0 ) {
+                func_8003D200( chan );
+            }
+            pitch = chan->unk_30;
+            if ( chan->unk_D5 ) {
+                pitch += func_8003D310( chan );
+            }
+            if ( chan->unk_CE ) {
+                pitch += func_8003D2B8( chan );
+            }
+            if ( chan->unk_08 == 0 ) {
+                func_8003CE74( chan, i, pitch );
+                func_8003CD20( chan, i );
+            }
+        }
+        chan->unk_AA = (u32)( chan->unk_0C - chan->unk_40 ) >> 8;
+    }
+    return D_80064348;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C75C);
 

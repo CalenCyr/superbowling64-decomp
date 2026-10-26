@@ -4,7 +4,18 @@
 #include "structs.h"
 
 void func_8003C088( s32 arg );
+void func_8003C354( UnkMsg8003C3D4 *msg );
 s32 func_8003C3D4( UnkMsg8003C3D4 *msg );
+void func_8003C75C( UnkChannel *chan, s32 index );
+void func_8003CCA4( UnkChannel *chan, s32 index );
+void func_8003CD20( UnkChannel *chan, s32 index );
+void func_8003CE74( UnkChannel *chan, s32 index, f32 pitch );
+void func_8003CFF0( UnkChannel *chan );
+void func_8003D200( UnkChannel *chan );
+f32 func_8003D2B8( UnkChannel *chan );
+f32 func_8003D310( UnkChannel *chan );
+void func_8003D374( UnkChannel *chan );
+void func_8003D438( UnkChannel *chan );
 void func_8003D6E0( UnkSoundBank *bank, s32 base );
 s32 func_8003D878( s32 range );
 void func_8003D90C( UnkChannel *chan );

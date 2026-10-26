@@ -98,7 +98,7 @@ typedef struct {
     /* 0x00C */ s32 unk_0C;
     /* 0x010 */ s32 unk_10;          /* -1: none */
     /* 0x014 */ s32 unk_14;
-    /* 0x018 */ u8 unk_18[0x1C - 0x18];
+    /* 0x018 */ s32 unk_18;
     /* 0x01C */ u32 unk_1C;
     /* 0x020 */ f32 unk_20;
     /* 0x024 */ f32 unk_24;
@@ -132,7 +132,7 @@ typedef struct {
     /* 0x094 */ s32 unk_94;
     /* 0x098 */ s16 unk_98;
     /* 0x09A */ u16 unk_9A;
-    /* 0x09C */ s16 unk_9C;
+    /* 0x09C */ u16 unk_9C;          /* tempo: added to unk_0C every tick */
     /* 0x09E */ s16 unk_9E;
     /* 0x0A0 */ u16 unk_A0;
     /* 0x0A2 */ u16 unk_A2;
