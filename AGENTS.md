@@ -31,8 +31,17 @@ Also record:
   Compiler: `tools/gcc_2.7.2/` (decompals build of KMC gcc 2.7.2 + KMC as 2.6). Linker and objcopy: system
   `mips64-linux-gnu-*` (binutils 2.46), `ld -m elf32btsmip`. Optimisation flags not yet determined.
   Symbols outside every splat segment (libultra boot globals at 0x80000300) live in `undefined_syms.txt`. Retail ROM: `rom.z64`, SHA-1 `56937a9e9536af55ebed06480413265848c4a04a`,
-  F3DEX 2.08, libultra 2.0K. Main segment ROM 0x1060 at VRAM 0x80025C60, BSS ends 0x8010A080; code past ROM
-  0x3C2A0 runs at 0x801xxxxx (overlays, boundaries not yet mapped).
+  F3DEX 2.08, libultra 2.0K.
+- **ROM map** (from the game's `BW64FAT` file table at ROM 0x3C2A0, which main loads to 0x8010A080 at boot and
+  `func_8002889C` searches by 8.3 name):
+
+  | segment | ROM | VRAM | notes |
+  |---|---|---|---|
+  | main | 0x1060-0x3C2A0 | 0x80025C60 | 604 functions; BSS to 0x8010A080 |
+  | fat | 0x3C2A0-0x3C470 | 0x8010A080 | `BW64FAT` table: {name ptr, ROM start, ROM end, 0} |
+  | knstatic | 0x3C470-0x3C570 | 0x8010A250 | `KNSTATICSYS` |
+  | gacode, rscode, gscode, cacode, pvcode, mgcode, opcode | 0x3C570-0x6DE70 | 0x80112350 | code overlays sharing one slot; symbols suffixed `_<seg>`; text/data split points are estimates |
+  | idx, str, bgmptr, bgmwbk, septr, sewbk, bfx | 0x6DE70-0x656CD0 | - | asset files (bin) |
 - **Toolchain:** compiler and linker version and build, flags, per-unit flag overrides.
 - **Annotations:** the address marker format (for example `// FUNCTION: <MODULE> 0x...`), the stub marker and
   the data marker.
@@ -137,7 +146,7 @@ Project profile (fill in):
 | compiler dialect: what it accepts and rejects (R22) | GNU C (gcc 2.7.2): C89 plus GNU extensions; `//` comments accepted |
 | naming-style table, one row per module if styles differ (R8); without evidence, start from `style-defaults.md` | Table 1 (Quake III C style) from `decomp-code-rules/references/style-defaults.md`, all modules (user ruling); libultra keeps SDK names |
 | layout style: braces, indent, line limit, function and section banners (R23, R32, R33) | Table 1 layout: K&R braces with spaces inside parentheses, `/* ===== Name ===== */` banners |
-| placeholder patterns (R7) | `func_8XXXXXXX`, `D_8XXXXXXX`, `jtbl_`, `L8XXXXXXX` (splat defaults) |
+| placeholder patterns (R7) | `func_8XXXXXXX`, `D_8XXXXXXX`, `jtbl_`, `L8XXXXXXX` (splat defaults); overlay symbols add `_<segment>` |
 | evidence sources for names: strings, symbols, RTTI, sibling source (R7) | ROM strings; libultra 2.0K / libgultra SDK source; no symbols |
 | does the binary record source lines? (if yes, layout is [checked]: R23) | No debug info; check for `__FILE__`/`__LINE__` assert strings before relying on that |
 | parking mechanism for unfinished functions (exempt from R37) | `INCLUDE_ASM("asm/nonmatchings/<unit>", <func>);` (`include/include_asm.h`) |

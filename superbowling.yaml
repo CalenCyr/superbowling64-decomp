@@ -70,8 +70,122 @@ segments:
       - [0x32150, data]
       - { type: bss, vram: 0x80060EA0 }
 
-  - type: bin
+  # BW64FAT file table: {name, romStart, romEnd, 0} entries; loaded at boot right after main's bss.
+  - name: fat
+    type: code
     start: 0x3C2A0
-    follows_vram: main
+    vram: 0x8010A080
+    subsegments:
+      - [0x3C2A0, data]
+
+  - name: knstatic
+    type: code
+    start: 0x3C470
+    vram: 0x8010A250
+    subsegments:
+      - [0x3C470, data]
+
+  # Code overlays: all load into the same slot at 0x80112350.
+  - name: gacode
+    type: code
+    start: 0x3C570
+    vram: 0x80112350
+    exclusive_ram_id: ovl
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x3C570, asm]
+      - [0x4D820, data]
+
+  - name: rscode
+    type: code
+    start: 0x56FF0
+    vram: 0x80112350
+    exclusive_ram_id: ovl
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x56FF0, asm]
+      - [0x58EF0, data]
+
+  - name: gscode
+    type: code
+    start: 0x58F40
+    vram: 0x80112350
+    exclusive_ram_id: ovl
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x58F40, asm]
+      - [0x62130, data]
+
+  - name: cacode
+    type: code
+    start: 0x67370
+    vram: 0x80112350
+    exclusive_ram_id: ovl
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x67370, asm]
+      - [0x6A380, data]
+
+  - name: pvcode
+    type: code
+    start: 0x6A650
+    vram: 0x80112350
+    exclusive_ram_id: ovl
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x6A650, asm]
+      - [0x6A950, data]
+
+  - name: mgcode
+    type: code
+    start: 0x6BA90
+    vram: 0x80112350
+    exclusive_ram_id: ovl
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x6BA90, asm]
+      - [0x6BC90, data]
+
+  - name: opcode
+    type: code
+    start: 0x6BE70
+    vram: 0x80112350
+    exclusive_ram_id: ovl
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x6BE70, asm]
+      - [0x6DBD0, data]
+
+  - name: idx
+    type: bin
+    start: 0x6DE70
+
+  - name: str
+    type: bin
+    start: 0x767E0
+
+  - name: bgmptr
+    type: bin
+    start: 0x3D60F0
+
+  - name: bgmwbk
+    type: bin
+    start: 0x3DADF0
+
+  - name: septr
+    type: bin
+    start: 0x4D8190
+
+  - name: sewbk
+    type: bin
+    start: 0x4DB6C0
+
+  - name: bfx
+    type: bin
+    start: 0x655AD0
+
+  - name: pad
+    type: bin
+    start: 0x656CD0
 
   - [0x800000]
