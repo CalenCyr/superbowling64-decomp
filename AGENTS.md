@@ -16,20 +16,36 @@ This file is project-independent. Fill in the **Project adapter** section once p
 
 | verb | meaning | this project's command |
 |---|---|---|
-| `build` | compile every unit, compare every annotated function | `make` |
-| `match <unit>` | compile and compare one unit quickly (the inner loop) | TODO |
-| `diff <function>` | side-by-side disassembly: compiled vs retail | TODO (objdiff / asm-differ) |
-| `report` | refresh the progress report (objdiff or similar) | TODO |
-| `gate` | the checks that must stay green before a commit or merge | `make gate`: deletes `build/`, rebuilds, checks SHA-1 `56937a9e9536af55ebed06480413265848c4a04a`; success line starts `GATE OK` |
+| `build` | compile every unit, compare every annotated function | `make` (then `make report` for per-function status) |
+| `match <unit>` | compile and compare one unit quickly (the inner loop) | `make build/src/<unit>.o && python3 tools/fdiff.py build/src/<unit>.o <func>` |
+| `diff <function>` | side-by-side disassembly: compiled vs retail | `make diff UNIT=src/<unit> FUNC=<func>` (text); `tools/objdiff/objdiff-cli diff -u src/<unit> <func>` (TUI) |
+| `report` | refresh the progress report (objdiff or similar) | `make report` (objdiff 3.8.2; targets are `expected/`, refreshed by `make expected` only on a green gate) |
+| `gate` | the checks that must stay green before a commit or merge | `make gate` (about 2 s): deletes `build/`, rebuilds, checks SHA-1 `56937a9e9536af55ebed06480413265848c4a04a`; success line starts `GATE OK` |
 | `disasm` / `xref` / `class` | retail assembly, callers and callees, vtable and hierarchy evidence | `make split` (splat) → `asm/`, `assets/` |
-| `permute <function>` | the permuter, if there is one | TODO (decomp-permuter) |
-| `rules [<unit>]` | the rule checker: [match] findings (`MATCH-PENDING`) and advisory findings (naming, readability) | TODO |
+| `permute <function>` | the permuter, if there is one | not set up yet (decomp-permuter) |
+| `rules [<unit>]` | the rule checker: [match] findings (`MATCH-PENDING`) and advisory findings (naming, readability) | not written yet; until it exists, review against `decomp-code-rules` by hand |
 
 Also record:
 - **Toolchain (this project):** KMC GCC 2.7.2 (N64 SDK), user ruling. Evidence: epilogues place `addiu sp` in the
   `jr ra` delay slot throughout, including the libultra region (KMC `libgultra`); splat also detects KMC.
   Compiler: `tools/gcc_2.7.2/` (decompals build of KMC gcc 2.7.2 + KMC as 2.6). Linker and objcopy: system
-  `mips64-linux-gnu-*` (binutils 2.46), `ld -m elf32btsmip`. Optimisation flags not yet determined.
+  `mips64-linux-gnu-*` (binutils 2.46), `ld -m elf32btsmip`.
+- **Flags** (verified on five game functions): `-c -G0 -mips3 -mgp32 -mfp32 -O2`. `-O3` gave the same bytes on those
+  (no static callees); switch a unit to `-O3` only on evidence of inlining. Plain `char` is signed: retail byte
+  strings use `lbu`, so they are `u8`.
+- **C pipeline:** a C unit is a splat `c` subsegment (`src/<unit>.c`); unmatched functions stay as
+  `INCLUDE_ASM("asm/nonmatchings/<unit>", <func>);`. C is compiled by the KMC `gcc` driver, so KMC `as` 2.6
+  assembles both compiled code and included asm (modern GAS expands `move` to `or`, KMC to `addu`). Asm-only units
+  use modern GAS. `make split` never overwrites an existing `src/` file. To convert a unit: change its subsegment
+  from `asm` to `c` in `superbowling.yaml`, run `make split`, then `make gate`.
+- **Headers:** `include/common.h` (types, `INCLUDE_ASM`), `include/structs.h`, `include/variables.h`,
+  `include/functions.h`. Each type and global is declared once there (R1, R2).
+- **libultra:** 2.0K `libgultra_rom`. 153 object files (259 functions) in main match decompals' ultralib built with
+  this compiler; their names are in `symbol_addrs.txt` and their units are named `libultra/<dir>/<file>`.
+  Ambiguous matches resolved by callee or data: `piacs` at 0x80043B40 and `siacs` at 0x8004B1B0;
+  `osViGetCurrentFramebuffer` 0x8004DFE0 (reads `__osViCurr`); `__osSiRawReadIo`/`__osSiRawWriteIo` (call
+  `__osSiDeviceBusy`). `sprite` vs `spriteex` at 0x8004B2D0 is unresolved (chose `sprite`). About 50 functions
+  after `ldiv` (0x80055660) are unidentified, likely KMC libc/libgcc.
   Symbols outside every splat segment (libultra boot globals at 0x80000300) live in `undefined_syms.txt`. Retail ROM: `rom.z64`, SHA-1 `56937a9e9536af55ebed06480413265848c4a04a`,
   F3DEX 2.08, libultra 2.0K.
 - **ROM map** (from the game's `BW64FAT` file table at ROM 0x3C2A0, which main loads to 0x8010A080 at boot and
@@ -147,7 +163,7 @@ Project profile (fill in):
 | naming-style table, one row per module if styles differ (R8); without evidence, start from `style-defaults.md` | Table 1 (Quake III C style) from `decomp-code-rules/references/style-defaults.md`, all modules (user ruling); libultra keeps SDK names |
 | layout style: braces, indent, line limit, function and section banners (R23, R32, R33) | Table 1 layout: K&R braces with spaces inside parentheses, `/* ===== Name ===== */` banners |
 | placeholder patterns (R7) | `func_8XXXXXXX`, `D_8XXXXXXX`, `jtbl_`, `L8XXXXXXX` (splat defaults); overlay symbols add `_<segment>` |
-| evidence sources for names: strings, symbols, RTTI, sibling source (R7) | ROM strings; libultra 2.0K / libgultra SDK source; no symbols |
+| evidence sources for names: strings, symbols, RTTI, sibling source (R7) | ROM strings; libultra names (matched against ultralib); no symbols |
 | does the binary record source lines? (if yes, layout is [checked]: R23) | No debug info; check for `__FILE__`/`__LINE__` assert strings before relying on that |
 | parking mechanism for unfinished functions (exempt from R37) | `INCLUDE_ASM("asm/nonmatchings/<unit>", <func>);` (`include/include_asm.h`) |
 | rules this project tightens or relaxes, with the reason | |
