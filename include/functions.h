@@ -16,4 +16,9 @@ s32 func_8003F340( s32 arg );
 void *func_8003FCAC( s32 size );
 void func_8003FD2C( void *dst, void *src, s32 len );
 
+void func_800424B0( UnkVoice *voice, s32 pan );
+void func_800425D0( UnkVoice *voice, s32 volume, s32 time );
+void func_80042680( UnkVoice *voice, s32 arg1 );
+void func_80042710( UnkVoice *voice );
+
 #endif

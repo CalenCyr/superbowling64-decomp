@@ -3,6 +3,15 @@
 
 #include "common.h"
 
+/*
+ * Element of the D_80064338 array, one per channel above the first four. Its size (0x1C) and the
+ * { s16, s16, u8 } configuration func_8003B3FC passes to func_80042220 when it sets one up match libultra's
+ * ALVoice and alSynAllocVoice; unconfirmed.
+ */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x1C];
+} UnkVoice;
+
 /* Message passed to func_8003C3D4; identity unknown. */
 typedef struct {
     /* 0x00 */ u8 cmd;
@@ -86,7 +95,10 @@ typedef struct {
     /* 0x000 */ s32 unk_00;
     /* 0x004 */ u8 *unk_04;         /* command read position */
     /* 0x008 */ s32 unk_08;
-    /* 0x00C */ u8 unk_0C[0x20 - 0x0C];
+    /* 0x00C */ s32 unk_0C;
+    /* 0x010 */ s32 unk_10;          /* -1: none */
+    /* 0x014 */ u8 unk_14[0x1C - 0x14];
+    /* 0x01C */ u32 unk_1C;
     /* 0x020 */ f32 unk_20;
     /* 0x024 */ f32 unk_24;
     /* 0x028 */ u8 unk_28[0x2C - 0x28];
@@ -94,13 +106,13 @@ typedef struct {
     /* 0x030 */ f32 unk_30;
     /* 0x034 */ u8 *unk_34;
     /* 0x038 */ u8 *unk_38;
-    /* 0x03C */ u8 unk_3C[0x40 - 0x3C];
+    /* 0x03C */ s32 unk_3C;
     /* 0x040 */ s32 unk_40;
     /* 0x044 */ s32 unk_44;
     /* 0x048 */ s32 unk_48;
     /* 0x04C */ u8 unk_4C[0x50 - 0x4C];
     /* 0x050 */ f32 unk_50;
-    /* 0x054 */ u8 unk_54[0x58 - 0x54];
+    /* 0x054 */ s32 unk_54;
     /* 0x058 */ f32 unk_58;
     /* 0x05C */ f32 unk_5C;
     /* 0x060 */ f32 unk_60;
@@ -118,10 +130,10 @@ typedef struct {
     /* 0x090 */ f32 unk_90;
     /* 0x094 */ s32 unk_94;
     /* 0x098 */ s16 unk_98;
-    /* 0x09A */ u8 unk_9A[0x9C - 0x9A];
+    /* 0x09A */ u16 unk_9A;
     /* 0x09C */ s16 unk_9C;
     /* 0x09E */ s16 unk_9E;
-    /* 0x0A0 */ u8 unk_A0[0xA2 - 0xA0];
+    /* 0x0A0 */ u16 unk_A0;
     /* 0x0A2 */ u16 unk_A2;
     /* 0x0A4 */ u16 unk_A4;
     /* 0x0A6 */ s16 unk_A6;          /* entry of unk_78->unk_18 the channel was started on */
@@ -130,8 +142,8 @@ typedef struct {
     /* 0x0AC */ s16 unk_AC;
     /* 0x0AE */ s16 unk_AE;
     /* 0x0B0 */ s16 unk_B0;
-    /* 0x0B2 */ s16 unk_B2;
-    /* 0x0B4 */ s16 unk_B4;
+    /* 0x0B2 */ u16 unk_B2;
+    /* 0x0B4 */ u16 unk_B4;
     /* 0x0B6 */ u8 unk_B6;
     /* 0x0B7 */ u8 unk_B7;
     /* 0x0B8 */ u8 unk_B8;
@@ -145,7 +157,9 @@ typedef struct {
     /* 0x0C0 */ u8 unk_C0;
     /* 0x0C1 */ u8 unk_C1;
     /* 0x0C2 */ u8 unk_C2;
-    /* 0x0C3 */ u8 unk_C3[0xC6 - 0xC3];
+    /* 0x0C3 */ u8 unk_C3;
+    /* 0x0C4 */ u8 unk_C4;
+    /* 0x0C5 */ u8 unk_C5;
     /* 0x0C6 */ u8 unk_C6;
     /* 0x0C7 */ u8 unk_C7;
     /* 0x0C8 */ u8 unk_C8;
@@ -154,7 +168,8 @@ typedef struct {
     /* 0x0CB */ u8 unk_CB[0xCE - 0xCB];
     /* 0x0CE */ u8 unk_CE;
     /* 0x0CF */ u8 unk_CF;
-    /* 0x0D0 */ u8 unk_D0[0xD2 - 0xD0];
+    /* 0x0D0 */ u8 unk_D0;
+    /* 0x0D1 */ s8 unk_D1;
     /* 0x0D2 */ u8 unk_D2;
     /* 0x0D3 */ u8 unk_D3;
     /* 0x0D4 */ u8 unk_D4;

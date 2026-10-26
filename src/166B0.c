@@ -465,13 +465,47 @@ INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C46C);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C75C);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CCA4);
+/*
+================
+func_8003CCA4
+
+Stops voice index if the channel had started it, then starts it again with unk_08 and clears unk_08.
+================
+*/
+void func_8003CCA4( UnkChannel *chan, s32 index ) {
+    if ( chan->unk_C9 ) {
+        func_80042710( &D_80064338[index] );
+    }
+    chan->unk_C9 = 1;
+    func_80042680( &D_80064338[index], chan->unk_08 );
+    chan->unk_08 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CD20);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CE74);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CF80);
+/*
+================
+func_8003CF80
+
+Sets unk_54 from unk_40 and unk_B2, or from unk_3C and unk_B4, or to unk_40 + 0x7FFFFFFF when unk_9A is 0x7FFF; copies unk_C0 and unk_BF to unk_C4 and unk_C5 and sets unk_C3.
+================
+*/
+void func_8003CF80( UnkChannel *chan ) {
+    if ( chan->unk_9A != 0x7FFF ) {
+        if ( chan->unk_B2 != 0 ) {
+            chan->unk_54 = chan->unk_40 + ( chan->unk_B2 << 8 );
+        } else {
+            chan->unk_54 = chan->unk_3C - ( chan->unk_B4 << 8 );
+        }
+    } else {
+        chan->unk_54 = chan->unk_40 + 0x7FFFFFFF;
+    }
+    chan->unk_C3 = 1;
+    chan->unk_C4 = chan->unk_C0;
+    chan->unk_C5 = chan->unk_BF;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CFF0);
 
@@ -488,9 +522,60 @@ void func_8003D1E4( UnkChannel *chan ) {
     chan->unk_DA = chan->unk_BD & 0x40;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D200);
+/*
+================
+func_8003D200
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D2B8);
+Advances unk_94 in steps of 0x100 up to unk_0C, moving unk_BD up to 0x7F or down to 0 by unk_D4 / 64 per step, reversing at either end.
+================
+*/
+void func_8003D200( UnkChannel *chan ) {
+    u32 step;
+
+    do {
+        step = chan->unk_D9 + chan->unk_D4;
+        chan->unk_94 += 0x100;
+        if ( step < 0x40 ) {
+            chan->unk_D9 = step;
+        } else {
+            chan->unk_D9 = step & 0x3F;
+            step >>= 6;
+            if ( !chan->unk_DA ) {
+                chan->unk_BD += step;
+                if ( chan->unk_BD >= 0x80 ) {
+                    chan->unk_BD = 0x7F;
+                    chan->unk_DA = 1;
+                }
+            } else {
+                chan->unk_BD -= step;
+                if ( chan->unk_BD >= 0x80 || chan->unk_BD == 0 ) {
+                    chan->unk_BD = 0;
+                    chan->unk_DA = 0;
+                }
+            }
+        }
+    } while ( chan->unk_94 - chan->unk_0C < 0 );
+}
+
+/*
+================
+func_8003D2B8
+
+Counts down unk_D0; at zero toggles unk_D1 between 0 (for unk_CF steps) and unk_D8 (for unk_CE steps). Returns unk_D1.
+================
+*/
+f32 func_8003D2B8( UnkChannel *chan ) {
+    if ( --chan->unk_D0 == 0 ) {
+        if ( chan->unk_D1 == 0 ) {
+            chan->unk_D1 = chan->unk_D8;
+            chan->unk_D0 = chan->unk_CE;
+        } else {
+            chan->unk_D1 = 0;
+            chan->unk_D0 = chan->unk_CF;
+        }
+    }
+    return chan->unk_D1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D310);
 

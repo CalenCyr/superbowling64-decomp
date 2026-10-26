@@ -5,11 +5,12 @@
 #include "structs.h"
 
 extern s32 D_8005CE4C;
-extern s16 D_8006434C;
-extern s16 D_8006434E;
+extern u16 D_8006434C;             /* scale for bank channels */
+extern u16 D_8006434E;             /* scale for the other channels */
 extern s32 D_80064334;              /* number of entries in D_8006433C */
 extern UnkChannel *D_8006433C;
 extern UnkChannel *D_80064340;      /* &D_8006433C[4] */
+extern UnkVoice *D_80064338;        /* one per channel from D_80064340 on */
 extern s32 D_80064344;
 extern s32 D_80064348;
 extern s32 D_80064350;              /* next channel id */
