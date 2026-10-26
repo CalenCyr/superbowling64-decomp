@@ -1,0 +1,9 @@
+rom.z64
+*.z64
+build/
+asm/
+assets/
+__pycache__/
+*.ld
+undefined_*.txt
+.splache
