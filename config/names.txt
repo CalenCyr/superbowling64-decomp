@@ -166,6 +166,11 @@ fxBus	ALVoiceConfig+0x02	evidence: SDK member name
 unityPitch	ALVoiceConfig+0x04	evidence: SDK member name
 next	ALPlayer+0x00	evidence: SDK member name
 clientData	ALPlayer+0x04	evidence: SDK member name
+handler	ALPlayer+0x08	evidence: SDK member name
+callTime	ALPlayer+0x0C	evidence: SDK member name
+samplesLeft	ALPlayer+0x10	evidence: SDK member name (n_alSynAddPlayer writes it)
+node, pvoice, table, clientPrivate, state, priority, fxBus, unityPitch	N_ALVoice	evidence: SDK member names; n_alSynAllocVoice writes 0x08, 0x0C, 0x14, 0x16, 0x18, 0x1A
+ALLink, ALMicroTime	ultra64.h	evidence: SDK types
 cmd	sndMsg_t+0x00	invented: SNDMSG_*
 arg	sndMsg_t+0x04	invented: sound id, or the effect setting for SNDMSG_SETFX
 program	drumEntry_t+0x00	invented: replaces sndChannel_t.program
