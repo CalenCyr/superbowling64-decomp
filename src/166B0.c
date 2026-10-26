@@ -42,19 +42,109 @@ INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BE60);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BEEC);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BF74);
+/*
+================
+func_8003BF74
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BFB0);
+Relocates bank to base and makes it the default D_8006435C if there is none yet.
+================
+*/
+void func_8003BF74( UnkSoundBank *bank, s32 base ) {
+    func_8003D6E0( bank, base );
+    if ( D_8006435C == NULL ) {
+        D_8006435C = bank;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BFD8);
+/*
+================
+func_8003BFB0
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003BFFC);
+Makes bank the current D_80064358 if it is relocated; returns D_80064358.
+================
+*/
+UnkSoundBank *func_8003BFB0( UnkSoundBank *bank ) {
+    if ( bank != NULL && bank->unk_10 < 0 ) {
+        D_80064358 = bank;
+    }
+    return D_80064358;
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C008);
+/*
+================
+func_8003BFD8
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C064);
+Makes bank the default D_8006435C if it is relocated.
+================
+*/
+void func_8003BFD8( UnkSoundBank *bank ) {
+    if ( bank != NULL && bank->unk_10 < 0 ) {
+        D_8006435C = bank;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C088);
+/*
+================
+func_8003BFFC
+
+Returns the default bank D_8006435C.
+================
+*/
+UnkSoundBank *func_8003BFFC( void ) {
+    return D_8006435C;
+}
+
+/*
+================
+func_8003C008
+
+Returns unk_7C of the first channel with the given id, or 0.
+================
+*/
+s32 func_8003C008( s32 id ) {
+    s32 i;
+    UnkChannel *chan;
+
+    if ( id == 0 ) {
+        return 0;
+    }
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_44 == id ) {
+            return chan->unk_7C;
+        }
+    }
+    return 0;
+}
+
+/*
+================
+func_8003C064
+
+Queues message 0 with arg.
+================
+*/
+void func_8003C064( s32 arg ) {
+    UnkMsg8003C3D4 msg;
+
+    msg.cmd = 0;
+    msg.arg = arg;
+    func_8003C3D4( &msg );
+}
+
+/*
+================
+func_8003C088
+
+Queues message 1 with arg.
+================
+*/
+void func_8003C088( s32 arg ) {
+    UnkMsg8003C3D4 msg;
+
+    msg.cmd = 1;
+    msg.arg = arg;
+    func_8003C3D4( &msg );
+}
 
 void func_8003C0B0(s32 arg) {
     UnkMsg8003C3D4 msg;
@@ -69,31 +159,179 @@ INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C0E0);
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C13C);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C1C0);
+/*
+================
+func_8003C1C0
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C1C8);
+Returns obj->unk_04.
+================
+*/
+s32 func_8003C1C0( UnkStruct8003C1EC *obj ) {
+    return obj->unk_04;
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C1D4);
+/*
+================
+func_8003C1C8
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C1E0);
+Sets the default bank D_80064368.
+================
+*/
+void func_8003C1C8( UnkSeqBank *bank ) {
+    D_80064368 = bank;
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C1EC);
+/*
+================
+func_8003C1D4
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C1F4);
+Sets D_8006436C.
+================
+*/
+void func_8003C1D4( s32 value ) {
+    D_8006436C = value;
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C1FC);
+/*
+================
+func_8003C1E0
+
+Returns the default bank D_80064368.
+================
+*/
+UnkSeqBank *func_8003C1E0( void ) {
+    return D_80064368;
+}
+
+/*
+================
+func_8003C1EC
+
+Sets obj->unk_10.
+================
+*/
+void func_8003C1EC( UnkStruct8003C1EC *obj, UnkSoundBank *bank ) {
+    obj->unk_10 = bank;
+}
+
+/*
+================
+func_8003C1F4
+
+Returns obj->unk_10.
+================
+*/
+UnkSoundBank *func_8003C1F4( UnkStruct8003C1EC *obj ) {
+    return obj->unk_10;
+}
+
+/*
+================
+func_8003C1FC
+
+Sets D_8005CE4C.
+================
+*/
+void func_8003C1FC( s32 value ) {
+    D_8005CE4C = value;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C208);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C26C);
+/*
+================
+func_8003C26C
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C2E4);
+Returns unk_20 of the header, or unk_14 of the bank, of the first channel with the given id, or NULL.
+================
+*/
+void *func_8003C26C( s32 id ) {
+    s32 i;
+    UnkChannel *chan;
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C2F0);
+    if ( id == 0 ) {
+        return NULL;
+    }
+    for ( i = 0, chan = D_8006433C; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_44 == id ) {
+            if ( chan->unk_74 != NULL ) {
+                return chan->unk_74->unk_20;
+            }
+            return chan->unk_78->unk_14;
+        }
+    }
+    return NULL;
+}
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C354);
+/*
+================
+func_8003C2E4
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C3D4);
+Sets the D_80064370 callback.
+================
+*/
+void func_8003C2E4( void (*callback)( s32 id, s32 value ) ) {
+    D_80064370 = callback;
+}
+
+/*
+================
+func_8003C2F0
+
+Allocates the message ring buffer with count entries, clamped to [0x40, 0x400].
+================
+*/
+void func_8003C2F0( s32 count ) {
+    if ( count < 0x40 ) {
+        count = 0x40;
+    } else if ( count > 0x400 ) {
+        count = 0x400;
+    }
+    D_80064380 = func_8003FCAC( count * sizeof( UnkMsg8003C3D4 ) );
+    D_8006437C = count;
+    D_80064378 = 0;
+    D_80064374 = 0;
+}
+
+/*
+================
+func_8003C354
+
+Handles one queued message: 0 and 1 change bit 0 of unk_00 on the channels of msg->arg, 2 calls func_8003F340.
+================
+*/
+void func_8003C354( UnkMsg8003C3D4 *msg ) {
+    switch ( msg->cmd ) {
+    case 0:
+        func_8003E10C( msg->arg, ~1, 1 );
+        break;
+    case 1:
+        func_8003E10C( msg->arg, ~1, 0 );
+        break;
+    case 2:
+        func_8003F340( msg->arg );
+        break;
+    }
+}
+
+/*
+================
+func_8003C3D4
+
+Appends msg to the ring buffer; returns 0 if it is full, else 1.
+================
+*/
+s32 func_8003C3D4( UnkMsg8003C3D4 *msg ) {
+    s32 next;
+
+    next = ( D_80064378 + 1 ) % D_8006437C;
+    if ( next == D_80064374 ) {
+        return 0;
+    }
+    func_8003FD2C( &D_80064380[D_80064378], msg, sizeof( UnkMsg8003C3D4 ) );
+    D_80064378 = next;
+    return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C46C);
 
