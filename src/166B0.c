@@ -1,3 +1,5 @@
+/* 166B0.c -- sequenced sound channels: channel commands, voice updates and the player callback */
+
 #include "common.h"
 #include "ultra64.h"
 #include "functions.h"
@@ -121,11 +123,18 @@ void func_8003B3FC( UnkAudioConfig *config ) {
     func_8003FCDC();
 }
 
-void func_8003B684(s32 flags, s16 value) {
-    if (flags & 1) {
+/*
+================
+func_8003B684
+
+Sets the volume scale of bank channels (bit 0 of flags) and of the other channels (bit 1).
+================
+*/
+void func_8003B684( s32 flags, s16 value ) {
+    if ( flags & 1 ) {
         D_8006434C = value;
     }
-    if (flags & 2) {
+    if ( flags & 2 ) {
         D_8006434E = value;
     }
 }
@@ -1550,14 +1559,21 @@ u8 *func_8003E160( UnkChannel *chan, u8 *src ) {
     return NULL;
 }
 
-/* Reads a value encoded as one byte, or as two bytes when the first has bit 7 set; returns the next read position. */
-u8 *func_8003E180(UnkChannel *obj, u8 *src) {
+/*
+================
+func_8003E180
+
+Channel command: sets the program unk_AE from a value encoded as one byte, or as two bytes when the first has
+bit 7 set.
+================
+*/
+u8 *func_8003E180( UnkChannel *chan, u8 *src ) {
     u32 value = *src++;
 
-    if (value & 0x80) {
-        value = *src++ | ((value & 0x7F) << 8);
+    if ( value & 0x80 ) {
+        value = *src++ | ( ( value & 0x7F ) << 8 );
     }
-    obj->unk_AE = value;
+    chan->unk_AE = value;
     return src;
 }
 
