@@ -1,0 +1,4 @@
+# Allow list for tools/rules.py, one entry per line:
+#   asm-helper NAME     an inline-asm function or macro the evidence shows the original had (R18); its
+#                       callers still count as matched, and are listed
+#   original-asm NAME   a function the evidence shows was written in assembly: ORIGINAL-ASM, counted neither way

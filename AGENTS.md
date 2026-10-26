@@ -23,7 +23,7 @@ This file is project-independent. Fill in the **Project adapter** section once p
 | `gate` | the checks that must stay green before a commit or merge | `make gate` (about 2 s): deletes `build/`, rebuilds, checks SHA-1 `56937a9e9536af55ebed06480413265848c4a04a`; success line starts `GATE OK` |
 | `disasm` / `xref` / `class` | retail assembly, callers and callees, vtable and hierarchy evidence | `make split` (splat) → `asm/`, `assets/` |
 | `permute <function>` | the permuter, if there is one | not set up yet (decomp-permuter) |
-| `rules [<unit>]` | the rule checker: [match] findings (`MATCH-PENDING`) and advisory findings (naming, readability) | not written yet; until it exists, review against `decomp-code-rules` by hand |
+| `rules [<unit>]` | the rule checker: [match] findings (`MATCH-PENDING`) and advisory findings (naming, readability) | `make rules [UNIT=src/<unit>]` (`tools/rules.py`; `--report report.json` limits MATCH-PENDING to exact functions, `--json` feeds `make report`'s headline; allow list `config/rules.txt`; its tests: `make rules-test`). It can't see Section F patterns that need the reader test (see its docstring) |
 
 Also record:
 - **Toolchain (this project):** KMC GCC 2.7.2 (N64 SDK), user ruling. Evidence: epilogues place `addiu sp` in the

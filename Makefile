@@ -22,7 +22,7 @@ C_FILES   := $(shell find src -name '*.c' 2>/dev/null)
 BIN_FILES := $(shell find assets -name '*.bin' 2>/dev/null)
 O_FILES   := $(S_FILES:%.s=$(BUILD)/%.o) $(C_FILES:%.c=$(BUILD)/%.o) $(BIN_FILES:%.bin=$(BUILD)/%.o)
 
-.PHONY: all split gate clean expected report diff
+.PHONY: all split gate clean expected report diff rules rules-test
 
 OBJDIFF  := tools/objdiff/objdiff-cli
 
@@ -68,7 +68,15 @@ objdiff.json: $(C_FILES) tools/objdiff_config.py
 
 report: all objdiff.json
 	$(OBJDIFF) report generate -o report.json
-	python3 tools/progress.py report.json
+	-python3 tools/rules.py --no-advisory --report report.json --json $(BUILD)/rules.json > /dev/null
+	python3 tools/progress.py report.json --rules $(BUILD)/rules.json
+
+# Rule checker: make rules [UNIT=src/<unit>] (all src/**/*.c by default); exits non-zero on [match] findings.
+rules:
+	python3 tools/rules.py $(UNIT)
+
+rules-test:
+	python3 tools/rules_tests/run.py
 
 # make diff UNIT=src/166B0 FUNC=func_8003C0B0  (text diff; `$(OBJDIFF) diff -u <unit> <func>` for the TUI)
 diff: all
