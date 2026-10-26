@@ -8,6 +8,7 @@ s32 func_8003C3D4( UnkMsg8003C3D4 *msg );
 void func_8003D6E0( UnkSoundBank *bank, s32 base );
 s32 func_8003D878( s32 range );
 void func_8003D90C( UnkChannel *chan );
+s32 func_8003DA48( UnkSeqHeader *hdr, s32 track );
 void func_8003DC10( s32 *table, s32 base, s32 count );
 s32 func_8003DEA0( UnkSeqHeader *hdr );
 s32 func_8003DC48( UnkChannel *chan, UnkSeqBank *bank, s32 index, s32 arg3, s32 arg4, s32 priority );
