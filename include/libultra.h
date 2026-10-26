@@ -42,5 +42,6 @@ typedef volatile s64 vs64;
 #include <PR/rcp.h>
 #include <PR/os.h>
 #include <PR/mbi.h>
+#include <PR/sptask.h>
 
 #endif
