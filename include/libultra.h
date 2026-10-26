@@ -32,7 +32,11 @@ typedef volatile s64 vs64;
 #define FALSE 0
 #endif
 
+/* the game's microcode is F3DEX 2.08 */
+#define F3DEX_GBI_2
+
 #include <PR/rcp.h>
 #include <PR/os.h>
+#include <PR/mbi.h>
 
 #endif
