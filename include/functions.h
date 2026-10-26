@@ -41,10 +41,11 @@ s32 func_8003FCDC( void );
 void func_800421D0( UnkPlayer *player );
 void func_80042220( UnkVoice *voice, UnkVoiceConfig *config );
 
+void func_80042410( UnkVoice *voice, u8 fx );
 void func_800424B0( UnkVoice *voice, s32 pan );
 void func_80042540( UnkVoice *voice, f32 pitch );
 void func_800425D0( UnkVoice *voice, s32 volume, s32 time );
-void func_80042680( UnkVoice *voice, s32 arg1 );
+void func_80042680( UnkVoice *voice, UnkSoundEntry *sound );
 void func_80042710( UnkVoice *voice );
 
 #endif

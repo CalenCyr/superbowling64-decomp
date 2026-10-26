@@ -67,7 +67,7 @@ typedef struct {
     /* 0x14 */ u8 **unk_14;
     /* 0x18 */ UnkEnvelope *unk_18;
     /* 0x1C */ UnkSeqEntry *unk_1C;
-    /* 0x20 */ u16 *unk_20;
+    /* 0x20 */ u16 *unk_20;         /* sound of each program; 0xFFFF: none */
     /* 0x24 */ u8 *unk_24;
     /* 0x28 */ s32 unk_28;          /* set once the offsets are relocated */
 } UnkSeqHeader;
@@ -122,7 +122,7 @@ typedef struct {
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ s32 unk_0C;          /* bit 0: relocated */
     /* 0x10 */ UnkSoundBank *unk_10;
-    /* 0x14 */ u8 *unk_14;
+    /* 0x14 */ u16 *unk_14;         /* sound of each program */
     /* 0x18 */ UnkSeqBankEntry unk_18[1];  /* unk_00 entries */
 } UnkSeqBank;
 
@@ -158,7 +158,7 @@ typedef struct {
 typedef struct {
     /* 0x000 */ s32 unk_00;
     /* 0x004 */ u8 *unk_04;         /* command read position */
-    /* 0x008 */ s32 unk_08;
+    /* 0x008 */ UnkSoundEntry *unk_08;  /* sound to start on the voice, NULL: none */
     /* 0x00C */ s32 unk_0C;
     /* 0x010 */ s32 unk_10;          /* -1: none */
     /* 0x014 */ s32 unk_14;
@@ -205,7 +205,7 @@ typedef struct {
     /* 0x0A8 */ u16 unk_A8;
     /* 0x0AA */ u16 unk_AA;
     /* 0x0AC */ u16 unk_AC;
-    /* 0x0AE */ s16 unk_AE;
+    /* 0x0AE */ u16 unk_AE;          /* program */
     /* 0x0B0 */ s16 unk_B0;
     /* 0x0B2 */ u16 unk_B2;
     /* 0x0B4 */ u16 unk_B4;

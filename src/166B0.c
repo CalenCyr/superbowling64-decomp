@@ -4,6 +4,9 @@
 #include "structs.h"
 #include "variables.h"
 
+/* The low byte of x as a signed value. */
+#define SEXT8( x ) ( ( ( x ) & 0x80 ) ? ( ( x ) & 0xFF ) - 0x100 : ( ( x ) & 0xFF ) )
+
 /*
 ================
 SetEnvelope
@@ -781,7 +784,7 @@ func_8003C26C
 Returns unk_20 of the header, or unk_14 of the bank, of the first channel with the given id, or NULL.
 ================
 */
-void *func_8003C26C( s32 id ) {
+u16 *func_8003C26C( s32 id ) {
     s32 i;
     UnkChannel *chan;
 
@@ -891,7 +894,7 @@ s32 func_8003C46C( void *clientData ) {
         if ( chan->unk_04 == NULL || ( chan->unk_00 & 1 ) ) {
             continue;
         }
-        if ( chan->unk_08 != 0 ) {
+        if ( chan->unk_08 != NULL ) {
             func_8003CCA4( chan, i );
         }
         chan->unk_0C += chan->unk_9C;
@@ -918,7 +921,7 @@ s32 func_8003C46C( void *clientData ) {
             chan->unk_74 = NULL;
             chan->unk_78 = NULL;
             chan->unk_44 = 0;
-            chan->unk_08 = 0;
+            chan->unk_08 = NULL;
             chan->unk_04 = NULL;
             if ( chan->unk_C9 ) {
                 chan->unk_C9 = 0;
@@ -939,7 +942,7 @@ s32 func_8003C46C( void *clientData ) {
             if ( chan->unk_CE ) {
                 pitch += func_8003D2B8( chan );
             }
-            if ( chan->unk_08 == 0 ) {
+            if ( chan->unk_08 == NULL ) {
                 func_8003CE74( chan, i, pitch );
                 func_8003CD20( chan, i );
             }
@@ -949,7 +952,127 @@ s32 func_8003C46C( void *clientData ) {
     return D_80064348;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C75C);
+/*
+================
+func_8003C75C
+
+Runs the channel's commands up to its next note, then plays it: length, velocity, program (or drum map entry), sound, pitch and effect; the rest note 0x60 releases the voice. A channel without commands left stops its voice.
+================
+*/
+void func_8003C75C( UnkChannel *chan, s32 index ) {
+    u8 *src;
+    s32 note;
+    // RULE-EXCEPTION: R30, the command, length and detune bytes share one local; separate locals
+    // change the register allocation.
+    u8 byte;
+    u8 value;
+    u16 sound;
+    UnkSoundBank *bank;
+    u8 fx;
+
+    src = chan->unk_04;
+    if ( src != NULL ) {
+    next:
+        byte = *src;
+        if ( byte >= 0x80 ) {
+            src = D_8005CB70[byte & 0x7F]( chan, src + 1 );
+            if ( src != NULL ) {
+                goto next;
+            }
+        }
+    }
+    chan->unk_04 = src;
+    if ( src != NULL ) {
+        chan->unk_4C = chan->unk_50;
+        note = *chan->unk_04++;
+        if ( chan->unk_D2 ) {
+            value = *chan->unk_04++;
+            chan->unk_BB = value;
+            if ( value >= 0x80 ) {
+                chan->unk_BB = value & 0x7F;
+                chan->unk_D2 = 0;
+                chan->unk_D3 = chan->unk_BB;
+            }
+        } else {
+            chan->unk_BB = chan->unk_D3;
+        }
+        if ( chan->unk_AC != 0 ) {
+            if ( chan->unk_B7 == 0 ) {
+                chan->unk_9A = chan->unk_AC;
+            } else {
+                chan->unk_B7 = 0;
+                byte = *chan->unk_04++;
+                if ( byte < 0x80 ) {
+                    chan->unk_9A = byte;
+                } else {
+                    chan->unk_9A = *chan->unk_04++ + ( ( byte & 0x7F ) << 8 );
+                }
+            }
+        } else {
+            byte = *chan->unk_04++;
+            if ( byte < 0x80 ) {
+                chan->unk_9A = byte;
+            } else {
+                chan->unk_9A = *chan->unk_04++ + ( ( byte & 0x7F ) << 8 );
+            }
+        }
+        chan->unk_40 = chan->unk_3C;
+        chan->unk_3C += chan->unk_9A << 8;
+        chan->unk_AA = 0;
+        chan->unk_D1 = 0;
+        chan->unk_D0 = chan->unk_CF;
+        if ( chan->unk_74 != NULL && chan->unk_84 == NULL && chan->unk_74->unk_20[chan->unk_AE] == 0xFFFF ) {
+            note = 0x60;
+        }
+        if ( note != 0x60 ) {
+            bank = chan->unk_7C;
+            if ( chan->unk_84 != NULL ) {
+                chan->unk_AE = chan->unk_84[note].unk_00;
+                chan->unk_BD = chan->unk_84[note].unk_04 >> 1;
+                SetEnvelope( chan, &chan->unk_74->unk_18[chan->unk_84[note].unk_02].unk_00 );
+                note = chan->unk_84[note].unk_05;
+            }
+            if ( !chan->unk_D6 ) {
+                func_8003CF80( chan );
+            }
+            if ( chan->unk_D4 ) {
+                func_8003D1E4( chan );
+            }
+            sound = chan->unk_AE;
+            if ( chan->unk_74 != NULL ) {
+                sound = chan->unk_74->unk_20[sound];
+            } else {
+                sound = chan->unk_78->unk_14[sound];
+            }
+            if ( !chan->unk_D7 ) {
+                chan->unk_08 = bank->unk_2C[sound];
+                if ( chan->unk_C9 && chan->unk_A0 != 0 ) {
+                    chan->unk_A0 = 0;
+                    func_800425D0( &D_80064338[index], 0, D_80064348 );
+                } else {
+                    func_8003CCA4( chan, index );
+                }
+            }
+            chan->unk_2C = note + bank->unk_28[sound].value;
+            byte = chan->unk_B9 * ( 1 - chan->unk_BA );
+            chan->unk_2C += SEXT8( byte );
+            fx = chan->unk_CA;
+            if ( fx != chan->unk_CC ) {
+                chan->unk_CC = fx;
+                func_80042410( &D_80064338[index], chan->unk_CB + ( ( ( 0x80 - chan->unk_CB ) * fx ) >> 7 ) );
+            }
+        } else if ( chan->unk_C3 < 4 ) {
+            chan->unk_C3 = 4;
+            chan->unk_C5 = 1;
+            chan->unk_54 = chan->unk_0C;
+            chan->unk_CD = chan->unk_C4;
+        }
+    } else if ( chan->unk_C9 ) {
+        chan->unk_C9 = 0;
+        func_800425D0( &D_80064338[index], 0, D_80064348 );
+        func_80042710( &D_80064338[index] );
+    }
+}
 
 /*
 ================
@@ -964,7 +1087,7 @@ void func_8003CCA4( UnkChannel *chan, s32 index ) {
     }
     chan->unk_C9 = 1;
     func_80042680( &D_80064338[index], chan->unk_08 );
-    chan->unk_08 = 0;
+    chan->unk_08 = NULL;
 }
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CD20);
@@ -1423,7 +1546,7 @@ u8 *func_8003E160( UnkChannel *chan, u8 *src ) {
     chan->unk_74 = NULL;
     chan->unk_78 = NULL;
     chan->unk_44 = 0;
-    chan->unk_08 = 0;
+    chan->unk_08 = NULL;
     return NULL;
 }
 
