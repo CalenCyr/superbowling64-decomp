@@ -13,12 +13,12 @@ This repository contains no game code, assets or ROM. You need your own copy of 
 
 | | matched under the rules | bytes matched |
 |---|---|---|
-| all code | 429 / 915 functions | 87,636 / 335,940 bytes (26.1%) |
-| game | 100 / 586 functions | 12,520 / 260,824 bytes (4.8%) |
+| all code | 449 / 906 functions | 91,412 / 335,856 bytes (27.2%) |
+| game | 120 / 577 functions | 16,296 / 260,740 bytes (6.2%) |
 | libultra | 329 / 329 functions | 75,116 / 75,116 bytes (100%) |
 
 "Matched under the rules" counts functions whose bytes match *and* whose source passes the project's code rules
-(no fake matches). Run `make report` for current numbers; live progress is on
+(no fake matches); 10 hand-written assembly helpers are listed separately as original assembly. Run `make report` for current numbers; live progress is on
 [ByteMatch](https://bytematch.dev/CalenCyr/superbowling64-decomp), updated by CI on every push to `main`.
 
 ## What's known about the ROM
