@@ -969,7 +969,36 @@ void func_8003CCA4( UnkChannel *chan, s32 index ) {
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CD20);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CE74);
+/*
+================
+func_8003CE74
+
+Updates the pitch of voice index: the note unk_2C (gliding from unk_4C over unk_B8 ticks) plus offset and unk_24, in semitones; sent only when it changed, capped at a ratio of 2.
+================
+*/
+void func_8003CE74( UnkChannel *chan, s32 index, f32 offset ) {
+    f32 pitch;
+
+    pitch = chan->unk_2C;
+    if ( chan->unk_B8 != 0 ) {
+        if ( chan->unk_B8 < chan->unk_AA ) {
+            chan->unk_50 = pitch;
+        } else {
+            pitch = chan->unk_4C + ( pitch - chan->unk_4C ) / chan->unk_B8 * chan->unk_AA;
+            chan->unk_50 = pitch;
+        }
+    }
+    pitch += offset + chan->unk_24;
+    if ( pitch != chan->unk_28 ) {
+        chan->unk_28 = pitch;
+        pitch = func_8003D54C( pitch * ( 1.0 / 12 ) );
+        if ( pitch > 2.0 ) {
+            pitch = 2.0f;
+            chan->unk_BB = 0;
+        }
+        func_80042540( &D_80064338[index], pitch );
+    }
+}
 
 /*
 ================
@@ -1160,7 +1189,38 @@ void func_8003D374( UnkChannel *chan ) {
     } while ( chan->unk_14 - chan->unk_0C < 0 );
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D438);
+/*
+================
+func_8003D438
+
+Advances unk_18 in steps of 0x100 up to unk_0C, reading a new pitch offset unk_70 (and unk_24) and step length from the unk_34 stream each time unk_A4 runs out.
+================
+*/
+void func_8003D438( UnkChannel *chan ) {
+    u8 value;
+
+    do {
+        chan->unk_18 += 0x100;
+        if ( --chan->unk_A4 == 0 ) {
+            value = *chan->unk_34++;
+            if ( value >= 0x80 ) {
+                chan->unk_70 = (f32)( value & 0x7F ) - 64.0;
+                chan->unk_24 = chan->unk_70 * chan->unk_6C;
+                value = *chan->unk_34++;
+                if ( value >= 0x80 ) {
+                    chan->unk_A4 = ( value & 0x7F ) << 8;
+                    chan->unk_A4 += *chan->unk_34++ + 2;
+                } else {
+                    chan->unk_A4 = value + 2;
+                }
+            } else {
+                chan->unk_70 = (f32)value - 64.0;
+                chan->unk_24 = chan->unk_70 * chan->unk_6C;
+                chan->unk_A4 = 1;
+            }
+        }
+    } while ( chan->unk_18 - chan->unk_0C < 0 );
+}
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D54C);
 

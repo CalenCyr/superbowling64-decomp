@@ -155,7 +155,7 @@ typedef struct {
     /* 0x040 */ s32 unk_40;
     /* 0x044 */ s32 unk_44;
     /* 0x048 */ s32 unk_48;
-    /* 0x04C */ u8 unk_4C[0x50 - 0x4C];
+    /* 0x04C */ f32 unk_4C;
     /* 0x050 */ f32 unk_50;
     /* 0x054 */ s32 unk_54;
     /* 0x058 */ f32 unk_58;

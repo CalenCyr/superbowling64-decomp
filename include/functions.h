@@ -21,6 +21,7 @@ f32 func_8003D2B8( UnkChannel *chan );
 f32 func_8003D310( UnkChannel *chan );
 void func_8003D374( UnkChannel *chan );
 void func_8003D438( UnkChannel *chan );
+f32 func_8003D54C( f32 x );
 void func_8003D6E0( UnkSoundBank *bank, s32 base );
 s32 func_8003D878( s32 range );
 void func_8003D90C( UnkChannel *chan );
@@ -41,6 +42,7 @@ void func_800421D0( UnkPlayer *player );
 void func_80042220( UnkVoice *voice, UnkVoiceConfig *config );
 
 void func_800424B0( UnkVoice *voice, s32 pan );
+void func_80042540( UnkVoice *voice, f32 pitch );
 void func_800425D0( UnkVoice *voice, s32 volume, s32 time );
 void func_80042680( UnkVoice *voice, s32 arg1 );
 void func_80042710( UnkVoice *voice );
