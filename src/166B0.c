@@ -1136,7 +1136,53 @@ s32 func_8003D878( s32 range ) {
 
 INCLUDE_ASM("asm/nonmatchings/166B0", func_8003D90C);
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003DA48);
+/*
+================
+func_8003DA48
+
+Picks the channel index for track of hdr (-1: the master channel, which prefers the first four). Takes a free channel, else the bank channel of lowest priority, else a channel of another header, else one already on this track, else one by track number.
+================
+*/
+s32 func_8003DA48( UnkSeqHeader *hdr, s32 track ) {
+    s32 i;
+    s32 best;
+    s32 lowest;
+    UnkChannel *chan;
+
+    if ( track < 0 ) {
+        for ( i = 0, chan = D_8006433C; i < 4; i++, chan++ ) {
+            if ( chan->unk_04 == NULL ) {
+                return i;
+            }
+        }
+    }
+    for ( i = 4, chan = D_80064340; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_04 == NULL ) {
+            return i;
+        }
+    }
+    for ( i = 4, chan = D_80064340, lowest = 0x7FFFFFFF, best = 3; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_78 != NULL && chan->unk_48 <= lowest ) {
+            lowest = chan->unk_48;
+            best = i;
+        }
+    }
+    if ( best >= 4 ) {
+        return best;
+    }
+    // the original never advances chan here, so this tests the first channel each time
+    for ( i = 4, chan = D_80064340; i < D_80064334; i++ ) {
+        if ( chan->unk_78 == NULL && chan->unk_74 != hdr ) {
+            return i;
+        }
+    }
+    for ( i = 4, chan = D_80064340; i < D_80064334; i++, chan++ ) {
+        if ( chan->unk_74 == hdr && hdr->unk_0C[track] == chan->unk_80 ) {
+            return i;
+        }
+    }
+    return track % ( D_80064334 - 4 ) + 4;
+}
 
 /*
 ================
