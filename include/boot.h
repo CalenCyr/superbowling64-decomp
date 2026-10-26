@@ -14,5 +14,7 @@ s32 __osEPiRawReadIo( OSPiHandle *pihandle, u32 devAddr, u32 *data );
 s32 __osEPiRawWriteIo( OSPiHandle *pihandle, u32 devAddr, u32 data );
 
 extern OSPiHandle *D_800ABD60;      /* cartridge ROM handle */
+extern OSIoMesg D_80066B70;         /* the request of each ROM DMA */
+extern OSMesgQueue D_800DF578;      /* where ROM DMAs report completion */
 
 #endif
