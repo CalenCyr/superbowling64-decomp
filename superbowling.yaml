@@ -308,6 +308,8 @@ segments:
       - [0x3A470, lib, libgultra_rom, vimodempallan1, .data]
       - [0x3A4C0, lib, libgultra_rom, xlitob, .data]
       - [0x3A4F0, data]
+      - [0x3B990, .rodata, 166B0]
+      - [0x3BA70, rodata]
       - [0x3BB90, lib, libgultra_rom, setintmask, .rodata]
       - [0x3BC10, lib, libgultra_rom, devmgr, .rodata]
       - [0x3BC30, lib, libgultra_rom, aisetfreq, .rodata]
