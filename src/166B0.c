@@ -1122,7 +1122,37 @@ void func_8003CCA4( UnkChannel *chan, s32 index ) {
     chan->unk_08 = NULL;
 }
 
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003CD20);
+/*
+================
+func_8003CD20
+
+Updates the volume and pan of voice index from the channel, sending only values that changed.
+================
+*/
+void func_8003CD20( UnkChannel *chan, s32 index ) {
+    // RULE-EXCEPTION: R30, the volume and the pan share one local; separate locals change the register
+    // allocation.
+    u32 value;
+
+    value = (u32)( chan->unk_BC * chan->unk_C4 * chan->unk_BB * chan->unk_9E ) >> 13;
+    if ( value > 0x7FFF ) {
+        value = 0x7FFF;
+    }
+    value *= chan->unk_78 == NULL ? D_8006434E : D_8006434C;
+    value >>= 15;
+    if ( chan->unk_10 != -1 ) {
+        value = value * chan->unk_10 / chan->unk_1C;
+    }
+    if ( value != chan->unk_A0 ) {
+        chan->unk_A0 = value;
+        func_800425D0( &D_80064338[index], (s16)value, D_80064348 );
+    }
+    value = ( ( chan->unk_BD * chan->unk_B0 ) >> 7 ) & 0x7F;
+    if ( value != chan->unk_BE ) {
+        chan->unk_BE = value;
+        func_800424B0( &D_80064338[index], value );
+    }
+}
 
 /*
 ================
