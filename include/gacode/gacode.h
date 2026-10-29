@@ -7,6 +7,7 @@
 #include "libultra.h"
 #include <PR/gu.h>
 #include "input.h"
+#include "boot.h"
 
 /*
 ==============================================================================
@@ -21,6 +22,14 @@ extern u8 D_8005C162;               /* index of the last team */
 extern u8 D_800994BE[];
 extern u8 D_80068A50[];
 extern s16 D_800EA090[];
+
+/* Entry of main's resource table D_800F80B0. Name invented. */
+typedef struct {
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ u8 *unk_04;
+} unkResource_t;
+
+extern unkResource_t D_800F80B0[];
 
 s32 func_80037410( void );          /* unit 12260 */
 void func_800379A8( s64 handle );   /* unit 12C70: stops the sound of a func_80037870 handle */
@@ -145,6 +154,8 @@ typedef struct {
 typedef s32 (*gaPlayerFunc_t)( s32 player );
 
 extern u8 D_80123601_gacode;
+extern s32 D_8012C920_gacode;
+extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];
 extern s16 D_8012C784_gacode[];
 extern gaPlayer_t D_8012D658_gacode[MAX_PLAYERS];
@@ -227,5 +238,13 @@ void func_80120DD8_gacode( u8 arg0 );
 void func_801213B4_gacode( u8 arg0 );
 void func_801219CC_gacode( u8 arg0 );
 void func_80121FD0_gacode( u8 arg0, u8 arg1 );
+
+/* unit 4C560 */
+void func_80122340_gacode( void );
+void func_8012239C_gacode( s32 arg0 );
+void func_80122470_gacode( void );
+void func_80122BD8_gacode( void );
+void func_80122C60_gacode( void );
+void func_801233A8_gacode( void );
 
 #endif
