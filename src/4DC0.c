@@ -4,7 +4,7 @@
 #include "libultra.h"
 #include "boot.h"
 #include "archive.h"
-#include "libc_boot.h"
+#include "libc.h"
 
 #define ARCHIVE_DMA_CHUNK   0x1000      /* bytes per ROM DMA */
 
@@ -24,7 +24,7 @@ void func_800299C0( u8 *dst, u8 *src, u16 len ) {
     u16 flags;
     s32 c;
 
-    func_80056150( D_80061A00, 0, LZSS_N - LZSS_F );
+    memset( D_80061A00, 0, LZSS_N - LZSS_F );
     r = LZSS_N - LZSS_F;
     flags = 0;
     for ( pos = 0; pos < len; ) {

@@ -379,3 +379,10 @@ rspbootTextEnd	0x80056DD0	evidence: end of rspboot (0xD0 bytes), used as the boo
 errno	0x80068210	evidence: set to 33/34 (EDOM/ERANGE) by the libm error path
 _ctype	0x8005F2F0	invented: 256-byte ctype class table used by atol (space bit 0x01, digit bit 0x08)
 strcpy	0x80029578	evidence: libkmc strcat calls strcpy by name; this routine copies a string with its terminator
+
+# boot units 1060-51F0 (types; their functions keep placeholder names)
+FatEntry	include/fat.h	evidence: entry of the ROM's BW64FAT table (name pointer, ROM start, ROM end)
+FatTable	include/fat.h	evidence: the BW64FAT file at ROM 0x3C2A0, header "BW64FAT"
+ArchiveEntry	include/archive.h	invented: {ROM offset into the str segment, stored size, decompressed size} record read by the LZSS loader
+HeapBlock	include/heap.h	invented: free-list block header (next, size) of the block allocator in unit 51F0
+HostPacket	include/hostio.h	invented: request header (command, size, file name) exchanged with the development host link in unit 4890

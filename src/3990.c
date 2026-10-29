@@ -26,19 +26,19 @@ void spSetAttribute();
 void spFinish();
 void guOrtho();
 void guRotateRPY();
-void *func_80056150();
+void *memset();
 void spColor();
 void guTranslateF();
-void func_80055EA0();
-void func_800560E4();
+int memcmp();
+void *memmove();
 void osViSetMode();
 void osViSetSpecialFeatures();
 u32 osGetMemSize();
-void func_80056220();
+int rand();
 void guLookAtReflect();
-void func_80055B58();
-void func_80055820();
-void func_80056480();
+double atan();
+double asin();
+char *strcat();
 
 /*
 ================
@@ -68,17 +68,17 @@ void func_80028590( void ) {
     spFinish();
     guOrtho();
     guRotateRPY();
-    func_80056150();
+    memset();
     spColor();
     guTranslateF();
-    func_80055EA0( 0, 0, 0 );
-    func_800560E4();
+    memcmp( 0, 0, 0 );
+    memmove();
     osViSetMode();
     osViSetSpecialFeatures();
     osGetMemSize();
-    func_80056220();
+    rand();
     guLookAtReflect();
-    func_80055B58();
-    func_80055820();
-    func_80056480();
+    atan();
+    asin();
+    strcat();
 }

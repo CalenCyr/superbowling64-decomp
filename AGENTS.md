@@ -36,6 +36,10 @@ Also record:
   - Per-unit override: `src/libkmc/*.c` (KMC's C runtime) build with `-O` instead of `-O2` (Makefile). Evidence: its
     code is unscheduled; `rand` stores its state before computing the result and `func_80056690` loads its stack
     arguments in source order, which `-O2`'s scheduler reorders; every libkmc C function matches at `-O`.
+  - Per-unit override: units `3AD0`, `4890` and `4DC0` build with `-O3` (Makefile). Evidence: they inline their own
+    earlier functions at the call sites without `inline` (gcc 2.7.2's `-O3` turns on `-finline-functions`); each
+    fails the gate at `-O2`. Unit `166B0` instead matches at `-O2` with `inline` on `Snd_SetFxType` and fails at
+    `-O3`.
 - **C pipeline:** a C unit is a splat `c` subsegment (`src/<unit>.c`); unmatched functions stay as
   `INCLUDE_ASM("asm/nonmatchings/<unit>", <func>);`. C is compiled by the KMC `gcc` driver, so KMC `as` 2.6
   assembles both compiled code and included asm (modern GAS expands `move` to `or`, KMC to `addu`). Asm-only units

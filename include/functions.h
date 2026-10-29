@@ -41,4 +41,8 @@ void *Snd_Alloc( s32 size );
 void Snd_MemMove( void *dst, void *src, s32 len );
 s32 Snd_HeapUsed( void );
 
+/* called from the boot units */
+s32 Snd_PlayBgm( seqHeader_t *hdr );
+s32 Snd_SetVolume( s32 id, s32 value );
+
 #endif

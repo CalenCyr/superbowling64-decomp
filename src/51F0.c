@@ -2,7 +2,7 @@
 
 #include "common.h"
 #include "heap.h"
-#include "libc_boot.h"
+#include "libc.h"
 
 #define HEAP_ALIGN( size )  ( ( ( size ) + 7 ) & ~7 )
 
@@ -55,7 +55,7 @@ void *func_80029E28( u32 size ) {
         D_80066B88 = D_80062A24 - ( (u8 *)BLOCK_END( block ) + ( size + sizeof( HeapBlock ) ) );
     }
     BLOCK_END( block )->size = size + sizeof( HeapBlock );
-    func_80056150( BLOCK_END( block ) + 1, 0, size );
+    memset( BLOCK_END( block ) + 1, 0, size );
     return BLOCK_END( block ) + 1;
 }
 

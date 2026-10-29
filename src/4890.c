@@ -50,12 +50,12 @@ s32 func_80029524( void ) {
 
 /*
 ================
-func_80029578
+strcpy
 
 Copies the string src to dst.
 ================
 */
-void func_80029578( u8 *dst, u8 *src ) {
+void strcpy( u8 *dst, const u8 *src ) {
     while ( *src != '\0' ) {
         *dst++ = *src++;
     }
@@ -71,7 +71,7 @@ Sends request 1 for name.
 */
 void func_800295A0( u8 *name ) {
     D_800692D8.command = 1;
-    func_80029578( D_800692D8.name, name );
+    strcpy( D_800692D8.name, name );
     func_80029490( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
 }
 
@@ -84,7 +84,7 @@ Sends request 2 for name and receives the file's size.
 */
 s32 func_8002961C( u8 *name ) {
     D_800692D8.command = 2;
-    func_80029578( D_800692D8.name, name );
+    strcpy( D_800692D8.name, name );
     D_800692D8.size = 0x100000;
     func_80029490( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
     func_800294D8( (u8 *)&D_800619F0, sizeof( D_800619F0 ) );
@@ -111,7 +111,7 @@ Sends request 2 for name with size, then receives the size the host returns and 
 */
 s32 func_80029728( u8 *name, u8 *buf, s32 size ) {
     D_800692D8.command = 2;
-    func_80029578( D_800692D8.name, name );
+    strcpy( D_800692D8.name, name );
     D_800692D8.size = size;
     func_80029490( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
     func_800294D8( (u8 *)&size, sizeof( size ) );
@@ -128,7 +128,7 @@ Sends request 3 for name, then the size bytes of buf.
 */
 void func_80029814( u8 *name, u8 *buf, s32 size ) {
     D_800692D8.command = 3;
-    func_80029578( D_800692D8.name, name );
+    strcpy( D_800692D8.name, name );
     D_800692D8.size = size;
     func_80029490( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
     func_80029490( buf, size );

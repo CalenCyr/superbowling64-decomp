@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "libultra.h"
+#include "libc.h"
 
 /* PI I/O registers of the host link; the status bit is set when the link can take the next byte */
 #define HOSTIO_DATA         0x11000000      /* read: the byte from the host, in the low 8 bits */
@@ -29,7 +30,6 @@ extern s32 D_800619F0;
 void func_80029490( u8 *buf, s32 len );
 void func_800294D8( u8 *buf, s32 len );
 s32 func_80029524( void );
-void func_80029578( u8 *dst, u8 *src );
 void func_800295A0( u8 *name );
 s32 func_8002961C( u8 *name );
 void func_800296D4( u8 *buf );

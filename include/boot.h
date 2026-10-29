@@ -6,6 +6,7 @@
 #include "common.h"
 #include "libultra.h"
 #include "structs.h"
+#include "functions.h"
 
 #define BOOT_STACK_SIZE     0x200       /* bytes of stack of each boot thread */
 #define RAM_END             0x80400000  /* end of the 4 MB of RDRAM, in KSEG0 */
@@ -65,15 +66,13 @@ extern OSMesg D_800693B8[8];
 
 extern OSTask D_80060EA0;
 extern UnkRspProgram *D_80066B50;
-extern u64 func_80056D00[];         /* rspboot: its text, up to D_80056DD0 */
-extern u64 D_80056DD0[];
 extern s32 D_8005B100;
 extern s32 D_8005B110;
 extern s32 D_8005C9D8;
 extern s32 D_8005C9DC;
 extern s32 D_8005C9E0;              /* frames until the sequence D_8005C9E4 starts */
 extern s32 D_8005C9E4;
-extern UnkSeqHeader *D_800A3048;
+extern seqHeader_t *D_800A3048;
 
 extern u8 D_8009CFB0;
 extern u8 D_800619A0;
@@ -84,8 +83,5 @@ void func_80025FEC( void *arg );
 void func_80026B10( void );
 void func_80026B28( void );
 
-/* unit 166B0 */
-s32 func_8003B6B0( UnkSeqHeader *hdr );
-s32 func_8003BD20( s32 id, s32 value );
 
 #endif

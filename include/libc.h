@@ -40,7 +40,7 @@ void *memset( void *dst, int c, size_t n );
 void *func_80055FE0( void *dst, const void *src, size_t n );
 void func_8005612C( const void *src, void *dst, size_t n );
 void *func_800561F0( void *dst, size_t n, int c );
-void strcpy( char *dst, const char *src ); /* the game's own (unit 4890); returns nothing */
+void strcpy( u8 *dst, const u8 *src ); /* the game's own (unit 4890); returns nothing */
 char *strcat( char *dst, const char *src );
 int strncmp( const char *s1, const char *s2, size_t n );
 

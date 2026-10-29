@@ -5,7 +5,7 @@
 #include "boot.h"
 #include "heap.h"
 #include "input.h"
-#include "libc_boot.h"
+#include "libc.h"
 
 #define HEAP_START  0x80150000
 #define HEAP_END    0x8038F7FF
@@ -24,7 +24,7 @@ void main( void ) {
     __osInitialize_common();
     __osInitialize_autodetect();
     D_800A2FE4 = 0;
-    func_80056150( D_8010A250, 0, RAM_END - (u32)D_8010A250 );
+    memset( D_8010A250, 0, RAM_END - (u32)D_8010A250 );
     D_80066C38 = 0x8038F800;
     D_80066C3C = 0x803B5000;
     D_80066C40 = 0x803DA800;
@@ -37,12 +37,12 @@ void main( void ) {
     D_8009D098.unk_7A = 2;
     D_8009D098.unk_7B = 1;
     for ( i = 0; i < 4; i++ ) {
-        func_80056150( &D_8009D098.unk_08[i], 0, sizeof( UnkRecord ) );
+        memset( &D_8009D098.unk_08[i], 0, sizeof( UnkRecord ) );
         D_8009D098.unk_08[i].unk_12 = 300;
-        func_80056150( D_8009D098.unk_08[i].unk_00, 0xFF, sizeof( D_8009D098.unk_08[i].unk_00 ) );
-        func_80056150( &D_800E44E8[i], 0, sizeof( UnkRecord ) );
+        memset( D_8009D098.unk_08[i].unk_00, 0xFF, sizeof( D_8009D098.unk_08[i].unk_00 ) );
+        memset( &D_800E44E8[i], 0, sizeof( UnkRecord ) );
         D_800E44E8[i].unk_12 = 300;
-        func_80056150( D_800E44E8[i].unk_00, 0xFF, sizeof( D_800E44E8[i].unk_00 ) );
+        memset( D_800E44E8[i].unk_00, 0xFF, sizeof( D_800E44E8[i].unk_00 ) );
     }
     osCreateThread( &D_80060EE0, 1, func_80025E10, NULL, &D_80061090[BOOT_STACK_SIZE / sizeof( u64 )], 10 );
     osStartThread( &D_80060EE0 );
@@ -75,13 +75,13 @@ D_8005C9E4 when it reaches zero.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: register/schedule; retail sets up a2 = 0 and a3 = the id around the func_8003BD20 call (as if
+// NON_MATCHING: register/schedule; retail sets up a2 = 0 and a3 = the id around the Snd_SetVolume call (as if
 // it took more arguments), and schedules the ucode store before ucode_size
 void func_80025EBC( void ) {
     D_80060EA0.t.type = M_AUDTASK;
     D_80060EA0.t.flags = 0;
-    D_80060EA0.t.ucode_boot = func_80056D00;
-    D_80060EA0.t.ucode_boot_size = (u8 *)D_80056DD0 - (u8 *)func_80056D00;
+    D_80060EA0.t.ucode_boot = rspbootTextStart;
+    D_80060EA0.t.ucode_boot_size = (u8 *)rspbootTextEnd - (u8 *)rspbootTextStart;
     D_80060EA0.t.ucode = D_80066B50->ucode;
     D_80060EA0.t.ucode_size = 0x1000;
     D_80060EA0.t.ucode_data = D_80066B50->ucodeData;
@@ -94,9 +94,9 @@ void func_80025EBC( void ) {
     osSpTaskStartGo( &D_80060EA0 );
     if ( D_8005C9E4 != 0 ) {
         if ( --D_8005C9E0 == 0 ) {
-            D_8005C9DC = func_8003B6B0( D_800A3048 );
+            D_8005C9DC = Snd_PlayBgm( D_800A3048 );
             D_8005C9D8 = 0;
-            func_8003BD20( D_8005C9DC, D_8005C9E4 );
+            Snd_SetVolume( D_8005C9DC, D_8005C9E4 );
             D_8005C9E4 = 0;
         }
     }

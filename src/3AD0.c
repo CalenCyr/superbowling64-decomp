@@ -4,7 +4,7 @@
 #include "libultra.h"
 #include "boot.h"
 #include "fat.h"
-#include "libc_boot.h"
+#include "libc.h"
 
 /*
 ================
@@ -20,7 +20,7 @@ s16 func_800286D0( u8 *name ) {
         if ( D_8010A080.entries[i].name == NULL ) {
             return -1;
         }
-        if ( func_80056530( name, D_8010A080.entries[i].name, FAT_NAME_LEN ) == 0 ) {
+        if ( strncmp( name, D_8010A080.entries[i].name, FAT_NAME_LEN ) == 0 ) {
             return i;
         }
     }
