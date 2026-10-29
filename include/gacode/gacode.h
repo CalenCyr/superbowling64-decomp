@@ -23,7 +23,9 @@ MAIN (functions and globals of main units without a header yet, under their curr
 */
 
 extern u8 D_8005C160;               /* low nibble 3: func_8011A26C; else bits 4-5 pick a mode, bits 6-7 its arg */
+extern u8 D_8005C161;               /* number of players */
 extern u8 D_8005C162;               /* index of the last team */
+extern u8 D_8005C0E4[];             /* per player: low nibble a character */
 extern u8 D_800994BE[];
 extern u8 D_80068A50[];
 extern s16 D_800EA090[];
@@ -76,12 +78,15 @@ Object of main's scene engine (D_800EA120 holds pointers to them): only the memb
 invented.
 */
 typedef struct {
-    /* 0x00 */ s32 unk_00;
+    /* 0x00 */ u16 unk_00;               /* flags */
+    /* 0x02 */ u8 unk_02[2];
     /* 0x04 */ f32 mtx[4][4];           /* placement, set by func_8011D2C0_gacode */
     /* 0x44 */ f32 unk_44;
     /* 0x48 */ u16 unk_48;
     /* 0x4A */ u8 unk_4A;               /* 0: not drawn */
-    /* 0x4B */ u8 unk_4B[0x1C8 - 0x4B];
+    /* 0x4B */ u8 unk_4B[0x50 - 0x4B];
+    /* 0x50 */ void *unk_50;              /* a loaded file (func_80030C04) */
+    /* 0x54 */ u8 unk_54[0x1C8 - 0x54];
     /* 0x1C8 */ vec3_t unk_1C8;
 } sceneObj_t;
 
@@ -150,7 +155,8 @@ typedef struct {
 
 /* What gaCharacter_t.unk_00 points to. Name invented. */
 typedef struct {
-    /* 0x00 */ u8 unk_00[0x1B];
+    /* 0x00 */ s16 *unk_00;                 /* file indices */
+    /* 0x04 */ u8 unk_04[0x1B - 0x04];
     /* 0x1B */ u8 unk_1B[1];            /* indexed by gaLane_t.unk_B26 */
 } gaCharacterData_t;
 
@@ -305,6 +311,7 @@ s32 func_80116998_gacode( gaPlayer_t *pl );
 void func_801169F8_gacode( s32 player, f32 *value, s16 delta );
 s32 func_801179FC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117ABC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_80117BDC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118CCC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
@@ -366,7 +373,7 @@ void func_8012224C_gacode( u8 frame );
 
 /* unit 4C560 */
 void func_80122340_gacode( void );
-void func_8012239C_gacode( s32 arg0 );
+void func_8012239C_gacode( s32 set );
 void func_80122470_gacode( void );
 void func_80122BD8_gacode( void );
 void func_80122C60_gacode( void );

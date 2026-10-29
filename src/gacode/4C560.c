@@ -21,7 +21,45 @@ inline void func_80122340_gacode( void ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/4C560", func_8012239C_gacode);
+/*
+================
+func_8012239C_gacode
+
+With set nonzero, gives each player's scene object (140 on) the flag bits of the low nibble of its
+D_8005C0E4 entry.
+================
+*/
+void func_8012239C_gacode( s32 set ) {
+    s32 i;
+
+    if ( !set ) {
+        return;
+    }
+    for ( i = 0; i < D_8005C161; i++ ) {
+        switch ( D_8005C0E4[i] & 0xF ) {
+        case 1:
+            ( (sceneObj_t *)D_800EA120[140 + i] )->unk_00 |= 0x1400;
+            break;
+        case 7:
+            ( (sceneObj_t *)D_800EA120[140 + i] )->unk_00 |= 0x1C00;
+            break;
+        case 0:
+        case 2:
+            ( (sceneObj_t *)D_800EA120[140 + i] )->unk_00 |= 0x1000;
+            break;
+        case 4:
+            ( (sceneObj_t *)D_800EA120[140 + i] )->unk_00 |= 0x1E00;
+            break;
+        case 3:
+        case 6:
+            ( (sceneObj_t *)D_800EA120[140 + i] )->unk_00 |= 0x3000;
+            break;
+        case 5:
+            ( (sceneObj_t *)D_800EA120[140 + i] )->unk_00 |= 0x2800;
+            break;
+        }
+    }
+}
 
 /*
 ================

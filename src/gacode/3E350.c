@@ -577,7 +577,32 @@ s32 func_80117ABC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117AE0_gacode);
+/*
+================
+func_80117AE0_gacode
+
+Lane input handler: shows the standing pins (unk_4A 3) and hides the rest and the player, loads the
+character's file 1 for it, shows objects unk_AF4 (2 on lane 1, else 1) and moves on to
+func_80117BDC_gacode.
+================
+*/
+s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    s16 *files = pl->character.unk_00->unk_00;
+    gaLane_t *lane = pl->lane;
+    s32 i;
+
+    lane->bodies[0].unk_5D = 0;
+    for ( i = 1; i < NUM_BODIES; i++ ) {
+        lane->bodyObjs[i]->unk_4A = lane->bodies[i].unk_5D == 1 ? 3 : 0;
+    }
+    pl->obj->unk_4A = 0;
+    pl->obj->unk_48 = 0;
+    pl->obj->unk_50 = func_80030C04( files[1], FILE_TYPE2 );
+    pl->lane->unk_AF4[0]->unk_4A = pl->lane->unk_AF4[1]->unk_4A = D_8012D658_gacode[player].laneIndex != 0 ? 2 : 1;
+    pl->lane->unk_B10 = func_80117BDC_gacode;
+    return 0;
+}
 
 INCLUDE_RODATA("asm/nonmatchings/gacode/3E350", D_8012CA20_gacode);
 
