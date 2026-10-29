@@ -1,4 +1,8 @@
+/* 474E0.c -- game overlay */
+
 #include "common.h"
+#include "libultra.h"
+#include "gacode/gacode.h"
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D2C0_gacode);
 
@@ -66,7 +70,19 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120C0C_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120D30_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120D7C_gacode);
+/*
+================
+func_80120D7C_gacode
+
+Stops the sound of *handle, if any, and clears it.
+================
+*/
+void func_80120D7C_gacode( s64 *handle ) {
+    if ( *handle != 0 ) {
+        func_800379A8( *handle );
+        *handle = 0;
+    }
+}
 
 void func_80120DD0_gacode(void) {
 }

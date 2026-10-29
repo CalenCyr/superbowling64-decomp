@@ -1,4 +1,8 @@
+/* 4C560.c -- game overlay */
+
 #include "common.h"
+#include "libultra.h"
+#include "gacode/gacode.h"
 
 INCLUDE_ASM("asm/nonmatchings/gacode/4C560", func_80122340_gacode);
 

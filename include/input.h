@@ -48,6 +48,6 @@ void func_80027BC0( void );
 void func_80027FF0( void );
 
 /* unit 12C70 */
-void func_80037870( s32 arg0, s32 arg1 );
+s64 func_80037870( s32 arg0, s32 arg1 );   /* returns a sound handle (func_800379A8 stops it) */
 
 #endif

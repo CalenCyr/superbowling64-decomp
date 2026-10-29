@@ -1,4 +1,8 @@
+/* 3E350.c -- game overlay */
+
 #include "common.h"
+#include "libultra.h"
+#include "gacode/gacode.h"
 
 void func_80114130_gacode(void) {
 }
