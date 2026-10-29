@@ -593,3 +593,5 @@ snd_minFrameSize = 0x800645B4; // size:0x4
 snd_maxFrameSize = 0x800645B8; // size:0x4
 snd_extraSamples = 0x800645BC; // size:0x4
 snd_frameSettled = 0x8005CE60; // size:0x4
+// lane/audio-mgr: symbols of units 19F50-1ADA0
+D_800EA0A8 = 0x800EA0A8; // size:0x18 allow_addend:True

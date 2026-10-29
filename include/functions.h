@@ -33,9 +33,20 @@ s32 Snd_StartBgm( seqHeader_t *hdr );
 s32 Snd_StartSeOnChannel( sndChannel_t *chan, seTable_t *table, s32 index, s32 volume, s32 pan, s32 priority );
 s32 Snd_StartSe( seTable_t *table, s32 index, s32 volume, s32 pan, s32 priority );
 void Snd_SetChannelFlags( s32 id, s32 mask, s32 bits );
+
+/* synthesizer and effect setup (19F50.c) */
+void func_8003EB50( N_ALGlobals *g, ALSynConfig *c );
+void func_8003EBB8( ALSynConfig *c );
+ALFx *func_8003EE28( s16 bus, ALSynConfig *c, ALHeap *hp );
+void func_8003EE78( ALFx **fx, ALSynConfig *c, ALHeap *hp );
+void func_8003EFC0( s32 *param );
+void func_8003F2A0( ALSynConfig *c );
+s32 func_8003F2B8( void );
+s32 func_8003F2FC( void );
+s32 func_8003F340( s32 index );
+
 void func_8003F7F0( s32 arg );
 void func_8003F9A0( sndConfig_t *config, s32 rate, s32 arg2 );
-s32 func_8003F340( s32 arg );
 void Snd_InitHeap( u8 *base, s32 len );
 void *Snd_Alloc( s32 size );
 s32 Snd_HeapUsed( void );

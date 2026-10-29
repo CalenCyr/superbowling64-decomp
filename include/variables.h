@@ -40,4 +40,11 @@ extern u32 snd_maxFrameSize;        /* snd_frameSize + AUDIO_FRAME_SAMPLES */
 extern u32 snd_extraSamples;        /* queued samples kept ahead of the AI */
 extern s32 snd_frameSettled;        /* 0 after a short or long frame, until the queue is back in range */
 
+/* audio manager: synthesizer and effect setup (19F50.c) */
+extern N_ALSynth *D_800EA098;      /* the synthesizer, as Snd_InitSynth set it up */
+extern fxStorage_t D_800EA0A8;
+extern s32 D_8005CC98[];            /* effect preset: the default */
+extern s32 D_8005CE20;              /* presets in D_8005CE24 */
+extern s32 *D_8005CE24[];           /* effect presets, NULL-terminated */
+
 #endif

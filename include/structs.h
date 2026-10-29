@@ -263,4 +263,25 @@ typedef struct {
     /* 0x138 */ u8 unk_138[0x13C - 0x138];
 } sndChannel_t;
 
+/*
+==============================================================================
+
+AUDIO MANAGER (19F50.c, 1A7A0.c, 1ADA0.c)
+
+==============================================================================
+*/
+
+/*
+Storage the effect shares between its presets (19F50.c): allocated once for the largest preset, then each
+preset only sets the delay lines up over it. Every delay line gets the same resampler and low-pass filter.
+*/
+typedef struct {
+    /* 0x00 */ ALDelay *delays;             /* as many as the preset with the most sections */
+    /* 0x04 */ s16 *buffer;                 /* as long as the longest preset */
+    /* 0x08 */ ALResampler *resampler;
+    /* 0x0C */ RESAMPLE_STATE *resamplerState;
+    /* 0x10 */ ALLowPass *lowPass;
+    /* 0x14 */ POLEF_STATE *lowPassState;
+} fxStorage_t;
+
 #endif
