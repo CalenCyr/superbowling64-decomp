@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "libultra.h"
+#include <PR/gu.h>
 #include "input.h"
 
 /*
@@ -18,6 +19,7 @@ MAIN (functions and globals of main units without a header yet, under their curr
 extern u8 D_8005C160;               /* low nibble 3: func_8011A26C; else bits 4-5 pick a mode, bits 6-7 its arg */
 extern u8 D_8005C162;               /* index of the last team */
 extern u8 D_800994BE[];
+extern u8 D_80068A50[];
 
 s32 func_80037410( void );          /* unit 12260 */
 void func_800379A8( s64 handle );   /* unit 12C70: stops the sound of a func_80037870 handle */
@@ -131,7 +133,9 @@ typedef struct {
 typedef s32 (*gaPlayerFunc_t)( s32 player );
 
 extern gaPlayer_t D_8012D658_gacode[MAX_PLAYERS];
+extern u8 D_8012D651_gacode;
 extern u16 D_8012D8D8_gacode;
+extern u8 D_8012D8DA_gacode;
 extern gaLane_t D_8012DCF0_gacode[2];
 
 /* A state of the overlay's main loop; returns nonzero when the state is done. */
@@ -183,7 +187,17 @@ void func_8011C0DC_gacode( s32 player, gaCamera_t *camera );
 void func_8011C650_gacode( s32 player, gaCamera_t *camera );
 
 /* unit 474E0 */
+void func_8011D2C0_gacode( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale );
+void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to );
+f32 func_8011D3D4_gacode( vec3_t v );
+s32 func_80120680_gacode( u16 key, s32 count, u16 *table );
+void func_80120980_gacode( u8 *pins, u16 mask );
+void func_80120D30_gacode( s32 lane, s32 id );
 void func_80120D7C_gacode( s64 *handle );
 void func_80120DD0_gacode( void );
+void func_80120DD8_gacode( u8 arg0 );
+void func_801213B4_gacode( u8 arg0 );
+void func_801219CC_gacode( u8 arg0 );
+void func_80121FD0_gacode( u8 arg0, u8 arg1 );
 
 #endif
