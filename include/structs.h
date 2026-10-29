@@ -2,7 +2,8 @@
 #define STRUCTS_H
 
 #include "common.h"
-#include "ultra64.h"
+#include "libultra.h"
+#include "n_libaudio.h"
 
 /*
 ==============================================================================

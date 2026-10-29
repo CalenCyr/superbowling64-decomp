@@ -11,7 +11,7 @@
  */
 
 #include "common.h"
-#include "ultra64.h"
+#include "libultra.h"
 #include "functions.h"
 #include "structs.h"
 #include "variables.h"
@@ -1490,7 +1490,7 @@ f32 Snd_UpdateVibrato( sndChannel_t *chan ) {
 
     time = chan->noteAge - chan->vibratoDelay;
     if ( time > 0 ) {
-        return chan->vibratoPitch = __sinf( time * chan->vibratoStep ) * chan->vibratoDepth;
+        return chan->vibratoPitch = sinf( time * chan->vibratoStep ) * chan->vibratoDepth;
     }
     return 0.0f;
 }
@@ -1641,15 +1641,17 @@ void Snd_RelocateWaveBank( void *data, s32 romBase ) {
         value = bank->unk_24[i] - '0';
         tune->value += (f32)SEXT8( value );
         if ( bank->waves[i]->flags == 0 ) {
-            if ( ( bank->waves[i]->base & 0xFF000000 ) != 0xFF000000 ) {
+            if ( ( (u32)bank->waves[i]->base & 0xFF000000 ) != 0xFF000000 ) {
                 bank->waves[i]->base += romBase;
             }
             bank->waves[i]->flags = 1;
-            if ( bank->waves[i]->loop != 0 ) {
-                bank->waves[i]->loop += (s32)data;
+            if ( bank->waves[i]->waveInfo.adpcmWave.loop != NULL ) {
+                bank->waves[i]->waveInfo.adpcmWave.loop =
+                    (ALADPCMloop *)( (u8 *)bank->waves[i]->waveInfo.adpcmWave.loop + (s32)data );
             }
-            if ( bank->waves[i]->type == 0 ) {
-                bank->waves[i]->book += (s32)data;
+            if ( bank->waves[i]->type == AL_ADPCM_WAVE ) {
+                bank->waves[i]->waveInfo.adpcmWave.book =
+                    (ALADPCMBook *)( (u8 *)bank->waves[i]->waveInfo.adpcmWave.book + (s32)data );
             }
         }
     }

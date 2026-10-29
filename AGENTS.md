@@ -80,6 +80,10 @@ Also record:
     `config/rules.txt`: GCC 2.7.2's `libgcc2.c` was checked and does not apply (no `__udivmoddi4` structure,
     non-ABI register conventions), so it is not adopted. `strcat` calls the game's own `strcpy` (0x80029578).
   - objdiff reports each linked member as a `libultra/<dir>/<file>` unit (`tools/objdiff_config.py`).
+  - SDK declarations come from one path: `include/libultra.h` wraps ultralib's `PR/` headers (`os.h`, `gu.h`,
+    `libaudio.h`, ...). ultralib ships no n_audio header, so `include/n_libaudio.h` (project header) declares only the
+    n_audio calls and `N_ALVoice` the game's code uses, reconstructed from the ROM. Nintendo's SDK sources and headers
+    (proprietary) are never copied or used as a model; n_audio code stays asm until it is reconstructed clean-room.
   Symbols outside every splat segment live in `undefined_syms.txt`. Retail ROM: `rom.z64`, SHA-1
   `56937a9e9536af55ebed06480413265848c4a04a`, F3DEX 2.08, libultra 2.0K.
 - **ROM map** (from the game's `BW64FAT` file table at ROM 0x3C2A0, which main loads to 0x8010A080 at boot and

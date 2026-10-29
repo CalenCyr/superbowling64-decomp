@@ -145,10 +145,10 @@ snd_commands	0x8005CB70	invented: command handlers, indexed by command - 0x80
 SetEnvelope	static inline in 166B0.c	invented: reads an envelope_t into the channel
 
 # 166B0.c sound driver: types
-N_ALVoice	ultra64.h	evidence: n_audio N_ALVoice, 0x1C bytes; the n_alSynAllocVoice offsets
-ALVoiceConfig	ultra64.h	evidence: SDK ALVoiceConfig { priority, fxBus, unityPitch }, as n_alSynAllocVoice reads it
-ALPlayer	ultra64.h	evidence: SDK ALPlayer { next, clientData, handler }, as n_alSynAddPlayer links it
-ALWaveTable	ultra64.h	evidence: SDK ALWaveTable; started by n_alSynStartVoice, patched like alBnkfNew's _bnkfPatchWaveTable
+N_ALVoice	n_libaudio.h	evidence: 0x1C-byte voice the n_alSyn* calls take; layout from the offsets n_alSynAllocVoice and the driver use (libultra ALVoice shape)
+ALVoiceConfig	PR/libaudio.h	evidence: SDK ALVoiceConfig { priority, fxBus, unityPitch }, as n_alSynAllocVoice reads it
+ALPlayer	PR/libaudio.h	evidence: SDK ALPlayer { next, clientData, handler }, as n_alSynAddPlayer links it
+ALWaveTable	PR/libaudio.h	evidence: SDK ALWaveTable (base, len, type, flags, waveInfo); started by n_alSynStartVoice, patched like alBnkfNew's _bnkfPatchWaveTable
 sndMsg_t	structs.h	invented: message ring buffer entry
 drumEntry_t	structs.h	invented: per-note program/envelope/pan/note override selected by command 0x9E
 envelope_t	structs.h	invented: the seven envelope bytes SetEnvelope reads
@@ -170,7 +170,8 @@ handler	ALPlayer+0x08	evidence: SDK member name
 callTime	ALPlayer+0x0C	evidence: SDK member name
 samplesLeft	ALPlayer+0x10	evidence: SDK member name (n_alSynAddPlayer writes it)
 node, pvoice, table, clientPrivate, state, priority, fxBus, unityPitch	N_ALVoice	evidence: SDK member names; n_alSynAllocVoice writes 0x08, 0x0C, 0x14, 0x16, 0x18, 0x1A
-ALLink, ALMicroTime	ultra64.h	evidence: SDK types
+ALLink, ALMicroTime	PR/libaudio.h	evidence: SDK types
+base, len, type, flags, waveInfo.adpcmWave.loop, waveInfo.adpcmWave.book	ALWaveTable	evidence: SDK member names; Snd_RelocateWaveBank patches base, flags, loop and book
 cmd	sndMsg_t+0x00	invented: SNDMSG_*
 arg	sndMsg_t+0x04	invented: sound id, or the effect setting for SNDMSG_SETFX
 program	drumEntry_t+0x00	invented: replaces sndChannel_t.program
