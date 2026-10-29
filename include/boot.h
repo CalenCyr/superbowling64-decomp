@@ -27,7 +27,8 @@ typedef struct {
     /* 0x79 */ u8 unk_79;
     /* 0x7A */ u8 unk_7A;
     /* 0x7B */ u8 unk_7B;
-} UnkRecordSet;
+    /* 0x7C */ u8 unk_7C[0x100 - 0x7C];
+} UnkRecordSet;                             /* size 0x100; func_800373DC sums bytes 0x04-0xFF */
 
 /* What func_80025EBC runs on the RSP; set through D_80066B50. Names invented. */
 typedef struct {
@@ -50,9 +51,7 @@ extern OSMesgQueue D_800DF578;      /* where ROM DMAs report completion */
 
 extern u8 D_8010A250[];             /* start of the memory main clears at boot (the KNSTATICSYS file) */
 extern u8 D_800A2FE4;
-extern u32 D_80066C38;              /* 0x8038F800 at boot */
-extern u32 D_80066C3C;              /* 0x803B5000 at boot */
-extern u32 D_80066C40;              /* 0x803DA800 at boot */
+extern u16 *D_80066C38[3];          /* RGBA5551 320x240 framebuffers: 0x8038F800, 0x803B5000, 0x803DA800 at boot */
 extern UnkRecordSet D_8009D098;
 extern UnkRecordSet *D_801000B8;
 extern UnkRecord D_800E44E8[4];
@@ -68,8 +67,7 @@ extern OSTask D_80060EA0;
 extern UnkRspProgram *D_80066B50;
 extern s32 D_8005B100;
 extern s32 D_8005B110;
-extern s32 D_8005C9D8;
-extern s32 D_8005C9DC;
+extern u64 D_8005C9D8;              /* sound id of the playing BGM, zero-extended; 0: none */
 extern s32 D_8005C9E0;              /* frames until the sequence D_8005C9E4 starts */
 extern s32 D_8005C9E4;
 extern seqHeader_t *D_800A3048;

@@ -25,9 +25,9 @@ void main( void ) {
     __osInitialize_autodetect();
     D_800A2FE4 = 0;
     memset( D_8010A250, 0, RAM_END - (u32)D_8010A250 );
-    D_80066C38 = 0x8038F800;
-    D_80066C3C = 0x803B5000;
-    D_80066C40 = 0x803DA800;
+    D_80066C38[0] = (u16 *)0x8038F800;
+    D_80066C38[1] = (u16 *)0x803B5000;
+    D_80066C38[2] = (u16 *)0x803DA800;
     func_80029DF0( (HeapBlock *)HEAP_START, (u8 *)HEAP_END );
     D_801000B8 = &D_8009D098;
     D_8009D098.unk_00 = 0;
@@ -94,9 +94,8 @@ void func_80025EBC( void ) {
     osSpTaskStartGo( &D_80060EA0 );
     if ( D_8005C9E4 != 0 ) {
         if ( --D_8005C9E0 == 0 ) {
-            D_8005C9DC = Snd_PlayBgm( D_800A3048 );
-            D_8005C9D8 = 0;
-            Snd_SetVolume( D_8005C9DC, D_8005C9E4 );
+            D_8005C9D8 = (u32)Snd_PlayBgm( D_800A3048 );
+            Snd_SetVolume( D_8005C9D8, D_8005C9E4 );
             D_8005C9E4 = 0;
         }
     }
