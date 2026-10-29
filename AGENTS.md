@@ -45,6 +45,13 @@ Also record:
   assembles both compiled code and included asm (modern GAS expands `move` to `or`, KMC to `addu`). Asm-only units
   use modern GAS. `make split` never overwrites an existing `src/` file. To convert a unit: change its subsegment
   from `asm` to `c` in `superbowling.yaml`, run `make split`, then `make gate`.
+  - Overlay units (pattern set by gacode): subsegment `[<rom>, c, <seg>/<unit>]` gives `src/<seg>/<unit>.c` and
+    `asm/nonmatchings/<seg>/<unit>/`; headers in `include/<seg>/`. Symbols keep the `_<seg>` suffix
+    (`symbol_name_format: $VRAM_$SEG`; the overlays share VRAM, `exclusive_ram_id: ovl`). The segment's
+    `bss_size` and `{ type: bss, vram: ... }` subsegment scope its bss symbols to it. Each unit's `.rodata`
+    (doubles, jump tables) is a `[<rom>, .rodata, <seg>/<unit>]` subsegment after all units' `.data`; splat moves
+    rodata used by one function into that function's asm, and the rest needs the `INCLUDE_RODATA` lines splat
+    writes into a fresh C file (regenerate one in a scratch copy to see where they go).
 - **Headers:** `include/common.h` (types, `INCLUDE_ASM`), `include/structs.h`, `include/variables.h`,
   `include/functions.h`. Each type and global is declared once there (R1, R2).
 - **libultra:** 2.0K `libgultra_rom`, linked from source. `lib/ultralib` is decompals' ultralib (git submodule
@@ -83,7 +90,8 @@ Also record:
   | main | 0x1060-0x3C2A0 | 0x80025C60 | 604 functions; BSS to 0x8010A080 |
   | fat | 0x3C2A0-0x3C470 | 0x8010A080 | `BW64FAT` table: {name ptr, ROM start, ROM end, 0} |
   | knstatic | 0x3C470-0x3C570 | 0x8010A250 | `KNSTATICSYS` |
-  | gacode, rscode, gscode, cacode, pvcode, mgcode, opcode | 0x3C570-0x6DE70 | 0x80112350 | code overlays sharing one slot; symbols suffixed `_<seg>`; text/data split points are estimates |
+  | gacode | 0x3C570-0x56FF0 | 0x80112350 | game overlay (`GACODE  SYS`): C units 3C570, 3E350, 474E0, 4C560; .data 0x4D820; .rodata 0x56C20 (per unit, confirmed by the gate); bss 0x8012CDD0-0x8012F350 (ends with the second lane) |
+  | rscode, gscode, cacode, pvcode, mgcode, opcode | 0x56FF0-0x6DE70 | 0x80112350 | code overlays sharing the slot; symbols suffixed `_<seg>`; text/data split points are estimates |
   | idx, str, bgmptr, bgmwbk, septr, sewbk, bfx | 0x6DE70-0x656CD0 | - | asset files (bin) |
 - **Toolchain:** compiler and linker version and build, flags, per-unit flag overrides.
 - **Annotations:** the address marker format (for example `// FUNCTION: <MODULE> 0x...`), the stub marker and
