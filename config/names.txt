@@ -424,3 +424,13 @@ snd_heap	0x800645A0	invented: the ALHeap of Snd_InitHeap
 snd_frameSize, snd_minFrameSize, snd_maxFrameSize, snd_extraSamples	0x800645B0-0x800645BC	invented: frame sizes from Snd_InitFrameSizes
 snd_frameSettled	0x8005CE60	invented: set while the AI queue is in range (Snd_NextFrameSize)
 AUDIO_FRAME_SAMPLES	structs.h	invented: the 184 samples per audio frame that Snd_InitFrameSizes and Snd_NextFrameSize use
+objNode_t, objClass_t, objParams_t, OBJ_PARAMS_SKIP, OBJ_PARAMS_END	object.h	invented: the object list of 53B0 (func_80029FF4 inserts by priority; func_8002A1EC reads the float records up to -1.0)
+drawEntry_t, DRAW_BUCKETS, DRAW_NONE	ground.h	invented: the 12-byte entries of D_8009D1A0 that func_8003128C sorts into 0x400 buckets chained by func_80031650
+SCREEN_WIDTH, SCREEN_HEIGHT	boot.h	invented: the 320x240 framebuffers (func_80031BB0's scissor and color image)
+fileImage_t, IMAGE_CI4, IMAGE_CI8, CI4_PALETTE_SIZE, CI8_PALETTE_SIZE	sprite.h	invented: the image files func_8002DF3C draws (palette offsets 0x20 and 0x200 by type)
+DRAW2D_COPY, DRAW2D_1CYCLE, DRAW2D_FILL	sprite.h	invented: the D_8005C190 values the 2D functions set with the cycle type they emit
+PROMPT_* (modes and states), PROMPT_ZOOM_FRAMES	save.h	invented: func_80036E60's modes, from its input handling, and D_8005C9BC's states
+SE_CURSOR, SE_DECIDE	gamesnd.h	invented: SE 0 on a cursor move and SE 1 on a choice in func_80036E60
+menuItem_t, MENU_END, MENU_NONE, MENU_SLIDE_STEPS, SLIDE_*	menu.h	invented: the 10-byte menu records func_800386E0 draws and func_8003893C edits
+SCORE_IMAGE_*, ROLL_STRIKE, ROLL_SPARE	menu.h	invented: indices of D_8005CAC0 that func_80039340 returns for the rolls of a frame
+Menu_SlidePos	13490.c	invented: the inline position calculation of func_800386E0's slides
