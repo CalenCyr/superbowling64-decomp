@@ -374,7 +374,31 @@ void func_80121FD0_gacode( u8 arg0, u8 arg1 ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80122060_gacode);
+/*
+================
+func_80122060_gacode
+
+Ends the player's frame: with done set, marks the frame's two results -1 and moves to the next frame (and
+returns 1); else takes one from D_80068A50. The player is finished after frame 10 or when D_80068A50
+reaches 0.
+================
+*/
+s32 func_80122060_gacode( u8 player, s32 done ) {
+    u8 frame = D_8009D19C[player];
+    s32 advanced = 0;
+
+    if ( done ) {
+        D_80066E18[player][frame] = D_800A3020[player][frame] = -1;
+        D_8009D19C[player]++;
+        advanced = 1;
+    } else {
+        D_80068A50[player]--;
+    }
+    if ( D_8009D19C[player] == 10 || D_80068A50[player] == 0 ) {
+        D_800994BE[player] = 1;
+    }
+    return advanced;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80122140_gacode);
 

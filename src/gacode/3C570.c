@@ -163,7 +163,36 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113D48_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113EE4_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80114024_gacode);
+/*
+================
+func_80114024_gacode
+
+Main loop state of mode 3: updates both lanes, and ends the turn when both are done, on A or Z, or when
+both lanes return -1.
+================
+*/
+s32 func_80114024_gacode( void ) {
+    s32 results[2];
+    s32 i;
+
+    for ( i = 0; i < 2; i++ ) {
+        results[i] = func_80114640_gacode( i );
+        if ( results[i] > 0 && D_800994BE[i] ) {
+            func_80115D70_gacode( i, 1 );
+        }
+    }
+    if ( func_80115E24_gacode( 1 ) ) {
+        return 1;
+    }
+    if ( func_80115DF4_gacode( 0 ) && func_80115DF4_gacode( 1 ) ) {
+        func_80115FCC_gacode();
+        return 0;
+    }
+    if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || results[0] + results[1] == -2 ) {
+        func_80116170_gacode( 1 );
+    }
+    return 0;
+}
 
 /*
 ================

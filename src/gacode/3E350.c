@@ -253,7 +253,37 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80115ED4_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80115FCC_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80116170_gacode);
+/*
+================
+func_80116170_gacode
+
+Once both lanes wait in func_80118EA0_gacode, ends the turn of players 0 and 1: with skip set, parks
+their lanes' input; else first runs func_80121E34_gacode and sets the lanes' view handlers.
+================
+*/
+void func_80116170_gacode( s32 skip ) {
+    gaPlayer_t *pl;
+    s32 i;
+
+    if ( D_8012DCF0_gacode[0].unk_B10 != func_80118EA0_gacode || D_8012DCF0_gacode[1].unk_B10 != D_8012DCF0_gacode[0].unk_B10 ) {
+        return;
+    }
+    D_8012D8D8_gacode = 0;
+    if ( !skip ) {
+        func_80121E34_gacode();
+    }
+    for ( i = 0; i < 2; i++ ) {
+        pl = &D_8012D658_gacode[i];
+        if ( skip ) {
+            pl->lane->unk_B10 = func_80118F38_gacode;
+        } else {
+            pl->lane->unk_B28 = 2700.0f;
+            pl->lane->unk_B0C = func_8011C650_gacode;
+            pl->lane->unk_B04 = func_80116248_gacode;
+        }
+        pl->lane->unk_B08 = func_8011B400_gacode;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80116248_gacode);
 

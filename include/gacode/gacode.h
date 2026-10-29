@@ -29,12 +29,14 @@ extern u8 D_80068A50[];
 extern s16 D_800EA090[];
 extern void *D_800EA120[];          /* main's scene objects, of several kinds: [1] the camera (gaCamera_t), the
                                        others mostly sceneObj_t */
-extern u8 D_8009D19C[4];            /* per player: character */
+extern u8 D_8009D19C[4];            /* per player: current frame (10: the game is over) */
+extern s8 D_800A3020[4][10];        /* per player and frame */
+extern s8 D_80066E18[4][10];        /* per player and frame */
 
 /* Main's game setup (D_800DF59C): only the members the overlay uses. Name invented. */
 typedef struct {
     /* 0x00 */ u8 unk_00[4];
-    /* 0x04 */ u8 unk_04[0x30];        /* per character */
+    /* 0x04 */ u8 unk_04[0x30];        /* indexed by frame */
 } unkGameSetup_t;                       /* size 0x34 */
 
 extern unkGameSetup_t D_800DF59C;
@@ -210,7 +212,7 @@ extern u8 D_80123601_gacode;
 extern s32 D_8012C920_gacode;
 extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];
-extern f32 D_80123850_gacode[][4];     /* per character: unk_98, unk_9C, unk_2C, unk_30 of a player */
+extern f32 D_80123850_gacode[][4];     /* unk_98, unk_9C, unk_2C, unk_30 of a player, by D_800DF59C.unk_04[] */
 extern s16 D_8012C784_gacode[];
 extern s16 D_8012C8E8_gacode[5];       /* path files of func_8011C57C_gacode's camera */
 extern gaStage_t D_80123EB0_gacode[];
@@ -252,7 +254,7 @@ s32 func_80114024_gacode( void );
 /* unit 3E350 */
 void func_80114130_gacode( void );
 void func_80114138_gacode( void );
-void func_80114640_gacode( s32 arg0 );
+s32 func_80114640_gacode( s32 lane );
 void func_8011A26C_gacode( void );
 void func_801144C4_gacode( u8 lastLane );
 void func_80114CB4_gacode( gaBody_t *body, gaSpot_t *spot, sceneObj_t *obj, f32 offset );
@@ -262,6 +264,8 @@ s32 func_801157F8_gacode( s32 player );
 s32 func_80115CDC_gacode( s32 player );
 s32 func_80115D38_gacode( s32 player );
 void func_80115D70_gacode( s32 player, u8 arg1 );
+void func_80115FCC_gacode( void );
+void func_80116170_gacode( s32 skip );
 s32 func_80115DF4_gacode( s32 player );
 s32 func_80115E24_gacode( u8 twoLanes );
 s32 func_801155BC_gacode( s32 player );
@@ -333,7 +337,9 @@ void func_80120DD0_gacode( void );
 void func_80120DD8_gacode( u8 arg0 );
 void func_801213B4_gacode( u8 arg0 );
 void func_801219CC_gacode( u8 arg0 );
+void func_80121E34_gacode( void );
 void func_80121FD0_gacode( u8 arg0, u8 arg1 );
+s32 func_80122060_gacode( u8 player, s32 done );
 
 /* unit 4C560 */
 void func_80122340_gacode( void );
