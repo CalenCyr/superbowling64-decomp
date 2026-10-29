@@ -576,3 +576,6 @@ strcpy = 0x80029578; // type:func
 D_80066B70 = 0x80066B70; // size:0x18
 D_80061090 = 0x80061090; // size:0x200
 D_80061440 = 0x80061440; // size:0x200
+// lane/match-main-53B0: symbols of units 53B0-13490
+D_800A30C0 = 0x800A30C0; // size:0x8CA0 allow_addend:True
+D_800F80B0 = 0x800F80B0; // size:0x8000 allow_addend:True
