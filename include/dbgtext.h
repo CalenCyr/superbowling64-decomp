@@ -22,7 +22,4 @@ void func_80028EA8( Gfx **gdl );
 void func_80029088( Gfx **gdl, s16 x, s16 y, u16 advance, u16 *glyphs );
 void func_800292D4( u16 *glyphs, s32 value, s32 digits );
 
-/* unit BEF0 */
-u8 *func_80030C04( s32 id, s32 arg1 );
-
 #endif

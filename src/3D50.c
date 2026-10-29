@@ -3,6 +3,7 @@
 #include "common.h"
 #include "libultra.h"
 #include "dbgtext.h"
+#include "filecache.h"
 
 /*
 ================
