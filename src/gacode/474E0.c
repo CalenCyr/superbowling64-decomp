@@ -183,8 +183,8 @@ Sets up a sprite of resource id at (x, y), keeping a copy of its palette.
 */
 void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, s16 x, s16 y ) {
     func_8002DF3C( id, 320, 240 );
-    if ( D_800F80B0[id].image != NULL ) {
-        memmove( sprite->palette, D_800F80B0[id].image->palette, sizeof( sprite->palette ) );
+    if ( D_800F80B0[id].data != NULL ) {
+        memmove( sprite->palette, ( (unkImage_t *)D_800F80B0[id].data )->palette, sizeof( sprite->palette ) );
         sprite->id = id;
         sprite->x = x;
         sprite->y = y;
@@ -200,8 +200,8 @@ Puts the sprite's saved palette back into its resource.
 ================
 */
 void func_80120B10_gacode( gaSprite_t *sprite ) {
-    if ( D_800F80B0[sprite->id].image != NULL ) {
-        memmove( D_800F80B0[sprite->id].image->palette, sprite->palette, sizeof( sprite->palette ) );
+    if ( D_800F80B0[sprite->id].data != NULL ) {
+        memmove( ( (unkImage_t *)D_800F80B0[sprite->id].data )->palette, sprite->palette, sizeof( sprite->palette ) );
     }
 }
 

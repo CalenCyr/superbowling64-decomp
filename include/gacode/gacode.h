@@ -8,6 +8,7 @@
 #include <PR/gu.h>
 #include "input.h"
 #include "gamesnd.h"
+#include "filecache.h"
 #include "boot.h"
 
 /*
@@ -32,13 +33,6 @@ typedef struct {
     /* 0x10 */ u16 palette[256];
 } unkImage_t;
 
-/* Entry of main's resource table D_800F80B0. Name invented. */
-typedef struct {
-    /* 0x00 */ s32 unk_00;
-    /* 0x04 */ unkImage_t *image;       /* NULL: not loaded */
-} unkResource_t;
-
-extern unkResource_t D_800F80B0[];
 
 s32 func_80037410( void );          /* unit 12260 */
 s32 func_8003B204( void );          /* unit 13490 */
