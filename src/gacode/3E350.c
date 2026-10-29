@@ -98,7 +98,40 @@ void func_80114CB4_gacode( gaBody_t *body, gaSpot_t *spot, sceneObj_t *obj, f32 
     obj->unk_44 = spot->pos[1] - height;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80114DD4_gacode);
+/*
+================
+func_80114DD4_gacode
+
+Publishes the ball of the player's lane to main: its position, and in D_800DF595 its state (0: no ball,
+1 or 2 (the lane in func_80118F68_gacode): unk_454 bit 1 set, 3: below -190).
+================
+*/
+void func_80114DD4_gacode( gaPlayer_t *pl ) {
+    gaLane_t *lane = pl->lane;
+    gaSpot_t *spot = &lane->spots[0];
+    u8 state;
+
+    D_800E6560[pl->laneIndex][0] = lane->bodies[0].pos[0];
+    D_800E6560[pl->laneIndex][1] = lane->bodies[0].pos[1];
+    D_800E6560[pl->laneIndex][2] = lane->bodies[0].pos[2];
+    if ( lane->bodies[0].unk_5D == 0 ) {
+        D_800DF595[pl->laneIndex] = 0;
+        return;
+    }
+    if ( ( lane->unk_454 >> 1 ) & 1 ) {
+        if ( pl->lane->unk_B10 == func_80118F68_gacode ) {
+            state = 2;
+        } else {
+            state = 1;
+        }
+    } else {
+        state = 0;
+    }
+    if ( spot->pos[1] <= -190.0f ) {
+        state = 3;
+    }
+    D_800DF595[pl->laneIndex] = state;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80114EC4_gacode);
 
@@ -268,7 +301,47 @@ s32 func_80115E24_gacode( u8 twoLanes ) {
     return 1;
 }
 
+/*
+================
+func_80115ED4_gacode
+
+When the players of every lane are done, or wait in func_80118F08_gacode (whose lanes then restart at
+func_80116248_gacode), stops their unk_B08 handlers; returns 1 then.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: control flow; retail shares the two-lane unk_B08 stores between both cases (the first jumps into
+// the second's tail with the result already 1); no spelling tried yet produces that tail merge
+s32 func_80115ED4_gacode( u8 twoLanes ) {
+    if ( twoLanes ) {
+        if ( D_8012DCF0_gacode[0].unk_B10 == func_80118F38_gacode && D_8012DCF0_gacode[1].unk_B10 == D_8012DCF0_gacode[0].unk_B10 ) {
+            D_8012DCF0_gacode[1].unk_B08 = func_8011B400_gacode;
+            D_8012DCF0_gacode[0].unk_B08 = func_8011B400_gacode;
+            return 1;
+        }
+        if ( D_8012DCF0_gacode[0].unk_B10 == func_80118F08_gacode && D_8012DCF0_gacode[1].unk_B10 == D_8012DCF0_gacode[0].unk_B10 ) {
+            D_8012DCF0_gacode[1].unk_B04 = func_80116248_gacode;
+            D_8012DCF0_gacode[0].unk_B04 = func_80116248_gacode;
+            D_8012DCF0_gacode[1].unk_B08 = func_8011B400_gacode;
+            D_8012DCF0_gacode[0].unk_B08 = func_8011B400_gacode;
+            return 1;
+        }
+        return 0;
+    }
+    if ( D_8012DCF0_gacode[0].unk_B10 == func_80118F38_gacode ) {
+        D_8012DCF0_gacode[0].unk_B08 = func_8011B400_gacode;
+        return 1;
+    }
+    if ( D_8012DCF0_gacode[0].unk_B10 == func_80118F08_gacode ) {
+        D_8012DCF0_gacode[0].unk_B04 = func_80116248_gacode;
+        D_8012DCF0_gacode[0].unk_B08 = func_8011B400_gacode;
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80115ED4_gacode);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80115FCC_gacode);
 

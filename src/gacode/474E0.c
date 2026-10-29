@@ -429,4 +429,25 @@ s32 func_80122060_gacode( u8 player, s32 done ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80122140_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8012224C_gacode);
+/*
+================
+func_8012224C_gacode
+
+Decides a frame between players 0 and 1: the lower D_80066E18 result takes 2 and the other 0, a tie gives
+both 1; a 2 counts in the player's D_800994B8.
+================
+*/
+void func_8012224C_gacode( u8 frame ) {
+    if ( D_80066E18[0][frame] < D_80066E18[1][frame] ) {
+        D_800A3020[0][frame] = 2;
+        D_800A3020[1][frame] = 0;
+    } else if ( D_80066E18[0][frame] > D_80066E18[1][frame] ) {
+        D_800A3020[1][frame] = 2;
+        D_800A3020[0][frame] = 0;
+    } else {
+        D_800A3020[1][frame] = 1;
+        D_800A3020[0][frame] = 1;
+    }
+    D_800994B8[0] += D_800A3020[0][frame] == 2 ? 1 : 0;
+    D_800994B8[1] += D_800A3020[1][frame] == 2 ? 1 : 0;
+}

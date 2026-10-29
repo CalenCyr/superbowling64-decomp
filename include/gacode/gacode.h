@@ -32,6 +32,9 @@ extern void *D_800EA120[];          /* main's scene objects, of several kinds: [
 extern u8 D_8009D19C[4];            /* per player: current frame (10: the game is over) */
 extern s8 D_800A3020[4][10];        /* per player and frame */
 extern s8 D_80066E18[4][10];        /* per player and frame */
+extern s8 D_800994B8[2];            /* per player of a duel: frames won */
+extern f32 D_800E6560[2][3];        /* per lane: position of the ball */
+extern u8 D_800DF595[2];            /* per lane: state of the ball (func_80114DD4_gacode) */
 
 /* Main's game setup (D_800DF59C): only the members the overlay uses. Name invented. */
 typedef struct {
@@ -120,7 +123,7 @@ typedef struct {
     /* 0x42C */ u8 unk_42C[0x8];
     /* 0x434 */ f32 unk_434;
     /* 0x438 */ u8 unk_438[0x1C];
-    /* 0x454 */ s32 unk_454;
+    /* 0x454 */ u32 unk_454;            /* flags */
     /* 0x458 */ u8 unk_458[0x688 - 0x458];
     /* 0x688 */ gaSpot_t spots[NUM_BODIES];
     /* 0x7E8 */ u8 unk_7E8[0x948 - 0x7E8];
@@ -272,6 +275,8 @@ void func_80114138_gacode( void );
 s32 func_80114640_gacode( s32 lane );
 void func_8011A26C_gacode( void );
 void func_801144C4_gacode( u8 lastLane );
+void func_80114DD4_gacode( gaPlayer_t *pl );
+s32 func_80115ED4_gacode( u8 twoLanes );
 void func_80114CB4_gacode( gaBody_t *body, gaSpot_t *spot, sceneObj_t *obj, f32 offset );
 void func_80114FC4_gacode( s32 player );
 void func_80114FFC_gacode( s32 player );
@@ -357,6 +362,7 @@ void func_801219CC_gacode( u8 arg0 );
 void func_80121E34_gacode( void );
 void func_80121FD0_gacode( u8 arg0, u8 arg1 );
 s32 func_80122060_gacode( u8 player, s32 done );
+void func_8012224C_gacode( u8 frame );
 
 /* unit 4C560 */
 void func_80122340_gacode( void );
