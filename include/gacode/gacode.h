@@ -7,6 +7,7 @@
 #include "libultra.h"
 #include <PR/gu.h>
 #include "input.h"
+#include "gamesnd.h"
 #include "boot.h"
 
 /*
@@ -40,7 +41,6 @@ typedef struct {
 extern unkResource_t D_800F80B0[];
 
 s32 func_80037410( void );          /* unit 12260 */
-void func_800379A8( s64 handle );   /* unit 12C70: stops the sound of a func_80037870 handle */
 s32 func_8003B204( void );          /* unit 13490 */
 void func_8002E4B0( u16 id, s32 x, s32 y, u8 arg3, f32 scaleX, f32 scaleY );   /* unit 7250 */
 void func_8002DF3C( s32 id, s32 width, s32 height );                            /* unit 7250 */
