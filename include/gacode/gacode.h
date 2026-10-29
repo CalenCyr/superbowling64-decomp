@@ -163,6 +163,8 @@ typedef struct {
     /* 0x34 */ u8 unk_34[0x14];
 } gaCharacter_t;                        /* size 0x48 */
 
+extern gaCharacter_t D_80123BE0_gacode[];
+
 #define MAX_PLAYERS     4
 
 /* A player (D_8012D658_gacode). Name invented. */
@@ -253,6 +255,7 @@ s32 func_80114024_gacode( void );
 
 /* unit 3E350 */
 void func_80114130_gacode( void );
+void func_80114550_gacode( s32 player, s8 port, u8 character, u8 lane );
 void func_80114138_gacode( void );
 s32 func_80114640_gacode( s32 lane );
 void func_8011A26C_gacode( void );
@@ -325,6 +328,7 @@ f32 func_8011D3D4_gacode( vec3_t v );
 f32 func_8011D424_gacode( vec3_t out, vec3_t in );
 f32 func_8011D4E4_gacode( vec3_t out, vec3_t from, vec3_t to );
 s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit );
+f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale );
 s32 func_80120680_gacode( u16 key, s32 count, u16 *table );
 void func_80120980_gacode( u8 *pins, u16 mask );
 void func_801209C0_gacode( u8 *order, u8 count, u8 first );

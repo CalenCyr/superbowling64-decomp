@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "libultra.h"
+#include "libc.h"
 #include "gacode/gacode.h"
 
 /*
@@ -38,7 +39,25 @@ void func_801144C4_gacode( u8 lastLane ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80114550_gacode);
+/*
+================
+func_80114550_gacode
+
+Sets up a player: its controller port (-1: played by the game), character and lane.
+================
+*/
+void func_80114550_gacode( s32 player, s8 port, u8 character, u8 lane ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    pl->lane = &D_8012DCF0_gacode[lane];
+    pl->laneIndex = lane;
+    pl->port = port;
+    memmove( pl->unk_48, pl->obj->mtx, sizeof( pl->unk_48 ) );
+    memmove( &pl->character, &D_80123BE0_gacode[character], sizeof( gaCharacter_t ) );
+    pl->unk_93 = D_80123BE0_gacode[character].unk_04;
+    func_80116248_gacode( player );
+    func_8011B8AC_gacode( player, pl->lane->camera );
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80114640_gacode);
 

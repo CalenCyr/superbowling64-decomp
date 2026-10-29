@@ -157,7 +157,34 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8012016C_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801203AC_gacode);
 
+/*
+================
+func_801205A0_gacode
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: same operations, but retail evaluates dx before dz and the products of the quotient in another
+// order (float register allocation and schedule differ throughout)
+f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale ) {
+    f32 dx = x - pos[0];
+    f32 dz = pos[2] - 730.0f;
+    f32 width = 730.0f - D_8012D220_gacode->unk_08;
+    f32 vx;
+    f32 vz;
+
+    if ( dz < 0.0f ) {
+        dz = 0.0f - dz - width;
+    } else {
+        dz = dz - width;
+    }
+    vz = scale * vel[2];
+    vx = scale * vel[0];
+    return ( vz * vz * 2 * dx - vx * 2 * vz * ( width + dz ) )
+         / ( width * width + width * 2 * dz + dz * dz * D_8012D220_gacode->unk_10 ) * 15.0 / D_8012D220_gacode->unk_0C;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801205A0_gacode);
+#endif
 
 /*
 ================
