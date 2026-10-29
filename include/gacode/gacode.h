@@ -51,6 +51,8 @@ typedef struct {
 void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
 void func_80039CBC( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
 void func_8003A3F0( s32 arg0, s32 arg1, s32 arg2 );             /* unit 13490 */
+void func_8003A658( s32 arg0, s32 x, s32 y );                   /* unit 13490 */
+void func_8002BED8( s16 file, s16 frame, f32 *pos, f32 *rot );     /* unit 7250: reads a frame of a path file */
 
 /*
 ==============================================================================
@@ -210,6 +212,7 @@ extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];
 extern f32 D_80123850_gacode[][4];     /* per character: unk_98, unk_9C, unk_2C, unk_30 of a player */
 extern s16 D_8012C784_gacode[];
+extern s16 D_8012C8E8_gacode[5];       /* path files of func_8011C57C_gacode's camera */
 extern gaStage_t D_80123EB0_gacode[];
 extern gaStage_t *D_8012D220_gacode;
 extern gaPlayer_t D_8012D658_gacode[MAX_PLAYERS];
@@ -306,6 +309,8 @@ void func_8011BCA8_gacode( s32 player, gaCamera_t *camera );
 void func_8011BD34_gacode( s32 player, gaCamera_t *camera );
 void func_8011C0DC_gacode( s32 player, gaCamera_t *camera );
 void func_8011C650_gacode( s32 player, gaCamera_t *camera );
+void func_8011B490_gacode( s32 lane );
+void func_8011C57C_gacode( s32 player, gaCamera_t *camera );
 void func_8011CEE4_gacode( gaPlayer_t *pl, s32 player );
 
 /* unit 474E0 */
@@ -314,6 +319,7 @@ void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to );
 void func_8011D304_gacode( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos );
 f32 func_8011D3D4_gacode( vec3_t v );
 f32 func_8011D424_gacode( vec3_t out, vec3_t in );
+f32 func_8011D4E4_gacode( vec3_t out, vec3_t from, vec3_t to );
 s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit );
 s32 func_80120680_gacode( u16 key, s32 count, u16 *table );
 void func_80120980_gacode( u8 *pins, u16 mask );

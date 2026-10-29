@@ -669,7 +669,26 @@ void func_8011B408_gacode( s32 player ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011B490_gacode);
+/*
+================
+func_8011B490_gacode
+
+Shows image 0x851 over the lane's side when its score leads, or 0xA6B when the two scores are level; then,
+except in mode func_8011582C_gacode, draws the lane's panel.
+================
+*/
+void func_8011B490_gacode( s32 lane ) {
+    s32 rival = lane == 0;
+
+    if ( D_800EA090[lane] > D_800EA090[rival] ) {
+        func_8002E4B0( 0x851, lane == 0 ? 0x14 : 0xA4, 0x94, D_80123601_gacode + 0x7F, 1.0f, 1.0f );
+    } else if ( D_800EA090[lane] == D_800EA090[rival] ) {
+        func_8002E4B0( 0xA6B, lane != 0 ? 0xB4 : 0x24, 0x94, D_80123601_gacode + 0x7F, 1.0f, 1.0f );
+    }
+    if ( D_8012CDF4_gacode != func_8011582C_gacode ) {
+        func_8003A658( lane, 0x18, lane == 0 ? 0x10 : 0xC0 );
+    }
+}
 
 /*
 ================
@@ -873,7 +892,25 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C254_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C468_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C57C_gacode);
+/*
+================
+func_8011C57C_gacode
+
+Camera handler: puts the eye on frame D_8012D8D8_gacode % 5 of the D_8012C8E8_gacode paths, looking down the
+lane.
+================
+*/
+void func_8011C57C_gacode( s32 player, gaCamera_t *camera ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    func_8002BED8( D_8012C8E8_gacode[D_8012D8D8_gacode % 5], 0, camera->eye, camera->unk_18 );
+    camera->at[2] = -1096.0f;
+    camera->at[0] = pl->lane->unk_B14;
+    camera->at[1] = D_8012D220_gacode->unk_14;
+    camera->unk_18[2] = camera->eye[2];
+    camera->unk_18[0] = camera->eye[0];
+    camera->unk_18[1] = 512.0f;
+}
 
 /*
 ================

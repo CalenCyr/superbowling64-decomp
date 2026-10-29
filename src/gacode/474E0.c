@@ -46,9 +46,10 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D304_gacode);
 func_8011D3A0_gacode
 
 out = to - from
+Declared inline: func_8011D4E4_gacode expands it.
 ================
 */
-void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to ) {
+inline void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to ) {
     out[0] = to[0] - from[0];
     out[1] = to[1] - from[1];
     out[2] = to[2] - from[2];
@@ -70,9 +71,10 @@ f32 func_8011D3D4_gacode( vec3_t v ) {
 func_8011D424_gacode
 
 out = in scaled to length 1, or (0, -1, 0) when in is zero; returns the length of in.
+Declared inline: func_8011D4E4_gacode expands it.
 ================
 */
-f32 func_8011D424_gacode( vec3_t out, vec3_t in ) {
+inline f32 func_8011D424_gacode( vec3_t out, vec3_t in ) {
     f32 length = sqrtf( in[0] * in[0] + in[1] * in[1] + in[2] * in[2] );
 
     if ( length == 0.0f ) {
@@ -87,7 +89,19 @@ f32 func_8011D424_gacode( vec3_t out, vec3_t in ) {
     return length;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D4E4_gacode);
+/*
+================
+func_8011D4E4_gacode
+
+out = the unit vector from from to to; returns their distance.
+================
+*/
+f32 func_8011D4E4_gacode( vec3_t out, vec3_t from, vec3_t to ) {
+    vec3_t delta;
+
+    func_8011D3A0_gacode( delta, from, to );
+    return func_8011D424_gacode( out, delta );
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D5B8_gacode);
 
