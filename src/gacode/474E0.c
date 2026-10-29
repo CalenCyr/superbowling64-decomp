@@ -84,7 +84,12 @@ void func_80120D7C_gacode( s64 *handle ) {
     }
 }
 
-void func_80120DD0_gacode(void) {
+/*
+================
+func_80120DD0_gacode
+================
+*/
+void func_80120DD0_gacode( void ) {
 }
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120DD8_gacode);

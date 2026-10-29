@@ -386,3 +386,15 @@ FatTable	include/fat.h	evidence: the BW64FAT file at ROM 0x3C2A0, header "BW64FA
 ArchiveEntry	include/archive.h	invented: {ROM offset into the str segment, stored size, decompressed size} record read by the LZSS loader
 HeapBlock	include/heap.h	invented: free-list block header (next, size) of the block allocator in unit 51F0
 HostPacket	include/hostio.h	invented: request header (command, size, file name) exchanged with the development host link in unit 4890
+
+# gacode overlay (include/gacode/gacode.h): types and members, all invented from use
+vec3_t	gacode.h	invented: three floats (x, y, z); the Quake-style vector type
+sceneObj_t	gacode.h	invented: object of main's scene engine (pointers in D_800EA120); mtx is the 4x4 float matrix func_8011D2C0_gacode builds with guPositionF
+gaBody_t	gacode.h	invented: 0x60-byte body of a lane, eleven per lane (index 0 the ball, 1-10 the pins: loops over 1..10 touch only pins); pos/rot/scale are the guPositionF arguments
+gaSpot_t	gacode.h	invented: 0x20-byte rest position of a body; func_80114CB4_gacode copies its pos into the body
+gaCamera_t	gacode.h	invented: three vectors the unk_B0C handlers write (eye, at, a third)
+gaLane_t	gacode.h	invented: 0xB30-byte lane (two, D_8012DCF0_gacode): bodies, their scene objects, four handler slots, a sound handle
+gaCharacter_t	gacode.h	invented: 0x48-byte record of D_80123BE0_gacode, copied to the start of gaPlayer_t
+gaPlayer_t	gacode.h	invented: 0xA0-byte player (four, D_8012D658_gacode): character, scene object, lane, controller port (-1: played by the game)
+gaState_t	gacode.h	invented: main-loop state function of the overlay (D_8012CDF0_gacode)
+gaPlayerFunc_t	gacode.h	invented: per-player handler (game mode D_8012CDF4_gacode, D_8012D23C_gacode)
