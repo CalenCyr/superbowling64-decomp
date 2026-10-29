@@ -243,6 +243,8 @@ s32 func_80117ABC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117AE0_gacode);
 
+INCLUDE_RODATA("asm/nonmatchings/gacode/3E350", D_8012CA20_gacode);
+
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117BDC_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117D20_gacode);
@@ -316,6 +318,8 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119328_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801194D0_gacode);
 
+INCLUDE_RODATA("asm/nonmatchings/gacode/3E350", D_8012CA78_gacode);
+
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119638_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119800_gacode);
@@ -343,6 +347,8 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011AB0C_gacode);
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011AD5C_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011B07C_gacode);
+
+INCLUDE_RODATA("asm/nonmatchings/gacode/3E350", D_8012CB38_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011B1A0_gacode);
 

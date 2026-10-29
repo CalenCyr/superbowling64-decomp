@@ -379,6 +379,11 @@ segments:
       - [0x474E0, c, gacode/474E0]
       - [0x4C560, c, gacode/4C560]
       - [0x4D820, data]
+      # .rodata of each unit, in unit order after all .data (doubles and jump tables, each unit's own)
+      - [0x56C20, .rodata, gacode/3C570]
+      - [0x56C30, .rodata, gacode/3E350]
+      - [0x56E80, .rodata, gacode/474E0]
+      - [0x56FD0, .rodata, gacode/4C560]
       - { type: bss, vram: 0x8012CDD0 }
 
   - name: rscode

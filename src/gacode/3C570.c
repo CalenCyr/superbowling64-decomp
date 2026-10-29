@@ -148,3 +148,5 @@ s32 func_80114108_gacode( void ) {
     func_80114640_gacode( 0 );
     return 0;
 }
+
+INCLUDE_RODATA("asm/nonmatchings/gacode/3C570", D_8012CA00_gacode);
