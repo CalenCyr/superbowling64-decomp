@@ -109,19 +109,24 @@ typedef struct {
     /* 0x18 */ seEntry_t entries[1];    /* numEntries entries */
 } seTable_t;
 
-/* Configuration passed to Snd_Init; filled on the stack by its caller. 0x28 to 0x3C go to func_8003F9A0. */
+/* Configuration passed to Snd_Init; filled on the stack by its caller. 0x28 to 0x3C are func_8003F9A0's. */
 typedef struct {
     /* 0x00 */ s32 unk_00;
     /* 0x04 */ s32 numVoices;       /* NUM_MASTER_CHANNELS more channels are added */
     /* 0x08 */ OSSched *sched;          /* the scheduler the audio thread's client registers with */
-    /* 0x0C */ s32 voicePriority;
+    /* 0x0C */ s32 voicePriority;       /* also the audio thread's priority */
     /* 0x10 */ u8 *heapBase;        /* audio heap (Snd_InitHeap) */
     /* 0x14 */ s32 heapSize;
     /* 0x18 */ waveBank_t *waveBank;    /* default wave bank, NULL: none */
     /* 0x1C */ s32 waveRomBase;     /* ROM address of its samples */
     /* 0x20 */ seTable_t *seTable;  /* default SE table, NULL: none */
     /* 0x24 */ s32 numMsgs;         /* message ring buffer size */
-    /* 0x28 */ u8 unk_28[0x40 - 0x28];
+    /* 0x28 */ s32 maxUpdates;          /* synthesizer parameter updates */
+    /* 0x2C */ s32 outputRate;          /* requested AI frequency */
+    /* 0x30 */ s32 maxCmds;             /* audio commands per frame */
+    /* 0x34 */ s32 ticksPerFrame;       /* audio frame length, in ticks */
+    /* 0x38 */ s32 numDmaBuffers;       /* ROM sample cache buffers */
+    /* 0x3C */ s32 dmaBufferSize;       /* bytes per cache buffer */
     /* 0x40 */ OSPiHandle *unk_40;      /* PI handle of the sample addresses tagged 0xFF000000 (func_8003F65C) */
 } sndConfig_t;
 
@@ -321,5 +326,14 @@ typedef struct {
     /* 0x04 */ void (*waitFrame)( void );
     /* 0x08 */ void (*runTask)( audioTask_t *task );
 } audioTaskFuncs_t;
+
+#define NUM_AUDIO_BUFFERS   3       /* output buffers the audio thread cycles through */
+#define AUDIO_STACK_SIZE    0x2000  /* the audio thread's stack */
+
+/* An output buffer of the audio thread (1ADA0.c): one frame of stereo samples for the AI. */
+typedef struct {
+    /* 0x00 */ s16 *ptr;
+    /* 0x04 */ u32 samples;                 /* sample pairs in the frame it holds */
+} audioBuffer_t;
 
 #endif

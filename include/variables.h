@@ -61,4 +61,12 @@ extern audioClient_t *D_800643D4;
 extern audioTaskFuncs_t D_8005CE40; /* func_8003F7FC, func_8003F860, func_8003F8C0 */
 extern audioTaskFuncs_t *D_8005CE4C;    /* the routines the audio thread uses, &D_8005CE40 by default */
 
+/* audio manager: audio thread (1ADA0.c) */
+extern N_ALGlobals D_800E64D0;      /* the n_audio globals */
+extern OSThread D_800643E0;         /* the audio thread */
+extern u8 *D_80064590;              /* its stack */
+extern audioBuffer_t *D_80064594;   /* NUM_AUDIO_BUFFERS output buffers */
+extern Acmd *D_80064598;            /* the frame's command list */
+extern audioBuffer_t *D_8005CE50;   /* the buffer the last task filled, for the AI next; NULL: none yet */
+
 #endif

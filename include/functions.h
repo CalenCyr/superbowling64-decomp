@@ -57,7 +57,10 @@ void func_8003F7FC( void );
 void func_8003F860( void );
 void func_8003F8C0( audioTask_t *audio );
 
-void func_8003F9A0( sndConfig_t *config, s32 rate, s32 arg2 );
+
+/* audio thread (1ADA0.c) */
+void func_8003F9A0( sndConfig_t *config, s32 tickRate, s32 fxType );
+void func_8003FAD8( void *arg );
 void Snd_InitHeap( u8 *base, s32 len );
 void *Snd_Alloc( s32 size );
 s32 Snd_HeapUsed( void );
