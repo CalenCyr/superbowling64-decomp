@@ -133,7 +133,32 @@ void func_80114DD4_gacode( gaPlayer_t *pl ) {
     D_800DF595[pl->laneIndex] = state;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80114EC4_gacode);
+/*
+================
+func_80114EC4_gacode
+
+While the ball of the player's lane is held, places it in the player's hand: at the character's offset
+from the joint it names, and sets the ball's spot from there (relative to the lane's unk_B14).
+================
+*/
+void func_80114EC4_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    gaCharacterData_t *data;
+    f32 mf[4][4];
+    u8 joint;
+
+    if ( pl->lane->bodies[0].unk_5D != 0 ) {
+        return;
+    }
+    data = pl->character.unk_00;
+    joint = data->unk_08 < 0 ? -data->unk_08 : data->unk_08;
+    guTranslateF( mf, data->unk_0C[0], data->unk_0C[1], data->unk_0C[2] );
+    guMtxCatF( mf, pl->obj->joints[joint].mtx, pl->lane->bodyObjs[0]->mtx );
+    guMtxXFMF( pl->lane->bodyObjs[0]->mtx, 0.0f, 0.0f, 0.0f, &pl->lane->spots[0].pos[0], &pl->lane->spots[0].pos[1],
+               &pl->lane->spots[0].pos[2] );
+    pl->lane->spots[0].pos[0] -= pl->lane->unk_B14;
+    func_8002AEBC( pl->lane->bodyObjs[0] );
+}
 
 /*
 ================
@@ -971,8 +996,8 @@ void func_8011BA8C_gacode( s32 player, gaCamera_t *camera ) {
     camera->eye[2] = 730.0f;
     camera->eye[0] = pl->obj->mtx[3][0] + side * 250.0;
     camera->eye[1] = 40.0f;
-    camera->at[2] = pl->obj->unk_1C8[2];
-    camera->at[0] = pl->obj->unk_1C8[0];
+    camera->at[2] = pl->obj->joints[1].mtx[3][2];
+    camera->at[0] = pl->obj->joints[1].mtx[3][0];
     camera->at[1] = 60.0f;
     camera->unk_18[2] = camera->eye[2];
     camera->unk_18[0] = camera->eye[0];
@@ -1035,12 +1060,12 @@ func_8011BCA8_gacode
 void func_8011BCA8_gacode( s32 player, gaCamera_t *camera ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
 
-    camera->eye[2] = pl->obj->unk_1C8[2] - 256.0f;
-    camera->eye[0] = pl->obj->unk_1C8[0];
+    camera->eye[2] = pl->obj->joints[1].mtx[3][2] - 256.0f;
+    camera->eye[0] = pl->obj->joints[1].mtx[3][0];
     camera->eye[1] = 50.0f;
-    camera->at[2] = pl->obj->unk_1C8[2];
-    camera->at[0] = pl->obj->unk_1C8[0];
-    camera->at[1] = pl->obj->unk_1C8[1];
+    camera->at[2] = pl->obj->joints[1].mtx[3][2];
+    camera->at[0] = pl->obj->joints[1].mtx[3][0];
+    camera->at[1] = pl->obj->joints[1].mtx[3][1];
     camera->unk_18[2] = camera->eye[2];
     camera->unk_18[0] = camera->eye[0];
     camera->unk_18[1] = 512.0f;
@@ -1067,7 +1092,28 @@ void func_8011C0DC_gacode( s32 player, gaCamera_t *camera ) {
     camera->unk_18[1] = 512.0f;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C158_gacode);
+/*
+================
+func_8011C158_gacode
+
+Camera handler: eye above the origin, looking out at the lane's D_8012C764_gacode angle, which turns by
+0.3 degrees a frame.
+================
+*/
+void func_8011C158_gacode( s32 player, gaCamera_t *camera ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    camera->eye[2] = 0.0f;
+    camera->eye[0] = 0.0f;
+    camera->eye[1] = 80.0f;
+    camera->at[2] = cosf( D_8012C764_gacode[pl->laneIndex] ) * 256.0f;
+    camera->at[0] = sinf( D_8012C764_gacode[pl->laneIndex] ) * 256.0f;
+    camera->at[1] = camera->eye[1];
+    camera->unk_18[2] = camera->eye[2];
+    camera->unk_18[0] = camera->eye[0];
+    camera->unk_18[1] = 512.0f;
+    D_8012C764_gacode[pl->laneIndex] += M_PI / 600.0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C254_gacode);
 

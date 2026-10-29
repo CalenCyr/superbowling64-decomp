@@ -73,6 +73,12 @@ OVERLAY
 
 typedef f32 vec3_t[3];
 
+/* Joint of a scene object: its matrix, the translation in row 3. Name invented. */
+typedef struct {
+    /* 0x000 */ f32 mtx[4][4];
+    /* 0x040 */ u8 unk_40[0x100];
+} sceneJoint_t;                         /* size 0x140 */
+
 /*
 Object of main's scene engine (D_800EA120 holds pointers to them): only the members the overlay uses. Name
 invented.
@@ -86,9 +92,11 @@ typedef struct {
     /* 0x4A */ u8 unk_4A;               /* 0: not drawn */
     /* 0x4B */ u8 unk_4B[0x50 - 0x4B];
     /* 0x50 */ void *unk_50;              /* a loaded file (func_80030C04) */
-    /* 0x54 */ u8 unk_54[0x1C8 - 0x54];
-    /* 0x1C8 */ vec3_t unk_1C8;
+    /* 0x54 */ u8 unk_54[0x04];
+    /* 0x58 */ sceneJoint_t joints[2];  /* (at least two) */
 } sceneObj_t;
+
+void func_8002AEBC( sceneObj_t *obj );  /* main, unit 53B0 */
 
 /* Ball or pin of a lane. Name invented. */
 typedef struct {
@@ -156,7 +164,11 @@ typedef struct {
 /* What gaCharacter_t.unk_00 points to. Name invented. */
 typedef struct {
     /* 0x00 */ s16 *unk_00;                 /* file indices */
-    /* 0x04 */ u8 unk_04[0x1B - 0x04];
+    /* 0x04 */ u8 unk_04[0x04];
+    /* 0x08 */ s8 unk_08;                   /* +-: a joint of the player's object */
+    /* 0x09 */ u8 unk_09[0x03];
+    /* 0x0C */ vec3_t unk_0C;               /* offset of the ball from that joint */
+    /* 0x18 */ u8 unk_18[0x03];
     /* 0x1B */ u8 unk_1B[1];            /* indexed by gaLane_t.unk_B26 */
 } gaCharacterData_t;
 
@@ -237,6 +249,7 @@ extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];
 extern f32 D_80123850_gacode[][4];     /* unk_98, unk_9C, unk_2C, unk_30 of a player, by D_800DF59C.unk_04[] */
 extern s16 D_8012C784_gacode[];
+extern f32 D_8012C764_gacode[2];       /* per lane: angle of func_8011C158_gacode's camera */
 extern s16 D_8012C8E8_gacode[5];       /* path files of func_8011C57C_gacode's camera */
 extern gaStage_t D_80123EB0_gacode[];
 extern gaStage_t *D_8012D220_gacode;
