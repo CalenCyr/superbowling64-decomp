@@ -39,6 +39,12 @@ extern s8 D_800DF628;
 extern s32 D_8005C0EC;
 extern u32 D_800693B0;
 extern s32 D_8005B0F4;
+/* requests to the controller thread (func_80028064), and its replies */
+extern OSMesgQueue D_800E6690;
+extern OSMesgQueue D_800F8098;
+extern s32 D_80066B8C;              /* result of the last request */
+extern s32 D_800E4FC8;
+extern u8 D_800E6578;
 
 void func_800279F0( void );
 void func_80027A7C( s32 chan );

@@ -16,6 +16,10 @@
 #define SE_PAN_MASK         0x03        /* 0: centre, 1: left, 2: right, 3: random pan and volume */
 #define SE_NO_REUSE         0x80
 
+/* SE indices (names invented) */
+#define SE_CURSOR           0           /* a menu cursor moves */
+#define SE_DECIDE           1           /* a menu choice is taken */
+
 #define SCREENSHOT_WIDTH    320
 #define SCREENSHOT_HEIGHT   240
 #define SCREENSHOT_FILE_SIZE 0x38438   /* bytes written, as the header's bfSize: 2 more than the header and pixels */
