@@ -83,7 +83,6 @@ segments:
       - [0x111A0, c]
       - [0x12260, c]
       - [0x12C70, c]
-      - [0x13230, c]
       - [0x13490, c]
       - [0x166B0, c]
       - [0x19F50, asm]
@@ -313,6 +312,13 @@ segments:
       - [0x3A4F0, .data, libkmc/atan]
       - [0x3A6F0, .data, libkmc/ctype]
       - [0x3A7F0, data]
+      - [0x3B7C0, .rodata, 53B0]
+      - [0x3B7D0, rodata]  # BEF0 .rodata: one string shared by two functions
+      - [0x3B7E0, .rodata, C650]
+      - [0x3B830, .rodata, 111A0]
+      - [0x3B8F0, .rodata, 12260]
+      - [0x3B950, .rodata, 12C70]
+      - [0x3B980, rodata]  # 13490 .rodata: auto array initialisers
       - [0x3B990, .rodata, 166B0]
       - [0x3BA70, rodata]
       - [0x3BB90, lib, libgultra_rom, setintmask, .rodata]
