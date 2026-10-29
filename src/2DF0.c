@@ -3,6 +3,7 @@
 #include "common.h"
 #include "libultra.h"
 #include "input.h"
+#include "gamesnd.h"
 
 #define STICK_DEADZONE      6       /* stick values up to this far from 0 count as 0 */
 #define STICK_DPAD          30      /* stick values beyond this count as a D-pad direction */
