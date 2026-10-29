@@ -60,9 +60,10 @@ inline void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to ) {
 func_8011D3D4_gacode
 
 Length of v.
+Declared inline: func_8011D5B8_gacode expands it.
 ================
 */
-f32 func_8011D3D4_gacode( vec3_t v ) {
+inline f32 func_8011D3D4_gacode( vec3_t v ) {
     return sqrtf( v[0] * v[0] + v[1] * v[1] + v[2] * v[2] );
 }
 
@@ -71,7 +72,7 @@ f32 func_8011D3D4_gacode( vec3_t v ) {
 func_8011D424_gacode
 
 out = in scaled to length 1, or (0, -1, 0) when in is zero; returns the length of in.
-Declared inline: func_8011D4E4_gacode expands it.
+Declared inline: func_8011D4E4_gacode and func_8011D6C4_gacode expand it.
 ================
 */
 inline f32 func_8011D424_gacode( vec3_t out, vec3_t in ) {
@@ -103,9 +104,37 @@ f32 func_8011D4E4_gacode( vec3_t out, vec3_t from, vec3_t to ) {
     return func_8011D424_gacode( out, delta );
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D5B8_gacode);
+/*
+================
+func_8011D5B8_gacode
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D6C4_gacode);
+Cosine of the angle between a and b; 1 when either is zero.
+================
+*/
+f32 func_8011D5B8_gacode( vec3_t a, vec3_t b ) {
+    f32 lengths = func_8011D3D4_gacode( a ) * func_8011D3D4_gacode( b );
+
+    if ( lengths == 0.0f ) {
+        return 1.0f;
+    }
+    return ( a[0] * b[0] + a[1] * b[1] + a[2] * b[2] ) / lengths;
+}
+
+/*
+================
+func_8011D6C4_gacode
+
+out = the unit vector of a x b, or (0, -1, 0) when a and b are parallel.
+================
+*/
+void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b ) {
+    vec3_t cross;
+
+    cross[0] = a[1] * b[2] - a[2] * b[1];
+    cross[1] = a[2] * b[0] - a[0] * b[2];
+    cross[2] = a[0] * b[1] - a[1] * b[0];
+    func_8011D424_gacode( out, cross );
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D7CC_gacode);
 
