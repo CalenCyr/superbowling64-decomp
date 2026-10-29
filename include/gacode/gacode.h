@@ -224,6 +224,7 @@ typedef s32 (*gaState_t)( void );
 extern gaState_t D_8012CDF0_gacode;     /* current state */
 extern gaPlayerFunc_t D_8012CDF4_gacode;  /* game mode */
 extern gaPlayerFunc_t D_8012D23C_gacode;
+extern s16 D_8012CE00_gacode;          /* BGM of the game (func_800379C8) */
 extern s64 D_8012CDE8_gacode;           /* sound handle (func_80037870) */
 extern u8 D_8012CDF8_gacode[2];         /* per team: index in D_8012CE02_gacode of the current player */
 extern s8 D_8012CE02_gacode[2][5];      /* per team: player numbers, -1 ends */
@@ -238,6 +239,12 @@ s32 func_801132A8_gacode( void );
 s32 func_80114108_gacode( void );
 void func_80112A74_gacode( void );
 void func_801138EC_gacode( u8 *cur, s32 start, s32 team );
+void func_801132B0_gacode( void );
+void func_80113384_gacode( void );
+void func_80113594_gacode( gaState_t state, gaPlayerFunc_t mode );
+void func_801136FC_gacode( void );
+s32 func_80113EE4_gacode( void );
+s32 func_80114024_gacode( void );
 
 /* unit 3E350 */
 void func_80114130_gacode( void );
@@ -255,6 +262,8 @@ void func_80115D70_gacode( s32 player, u8 arg1 );
 s32 func_80115DF4_gacode( s32 player );
 s32 func_80115E24_gacode( u8 twoLanes );
 s32 func_801155BC_gacode( s32 player );
+s32 func_801151A0_gacode( s32 player );
+s32 func_8011582C_gacode( s32 player );
 s32 func_801156D8_gacode( s32 player );
 void func_80116248_gacode( s32 player );
 void func_80116398_gacode( s32 player );
@@ -305,6 +314,7 @@ void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to );
 void func_8011D304_gacode( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos );
 f32 func_8011D3D4_gacode( vec3_t v );
 f32 func_8011D424_gacode( vec3_t out, vec3_t in );
+s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit );
 s32 func_80120680_gacode( u16 key, s32 count, u16 *table );
 void func_80120980_gacode( u8 *pins, u16 mask );
 void func_801209C0_gacode( u8 *order, u8 count, u8 first );

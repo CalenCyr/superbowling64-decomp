@@ -107,7 +107,27 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011E12C_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011E504_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011E63C_gacode);
+/*
+================
+func_8011E63C_gacode
+
+Moves *speed one step toward limit's side; once *value reaches limit (from below for a positive limit,
+from above for a negative one) clamps it there, stops *speed and returns 1.
+================
+*/
+s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit ) {
+    if ( ( limit > 0.0f && *value >= limit ) || ( limit < 0.0f && *value <= limit ) ) {
+        *value = limit;
+        *speed = 0.0f;
+        return 1;
+    }
+    if ( *value > limit ) {
+        *speed -= 1.0;
+    } else {
+        *speed += 1.0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011E6F8_gacode);
 

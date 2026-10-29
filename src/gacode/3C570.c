@@ -104,7 +104,33 @@ s32 func_801132A8_gacode( void ) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_801132B0_gacode);
+/*
+================
+func_801132B0_gacode
+
+Sets up the game for the mode in the low nibble of D_8005C160, with its BGM.
+================
+*/
+void func_801132B0_gacode( void ) {
+    switch ( D_8005C160 & 0xF ) {
+    case 0:
+        func_80113384_gacode();
+        break;
+    case 1:
+        func_80113594_gacode( func_80113EE4_gacode, func_801151A0_gacode );
+        D_8012CE00_gacode = D_8012D220_gacode->unk_1A;
+        break;
+    case 3:
+        func_80113594_gacode( func_80114024_gacode, func_8011582C_gacode );
+        D_8012CE00_gacode = 17;
+        break;
+    case 2:
+        func_80113594_gacode( func_80114108_gacode, func_801157F8_gacode );
+        D_8012CE00_gacode = 16;
+        break;
+    }
+    func_801136FC_gacode();
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113384_gacode);
 

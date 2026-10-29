@@ -421,7 +421,29 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117124_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801178D8_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801179FC_gacode);
+/*
+================
+func_801179FC_gacode
+
+Lane input handler: on button 1 of a human player, or after 30 frames for the game's own player, sounds
+effect 1 and moves the lane on to func_80117AE0_gacode.
+================
+*/
+s32 func_801179FC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    s8 port;
+
+    pl->obj->unk_4A = 0;
+    pl->lane->unk_B20++;
+    port = pl->port;
+    if ( ( port >= 0 && input == 1 ) || ( port < 0 && pl->lane->unk_B20 >= 30 ) ) {
+        pl->lane->unk_B20 = 0;
+        func_80120D30_gacode( pl->laneIndex, 1 );
+        pl->lane->unk_B10 = func_80117AE0_gacode;
+        pl->lane->unk_B08 = func_8011AB0C_gacode;
+    }
+    return 0;
+}
 
 /*
 ================
