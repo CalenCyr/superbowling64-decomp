@@ -46,5 +46,6 @@ typedef volatile s64 vs64;
 #include <PR/ucode.h>
 #include <PR/gu.h>
 #include <PR/libaudio.h>
+#include <PR/sched.h>
 
 #endif

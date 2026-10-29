@@ -143,7 +143,7 @@ void Snd_Init( sndConfig_t *config ) {
     }
     snd_tickTime = 1000000 / snd_tickRate;
     Snd_InitHeap( config->heapBase, config->heapSize );
-    func_8003F7F0( config->unk_08 );
+    func_8003F7F0( config->sched );
     snd_voices = Snd_Alloc( ( snd_numChannels - NUM_MASTER_CHANNELS ) * sizeof( N_ALVoice ) );
     snd_channels = Snd_Alloc( snd_numChannels * sizeof( sndChannel_t ) );
     snd_voiceChannels = snd_channels + NUM_MASTER_CHANNELS;
@@ -887,12 +887,11 @@ waveBank_t *Snd_GetSeWaveBank( seTable_t *table ) {
 ================
 func_8003C1FC
 
-Sets D_8005CE4C, a pointer to a table of three functions of the synthesizer unit (func_8003F7FC to
-func_8003F8C0); identity unknown.
+Sets the task routines the audio thread uses (D_8005CE40 by default).
 ================
 */
-void func_8003C1FC( s32 value ) {
-    D_8005CE4C = value;
+void func_8003C1FC( audioTaskFuncs_t *funcs ) {
+    D_8005CE4C = funcs;
 }
 
 #ifdef NON_MATCHING

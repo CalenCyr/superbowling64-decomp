@@ -113,7 +113,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ s32 unk_00;
     /* 0x04 */ s32 numVoices;       /* NUM_MASTER_CHANNELS more channels are added */
-    /* 0x08 */ s32 unk_08;
+    /* 0x08 */ OSSched *sched;          /* the scheduler the audio thread's client registers with */
     /* 0x0C */ s32 voicePriority;
     /* 0x10 */ u8 *heapBase;        /* audio heap (Snd_InitHeap) */
     /* 0x14 */ s32 heapSize;
@@ -122,7 +122,7 @@ typedef struct {
     /* 0x20 */ seTable_t *seTable;  /* default SE table, NULL: none */
     /* 0x24 */ s32 numMsgs;         /* message ring buffer size */
     /* 0x28 */ u8 unk_28[0x40 - 0x28];
-    /* 0x40 */ s32 unk_40;
+    /* 0x40 */ OSPiHandle *unk_40;      /* PI handle of the sample addresses tagged 0xFF000000 (func_8003F65C) */
 } sndConfig_t;
 
 #define AUDIO_FRAME_SAMPLES 184     /* audio frame granularity: frame sizes are whole multiples of 184 samples */
@@ -283,5 +283,43 @@ typedef struct {
     /* 0x10 */ ALLowPass *lowPass;
     /* 0x14 */ POLEF_STATE *lowPassState;
 } fxStorage_t;
+
+/*
+A ROM DMA buffer of the sample cache (1A7A0.c). Buffers in use are on a list sorted by startAddr; one that no
+sample read has used for two frames goes back to the free list.
+*/
+typedef struct dmaBuffer_s {
+    /* 0x00 */ struct dmaBuffer_s *prev;
+    /* 0x04 */ struct dmaBuffer_s *next;
+    /* 0x08 */ s32 framesLeft;              /* frames until it is freed, unless used again */
+    /* 0x0C */ u32 startAddr;               /* ROM address of its data; -1: none yet */
+    /* 0x10 */ u8 *ptr;                     /* its data, D_800643A4 bytes */
+} dmaBuffer_t;
+
+#define AUDIO_CLIENT_MESGS  4   /* audioClient_t's queue sizes */
+
+/* The audio thread's scheduler client (1A7A0.c): retrace messages, and the done message of its tasks. */
+typedef struct {
+    /* 0x00 */ OSScClient client;
+    /* 0x08 */ OSMesgQueue msgQ;            /* from the scheduler */
+    /* 0x20 */ OSMesg msgBuf[AUDIO_CLIENT_MESGS];
+    /* 0x30 */ OSMesgQueue taskDoneQ;       /* the task's done message */
+    /* 0x48 */ OSMesg taskDoneMsgBuf[AUDIO_CLIENT_MESGS];
+} audioClient_t;
+
+/* What an audio frame's RSP task runs: its command list and microcode. */
+typedef struct {
+    /* 0x00 */ Acmd *cmdList;
+    /* 0x04 */ s32 cmdSize;                 /* bytes */
+    /* 0x08 */ u64 *ucode;
+    /* 0x0C */ u64 *ucodeData;
+} audioTask_t;
+
+/* The audio thread's three task routines (1A7A0.c, D_8005CE40): another table can stand in for them. */
+typedef struct {
+    /* 0x00 */ void (*init)( void );
+    /* 0x04 */ void (*waitFrame)( void );
+    /* 0x08 */ void (*runTask)( audioTask_t *task );
+} audioTaskFuncs_t;
 
 #endif

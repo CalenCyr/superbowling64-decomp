@@ -45,7 +45,18 @@ s32 func_8003F2B8( void );
 s32 func_8003F2FC( void );
 s32 func_8003F340( s32 index );
 
-void func_8003F7F0( s32 arg );
+
+/* ROM sample cache and scheduler client (1A7A0.c) */
+ALDMANew func_8003F3A0( s32 count, s32 size );
+void func_8003F514( void );
+ALDMAproc func_8003F5E4( void *state );
+s32 func_8003F5F0( s32 addr, s32 len, void *state );
+dmaBuffer_t *func_8003F65C( u32 addr, s32 len );
+void func_8003F7F0( OSSched *sc );
+void func_8003F7FC( void );
+void func_8003F860( void );
+void func_8003F8C0( audioTask_t *audio );
+
 void func_8003F9A0( sndConfig_t *config, s32 rate, s32 arg2 );
 void Snd_InitHeap( u8 *base, s32 len );
 void *Snd_Alloc( s32 size );
