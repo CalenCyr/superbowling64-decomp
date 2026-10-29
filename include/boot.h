@@ -10,6 +10,8 @@
 
 #define BOOT_STACK_SIZE     0x200       /* bytes of stack of each boot thread */
 #define RAM_END             0x80400000  /* end of the 4 MB of RDRAM, in KSEG0 */
+#define SCREEN_WIDTH        320         /* pixels of the framebuffers of D_80066C38 */
+#define SCREEN_HEIGHT       240
 
 /* Record of 0x1C bytes kept four at a time in D_8009D098 and D_800E44E8; its purpose is unknown. */
 typedef struct {
@@ -52,6 +54,9 @@ extern OSMesgQueue D_800DF578;      /* where ROM DMAs report completion */
 extern u8 D_8010A250[];             /* start of the memory main clears at boot (the KNSTATICSYS file) */
 extern u8 D_800A2FE4;
 extern u16 *D_80066C38[3];          /* RGBA5551 320x240 framebuffers: 0x8038F800, 0x803B5000, 0x803DA800 at boot */
+extern s32 D_8005B0F8;              /* index in D_80066C38 of the framebuffer being drawn */
+extern s8 D_8005C0B1;               /* 0 or 1: which of the double-buffered display lists and matrices is built */
+extern Gfx *D_800F8094;             /* next command of the display list being built */
 extern UnkRecordSet D_8009D098;
 extern UnkRecordSet *D_801000B8;
 extern UnkRecord D_800E44E8[4];
