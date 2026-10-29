@@ -362,10 +362,10 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120C0C_gacode);
 ================
 func_80120D30_gacode
 
-Starts sound id for a lane.
+Starts sound id for a lane; returns its handle.
 ================
 */
-void func_80120D30_gacode( s32 lane, s32 id ) {
+u64 func_80120D30_gacode( s32 lane, s32 id ) {
     u8 flags;
 
     if ( D_8005C162 ) {
@@ -376,7 +376,7 @@ void func_80120D30_gacode( s32 lane, s32 id ) {
     if ( id != 0x4E && id != 0x4F ) {
         flags |= 0x80;
     }
-    func_80037870( id, flags );
+    return func_80037870( id, flags );
 }
 
 /*
@@ -456,7 +456,32 @@ s32 func_80122060_gacode( u8 player, s32 done ) {
     return advanced;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80122140_gacode);
+/*
+================
+func_80122140_gacode
+
+Counts a throw of the player's frame; once forced, or at D_80099458 + 5 throws, scores the frame against
+D_80099458 and moves on (returns 1 then). The player is finished after frame 9.
+================
+*/
+s32 func_80122140_gacode( u8 player, s32 force ) {
+    u8 frame;
+    s8 throws;
+    s32 advanced = 0;
+
+    frame = D_8009D19C[player];
+    throws = ++D_80066E18[player][frame];
+
+    if ( force || throws >= D_80099458[frame] + 5 ) {
+        D_800EA090[player] += D_800DF630[player][frame] = throws - D_80099458[frame];
+        D_8009D19C[player]++;
+        advanced = 1;
+    }
+    if ( D_8009D19C[player] == 9 ) {
+        D_800994BE[player] = 1;
+    }
+    return advanced;
+}
 
 /*
 ================

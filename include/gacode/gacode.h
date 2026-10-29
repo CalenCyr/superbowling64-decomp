@@ -34,6 +34,8 @@ extern void *D_800EA120[];          /* main's scene objects, of several kinds: [
 extern u8 D_8009D19C[4];            /* per player: current frame (10: the game is over) */
 extern s8 D_800A3020[4][10];        /* per player and frame */
 extern s8 D_80066E18[4][10];        /* per player and frame */
+extern u8 D_80099458[9];            /* per frame: par of the frame (func_80122140_gacode) */
+extern s16 D_800DF630[4][10];       /* per player and frame: score against par */
 extern s8 D_800994B8[2];            /* per player of a duel: frames won */
 extern f32 D_800E6560[2][3];        /* per lane: position of the ball */
 extern u8 D_800DF595[2];            /* per lane: state of the ball (func_80114DD4_gacode) */
@@ -316,6 +318,7 @@ void func_80116398_gacode( s32 player );
 void func_801163A0_gacode( s32 player );
 void func_80116414_gacode( s32 player );
 void func_8011641C_gacode( s32 player, u8 *pins );
+void func_801167C0_gacode( s32 player, gaPlayer_t *pl, u8 strong );
 void func_80116750_gacode( gaLane_t *lane );
 void func_80116798_gacode( gaLane_t *lane );
 void func_8011669C_gacode( gaPlayer_t *pl );
@@ -375,7 +378,7 @@ void func_801209C0_gacode( u8 *order, u8 count, u8 first );
 void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, u16 first, u16 last );
 void func_80120B10_gacode( gaSprite_t *sprite );
 void func_80120B50_gacode( gaSprite_t *sprite, u16 color, u16 index );
-void func_80120D30_gacode( s32 lane, s32 id );
+u64 func_80120D30_gacode( s32 lane, s32 id );
 void func_80120D7C_gacode( s64 *handle );
 void func_80120DD0_gacode( void );
 void func_80120DD8_gacode( u8 arg0 );
@@ -384,6 +387,7 @@ void func_801219CC_gacode( u8 arg0 );
 void func_80121E34_gacode( void );
 void func_80121FD0_gacode( u8 arg0, u8 arg1 );
 s32 func_80122060_gacode( u8 player, s32 done );
+s32 func_80122140_gacode( u8 player, s32 force );
 void func_8012224C_gacode( u8 frame );
 
 /* unit 4C560 */

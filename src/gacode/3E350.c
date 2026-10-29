@@ -497,7 +497,28 @@ void func_80116798_gacode( gaLane_t *lane ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801167C0_gacode);
+/*
+================
+func_801167C0_gacode
+
+Sounds the result of a throw from the stage's list: 0x49 for a ball in the gutter, else by how far the
+lane's unk_428 got, the second list when strong is set; keeps the sound in the lane's unk_B18.
+================
+*/
+void func_801167C0_gacode( s32 player, gaPlayer_t *pl, u8 strong ) {
+    s32 id;
+
+    if ( pl->lane->spots[0].pos[1] <= -190.0f ) {
+        id = 0x49;
+    } else if ( pl->lane->unk_428 >= -13.0f ) {
+        id = strong ? D_8012D220_gacode->unk_1E[5] : D_8012D220_gacode->unk_1E[2];
+    } else if ( pl->lane->unk_428 <= -16.0f ) {
+        id = strong ? D_8012D220_gacode->unk_1E[7] : D_8012D220_gacode->unk_1E[4];
+    } else {
+        id = strong ? D_8012D220_gacode->unk_1E[6] : D_8012D220_gacode->unk_1E[3];
+    }
+    pl->lane->unk_B18 = func_80120D30_gacode( pl->laneIndex, id );
+}
 
 /*
 ================
