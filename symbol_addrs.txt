@@ -597,3 +597,4 @@ snd_frameSettled = 0x8005CE60; // size:0x4
 D_800EA0A8 = 0x800EA0A8; // size:0x18 allow_addend:True
 aspMainTextStart = 0x8005A480;
 aspMainDataStart = 0x80060010;
+D_80066E00 = 0x80066E00; // size:0x10 allow_addend:True

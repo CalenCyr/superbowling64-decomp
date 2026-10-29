@@ -34,6 +34,8 @@ extern int errno;
 typedef unsigned int size_t;
 
 void *memcpy( void *dst, const void *src, size_t n ); /* libultra's */
+char *strchr( const char *s, int c );                 /* libultra's */
+size_t strlen( const char *s );                       /* libultra's */
 int memcmp( const void *s1, const void *s2, size_t n );
 void *memmove( void *dst, const void *src, size_t n );
 void *memset( void *dst, int c, size_t n );
