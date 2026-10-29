@@ -65,7 +65,27 @@ f32 func_8011D3D4_gacode( vec3_t v ) {
     return sqrtf( v[0] * v[0] + v[1] * v[1] + v[2] * v[2] );
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D424_gacode);
+/*
+================
+func_8011D424_gacode
+
+out = in scaled to length 1, or (0, -1, 0) when in is zero; returns the length of in.
+================
+*/
+f32 func_8011D424_gacode( vec3_t out, vec3_t in ) {
+    f32 length = sqrtf( in[0] * in[0] + in[1] * in[1] + in[2] * in[2] );
+
+    if ( length == 0.0f ) {
+        out[0] = 0.0f;
+        out[1] = -1.0f;
+        out[2] = 0.0f;
+    } else {
+        out[0] = in[0] / length;
+        out[1] = in[1] / length;
+        out[2] = in[2] / length;
+    }
+    return length;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D4E4_gacode);
 

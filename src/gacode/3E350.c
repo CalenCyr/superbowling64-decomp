@@ -331,7 +331,32 @@ void func_80116798_gacode( gaLane_t *lane ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801167C0_gacode);
 
+/*
+================
+func_801168D0_gacode
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: control flow; retail computes the height before the first test and gives that test its own
+// return-0 block, and puts the 1 in v0 before the final store
+s32 func_801168D0_gacode( gaPlayer_t *pl ) {
+    gaLane_t *lane = pl->lane;
+
+    if ( lane->spots[0].pos[2] > -1186.0f
+         && lane->spots[0].pos[1] - lane->spots[0].unk_18 < D_8012D220_gacode->unk_14
+         && ( lane->unk_454 & 1 ) ) {
+        func_80120D7C_gacode( &lane->unk_B18 );
+        func_80120D30_gacode( pl->laneIndex, 0x2F );
+        pl->lane->bodies[0].rot[2] = pl->lane->unk_434 = 0.0f;
+        pl->lane->unk_B25 = 3;
+        pl->lane->unk_B10 = func_80118F68_gacode;
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801168D0_gacode);
+#endif
 
 /*
 ================
@@ -409,7 +434,25 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801187D0_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801189C4_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80118CCC_gacode);
+/*
+================
+func_80118CCC_gacode
+================
+*/
+s32 func_80118CCC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    pl->lane->unk_B0C = func_8011BCA8_gacode;
+    pl->lane->unk_B20++;
+    if ( pl->obj->unk_48 == pl->character.unk_00->unk_1B[pl->lane->unk_B26] - 1
+         || ( pl->lane->unk_B20 >= 30 && ( D_800E44E0[pl->laneIndex] & ( A_BUTTON | Z_TRIG ) ) ) ) {
+        pl->lane->unk_B20 = 0;
+        pl->lane->unk_B0C = func_8011C650_gacode;
+        D_8012D8D8_gacode++;
+        pl->lane->unk_B10 = func_80118D9C_gacode;
+    }
+    return 0;
+}
 
 /*
 ================
@@ -568,7 +611,30 @@ void func_8011B5C8_gacode( s32 lane ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011B634_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011B8AC_gacode);
+/*
+================
+func_8011B8AC_gacode
+
+An unk_B0C handler: the camera of func_8011C0DC_gacode, raised by unk_B28, which falls by 45 a frame to 0.
+================
+*/
+void func_8011B8AC_gacode( s32 player, gaCamera_t *camera ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    camera->eye[2] = 960.0f;
+    camera->eye[0] = pl->lane->unk_B14;
+    camera->eye[1] = pl->lane->unk_B28 + 150.0f;
+    camera->at[2] = 335.0f;
+    camera->at[0] = pl->lane->unk_B14;
+    camera->at[1] = 0.0f;
+    camera->unk_18[2] = camera->eye[2];
+    camera->unk_18[0] = camera->eye[0];
+    camera->unk_18[1] = 512.0f;
+    pl->lane->unk_B28 -= 45.0f;
+    if ( pl->lane->unk_B28 < 0.0f ) {
+        pl->lane->unk_B28 = 0.0f;
+    }
+}
 
 /*
 ================
@@ -628,7 +694,34 @@ void func_8011BA8C_gacode( s32 player, gaCamera_t *camera ) {
     camera->unk_18[1] = 512.0f;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011BB44_gacode);
+/*
+================
+func_8011BB44_gacode
+
+An unk_B0C handler: R and L step unk_92 through 0 to 4, wrapping; the camera is func_8011B634_gacode's.
+================
+*/
+void func_8011BB44_gacode( s32 player, gaCamera_t *camera ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    if ( D_800E44E0[pl->laneIndex] & R_TRIG ) {
+        func_80120D30_gacode( pl->laneIndex, 0x33 );
+        if ( pl->unk_92 == 4 ) {
+            pl->unk_92 = 0;
+        } else {
+            pl->unk_92++;
+        }
+    }
+    if ( D_800E44E0[pl->laneIndex] & L_TRIG ) {
+        func_80120D30_gacode( pl->laneIndex, 0x33 );
+        if ( pl->unk_92 == 0 ) {
+            pl->unk_92 = 4;
+        } else {
+            pl->unk_92--;
+        }
+    }
+    func_8011B634_gacode( pl, pl->unk_92 );
+}
 
 /*
 ================

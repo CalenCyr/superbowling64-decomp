@@ -87,7 +87,9 @@ typedef struct {
 /* Where a body of a lane stands; func_80114CB4_gacode places the body there. Name invented. */
 typedef struct {
     /* 0x00 */ vec3_t pos;
-    /* 0x0C */ u8 unk_0C[0x14];
+    /* 0x0C */ vec3_t unk_0C;
+    /* 0x18 */ f32 unk_18;
+    /* 0x1C */ f32 unk_1C;
 } gaSpot_t;                             /* size 0x20 */
 
 /* View of a lane, set each frame by the lane's unk_B0C handler. Name invented. */
@@ -105,7 +107,11 @@ typedef struct {
     /* 0x000 */ gaBody_t bodies[NUM_BODIES];
     /* 0x420 */ u8 unk_420[0x8];
     /* 0x428 */ f32 unk_428;
-    /* 0x42C */ u8 unk_42C[0x688 - 0x42C];
+    /* 0x42C */ u8 unk_42C[0x8];
+    /* 0x434 */ f32 unk_434;
+    /* 0x438 */ u8 unk_438[0x1C];
+    /* 0x454 */ s32 unk_454;
+    /* 0x458 */ u8 unk_458[0x688 - 0x458];
     /* 0x688 */ gaSpot_t spots[NUM_BODIES];
     /* 0x7E8 */ u8 unk_7E8[0x948 - 0x7E8];
     /* 0x948 */ gaBody_t unk_948[3];
@@ -124,7 +130,9 @@ typedef struct {
     /* 0xB24 */ u8 unk_B24;
     /* 0xB25 */ u8 unk_B25;
     /* 0xB26 */ u8 unk_B26;
-    /* 0xB27 */ u8 unk_B27[9];
+    /* 0xB27 */ u8 unk_B27;
+    /* 0xB28 */ f32 unk_B28;            /* camera height offset of func_8011B8AC_gacode */
+    /* 0xB2C */ u8 unk_B2C[4];
 } gaLane_t;                             /* size 0xB30 */
 
 /* What gaCharacter_t.unk_00 points to. Name invented. */
@@ -154,7 +162,7 @@ typedef struct {
     /* 0x8C */ gaLane_t *lane;
     /* 0x90 */ s8 port;                 /* controller port; -1: played by the game */
     /* 0x91 */ u8 laneIndex;
-    /* 0x92 */ u8 unk_92;
+    /* 0x92 */ s8 unk_92;               /* 0 to 4, stepped by func_8011BB44_gacode */
     /* 0x93 */ u8 unk_93;
     /* 0x94 */ u8 unk_94[0x0C];
 } gaPlayer_t;                           /* size 0xA0 */
@@ -245,24 +253,30 @@ void func_8011641C_gacode( s32 player, u8 *pins );
 void func_80116750_gacode( gaLane_t *lane );
 void func_80116798_gacode( gaLane_t *lane );
 void func_8011669C_gacode( gaPlayer_t *pl );
+s32 func_801168D0_gacode( gaPlayer_t *pl );
 s32 func_80116998_gacode( gaPlayer_t *pl );
 void func_801169F8_gacode( s32 player, f32 *value, s16 delta );
 s32 func_801179FC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117ABC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_80118CCC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118D9C_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118EA0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118F08_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118F38_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_80118F68_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 void func_8011AA78_gacode( s32 player );
 void func_8011AB0C_gacode( s32 player );
 void func_8011B400_gacode( s32 player );
 void func_8011B408_gacode( s32 player );
 void func_8011B564_gacode( s32 player );
 void func_8011B5C8_gacode( s32 lane );
+void func_8011B634_gacode( gaPlayer_t *pl, s32 view );
+void func_8011B8AC_gacode( s32 player, gaCamera_t *camera );
 void func_8011B974_gacode( s32 player, gaCamera_t *camera );
 void func_8011BA00_gacode( s32 player, gaCamera_t *camera );
+void func_8011BB44_gacode( s32 player, gaCamera_t *camera );
 void func_8011BA8C_gacode( s32 player, gaCamera_t *camera );
 void func_8011BC10_gacode( s32 player, gaCamera_t *camera );
 void func_8011BCA8_gacode( s32 player, gaCamera_t *camera );
@@ -275,6 +289,7 @@ void func_8011D2C0_gacode( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale );
 void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to );
 void func_8011D304_gacode( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos );
 f32 func_8011D3D4_gacode( vec3_t v );
+f32 func_8011D424_gacode( vec3_t out, vec3_t in );
 s32 func_80120680_gacode( u16 key, s32 count, u16 *table );
 void func_80120980_gacode( u8 *pins, u16 mask );
 void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, s16 x, s16 y );
