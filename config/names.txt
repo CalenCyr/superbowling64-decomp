@@ -398,3 +398,8 @@ gaCharacter_t	gacode.h	invented: 0x48-byte record of D_80123BE0_gacode, copied t
 gaPlayer_t	gacode.h	invented: 0xA0-byte player (four, D_8012D658_gacode): character, scene object, lane, controller port (-1: played by the game)
 gaState_t	gacode.h	invented: main-loop state function of the overlay (D_8012CDF0_gacode)
 gaPlayerFunc_t	gacode.h	invented: per-player handler (game mode D_8012CDF4_gacode, D_8012D23C_gacode)
+gaCharacterData_t	gacode.h	invented: what gaCharacter_t.unk_00 points to (a byte table indexed by gaLane_t.unk_B26)
+gaStage_t	gacode.h	invented: 0x34-byte stage configuration (D_80123EB0_gacode); its last member is a per-frame function (func_80122470_gacode ...)
+gaSprite_t	gacode.h	invented: sprite of a main resource with a 256-colour palette copy (func_80120A7C_gacode)
+unkResource_t	gacode.h	invented: entry of main's resource table D_800F80B0 {?, image pointer}
+unkImage_t	gacode.h	invented: image a resource points to: 0x10-byte header, then a 256-colour palette

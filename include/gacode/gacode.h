@@ -23,10 +23,18 @@ extern u8 D_800994BE[];
 extern u8 D_80068A50[];
 extern s16 D_800EA090[];
 
+/* Image of main's resource table: a header, then a 256-colour palette. Name invented. */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x07];
+    /* 0x07 */ u8 unk_07;
+    /* 0x08 */ u8 unk_08[0x08];
+    /* 0x10 */ u16 palette[256];
+} unkImage_t;
+
 /* Entry of main's resource table D_800F80B0. Name invented. */
 typedef struct {
     /* 0x00 */ s32 unk_00;
-    /* 0x04 */ u8 *unk_04;
+    /* 0x04 */ unkImage_t *image;       /* NULL: not loaded */
 } unkResource_t;
 
 extern unkResource_t D_800F80B0[];
@@ -35,6 +43,7 @@ s32 func_80037410( void );          /* unit 12260 */
 void func_800379A8( s64 handle );   /* unit 12C70: stops the sound of a func_80037870 handle */
 s32 func_8003B204( void );          /* unit 13490 */
 void func_8002E4B0( u16 id, s32 x, s32 y, u8 arg3, f32 scaleX, f32 scaleY );   /* unit 7250 */
+void func_8002DF3C( s32 id, s32 width, s32 height );                            /* unit 7250 */
 void func_8002FDE4( s32 x, s32 y, s32 w, s32 h, u8 r, u8 g, u8 b, u8 a );       /* unit 7250: fills a rectangle */
 void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
 void func_80039CBC( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
@@ -150,6 +159,30 @@ typedef struct {
     /* 0x94 */ u8 unk_94[0x0C];
 } gaPlayer_t;                           /* size 0xA0 */
 
+/* Configuration of a stage (D_80123EB0_gacode); D_8012D220_gacode points to the current one. Name invented. */
+typedef struct {
+    /* 0x00 */ void *unk_00;
+    /* 0x04 */ f32 unk_04;
+    /* 0x08 */ f32 unk_08;
+    /* 0x0C */ f32 unk_0C;
+    /* 0x10 */ f32 unk_10;
+    /* 0x14 */ f32 unk_14;
+    /* 0x18 */ u16 unk_18;
+    /* 0x1A */ u16 unk_1A;
+    /* 0x1C */ s16 unk_1C;              /* sound id; -1: none */
+    /* 0x1E */ s16 unk_1E[9];
+    /* 0x30 */ void (*update)( void );  /* each frame */
+} gaStage_t;                            /* size 0x34 */
+
+/* Sprite of a main resource, with a copy of its palette. Name invented. */
+typedef struct {
+    /* 0x000 */ u16 id;
+    /* 0x002 */ s16 x;
+    /* 0x004 */ s16 y;
+    /* 0x006 */ u16 palette[256];
+    /* 0x206 */ u8 unk_206;
+} gaSprite_t;                           /* size 0x208 */
+
 /* Handler of a player: the game mode (D_8012CDF4_gacode) or what starts a turn (D_8012D23C_gacode). */
 typedef s32 (*gaPlayerFunc_t)( s32 player );
 
@@ -158,6 +191,8 @@ extern s32 D_8012C920_gacode;
 extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];
 extern s16 D_8012C784_gacode[];
+extern gaStage_t D_80123EB0_gacode[];
+extern gaStage_t *D_8012D220_gacode;
 extern gaPlayer_t D_8012D658_gacode[MAX_PLAYERS];
 extern u8 D_8012D651_gacode;
 extern u16 D_8012D8D8_gacode;
@@ -199,6 +234,9 @@ s32 func_80115CDC_gacode( s32 player );
 s32 func_80115D38_gacode( s32 player );
 void func_80115D70_gacode( s32 player, u8 arg1 );
 s32 func_80115DF4_gacode( s32 player );
+s32 func_80115E24_gacode( u8 twoLanes );
+s32 func_801155BC_gacode( s32 player );
+s32 func_801156D8_gacode( s32 player );
 void func_80116248_gacode( s32 player );
 void func_80116398_gacode( s32 player );
 void func_801163A0_gacode( s32 player );
@@ -206,20 +244,27 @@ void func_80116414_gacode( s32 player );
 void func_8011641C_gacode( s32 player, u8 *pins );
 void func_80116750_gacode( gaLane_t *lane );
 void func_80116798_gacode( gaLane_t *lane );
+void func_8011669C_gacode( gaPlayer_t *pl );
 s32 func_80116998_gacode( gaPlayer_t *pl );
 void func_801169F8_gacode( s32 player, f32 *value, s16 delta );
+s32 func_801179FC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117ABC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118D9C_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118EA0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118F08_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118F38_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+void func_8011AA78_gacode( s32 player );
+void func_8011AB0C_gacode( s32 player );
 void func_8011B400_gacode( s32 player );
 void func_8011B408_gacode( s32 player );
 void func_8011B564_gacode( s32 player );
 void func_8011B5C8_gacode( s32 lane );
 void func_8011B974_gacode( s32 player, gaCamera_t *camera );
 void func_8011BA00_gacode( s32 player, gaCamera_t *camera );
+void func_8011BA8C_gacode( s32 player, gaCamera_t *camera );
+void func_8011BC10_gacode( s32 player, gaCamera_t *camera );
 void func_8011BCA8_gacode( s32 player, gaCamera_t *camera );
 void func_8011BD34_gacode( s32 player, gaCamera_t *camera );
 void func_8011C0DC_gacode( s32 player, gaCamera_t *camera );
@@ -228,9 +273,12 @@ void func_8011C650_gacode( s32 player, gaCamera_t *camera );
 /* unit 474E0 */
 void func_8011D2C0_gacode( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale );
 void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to );
+void func_8011D304_gacode( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos );
 f32 func_8011D3D4_gacode( vec3_t v );
 s32 func_80120680_gacode( u16 key, s32 count, u16 *table );
 void func_80120980_gacode( u8 *pins, u16 mask );
+void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, s16 x, s16 y );
+void func_80120B10_gacode( gaSprite_t *sprite );
 void func_80120D30_gacode( s32 lane, s32 id );
 void func_80120D7C_gacode( s64 *handle );
 void func_80120DD0_gacode( void );

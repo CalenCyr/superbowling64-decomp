@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "libultra.h"
+#include "libc.h"
 #include "gacode/gacode.h"
 
 /*
@@ -21,7 +22,24 @@ void func_8011D2C0_gacode( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale ) {
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D2C0_gacode);
 #endif
 
+#ifdef NON_MATCHING
+// NON_MATCHING: stack frame; retail's is 0xF0 bytes, 0x80 more than this body needs (as func_8011D2C0_gacode)
+/*
+================
+func_8011D304_gacode
+
+out = in placed by rotation rot (degrees) and translation pos.
+================
+*/
+void func_8011D304_gacode( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos ) {
+    f32 mf[4][4];
+
+    guPositionF( mf, rot[0], rot[1], rot[2], 1.0f, pos[0], pos[1], pos[2] );
+    guMtxXFMF( mf, in[0], in[1], in[2], &out[0], &out[1], &out[2] );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D304_gacode);
+#endif
 
 /*
 ================
@@ -136,9 +154,36 @@ void func_80120980_gacode( u8 *pins, u16 mask ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801209C0_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120A7C_gacode);
+/*
+================
+func_80120A7C_gacode
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120B10_gacode);
+Sets up a sprite of resource id at (x, y), keeping a copy of its palette.
+================
+*/
+void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, s16 x, s16 y ) {
+    func_8002DF3C( id, 320, 240 );
+    if ( D_800F80B0[id].image != NULL ) {
+        memmove( sprite->palette, D_800F80B0[id].image->palette, sizeof( sprite->palette ) );
+        sprite->id = id;
+        sprite->x = x;
+        sprite->y = y;
+        sprite->unk_206 = 0;
+    }
+}
+
+/*
+================
+func_80120B10_gacode
+
+Puts the sprite's saved palette back into its resource.
+================
+*/
+void func_80120B10_gacode( gaSprite_t *sprite ) {
+    if ( D_800F80B0[sprite->id].image != NULL ) {
+        memmove( D_800F80B0[sprite->id].image->palette, sprite->palette, sizeof( sprite->palette ) );
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120B50_gacode);
 

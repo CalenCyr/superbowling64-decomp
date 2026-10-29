@@ -16,8 +16,8 @@ nothing calls (gcc 2.7 emits an extern inline function).
 inline void func_80122340_gacode( void ) {
     D_8012C924_gacode++;
     if ( ( D_8005C160 & 0xF ) == 3 ) {
-        D_800F80B0[1673].unk_04[7] = D_8009CFB0;
-        D_800F80B0[1674].unk_04[7] = D_8009CFB0;
+        D_800F80B0[1673].image->unk_07 = D_8009CFB0;
+        D_800F80B0[1674].image->unk_07 = D_8009CFB0;
     }
 }
 
