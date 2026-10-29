@@ -600,3 +600,6 @@ aspMainDataStart = 0x80060010;
 D_80066E00 = 0x80066E00; // size:0x10 allow_addend:True
 D_8005C9C4 = 0x8005C9C4; // size:0x1
 D_8005C9C5 = 0x8005C9C5; // size:0x1
+
+// gacode overlay data that the overlay reads through aggregates (splat names only the referenced members)
+D_801236B0_gacode = 0x801236B0; // segment:gacode size:0x10

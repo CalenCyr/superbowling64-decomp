@@ -54,6 +54,8 @@ void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
 void func_80039CBC( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
 void func_8003A3F0( s32 arg0, s32 arg1, s32 arg2 );             /* unit 13490 */
 void func_8003A658( s32 arg0, s32 x, s32 y );                   /* unit 13490 */
+void func_8002E0EC( s32 id, s32 x, s32 y );                    /* unit 7250 */
+void func_8003B1CC( s16 id, s16 x, s16 y );                     /* unit 13490: draws image id, if not negative */
 void func_8002BED8( s16 file, s16 frame, f32 *pos, f32 *rot );     /* unit 7250: reads a frame of a path file */
 
 /*
@@ -207,6 +209,16 @@ typedef struct {
     /* 0x206 */ u8 unk_206;
 } gaSprite_t;                           /* size 0x208 */
 
+/* A list of image ids with a cursor; one per lane (D_801236B0_gacode). Name invented. */
+typedef struct {
+    /* 0x00 */ u8 unk_00[2];
+    /* 0x02 */ u8 cur;
+    /* 0x03 */ u8 count;
+    /* 0x04 */ s16 *ids;
+} gaImageList_t;                        /* size 0x8 */
+
+extern gaImageList_t D_801236B0_gacode[2];
+
 /* Handler of a player: the game mode (D_8012CDF4_gacode) or what starts a turn (D_8012D23C_gacode). */
 typedef s32 (*gaPlayerFunc_t)( s32 player );
 
@@ -300,6 +312,7 @@ void func_80119ACC_gacode( s32 player, u8 lane );
 void func_80119DD8_gacode( s32 player, u8 lane );
 void func_8011A404_gacode( gaPlayer_t *pl );
 void func_8011AA78_gacode( s32 player );
+void func_80119800_gacode( s32 player, u8 full );
 void func_8011AB0C_gacode( s32 player );
 void func_8011B400_gacode( s32 player );
 void func_8011B408_gacode( s32 player );
