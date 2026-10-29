@@ -36,10 +36,14 @@ void Snd_SetChannelFlags( s32 id, s32 mask, s32 bits );
 void func_8003F7F0( s32 arg );
 void func_8003F9A0( sndConfig_t *config, s32 rate, s32 arg2 );
 s32 func_8003F340( s32 arg );
-void Snd_InitHeap( s32 arg0, s32 arg1 );
+void Snd_InitHeap( u8 *base, s32 len );
 void *Snd_Alloc( s32 size );
-void Snd_MemMove( void *dst, void *src, s32 len );
 s32 Snd_HeapUsed( void );
+ALHeap *Snd_GetHeap( void );
+void Snd_MemSet( void *dst, s32 value, u32 len );
+void Snd_MemMove( void *dst, void *src, u32 len );
+u32 Snd_InitFrameSizes( u32 ticks, u32 outputRate, u32 tickRate, u32 extraPercent );
+u32 Snd_NextFrameSize( u32 queued );
 
 /* called from the boot units */
 s32 Snd_PlayBgm( seqHeader_t *hdr );

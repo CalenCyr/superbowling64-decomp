@@ -32,4 +32,12 @@ extern s32 snd_msgWrite;
 extern s32 snd_numMsgs;
 extern sndMsg_t *snd_msgs;
 
+/* audio heap and frame sizes (1B060.c) */
+extern ALHeap snd_heap;
+extern u32 snd_frameSize;           /* samples per audio frame, a multiple of AUDIO_FRAME_SAMPLES */
+extern u32 snd_minFrameSize;        /* snd_frameSize - AUDIO_FRAME_SAMPLES */
+extern u32 snd_maxFrameSize;        /* snd_frameSize + AUDIO_FRAME_SAMPLES */
+extern u32 snd_extraSamples;        /* queued samples kept ahead of the AI */
+extern s32 snd_frameSettled;        /* 0 after a short or long frame, until the queue is back in range */
+
 #endif

@@ -115,7 +115,7 @@ typedef struct {
     /* 0x04 */ s32 numVoices;       /* NUM_MASTER_CHANNELS more channels are added */
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ s32 voicePriority;
-    /* 0x10 */ s32 heapBase;        /* audio heap (Snd_InitHeap) */
+    /* 0x10 */ u8 *heapBase;        /* audio heap (Snd_InitHeap) */
     /* 0x14 */ s32 heapSize;
     /* 0x18 */ waveBank_t *waveBank;    /* default wave bank, NULL: none */
     /* 0x1C */ s32 waveRomBase;     /* ROM address of its samples */
@@ -125,6 +125,7 @@ typedef struct {
     /* 0x40 */ s32 unk_40;
 } sndConfig_t;
 
+#define AUDIO_FRAME_SAMPLES 184     /* audio frame granularity: frame sizes are whole multiples of 184 samples */
 #define NUM_MASTER_CHANNELS 4       /* the first channels: BGM master streams only, no voice */
 #define MAX_LOOP_DEPTH      4       /* entries of the channel loop stack */
 #define FADE_NONE           ( -1 )  /* sndChannel_t.fadeLeft: not fading */

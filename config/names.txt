@@ -414,3 +414,13 @@ fileType2_t	include/filecache.h	invented: file relocated by func_80030C04 type 2
 fileType3_t	include/filecache.h	invented: file relocated by func_80030C04 type 3
 bmpHeader_t	include/gamesnd.h	evidence: D_8005CA40 is a BMP file and info header ("BM", 54-byte offset, 320x240, 24 bpp) written by func_80037E30
 bmpFile_t	include/gamesnd.h	evidence: func_80037E30 writes the header and 320x240 BGR pixels to the host as "BW%3.3d.BMP"
+
+# 1B060.c / 1B1A0.c audio heap and frame sizing
+Snd_GetHeap	0x8003FCF4	invented: returns &snd_heap
+Snd_MemSet	0x8003FD00	invented: byte fill, clears the heap in Snd_InitHeap
+Snd_InitFrameSizes	0x8003FDA0	invented: sets snd_frameSize and its neighbours from rate and tick rate
+Snd_NextFrameSize	0x8003FE44	invented: picks the next frame's samples from the AI queue length
+snd_heap	0x800645A0	invented: the ALHeap of Snd_InitHeap
+snd_frameSize, snd_minFrameSize, snd_maxFrameSize, snd_extraSamples	0x800645B0-0x800645BC	invented: frame sizes from Snd_InitFrameSizes
+snd_frameSettled	0x8005CE60	invented: set while the AI queue is in range (Snd_NextFrameSize)
+AUDIO_FRAME_SAMPLES	structs.h	invented: the 184 samples per audio frame that Snd_InitFrameSizes and Snd_NextFrameSize use
