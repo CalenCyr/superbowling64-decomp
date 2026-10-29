@@ -22,6 +22,8 @@ options:
 
   o_as_suffix: True
   use_legacy_include_asm: False
+  # include/include_asm.h, macro.inc and labels.inc are maintained in the repo (include_asm.h has NO_INCLUDE_ASM)
+  generate_asm_macros_files: False
   mips_abi_float_regs: o32
 
   # section_order: [".text", ".data", ".rodata", ".bss"]
