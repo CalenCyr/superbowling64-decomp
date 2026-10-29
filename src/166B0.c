@@ -1690,7 +1690,7 @@ CHANNEL ALLOCATION
 */
 
 #ifdef NON_MATCHING
-// NON_MATCHING: registers: retail puts the 0xFF constant in a1, moving chan and started to a2/a3
+// NON_MATCHING: registers: retail puts the 0xFF constant in a1, moving chan and started to a2/a3 (store order now matches)
 /*
 ================
 Snd_ResetChannel
@@ -1711,7 +1711,7 @@ void Snd_ResetChannel( sndChannel_t *data ) {
     for ( i = 0; i < sizeof( sndChannel_t ); i++ ) {
         *( (u8 *)data )++ = 0;
     }
-    chan->lastFxMix = chan->lastPan = RESEND;
+    chan->lastPan = chan->lastFxMix = RESEND;
     tempo = TEMPO_120_BPM / snd_tickRate;
     chan->fixedVelocity = 0x7F;
     chan->trackVolume = 0x7F;
@@ -1890,7 +1890,7 @@ s32 Snd_StartSe( seTable_t *table, s32 index, s32 volume, s32 pan, s32 priority 
 }
 
 #ifdef NON_MATCHING
-// NON_MATCHING: registers: retail keeps a separate base copy per relocation loop (as if Snd_RelocateTable were inlined) and swaps s1/s2
+// NON_MATCHING: registers: retail inlines Snd_RelocateTable (declaring it inline gives retail's 0x50 frame and loops), then keeps a separate base copy per relocation loop and swaps s1/s2
 /*
 ================
 Snd_StartBgm
