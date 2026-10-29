@@ -20,11 +20,13 @@ extern u8 D_8005C160;               /* low nibble 3: func_8011A26C; else bits 4-
 extern u8 D_8005C162;               /* index of the last team */
 extern u8 D_800994BE[];
 extern u8 D_80068A50[];
+extern s16 D_800EA090[];
 
 s32 func_80037410( void );          /* unit 12260 */
 void func_800379A8( s64 handle );   /* unit 12C70: stops the sound of a func_80037870 handle */
 s32 func_8003B204( void );          /* unit 13490 */
-void func_8002E4B0( s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5 );   /* unit 7250 */
+void func_8002E4B0( u16 id, s32 x, s32 y, u8 arg3, f32 scaleX, f32 scaleY );   /* unit 7250 */
+void func_8002FDE4( s32 x, s32 y, s32 w, s32 h, u8 r, u8 g, u8 b, u8 a );       /* unit 7250: fills a rectangle */
 void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
 void func_80039CBC( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
 void func_8003A3F0( s32 arg0, s32 arg1, s32 arg2 );             /* unit 13490 */
@@ -49,6 +51,8 @@ typedef struct {
     /* 0x44 */ f32 unk_44;
     /* 0x48 */ u16 unk_48;
     /* 0x4A */ u8 unk_4A;               /* 0: not drawn */
+    /* 0x4B */ u8 unk_4B[0x1C8 - 0x4B];
+    /* 0x1C8 */ vec3_t unk_1C8;
 } sceneObj_t;
 
 /* Ball or pin of a lane. Name invented. */
@@ -105,13 +109,21 @@ typedef struct {
     /* 0xB27 */ u8 unk_B27[9];
 } gaLane_t;                             /* size 0xB30 */
 
+/* What gaCharacter_t.unk_00 points to. Name invented. */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x1B];
+    /* 0x1B */ u8 unk_1B[1];            /* indexed by gaLane_t.unk_B26 */
+} gaCharacterData_t;
+
 /* Character record (D_80123BE0_gacode), copied into gaPlayer_t. Name invented. */
 typedef struct {
-    /* 0x00 */ u8 *unk_00;
+    /* 0x00 */ gaCharacterData_t *unk_00;
     /* 0x04 */ u8 unk_04;
     /* 0x05 */ u8 unk_05[0x0F];
     /* 0x14 */ f32 unk_14;
-    /* 0x18 */ u8 unk_18[0x30];
+    /* 0x18 */ u8 unk_18[0x08];
+    /* 0x20 */ f32 unk_20;
+    /* 0x24 */ u8 unk_24[0x24];
 } gaCharacter_t;                        /* size 0x48 */
 
 #define MAX_PLAYERS     4
@@ -132,6 +144,9 @@ typedef struct {
 /* Handler of a player: the game mode (D_8012CDF4_gacode) or what starts a turn (D_8012D23C_gacode). */
 typedef s32 (*gaPlayerFunc_t)( s32 player );
 
+extern u8 D_80123601_gacode;
+extern f32 D_8012C158_gacode[];
+extern s16 D_8012C784_gacode[];
 extern gaPlayer_t D_8012D658_gacode[MAX_PLAYERS];
 extern u8 D_8012D651_gacode;
 extern u16 D_8012D8D8_gacode;
@@ -164,25 +179,38 @@ void func_80114130_gacode( void );
 void func_80114138_gacode( void );
 void func_80114640_gacode( s32 arg0 );
 void func_8011A26C_gacode( void );
+void func_801144C4_gacode( u8 lastLane );
+void func_80114CB4_gacode( gaBody_t *body, gaSpot_t *spot, sceneObj_t *obj, f32 offset );
 void func_80114FC4_gacode( s32 player );
 void func_80114FFC_gacode( s32 player );
 s32 func_801157F8_gacode( s32 player );
 s32 func_80115CDC_gacode( s32 player );
 s32 func_80115D38_gacode( s32 player );
+void func_80115D70_gacode( s32 player, u8 arg1 );
 s32 func_80115DF4_gacode( s32 player );
 void func_80116248_gacode( s32 player );
 void func_80116398_gacode( s32 player );
 void func_801163A0_gacode( s32 player );
 void func_80116414_gacode( s32 player );
+void func_8011641C_gacode( s32 player, u8 *pins );
 void func_80116750_gacode( gaLane_t *lane );
 void func_80116798_gacode( gaLane_t *lane );
 s32 func_80116998_gacode( gaPlayer_t *pl );
+void func_801169F8_gacode( s32 player, f32 *value, s16 delta );
 s32 func_80117ABC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118D9C_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_80118EA0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118F08_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118F38_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 void func_8011B400_gacode( s32 player );
+void func_8011B408_gacode( s32 player );
+void func_8011B564_gacode( s32 player );
+void func_8011B5C8_gacode( s32 lane );
+void func_8011B974_gacode( s32 player, gaCamera_t *camera );
+void func_8011BA00_gacode( s32 player, gaCamera_t *camera );
+void func_8011BCA8_gacode( s32 player, gaCamera_t *camera );
+void func_8011BD34_gacode( s32 player, gaCamera_t *camera );
 void func_8011C0DC_gacode( s32 player, gaCamera_t *camera );
 void func_8011C650_gacode( s32 player, gaCamera_t *camera );
 
