@@ -371,12 +371,15 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
+    # bss: from the end of the file to past its last referenced symbol (0x8012F330, a word); the end is an estimate
+    bss_size: 0x2570
     subsegments:
       - [0x3C570, c, gacode/3C570]
       - [0x3E350, c, gacode/3E350]
       - [0x474E0, c, gacode/474E0]
       - [0x4C560, c, gacode/4C560]
       - [0x4D820, data]
+      - { type: bss, vram: 0x8012CDD0 }
 
   - name: rscode
     type: code
