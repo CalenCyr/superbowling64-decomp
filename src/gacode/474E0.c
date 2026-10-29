@@ -172,22 +172,44 @@ void func_80120980_gacode( u8 *pins, u16 mask ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801209C0_gacode);
+/*
+================
+func_801209C0_gacode
+
+Fills order with first, first + 1, ... (count values) and shuffles it.
+================
+*/
+void func_801209C0_gacode( u8 *order, u8 count, u8 first ) {
+    s32 i;
+    s32 j;          // RULE-EXCEPTION: R30, one local serves as the next value, then as the slot to swap with
+    u8 swap;
+
+    j = first;
+    for ( i = 0; i < count; i++ ) {
+        order[i] = j++;
+    }
+    for ( i = count - 1; i > 0; i-- ) {
+        j = guRandom() % i;
+        swap = order[i];
+        order[i] = order[j];
+        order[j] = swap;
+    }
+}
 
 /*
 ================
 func_80120A7C_gacode
 
-Sets up a sprite of resource id at (x, y), keeping a copy of its palette.
+Sets up a sprite of resource id with palette range first to last, keeping a copy of its palette.
 ================
 */
-void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, s16 x, s16 y ) {
+void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, u16 first, u16 last ) {
     func_8002DF3C( id, 320, 240 );
     if ( D_800F80B0[id].data != NULL ) {
         memmove( sprite->palette, ( (unkImage_t *)D_800F80B0[id].data )->palette, sizeof( sprite->palette ) );
         sprite->id = id;
-        sprite->x = x;
-        sprite->y = y;
+        sprite->first = first;
+        sprite->last = last;
         sprite->unk_206 = 0;
     }
 }
@@ -205,7 +227,44 @@ void func_80120B10_gacode( gaSprite_t *sprite ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120B50_gacode);
+/*
+================
+func_80120B50_gacode
+
+Rewrites the sprite's palette range in its resource from the saved copy: with color 0, the entries before
+index keep their colour and the others go black; else only entry index takes color.
+================
+*/
+void func_80120B50_gacode( gaSprite_t *sprite, u16 color, u16 index ) {
+    u16 *dst;
+    s32 i;
+
+    dst = D_800F80B0[sprite->id].data;
+    if ( dst == NULL ) {
+        return;
+    }
+    dst = ( (unkImage_t *)D_800F80B0[sprite->id].data )->palette;
+    dst += sprite->first;
+    if ( index < sprite->first ) {
+        index = sprite->first;
+    } else if ( index > sprite->last ) {
+        index = sprite->last;
+    }
+    for ( i = sprite->first; i <= sprite->last; i++ ) {
+        if ( color != 0 ) {
+            if ( i == index ) {
+                *dst = color;
+            } else {
+                *dst = sprite->palette[i];
+            }
+        } else if ( i < index ) {
+            *dst = sprite->palette[i];
+        } else {
+            *dst = 0;
+        }
+        dst++;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120C0C_gacode);
 

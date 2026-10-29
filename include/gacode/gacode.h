@@ -27,6 +27,17 @@ extern u8 D_8005C162;               /* index of the last team */
 extern u8 D_800994BE[];
 extern u8 D_80068A50[];
 extern s16 D_800EA090[];
+extern void *D_800EA120[];          /* main's scene objects, of several kinds: [1] the camera (gaCamera_t), the
+                                       others mostly sceneObj_t */
+extern u8 D_8009D19C[4];            /* per player: character */
+
+/* Main's game setup (D_800DF59C): only the members the overlay uses. Name invented. */
+typedef struct {
+    /* 0x00 */ u8 unk_00[4];
+    /* 0x04 */ u8 unk_04[0x30];        /* per character */
+} unkGameSetup_t;                       /* size 0x34 */
+
+extern unkGameSetup_t D_800DF59C;
 
 /* Image of main's resource table: a header, then a 256-colour palette. Name invented. */
 typedef struct {
@@ -89,6 +100,7 @@ typedef struct gaCamera_s {
     /* 0x00 */ vec3_t eye;
     /* 0x0C */ vec3_t at;
     /* 0x18 */ vec3_t unk_18;
+    /* 0x24 */ s32 unk_24;
 } gaCamera_t;
 
 #define NUM_BODIES      11              /* the ball, then the ten pins */
@@ -141,7 +153,10 @@ typedef struct {
     /* 0x14 */ f32 unk_14;
     /* 0x18 */ u8 unk_18[0x08];
     /* 0x20 */ f32 unk_20;
-    /* 0x24 */ u8 unk_24[0x24];
+    /* 0x24 */ u8 unk_24[0x08];
+    /* 0x2C */ f32 unk_2C;
+    /* 0x30 */ f32 unk_30;
+    /* 0x34 */ u8 unk_34[0x14];
 } gaCharacter_t;                        /* size 0x48 */
 
 #define MAX_PLAYERS     4
@@ -156,7 +171,9 @@ typedef struct {
     /* 0x91 */ u8 laneIndex;
     /* 0x92 */ s8 unk_92;               /* 0 to 4, stepped by func_8011BB44_gacode */
     /* 0x93 */ u8 unk_93;
-    /* 0x94 */ u8 unk_94[0x0C];
+    /* 0x94 */ u8 unk_94[0x04];
+    /* 0x98 */ f32 unk_98;
+    /* 0x9C */ f32 unk_9C;
 } gaPlayer_t;                           /* size 0xA0 */
 
 /* Configuration of a stage (D_80123EB0_gacode); D_8012D220_gacode points to the current one. Name invented. */
@@ -174,11 +191,12 @@ typedef struct {
     /* 0x30 */ void (*update)( void );  /* each frame */
 } gaStage_t;                            /* size 0x34 */
 
-/* Sprite of a main resource, with a copy of its palette. Name invented. */
+/* Main resource image with a range of its palette that the overlay fades; keeps a copy of the palette. Name
+invented. */
 typedef struct {
     /* 0x000 */ u16 id;
-    /* 0x002 */ s16 x;
-    /* 0x004 */ s16 y;
+    /* 0x002 */ u16 first;              /* palette range */
+    /* 0x004 */ u16 last;
     /* 0x006 */ u16 palette[256];
     /* 0x206 */ u8 unk_206;
 } gaSprite_t;                           /* size 0x208 */
@@ -190,6 +208,7 @@ extern u8 D_80123601_gacode;
 extern s32 D_8012C920_gacode;
 extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];
+extern f32 D_80123850_gacode[][4];     /* per character: unk_98, unk_9C, unk_2C, unk_30 of a player */
 extern s16 D_8012C784_gacode[];
 extern gaStage_t D_80123EB0_gacode[];
 extern gaStage_t *D_8012D220_gacode;
@@ -258,6 +277,9 @@ s32 func_80118EA0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118F08_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118F38_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118F68_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+void func_80119ACC_gacode( s32 player, u8 lane );
+void func_80119DD8_gacode( s32 player, u8 lane );
+void func_8011A404_gacode( gaPlayer_t *pl );
 void func_8011AA78_gacode( s32 player );
 void func_8011AB0C_gacode( s32 player );
 void func_8011B400_gacode( s32 player );
@@ -275,6 +297,7 @@ void func_8011BCA8_gacode( s32 player, gaCamera_t *camera );
 void func_8011BD34_gacode( s32 player, gaCamera_t *camera );
 void func_8011C0DC_gacode( s32 player, gaCamera_t *camera );
 void func_8011C650_gacode( s32 player, gaCamera_t *camera );
+void func_8011CEE4_gacode( gaPlayer_t *pl, s32 player );
 
 /* unit 474E0 */
 void func_8011D2C0_gacode( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale );
@@ -284,8 +307,10 @@ f32 func_8011D3D4_gacode( vec3_t v );
 f32 func_8011D424_gacode( vec3_t out, vec3_t in );
 s32 func_80120680_gacode( u16 key, s32 count, u16 *table );
 void func_80120980_gacode( u8 *pins, u16 mask );
-void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, s16 x, s16 y );
+void func_801209C0_gacode( u8 *order, u8 count, u8 first );
+void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, u16 first, u16 last );
 void func_80120B10_gacode( gaSprite_t *sprite );
+void func_80120B50_gacode( gaSprite_t *sprite, u16 color, u16 index );
 void func_80120D30_gacode( s32 lane, s32 id );
 void func_80120D7C_gacode( s64 *handle );
 void func_80120DD0_gacode( void );

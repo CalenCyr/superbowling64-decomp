@@ -109,7 +109,28 @@ void func_80114FFC_gacode( s32 player ) {
     func_80120D7C_gacode( &pl->lane->unk_B18 );
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80115054_gacode);
+/*
+================
+func_80115054_gacode
+
+Sets the camera's unk_24 to -1, clears the players' unk_92 and hides scene objects 120 to 133 and 141.
+================
+*/
+void func_80115054_gacode( void ) {
+    gaPlayer_t *pl;
+    s32 player;
+    s32 i;
+
+    ( (gaCamera_t *)D_800EA120[1] )->unk_24 = -1;
+    for ( player = MAX_PLAYERS - 1; player >= 0; player-- ) {
+        pl = &D_8012D658_gacode[player];
+        pl->unk_92 = 0;
+    }
+    for ( i = 0; i < 14; i++ ) {
+        ( (sceneObj_t *)D_800EA120[120 + i] )->unk_4A = 0;
+    }
+    ( (sceneObj_t *)D_800EA120[141] )->unk_4A = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801150B4_gacode);
 
@@ -469,7 +490,32 @@ s32 func_80118D9C_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     return D_8012D23C_gacode( player );
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80118E04_gacode);
+/*
+================
+func_80118E04_gacode
+
+Lane input handler: after the throw (40 frames of it when unk_B25 is set), starts the next turn.
+================
+*/
+s32 func_80118E04_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    if ( pl->obj->unk_48 != 0 ) {
+        pl->obj->unk_48--;
+    }
+    pl->lane->unk_B20++;
+    if ( pl->lane->unk_B25 != 0 ) {
+        if ( pl->lane->unk_B20 < 40 ) {
+            return 0;
+        }
+        pl->lane->unk_B20 = 0;
+    } else {
+        pl->lane->unk_B20 = 0;
+    }
+    pl->obj->unk_48 = 0;
+    D_8012D8D8_gacode++;
+    return D_8012D23C_gacode( player );
+}
 
 /*
 ================
@@ -543,7 +589,24 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A404_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A8AC_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011AA78_gacode);
+/*
+================
+func_8011AA78_gacode
+
+Runs the part of the game mode's ending that belongs to the mode.
+================
+*/
+void func_8011AA78_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    if ( D_8012CDF4_gacode == func_801156D8_gacode ) {
+        func_80119DD8_gacode( player, pl->laneIndex );
+    } else if ( D_8012CDF4_gacode == func_801155BC_gacode ) {
+        func_80119ACC_gacode( player, pl->laneIndex );
+    } else if ( D_8012CDF4_gacode == func_801157F8_gacode ) {
+        func_8011A404_gacode( pl );
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011AB0C_gacode);
 
@@ -804,6 +867,20 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C658_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C93C_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011CEE4_gacode);
+/*
+================
+func_8011CEE4_gacode
+
+Gives the player the four values of its character's D_80123850_gacode row.
+================
+*/
+void func_8011CEE4_gacode( gaPlayer_t *pl, s32 player ) {
+    f32 *values = D_80123850_gacode[D_800DF59C.unk_04[D_8009D19C[player]]];
+
+    pl->unk_98 = values[0];
+    pl->unk_9C = values[1];
+    pl->character.unk_2C = values[2];
+    pl->character.unk_30 = values[3];
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011CF30_gacode);
