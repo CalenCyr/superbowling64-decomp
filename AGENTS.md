@@ -97,7 +97,9 @@ Also record:
   | fat | 0x3C2A0-0x3C470 | 0x8010A080 | `BW64FAT` table: {name ptr, ROM start, ROM end, 0} |
   | knstatic | 0x3C470-0x3C570 | 0x8010A250 | `KNSTATICSYS` |
   | gacode | 0x3C570-0x56FF0 | 0x80112350 | game overlay (`GACODE  SYS`): C units 3C570, 3E350, 474E0, 4C560; .data 0x4D820; .rodata 0x56C20 (per unit, confirmed by the gate); bss 0x8012CDD0-0x8012F350 (ends with the second lane) |
-  | rscode, gscode, cacode, pvcode, mgcode, opcode | 0x56FF0-0x6DE70 | 0x80112350 | code overlays sharing the slot; symbols suffixed `_<seg>`; text/data split points are estimates |
+  | rscode | 0x56FF0-0x58F40 | 0x80112350 | results overlay (`RSCODE  SYS`): C unit 56FF0; .data 0x58EF0; .rodata 0x58F30 (one auto array initialiser); bss 0x801142A0, 0x18 (end estimated) |
+  | gscode | 0x58F40-0x67370 | 0x80112350 | game-select overlay (`GSCODE  SYS`): 12 C units 58F40-61CA0; .data 0x62130; .rodata 0x67260 (per unit: 58F40, 59490, 5AD50, 5E2B0, 605D0, 61640); bss 0x80120780, 0x2F0 (end estimated) |
+  | cacode, pvcode, mgcode, opcode | 0x67370-0x6DE70 | 0x80112350 | code overlays sharing the slot; symbols suffixed `_<seg>`; text/data split points are estimates |
   | idx, str, bgmptr, bgmwbk, septr, sewbk, bfx | 0x6DE70-0x656CD0 | - | asset files (bin) |
 - **Toolchain:** compiler and linker version and build, flags, per-unit flag overrides.
 - **Annotations:** the address marker format (for example `// FUNCTION: <MODULE> 0x...`), the stub marker and
