@@ -183,7 +183,11 @@ typedef struct {
 typedef struct {
     /* 0x00 */ gaCharacterData_t *unk_00;
     /* 0x04 */ u8 unk_04;
-    /* 0x05 */ u8 unk_05[0x0F];
+    /* 0x05 */ u8 unk_05;               /* nonzero: unk_30 runs from -unk_10 to 0, else from 0 to unk_10 */
+    /* 0x06 */ u8 unk_06[0x02];
+    /* 0x08 */ f32 unk_08;              /* upper limit of unk_2C */
+    /* 0x0C */ f32 unk_0C;              /* lower limit of unk_2C */
+    /* 0x10 */ f32 unk_10;              /* range of unk_30 */
     /* 0x14 */ f32 unk_14;
     /* 0x18 */ u8 unk_18[0x08];
     /* 0x20 */ f32 unk_20;
@@ -338,13 +342,16 @@ void func_8011669C_gacode( gaPlayer_t *pl );
 s32 func_801168D0_gacode( gaPlayer_t *pl );
 s32 func_80116998_gacode( gaPlayer_t *pl );
 void func_801169F8_gacode( s32 player, f32 *value, s16 delta );
+void func_80116A64_gacode( gaPlayer_t *pl, s16 stickX, s16 stickY );
 s32 func_801178D8_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_801179FC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117ABC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117BDC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_80117D20_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117EFC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118014_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118270_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118CCC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
@@ -362,6 +369,7 @@ void func_80119800_gacode( s32 player, u8 full );
 void func_8011AB0C_gacode( s32 player );
 void func_8011AD5C_gacode( s32 player );
 void func_8011B07C_gacode( s32 player );
+void func_8011B1A0_gacode( s32 player );
 void func_8011B2E8_gacode( s32 player );
 void func_8011B400_gacode( s32 player );
 void func_8011B408_gacode( s32 player );

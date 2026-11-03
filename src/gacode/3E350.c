@@ -671,7 +671,31 @@ void func_801169F8_gacode( s32 player, f32 *value, s16 delta ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80116A64_gacode);
+/*
+================
+func_80116A64_gacode
+
+Moves the character's unk_2C by the stick's y and unk_30 against its x, each kept in its range.
+
+Declared inline: nothing calls this copy, and func_80118014_gacode and func_80118270_gacode repeat its body.
+================
+*/
+inline void func_80116A64_gacode( gaPlayer_t *pl, s16 stickX, s16 stickY ) {
+    if ( stickX == 0 && stickY == 0 ) {
+        return;
+    }
+    pl->character.unk_2C += stickY / 200.0f;
+    pl->character.unk_2C = pl->character.unk_2C < pl->character.unk_0C ? pl->character.unk_0C
+                         : ( pl->character.unk_2C > pl->character.unk_08 ? pl->character.unk_08 : pl->character.unk_2C );
+    pl->character.unk_30 -= stickX / 120.0f;
+    if ( pl->character.unk_05 != 0 ) {
+        pl->character.unk_30 = pl->character.unk_30 < -pl->character.unk_10 ? -pl->character.unk_10
+                             : ( pl->character.unk_30 > 0.0 ? 0.0f : pl->character.unk_30 );
+    } else {
+        pl->character.unk_30 = pl->character.unk_30 < 0.0 ? 0.0f
+                             : ( pl->character.unk_30 > pl->character.unk_10 ? pl->character.unk_10 : pl->character.unk_30 );
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80116BA4_gacode);
 
@@ -810,9 +834,59 @@ s32 func_80117EFC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80118014_gacode);
+/*
+================
+func_80118014_gacode
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80118270_gacode);
+Lane input handler: 1 goes on to func_80118270_gacode; -1 backs out (hides the player and the ball, restores
+the player's placement and goes back to func_80117D20_gacode); else the stick moves the character's unk_2C and
+unk_30.
+================
+*/
+s32 func_80118014_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    pl->obj->unk_48 = 0;
+    if ( input == 1 ) {
+        func_80120D30_gacode( pl->laneIndex, 0xB );
+        pl->lane->unk_B08 = func_8011B07C_gacode;
+        pl->lane->unk_B10 = func_80118270_gacode;
+        return 0;
+    }
+    if ( input == -1 ) {
+        func_80120D30_gacode( pl->laneIndex, 0xC );
+        pl->obj->unk_48 = pl->character.unk_00->unk_19;
+        pl->lane->bodyObjs[0]->unk_4A = pl->obj->unk_4A = 0;
+        pl->lane->unk_AF4[0]->unk_4A = pl->lane->unk_AF4[1]->unk_4A = pl->laneIndex != 0 ? 2 : 1;
+        memmove( pl->obj->mtx, pl->unk_48, sizeof( pl->unk_48 ) );
+        pl->lane->unk_B08 = func_8011AB0C_gacode;
+        pl->lane->unk_B0C = func_8011BA00_gacode;
+        pl->lane->unk_B10 = func_80117D20_gacode;
+        return 0;
+    }
+    func_80116A64_gacode( pl, stickX, stickY );
+    return 0;
+}
+
+/*
+================
+func_80118270_gacode
+
+Lane input handler: the stick moves the character's unk_2C and unk_30 until the player object's unk_48 passes
+the character's unk_18, then goes on to func_8011840C_gacode.
+================
+*/
+s32 func_80118270_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    if ( pl->obj->unk_48 > pl->character.unk_00->unk_18 ) {
+        pl->lane->unk_B08 = func_8011B1A0_gacode;
+        pl->lane->unk_B10 = func_8011840C_gacode;
+        return 0;
+    }
+    func_80116A64_gacode( pl, stickX, stickY );
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011840C_gacode);
 
