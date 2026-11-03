@@ -39,6 +39,8 @@ typedef struct {
 
 extern u16 D_8005CA80[MENU_SLIDE_STEPS];    /* position of a sliding item at each step, 0x1000: in place */
 extern u16 D_8005CAC0[16];
+extern u16 D_8005CB18[10];          /* image of each digit */
+extern u16 D_8005CB04[10];          /* image of each small digit */
 extern s16 D_8005CAE4[];           /* icon of each player, then of the computer */
 extern s8 D_800DF5D0[];            /* number shown on each player's name plate; 0: none */
 
@@ -50,6 +52,8 @@ void func_80038D0C( u8 tenth, s16 x, s16 y );
 void func_8003893C( menuItem_t *items, s16 id, s16 image, s16 x, s16 y, s16 alpha );
 void func_800393D8( s16 value, s16 x, s16 y );
 u16 func_80039340( s16 pins, u8 foul );
+void func_80039554( s16 *digits, s16 value, u8 small, u8 tens );
+void func_8003AE9C( s16 a, s16 b, u8 show, s16 x, s16 y );
 void func_8003A8B4( s32 arg0, u8 count, u8 small, s16 x, s16 y );
 void func_8003B1CC( s16 image, s16 x, s16 y );
 s32 func_8003B204( void );

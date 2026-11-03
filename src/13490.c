@@ -258,7 +258,50 @@ void func_800393D8( s16 value, s16 x, s16 y ) {
     func_8003B1CC( digits[2], x + 12, y );
 }
 
-INCLUDE_ASM("asm/nonmatchings/13490", func_80039554);
+/*
+================
+func_80039554
+
+Sets digits to the images of the four digits of value, up to 9999, from D_8005CB04 when small is set: -1, no
+image, for leading zeros, but the tens are shown when tens is set.
+================
+*/
+void func_80039554( s16 *digits, s16 value, u8 small, u8 tens ) {
+    u16 *images;
+    s16 thousands;
+    s16 hundreds;
+    s16 ten;
+    s16 ones;
+
+    thousands = value / 1000;
+    ones = value - thousands * 1000;
+    hundreds = ones / 100;
+    ones -= hundreds * 100;
+    ten = ones / 10;
+    ones -= ten * 10;
+    images = D_8005CB18;
+    if ( small ) {
+        images = D_8005CB04;
+    }
+    if ( thousands != 0 ) {
+        digits[0] = images[thousands];
+    } else {
+        digits[0] = -1;
+    }
+    if ( thousands != 0 || hundreds != 0 ) {
+        digits[1] = images[hundreds];
+    } else {
+        digits[1] = -1;
+    }
+    if ( tens ) {
+        digits[2] = images[ten];
+    } else if ( thousands != 0 || hundreds != 0 || ten != 0 ) {
+        digits[2] = images[ten];
+    } else {
+        digits[2] = -1;
+    }
+    digits[3] = images[ones];
+}
 
 INCLUDE_ASM("asm/nonmatchings/13490", func_80039700);
 
@@ -300,7 +343,34 @@ INCLUDE_ASM("asm/nonmatchings/13490", func_8003A8B4);
 
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A970);
 
-INCLUDE_ASM("asm/nonmatchings/13490", func_8003AE9C);
+/*
+================
+func_8003AE9C
+
+Draws the box of two numbers at (x, y), a above b, or the empty box when show is clear.
+================
+*/
+void func_8003AE9C( s16 a, s16 b, u8 show, s16 x, s16 y ) {
+    s16 digits[4];
+    s16 topY;      /* of the upper number */
+
+    topY = y + 2;
+    if ( show ) {
+        func_8002DF3C( 0x9E5, x, y );
+        func_80039554( digits, a, FALSE, FALSE );
+        func_8003B1CC( digits[0], x + 4, topY );
+        func_8003B1CC( digits[1], x + 10, topY );
+        func_8003B1CC( digits[2], x + 16, topY );
+        func_8003B1CC( digits[3], x + 22, topY );
+        func_80039554( digits, b, FALSE, TRUE );
+        func_8003B1CC( digits[0], x + 4, y + 14 );
+        func_8003B1CC( digits[1], x + 10, y + 14 );
+        func_8003B1CC( digits[2], x + 16, y + 14 );
+        func_8003B1CC( digits[3], x + 24, y + 14 );
+    } else {
+        func_8002DF3C( 0x9E7, x, y );
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003B034);
 
