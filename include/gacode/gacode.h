@@ -62,7 +62,6 @@ void func_80039CBC( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
 void func_8003A3F0( s32 arg0, s32 arg1, s32 arg2 );             /* unit 13490 */
 void func_8003A658( s32 arg0, s32 x, s32 y );                   /* unit 13490 */
 void func_8002E0EC( s32 id, s32 x, s32 y );                    /* unit 7250 */
-void func_8003B1CC( s16 id, s16 x, s16 y );                     /* unit 13490: draws image id, if not negative */
 void func_8002BED8( s16 file, s16 frame, f32 *pos, f32 *rot );     /* unit 7250: reads a frame of a path file */
 
 /*
