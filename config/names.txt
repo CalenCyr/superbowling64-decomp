@@ -439,3 +439,6 @@ sceneObject_t	object.h	invented: scene object (body after the objNode_t header; 
 sceneObjJoint_t	object.h	invented: 0x140-byte joint: float matrix, then Mtx[2] and mirrored Mtx[2] by D_8005C0B1 (func_8002AF20, func_8002B9CC)
 sceneCamera_t	object.h	invented: 0x248-byte camera (D_8009CFA0); eye/at/up are the guLookAtReflectF arguments of func_8002C324, path a FILE_TYPE3 file
 puff_t	ground.h	invented: 12-byte camera-facing square (D_800E4D70, 50): flags, life, alpha, size and their steps (func_80035380 starts one, func_80035748 ages and draws them)
+
+# rscode overlay (include/rscode/rscode.h): invented from use
+rsState_t	rscode.h	invented: main-loop state function of the results overlay (D_801142AC_rscode), as gacode's gaState_t
