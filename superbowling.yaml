@@ -402,9 +402,12 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
+    # bss: from the end of the file to past its last referenced symbol (0x801142B4, a byte); the end is an estimate
+    bss_size: 0x18
     subsegments:
-      - [0x56FF0, asm]
+      - [0x56FF0, c, rscode/56FF0]
       - [0x58EF0, data]
+      - { type: bss, vram: 0x801142A0 }
 
   - name: gscode
     type: code
@@ -412,20 +415,31 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
+    # bss: from the end of the file to past its last referenced symbol (0x80120A68, at least three bytes); the end is
+    # an estimate
+    bss_size: 0x2F0
     subsegments:
-      - [0x58F40, asm]
-      - [0x59490, asm]
-      - [0x59B00, asm]
-      - [0x5A020, asm]
-      - [0x5A580, asm]
-      - [0x5A990, asm]
-      - [0x5AD50, asm]
-      - [0x5E2B0, asm]
-      - [0x5EC00, asm]
-      - [0x605D0, asm]
-      - [0x61640, asm]
-      - [0x61CA0, asm]
+      - [0x58F40, c, gscode/58F40]
+      - [0x59490, c, gscode/59490]
+      - [0x59B00, c, gscode/59B00]
+      - [0x5A020, c, gscode/5A020]
+      - [0x5A580, c, gscode/5A580]
+      - [0x5A990, c, gscode/5A990]
+      - [0x5AD50, c, gscode/5AD50]
+      - [0x5E2B0, c, gscode/5E2B0]
+      - [0x5EC00, c, gscode/5EC00]
+      - [0x605D0, c, gscode/605D0]
+      - [0x61640, c, gscode/61640]
+      - [0x61CA0, c, gscode/61CA0]
       - [0x62130, data]
+      # .rodata of each unit, in unit order after all .data (jump tables and doubles, each unit's own)
+      - [0x67260, .rodata, gscode/58F40]
+      - [0x672A0, .rodata, gscode/59490]
+      - [0x672D0, .rodata, gscode/5AD50]
+      - [0x67310, .rodata, gscode/5E2B0]
+      - [0x67320, .rodata, gscode/605D0]
+      - [0x67360, .rodata, gscode/61640]
+      - { type: bss, vram: 0x80120780 }
 
   - name: cacode
     type: code
