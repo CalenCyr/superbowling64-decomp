@@ -55,7 +55,9 @@ extern u8 D_8010A250[];             /* start of the memory main clears at boot (
 extern u8 D_800A2FE4;
 extern u16 *D_80066C38[3];          /* RGBA5551 320x240 framebuffers: 0x8038F800, 0x803B5000, 0x803DA800 at boot */
 extern s32 D_8005B0F8;              /* index in D_80066C38 of the framebuffer being drawn */
-extern s8 D_8005C0B1;               /* 0 or 1: which of the double-buffered display lists and matrices is built */
+/* 0 or 1: which of the double-buffered display lists and matrices is built */
+// volatile: units 1060, 7250 and C650 read it with lbu and a separate sign extension, once per use (53B0 alone uses lb)
+extern volatile s8 D_8005C0B1;
 extern Gfx *D_800F8094;             /* next command of the display list being built */
 extern UnkRecordSet D_8009D098;
 extern UnkRecordSet *D_801000B8;

@@ -4,6 +4,7 @@
 /* filecache.h -- reference-counted cache of the files of the str segment, by file index (unit BEF0) */
 
 #include "common.h"
+#include "libultra.h"
 
 #define FILECACHE_SIZE      0x1000      /* file indices the cache can hold */
 
@@ -53,16 +54,31 @@ typedef struct {
     /* 0x38 */ void *unk_38;
 } fileRefB_t;
 
+/* Animation of a model (FILE_TYPE2): per frame, the floats its joints' masks select. */
 typedef struct {
-    /* 0x00 */ u8 unk_00[0x10];
-    /* 0x10 */ void *unk_10;
-    /* 0x14 */ void *unk_14;
+    /* 0x00 */ u32 numFrames;
+    /* 0x04 */ u8 unk_04[0x04];
+    /* 0x08 */ u32 unk_08;
+    /* 0x0C */ u32 frameSize;       /* floats per frame */
+    /* 0x10 */ u16 *unk_10;
+    /* 0x14 */ f32 *unk_14;
 } fileType2_t;
 
+/* Camera path (FILE_TYPE3): per frame, the floats its masks select (bit 4 >> i for component i). */
 typedef struct {
-    /* 0x00 */ u8 unk_00[0x48];
-    /* 0x48 */ void *unk_48;
-    /* 0x4C */ void *unk_4C;
+    /* 0x00 */ u32 numFrames;
+    /* 0x04 */ u8 unk_04[0x04];
+    /* 0x08 */ f32 fovy;
+    /* 0x0C */ u16 frameSize;       /* floats per frame */
+    /* 0x0E */ u8 unk_0E[0x02];
+    /* 0x10 */ u16 eyeMask;
+    /* 0x12 */ u16 unk_12;          /* the mask of unk_2C */
+    /* 0x14 */ f32 at[3];
+    /* 0x20 */ f32 eye[3];          /* where the frames leave a component out */
+    /* 0x2C */ f32 unk_2C[3];
+    /* 0x38 */ u8 unk_38[0x10];
+    /* 0x48 */ f32 *frames;
+    /* 0x4C */ Lights1 *light;
     /* 0x50 */ void *unk_50;
 } fileType3_t;
 

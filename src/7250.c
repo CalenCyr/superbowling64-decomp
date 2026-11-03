@@ -6,16 +6,72 @@
 #include "dbgtext.h"
 #include "filecache.h"
 #include "sprite.h"
+#include "object.h"
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_8002BE50);
+/*
+================
+func_8002BE50
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_8002BED8);
+Sets the ambient colour of camera index to color (red, green, blue).
+================
+*/
+void func_8002BE50( s32 index, u8 *color ) {
+    u32 i;
+
+    for ( i = 0; i < 3; i++ ) {
+        D_8009CFA0[index]->lights[D_8005C0B1].a.l.col[i] = D_8009CFA0[index]->lights[D_8005C0B1].a.l.colc[i] =
+            color[i];
+    }
+}
+
+/*
+================
+func_8002BED8
+
+Reads frame of camera path file into eye and unk_2C, each component from the frame or the path's default.
+================
+*/
+void func_8002BED8( s16 file, s16 frame, f32 *eye, f32 *unk_2C ) {
+    fileType3_t *path;
+    f32 *data;
+    s32 i;
+
+    path = func_80030C04( file, FILE_TYPE3 );
+    data = path->frames + path->frameSize * frame;
+    for ( i = 0; i < 3; i++ ) {
+        if ( path->eyeMask & ( 4 >> i ) ) {
+            *eye++ = *data++;
+        } else {
+            *eye++ = path->eye[i];
+        }
+    }
+    for ( i = 0; i < 3; i++ ) {
+        if ( path->unk_12 & ( 4 >> i ) ) {
+            unk_2C[i] = *data++;
+        } else {
+            unk_2C[i] = path->unk_2C[i];
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/7250", func_8002BFD8);
 
 INCLUDE_ASM("asm/nonmatchings/7250", func_8002C324);
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_8002C908);
+/*
+================
+func_8002C908
+
+Updates cam, and advances it along its path, from the start after the last frame.
+================
+*/
+void func_8002C908( sceneCamera_t *cam ) {
+    func_8002C324( cam );
+    cam->frame += D_800F7BF8;
+    if ( cam->frame == cam->path->numFrames ) {
+        cam->frame = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/7250", func_8002C950);
 

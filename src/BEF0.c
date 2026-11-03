@@ -111,8 +111,8 @@ void *func_80030C04( s16 index, s16 type ) {
         break;
     case FILE_TYPE3:
         file3 = D_800F80B0[index].data;
-        file3->unk_48 = FILE_RELOC( file3, file3->unk_48 );
-        file3->unk_4C = FILE_RELOC( file3, file3->unk_4C );
+        file3->frames = FILE_RELOC( file3, file3->frames );
+        file3->light = FILE_RELOC( file3, file3->light );
         file3->unk_50 = FILE_RELOC( file3, file3->unk_50 );
         break;
     }
