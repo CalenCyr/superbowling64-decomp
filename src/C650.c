@@ -5,6 +5,7 @@
 #include "libc.h"
 #include "boot.h"
 #include "ground.h"
+#include "filecache.h"
 
 /*
 ================
@@ -140,9 +141,81 @@ void func_80031CD0( void ) {
 
 INCLUDE_ASM("asm/nonmatchings/C650", func_80031E40);
 
-INCLUDE_ASM("asm/nonmatchings/C650", func_80035074);
+/*
+================
+func_80035074
 
+Frees every puff, loads the puff images, and makes the puff squares of each size from the first.
+================
+*/
+void func_80035074( void ) {
+    s32 i;
+
+    for ( i = 0; i < NUM_PUFFS; i++ ) {
+        D_800E4D70[i].life = 0;
+    }
+    for ( i = 0; i < 2; i++ ) {
+        func_80030C04( D_8005C1E4[i], FILE_RAW );
+    }
+    for ( i = 1; i < NUM_PUFF_SIZES; i++ ) {
+        D_8005C1F0[i * 4] = D_8005C1F0[0];
+        D_8005C1F0[i * 4].v.ob[0] = -( i + 1 );
+        D_8005C1F0[i * 4].v.ob[1] = i + 1;
+        D_8005C1F0[i * 4 + 1] = D_8005C1F0[1];
+        D_8005C1F0[i * 4 + 1].v.ob[0] = i + 1;
+        D_8005C1F0[i * 4 + 1].v.ob[1] = i + 1;
+        D_8005C1F0[i * 4 + 2] = D_8005C1F0[2];
+        D_8005C1F0[i * 4 + 2].v.ob[0] = -( i + 1 );
+        D_8005C1F0[i * 4 + 2].v.ob[1] = -( i + 1 );
+        D_8005C1F0[i * 4 + 3] = D_8005C1F0[3];
+        D_8005C1F0[i * 4 + 3].v.ob[0] = i + 1;
+        D_8005C1F0[i * 4 + 3].v.ob[1] = -( i + 1 );
+    }
+}
+
+/*
+================
+func_80035220
+
+Sets m to stand at (x, y, z) and face (tx, ty, tz), turned about y then tilted.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: register allocation: dx and dz * dz trade $f26 and $f24; the rest is exact
+void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz ) {
+    f32 dx, dy, dz;
+    f32 dist, distXZ;
+    f32 cosPitch, sinPitch, cosYaw, sinYaw;
+
+    dx = tx - x;
+    dy = ty - y;
+    dz = tz - z;
+    dist = sqrtf( dx * dx + dy * dy + dz * dz );
+    distXZ = sqrtf( dx * dx + dz * dz );
+    cosPitch = distXZ / dist;
+    sinYaw = dx / distXZ;
+    cosYaw = dz / distXZ;
+    sinPitch = ( y - ty ) / dist;
+    m[0][0] = cosYaw;
+    m[0][1] = 0.0f;
+    m[0][2] = -sinYaw;
+    m[0][3] = 0.0f;
+    m[1][0] = sinYaw * sinPitch;
+    m[1][1] = cosPitch;
+    m[1][2] = cosYaw * sinPitch;
+    m[1][3] = 0.0f;
+    m[2][0] = cosPitch * sinYaw;
+    m[2][1] = -sinPitch;
+    m[2][2] = cosPitch * cosYaw;
+    m[2][3] = 0.0f;
+    m[3][0] = x;
+    m[3][1] = y;
+    m[3][2] = z;
+    m[3][3] = 1.0f;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/C650", func_80035220);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/C650", func_80035380);
 

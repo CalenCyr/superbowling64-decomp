@@ -18,6 +18,23 @@ typedef struct {
     /* 0x08 */ void *unk_08;
 } drawEntry_t;                      /* size 0xC */
 
+#define NUM_PUFFS           50
+#define NUM_PUFF_SIZES      30          /* squares of D_8005C1F0: half-width 1 to 30 */
+
+/* puff_t.flags */
+#define PUFF_KIND           0xFF        /* 0 or 1: its texture (D_8005C1E4) and colour (D_8005C970) */
+#define PUFF_CAMERA( n )    ( 0x100 << ( n ) )  /* drawn by camera n */
+
+/* A puff: a square that faces the cameras, grows and fades, for life frames. */
+typedef struct {
+    /* 0x00 */ u16 flags;
+    /* 0x02 */ u16 life;            /* frames left; 0: free */
+    /* 0x04 */ s16 alpha;
+    /* 0x06 */ s16 alphaStep;
+    /* 0x08 */ s16 size;            /* its square in D_8005C1F0 */
+    /* 0x0A */ s16 sizeStep;
+} puff_t;                           /* size 0xC */
+
 extern s16 D_800DF6A8;              /* first entry of the draw list, once func_80031650 has chained the buckets */
 extern s16 D_800E8070;              /* entries in D_8009D1A0 */
 extern s16 D_800E4FE0[DRAW_BUCKETS];    /* first entry of each bucket, or DRAW_NONE */
@@ -38,6 +55,13 @@ void func_80031650( void );
 void func_80031BB0( void );
 void func_80031CD0( void );
 s32 func_80031C9C( u32 value );
+extern puff_t D_800E4D70[NUM_PUFFS];
+extern s16 D_8005C1E4[2];           /* image files of the two kinds of puff */
+extern Vtx D_8005C1F0[NUM_PUFF_SIZES * 4]; /* squares of four vertices, by size */
+extern Mtx D_800E6770[2][NUM_PUFFS];    /* each puff turned to face camera 0, then camera 1 */
+
 void func_80035074( void );
+void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz );
+void func_80035380( u16 flags, f32 x, f32 y, f32 z );
 
 #endif
