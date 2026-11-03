@@ -604,3 +604,5 @@ D_8005C9C5 = 0x8005C9C5; // size:0x1
 // gacode overlay data that the overlay reads through aggregates (splat names only the referenced members)
 D_801236B0_gacode = 0x801236B0; // segment:gacode size:0x10
 D_800E6560 = 0x800E6560; // size:0x18
+D_800693D8 = 0x800693D8; // size:0x4
+D_800693DC = 0x800693DC; // size:0x2

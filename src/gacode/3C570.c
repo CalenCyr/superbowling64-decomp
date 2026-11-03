@@ -161,7 +161,46 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113AD4_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113D48_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113EE4_gacode);
+/*
+================
+func_80113EE4_gacode
+
+Main loop state of a two-lane game: updates both lanes; when both are done, counts a game won for the lane
+func_80115FCC_gacode returns. On A or Z with both lanes at -1, starts the next game (skipping when a lane has
+won two).
+================
+*/
+s32 func_80113EE4_gacode( void ) {
+    s32 results[2];
+    s32 winner;
+    s32 i;
+
+    for ( i = 0; i < 2; i++ ) {
+        results[i] = func_80114640_gacode( i );
+        if ( results[i] > 0 && D_800994BE[i] ) {
+            func_80115D70_gacode( i, 1 );
+        }
+    }
+    if ( func_80115E24_gacode( 1 ) ) {
+        return 1;
+    }
+    if ( func_80115DF4_gacode( 0 ) && func_80115DF4_gacode( 1 ) ) {
+        winner = func_80115FCC_gacode();
+        if ( winner >= 0 ) {
+            D_800693DC[winner]++;
+        }
+        return 0;
+    }
+    if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) && results[0] + results[1] == -2 ) {
+        func_80037870( SE_DECIDE, 0 );
+        if ( D_800693DC[0] == 2 || D_800693DC[1] == 2 ) {
+            func_80116170_gacode( 1 );
+        } else {
+            func_80116170_gacode( 0 );
+        }
+    }
+    return 0;
+}
 
 /*
 ================

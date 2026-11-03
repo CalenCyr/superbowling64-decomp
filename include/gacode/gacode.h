@@ -27,6 +27,7 @@ extern u8 D_8005C161;               /* number of players */
 extern u8 D_8005C162;               /* index of the last team */
 extern u8 D_8005C0E4[];             /* per player: low nibble a character */
 extern u8 D_800994BE[];
+extern u8 D_800693DC[2];            /* per lane: games won (func_80113EE4_gacode) */
 extern u8 D_80068A50[];
 extern s16 D_800EA090[];
 extern void *D_800EA120[];          /* main's scene objects, of several kinds: [1] the camera (gaCamera_t), the
@@ -317,7 +318,7 @@ s32 func_801157F8_gacode( s32 player );
 s32 func_80115CDC_gacode( s32 player );
 s32 func_80115D38_gacode( s32 player );
 void func_80115D70_gacode( s32 player, u8 arg1 );
-void func_80115FCC_gacode( void );
+s32 func_80115FCC_gacode( void );
 void func_80116170_gacode( s32 skip );
 s32 func_80115DF4_gacode( s32 player );
 s32 func_80115E24_gacode( u8 twoLanes );
