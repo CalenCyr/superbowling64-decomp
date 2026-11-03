@@ -628,7 +628,39 @@ void func_80113DC8_rscode( u8 choice, u16 *images, s16 y, u16 w, u16 h ) {
     func_8002E4B0( images[!choice], x[!choice], y, 0x60, 1.0f, 1.0f );
 }
 
+/*
+================
+func_80113EC0_rscode
+
+Adds the player's game to a character's record: one more game (to 255), the total score (to 0xFFFF), the
+high and the low score, and three more counts (to 9999).
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: needs the members of boot.h's UnkRecord at 0x0C-0x1A (main's header, the fields named here);
+// with them (and D_800DF6B4, D_8009D088, D_8009CF80 as u16[4]), retail's frame is 8 bytes (this body: 16), and its high/low selects differ in register use
+void func_80113EC0_rscode( UnkRecord *record, s32 player ) {
+    if ( record->games + 1 < 256 ) {
+        record->games++;
+    }
+    if ( record->total + D_800DF630[player][9] <= 0xFFFF ) {
+        record->total += D_800DF630[player][9];
+    }
+    record->high = D_800DF630[player][9] < record->high ? record->high : D_800DF630[player][9];
+    record->low = record->low < D_800DF630[player][9] ? record->low : D_800DF630[player][9];
+    if ( record->unk_14 + D_800DF6B4[player] < 10000 ) {
+        record->unk_14 += D_800DF6B4[player];
+    }
+    if ( record->unk_16 + D_8009D088[player] < 10000 ) {
+        record->unk_16 += D_8009D088[player];
+    }
+    if ( record->unk_18 + D_8009CF80[player] < 10000 ) {
+        record->unk_18 += D_8009CF80[player];
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_80113EC0_rscode);
+#endif
 
 /*
 ================

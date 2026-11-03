@@ -39,7 +39,8 @@ typedef struct {
 } unk80066C00_t;                        /* size 0x24 */
 
 extern unk80066C00_t D_80066C00;
-extern u8 D_800693DC[2];            /* per player of a duel: games won */
+extern u8 D_800693DC[2];
+extern u16 D_8009CF80[4];            /* per player of a duel: games won */
 extern u16 D_8009D030[2][3];        /* per player of a duel and game: score */
 extern u16 D_80068218[][6];         /* per player: name */
 extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */
