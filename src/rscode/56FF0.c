@@ -533,10 +533,10 @@ void func_801137CC_rscode( void ) {
 func_801137D4_rscode
 
 Draws the pin diagram of a player's frame at (x, y): image 0x89D for a pin of the first mask (D_800A3050),
-else 0x89C for a pin of the second (D_800F7C18).
+else 0x89C for a pin of the second (D_800F7C18). Declared inline: func_80113904_rscode repeats its body.
 ================
 */
-void func_801137D4_rscode( s32 player, u8 frame, s16 x, s16 y ) {
+inline void func_801137D4_rscode( s32 player, u8 frame, s16 x, s16 y ) {
     s32 pin;
 
     func_8002DF3C( 0x899, x, y );
@@ -549,7 +549,69 @@ void func_801137D4_rscode( s32 player, u8 frame, s16 x, s16 y ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_80113904_rscode);
+/*
+================
+func_80113904_rscode
+
+Pin diagrams of every player's frames at (x, y), in teams in sub-mode 1; C left and right turn the page.
+================
+*/
+void func_80113904_rscode( s16 x, s16 y ) {
+    s16 rowX;
+    s16 pageX;
+    s32 players;
+    s32 player;
+    s32 frame;
+    s32 end;
+    s32 mate;
+
+    if ( ( D_801142A0_rscode & R_CBUTTONS ) && !D_80114280_rscode ) {
+        func_80037870( 0x33, 0 );
+        D_80114280_rscode = 1;
+    }
+    if ( ( D_801142A0_rscode & L_CBUTTONS ) && D_80114280_rscode == 1 ) {
+        func_80037870( 0x33, 0 );
+        D_80114280_rscode = 0;
+    }
+    func_8002DF3C( D_80114280_rscode ? 0x89B : 0x89A, 0xF8, 0x18 );
+    if ( D_801142B4_rscode == 2 ) {
+        func_8002DF3C( 0xA12, x, y - 3 );
+    }
+    func_80038D0C( D_80114280_rscode, x + 0x2C, y );
+    y += 9;
+    players = D_801142B4_rscode == 1 ? D_8005C161 >> 1 : D_8005C161;
+    for ( player = 0; player < players; player++ ) {
+        rowX = x;
+        if ( D_801142B4_rscode == 2 && player == 2 ) {
+            func_8002DF3C( 0x9FB, rowX, y + 4 );
+            y += 0x10;
+        }
+        if ( D_801142B4_rscode == 1 ) {
+            mate = ( player == 1 ) * 2;
+            func_80038AE8( mate, D_8005C0E4[mate] >> 7, D_80068218[mate], 0, rowX, y );
+            func_80038AE8( mate | 1, D_8005C0E4[mate + 1] >> 7, D_80068218[mate + 1], 0, rowX, y + 0x1C );
+        } else {
+            func_80038AE8( player, D_8005C0E4[player] >> 7, D_80068218[player], 0, rowX, y );
+        }
+        rowX += 0x2C;
+        if ( D_801142B4_rscode == 1 ) {
+            y += 0xE;
+        }
+        frame = D_80114280_rscode ? 9 : 0;
+        end = D_80114280_rscode ? D_80066C00.unk_20[player] : 9;
+        pageX = rowX;
+        rowX += D_80114280_rscode ? 0x10 : 0;
+        for ( ; frame < end; frame++ ) {
+            func_801137D4_rscode( player, frame, rowX, y );
+            rowX += 0x18;
+        }
+        if ( D_80114280_rscode ) {
+            rowX = pageX;
+        }
+        func_8002E4B0( D_80114280_rscode ? 0x84C : 0x84B, rowX, y + 4, D_80114252_rscode + 0x40, 1.0f, 1.0f );
+        y += D_801142B4_rscode == 1 ? 0x38 : 0x1C;
+    }
+}
 
 /*
 ================

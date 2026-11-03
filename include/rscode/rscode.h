@@ -32,6 +32,13 @@ extern s16 D_800EA090[];
 extern u8 D_8009D19C[4];            /* per player: current frame (10: the game is over) */
 extern s16 D_800DF630[4][10];       /* per player and frame: score */
 extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
+/* Main's D_80066C00 (0x24 bytes): only the member the overlay uses. Name invented. */
+typedef struct {
+    /* 0x00 */ u8 unk_00[0x20];
+    /* 0x20 */ u8 unk_20[4];               /* per player: frames of the pin diagram's second page, 9 on */
+} unk80066C00_t;                        /* size 0x24 */
+
+extern unk80066C00_t D_80066C00;
 extern u8 D_800693DC[2];            /* per player of a duel: games won */
 extern u16 D_8009D030[2][3];        /* per player of a duel and game: score */
 extern u16 D_80068218[][6];         /* per player: name */
@@ -62,7 +69,8 @@ extern u8 D_80114252_rscode;        /* alpha of the boxes, 0 to 0x80 and back */
 extern u8 D_80114253_rscode;        /* 1: D_80114252_rscode falls */
 extern s16 D_80114254_rscode;       /* frames the current message has been shown */
 extern u8 D_80114256_rscode;        /* choice of func_80113564_rscode's menu */
-extern s16 D_80114258_rscode[10][2];    /* x and y of each pin in a frame's pin diagram */
+extern s16 D_80114258_rscode[10][2];
+extern u8 D_80114280_rscode;        /* page of the pin diagrams: 0 frames 1-9, 1 the tenth on */    /* x and y of each pin in a frame's pin diagram */
 extern u8 D_801142A2_rscode[4];     /* per player: rank by score, 1 the best */
 extern u16 D_801142A0_rscode;       /* buttons pressed this frame (0 once leaving) */
 extern u16 D_801142A6_rscode;       /* D-pad presses this frame (0 once leaving) */
