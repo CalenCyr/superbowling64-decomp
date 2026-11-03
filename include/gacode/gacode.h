@@ -93,7 +93,8 @@ typedef struct {
     /* 0x44 */ f32 unk_44;
     /* 0x48 */ u16 unk_48;
     /* 0x4A */ u8 unk_4A;               /* 0: not drawn */
-    /* 0x4B */ u8 unk_4B[0x50 - 0x4B];
+    /* 0x4B */ u8 unk_4B;
+    /* 0x4C */ fileType1_t *unk_4C;      /* a loaded file (func_80030C04 FILE_TYPE1) */
     /* 0x50 */ void *unk_50;              /* a loaded file (func_80030C04) */
     /* 0x54 */ u8 unk_54[0x04];
     /* 0x58 */ sceneJoint_t joints[2];  /* (at least two) */
@@ -251,6 +252,7 @@ typedef struct {
 } gaImageList_t;                        /* size 0x8 */
 
 extern gaImageList_t D_801236B0_gacode[2];
+extern u16 D_8012C9A0_gacode[][4];      /* image files of func_80123430_gacode, by its index */
 extern gaSprite_t D_8012D8E0_gacode[2];   /* per lane */
 
 /* Handler of a player: the game mode (D_8012CDF4_gacode) or what starts a turn (D_8012D23C_gacode). */
@@ -430,6 +432,6 @@ void func_80122470_gacode( void );
 void func_80122BD8_gacode( void );
 void func_80122C60_gacode( void );
 void func_801233A8_gacode( void );
-void func_80123430_gacode( s32 lane, s32 arg1, s32 arg2 );
+void func_80123430_gacode( s32 lane, s32 alt, s32 index );
 
 #endif

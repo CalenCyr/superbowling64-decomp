@@ -121,4 +121,37 @@ void func_801233A8_gacode( void ) {
     func_80122340_gacode();
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/4C560", func_80123430_gacode);
+/*
+================
+func_80123430_gacode
+
+Loads the image files of D_8012C9A0_gacode[index] and points the palettes of the first four parts' second
+files of the lane's scene object (100 or 120) at them; the first part takes file 1, or file 0 when alt is set.
+================
+*/
+void func_80123430_gacode( s32 lane, s32 alt, s32 index ) {
+    sceneObj_t *obj;
+
+    if ( lane == 0 ) {
+        obj = D_800EA120[100];
+    } else {
+        obj = D_800EA120[120];
+    }
+    func_80030C04( D_8012C9A0_gacode[index][2], FILE_RAW );
+    func_80030C04( D_8012C9A0_gacode[index][3], FILE_RAW );
+    ( (fileRefB_t *)D_800F80B0[obj->unk_4C->parts[0]->refs[1].unk_02].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][3]].data )->palette;
+    ( (fileRefB_t *)D_800F80B0[obj->unk_4C->parts[0]->refs[2].unk_02].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][2]].data )->palette;
+    ( (fileRefB_t *)D_800F80B0[obj->unk_4C->parts[0]->refs[3].unk_02].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][2]].data )->palette;
+    if ( alt == 0 ) {
+        func_80030C04( D_8012C9A0_gacode[index][1], FILE_RAW );
+        ( (fileRefB_t *)D_800F80B0[obj->unk_4C->parts[0]->refs[0].unk_02].data )->unk_30 =
+            ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][1]].data )->palette;
+    } else {
+        func_80030C04( D_8012C9A0_gacode[index][0], FILE_RAW );
+        ( (fileRefB_t *)D_800F80B0[obj->unk_4C->parts[0]->refs[0].unk_02].data )->unk_30 =
+            ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][0]].data )->palette;
+    }
+}
