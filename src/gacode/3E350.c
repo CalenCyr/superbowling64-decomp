@@ -1098,7 +1098,47 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011917C_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119328_gacode);
 
+/*
+================
+func_801194D0_gacode
+
+Draws a human player's unk_93 selector on its lane's side, and steps unk_93 (0 to 10, wrapping) down on C-left
+and up on C-right.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: retail loads 0xC8 into s0 before the C-left test and passes it to the C-right call (a y
+// variable set on more than one path, as func_80119800_gacode); this uses the constant
+void func_801194D0_gacode( gaPlayer_t *pl ) {
+    s32 x;
+
+    if ( pl->port < 0 ) {
+        return;
+    }
+    x = pl->laneIndex == 0 ? 0x6C : 0xA4;
+    func_8002DF3C( 0xAF7, x, 0xC8 );
+    func_8002DF3C( D_8012C7F4_gacode[pl->unk_93], x + 0x10, 0xC8 );
+    func_8002DF3C( 0xAF5, x + 0x20, 0xC8 );
+    func_800393D8( pl->unk_93 + 6, x - 6, 0xD9 );
+    func_8002DF3C( 0xAF3, x + 0x10, 0xD8 );
+    if ( D_800E44E0[pl->port] & L_CBUTTONS ) {
+        func_8002DF3C( 0xAF6, x, 0xC8 );
+        func_80120D30_gacode( pl->laneIndex, 0 );
+        pl->unk_93 = pl->unk_93 == 0 ? 10 : pl->unk_93 - 1;
+    }
+    if ( D_800E44E0[pl->port] & R_CBUTTONS ) {
+        func_8002DF3C( 0xAF4, x + 0x20, 0xC8 );
+        func_80120D30_gacode( pl->laneIndex, 0 );
+        if ( pl->unk_93 == 10 ) {
+            pl->unk_93 = 0;
+        } else {
+            pl->unk_93++;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801194D0_gacode);
+#endif
 
 INCLUDE_RODATA("asm/nonmatchings/gacode/3E350", D_8012CA78_gacode);
 

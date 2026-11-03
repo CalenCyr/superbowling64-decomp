@@ -212,7 +212,7 @@ typedef struct {
     /* 0x90 */ s8 port;                 /* controller port; -1: played by the game */
     /* 0x91 */ u8 laneIndex;
     /* 0x92 */ s8 unk_92;               /* 0 to 4, stepped by func_8011BB44_gacode */
-    /* 0x93 */ u8 unk_93;
+    /* 0x93 */ u8 unk_93;               /* 0 to 10, chosen with C-left and C-right (func_801194D0_gacode) */
     /* 0x94 */ u16 unk_94;
     /* 0x96 */ u8 unk_96[0x02];
     /* 0x98 */ f32 unk_98;
@@ -281,6 +281,7 @@ extern s16 D_8012C784_gacode[];
    earlier */
 extern s16 D_8012C7E6_gacode[];
 extern f32 D_801239E8_gacode[11];      /* by gaPlayer_t.unk_93 */
+extern u16 D_8012C7F4_gacode[11];      /* image ids, by gaPlayer_t.unk_93 */
 extern f32 D_8012C764_gacode[2];       /* per lane: angle of func_8011C158_gacode's camera */
 extern u8 D_8012C7C8_gacode;           /* func_8011C57C_gacode's camera has started (func_801150B4_gacode) */
 extern s16 D_8012C8D4_gacode[10];      /* path files of func_8011C468_gacode's camera */
@@ -382,6 +383,7 @@ void func_80119ACC_gacode( s32 player, u8 lane );
 void func_80119DD8_gacode( s32 player, u8 lane );
 void func_8011A404_gacode( gaPlayer_t *pl );
 void func_8011AA78_gacode( s32 player );
+void func_801194D0_gacode( gaPlayer_t *pl );
 void func_80119638_gacode( gaPlayer_t *pl );
 void func_80119800_gacode( s32 player, u8 full );
 void func_8011AB0C_gacode( s32 player );
