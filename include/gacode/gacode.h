@@ -38,6 +38,7 @@ extern u8 D_80099458[9];            /* per frame: par of the frame (func_8012214
 extern s16 D_800DF630[4][10];       /* per player and frame: score against par */
 extern s8 D_800994B8[2];            /* per player of a duel: frames won */
 extern f32 D_800E6560[2][3];        /* per lane: position of the ball */
+extern u8 D_8006940D[NUM_PLAYERS];   /* per port (unit 2DF0) */
 extern u8 D_800DF595[2];            /* per lane: state of the ball (func_80114DD4_gacode) */
 
 /* Main's game setup (D_800DF59C): only the members the overlay uses. Name invented. */
@@ -136,7 +137,8 @@ typedef struct {
     /* 0x428 */ f32 unk_428;
     /* 0x42C */ u8 unk_42C[0x8];
     /* 0x434 */ f32 unk_434;
-    /* 0x438 */ u8 unk_438[0x1C];
+    /* 0x438 */ u8 unk_438[0x18];
+    /* 0x450 */ f32 unk_450;            /* from D_801239E8_gacode, by gaPlayer_t.unk_93 */
     /* 0x454 */ u32 unk_454;            /* flags */
     /* 0x458 */ u8 unk_458[0x688 - 0x458];
     /* 0x688 */ gaSpot_t spots[NUM_BODIES];
@@ -169,7 +171,9 @@ typedef struct {
     /* 0x08 */ s8 unk_08;                   /* +-: a joint of the player's object */
     /* 0x09 */ u8 unk_09[0x03];
     /* 0x0C */ vec3_t unk_0C;               /* offset of the ball from that joint */
-    /* 0x18 */ u8 unk_18[0x03];
+    /* 0x18 */ u8 unk_18;
+    /* 0x19 */ u8 unk_19;
+    /* 0x1A */ u8 unk_1A;
     /* 0x1B */ u8 unk_1B[1];            /* indexed by gaLane_t.unk_B26 */
 } gaCharacterData_t;
 
@@ -201,7 +205,8 @@ typedef struct {
     /* 0x91 */ u8 laneIndex;
     /* 0x92 */ s8 unk_92;               /* 0 to 4, stepped by func_8011BB44_gacode */
     /* 0x93 */ u8 unk_93;
-    /* 0x94 */ u8 unk_94[0x04];
+    /* 0x94 */ u16 unk_94;
+    /* 0x96 */ u8 unk_96[0x02];
     /* 0x98 */ f32 unk_98;
     /* 0x9C */ f32 unk_9C;
 } gaPlayer_t;                           /* size 0xA0 */
@@ -240,6 +245,7 @@ typedef struct {
 } gaImageList_t;                        /* size 0x8 */
 
 extern gaImageList_t D_801236B0_gacode[2];
+extern gaSprite_t D_8012D8E0_gacode[2];   /* per lane */
 
 /* Handler of a player: the game mode (D_8012CDF4_gacode) or what starts a turn (D_8012D23C_gacode). */
 typedef s32 (*gaPlayerFunc_t)( s32 player );
@@ -250,7 +256,9 @@ extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];
 extern f32 D_80123850_gacode[][4];     /* unk_98, unk_9C, unk_2C, unk_30 of a player, by D_800DF59C.unk_04[] */
 extern s16 D_8012C784_gacode[];
+extern f32 D_801239E8_gacode[11];      /* by gaPlayer_t.unk_93 */
 extern f32 D_8012C764_gacode[2];       /* per lane: angle of func_8011C158_gacode's camera */
+extern u8 D_8012C7C8_gacode;           /* func_8011C57C_gacode's camera has started (func_801150B4_gacode) */
 extern s16 D_8012C8E8_gacode[5];       /* path files of func_8011C57C_gacode's camera */
 extern gaStage_t D_80123EB0_gacode[];
 extern gaStage_t *D_8012D220_gacode;
@@ -327,6 +335,9 @@ void func_801169F8_gacode( s32 player, f32 *value, s16 delta );
 s32 func_801179FC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117ABC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117BDC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_80117EFC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_80118014_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_80118270_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118CCC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
@@ -341,6 +352,9 @@ void func_8011A404_gacode( gaPlayer_t *pl );
 void func_8011AA78_gacode( s32 player );
 void func_80119800_gacode( s32 player, u8 full );
 void func_8011AB0C_gacode( s32 player );
+void func_8011AD5C_gacode( s32 player );
+void func_8011B07C_gacode( s32 player );
+void func_8011B2E8_gacode( s32 player );
 void func_8011B400_gacode( s32 player );
 void func_8011B408_gacode( s32 player );
 void func_8011B564_gacode( s32 player );
@@ -355,6 +369,9 @@ void func_8011BC10_gacode( s32 player, gaCamera_t *camera );
 void func_8011BCA8_gacode( s32 player, gaCamera_t *camera );
 void func_8011BD34_gacode( s32 player, gaCamera_t *camera );
 void func_8011C0DC_gacode( s32 player, gaCamera_t *camera );
+void func_8011C158_gacode( s32 player, gaCamera_t *camera );
+void func_8011C254_gacode( s32 player, gaCamera_t *camera );
+void func_8011C468_gacode( s32 player, gaCamera_t *camera );
 void func_8011C650_gacode( s32 player, gaCamera_t *camera );
 void func_8011B490_gacode( s32 lane );
 void func_8011C57C_gacode( s32 player, gaCamera_t *camera );
@@ -377,6 +394,7 @@ void func_801209C0_gacode( u8 *order, u8 count, u8 first );
 void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, u16 first, u16 last );
 void func_80120B10_gacode( gaSprite_t *sprite );
 void func_80120B50_gacode( gaSprite_t *sprite, u16 color, u16 index );
+void func_80120C0C_gacode( gaSprite_t *sprite, u16 color, f32 t );
 u64 func_80120D30_gacode( s32 lane, s32 id );
 void func_80120D7C_gacode( s64 *handle );
 void func_80120DD0_gacode( void );
@@ -396,5 +414,6 @@ void func_80122470_gacode( void );
 void func_80122BD8_gacode( void );
 void func_80122C60_gacode( void );
 void func_801233A8_gacode( void );
+void func_80123430_gacode( s32 lane, s32 arg1, s32 arg2 );
 
 #endif

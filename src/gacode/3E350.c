@@ -209,7 +209,36 @@ void func_80115054_gacode( void ) {
     ( (sceneObj_t *)D_800EA120[141] )->unk_4A = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801150B4_gacode);
+/*
+================
+func_801150B4_gacode
+
+Moves main's camera on from the view the player's lane shows: each unk_B0C handler hands over to the next
+camera.
+================
+*/
+void func_801150B4_gacode( s32 player ) {
+    void (*view)( s32 player, gaCamera_t *camera ) = D_8012D658_gacode[player].lane->unk_B0C;
+    gaCamera_t *camera = D_800EA120[1];
+
+    if ( view == func_8011BB44_gacode ) {
+        func_8011C468_gacode( player, camera );
+        D_8012C7C8_gacode = 0;
+    } else if ( view == func_8011BC10_gacode ) {
+        if ( D_8012C7C8_gacode == 0 ) {
+            func_8011C57C_gacode( player, camera );
+            D_8012C7C8_gacode = 1;
+        } else {
+            func_8011C650_gacode( player, camera );
+        }
+    } else if ( view == func_8011BA8C_gacode || view == func_8011BCA8_gacode ) {
+        func_8011C254_gacode( player, camera );
+    } else if ( view == func_8011C650_gacode ) {
+        func_8011C650_gacode( player, camera );
+    } else {
+        func_8011C158_gacode( player, camera );
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801151A0_gacode);
 
@@ -656,7 +685,35 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117BDC_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117D20_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117EFC_gacode);
+/*
+================
+func_80117EFC_gacode
+
+unk_B10 handler: shows the player and the ball and picks the lane's next handlers by whether its unk_AF4[2]
+object is shown.
+================
+*/
+s32 func_80117EFC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    pl->obj->unk_48 = 0;
+    func_80123430_gacode( pl->laneIndex, 0, pl->unk_93 );
+    pl->lane->unk_450 = D_801239E8_gacode[pl->unk_93];
+    pl->lane->bodyObjs[0]->unk_4A = pl->obj->unk_4A = pl->laneIndex != 0 ? 2 : 1;
+    if ( pl->port >= 0 ) {
+        D_800DF680[pl->port] = 8;
+        D_8006940D[pl->port] = 0;
+    }
+    pl->lane->unk_B0C = func_8011BA8C_gacode;
+    if ( pl->lane->unk_AF4[2]->unk_4A != 0 ) {
+        pl->lane->unk_B08 = func_8011B07C_gacode;
+        pl->lane->unk_B10 = func_80118270_gacode;
+    } else {
+        pl->lane->unk_B08 = func_8011AD5C_gacode;
+        pl->lane->unk_B10 = func_80118014_gacode;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80118014_gacode);
 
@@ -796,7 +853,8 @@ current image of the lane's D_801236B0_gacode list.
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: retail sets y once after the lane test and reuses the loaded laneIndex for the first image id;
-// this reloads laneIndex and swaps s2/s3 (y must stay a variable: retail adds 0x11 to it with ori)
+// this reloads laneIndex and swaps s2/s3 (y must stay a variable: retail adds 0x11 to it with ori). A ternary
+// for x (as func_8011B2E8_gacode) keeps laneIndex but lets y fold to a constant
 void func_80119800_gacode( s32 player, u8 full ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
     s32 x;
@@ -867,7 +925,31 @@ INCLUDE_RODATA("asm/nonmatchings/gacode/3E350", D_8012CB38_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011B1A0_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011B2E8_gacode);
+/*
+================
+func_8011B2E8_gacode
+
+unk_B08 handler: fades the lane's D_8012D8E0_gacode sprite by how far unk_94 has come in the character's
+unk_18 to unk_19 range, and draws a human player's panel.
+================
+*/
+void func_8011B2E8_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    gaCharacterData_t *data = pl->character.unk_00;
+    s32 last = data->unk_19 - 1;
+    s32 range = ( last - data->unk_18 ) * 2;
+    s32 cur = pl->unk_94 - 1;
+    s32 x;
+
+    func_80120C0C_gacode( &D_8012D8E0_gacode[pl->laneIndex], 0x7C1,
+                          (f32)( range - ( cur - data->unk_18 ) ) / (f32)range );
+    if ( pl->port < 0 ) {
+        return;
+    }
+    x = pl->laneIndex != 0 ? 0xB0 : 0x18;
+    func_8002E0EC( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
+    func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, 0xA8 + 0x11 );
+}
 
 /*
 ================
