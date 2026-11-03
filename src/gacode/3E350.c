@@ -496,7 +496,45 @@ void func_80116170_gacode( s32 skip ) {
     }
 }
 
+/*
+================
+func_80116248_gacode
+
+Sets up the pins of the player's lane for the game mode and frame, then starts the turn: with
+D_8012D8D8_gacode at 0 through the lane's opening handlers, else through func_8011669C_gacode.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: stack frame only; retail's is 0x50 bytes, 0x20 more than this body needs (as func_8011D2C0_gacode:
+// as if a 32-byte local were declared and never used); every instruction else is the same
+void func_80116248_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    u8 pins[NUM_PINS];
+    u16 mask;
+
+    if ( D_8012CDF4_gacode == func_801157F8_gacode ) {
+        mask = D_8012C7C6_gacode;
+    } else if ( D_8012CDF4_gacode == func_801156D8_gacode ) {
+        mask = D_801237F0_gacode[D_800DF59C.unk_04[D_8009D19C[player]]].pins;
+    } else if ( D_8012CDF4_gacode == func_801155BC_gacode ) {
+        mask = D_80123950_gacode[D_800DF59C.unk_04[D_8009D19C[player]]].pins;
+    } else {
+        mask = 0x3FF;
+    }
+    func_80120980_gacode( pins, mask );
+    func_8011641C_gacode( player, pins );
+    pl->lane->unk_B04 = func_80116398_gacode;
+    if ( D_8012D8D8_gacode == 0 ) {
+        pl->lane->unk_B10 = func_801178D8_gacode;
+        pl->lane->unk_B08 = func_8011B400_gacode;
+        pl->lane->unk_B0C = func_8011B8AC_gacode;
+    } else {
+        func_8011669C_gacode( pl );
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80116248_gacode);
+#endif
 
 /*
 ================
@@ -800,7 +838,39 @@ s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 INCLUDE_RODATA("asm/nonmatchings/gacode/3E350", D_8012CA20_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117BDC_gacode);
+/*
+================
+func_80117BDC_gacode
+
+Lane input handler: unless func_80117124_gacode handles the frame, turns the lane's unk_948[0] and on 1 goes
+on to func_80117D20_gacode; else the stick moves the character's unk_14 (within 50) and the lane's
+unk_A68[0] with it.
+================
+*/
+s32 func_80117BDC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    if ( func_80117124_gacode( player, pl ) ) {
+        return 0;
+    }
+    pl->obj->unk_48 = pl->character.unk_00->unk_19;
+    pl->lane->unk_948[0].rot[1] += 8.0;
+    pl->lane->unk_948[1].rot[1] = 0.0f;
+    if ( input == 1 ) {
+        func_80120D30_gacode( pl->laneIndex, 0xB );
+        pl->lane->unk_B0C = func_8011BA00_gacode;
+        pl->lane->unk_B10 = func_80117D20_gacode;
+        return 0;
+    }
+    pl->character.unk_14 += stickX / 50.0f;
+    if ( pl->character.unk_14 < -50.0f ) {
+        pl->character.unk_14 = -50.0f;
+    } else if ( pl->character.unk_14 > 50.0f ) {
+        pl->character.unk_14 = 50.0f;
+    }
+    pl->lane->unk_A68[0].pos[0] = pl->character.unk_14;
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117D20_gacode);
 

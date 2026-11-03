@@ -255,6 +255,18 @@ extern gaImageList_t D_801236B0_gacode[2];
 extern u16 D_8012C9A0_gacode[][4];      /* image files of func_80123430_gacode, by its index */
 extern gaSprite_t D_8012D8E0_gacode[2];   /* per lane */
 
+/* A pin setup of a game mode, by frame (D_801237F0_gacode, D_80123950_gacode). Name invented. */
+typedef struct {
+    /* 0x00 */ u8 unk_00;
+    /* 0x01 */ u8 unk_01;
+    /* 0x02 */ u16 pins;                /* pins standing, pin 1 in bit 9 (func_80120980_gacode) */
+    /* 0x04 */ u16 unk_04;
+} gaPinSetup_t;                         /* size 0x6 */
+
+extern gaPinSetup_t D_801237F0_gacode[];   /* for func_801156D8_gacode, by D_800DF59C.unk_04[] */
+extern gaPinSetup_t D_80123950_gacode[];   /* for func_801155BC_gacode, by D_800DF59C.unk_04[] */
+extern u16 D_8012C7C6_gacode;              /* pins of func_801157F8_gacode */
+
 /* Handler of a player: the game mode (D_8012CDF4_gacode) or what starts a turn (D_8012D23C_gacode). */
 typedef s32 (*gaPlayerFunc_t)( s32 player );
 
@@ -348,6 +360,7 @@ void func_80116A64_gacode( gaPlayer_t *pl, s16 stickX, s16 stickY );
 s32 func_801178D8_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_801179FC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117ABC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_80117124_gacode( s32 player, gaPlayer_t *pl );
 s32 func_80117BDC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117D20_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117EFC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
