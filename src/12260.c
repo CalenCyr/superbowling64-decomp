@@ -235,7 +235,12 @@ s32 func_80037410( void ) {
         for ( i = 4; i < 0x100; i++ ) {
             sum += bytes[i];
         }
-        *(s32 *)bytes = sum;           /* the checksum word, at the start of the settings */
+        /*
+        The checksum word goes back through the same raw view of the settings. A store to the struct member
+        (settings->unk_00) is not what the original wrote: gcc 2.7.2 lets a struct-member store move past the
+        global stores below (MEM_IN_STRUCT_P), and retail keeps it first.
+        */
+        *(s32 *)bytes = sum;
         D_80064314 = 5;
         D_800E6578 = 1;
         osSendMesg( &D_800E6690, &D_80064314, OS_MESG_NOBLOCK );
