@@ -155,7 +155,8 @@ typedef struct {
     /* 0xB14 */ f32 unk_B14;
     /* 0xB18 */ s64 unk_B18;            /* sound handle (func_80037870) */
     /* 0xB20 */ s16 unk_B20;
-    /* 0xB22 */ u8 unk_B22[2];
+    /* 0xB22 */ u8 unk_B22;
+    /* 0xB23 */ u8 unk_B23;
     /* 0xB24 */ u8 unk_B24;
     /* 0xB25 */ u8 unk_B25;
     /* 0xB26 */ u8 unk_B26;
@@ -256,9 +257,13 @@ extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];
 extern f32 D_80123850_gacode[][4];     /* unk_98, unk_9C, unk_2C, unk_30 of a player, by D_800DF59C.unk_04[] */
 extern s16 D_8012C784_gacode[];
+/* by score against par; TODO identity: scores below par read before the label, so the table likely starts
+   earlier */
+extern s16 D_8012C7E6_gacode[];
 extern f32 D_801239E8_gacode[11];      /* by gaPlayer_t.unk_93 */
 extern f32 D_8012C764_gacode[2];       /* per lane: angle of func_8011C158_gacode's camera */
 extern u8 D_8012C7C8_gacode;           /* func_8011C57C_gacode's camera has started (func_801150B4_gacode) */
+extern s16 D_8012C8D4_gacode[10];      /* path files of func_8011C468_gacode's camera */
 extern s16 D_8012C8E8_gacode[5];       /* path files of func_8011C57C_gacode's camera */
 extern gaStage_t D_80123EB0_gacode[];
 extern gaStage_t *D_8012D220_gacode;

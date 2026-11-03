@@ -402,6 +402,7 @@ gaPlayerFunc_t	gacode.h	invented: per-player handler (game mode D_8012CDF4_gacod
 gaCharacterData_t	gacode.h	invented: what gaCharacter_t.unk_00 points to (a byte table indexed by gaLane_t.unk_B26)
 gaStage_t	gacode.h	invented: 0x34-byte stage configuration (D_80123EB0_gacode); its last member is a per-frame function (func_80122470_gacode ...)
 gaSprite_t	gacode.h	invented: sprite of a main resource with a 256-colour palette copy (func_80120A7C_gacode)
+GA_ScoreResult	3E350.c	invented: the inline helper of func_801155BC_gacode that maps 2 + a frame's score against par to the game mode's result (1 par, 2 one under, 3 else)
 unkImage_t	gacode.h	invented: image a resource points to: 0x10-byte header, then a 256-colour palette
 # units 53B0-13490 (lane match-main-53B0: types; functions keep placeholder names)
 fileCacheEntry_t	include/filecache.h	invented: {reference count, data} slot per str file index in D_800F80B0 (unit BEF0)

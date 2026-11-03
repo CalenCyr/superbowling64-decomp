@@ -242,9 +242,74 @@ void func_801150B4_gacode( s32 player ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801151A0_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801155BC_gacode);
+/*
+================
+GA_ScoreResult
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801156D8_gacode);
+Result of a game mode for a frame's score, given as 2 + the score against par: 1 for par, 2 for one under, else
+3. Retail has no out-of-line copy; func_801155BC_gacode expands it (the result reaches the caller's variable
+through a copy, which a plain ternary there does not give).
+================
+*/
+static inline s32 GA_ScoreResult( s32 score ) {
+    return score == 2 ? 1 : score == 1 ? 2 : 3;
+}
+
+/*
+================
+func_801155BC_gacode
+
+A game mode: when func_80122140_gacode ends the player's frame, plays the sound for its score against par,
+sets the lane's unk_B25 from the score and returns 1 for par, 2 for one under and 3 otherwise; else 0.
+================
+*/
+s32 func_801155BC_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    s32 result;
+
+    if ( ( pl->lane->unk_B24 = func_80122140_gacode( player, pl->lane->unk_B23 == 10 ) ) != 0 ) {
+        func_80120D30_gacode( pl->laneIndex, D_8012C7E6_gacode[D_800DF630[player][D_8009D19C[player] - 1]] );
+        pl->lane->unk_B25 = D_800DF630[player][D_8009D19C[player] - 1] + 0x1A;
+        result = GA_ScoreResult( pl->lane->unk_B25 - 0x18 );
+    } else {
+        pl->lane->unk_B25 = 0;
+        result = 0;
+    }
+    return result;
+}
+
+/*
+================
+func_801156D8_gacode
+
+A game mode: when func_80122060_gacode ends the player's frame, plays the sounds and sets the lane's unk_B25
+when the game is over (returns 2) or not (returns 1); else sets unk_B25 by D_80068A50 and returns 0.
+================
+*/
+s32 func_801156D8_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    if ( ( pl->lane->unk_B24 = func_80122060_gacode( player, pl->lane->unk_B23 == 10 ) ) != 0 ) {
+        if ( D_8009D19C[player] == 10 ) {
+            func_80120D30_gacode( pl->laneIndex, 0x77 );
+            pl->lane->unk_B25 = 0x14;
+            func_80120D30_gacode( pl->laneIndex, 0x36 );
+            return 2;
+        }
+        func_80120D30_gacode( pl->laneIndex, 0x7D );
+        pl->lane->unk_B25 = 0x12;
+        func_80120D30_gacode( pl->laneIndex, 0x37 );
+        return 1;
+    }
+    if ( D_80068A50[player] == 0 ) {
+        func_80120D30_gacode( pl->laneIndex, 0x6E );
+        pl->lane->unk_B25 = player + 0x15;
+    } else {
+        func_80120D30_gacode( pl->laneIndex, 0x6D );
+        pl->lane->unk_B25 = 0x13;
+    }
+    return 0;
+}
 
 /*
 ================
@@ -1220,7 +1285,25 @@ void func_8011C158_gacode( s32 player, gaCamera_t *camera ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C254_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C468_gacode);
+/*
+================
+func_8011C468_gacode
+
+Camera handler: puts the eye on the D_8012C8D4_gacode path (one of ten, by D_8012D8D8_gacode) at the frame that
+follows the ball down the lane, looking at the ball.
+================
+*/
+void func_8011C468_gacode( s32 player, gaCamera_t *camera ) {
+    gaLane_t *lane = D_8012D658_gacode[player].lane;
+    s16 frame;
+
+    frame = ( 730.0f - lane->spots[0].pos[2] ) * 480.0f / 1780.0;
+    frame = frame < 0 ? 0 : ( frame > 480 ? 480 : frame );
+    func_8002BED8( D_8012C8D4_gacode[D_8012D8D8_gacode % 10], frame, camera->eye, camera->unk_18 );
+    camera->at[2] = lane->bodies[0].pos[2];
+    camera->at[0] = lane->bodies[0].pos[0];
+    camera->at[1] = lane->bodies[0].pos[1];
+}
 
 /*
 ================
