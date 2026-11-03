@@ -187,11 +187,140 @@ void func_8011291C_rscode( void ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_801129CC_rscode);
+/*
+================
+func_801129CC_rscode
 
-INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_80112B60_rscode);
+Ranks the players by score; outside a sub-mode, adds the game to the records of each player's character
+and saves them.
+================
+*/
+void func_801129CC_rscode( void ) {
+    s16 scores[4];
+    s32 i;
+    s32 character;
 
-INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_80112E04_rscode);
+    D_801142B4_rscode = D_8005C160 >> 6;
+    for ( i = 0; i < D_8005C161; i++ ) {
+        scores[i] = D_800DF630[i][9];
+    }
+    func_80113FCC_rscode( D_801142A2_rscode, D_8005C161, scores, 0, 300 );
+    if ( !D_801142B4_rscode ) {
+        for ( i = 0; i < D_8005C161; i++ ) {
+            character = ( ( D_8005C0E4[i] >> 4 ) & 7 ) - 1;
+            if ( character >= 0 ) {
+                func_80113EC0_rscode( &D_800E44E8[character], i );
+                func_80113EC0_rscode( &D_8009D098.unk_08[character], i );
+            }
+        }
+        for ( character = 0; character < 4; character++ ) {
+            func_8003B034( &D_800E44E8[character], character, 0 );
+            func_8003B034( &D_8009D098.unk_08[character], character, 1 );
+        }
+    }
+    D_801142AC_rscode = func_80112B60_rscode;
+}
+
+/*
+================
+func_80112B60_rscode
+
+Mode 0's results: the score sheet or the pin diagrams (left and right choose), then, unless every record is
+empty, down goes to the records of func_80112E04_rscode.
+================
+*/
+void func_80112B60_rscode( void ) {
+    u16 images[2] = { 0x87A, 0x898 };
+    s16 y = 0x10;
+    s16 empty = 0;
+    s16 i;
+
+    for ( i = 0; i < 4; i++ ) {
+        empty += D_800E44E8[i].unk_0C[0] ? 0 : 1;
+    }
+    if ( ( D_801142A6_rscode & L_JPAD ) && D_80114251_rscode == 1 ) {
+        func_80037870( SE_CURSOR, 0 );
+        D_80114251_rscode = 0;
+    }
+    if ( ( D_801142A6_rscode & R_JPAD ) && D_80114251_rscode == 0 ) {
+        func_80037870( SE_CURSOR, 0 );
+        D_80114251_rscode = 1;
+    }
+    func_8002DF3C( 0x88D, 0x64, y );
+    y += 0x18;
+    switch ( D_80114251_rscode ) {
+    case 0:
+        func_80039700( D_801142B4_rscode, 1, 0x18, y );
+        break;
+    case 1:
+        func_80113904_rscode( 0x18, y );
+        break;
+    }
+    y += 0x8C;
+    func_80113DC8_rscode( D_80114251_rscode, images, y, 0x50, 0x10 );
+    y += 0x1C;
+    if ( !D_801142B4_rscode && empty != 4 ) {
+        func_8002E4B0( 0xA82, 0x48, y, 0x60, 1.0f, 1.0f );
+        func_8002E4B0( 0xA81, 0xA8, y, 0x60, 1.0f, 1.0f );
+    }
+    if ( D_801142A0_rscode & ( A_BUTTON | Z_TRIG ) ) {
+        func_80037870( SE_DECIDE, 0 );
+        D_801142AC_rscode = func_80113564_rscode;
+        D_801142B0_rscode = func_80112B60_rscode;
+    }
+    if ( ( D_801142A6_rscode & D_JPAD ) && !D_801142B4_rscode && empty != 4 ) {
+        func_80037870( SE_CURSOR, 0 );
+        D_801142AC_rscode = func_80112E04_rscode;
+        D_80114251_rscode += 2;
+    }
+}
+
+/*
+================
+func_80112E04_rscode
+
+Records of the characters, of this session or saved (left and right choose); up goes back to
+func_80112B60_rscode.
+================
+*/
+void func_80112E04_rscode( void ) {
+    u16 images[2] = { 0xA82, 0xA81 };
+    s16 y = 0x10;
+
+    if ( ( D_801142A6_rscode & L_JPAD ) && D_80114251_rscode == 3 ) {
+        func_80037870( SE_CURSOR, 0 );
+        D_80114251_rscode = 2;
+    }
+    if ( ( D_801142A6_rscode & R_JPAD ) && D_80114251_rscode == 2 ) {
+        func_80037870( SE_CURSOR, 0 );
+        D_80114251_rscode = 3;
+    }
+    func_8002DF3C( 0x88D, 0x64, y );
+    y += 0x18;
+    switch ( D_80114251_rscode ) {
+    case 2:
+        func_8003A970( 4, D_800E44E8, 0, 0x18, y );
+        break;
+    case 3:
+        func_8003A970( 4, D_8009D098.unk_08, 1, 0x18, y );
+        break;
+    }
+    y += 0x8C;
+    func_8002E4B0( 0x87A, 0x48, y, 0x60, 1.0f, 1.0f );
+    func_8002E4B0( 0x898, 0xA8, y, 0x60, 1.0f, 1.0f );
+    y += 0x1C;
+    func_80113DC8_rscode( D_80114251_rscode - 2, images, y, 0x50, 0x10 );
+    if ( D_801142A0_rscode & ( A_BUTTON | Z_TRIG ) ) {
+        func_80037870( SE_DECIDE, 0 );
+        D_801142AC_rscode = func_80113564_rscode;
+        D_801142B0_rscode = func_80112E04_rscode;
+    }
+    if ( D_801142A6_rscode & U_JPAD ) {
+        func_80037870( SE_CURSOR, 0 );
+        D_801142AC_rscode = func_80112B60_rscode;
+        D_80114251_rscode -= 2;
+    }
+}
 
 /*
 ================
@@ -245,7 +374,47 @@ void func_80113504_rscode( void ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_80113564_rscode);
+/*
+================
+func_80113564_rscode
+
+Menu of two choices: leave the results, or func_8011372C_rscode's; B goes back to the page it came from.
+================
+*/
+void func_80113564_rscode( void ) {
+    u16 images[2] = { 0xAB5, 0xA57 };
+
+    if ( ( D_801142A6_rscode & L_JPAD ) && D_80114256_rscode == 1 ) {
+        func_80037870( SE_CURSOR, 0 );
+        D_80114256_rscode = 0;
+    }
+    if ( ( D_801142A6_rscode & R_JPAD ) && D_80114256_rscode == 0 ) {
+        func_80037870( SE_CURSOR, 0 );
+        D_80114256_rscode = 1;
+    }
+    func_80113DC8_rscode( D_80114256_rscode, images, 0x68, 0x50, 0x10 );
+    func_8002E4B0( D_80114256_rscode ? 0x84C : 0x84B, 0x98, 0x68, D_80114252_rscode + 0x40, 1.0f, 1.0f );
+    if ( ( D_801142A0_rscode & B_BUTTON ) && D_801142B0_rscode != func_80113564_rscode ) {
+        func_80037870( 2, 0 );
+        D_80114256_rscode = 0;
+        D_801142AC_rscode = D_801142B0_rscode;
+    }
+    if ( D_801142A0_rscode & ( A_BUTTON | Z_TRIG ) ) {
+        switch ( D_80114256_rscode ) {
+        case 0:
+            D_801142A8_rscode = 4;
+            D_8005CB60 = 1;
+            D_801142AC_rscode = func_801137CC_rscode;
+            D_80114250_rscode = 1;
+            break;
+        case 1:
+            func_80037870( SE_DECIDE, 0 );
+            D_801142AC_rscode = func_8011372C_rscode;
+            D_80114256_rscode = 0;
+            break;
+        }
+    }
+}
 
 /*
 ================
@@ -290,14 +459,99 @@ Last state: does nothing while the overlay is left.
 void func_801137CC_rscode( void ) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_801137D4_rscode);
+/*
+================
+func_801137D4_rscode
+
+Draws the pin diagram of a player's frame at (x, y): image 0x89D for a pin of the first mask (D_800A3050),
+else 0x89C for a pin of the second (D_800F7C18).
+================
+*/
+void func_801137D4_rscode( s32 player, u8 frame, s16 x, s16 y ) {
+    s32 pin;
+
+    func_8002DF3C( 0x899, x, y );
+    for ( pin = 0; pin < 10; pin++ ) {
+        if ( ( D_800A3050[player][frame] >> ( 9 - pin ) ) & 1 ) {
+            func_8002DF3C( 0x89D, x + D_80114258_rscode[pin][0], y + D_80114258_rscode[pin][1] );
+        } else if ( ( D_800F7C18[player][frame] >> ( 9 - pin ) ) & 1 ) {
+            func_8002DF3C( 0x89C, x + D_80114258_rscode[pin][0], y + D_80114258_rscode[pin][1] );
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_80113904_rscode);
 
-INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_80113DC8_rscode);
+/*
+================
+func_80113DC8_rscode
+
+Draws two choices side by side, the chosen one in a box, the other faded.
+================
+*/
+void func_80113DC8_rscode( u8 choice, u16 *images, s16 y, u16 w, u16 h ) {
+    s16 x[2] = { 0x48, 0xA8 };
+
+    func_8002C950( x[choice], y, w, h, 0xE0, 0xE0, 0xE0, D_80114252_rscode + 0x40 );
+    func_8002DF3C( images[choice], x[choice], y );
+    func_8002E4B0( images[!choice], x[!choice], y, 0x60, 1.0f, 1.0f );
+}
 
 INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_80113EC0_rscode);
 
-INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_80113FCC_rscode);
+/*
+================
+func_80113FCC_rscode
 
-INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_801140EC_rscode);
+Ranks the count scores, each between low and high, from the highest: ranks[i] is 1 plus the number of
+higher scores. Bug (kept): the loops run to i == count, one entry past the end; func_801129CC_rscode's
+call ranks a fifth, stale score and writes its rank over D_801142A6_rscode.
+================
+*/
+void func_80113FCC_rscode( u8 *ranks, u8 count, s16 *scores, s16 low, s16 high ) {
+    s32 tally[302];
+    s32 i;
+
+    for ( i = low; i <= high; i++ ) {
+        tally[i] = 0;
+    }
+    for ( i = 0; i <= count; i++ ) {
+        tally[scores[i]]++;
+    }
+    tally[high + 1] = 1;
+    for ( i = high; i >= low; i-- ) {
+        tally[i] += tally[i + 1];
+    }
+    for ( i = 0; i <= count; i++ ) {
+        ranks[i] = tally[scores[i] + 1];
+    }
+}
+
+/*
+================
+func_801140EC_rscode
+
+Ranks the count values, each between low and high, from the lowest: ranks[i] is 1 plus the number of
+lower values. As func_80113FCC_rscode, the loops run one entry past the end. Nothing calls it.
+================
+*/
+void func_801140EC_rscode( u8 *ranks, u8 count, s16 *values, s16 low, s16 high ) {
+    s32 tally[12];
+    s16 base = 1 - low;
+    s32 value;
+    s32 i;
+
+    for ( value = low + base; value <= high + base; value++ ) {
+        tally[value] = 0;
+    }
+    for ( i = 0; i <= count; i++ ) {
+        tally[values[i] + base]++;
+    }
+    tally[0] = 1;
+    for ( value = low + base; value <= high + base; value++ ) {
+        tally[value] += tally[value - 1];
+    }
+    for ( i = 0; i <= count; i++ ) {
+        ranks[i] = tally[values[i] + base - 1];
+    }
+}
