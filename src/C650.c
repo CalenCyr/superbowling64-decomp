@@ -6,6 +6,7 @@
 #include "boot.h"
 #include "ground.h"
 #include "filecache.h"
+#include "object.h"
 
 /*
 ================
@@ -181,8 +182,9 @@ Sets m to stand at (x, y, z) and face (tx, ty, tz), turned about y then tilted.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: register allocation: dx and dz * dz trade $f26 and $f24; the rest is exact
-void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz ) {
+// NON_MATCHING: register allocation: dx and dz * dz trade $f26 and $f24; the rest is exact. inline: func_80035380
+// expands it twice
+inline void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz ) {
     f32 dx, dy, dz;
     f32 dist, distXZ;
     f32 cosPitch, sinPitch, cosYaw, sinYaw;
@@ -217,6 +219,49 @@ void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz ) {
 INCLUDE_ASM("asm/nonmatchings/C650", func_80035220);
 #endif
 
+/*
+================
+func_80035380
+
+Starts a puff of flags at (x, y, z), in the first free slot, facing each camera.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: exact but for the second func_80035220 expansion, where dx and dz * dz trade $f26 and $f24 as in
+// func_80035220 itself; the first expansion is exact
+void func_80035380( u16 flags, f32 x, f32 y, f32 z ) {
+    f32 m[4][4];
+    u32 i;
+
+    for ( i = 0; i < NUM_PUFFS; i++ ) {
+        if ( D_800E4D70[i].life == 0 ) {
+            break;
+        }
+    }
+    D_800E4D70[i].flags = flags;
+    switch ( flags & PUFF_KIND ) {
+    case 0:
+        D_800E4D70[i].alpha = 0xFF;
+        D_800E4D70[i].alphaStep = -8;
+        D_800E4D70[i].size = 15;
+        D_800E4D70[i].sizeStep = 2;
+        D_800E4D70[i].life = 15;
+        break;
+    case 1:
+        D_800E4D70[i].alpha = 0xFF;
+        D_800E4D70[i].alphaStep = -15;
+        D_800E4D70[i].size = 10;
+        D_800E4D70[i].sizeStep = 2;
+        D_800E4D70[i].life = 7;
+        break;
+    }
+    func_80035220( m, x, y, z, D_8009CFA0[0]->eye[0], D_8009CFA0[0]->eye[1], D_8009CFA0[0]->eye[2] );
+    guMtxF2L( m, &D_800E6770[0][i] );
+    func_80035220( m, x, y, z, D_8009CFA0[1]->eye[0], D_8009CFA0[1]->eye[1], D_8009CFA0[1]->eye[2] );
+    guMtxF2L( m, &D_800E6770[1][i] );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/C650", func_80035380);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/C650", func_80035748);
