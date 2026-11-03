@@ -323,9 +323,11 @@ func_80120B50_gacode
 
 Rewrites the sprite's palette range in its resource from the saved copy: with color 0, the entries before
 index keep their colour and the others go black; else only entry index takes color.
+
+Declared inline: nothing calls this copy, and func_80120C0C_gacode repeats its body.
 ================
 */
-void func_80120B50_gacode( gaSprite_t *sprite, u16 color, u16 index ) {
+inline void func_80120B50_gacode( gaSprite_t *sprite, u16 color, u16 index ) {
     u16 *dst;
     s32 i;
 
@@ -356,7 +358,24 @@ void func_80120B50_gacode( gaSprite_t *sprite, u16 color, u16 index ) {
     }
 }
 
+/*
+================
+func_80120C0C_gacode
+
+func_80120B50_gacode at fraction t of the sprite's palette range.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: register colouring only: retail keeps the unclamped index in a3 and its u16 copy in t1; this
+// swaps them
+void func_80120C0C_gacode( gaSprite_t *sprite, u16 color, f32 t ) {
+    u16 count = sprite->last - sprite->first + 1;
+
+    func_80120B50_gacode( sprite, color, sprite->first + (u32)( count * t ) );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120C0C_gacode);
+#endif
 
 /*
 ================
