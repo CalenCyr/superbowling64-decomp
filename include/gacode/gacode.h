@@ -10,6 +10,9 @@
 #include "gamesnd.h"
 #include "filecache.h"
 #include "boot.h"
+#include "save.h"
+#include "menu.h"
+#include "sprite.h"
 
 /*
 ==============================================================================
@@ -34,11 +37,6 @@ typedef struct {
 } unkImage_t;
 
 
-s32 func_80037410( void );          /* unit 12260 */
-s32 func_8003B204( void );          /* unit 13490 */
-void func_8002E4B0( u16 id, s32 x, s32 y, u8 arg3, f32 scaleX, f32 scaleY );   /* unit 7250 */
-void func_8002DF3C( s32 id, s32 width, s32 height );                            /* unit 7250 */
-void func_8002FDE4( s32 x, s32 y, s32 w, s32 h, u8 r, u8 g, u8 b, u8 a );       /* unit 7250: fills a rectangle */
 void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
 void func_80039CBC( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
 void func_8003A3F0( s32 arg0, s32 arg1, s32 arg2 );             /* unit 13490 */
