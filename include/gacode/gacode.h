@@ -195,7 +195,8 @@ typedef struct {
     /* 0x24 */ u8 unk_24[0x08];
     /* 0x2C */ f32 unk_2C;
     /* 0x30 */ f32 unk_30;
-    /* 0x34 */ u8 unk_34[0x14];
+    /* 0x34 */ f32 unk_34;              /* an angle (radians; func_8011B1A0_gacode, func_8011840C_gacode) */
+    /* 0x38 */ u8 unk_38[0x10];
 } gaCharacter_t;                        /* size 0x48 */
 
 extern gaCharacter_t D_80123BE0_gacode[];
@@ -286,6 +287,7 @@ extern s16 D_8012C8D4_gacode[10];      /* path files of func_8011C468_gacode's c
 extern s16 D_8012C8E8_gacode[5];       /* path files of func_8011C57C_gacode's camera */
 extern gaStage_t D_80123EB0_gacode[];
 extern gaStage_t *D_8012D220_gacode;
+extern u8 D_8012D225_gacode;            /* nonzero: B commits the throw early (func_8011840C_gacode) */
 extern gaPlayer_t D_8012D658_gacode[MAX_PLAYERS];
 extern u8 D_8012D651_gacode;
 extern u16 D_8012D8D8_gacode;
@@ -367,6 +369,7 @@ s32 func_80117EFC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118014_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118270_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_80118524_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118CCC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );

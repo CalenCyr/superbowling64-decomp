@@ -958,7 +958,29 @@ s32 func_80118270_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011840C_gacode);
+/*
+================
+func_8011840C_gacode
+
+Lane input handler: commits the throw (keeps the player object's unk_48 in unk_94 and goes on to
+func_80118524_gacode) once the sine of the character's unk_34 is down to -0.3, on B at the last frame when
+D_8012D225_gacode allows it, or on input 1 while the sine is at most 0.5.
+================
+*/
+s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    if ( sinf( pl->character.unk_34 ) <= -0.3 ||
+         ( D_8012D225_gacode && pl->port >= 0 && ( D_800E57E4[pl->port] & B_BUTTON ) &&
+           pl->obj->unk_48 == pl->character.unk_00->unk_19 ) ||
+         ( sinf( pl->character.unk_34 ) <= 0.5 && input == 1 ) ) {
+        pl->unk_94 = pl->obj->unk_48;
+        pl->lane->unk_B10 = func_80118524_gacode;
+        pl->lane->unk_B08 = func_8011B2E8_gacode;
+        return 0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80118524_gacode);
 
@@ -1185,7 +1207,32 @@ void func_8011B07C_gacode( s32 player ) {
 
 INCLUDE_RODATA("asm/nonmatchings/gacode/3E350", D_8012CB38_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011B1A0_gacode);
+/*
+================
+func_8011B1A0_gacode
+
+unk_B08 handler: as func_8011B2E8_gacode, by the player object's unk_48, and sets the character's unk_34 angle
+from the same fraction (-pi/2 to pi/2).
+================
+*/
+void func_8011B1A0_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    gaCharacterData_t *data = pl->character.unk_00;
+    s32 last = data->unk_19 - 1;
+    s32 range = ( last - data->unk_18 ) * 2;
+    s32 cur = pl->obj->unk_48 - 1;
+    f32 t = (f32)( range - ( cur - data->unk_18 ) ) / (f32)range;
+    s32 x;
+
+    func_80120C0C_gacode( &D_8012D8E0_gacode[pl->laneIndex], 0x7C1, t );
+    if ( pl->port >= 0 ) {
+        x = pl->laneIndex != 0 ? 0xB0 : 0x18;
+        func_8002E0EC( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
+        func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD,
+                       0xA8 + 0x11 );
+    }
+    pl->character.unk_34 = ( t - 0.5 ) * M_PI;
+}
 
 /*
 ================
