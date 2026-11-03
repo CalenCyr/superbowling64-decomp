@@ -7,6 +7,7 @@
 #include "hostio.h"
 #include "object.h"
 #include "ground.h"
+#include "boot.h"
 
 /*
 ================
@@ -218,20 +219,159 @@ void func_8002A8B0( f32 m[4][4], f32 rot[3][3] ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002A98C);
+/*
+================
+func_8002A98C
 
+Rotates the axes of m by x, y and z radians.
+================
+*/
+void func_8002A98C( f32 m[4][4], f32 x, f32 y, f32 z ) {
+    f32 rot[3][3];
+    f32 sx, cx, sy, cy, sz, cz;
+    f32 t;      // RULE-EXCEPTION: R30, one temporary for both shared products: two locals schedule differently
+
+    sx = sinf( x );
+    cx = cosf( x );
+    sy = sinf( y );
+    cy = cosf( y );
+    sz = sinf( z );
+    cz = cosf( z );
+    t = sx * sz;
+    rot[0][0] = cy * cz + sy * t;
+    rot[0][1] = cx * sz;
+    rot[0][2] = -cz * sy + cy * t;
+    t = cz * sx;
+    rot[1][0] = sy * t - cy * sz;
+    rot[1][1] = cx * cz;
+    rot[1][2] = cy * t + sy * sz;
+    rot[2][0] = cx * sy;
+    rot[2][1] = -sx;
+    rot[2][2] = cx * cy;
+    func_8002A8B0( m, rot );
+}
+
+/*
+================
+func_8002AAD0
+
+Sets m to a rotation by x, y and z radians, scaled by scale, then moved to (tx, ty, tz).
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: MATCH-PENDING (R17): byte-exact only with the unused local rot, which supplies retail's 0x28
+// bytes of unused frame; without it the frame is 0x50 instead of 0x78
+void func_8002AAD0( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, f32 ty, f32 tz ) {
+    f32 rot[3][3];
+    f32 sx, cx, sy, cy, sz, cz;
+    f32 t;      // RULE-EXCEPTION: R30, one temporary for both shared products, as in func_8002A98C
+
+    sx = sinf( x );
+    cx = cosf( x );
+    sy = sinf( y );
+    cy = cosf( y );
+    sz = sinf( z );
+    cz = cosf( z );
+    t = sx * sz;
+    m[0][0] = ( cy * cz + sy * t ) * scale;
+    m[0][1] = cx * sz * scale;
+    m[0][2] = ( -cz * sy + cy * t ) * scale;
+    m[0][3] = 0.0f;
+    t = cz * sx;
+    m[1][0] = ( sy * t - cy * sz ) * scale;
+    m[1][1] = cx * cz * scale;
+    m[1][2] = ( cy * t + sy * sz ) * scale;
+    m[1][3] = 0.0f;
+    m[2][0] = cx * sy * scale;
+    m[2][1] = -sx * scale;
+    m[2][2] = cx * cy * scale;
+    m[2][3] = 0.0f;
+    m[3][0] = tx;
+    m[3][1] = ty;
+    m[3][2] = tz;
+    m[3][3] = 1.0f;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/53B0", func_8002AAD0);
+#endif
 
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002AC84);
+/*
+================
+func_8002AC84
 
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002AEBC);
+Moves m by trans, then rotates it by rot (radians) and scales it by scale.
+================
+*/
+void func_8002AC84( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale ) {
+    func_8002A810( m, trans[0], trans[1], trans[2] );
+    if ( rot[0] != 0.0 || rot[1] != 0.0 || rot[2] != 0.0 ) {
+        func_8002A98C( m, rot[0], rot[1], rot[2] );
+    }
+    func_8002A864( m, scale[0], scale[1], scale[2] );
+}
+
+/*
+================
+func_8002AEBC
+
+Makes the drawn matrix of obj from its placement.
+================
+*/
+void func_8002AEBC( sceneObject_t *obj ) {
+    func_8002A864( obj->mtx, 1.0f, 1.0f, 1.0f );
+    guMtxF2L( obj->mtx, &obj->joints[0].mtxL[D_8005C0B1] );
+}
 
 INCLUDE_ASM("asm/nonmatchings/53B0", func_8002AF20);
 
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002B380);
+/*
+================
+func_8002B380
+
+Converts the model commands at gfx, in place, into the display list they stand for: each command is 8 bytes,
+like the Gfx it becomes.
+================
+*/
+void func_8002B380( Gfx *gfx ) {
+    u8 cmd[0x18];   /* a command, read with more bytes than it has */
+    s32 end;
+
+    end = 0;
+    do {
+        memmove( cmd, gfx, sizeof( cmd ) );
+        switch ( cmd[0] ) {
+        case MDLCMD_END:
+            gSPEndDisplayList( gfx++ );
+            end = -1;
+            break;
+        case MDLCMD_TRI1:
+            gSP1Triangle( gfx++, cmd[1], cmd[2], cmd[3], cmd[4] );
+            break;
+        case MDLCMD_TRI2:
+            gSP2Triangles( gfx++, cmd[1], cmd[2], cmd[3], cmd[7] & 0xF, cmd[4], cmd[5], cmd[6], cmd[7] >> 4 );
+            break;
+        case MDLCMD_VTX_ST:
+            gSPModifyVertex( gfx++, cmd[1], G_MWO_POINT_ST, ( cmd[2] << 24 ) + ( cmd[3] << 16 ) + ( cmd[4] << 8 ) + cmd[5] );
+            break;
+        }
+    } while ( end != -1 );
+}
 
 INCLUDE_ASM("asm/nonmatchings/53B0", func_8002B610);
 
 INCLUDE_ASM("asm/nonmatchings/53B0", func_8002B9CC);
 
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002BE00);
+/*
+================
+func_8002BE00
+
+Draws obj, and advances its animation, from the start after its last frame.
+================
+*/
+void func_8002BE00( sceneObject_t *obj ) {
+    func_8002B9CC( obj );
+    obj->frame += D_800F7BF8;
+    if ( obj->frame == obj->anim[0] ) {
+        obj->frame = 0;
+    }
+}

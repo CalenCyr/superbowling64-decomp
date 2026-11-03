@@ -38,6 +38,37 @@ extern s32 D_800EA0C0;
 extern s32 D_800F7BF8;              /* frames each update advances; 1 at start */
 extern u8 D_800F30E0[0x8000];       /* func_8002A7EC reads a host file here */
 
+/* Model commands func_8002B380 converts: the opcode byte, then its arguments. */
+#define MDLCMD_END          0           /* end of the list */
+#define MDLCMD_TRI1         2           /* vertices 1-3, flag 4 */
+#define MDLCMD_VTX_ST       9           /* vertex 1, texture coordinates 2-5 */
+#define MDLCMD_TRI2         13          /* vertices 1-3 and 4-6, flags in the nibbles of 7 */
+
+/* Joint of a scene object: its matrix, the translation in row 3, and the fixed-point copies drawn from it. */
+typedef struct {
+    /* 0x000 */ f32 mtx[4][4];
+    /* 0x040 */ Mtx mtxL[2];            /* by D_8005C0B1 */
+    /* 0x0C0 */ Mtx mirrorL[2];         /* by D_8005C0B1: mtx with its translation mirrored */
+} sceneObjJoint_t;                         /* size 0x140 */
+
+/*
+Object of the scene engine (gacode's D_800EA120 holds pointers to them). gacode.h keeps a partial copy of it,
+sceneObj_t, until it includes this header.
+*/
+typedef struct {
+    /* 0x00 */ u16 flags;
+    /* 0x02 */ u8 unk_02[2];
+    /* 0x04 */ f32 mtx[4][4];           /* placement */
+    /* 0x44 */ f32 unk_44;
+    /* 0x48 */ u16 frame;               /* of the animation */
+    /* 0x4A */ u8 viewMask;             /* 0: not drawn */
+    /* 0x4B */ u8 unk_4B;
+    /* 0x4C */ void *model;
+    /* 0x50 */ s32 *anim;               /* a loaded file (func_80030C04); its first word is its frame count */
+    /* 0x54 */ u8 unk_54[0x04];
+    /* 0x58 */ sceneObjJoint_t joints[1];  /* one per joint of the model */
+} sceneObject_t;
+
 void func_80029FB0( void );
 void func_80029FF4( objParams_t *params );
 void func_8002A1EC( objClass_t *classes, objParams_t *params );
@@ -48,8 +79,12 @@ void func_8002A7EC( u8 *name );
 void func_8002A810( f32 m[4][4], f32 x, f32 y, f32 z );
 void func_8002A864( f32 m[4][4], f32 x, f32 y, f32 z );
 void func_8002A8B0( f32 m[4][4], f32 rot[3][3] );
-void func_8002B380( void *arg );
-void func_8002B9CC( void *obj );
-void func_8002BE00( void *obj );
+void func_8002A98C( f32 m[4][4], f32 x, f32 y, f32 z );
+void func_8002AAD0( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, f32 ty, f32 tz );
+void func_8002AC84( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale );
+void func_8002AEBC( sceneObject_t *obj );
+void func_8002B380( Gfx *gfx );
+void func_8002B9CC( sceneObject_t *obj );
+void func_8002BE00( sceneObject_t *obj );
 
 #endif

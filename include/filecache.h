@@ -42,7 +42,7 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u8 unk_00[0x04];
     /* 0x04 */ void *unk_04;
-    /* 0x08 */ void *unk_08;        /* passed to func_8002B380 */
+    /* 0x08 */ Gfx *unk_08;         /* model commands, converted by func_8002B380 */
 } fileRefA_t;
 
 typedef struct {
