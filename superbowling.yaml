@@ -407,6 +407,7 @@ segments:
     subsegments:
       - [0x56FF0, c, rscode/56FF0]
       - [0x58EF0, data]
+      - [0x58F30, .rodata, rscode/56FF0]   # an auto array initialiser
       - { type: bss, vram: 0x801142A0 }
 
   - name: gscode

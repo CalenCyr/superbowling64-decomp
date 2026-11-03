@@ -32,6 +32,9 @@ extern s16 D_800EA090[];
 extern u8 D_8009D19C[4];            /* per player: current frame (10: the game is over) */
 extern s16 D_800DF630[4][10];       /* per player and frame: score */
 extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
+extern u8 D_800693DC[2];            /* per player of a duel: games won */
+extern u16 D_8009D030[2][3];        /* per player of a duel and game: score */
+extern u16 D_80068218[][6];         /* per player: name */
 extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */
 
 void func_8002C950( s32 x, s32 y, s32 w, s32 h, u8 r, u8 g, u8 b, u8 a );    /* unit 7250 */

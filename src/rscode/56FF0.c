@@ -356,7 +356,76 @@ void func_801130AC_rscode( void ) {
     }
 }
 
+/*
+================
+func_8011311C_rscode
+
+Results of a duel: the score of each game, the higher one marked, the games won, and the winner; A or Z
+leaves when player 1 won (setting the bit of D_8005C163 in D_8009D098.unk_04), else opens the menu.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: retail passes x to func_800389D0 zero-extended and not folded to the constant 0x40 (then forms
+// x + 0x38 with ori), and allocates the first loop's registers differently (x in s1, i in s2)
+void func_8011311C_rscode( void ) {
+    u16 images[3] = { 0x874, 0x873, 0x872 };
+    s16 x;
+    s16 y;
+    s32 games;
+    s32 player;
+    s32 opponent;
+    s32 i;
+
+    func_8002DF3C( 0x88D, 0x64, 0x10 );
+    y = 0x28;
+    x = 0x78;
+    games = D_800693DC[0] + D_800693DC[1];
+    for ( i = 0; i < games; i++ ) {
+        func_8002DF3C( images[i], x, y );
+        x += 0x20;
+    }
+    func_8002DF3C( 0x871, x, y );
+    y += 9;
+    for ( player = 0; player < 2; player++ ) {
+        x = 0x40;
+        func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player], x, y );
+        x += 0x38;
+        opponent = !player;
+        for ( i = 0; i < games; i++ ) {
+            func_8002DF3C( 0x86D, x, y );
+            func_800393D8( D_8009D030[player][i], x + 6, y + 6 );
+            if ( D_8009D030[player][i] > D_8009D030[opponent][i] ) {
+                func_8002E4B0( 0x86C, x, y, D_80114252_rscode + 0x20, 1.0f, 1.0f );
+            }
+            x += 0x20;
+        }
+        func_8002DF3C( 0x86B, x, y );
+        func_8003A8B4( player, D_800693DC[player], 1, x + 4, y + 2 );
+        y += 0x14;
+    }
+    if ( D_800693DC[0] > D_800693DC[1] ) {
+        func_8002E4B0( 0x869, 0x2C, y + 8, D_80114252_rscode + 0x7F, 1.0f, 1.0f );
+        if ( !( D_8009D098.unk_04 & ( 1 << D_8005C163 ) ) ) {
+            func_8002DF3C( 0x870, 0x38, 0xAC );
+        }
+    } else {
+        func_8002E4B0( 0x86A, 0x2C, y + 8, D_80114252_rscode + 0x7F, 1.0f, 1.0f );
+    }
+    if ( D_801142A0_rscode & ( A_BUTTON | Z_TRIG ) ) {
+        func_80037870( SE_DECIDE, 0 );
+        if ( D_800693DC[0] > D_800693DC[1] ) {
+            D_801142AC_rscode = func_8011377C_rscode;
+            D_8009D098.unk_04 |= 1 << D_8005C163;
+        } else {
+            D_801142AC_rscode = func_80113564_rscode;
+            D_801142B0_rscode = func_8011311C_rscode;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_8011311C_rscode);
+INCLUDE_RODATA("asm/nonmatchings/rscode/56FF0", D_80114290_rscode);
+#endif
 
 /*
 ================
