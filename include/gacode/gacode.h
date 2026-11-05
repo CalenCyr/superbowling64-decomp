@@ -13,6 +13,7 @@
 #include "save.h"
 #include "menu.h"
 #include "sprite.h"
+#include "object.h"
 
 /*
 ==============================================================================
@@ -31,7 +32,7 @@ extern u8 D_800693DC[2];            /* per lane: games won (func_80113EE4_gacode
 extern u8 D_80068A50[];
 extern s16 D_800EA090[];
 extern void *D_800EA120[];          /* main's scene objects, of several kinds: [1] the camera (gaCamera_t), the
-                                       others mostly sceneObj_t */
+                                       others mostly sceneObject_t */
 extern u8 D_8009D19C[4];            /* per player: current frame (10: the game is over) */
 extern s8 D_800A3020[4][10];        /* per player and frame */
 extern s8 D_80066E18[4][10];        /* per player and frame */
@@ -64,7 +65,6 @@ void func_80039CBC( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
 void func_8003A3F0( s32 arg0, s32 arg1, s32 arg2 );             /* unit 13490 */
 void func_8003A658( s32 arg0, s32 x, s32 y );                   /* unit 13490 */
 void func_8002E0EC( s32 id, s32 x, s32 y );                    /* unit 7250 */
-void func_8002BED8( s16 file, s16 frame, f32 *pos, f32 *rot );     /* unit 7250: reads a frame of a path file */
 
 /*
 ==============================================================================
@@ -77,30 +77,12 @@ OVERLAY
 typedef f32 vec3_t[3];
 
 /* Joint of a scene object: its matrix, the translation in row 3. Name invented. */
-typedef struct {
-    /* 0x000 */ f32 mtx[4][4];
-    /* 0x040 */ u8 unk_40[0x100];
-} sceneJoint_t;                         /* size 0x140 */
 
 /*
 Object of main's scene engine (D_800EA120 holds pointers to them): only the members the overlay uses. Name
 invented.
 */
-typedef struct {
-    /* 0x00 */ u16 unk_00;               /* flags */
-    /* 0x02 */ u8 unk_02[2];
-    /* 0x04 */ f32 mtx[4][4];           /* placement, set by func_8011D2C0_gacode */
-    /* 0x44 */ f32 unk_44;
-    /* 0x48 */ u16 unk_48;
-    /* 0x4A */ u8 unk_4A;               /* 0: not drawn */
-    /* 0x4B */ u8 unk_4B;
-    /* 0x4C */ fileType1_t *unk_4C;      /* a loaded file (func_80030C04 FILE_TYPE1) */
-    /* 0x50 */ void *unk_50;              /* a loaded file (func_80030C04) */
-    /* 0x54 */ u8 unk_54[0x04];
-    /* 0x58 */ sceneJoint_t joints[2];  /* (at least two) */
-} sceneObj_t;
 
-void func_8002AEBC( sceneObj_t *obj );  /* main, unit 53B0 */
 
 /* Ball or pin of a lane. Name invented. */
 typedef struct {
@@ -147,8 +129,8 @@ typedef struct {
     /* 0x7E8 */ u8 unk_7E8[0x948 - 0x7E8];
     /* 0x948 */ gaBody_t unk_948[3];
     /* 0xA68 */ gaSpot_t unk_A68[3];
-    /* 0xAC8 */ sceneObj_t *bodyObjs[NUM_BODIES];
-    /* 0xAF4 */ sceneObj_t *unk_AF4[3];
+    /* 0xAC8 */ sceneObject_t *bodyObjs[NUM_BODIES];
+    /* 0xAF4 */ sceneObject_t *unk_AF4[3];
     /* 0xB00 */ gaCamera_t *camera;
     /* 0xB04 */ void (*unk_B04)( s32 player );
     /* 0xB08 */ void (*unk_B08)( s32 player );
@@ -207,7 +189,7 @@ extern gaCharacter_t D_80123BE0_gacode[];
 typedef struct {
     /* 0x00 */ gaCharacter_t character;
     /* 0x48 */ f32 unk_48[4][4];        /* copy of obj->mtx */
-    /* 0x88 */ sceneObj_t *obj;
+    /* 0x88 */ sceneObject_t *obj;
     /* 0x8C */ gaLane_t *lane;
     /* 0x90 */ s8 port;                 /* controller port; -1: played by the game */
     /* 0x91 */ u8 laneIndex;
@@ -332,7 +314,7 @@ void func_8011A26C_gacode( void );
 void func_801144C4_gacode( u8 lastLane );
 void func_80114DD4_gacode( gaPlayer_t *pl );
 s32 func_80115ED4_gacode( u8 twoLanes );
-void func_80114CB4_gacode( gaBody_t *body, gaSpot_t *spot, sceneObj_t *obj, f32 offset );
+void func_80114CB4_gacode( gaBody_t *body, gaSpot_t *spot, sceneObject_t *obj, f32 offset );
 void func_80114FC4_gacode( s32 player );
 void func_80114FFC_gacode( s32 player );
 s32 func_801157F8_gacode( s32 player );
