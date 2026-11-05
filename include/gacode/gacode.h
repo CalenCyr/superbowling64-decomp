@@ -4,6 +4,8 @@
 /* gacode.h -- the game overlay (file GACODE  SYS, ROM 0x3C570, loaded at 0x80112350) */
 
 #include "common.h"
+#include "game.h"
+#include "menu.h"
 #include "libultra.h"
 #include <PR/gu.h>
 #include "input.h"
@@ -23,21 +25,13 @@ MAIN (functions and globals of main units without a header yet, under their curr
 ==============================================================================
 */
 
-extern u8 D_8005C160;               /* low nibble 3: func_8011A26C; else bits 4-5 pick a mode, bits 6-7 its arg */
-extern u8 D_8005C161;               /* number of players */
-extern u8 D_8005C162;               /* index of the last team */
-extern u8 D_8005C0E4[];             /* per player: low nibble a character */
 extern u8 D_800994BE[];
-extern u8 D_800693DC[2];            /* per lane: games won (func_80113EE4_gacode) */
 extern u8 D_80068A50[];
-extern s16 D_800EA090[];
 extern void *D_800EA120[];          /* main's scene objects, of several kinds: [1] the camera (gaCamera_t), the
                                        others mostly sceneObject_t */
-extern u8 D_8009D19C[4];            /* per player: current frame (10: the game is over) */
 extern s8 D_800A3020[4][10];        /* per player and frame */
 extern s8 D_80066E18[4][10];        /* per player and frame */
 extern u8 D_80099458[9];            /* per frame: par of the frame (func_80122140_gacode) */
-extern s16 D_800DF630[4][10];       /* per player and frame: score against par */
 extern s8 D_800994B8[2];            /* per player of a duel: frames won */
 extern f32 D_800E6560[2][3];        /* per lane: position of the ball */
 extern u8 D_8006940D[NUM_PLAYERS];   /* per port (unit 2DF0) */
@@ -60,9 +54,6 @@ typedef struct {
 } unkImage_t;
 
 
-void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
-void func_80039CBC( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );   /* unit 13490 */
-void func_8003A3F0( s32 arg0, s32 arg1, s32 arg2 );             /* unit 13490 */
 void func_8003A658( s32 arg0, s32 x, s32 y );                   /* unit 13490 */
 void func_8002E0EC( s32 id, s32 x, s32 y );                    /* unit 7250 */
 

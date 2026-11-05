@@ -46,6 +46,9 @@ extern s8 D_800DF5D0[];            /* number shown on each player's name plate; 
 
 void func_800386E0( menuItem_t *items, u8 step );
 void func_800389D0( s32 player, u8 cpu, u16 *name, s16 x, s16 y );
+void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );
+void func_80039CBC( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );
+void func_8003A3F0( s32 arg0, s32 arg1, s32 arg2 );
 void func_80038AE8( s32 player, u8 cpu, u16 *name, u8 noIcon, s16 x, s16 y );
 void func_80038C1C( u8 count, u8 first, s16 x, s16 y );
 void func_80038D0C( u8 tenth, s16 x, s16 y );

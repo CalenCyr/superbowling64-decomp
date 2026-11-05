@@ -611,5 +611,4 @@ D_800693DC = 0x800693DC; // size:0x2
 D_800A3050 = 0x800A3050; // size:0x60
 D_80114256_rscode = 0x80114256; // segment:rscode size:0x1
 D_80114258_rscode = 0x80114258; // segment:rscode size:0x28
-D_800693DC = 0x800693DC; // size:0x2
 D_8009D030 = 0x8009D030; // size:0xC
