@@ -32,5 +32,7 @@ void func_8002CE24( s16 type, s16 x, s16 y, s16 width, s16 height, void *palette
 void func_8002DF3C( u16 id, s16 x, s16 y );
 void func_8002E4B0( u16 id, s16 x, s16 y, u8 alpha, f32 scaleX, f32 scaleY );
 void func_8002FDE4( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a );
+void func_8002C950( s32 x, s32 y, s32 w, s32 h, u8 r, u8 g, u8 b, u8 a );
+void func_8003068C( s32 r, s32 g, s32 b );
 
 #endif

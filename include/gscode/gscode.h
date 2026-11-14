@@ -24,10 +24,6 @@ MAIN (functions and globals of main units without a header yet, under their curr
 
 extern u8 D_8005B191;               /* set while the overlay checks the controller paks */
 
-void func_8002C950( s32 x, s32 y, s32 w, s32 h, u8 r, u8 g, u8 b, u8 a );    /* unit 7250 */
-void func_8003068C( s32 r, s32 g, s32 b );                                   /* unit 7250 */
-extern u8 D_8005C0B6;
-extern u8 D_8005C0BF;               /* 0, then 1 once an overlay asks to leave, 2 when it goes */
 
 /*
 ==============================================================================

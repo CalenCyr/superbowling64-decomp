@@ -22,8 +22,6 @@ MAIN (functions and globals of main units without a header yet, under their curr
 ==============================================================================
 */
 
-extern u8 D_8005C0B6;
-extern u8 D_8005C0BF;               /* 0, then 1 once the overlay asks to leave, 2 when it goes */
 extern s16 D_8005C0C0;
 extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
 /* Main's D_80066C00 (0x24 bytes): only the member the overlay uses. Name invented. */
@@ -38,8 +36,6 @@ extern u16 D_8009D030[2][3];        /* per player of a duel and game: score */
 extern u16 D_80068218[][6];         /* per player: name */
 extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */
 
-void func_8002C950( s32 x, s32 y, s32 w, s32 h, u8 r, u8 g, u8 b, u8 a );    /* unit 7250 */
-void func_8003068C( s32 r, s32 g, s32 b );                                   /* unit 7250 */
 void func_8003A970( s16 count, UnkRecord *records, u8 arg2, s16 x, s16 y );  /* unit 13490 */
 void func_8003B034( UnkRecord *record, s32 index, u8 arg2 );                 /* unit 13490 */
 
