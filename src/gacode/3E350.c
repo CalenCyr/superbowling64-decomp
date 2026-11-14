@@ -657,14 +657,12 @@ void func_801167C0_gacode( s32 player, gaPlayer_t *pl, u8 strong ) {
 func_801168D0_gacode
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: control flow; retail computes the height before the first test and gives that test its own
-// return-0 block, and puts the 1 in v0 before the final store
 s32 func_801168D0_gacode( gaPlayer_t *pl ) {
     gaLane_t *lane = pl->lane;
+    f32 height = lane->spots[0].pos[1] - lane->spots[0].unk_18;
 
     if ( lane->spots[0].pos[2] > -1186.0f
-         && lane->spots[0].pos[1] - lane->spots[0].unk_18 < D_8012D220_gacode->unk_14
+         && height < D_8012D220_gacode->unk_14
          && ( lane->unk_454 & 1 ) ) {
         func_80120D7C_gacode( &lane->unk_B18 );
         func_80120D30_gacode( pl->laneIndex, 0x2F );
@@ -675,9 +673,6 @@ s32 func_801168D0_gacode( gaPlayer_t *pl ) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801168D0_gacode);
-#endif
 
 /*
 ================
