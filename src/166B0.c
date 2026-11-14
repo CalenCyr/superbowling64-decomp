@@ -2132,8 +2132,6 @@ u8 *Snd_CmdVibrato( sndChannel_t *chan, u8 *src ) {
     return src;
 }
 
-#ifdef NON_MATCHING
-// NON_MATCHING: schedule: retail reloads vibratoPeriod right after storing it and interleaves the two divisions
 /*
 ================
 Snd_CmdVibratoInverted
@@ -2143,13 +2141,11 @@ Command 0x89 <delay> <period> <depth>: as 0x88, starting downwards.
 */
 u8 *Snd_CmdVibratoInverted( sndChannel_t *chan, u8 *src ) {
     chan->vibratoDelay = *src++;
-    chan->vibratoStep = 6.2831852 / (f32)( chan->vibratoPeriod = *src++ );
+    chan->vibratoPeriod = *src++;
     chan->vibratoDepth = -(f32)*src++ / 50.0;
+    chan->vibratoStep = 6.2831852 / (f32)chan->vibratoPeriod;
     return src;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/166B0", Snd_CmdVibratoInverted);
-#endif
 
 /*
 ================
