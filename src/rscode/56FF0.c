@@ -367,6 +367,8 @@ leaves when player 1 won (setting the bit of D_8005C163 in D_8009D098.unk_04), e
 #ifdef NON_MATCHING
 // NON_MATCHING: retail passes x to func_800389D0 zero-extended and not folded to the constant 0x40 (then forms
 // x + 0x38 with ori), and allocates the first loop's registers differently (x in s1, i in s2)
+// The zero extension fits a call with no prototype in scope; the project keeps every call prototyped, so it stays
+// parked.
 void func_8011311C_rscode( void ) {
     u16 images[3] = { 0x874, 0x873, 0x872 };
     s16 x;
