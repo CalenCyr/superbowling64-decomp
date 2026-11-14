@@ -1690,26 +1690,26 @@ CHANNEL ALLOCATION
 */
 
 #ifdef NON_MATCHING
-// NON_MATCHING: registers: retail puts the 0xFF constant in a1, moving chan and started to a2/a3 (store order now matches)
+// NON_MATCHING: registers only: retail swaps a0 and a1 between the 0xFF constant and the tempo quotient
 /*
 ================
 Snd_ResetChannel
 
-Clears data, a channel, to its defaults, keeping only voiceActive: centre pan, full levels, scales of 1, a
+Clears chan to its defaults, keeping only voiceActive: centre pan, full levels, scales of 1, a
 120 bpm tempo, no fade and the next (or default) wave bank.
 ================
 */
-void Snd_ResetChannel( sndChannel_t *data ) {
-    sndChannel_t *chan;
+void Snd_ResetChannel( sndChannel_t *chan ) {
+    u8 *p;
     u8 started;
     s32 tempo;
     u32 i;
 
-    chan = data;
+    p = (u8 *)chan;
     started = chan->voiceActive;
     chan->cmdPos = NULL;
     for ( i = 0; i < sizeof( sndChannel_t ); i++ ) {
-        *( (u8 *)data )++ = 0;
+        *p++ = 0;
     }
     chan->lastPan = chan->lastFxMix = RESEND;
     tempo = TEMPO_120_BPM / snd_tickRate;
@@ -1717,8 +1717,8 @@ void Snd_ResetChannel( sndChannel_t *data ) {
     chan->trackVolume = 0x7F;
     chan->envPeakLevel = 0x7F;
     chan->envDecayTime = 0xFF;
-    chan->envSustainLevel = 0x7F;
     chan->pan = PAN_CENTRE;
+    chan->envSustainLevel = 0x7F;
     chan->envInterval = 1;
     chan->envAttackTime = 1;
     chan->envReleaseTime = 15;
