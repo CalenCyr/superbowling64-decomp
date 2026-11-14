@@ -35,13 +35,19 @@ OVERLAY
 ==============================================================================
 */
 
-/* D_8011B8C5_gscode: step of the two-choice menu of unit 5A990 */
+/* D_8011B845_gscode, D_8011B8C5_gscode: step of the two-choice menus of units 5A580 and 5A990 */
 #define CHOICE_IN           0           /* sliding in */
 #define CHOICE_RUN          1           /* in place, taking input */
 #define CHOICE_TAKEN        2           /* a choice was taken, sliding out */
 #define CHOICE_BACK         3           /* backed out, sliding out */
 
 extern s32 D_8011B5A0_gscode;       /* entries in D_80120781_gscode */
+extern menuItem_t D_8011B7D0_gscode[9];  /* the menu of one or two players; [5]: its title */
+extern s16 D_8011B82C_gscode[2][6];  /* per choice: images of its blink */
+extern u8 D_8011B844_gscode;        /* slide step of the menu of one or two players */
+extern u8 D_8011B845_gscode;        /* CHOICE_IN etc. */
+extern u8 D_8011B846_gscode;        /* highlighted choice: 0 one player, 1 two */
+extern u8 D_8011B847_gscode;        /* blink frame, 0 to 29 */
 extern menuItem_t D_8011B850_gscode[9];  /* the two-choice menu; [5]: its title */
 extern s16 D_8011B8AC_gscode[2][6];  /* per choice: images of its blink */
 extern u8 D_8011B8C4_gscode;        /* slide step of the two-choice menu */
@@ -62,6 +68,9 @@ void func_801123C4_gscode( u8 screen );
 void func_801123E8_gscode( void );
 void func_8011288C_gscode( void );
 void func_80112894_gscode( void );
+
+/* unit 5A580 */
+s32 func_80113990_gscode( void );
 
 /* unit 5A990 */
 s32 func_80113DA0_gscode( void );
