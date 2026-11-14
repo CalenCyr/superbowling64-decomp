@@ -322,13 +322,11 @@ func_8003A8B4
 Draws count pieces of a box at (x, y): its left end, then its body; small ones when small is set.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: the selects of the images and of the offset; retail computes all three from one mask before the loop, this selects the offset with a branch
 void func_8003A8B4( s32 arg0, u8 count, u8 small, s16 x, s16 y ) {
     s32 i;
     s32 offset;
 
-    offset = small ? 16 : 36;
+    offset = small ? 16 : 20;
     for ( i = 0; i < count; i++ ) {
         if ( i == 0 ) {
             func_8002DF3C( small ? 0x865 : 0x867, x, y );
@@ -337,9 +335,6 @@ void func_8003A8B4( s32 arg0, u8 count, u8 small, s16 x, s16 y ) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/13490", func_8003A8B4);
-#endif
 
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A970);
 
