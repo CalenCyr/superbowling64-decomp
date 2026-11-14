@@ -894,8 +894,6 @@ void func_8003C1FC( audioTaskFuncs_t *funcs ) {
     D_8005CE4C = funcs;
 }
 
-#ifdef NON_MATCHING
-// NON_MATCHING: registers: retail loads snd_numChannels into v1 and snd_channels into v0 (swapped here); the seTable_t cast reads unk_08 at the same offset
 /*
 ================
 func_8003C208
@@ -906,24 +904,20 @@ Returns unk_08 of the sequence (or else the SE table) of the first channel of so
 s32 func_8003C208( s32 id ) {
     s32 i;
     sndChannel_t *chan;
-    seqHeader_t *hdr;
 
-    if ( id != 0 ) {
-        for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
-            if ( chan->id == id ) {
-                hdr = chan->seq;
-                if ( hdr == NULL ) {
-                    hdr = (seqHeader_t *)chan->seTable;
-                }
-                return hdr->unk_08;
+    if ( id == 0 ) {
+        return 0;
+    }
+    for ( i = 0, chan = snd_channels; i < snd_numChannels; i++, chan++ ) {
+        if ( chan->id == id ) {
+            if ( chan->seq != NULL ) {
+                return chan->seq->unk_08;
             }
+            return chan->seTable->unk_08;
         }
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/166B0", func_8003C208);
-#endif
 
 /*
 ================
