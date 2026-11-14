@@ -100,10 +100,13 @@ typedef struct {
 } sceneCamera_t;                        /* size 0x248 */
 
 extern sceneCamera_t *D_8009CFA0[];
+extern void *D_800EA120[];          /* main's scene objects, of several kinds: [1] gacode's camera (gaCamera_t), the
+                                       others mostly sceneObject_t */
 
 void func_80029FB0( void );
 void func_80029FF4( objParams_t *params );
 void func_8002A1EC( objClass_t *classes, objParams_t *params );
+void func_8002A2F0( void );
 void func_8002A624( objNode_t *obj );
 void func_8002A67C( void );
 f32 func_8002A724( u8 *str );

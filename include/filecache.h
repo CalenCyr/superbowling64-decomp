@@ -76,7 +76,8 @@ typedef struct {
     /* 0x14 */ f32 at[3];
     /* 0x20 */ f32 eye[3];          /* where the frames leave a component out */
     /* 0x2C */ f32 unk_2C[3];
-    /* 0x38 */ u8 unk_38[0x10];
+    /* 0x38 */ u32 unk_38;           /* flags; 4 set by gscode's character menu */
+    /* 0x3C */ u8 unk_3C[0x0C];
     /* 0x48 */ f32 *frames;
     /* 0x4C */ Lights1 *light;
     /* 0x50 */ void *unk_50;

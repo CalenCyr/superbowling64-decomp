@@ -1,3 +1,133 @@
-#include "common.h"
+/* 61640.c -- game-select overlay: the character menu */
 
+#include "common.h"
+#include "libultra.h"
+#include "gscode/gscode.h"
+
+/*
+================
+func_8011AA50_gscode
+
+Frame of the character menu: the eight characters' images (the locked ones as a blank) slide in, the
+highlighted character's model turns in the scene behind them, left and right move the cursor between the
+unlocked characters, A or Z plays its next animation and B backs out. Returns 0 while the menu runs; once
+it has slid out, 1 when a character was taken and 2 for backing out.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: retail loads the argument of both func_80031184 calls with lhu (passed unconverted, as with no
+// prototype in scope); the s16 prototype makes it lh. Every other instruction is the same.
+s32 func_8011AA50_gscode( void ) {
+    s32 i;
+    sceneObject_t *obj;
+
+    func_8003893C( D_80120430_gscode, 10, D_80120644_gscode[D_80120656_gscode], MENU_NONE, MENU_NONE, MENU_NONE );
+    for ( i = 0; i < 8; i++ ) {
+        if ( D_8009D098.unk_04 & ( 1 << i ) ) {
+            func_8003893C( D_80120430_gscode, i, D_801204DC_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
+        } else {
+            func_8003893C( D_80120430_gscode, i, 0x8BC, MENU_NONE, MENU_NONE, MENU_NONE );
+        }
+    }
+
+    if ( ( D_80120657_gscode & 1 ) && D_80120655_gscode == CHOICE_RUN ) {
+        if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+            func_80037870( SE_DECIDE, 0 );
+            if ( ++D_80120658_gscode == D_801205DC_gscode[D_80120656_gscode] ) {
+                D_80120658_gscode = 0;
+            }
+            ( (sceneObject_t *)D_800EA120[10] )->frame = 1;
+            func_80031184( D_80120A48_gscode[D_80120656_gscode] );
+            D_80120A48_gscode[D_80120656_gscode] = D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1];
+            ( (sceneObject_t *)D_800EA120[10] )->anim =
+                func_80030C04( D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1], FILE_TYPE2 );
+        }
+        if ( D_800E4D62 & B_BUTTON ) {
+            func_80037870( 2, 0 );
+            D_80120655_gscode = CHOICE_BACK;
+        }
+        if ( D_800E6758 & L_JPAD ) {
+            do {
+                if ( --D_80120656_gscode == 0xFF ) {
+                    D_80120656_gscode = 7;
+                }
+            } while ( !( D_8009D098.unk_04 & ( 1 << D_80120656_gscode ) ) );
+            func_80037870( SE_CURSOR, SE_NO_REUSE );
+        }
+        if ( D_800E6758 & R_JPAD ) {
+            do {
+                if ( ++D_80120656_gscode == 8 ) {
+                    D_80120656_gscode = 0;
+                }
+            } while ( !( D_8009D098.unk_04 & ( 1 << D_80120656_gscode ) ) );
+            func_80037870( SE_CURSOR, SE_NO_REUSE );
+        }
+    }
+
+    func_8003893C( D_80120430_gscode, 9, MENU_NONE, ( D_80120656_gscode + 1 ) * 32, MENU_NONE, MENU_NONE );
+    func_8003068C( 0, 0, 0 );
+    if ( D_80120657_gscode & 1 ) {
+        func_8002DF3C( 0xA58, 0, 0 );
+    }
+    func_800386E0( D_80120430_gscode, D_80120654_gscode );
+
+    if ( D_80120655_gscode == CHOICE_RUN ) {
+        if ( D_80120A20_gscode == D_80120656_gscode ) {
+            if ( ( (sceneObject_t *)D_800EA120[10] )->frame ) {
+                goto draw;
+            }
+        } else {
+            D_80120658_gscode = 0;
+        }
+        ( (sceneObject_t *)D_800EA120[10] )->frame = 0;
+        ( (sceneObject_t *)D_800EA120[10] )->model = D_80120A28_gscode[D_80120656_gscode];
+        D_80120A20_gscode = D_80120656_gscode;
+        func_80031184( D_80120A48_gscode[D_80120656_gscode] );
+        D_80120A48_gscode[D_80120656_gscode] = D_801205E4_gscode[D_80120656_gscode][0];
+        ( (sceneObject_t *)D_800EA120[10] )->anim = func_80030C04( D_801205E4_gscode[D_80120656_gscode][0], FILE_TYPE2 );
+        func_8002AAD0( ( (sceneObject_t *)D_800EA120[10] )->mtx, 0.0f, 0.0f, 0.0f,
+                       D_801205AC_gscode[D_80120656_gscode] * 1.2, -100.0f, -100.0f, 300.0f );
+    draw:
+        func_8002A2F0();
+    }
+
+    switch ( D_80120655_gscode ) {
+    case CHOICE_IN:
+        D_80120654_gscode -= 2;
+        if ( D_80120654_gscode == 0 ) {
+            D_80120655_gscode = CHOICE_RUN;
+            func_80026B28();
+            func_8002A1EC( D_8011B540_gscode, D_801204EC_gscode );
+            D_80120A20_gscode = 0xFFFF;
+            D_8009CFA0[0]->path->unk_38 |= 4;
+        } else if ( D_80120654_gscode == 28 ) {
+            for ( i = 0; i < 8; i++ ) {
+                D_80120A28_gscode[i] = func_80030C04( D_801205CC_gscode[i], FILE_TYPE1 );
+                func_80030C04( D_801205E4_gscode[i][0], FILE_TYPE2 );
+                D_80120A48_gscode[i] = D_801205E4_gscode[i][0];
+            }
+        }
+        break;
+    case CHOICE_TAKEN:
+    case CHOICE_BACK:
+        D_80120430_gscode[5].slide = SLIDE_RIGHT;
+        D_80120654_gscode += 2;
+        if ( D_80120654_gscode == 30 ) {
+            func_800379C8( 1 );
+            func_8002A67C();
+            func_800311D0( 0x825 );
+            D_80120430_gscode[5].slide = SLIDE_LEFT;
+            if ( D_80120655_gscode == CHOICE_TAKEN ) {
+                D_80120655_gscode = CHOICE_IN;
+                return 1;
+            }
+            D_80120655_gscode = CHOICE_IN;
+            return 2;
+        }
+        break;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gscode/61640", func_8011AA50_gscode);
+#endif

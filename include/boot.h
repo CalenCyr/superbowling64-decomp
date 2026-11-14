@@ -23,7 +23,7 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ s32 unk_00;
-    /* 0x04 */ s32 unk_04;
+    /* 0x04 */ u32 unk_04;                  /* bit per character of gscode's character menu: unlocked */
     /* 0x08 */ UnkRecord unk_08[4];
     /* 0x78 */ u8 unk_78;
     /* 0x79 */ u8 unk_79;

@@ -620,3 +620,7 @@ D_8011B8C7_gscode = 0x8011B8C7; // segment:gscode size:0x1
 D_8011B7D0_gscode = 0x8011B7D0; // segment:gscode size:0x5A
 D_8011B6B0_gscode = 0x8011B6B0; // segment:gscode size:0x64
 D_8011B740_gscode = 0x8011B740; // segment:gscode size:0x64
+// gscode: the menu of the eight characters of unit 61640 (images, slide step, state)
+D_80120430_gscode = 0x80120430; // segment:gscode size:0xAA
+D_80120654_gscode = 0x80120654; // segment:gscode size:0x1
+D_80120655_gscode = 0x80120655; // segment:gscode size:0x1

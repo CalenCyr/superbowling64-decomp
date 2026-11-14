@@ -13,6 +13,8 @@
 #include "gamesnd.h"
 #include "menu.h"
 #include "save.h"
+#include "object.h"
+#include "filecache.h"
 
 /*
 ==============================================================================
@@ -72,10 +74,27 @@ extern u8 D_8011B8C4_gscode;        /* slide step of the two-choice menu */
 extern u8 D_8011B8C5_gscode;        /* CHOICE_IN etc. */
 extern u8 D_8011B8C6_gscode;        /* highlighted choice, 0 or 1 */
 extern u8 D_8011B8C7_gscode;        /* blink frame, 0 to 29 */
+extern objClass_t D_8011B540_gscode[];   /* the classes of the character menu's scene */
+extern menuItem_t D_80120430_gscode[17]; /* the character menu: [0-7] the characters, [9] the cursor, [10] the name */
+extern s16 D_801204DC_gscode[8];    /* per character: its image once unlocked */
+extern objParams_t D_801204EC_gscode[]; /* the scene of the character menu */
+extern f32 D_801205AC_gscode[8];    /* per character: scale of its model */
+extern s16 D_801205CC_gscode[8];    /* per character: file of its model */
+extern u8 D_801205DC_gscode[8];     /* per character: animations in D_801205E4_gscode */
+extern s16 D_801205E4_gscode[8][6]; /* per character: files of its animations; [0] the idle one */
+extern s16 D_80120644_gscode[8];    /* per character: image of its name */
+extern u8 D_80120654_gscode;        /* slide step of the character menu */
+extern u8 D_80120655_gscode;        /* CHOICE_IN etc. */
+extern u8 D_80120656_gscode;        /* highlighted character, 0 to 7 */
+extern u8 D_80120657_gscode;        /* bit 0: the character menu takes input */
+extern u8 D_80120658_gscode;        /* animation of the highlighted character */
 extern s16 D_80120660_gscode[4];    /* images of a blinking marker */
 extern s32 D_80120668_gscode;       /* frame counter of the pak check */
 extern u8 D_80120780_gscode;        /* current screen */
 extern u8 D_80120781_gscode[];      /* screens to go back to, a stack */
+extern u16 D_80120A20_gscode;       /* character whose model is shown; 0xFFFF: none */
+extern fileType1_t *D_80120A28_gscode[8]; /* per character: its loaded model */
+extern u16 D_80120A48_gscode[8];    /* per character: file of its loaded animation */
 extern u32 D_80120A60_gscode;       /* step of the pak check */
 extern s32 D_80120A64_gscode;       /* 1: a second controller is in play */
 extern u8 D_80120A68_gscode[2];     /* per port: controller status of the last frame */
