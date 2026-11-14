@@ -15,7 +15,7 @@
 
 /* Record of 0x1C bytes kept four at a time in D_8009D098 and D_800E44E8; its purpose is unknown. */
 typedef struct {
-    /* 0x00 */ u8 unk_00[0x0C];             /* set to 0xFF at boot */
+    /* 0x00 */ u16 name[6];                 /* a player's name, characters ended by 0xFFFF; 0xFF bytes at boot */
     /* 0x0C */ u8 unk_0C[0x06];
     /* 0x12 */ s16 unk_12;                  /* 300 at boot */
     /* 0x14 */ u8 unk_14[0x08];

@@ -74,6 +74,16 @@ extern u8 D_8011B8C4_gscode;        /* slide step of the two-choice menu */
 extern u8 D_8011B8C5_gscode;        /* CHOICE_IN etc. */
 extern u8 D_8011B8C6_gscode;        /* highlighted choice, 0 or 1 */
 extern u8 D_8011B8C7_gscode;        /* blink frame, 0 to 29 */
+extern menuItem_t D_8011BA08_gscode[7];  /* the name entry: id 0x17 its background, 0x18 the character grid, 0x19 the cursor */
+extern s32 D_8011BA6C_gscode;       /* step of the name entry: 1 next player, 2 backed out, 5 done */
+extern u16 D_8011BA70_gscode[3 * 2 * 5 * 12]; /* the characters of the name entry: per set, case, row (5) and column (12) */
+extern u8 D_8011BD40_gscode;        /* column the cursor left the grid from */
+extern u8 D_80120793_gscode;        /* player whose name is entered */
+extern s8 D_80120794_gscode;        /* column of the cursor; on the row below the grid, 4 to 6 the sets, 7 the end */
+extern s8 D_80120795_gscode;        /* row of the cursor, 0 to 4; -1: the row below the grid */
+extern u8 D_80120796_gscode;        /* character set, 0 to 2 */
+extern u8 D_80120797_gscode;        /* case of the character set, 0 or 1 */
+extern u8 D_80120798_gscode;        /* characters entered of the name, 0 to 5 */
 extern objClass_t D_8011B540_gscode[];   /* the classes of the character menu's scene */
 extern menuItem_t D_80120430_gscode[17]; /* the character menu: [0-7] the characters, [9] the cursor, [10] the name */
 extern s16 D_801204DC_gscode[8];    /* per character: its image once unlocked */
@@ -119,6 +129,7 @@ s32 func_80113990_gscode( void );
 s32 func_80113DA0_gscode( void );
 
 /* unit 5AD50 */
+s32 func_80114680_gscode( void );
 s32 func_80114D1C_gscode( void );
 
 /* unit 5E2B0 */
