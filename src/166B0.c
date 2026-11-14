@@ -1562,42 +1562,38 @@ UTILITIES
 */
 
 #ifdef NON_MATCHING
-// NON_MATCHING: FPU registers: x lives in $f6 in retail, $f14 here, and the x^6 term takes a different register
+// NON_MATCHING: FPU registers: x2 lives in $f16 in retail, $f10/$f14 here; the inline series (one copy per branch) put x in retail's $f6
+/*
+================
+Snd_Exp2Series
+
+Returns the series sum of ( x ln 2 )^n / n! to n = 6, which is about 2 to the power x.
+================
+*/
+static inline f64 Snd_Exp2Series( f32 x ) {
+    f32 x2;
+
+    x2 = x * x;
+    return 1.0 + x * 0.69314718055994495 + x2 * 0.240226506959101 + x2 * x * 0.0555041086648216
+           + x2 * x2 * 0.0096181291076284804 + x2 * x2 * x * 0.00133335581464284
+           + x2 * x2 * x2 * 0.000154035303933816;
+}
+
 /*
 ================
 Snd_Exp2
 
-Returns 2 to the power x, from the series sum of ( x ln 2 )^n / n! to n = 6; a negative
-x takes the reciprocal.
+Returns 2 to the power x; a negative x takes the reciprocal of the series.
 ================
 */
 f32 Snd_Exp2( f32 x ) {
-    f32 x2;
-    f32 x3;
-    f32 x4;
-    f32 x5;
-    f32 x6;
-
     if ( x == 0.0f ) {
         return 1.0f;
     }
     if ( x > 0.0f ) {
-        x2 = x * x;
-        x3 = x2 * x;
-        x4 = x2 * x2;
-        x5 = x4 * x;
-        x6 = x4 * x2;
-        return 1.0 + x * 0.69314718055994495 + x2 * 0.240226506959101 + x3 * 0.0555041086648216
-               + x4 * 0.0096181291076284804 + x5 * 0.00133335581464284 + x6 * 0.000154035303933816;
+        return Snd_Exp2Series( x );
     }
-    x = -x;
-    x2 = x * x;
-    x3 = x2 * x;
-    x4 = x2 * x2;
-    x5 = x4 * x;
-    x6 = x4 * x2;
-    return 1.0 / ( 1.0 + x * 0.69314718055994495 + x2 * 0.240226506959101 + x3 * 0.0555041086648216
-                   + x4 * 0.0096181291076284804 + x5 * 0.00133335581464284 + x6 * 0.000154035303933816 );
+    return 1.0 / Snd_Exp2Series( -x );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/166B0", Snd_Exp2);
