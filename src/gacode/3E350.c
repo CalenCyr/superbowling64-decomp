@@ -428,9 +428,6 @@ When the players of every lane are done, or wait in func_80118F08_gacode (whose 
 func_80116248_gacode), stops their unk_B08 handlers; returns 1 then.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: control flow; retail shares the two-lane unk_B08 stores between both cases (the first jumps into
-// the second's tail with the result already 1); no spelling tried yet produces that tail merge
 s32 func_80115ED4_gacode( u8 twoLanes ) {
     if ( twoLanes ) {
         if ( D_8012DCF0_gacode[0].unk_B10 == func_80118F38_gacode && D_8012DCF0_gacode[1].unk_B10 == D_8012DCF0_gacode[0].unk_B10 ) {
@@ -445,22 +442,19 @@ s32 func_80115ED4_gacode( u8 twoLanes ) {
             D_8012DCF0_gacode[0].unk_B08 = func_8011B400_gacode;
             return 1;
         }
-        return 0;
-    }
-    if ( D_8012DCF0_gacode[0].unk_B10 == func_80118F38_gacode ) {
-        D_8012DCF0_gacode[0].unk_B08 = func_8011B400_gacode;
-        return 1;
-    }
-    if ( D_8012DCF0_gacode[0].unk_B10 == func_80118F08_gacode ) {
-        D_8012DCF0_gacode[0].unk_B04 = func_80116248_gacode;
-        D_8012DCF0_gacode[0].unk_B08 = func_8011B400_gacode;
-        return 1;
+    } else {
+        if ( D_8012DCF0_gacode[0].unk_B10 == func_80118F38_gacode ) {
+            D_8012DCF0_gacode[0].unk_B08 = func_8011B400_gacode;
+            return 1;
+        }
+        if ( D_8012DCF0_gacode[0].unk_B10 == func_80118F08_gacode ) {
+            D_8012DCF0_gacode[0].unk_B04 = func_80116248_gacode;
+            D_8012DCF0_gacode[0].unk_B08 = func_8011B400_gacode;
+            return 1;
+        }
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80115ED4_gacode);
-#endif
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80115FCC_gacode);
 
