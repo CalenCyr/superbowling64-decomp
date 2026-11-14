@@ -26,6 +26,8 @@ extern u8 D_8005B191;               /* set while the overlay checks the controll
 
 void func_8002C950( s32 x, s32 y, s32 w, s32 h, u8 r, u8 g, u8 b, u8 a );    /* unit 7250 */
 void func_8003068C( s32 r, s32 g, s32 b );                                   /* unit 7250 */
+extern u8 D_8005C0B6;
+extern u8 D_8005C0BF;               /* 0, then 1 once an overlay asks to leave, 2 when it goes */
 
 /*
 ==============================================================================
@@ -66,8 +68,14 @@ extern u8 D_80120A68_gscode[2];     /* per port: controller status of the last f
 void func_80112350_gscode( void );
 void func_801123C4_gscode( u8 screen );
 void func_801123E8_gscode( void );
+s32 func_80112414_gscode( void );
 void func_8011288C_gscode( void );
 void func_80112894_gscode( void );
+
+/* units 59490, 59B00, 5A020: the first screens */
+s32 func_801128A0_gscode( void );
+s32 func_80112F10_gscode( void );
+s32 func_80113430_gscode( void );
 
 /* unit 5A580 */
 s32 func_80113990_gscode( void );
@@ -75,8 +83,19 @@ s32 func_80113990_gscode( void );
 /* unit 5A990 */
 s32 func_80113DA0_gscode( void );
 
+/* unit 5AD50 */
+s32 func_80114D1C_gscode( void );
+
+/* unit 5E2B0 */
+s32 func_801176C0_gscode( void );
+
 /* unit 5EC00 */
 u8 func_80118010_gscode( u8 flags );
+s32 func_80118040_gscode( void );
+
+/* units 605D0, 61640 */
+s32 func_801199E0_gscode( void );
+s32 func_8011AA50_gscode( void );
 
 /* unit 61CA0 */
 void func_8011B0B0_gscode( void );
