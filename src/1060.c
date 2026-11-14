@@ -74,19 +74,16 @@ Runs the D_80066B50 program on the RSP as an audio task; then counts down D_8005
 D_8005C9E4 when it reaches zero.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: register/schedule; retail sets up a2 = 0 and a3 = the id around the Snd_SetVolume call (as if
-// it took more arguments), and schedules the ucode store before ucode_size
 void func_80025EBC( void ) {
+    D_8005B110 = 2;
     D_80060EA0.t.type = M_AUDTASK;
     D_80060EA0.t.flags = 0;
     D_80060EA0.t.ucode_boot = rspbootTextStart;
     D_80060EA0.t.ucode_boot_size = (u8 *)rspbootTextEnd - (u8 *)rspbootTextStart;
     D_80060EA0.t.ucode = D_80066B50->ucode;
-    D_80060EA0.t.ucode_size = 0x1000;
     D_80060EA0.t.ucode_data = D_80066B50->ucodeData;
+    D_80060EA0.t.ucode_size = 0x1000;
     D_80060EA0.t.ucode_data_size = 0x800;
-    D_8005B110 = 2;
     D_80060EA0.t.data_ptr = D_80066B50->dataPtr;
     D_8005B100 = 1;
     D_80060EA0.t.data_size = D_80066B50->dataSize;
@@ -100,9 +97,6 @@ void func_80025EBC( void ) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/1060", func_80025EBC);
-#endif
 
 INCLUDE_ASM("asm/nonmatchings/1060", func_80025FEC);
 
