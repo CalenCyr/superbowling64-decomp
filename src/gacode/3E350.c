@@ -1096,7 +1096,33 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80118F68_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011917C_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119328_gacode);
+/*
+================
+func_80119328_gacode
+
+Draws the pin diagram of the player's lane on its side of the screen: the frame (0x92A), then image 0x929 for
+each pin still standing. Declared inline: func_8011AB0C_gacode and func_8011AD5C_gacode repeat its body.
+================
+*/
+inline void func_80119328_gacode( gaPlayer_t *pl ) {
+    s16 offsets[NUM_BODIES][2] = {
+        { 0x00, 0x00 },                 /* the ball: unused */
+        { 0x10, 0x1C },
+        { 0x0C, 0x14 }, { 0x14, 0x14 },
+        { 0x08, 0x0C }, { 0x10, 0x0C }, { 0x18, 0x0C },
+        { 0x04, 0x04 }, { 0x0C, 0x04 }, { 0x14, 0x04 }, { 0x1C, 0x04 },
+    };
+    s16 x = pl->laneIndex != 0 ? 0xFC : 0x18;
+    s16 y = 0x30;
+    s32 i;
+
+    func_8002DF3C( 0x92A, x, y );
+    for ( i = 1; i < NUM_BODIES; i++ ) {
+        if ( pl->lane->bodies[i].unk_5D == 1 ) {
+            func_8002DF3C( 0x929, x + offsets[i][0], y + offsets[i][1] );
+        }
+    }
+}
 
 /*
 ================
@@ -1140,8 +1166,6 @@ void func_801194D0_gacode( gaPlayer_t *pl ) {
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801194D0_gacode);
 #endif
 
-INCLUDE_RODATA("asm/nonmatchings/gacode/3E350", D_8012CA78_gacode);
-
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119638_gacode);
 
 /*
@@ -1149,38 +1173,30 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119638_gacode);
 func_80119800_gacode
 
 Draws a human player's panel on its lane's side: the frame, its second part when full is set, and the
-current image of the lane's D_801236B0_gacode list.
+current image of the lane's D_801236B0_gacode list. Declared inline: func_8011AD5C_gacode repeats its body
+with full set.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: retail sets y once after the lane test and reuses the loaded laneIndex for the first image id;
-// this reloads laneIndex and swaps s2/s3 (y must stay a variable: retail adds 0x11 to it with ori). A ternary
-// for x (as func_8011B2E8_gacode and func_8011B07C_gacode, which open-code this panel: as an inline call
-// they recompute pl) keeps laneIndex but lets y fold to a constant
-void func_80119800_gacode( s32 player, u8 full ) {
+inline void func_80119800_gacode( s32 player, u8 full ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
     s32 x;
-    s32 y;
+    s16 y;
 
     if ( pl->port < 0 ) {
         return;
     }
     if ( pl->laneIndex != 0 ) {
         x = 0xB0;
-        y = 0xA8;
     } else {
         x = 0x18;
-        y = 0xA8;
     }
-    func_8002E0EC( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
+    y = 0xA8;
+    func_8002E0EC( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, y );
     if ( full ) {
-        func_8002E0EC( pl->laneIndex != 0 ? 0xA47 : 0xA49, x + 0x1D, 0xA8 );
+        func_8002E0EC( pl->laneIndex != 0 ? 0xA47 : 0xA49, x + 0x1D, y );
     }
     func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, y + 0x11 );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119800_gacode);
-#endif
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801198E4_gacode);
 
@@ -1217,9 +1233,60 @@ void func_8011AA78_gacode( s32 player ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011AB0C_gacode);
+/*
+================
+func_8011AB0C_gacode
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011AD5C_gacode);
+unk_B08 handler: runs the game mode's part of the frame, draws the lane's pin diagram and the player's
+unk_93 selector.
+================
+*/
+void func_8011AB0C_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    if ( D_8012CDF4_gacode == func_801157F8_gacode ) {
+        func_8011A8AC_gacode( pl );
+    } else if ( D_8012CDF4_gacode == func_801156D8_gacode ) {
+        func_80119C50_gacode( player, pl->laneIndex );
+    } else if ( D_8012CDF4_gacode == func_801155BC_gacode ) {
+        func_801198E4_gacode( player, pl->laneIndex );
+    } else if ( D_8012CDF4_gacode == func_8011582C_gacode ) {
+        func_80119F8C_gacode( player, pl->laneIndex );
+    } else {
+        func_8011917C_gacode( player, pl->laneIndex );
+    }
+    func_80119328_gacode( pl );
+    func_801194D0_gacode( pl );
+}
+
+/*
+================
+func_8011AD5C_gacode
+
+unk_B08 handler: runs the game mode's part of the frame (none for func_801157F8_gacode), draws the lane's pin
+diagram, runs func_80119638_gacode, clears the lane's D_8012D8E0_gacode sprite and draws a human player's
+full panel.
+================
+*/
+void func_8011AD5C_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    if ( D_8012CDF4_gacode != func_801157F8_gacode ) {
+        if ( D_8012CDF4_gacode == func_801156D8_gacode ) {
+            func_80119C50_gacode( player, pl->laneIndex );
+        } else if ( D_8012CDF4_gacode == func_801155BC_gacode ) {
+            func_801198E4_gacode( player, pl->laneIndex );
+        } else if ( D_8012CDF4_gacode == func_8011582C_gacode ) {
+            func_80119F8C_gacode( player, pl->laneIndex );
+        } else {
+            func_8011917C_gacode( player, pl->laneIndex );
+        }
+    }
+    func_80119328_gacode( pl );
+    func_80119638_gacode( pl );
+    func_80120C0C_gacode( &D_8012D8E0_gacode[pl->laneIndex], 0, 0.0f );
+    func_80119800_gacode( player, 1 );
+}
 
 /*
 ================
