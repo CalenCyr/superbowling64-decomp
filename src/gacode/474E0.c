@@ -192,8 +192,8 @@ func_801205A0_gacode
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: same operations, but retail evaluates dx before dz and the products of the quotient in another
-// order (float register allocation and schedule differ throughout)
+// NON_MATCHING: schedule only; retail loads pos[0] and x and subtracts dx before dz (dz's f10 and dx's f12 swap
+// slots, and one nop more here); every product and sum is the same
 f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale ) {
     f32 dx = x - pos[0];
     f32 dz = pos[2] - 730.0f;
@@ -209,7 +209,7 @@ f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale ) {
     vz = scale * vel[2];
     vx = scale * vel[0];
     return ( vz * vz * 2 * dx - vx * 2 * vz * ( width + dz ) )
-         / ( width * width + width * 2 * dz + dz * dz * D_8012D220_gacode->unk_10 ) * 15.0 / D_8012D220_gacode->unk_0C;
+         / ( width * width + width * 2 * dz + D_8012D220_gacode->unk_10 * ( dz * dz ) ) * 15.0 / D_8012D220_gacode->unk_0C;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801205A0_gacode);
