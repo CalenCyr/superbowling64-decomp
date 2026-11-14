@@ -33,14 +33,21 @@ OVERLAY
 ==============================================================================
 */
 
-/* D_8011B739_gscode, D_8011B7C9_gscode, D_8011B845_gscode, D_8011B8C5_gscode: step of the choice menus of units
- * 59B00, 5A020, 5A580 and 5A990 */
+/* D_8011B6A1_gscode, D_8011B739_gscode, D_8011B7C9_gscode, D_8011B845_gscode, D_8011B8C5_gscode: step of the choice menus of units
+ * 59490, 59B00, 5A020, 5A580 and 5A990 */
 #define CHOICE_IN           0           /* sliding in */
 #define CHOICE_RUN          1           /* in place, taking input */
 #define CHOICE_TAKEN        2           /* a choice was taken, sliding out */
 #define CHOICE_BACK         3           /* backed out, sliding out */
 
 extern s32 D_8011B5A0_gscode;       /* entries in D_80120781_gscode */
+extern menuItem_t D_8011B5B0_gscode[12]; /* the menu of the five game modes, its background; [5]: its title */
+extern menuItem_t D_8011B628_gscode[6];  /* its choices, ids 1 to 5 */
+extern s16 D_8011B664_gscode[5][6];  /* per item of D_8011B628_gscode: images of its blink */
+extern u8 D_8011B6A0_gscode;        /* slide step of the menu of the five game modes */
+extern u8 D_8011B6A1_gscode;        /* CHOICE_IN etc. */
+extern u8 D_8011B6A2_gscode;        /* highlighted choice, 0 to 4 */
+extern u8 D_8011B6A3_gscode;        /* blink frame, 0 to 29 */
 extern menuItem_t D_8011B6B0_gscode[10]; /* the three-choice menu; [5]: its title */
 extern s16 D_8011B714_gscode[3][6];  /* per choice: images of its blink */
 extern u8 D_8011B738_gscode;        /* slide step of the three-choice menu */
