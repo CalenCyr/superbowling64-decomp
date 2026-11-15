@@ -459,9 +459,10 @@ segments:
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x6A650, asm]
-      - [0x6A940, asm]
+      - [0x6A650, c, pvcode/6A650]
+      - [0x6A940, c, pvcode/6A940]
       - [0x6A950, data]
+      - [0x6BA40, .rodata, pvcode/6A650]   # the file name and the debug format strings
 
   - name: mgcode
     type: code
