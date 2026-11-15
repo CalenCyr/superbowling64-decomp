@@ -122,6 +122,66 @@ extern u32 D_80120A60_gscode;       /* step of the pak check */
 extern s32 D_80120A64_gscode;       /* 1: a second controller is in play */
 extern u8 D_80120A68_gscode[2];     /* per port: controller status of the last frame */
 
+/* D_80120426_gscode: line of the options screen */
+#define OPTION_SOUND        0           /* D_8009D098.unk_78, 0 to 2 */
+#define OPTION_79           1           /* D_8009D098.unk_79, 0 or 1 */
+#define OPTION_SOUND_TEST   2           /* D_80120427_gscode */
+#define OPTION_BGM_VOLUME   3           /* D_8009D098.unk_7A, 0 to 4 */
+#define OPTION_7B           4           /* D_8009D098.unk_7B, 0 or 1 */
+#define OPTION_RECORDS      5           /* toggles the records page */
+#define OPTION_CREDITS      6           /* plays the credits */
+#define OPTION_EXIT         7
+
+#define NUM_SOUND_TESTS     20
+#define NUM_CREDIT_SPRITES  20
+
+/* D_8011FD58_gscode: commands of the credits script */
+#define CREDIT_SHOW         0           /* show image a at (b, c) with alpha */
+#define CREDIT_MOVE         1           /* move to (a, b) in c frames */
+#define CREDIT_FADE         2           /* fade to alpha a in b frames */
+#define CREDIT_WAIT         3           /* wait sprite frames */
+#define CREDIT_END          4
+
+typedef struct {
+    /* 0x00 */ s16 op;              /* CREDIT_SHOW etc. */
+    /* 0x02 */ s16 sprite;          /* index in D_80120860_gscode; CREDIT_WAIT: frames */
+    /* 0x04 */ u16 a;
+    /* 0x06 */ u16 b;
+    /* 0x08 */ u16 c;
+    /* 0x0A */ u8 unk_0A;
+    /* 0x0B */ u8 alpha;            /* CREDIT_SHOW */
+} creditCmd_t;                      /* size 0xC */
+
+/* An image of the credits, moving and fading to its targets. */
+typedef struct {
+    /* 0x00 */ s16 image;           /* -1: unused */
+    /* 0x02 */ s16 x;
+    /* 0x04 */ s16 y;
+    /* 0x06 */ u8 alpha;
+    /* 0x08 */ s16 targetX;
+    /* 0x0A */ s16 targetY;
+    /* 0x0C */ s16 moveFrames;      /* 0: not moving */
+    /* 0x0E */ s16 moveFrame;
+    /* 0x10 */ u8 targetAlpha;
+    /* 0x12 */ s16 fadeFrames;      /* 0: not fading */
+    /* 0x14 */ s16 fadeFrame;
+} creditSprite_t;                   /* size 0x16 */
+
+extern menuItem_t D_8011FC90_gscode[20]; /* the options screen; [5] its title, id 0 the cursor */
+extern creditCmd_t D_8011FD58_gscode[142]; /* the credits script */
+extern u32 D_80120400_gscode;       /* frames since the last sound test */
+extern s16 D_80120404_gscode[4];    /* per D_8009D098.unk_78: its image */
+extern s16 D_8012040C_gscode[2];    /* per D_8009D098.unk_79 and unk_7B: their image */
+extern s16 D_80120410_gscode[10];   /* image of each digit */
+extern u8 D_80120424_gscode;        /* slide step of the options screen */
+extern u8 D_80120425_gscode;        /* 0 sliding in, 1 in place, 2 and 3 sliding out (3: backed out) */
+extern u8 D_80120426_gscode;        /* OPTION_SOUND etc. */
+extern u8 D_80120427_gscode;        /* sound of the sound test, 0 to NUM_SOUND_TESTS - 1 */
+extern u8 D_80120428_gscode;        /* 0 the options, 1 the records page, 2 the credits */
+extern creditSprite_t D_80120860_gscode[NUM_CREDIT_SPRITES];
+extern u16 D_80120A18_gscode;        /* frames before the next credits command; 0xFFFF: the script ended */
+extern u16 D_80120A1A_gscode;        /* next command of the credits script */
+
 /* unit 58F40 */
 void func_80112350_gscode( void );
 void func_801123C4_gscode( u8 screen );
