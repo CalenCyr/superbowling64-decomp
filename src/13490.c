@@ -372,7 +372,44 @@ void func_8003A074( s32 player, u8 frame, u8 kind, u8 all, s16 x, s16 y ) {
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A074);
 #endif
 
+/*
+================
+func_8003A21C
+
+Draws the player's total at (x, y): its score, signed, or in a duel whether the player leads, ties or trails
+on frames won, and by how many.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: exact but for images' initialiser (D_80060588), which needs 13490's .rodata as a C subsegment
+// ([0x3B980, .rodata, 13490] in superbowling.yaml)
+void func_8003A21C( s32 player, u8 duel, s16 x, s16 y ) {
+    s16 images[3] = { 0x9ED, 0x9E9, 0x9EC };
+    s16 digits[4];
+    s16 score;
+    s16 lead;
+    s32 other;
+    s32 sign;
+
+    if ( !duel ) {
+        score = D_800EA090[player];
+        sign = score < 0 ? 0 : score > 0 ? 2 : 1;
+        func_8002DF3C( D_8005CB58[sign], x + 4, y + 4 );
+        func_800393D8( score < 0 ? -score : score, x + 8, y + 7 );
+    } else {
+        other = player != 1;
+        sign = D_800994B8[player] > D_800994B8[other] ? 0 : D_800994B8[player] == D_800994B8[other] ? 1 : 2;
+        func_8002DF3C( images[sign], x, y + 2 );
+        lead = D_800994B8[player] - D_800994B8[other];
+        if ( lead != 0 ) {
+            func_80039554( digits, lead < 0 ? -lead : lead, FALSE, FALSE );
+            func_8003B1CC( digits[3], x + 6, y + 4 );
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A21C);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A3F0);
 

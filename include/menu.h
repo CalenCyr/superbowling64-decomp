@@ -66,6 +66,7 @@ void func_800393D8( s16 value, s16 x, s16 y );
 u16 func_80039340( s16 pins, u8 foul );
 void func_80039554( s16 *digits, s16 value, u8 small, u8 tens );
 void func_8003A074( s32 player, u8 frame, u8 kind, u8 all, s16 x, s16 y );
+void func_8003A21C( s32 player, u8 duel, s16 x, s16 y );
 void func_8003B034( UnkRecord *record, s32 index, u8 kind );
 void func_8003AE9C( s16 a, s16 b, u8 show, s16 x, s16 y );
 void func_8003A8B4( s32 arg0, u8 count, u8 small, s16 x, s16 y );

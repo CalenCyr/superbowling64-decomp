@@ -29,7 +29,6 @@ extern u8 D_800994BE[];
 extern u8 D_80068A50[];
 extern s8 D_80066E18[4][10];        /* per player and frame */
 extern u8 D_80099458[9];            /* per frame: par of the frame (func_80122140_gacode) */
-extern s8 D_800994B8[2];            /* per player of a duel: frames won */
 extern f32 D_800E6560[2][3];        /* per lane: position of the ball */
 extern u8 D_8006940D[NUM_PLAYERS];   /* per port (unit 2DF0) */
 extern u8 D_800DF595[2];            /* per lane: state of the ball (func_80114DD4_gacode) */
