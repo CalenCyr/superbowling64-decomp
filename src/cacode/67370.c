@@ -112,7 +112,72 @@ void func_8011268C_cacode( s32 frame, s32 clip ) {
 
 INCLUDE_ASM("asm/nonmatchings/cacode/67370", func_801128F4_cacode);
 
-INCLUDE_ASM("asm/nonmatchings/cacode/67370", func_80112CDC_cacode);
+/*
+================
+func_80112CDC_cacode
+
+Splits the matrix src into its translation trans, its rotation angles rot (radians, wrapped into 0 to 2 pi) and
+one uniform scale, written to all three components of scale.
+================
+*/
+void func_80112CDC_cacode( caMatrix_t *src, f32 *trans, f32 *rot, f32 *scale ) {
+    caMatrix_t mtx;
+    f32 xx, yy, zz;
+    f32 sinX;
+
+    mtx = *src;
+    trans[0] = mtx.m[3][0];
+    trans[1] = mtx.m[3][1];
+    trans[2] = mtx.m[3][2];
+
+    rot[1] = atan( mtx.m[2][0] / mtx.m[2][2] );
+    if ( rot[1] < 0.0f ) {
+        rot[1] += 2 * M_PI;
+    }
+    rot[2] = atan( mtx.m[0][1] / mtx.m[1][1] );
+    if ( rot[2] < 0.0f ) {
+        rot[2] += 2 * M_PI;
+    }
+    if ( mtx.m[2][0] > 0.0f ) {
+        if ( mtx.m[2][2] < 0.0f ) {
+            rot[1] -= M_PI;
+        }
+    } else if ( mtx.m[2][2] < 0.0f ) {
+        rot[1] += M_PI;
+    }
+    if ( mtx.m[0][1] > 0.0f ) {
+        if ( mtx.m[1][1] < 0.0f ) {
+            rot[2] -= M_PI;
+        }
+    } else if ( mtx.m[1][1] < 0.0f ) {
+        rot[2] += M_PI;
+    }
+
+    sinX = -mtx.m[0][0] / mtx.m[2][1] - sinf( rot[1] ) * sinf( rot[2] );
+    sinX = cosf( rot[1] ) * cosf( rot[2] ) / sinX;
+    rot[0] = asin( sinX );
+    if ( cosf( rot[0] ) < 0.0f ) {
+        rot[0] = M_PI - rot[0];
+    }
+    if ( rot[0] < 0.0f ) {
+        rot[0] += 2 * M_PI;
+    }
+
+    /* the scale comes from the largest component of the third row, the one least hurt by dividing */
+    xx = mtx.m[2][0] * mtx.m[2][0];
+    yy = mtx.m[2][1] * mtx.m[2][1];
+    zz = mtx.m[2][2] * mtx.m[2][2];
+    if ( yy < xx ) {
+        if ( zz <= xx ) {
+            scale[0] = scale[1] = scale[2] = mtx.m[2][0] / ( cosf( rot[0] ) * sinf( rot[1] ) );
+            return;
+        }
+    } else if ( zz < yy ) {
+        scale[0] = scale[1] = scale[2] = mtx.m[2][1] / -sinf( rot[0] );
+        return;
+    }
+    scale[0] = scale[1] = scale[2] = mtx.m[2][2] / ( cosf( rot[0] ) * cosf( rot[1] ) );
+}
 
 /*
 ================
