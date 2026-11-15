@@ -14,6 +14,9 @@
 /* main (owner unit not identified yet) */
 extern u8 D_8005C0E8;               /* the next mode: 0xA on entry; the overlay sets 0xFE or 0xFD */
 
+extern u8 D_801140B0_opcode;
+extern u16 D_801140C0_opcode[];     /* character code 0x10-0x94 -> entry (func_80113130_opcode) */
+
 extern s16 D_80114350_opcode;
 
 #endif

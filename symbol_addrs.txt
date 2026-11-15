@@ -625,3 +625,8 @@ D_8011B740_gscode = 0x8011B740; // segment:gscode size:0x64
 D_80120430_gscode = 0x80120430; // segment:gscode size:0xAA
 D_80120654_gscode = 0x80120654; // segment:gscode size:0x1
 D_80120655_gscode = 0x80120655; // segment:gscode size:0x1
+
+// opcode: unit 6C470's byte at the start of .data (its 15 bytes of padding end that unit's .data), then unit
+// 6CC50's character-code table (u16, codes 0x10-0x94; the asm reaches it as D_801140A0 = table - 0x20)
+D_801140B0_opcode = 0x801140B0; // segment:opcode size:0x1
+D_801140C0_opcode = 0x801140C0; // segment:opcode size:0x10A
