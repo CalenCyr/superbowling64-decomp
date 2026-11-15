@@ -640,3 +640,5 @@ D_80120428_gscode = 0x80120428; // segment:gscode size:0x1
 D_80120860_gscode = 0x80120860; // segment:gscode size:0x1B8
 D_80120A18_gscode = 0x80120A18; // segment:gscode size:0x2
 D_80120A1A_gscode = 0x80120A1A; // segment:gscode size:0x2
+D_80115374_cacode = 0x80115374; // segment:cacode size:0xC
+D_80115630_cacode = 0x80115630; // segment:cacode size:0x1A4
