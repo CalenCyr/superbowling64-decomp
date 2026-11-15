@@ -469,9 +469,14 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
+    # bss: one u8 grid of 21 x 21 cells at 0x80112730 (the maze func_80038214 builds for 10 x 10); the end is an
+    # estimate
+    bss_size: 0x1C0
     subsegments:
-      - [0x6BA90, asm]
+      - [0x6BA90, c, mgcode/6BA90]
       - [0x6BC90, data]
+      - [0x6BE30, .rodata, mgcode/6BA90]   # the debug format strings
+      - { type: bss, vram: 0x80112730 }
 
   - name: opcode
     type: code
