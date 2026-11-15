@@ -9,7 +9,40 @@
 #include "sprite.h"
 #include "menu.h"
 
-INCLUDE_ASM("asm/nonmatchings/13490", func_80038090);
+/*
+================
+func_80038090
+
+Draws maze, (2 * width + 1) rows of (2 * height + 1) bytes (0: path, 1: wall), into image, a 64 x 64 CI4
+image (32 bytes a row), one pixel per byte.
+================
+*/
+void func_80038090( u16 image, u32 width, u32 height, u8 *maze ) {
+    u8 *pixels;
+    s32 row;
+    s32 col;
+
+    func_80030C04( image, FILE_RAW );
+    pixels = ( (fileImage_t *)D_800F80B0[image].data )->data + CI4_PALETTE_SIZE;
+    memset( pixels, 0, 0x800 );
+    for ( row = 0; row < width * 2 + 1; row++ ) {
+        for ( col = 0; col < height * 2 + 1; col++ ) {
+            if ( maze[row * ( height * 2 + 1 ) + col] == 0 ) {
+                if ( col & 1 ) {
+                    pixels[row * 32 + col / 2] &= 0xF0;
+                } else {
+                    pixels[row * 32 + col / 2] &= 0x0F;
+                }
+            } else if ( maze[row * ( height * 2 + 1 ) + col] == 1 ) {
+                if ( col & 1 ) {
+                    pixels[row * 32 + col / 2] |= 0x01;
+                } else {
+                    pixels[row * 32 + col / 2] |= 0x10;
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/13490", func_80038214);
 
