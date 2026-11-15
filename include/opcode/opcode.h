@@ -11,4 +11,9 @@
 #include "dbgtext.h"
 #include "gamesnd.h"
 
+/* main (owner unit not identified yet) */
+extern u8 D_8005C0E8;               /* the next mode: 0xA on entry; the overlay sets 0xFE or 0xFD */
+
+extern s16 D_80114350_opcode;
+
 #endif

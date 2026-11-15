@@ -4,6 +4,14 @@
 #include "libultra.h"
 #include "opcode/opcode.h"
 
-INCLUDE_ASM("asm/nonmatchings/opcode/6C470", func_80112950_opcode);
+/*
+================
+func_80112950_opcode
+
+Does nothing.
+================
+*/
+void func_80112950_opcode( void ) {
+}
 
 INCLUDE_ASM("asm/nonmatchings/opcode/6C470", func_80112958_opcode);
