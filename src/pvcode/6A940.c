@@ -4,6 +4,22 @@
 #include "libultra.h"
 #include "pvcode/pvcode.h"
 
-INCLUDE_ASM("asm/nonmatchings/pvcode/6A940", func_80112640_pvcode);
+/*
+================
+func_80112640_pvcode
 
-INCLUDE_ASM("asm/nonmatchings/pvcode/6A940", func_80112648_pvcode);
+An empty handler of the scene's classes.
+================
+*/
+void func_80112640_pvcode( void ) {
+}
+
+/*
+================
+func_80112648_pvcode
+
+An empty handler of the scene's classes.
+================
+*/
+void func_80112648_pvcode( void ) {
+}

@@ -10,5 +10,10 @@
 #include "object.h"
 #include "dbgtext.h"
 #include "gamesnd.h"
+#include "filecache.h"
+#include "hostio.h"
+
+extern objClass_t D_80112660_pvcode[];  /* the classes of the overlay's scene */
+extern objParams_t D_801126C0_pvcode[]; /* the overlay's scene objects, unless read from the host */
 
 #endif
