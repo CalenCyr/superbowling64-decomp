@@ -349,9 +349,6 @@ Draws the player's frame at (x, y), once it is played or when all is set: kind 0
 the image of its D_800A3020 entry.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: exact but for images' initialiser (D_80060580), which needs 13490's .rodata as a C subsegment
-// ([0x3B980, .rodata, 13490] in superbowling.yaml) once func_8003A21C (D_80060588) is C as well
 void func_8003A074( s32 player, u8 frame, u8 kind, u8 all, s16 x, s16 y ) {
     s16 images[3] = { -1, 0x9EA, 0x9EB };
     s16 score;
@@ -368,9 +365,6 @@ void func_8003A074( s32 player, u8 frame, u8 kind, u8 all, s16 x, s16 y ) {
         func_8003B1CC( images[D_800A3020[player][frame]], x + 4, y + 3 );
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/13490", func_8003A074);
-#endif
 
 /*
 ================
@@ -380,9 +374,6 @@ Draws the player's total at (x, y): its score, signed, or in a duel whether the 
 on frames won, and by how many.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: exact but for images' initialiser (D_80060588), which needs 13490's .rodata as a C subsegment
-// ([0x3B980, .rodata, 13490] in superbowling.yaml)
 void func_8003A21C( s32 player, u8 duel, s16 x, s16 y ) {
     s16 images[3] = { 0x9ED, 0x9E9, 0x9EC };
     s16 digits[4];
@@ -407,9 +398,6 @@ void func_8003A21C( s32 player, u8 duel, s16 x, s16 y ) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/13490", func_8003A21C);
-#endif
 
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A3F0);
 
