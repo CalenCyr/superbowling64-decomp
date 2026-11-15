@@ -22,7 +22,6 @@ MAIN (functions and globals of main units without a header yet, under their curr
 ==============================================================================
 */
 
-extern s16 D_8005C0C0;
 extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
 /* Main's D_80066C00 (0x24 bytes): only the member the overlay uses. Name invented. */
 typedef struct {

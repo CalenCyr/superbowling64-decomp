@@ -615,6 +615,7 @@ D_8009D030 = 0x8009D030; // size:0xC
 
 // gscode: the choice menus of units 59B00, 5A020, 5A580 and 5A990 (images, slide step, state, choice, blink counter)
 D_8011B850_gscode = 0x8011B850; // segment:gscode size:0x5A
+D_8011BD50_gscode = 0x8011BD50; // segment:gscode size:0xA0
 D_8011B8C6_gscode = 0x8011B8C6; // segment:gscode size:0x1
 D_8011B8C7_gscode = 0x8011B8C7; // segment:gscode size:0x1
 D_8011B7D0_gscode = 0x8011B7D0; // segment:gscode size:0x5A

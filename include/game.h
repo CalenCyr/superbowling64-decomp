@@ -20,5 +20,6 @@ extern s16 D_800DF630[4][10];       /* per player and frame: score */
 extern s16 D_800EA090[];
 extern u8 D_8005C0B6;               /* restored by the results overlay on leaving */
 extern u8 D_8005C0BF;               /* 0, then 1 once an overlay asks to leave, 2 when it goes */
+extern s16 D_8005C0C0;
 
 #endif

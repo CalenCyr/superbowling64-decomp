@@ -84,6 +84,19 @@ extern s8 D_80120795_gscode;        /* row of the cursor, 0 to 4; -1: the row be
 extern u8 D_80120796_gscode;        /* character set, 0 to 2 */
 extern u8 D_80120797_gscode;        /* case of the character set, 0 or 1 */
 extern u8 D_80120798_gscode;        /* characters entered of the name, 0 to 5 */
+extern menuItem_t D_8011BD50_gscode[16]; /* the character select: [5] its title, ids 0-7 the portraits, id 9 the cursor */
+extern menuItem_t D_8011BDF0_gscode[3];  /* the character menu's name (id 8) and marker (id 10) */
+extern s16 D_8011BE10_gscode[8];    /* per character: image of its name */
+extern s16 D_8011BE20_gscode[8];    /* per character: x of its name */
+extern s16 D_8011BE30_gscode[4];    /* images of the marker */
+extern u8 D_8011BE38_gscode[8];     /* per character: its image in D_8011BE30_gscode */
+extern objParams_t *D_8011F880_gscode[8]; /* per character: the scene of its model */
+extern u8 D_8011F8A0_gscode;        /* frames before the camera turns */
+extern f32 D_8011F8A4_gscode;       /* angle of the camera about the model */
+extern s16 D_8011F8A8_gscode[8];    /* per character: its portrait image */
+extern u8 D_8011F8B8_gscode;        /* slide step of the character menu */
+extern u8 D_8011F8B9_gscode;        /* CHOICE_IN etc.; 4: the name entry */
+extern u8 D_8011F8BA_gscode;        /* frame of the viewport's zoom, 0 to 15 */
 extern objClass_t D_8011B540_gscode[];   /* the classes of the character menu's scene */
 extern menuItem_t D_80120430_gscode[17]; /* the character menu: [0-7] the characters, [9] the cursor, [10] the name */
 extern s16 D_801204DC_gscode[8];    /* per character: its image once unlocked */
