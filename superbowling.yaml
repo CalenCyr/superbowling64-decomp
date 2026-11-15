@@ -448,9 +448,14 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
+    # bss: from the end of the file through the first 300-frame track of D_80115830 (0xE10 bytes, indexed by
+    # object); the track count is a runtime value, so the end is an estimate
+    bss_size: 0x1010
     subsegments:
-      - [0x67370, asm]
+      - [0x67370, c, cacode/67370]
       - [0x6A380, data]
+      - [0x6A570, .rodata, cacode/67370]   # file names, debug format strings and FP constants
+      - { type: bss, vram: 0x80115630 }
 
   - name: pvcode
     type: code
