@@ -10,6 +10,8 @@
 #include "object.h"
 #include "dbgtext.h"
 #include "gamesnd.h"
+#include "game.h"
+#include "sprite.h"
 
 /* main (owner unit not identified yet) */
 extern u8 D_8005C0E8;               /* the next mode: 0xA on entry; the overlay sets 0xFE or 0xFD */
@@ -17,6 +19,9 @@ extern u8 D_8005C0E8;               /* the next mode: 0xA on entry; the overlay 
 extern u8 D_801140B0_opcode;
 extern u16 D_801140C0_opcode[];     /* character code 0x10-0x94 -> entry (func_80113130_opcode) */
 
-extern s16 D_80114350_opcode;
+extern u16 D_80114350_opcode;     /* frames in the current mode */
+
+s32 func_80112958_opcode( void );
+s32 func_80113168_opcode( void );
 
 #endif

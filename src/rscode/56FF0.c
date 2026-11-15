@@ -390,7 +390,7 @@ void func_8011311C_rscode( void ) {
     y += 9;
     for ( player = 0; player < 2; player++ ) {
         x = 0x40;
-        func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player], x, y );
+        func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, y );
         x += 0x38;
         opponent = !player;
         for ( i = 0; i < games; i++ ) {
@@ -590,10 +590,10 @@ void func_80113904_rscode( s16 x, s16 y ) {
         }
         if ( D_801142B4_rscode == 1 ) {
             mate = ( player == 1 ) * 2;
-            func_80038AE8( mate, D_8005C0E4[mate] >> 7, D_80068218[mate], 0, rowX, y );
-            func_80038AE8( mate | 1, D_8005C0E4[mate + 1] >> 7, D_80068218[mate + 1], 0, rowX, y + 0x1C );
+            func_80038AE8( mate, D_8005C0E4[mate] >> 7, D_80068218[mate].chars, 0, rowX, y );
+            func_80038AE8( mate | 1, D_8005C0E4[mate + 1] >> 7, D_80068218[mate + 1].chars, 0, rowX, y + 0x1C );
         } else {
-            func_80038AE8( player, D_8005C0E4[player] >> 7, D_80068218[player], 0, rowX, y );
+            func_80038AE8( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, 0, rowX, y );
         }
         rowX += 0x2C;
         if ( D_801142B4_rscode == 1 ) {
