@@ -400,7 +400,24 @@ void func_8003AE9C( s16 a, s16 b, u8 show, s16 x, s16 y ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/13490", func_8003B034);
+/*
+================
+func_8003B034
+
+Sets the figures of record, of character index, in the kind's row of D_800E66B0, D_800DF5D8, D_800A2FE8 and
+D_80099488; all 0 when it holds no game.
+================
+*/
+void func_8003B034( UnkRecord *record, s32 index, u8 kind ) {
+    if ( record->games == 0 ) {
+        D_800E66B0[kind][index] = D_800DF5D8[kind][index] = D_800A2FE8[kind][index] = D_80099488[kind][index] = 0.0f;
+    } else {
+        D_800E66B0[kind][index] = (f32)record->total / record->games;
+        D_800DF5D8[kind][index] = record->unk_14 * 100.0f / ( record->games * 12 );
+        D_800A2FE8[kind][index] = record->unk_16 * 100.0f / ( record->games * 10 );
+        D_80099488[kind][index] = record->unk_18 * 100.0f / ( record->games * 10 );
+    }
+}
 
 /*
 ================

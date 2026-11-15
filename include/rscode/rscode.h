@@ -36,7 +36,6 @@ extern u16 D_80068218[][6];         /* per player: name */
 extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */
 
 void func_8003A970( s16 count, UnkRecord *records, u8 arg2, s16 x, s16 y );  /* unit 13490 */
-void func_8003B034( UnkRecord *record, s32 index, u8 arg2 );                 /* unit 13490 */
 
 /*
 ==============================================================================

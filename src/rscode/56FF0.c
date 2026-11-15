@@ -236,7 +236,7 @@ void func_80112B60_rscode( void ) {
     s16 i;
 
     for ( i = 0; i < 4; i++ ) {
-        empty += D_800E44E8[i].unk_0C[0] ? 0 : 1;
+        empty += D_800E44E8[i].games ? 0 : 1;
     }
     if ( ( D_801142A6_rscode & L_JPAD ) && D_80114251_rscode == 1 ) {
         func_80037870( SE_CURSOR, 0 );
@@ -639,8 +639,7 @@ high and the low score, and three more counts (to 9999).
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: needs the members of boot.h's UnkRecord at 0x0C-0x1A (main's header, the fields named here);
-// with them (and D_800DF6B4, D_8009D088, D_8009CF80 as u16[4]), retail's frame is 8 bytes (this body: 16), and its high/low selects differ in register use
+// NON_MATCHING: needs D_800DF6B4, D_8009D088 and D_8009CF80 declared as u16[4]; with them, retail's frame is 8 bytes (this body: 16), and its high/low selects differ in register use
 void func_80113EC0_rscode( UnkRecord *record, s32 player ) {
     if ( record->games + 1 < 256 ) {
         record->games++;

@@ -38,10 +38,10 @@ void main( void ) {
     D_8009D098.unk_7B = 1;
     for ( i = 0; i < 4; i++ ) {
         memset( &D_8009D098.unk_08[i], 0, sizeof( UnkRecord ) );
-        D_8009D098.unk_08[i].unk_12 = 300;
+        D_8009D098.unk_08[i].low = 300;
         memset( D_8009D098.unk_08[i].name, 0xFF, sizeof( D_8009D098.unk_08[i].name ) );
         memset( &D_800E44E8[i], 0, sizeof( UnkRecord ) );
-        D_800E44E8[i].unk_12 = 300;
+        D_800E44E8[i].low = 300;
         memset( D_800E44E8[i].name, 0xFF, sizeof( D_800E44E8[i].name ) );
     }
     osCreateThread( &D_80060EE0, 1, func_80025E10, NULL, &D_80061090[BOOT_STACK_SIZE / sizeof( u64 )], 10 );
