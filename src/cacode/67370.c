@@ -4,7 +4,45 @@
 #include "libultra.h"
 #include "cacode/cacode.h"
 
-INCLUDE_ASM("asm/nonmatchings/cacode/67370", func_80112350_cacode);
+/*
+================
+func_80112350_cacode
+
+Draws frame frame of clip clip from the frame cache as 40 textured rectangles filling the 320 x 240 screen, with
+alpha alpha; nothing when the frame is not cached.
+================
+*/
+void func_80112350_cacode( s32 frame, s32 clip, u8 alpha ) {
+    s32 slot;
+    s32 row, col;
+
+    for ( slot = 0; slot < D_801157D4_cacode; slot++ ) {
+        if ( D_80115630_cacode[slot].frame == frame && D_80115630_cacode[slot].clip == clip ) {
+            break;
+        }
+    }
+    if ( slot == D_801157D4_cacode ) {
+        return;
+    }
+
+    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+    gDPSetRenderMode( D_800F8094++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
+    gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
+    gDPSetTexturePersp( D_800F8094++, G_TP_NONE );
+    gDPSetCombineLERP( D_800F8094++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE,
+                       0 );
+    gDPSetPrimColor( D_800F8094++, 0, 0, 255, 255, 255, alpha );
+    for ( row = 0; row < 8; row++ ) {
+        for ( col = 0; col < 5; col++ ) {
+            gDPLoadTextureBlock( D_800F8094++, D_80115630_cacode[slot].tiles[col + row * 5], G_IM_FMT_RGBA,
+                                 G_IM_SIZ_16b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 5,
+                                 G_TX_NOLOD, G_TX_NOLOD );
+            gSPTextureRectangle( D_800F8094++, ( col * 64 ) << 2, ( row * 32 ) << 2, ( col * 64 + 64 ) << 2,
+                                 ( row * 32 + 32 ) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
+        }
+    }
+    gDPPipeSync( D_800F8094++ );
+}
 
 /*
 ================
