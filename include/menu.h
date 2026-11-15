@@ -44,6 +44,8 @@ extern u16 D_8005CB04[10];          /* image of each small digit */
 extern s16 D_8005CAE4[];           /* icon of each player, then of the computer */
 extern s8 D_800DF5D0[];            /* number shown on each player's name plate; 0: none */
 
+void func_80038090( u16 image, s32 width, s32 height, u8 *maze );
+void func_80038214( s32 width, s32 height, u8 *maze );
 void func_800386E0( menuItem_t *items, u8 step );
 void func_800389D0( s32 player, u8 cpu, u16 *name, s16 x, s16 y );
 void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );

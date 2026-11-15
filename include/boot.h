@@ -55,6 +55,10 @@ extern u8 D_8010A250[];             /* start of the memory main clears at boot (
 extern u8 D_800A2FE4;
 extern u16 *D_80066C38[3];          /* RGBA5551 320x240 framebuffers: 0x8038F800, 0x803B5000, 0x803DA800 at boot */
 extern s32 D_8005B0F8;              /* index in D_80066C38 of the framebuffer being drawn */
+extern s32 D_8005B0E4;              /* RSP time of the last frame (mgcode's meter shows it as RSP) */
+extern s32 D_8005B0E8;              /* RDP time of the last frame (shown as RDP) */
+extern s32 D_8005B0EC;              /* CPU time of the last frame (shown as CPU) */
+extern s32 D_8005B0FC;              /* frame rate (shown as FRATE) */
 /* 0 or 1: which of the double-buffered display lists and matrices is built */
 // volatile: units 1060, 7250 and C650 read it with lbu and a separate sign extension, once per use (53B0 alone uses lb)
 extern volatile s8 D_8005C0B1;
