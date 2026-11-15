@@ -17,6 +17,7 @@ extern u8 D_8005CB60;
 extern u8 D_800693DC[2];            /* per lane: games won */
 extern u8 D_8009D19C[4];            /* per player: current frame (10: the game is over) */
 extern s16 D_800DF630[4][10];       /* per player and frame: score */
+extern s8 D_800A3020[4][10];        /* per player and frame */
 extern s16 D_800EA090[];
 extern u8 D_8005C0B6;               /* restored by the results overlay on leaving */
 extern u8 D_8005C0BF;               /* 0, then 1 once an overlay asks to leave, 2 when it goes */

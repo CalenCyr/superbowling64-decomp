@@ -27,7 +27,6 @@ MAIN (functions and globals of main units without a header yet, under their curr
 
 extern u8 D_800994BE[];
 extern u8 D_80068A50[];
-extern s8 D_800A3020[4][10];        /* per player and frame */
 extern s8 D_80066E18[4][10];        /* per player and frame */
 extern u8 D_80099458[9];            /* per frame: par of the frame (func_80122140_gacode) */
 extern s8 D_800994B8[2];            /* per player of a duel: frames won */

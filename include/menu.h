@@ -44,6 +44,7 @@ extern u16 D_8005CB18[10];          /* image of each digit */
 extern u16 D_8005CB04[10];          /* image of each small digit */
 extern s16 D_8005CAE4[];           /* icon of each player, then of the computer */
 extern s8 D_800DF5D0[];
+extern u16 D_8005CB58[4];          /* func_8003A074: sign of a score: negative, zero, positive */
 /* func_8003B034: per kind of record (0: D_800E44E8, 1: D_8009D098), per character, the record's figures */
 extern f32 D_800E66B0[3][4];        /* average score */
 extern f32 D_800DF5D8[3][4];        /* unk_14, percent of 12 a game */
@@ -64,6 +65,7 @@ void func_8003893C( menuItem_t *items, s16 id, s16 image, s16 x, s16 y, s16 alph
 void func_800393D8( s16 value, s16 x, s16 y );
 u16 func_80039340( s16 pins, u8 foul );
 void func_80039554( s16 *digits, s16 value, u8 small, u8 tens );
+void func_8003A074( s32 player, u8 frame, u8 kind, u8 all, s16 x, s16 y );
 void func_8003B034( UnkRecord *record, s32 index, u8 kind );
 void func_8003AE9C( s16 a, s16 b, u8 show, s16 x, s16 y );
 void func_8003A8B4( s32 arg0, u8 count, u8 small, s16 x, s16 y );

@@ -5,6 +5,7 @@
 #include "boot.h"
 #include "dbgtext.h"
 #include "filecache.h"
+#include "game.h"
 #include "save.h"
 #include "sprite.h"
 #include "menu.h"
@@ -340,7 +341,36 @@ INCLUDE_ASM("asm/nonmatchings/13490", func_80039700);
 
 INCLUDE_ASM("asm/nonmatchings/13490", func_80039CBC);
 
+/*
+================
+func_8003A074
+
+Draws the player's frame at (x, y), once it is played or when all is set: kind 0 its score, signed; otherwise
+the image of its D_800A3020 entry.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: exact but for images' initialiser (D_80060580), which needs 13490's .rodata as a C subsegment
+// ([0x3B980, .rodata, 13490] in superbowling.yaml) once func_8003A21C (D_80060588) is C as well
+void func_8003A074( s32 player, u8 frame, u8 kind, u8 all, s16 x, s16 y ) {
+    s16 images[3] = { -1, 0x9EA, 0x9EB };
+    s16 score;
+    s32 sign;
+
+    if ( kind == 0 ) {
+        score = D_800DF630[player][frame];
+        if ( all || frame < D_8009D19C[player] ) {
+            sign = score < 0 ? 0 : score > 0 ? 2 : 1;
+            func_8002DF3C( D_8005CB58[sign], x + 3, y + 4 );
+            func_800393D8( score < 0 ? -score : score, x - 2, y + 7 );
+        }
+    } else if ( all || frame < D_8009D19C[player] ) {
+        func_8003B1CC( images[D_800A3020[player][frame]], x + 4, y + 3 );
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A074);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A21C);
 
