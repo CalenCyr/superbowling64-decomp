@@ -485,11 +485,15 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
+    # bss: from the end of the file to past its last referenced symbol (0x801145FC, a word); the end is an estimate
+    bss_size: 0x2B0
     subsegments:
-      - [0x6BE70, asm]
-      - [0x6C470, asm]
-      - [0x6CC50, asm]
+      - [0x6BE70, c, opcode/6BE70]
+      - [0x6C470, c, opcode/6C470]
+      - [0x6CC50, c, opcode/6CC50]
       - [0x6DBD0, data]
+      - [0x6DDD0, .rodata, opcode/6C470]   # func_80112958_opcode's jump table
+      - { type: bss, vram: 0x80114350 }
 
   - name: idx
     type: bin

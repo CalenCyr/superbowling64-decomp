@@ -99,9 +99,10 @@ Also record:
   | gacode | 0x3C570-0x56FF0 | 0x80112350 | game overlay (`GACODE  SYS`): C units 3C570, 3E350, 474E0, 4C560; .data 0x4D820; .rodata 0x56C20 (per unit, confirmed by the gate); bss 0x8012CDD0-0x8012F350 (ends with the second lane) |
   | rscode | 0x56FF0-0x58F40 | 0x80112350 | results overlay (`RSCODE  SYS`): C unit 56FF0; .data 0x58EF0; .rodata 0x58F30 (one auto array initialiser); bss 0x801142A0, 0x18 (end estimated) |
   | gscode | 0x58F40-0x67370 | 0x80112350 | game-select overlay (`GSCODE  SYS`): 12 C units 58F40-61CA0; .data 0x62130; .rodata 0x67260 (per unit: 58F40, 59490, 5AD50, 5E2B0, 605D0, 61640); bss 0x80120780, 0x2F0 (end estimated) |
-  | cacode, opcode | 0x67370-0x6A650, 0x6BE70-0x6DE70 | 0x80112350 | code overlays sharing the slot; symbols suffixed `_<seg>`; text/data split points are estimates |
+  | cacode | 0x67370-0x6A650 | 0x80112350 | code overlay sharing the slot; symbols suffixed `_<seg>`; text/data split point is an estimate |
   | pvcode | 0x6A650-0x6BA90 | 0x80112350 | overlay (`PVCODE  SYS`): C units 6A650, 6A940 (the scene's two empty class handlers; text to 0x6A950); .data 0x6A950; .rodata 0x6BA40 (a file name and debug format strings); no bss |
   | mgcode | 0x6BA90-0x6BE70 | 0x80112350 | overlay (`MGCODE  SYS`): C unit 6BA90 (text to 0x6BC88); .data 0x6BC90; .rodata 0x6BE30 (debug format strings); bss 0x80112730, 0x1C0 (a 21 x 21 maze grid; end estimated) |
+  | opcode | 0x6BE70-0x6DE70 | 0x80112350 | overlay (`OPCODE  SYS`): C units 6BE70, 6C470, 6CC50 (text to 0x6DBC8); .data 0x6DBD0; .rodata 0x6DDD0 (6C470's jump table); bss 0x80114350, 0x2B0 (end estimated) |
   | idx, str, bgmptr, bgmwbk, septr, sewbk, bfx | 0x6DE70-0x656CD0 | - | asset files (bin) |
 - **Toolchain:** compiler and linker version and build, flags, per-unit flag overrides.
 - **Annotations:** the address marker format (for example `// FUNCTION: <MODULE> 0x...`), the stub marker and
