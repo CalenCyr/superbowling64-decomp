@@ -10,4 +10,6 @@
 #include "object.h"
 #include "dbgtext.h"
 
+void func_8011306C_cacode( float src[4][4], float dst[4][4] );
+
 #endif
