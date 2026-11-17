@@ -25,15 +25,26 @@ typedef struct {
     /* 0x08 */ u16 ( *tiles )[32 * 64];
 } frameSlot_t;                          /* size 0xC */
 
+extern s32 D_80115368_cacode;           /* the object whose model parts func_801128F4_cacode copies */
 extern s32 D_80115374_cacode[3];        /* first frame number of each clip's BMP files */
+
+extern objParams_t D_801153C0_cacode[6];     /* the scene: three cameras, then three objects; or the host's sce.dat */
 
 extern frameSlot_t D_80115630_cacode[35];
 extern u8 D_801157D4_cacode;            /* slots in use */
+extern sceneObjectNode_t *D_801157D8_cacode[3];     /* the scene's objects */
+extern sceneCameraNode_t *D_801157E4_cacode[3];     /* the scene's cameras */
+extern f32 D_801157F0_cacode[4][4];
+extern f32 D_80115830_cacode[][300][3];  /* by model part, per frame (bss end estimated) */
 
 /*
 Identity TODO: high addresses past the overlay's file, referenced without a segment suffix; their owner (perhaps
 a heap buffer of main, or the overlay's own bss) is unknown.
 */
+extern f32 D_8012FE10[2][300][4][4];    /* per frame, for cameras 1 and 2 */
+extern f32 D_80139410[2][300][3];       /* per frame: the at of cameras 1 and 2 */
+extern f32 D_8013B030[2][300][3];       /* the eye */
+extern f32 D_8013CC50[2][300][3];       /* the up point */
 extern u8 *D_8013E880;                  /* buffer one BMP file is read into */
 
 /* a 4 x 4 matrix copied whole; the name of the type is invented */

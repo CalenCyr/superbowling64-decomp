@@ -100,6 +100,17 @@ typedef struct {
 } sceneCamera_t;                        /* size 0x248 */
 
 extern sceneCamera_t *D_8009CFA0[];
+
+/* What the classes func_8002B610 and func_8002BFD8 create: the list header, then the scene object or camera. */
+typedef struct {
+    /* 0x00 */ objNode_t node;
+    /* 0x10 */ sceneObject_t obj;
+} sceneObjectNode_t;
+
+typedef struct {
+    /* 0x00 */ objNode_t node;
+    /* 0x10 */ sceneCamera_t cam;
+} sceneCameraNode_t;                    /* size 0x258 */
 extern void *D_800EA120[];          /* main's scene objects, of several kinds: [1] gacode's camera (gaCamera_t), the
                                        others mostly sceneObject_t */
 
@@ -119,12 +130,14 @@ void func_8002AAD0( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, f32 ty,
 void func_8002AC84( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale );
 void func_8002AEBC( sceneObject_t *obj );
 void func_8002B380( Gfx *gfx );
+objNode_t *func_8002B610( objParams_t *params );
 void func_8002B9CC( sceneObject_t *obj );
 void func_8002BE00( sceneObject_t *obj );
 
 /* the cameras (unit 7250) */
 void func_8002BE50( s32 index, u8 *color );
 void func_8002BED8( s16 file, s16 frame, f32 *eye, f32 *unk_2C );
+objNode_t *func_8002BFD8( objParams_t *params );
 void func_8002C324( sceneCamera_t *cam );
 void func_8002C908( sceneCamera_t *cam );
 

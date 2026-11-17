@@ -29,7 +29,9 @@ typedef struct {
 } fileType1Ref_t;
 
 typedef struct {
-    /* 0x00 */ u8 unk_00[0x2E];
+    /* 0x00 */ u8 unk_00[0x08];
+    /* 0x08 */ f32 unk_08[3];       /* cacode copies it as a joint's position */
+    /* 0x14 */ u8 unk_14[0x1A];
     /* 0x2E */ s16 numRefs;
     /* 0x30 */ fileType1Ref_t refs[1];   /* numRefs entries */
 } fileType1Part_t;

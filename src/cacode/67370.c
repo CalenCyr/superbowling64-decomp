@@ -110,7 +110,67 @@ void func_8011268C_cacode( s32 frame, s32 clip ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/cacode/67370", func_801128F4_cacode);
+/*
+================
+func_801128F4_cacode
+
+Entry of the overlay: Start switches to files from the development host; from the host, the scene's records come
+from its "sce.dat". Creates the scene's three cameras and three objects, fills the per-frame tables from cameras 1
+and 2 and the parts of object D_80115368_cacode, and allocates the frame cache (34 slots when D_800A2FE4 is set,
+else 9) and the BMP buffer.
+================
+*/
+void func_801128F4_cacode( void ) {
+    fileType1_t *model;
+    s32 i;
+    u32 j;
+
+    if ( D_800994BC & START_BUTTON ) {
+        D_8005C0BC = 1;
+        func_80029524();
+    }
+    if ( D_8005C0BC ) {
+        func_80029728( "sce.dat", (u8 *)D_801153C0_cacode, sizeof( D_801153C0_cacode ) );
+        D_8005C0BD = 1;
+        for ( i = 0; i < 3; i++ ) {
+            D_801157E4_cacode[i] = (sceneCameraNode_t *)func_8002BFD8( &D_801153C0_cacode[i] );
+            D_801157D8_cacode[i] = (sceneObjectNode_t *)func_8002B610( &D_801153C0_cacode[i + 3] );
+        }
+        D_8005C0BD = 0;
+    } else {
+        for ( i = 0; i < 3; i++ ) {
+            D_801157E4_cacode[i] = (sceneCameraNode_t *)func_8002BFD8( &D_801153C0_cacode[i] );
+            D_801157D8_cacode[i] = (sceneObjectNode_t *)func_8002B610( &D_801153C0_cacode[i + 3] );
+        }
+    }
+    model = D_801157D8_cacode[D_80115368_cacode]->obj.model;
+    D_80115374_cacode[0] = D_801157D8_cacode[0]->obj.anim[0];
+    for ( i = 0; i < 300; i++ ) {
+        guMtxIdentF( D_8012FE10[0][i] );
+        guMtxIdentF( D_8012FE10[1][i] );
+        memcpy( D_80139410[0][i], D_801157E4_cacode[1]->cam.at, sizeof( D_80139410[0][i] ) );
+        memcpy( D_8013B030[0][i], D_801157E4_cacode[1]->cam.eye, sizeof( D_8013B030[0][i] ) );
+        memcpy( D_8013CC50[0][i], D_801157E4_cacode[1]->cam.unk_18, sizeof( D_8013CC50[0][i] ) );
+        memcpy( D_80139410[1][i], D_801157E4_cacode[2]->cam.at, sizeof( D_80139410[1][i] ) );
+        memcpy( D_8013B030[1][i], D_801157E4_cacode[2]->cam.eye, sizeof( D_8013B030[1][i] ) );
+        memcpy( D_8013CC50[1][i], D_801157E4_cacode[2]->cam.unk_18, sizeof( D_8013CC50[1][i] ) );
+        for ( j = 0; j < model->numParts; j++ ) {
+            memcpy( D_80115830_cacode[j][i], model->parts[j]->unk_08, sizeof( D_80115830_cacode[j][i] ) );
+        }
+    }
+    guMtxIdentF( D_801157F0_cacode );
+    if ( D_800A2FE4 ) {
+        D_801157D4_cacode = 34;
+    } else {
+        D_801157D4_cacode = 9;
+    }
+    for ( i = 0; i < D_801157D4_cacode; i++ ) {
+        D_80115630_cacode[i].frame = -1;
+        D_80115630_cacode[i].stamp = 0;
+        D_80115630_cacode[i].tiles = func_80029E28( 40 * sizeof( *D_80115630_cacode[i].tiles ) );
+    }
+    D_8013E880 = func_80029E28( 54 + 320 * 240 * 2 );
+}
 
 /*
 ================
