@@ -47,12 +47,7 @@ extern f32 D_8013B030[2][300][3];       /* the eye */
 extern f32 D_8013CC50[2][300][3];       /* the up point */
 extern u8 *D_8013E880;                  /* buffer one BMP file is read into */
 
-/* a 4 x 4 matrix copied whole; the name of the type is invented */
-typedef struct {
-    /* 0x00 */ f32 m[4][4];
-} caMatrix_t;                           /* size 0x40 */
-
-void func_80112CDC_cacode( caMatrix_t *src, f32 *trans, f32 *rot, f32 *scale );
+void func_80112CDC_cacode( f32 src[4][4], f32 *trans, f32 *rot, f32 *scale );
 void func_8011306C_cacode( float src[4][4], float dst[4][4] );
 
 #endif

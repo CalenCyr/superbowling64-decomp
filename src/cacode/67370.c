@@ -180,40 +180,40 @@ Splits the matrix src into its translation trans, its rotation angles rot (radia
 one uniform scale, written to all three components of scale.
 ================
 */
-void func_80112CDC_cacode( caMatrix_t *src, f32 *trans, f32 *rot, f32 *scale ) {
-    caMatrix_t mtx;
+void func_80112CDC_cacode( f32 src[4][4], f32 *trans, f32 *rot, f32 *scale ) {
+    f32 mtx[4][4];
     f32 xx, yy, zz;
     f32 sinX;
 
-    mtx = *src;
-    trans[0] = mtx.m[3][0];
-    trans[1] = mtx.m[3][1];
-    trans[2] = mtx.m[3][2];
+    memcpy( mtx, src, sizeof( mtx ) );
+    trans[0] = mtx[3][0];
+    trans[1] = mtx[3][1];
+    trans[2] = mtx[3][2];
 
-    rot[1] = atan( mtx.m[2][0] / mtx.m[2][2] );
+    rot[1] = atan( mtx[2][0] / mtx[2][2] );
     if ( rot[1] < 0.0f ) {
         rot[1] += 2 * M_PI;
     }
-    rot[2] = atan( mtx.m[0][1] / mtx.m[1][1] );
+    rot[2] = atan( mtx[0][1] / mtx[1][1] );
     if ( rot[2] < 0.0f ) {
         rot[2] += 2 * M_PI;
     }
-    if ( mtx.m[2][0] > 0.0f ) {
-        if ( mtx.m[2][2] < 0.0f ) {
+    if ( mtx[2][0] > 0.0f ) {
+        if ( mtx[2][2] < 0.0f ) {
             rot[1] -= M_PI;
         }
-    } else if ( mtx.m[2][2] < 0.0f ) {
+    } else if ( mtx[2][2] < 0.0f ) {
         rot[1] += M_PI;
     }
-    if ( mtx.m[0][1] > 0.0f ) {
-        if ( mtx.m[1][1] < 0.0f ) {
+    if ( mtx[0][1] > 0.0f ) {
+        if ( mtx[1][1] < 0.0f ) {
             rot[2] -= M_PI;
         }
-    } else if ( mtx.m[1][1] < 0.0f ) {
+    } else if ( mtx[1][1] < 0.0f ) {
         rot[2] += M_PI;
     }
 
-    sinX = -mtx.m[0][0] / mtx.m[2][1] - sinf( rot[1] ) * sinf( rot[2] );
+    sinX = -mtx[0][0] / mtx[2][1] - sinf( rot[1] ) * sinf( rot[2] );
     sinX = cosf( rot[1] ) * cosf( rot[2] ) / sinX;
     rot[0] = asin( sinX );
     if ( cosf( rot[0] ) < 0.0f ) {
@@ -224,19 +224,19 @@ void func_80112CDC_cacode( caMatrix_t *src, f32 *trans, f32 *rot, f32 *scale ) {
     }
 
     /* the scale comes from the largest component of the third row, the one least hurt by dividing */
-    xx = mtx.m[2][0] * mtx.m[2][0];
-    yy = mtx.m[2][1] * mtx.m[2][1];
-    zz = mtx.m[2][2] * mtx.m[2][2];
+    xx = mtx[2][0] * mtx[2][0];
+    yy = mtx[2][1] * mtx[2][1];
+    zz = mtx[2][2] * mtx[2][2];
     if ( yy < xx ) {
         if ( zz <= xx ) {
-            scale[0] = scale[1] = scale[2] = mtx.m[2][0] / ( cosf( rot[0] ) * sinf( rot[1] ) );
+            scale[0] = scale[1] = scale[2] = mtx[2][0] / ( cosf( rot[0] ) * sinf( rot[1] ) );
             return;
         }
     } else if ( zz < yy ) {
-        scale[0] = scale[1] = scale[2] = mtx.m[2][1] / -sinf( rot[0] );
+        scale[0] = scale[1] = scale[2] = mtx[2][1] / -sinf( rot[0] );
         return;
     }
-    scale[0] = scale[1] = scale[2] = mtx.m[2][2] / ( cosf( rot[0] ) * cosf( rot[1] ) );
+    scale[0] = scale[1] = scale[2] = mtx[2][2] / ( cosf( rot[0] ) * cosf( rot[1] ) );
 }
 
 /*

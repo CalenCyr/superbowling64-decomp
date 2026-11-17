@@ -445,4 +445,3 @@ puff_t	ground.h	invented: 12-byte camera-facing square (D_800E4D70, 50): flags, 
 # rscode overlay (include/rscode/rscode.h): invented from use
 rsState_t	rscode.h	invented: main-loop state function of the results overlay (D_801142AC_rscode), as gacode's gaState_t
 frameSlot_t	include/cacode/cacode.h	invented: a slot of cacode's cache of BMP frames (frame, clip, LRU stamp, 40 RGBA16 tiles)
-caMatrix_t	include/cacode/cacode.h	invented: 4 x 4 float matrix func_80112CDC_cacode copies whole (a struct copy)
