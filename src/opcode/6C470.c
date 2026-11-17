@@ -25,10 +25,8 @@ Controller Pak and the saved settings, and prompts to load, create or repair the
 over: saving is then on (D_8005C0E0) with the settings loaded, or off.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: cases 21, 25 and 28 store the cursor rectangles in a different order (retail interleaves the width and height stores and loads the width first, into v1)
 s32 func_80112958_opcode( void ) {
-    UnkRecordSet *settings;
+    s32 *checksum;
 
     func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
     switch ( D_801140B0_opcode ) {
@@ -128,8 +126,10 @@ s32 func_80112958_opcode( void ) {
         }
         break;
     case 21:
-        D_800DF590[1] = D_800DF590[0] = 0x24;
-        D_800E6538[1] = D_800E6538[0] = 0x10;
+        D_800DF590[0] = 0x24;
+        D_800E6538[0] = 0x10;
+        D_800DF590[1] = 0x24;
+        D_800E6538[1] = 0x10;
         D_800E57E0[0] = 0x36;
         D_800E4D68[0] = 0x44;
         D_800E57E0[1] = 0x5E;
@@ -150,9 +150,9 @@ s32 func_80112958_opcode( void ) {
         if ( func_80036E60( 0x955, PROMPT_CLOSE ) ) {
             osRecvMesg( &D_800F8098, (OSMesg *)&D_80114360_opcode, OS_MESG_BLOCK );
             if ( D_80066B8C == 0 ) {
-                settings = D_801000B8;
                 /* the checksum word through a raw view, as func_80037410 does: a member store sinks past the stores below */
-                *(s32 *)settings = func_800373DC();
+                checksum = (s32 *)D_801000B8;
+                *checksum = func_800373DC();
                 D_80114360_opcode = 5;
                 D_800E6578 = 1;
                 osSendMesg( &D_800E6690, &D_80114360_opcode, OS_MESG_NOBLOCK );
@@ -181,10 +181,13 @@ s32 func_80112958_opcode( void ) {
         }
         break;
     case 25:
-        D_800DF590[0] = D_800DF590[1] = 0x34;
-        D_800DF590[2] = 0x7A;
+        /* BUG: the rectangle arrays hold two entries; the third choice's stores land on the next
+           globals (__osContLastCmd and D_800DF595, D_800E57E4[0], D_800E4D6C) */
+        D_800DF590[0] = 0x34;
         D_800E6538[0] = 0xE;
+        D_800DF590[1] = 0x34;
         D_800E6538[1] = 0x10;
+        D_800DF590[2] = 0x7A;
         D_800E6538[2] = 0x1C;
         D_800E57E0[0] = 0xA;
         D_800E4D68[0] = 0x36;
@@ -208,9 +211,11 @@ s32 func_80112958_opcode( void ) {
         }
         break;
     case 29:
-        D_800DF590[0] = D_800DF590[1] = 0x24;
+        D_800DF590[1] = 0x24;
+        D_800DF590[0] = 0x24;
+        D_800E6538[1] = 0x10;
+        D_800E6538[0] = 0x10;
         D_800E57E0[0] = 0x24;
-        D_800E6538[0] = D_800E6538[1] = 0x10;
         D_800E4D68[0] = 0x32;
         D_800E57E0[1] = 0x4E;
         D_800E4D68[1] = 0x32;
@@ -239,10 +244,13 @@ s32 func_80112958_opcode( void ) {
         }
         break;
     case 28:
-        D_800DF590[0] = D_800DF590[1] = 0x34;
-        D_800DF590[2] = 0x7A;
+        /* BUG: the rectangle arrays hold two entries; the third choice's stores land on the next
+           globals (__osContLastCmd and D_800DF595, D_800E57E4[0], D_800E4D6C) */
+        D_800DF590[0] = 0x34;
         D_800E6538[0] = 0xE;
+        D_800DF590[1] = 0x34;
         D_800E6538[1] = 0x10;
+        D_800DF590[2] = 0x7A;
         D_800E6538[2] = 0x1C;
         D_800E57E0[0] = 0xA;
         D_800E4D68[0] = 0x36;
@@ -294,6 +302,3 @@ s32 func_80112958_opcode( void ) {
     }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/opcode/6C470", func_80112958_opcode);
-#endif

@@ -36,11 +36,13 @@ extern f32 D_8005C994[PROMPT_ZOOM_FRAMES];  /* scale of the prompt in each frame
 extern u16 D_80066C44;              /* choice under the cursor */
 extern u8 D_8005C9C4;               /* alpha of the blinking cursor, 0x40 to 0x80 */
 extern s8 D_8005C9C5;               /* added to D_8005C9C4 each frame; turned at either end */
-/* cursor rectangle of each choice, from the prompt's corner */
-extern u16 D_800E57E0[3];           /* x */
-extern u16 D_800E4D68[3];           /* y */
-extern s16 D_800DF590[3];           /* width */
-extern s16 D_800E6538[3];           /* height */
+/* cursor rectangle of each choice, from the prompt's corner. Two entries each: the next bss objects
+   (D_800E57E4, D_800E4D6C, __osContLastCmd) start right after the first three; a three-choice
+   prompt's third rectangle overruns them (func_80112958_opcode) */
+extern u16 D_800E57E0[2];           /* x */
+extern u16 D_800E4D68[2];           /* y */
+extern s16 D_800DF590[2];           /* width */
+extern s16 D_800E6538[2];           /* height */
 
 s32 func_80036E60( s32 id, s32 mode );
 s32 func_800373DC( void );
