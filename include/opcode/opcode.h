@@ -16,10 +16,11 @@
 /* main (owner unit not identified yet) */
 extern u8 D_8005C0E8;               /* the next mode: 0xA on entry; the overlay sets 0xFE or 0xFD */
 
-extern u8 D_801140B0_opcode;
+extern u8 D_801140B0_opcode;         /* step of func_80112958_opcode */
 extern u16 D_801140C0_opcode[];     /* character code 0x10-0x94 -> entry (func_80113130_opcode) */
 
 extern u16 D_80114350_opcode;     /* frames in the current mode */
+extern s32 D_80114360_opcode;     /* message to and from the controller thread */
 
 s32 func_80112958_opcode( void );
 s32 func_80113168_opcode( void );
