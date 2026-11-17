@@ -290,4 +290,455 @@ void func_8011306C_cacode( float src[4][4], float dst[4][4] ) {
     }
 }
 
+/* the size of motion.dat: the motion tables, then D_80115374_cacode[1] and [2] */
+#define MOTION_FILE_SIZE    ( sizeof( D_80115830_cacode ) + sizeof( D_8012FE10 ) + sizeof( D_80139410 ) \
+                              + sizeof( D_8013B030 ) + sizeof( D_8013CC50 ) + 2 * sizeof( D_80115374_cacode[0] ) )
+#define STICK_DEAD          8           /* stick values within this of 0 are ignored */
+#define RAD_TO_DEG          57.2957795130823229
+
+/*
+================
+func_80113280_cacode
+
+Per-frame update and drawing of the overlay, a motion editor for the scene. L cycles the mode; Start selects the
+next camera and object (camera 2 only once clip 2 has a first frame); left and right on the D-pad step the frame
+(on their own once held), up copies the next or previous frame (with Z: the next) into this one, and down caches
+the selected camera's BMP frame. In CAMODE_ROTATE, A and B select the model part, the stick and R move the camera
+or turn the object, Z with A or B scales it, and the C buttons turn the selected part, whose rotation is stored
+for the frame; Z with Start swaps that rotation with the one kept in D_8013E870. CAMODE_FILE loads and saves the
+tables as motion.dat; CAMODE_IMAGE moves the clips' first BMP frames. Cameras 1 and 2 draw their clip's frame behind
+the scene (Z with the down and up C buttons sets its alpha), and the selected part's axes and the mode's text are
+drawn over it.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: byte-exact (gate green) only with D_80115370_cacode declared volatile: retail reads it twice
+// after each frame step at L_JPAD and R_JPAD (the first read unused), which only a volatile read emits. Without
+// it each step loses one lw. Pending a ruling on declaring it volatile with a `// volatile:` evidence note.
+void func_80113280_cacode( void ) {
+    u8 str[80];
+    f32 inv[4][4];
+    f32 m[4][4];
+    f32 rotM[4][4];
+    f32 move[3];
+    f32 rot[3];
+    f32 scale[3];
+    f32 swap[3];
+    sceneObject_t *obj;
+    sceneCamera_t *cam;
+    fileType1_t *model;
+    u8 *buf;
+    s32 size;
+    s32 i, j;
+
+    obj = &D_801157D8_cacode[D_80115368_cacode]->obj;
+    model = obj->model;
+    D_801157E4_cacode[D_80115368_cacode]->cam.frame = -1;
+    for ( i = 0; i < D_801157D4_cacode; i++ ) {
+        if ( D_80115630_cacode[i].stamp ) {
+            D_80115630_cacode[i].stamp--;
+        }
+    }
+
+    if ( ( D_800E4D62 & L_TRIG ) && ( D_800994BC & Z_TRIG ) ) {
+        if ( ++D_80115364_cacode == CAMODE_COUNT ) {
+            D_80115364_cacode = CAMODE_ROTATE;
+        }
+    }
+    if ( D_800994BC == 0 ) {
+        D_80115360_cacode = 0;
+    }
+
+    if ( D_80115364_cacode == CAMODE_FILE ) {
+        size = MOTION_FILE_SIZE;
+        if ( D_800E4D62 & A_BUTTON ) {
+            buf = func_80029E28( MOTION_FILE_SIZE );
+            func_80029728( "motion.dat", buf, MOTION_FILE_SIZE );
+            size = 0;
+            memcpy( D_80115830_cacode, buf + size, sizeof( D_80115830_cacode ) );
+            size += sizeof( D_80115830_cacode );
+            memcpy( D_8012FE10, buf + size, sizeof( D_8012FE10 ) );
+            size += sizeof( D_8012FE10 );
+            memcpy( D_80139410, buf + size, sizeof( D_80139410 ) );
+            size += sizeof( D_80139410 );
+            memcpy( D_8013B030, buf + size, sizeof( D_8013B030 ) );
+            size += sizeof( D_8013B030 );
+            memcpy( D_8013CC50, buf + size, sizeof( D_8013CC50 ) );
+            size += sizeof( D_8013CC50 );
+            memcpy( &D_80115374_cacode[1], buf + size, 2 * sizeof( D_80115374_cacode[0] ) );
+            size += 2 * sizeof( D_80115374_cacode[0] );
+            func_80029F18( buf );
+        }
+        if ( D_800E4D62 & B_BUTTON ) {
+            buf = func_80029E28( size );
+            size = 0;
+            memcpy( buf + size, D_80115830_cacode, sizeof( D_80115830_cacode ) );
+            size += sizeof( D_80115830_cacode );
+            memcpy( buf + size, D_8012FE10, sizeof( D_8012FE10 ) );
+            size += sizeof( D_8012FE10 );
+            memcpy( buf + size, D_80139410, sizeof( D_80139410 ) );
+            size += sizeof( D_80139410 );
+            memcpy( buf + size, D_8013B030, sizeof( D_8013B030 ) );
+            size += sizeof( D_8013B030 );
+            memcpy( buf + size, D_8013CC50, sizeof( D_8013CC50 ) );
+            size += sizeof( D_8013CC50 );
+            memcpy( buf + size, &D_80115374_cacode[1], 2 * sizeof( D_80115374_cacode[0] ) );
+            size += 2 * sizeof( D_80115374_cacode[0] );
+            func_80029814( "motion.dat", buf, size );
+            func_80029F18( buf );
+        }
+    }
+
+    if ( ( D_800E4D62 & START_BUTTON ) && !( D_800994BC & Z_TRIG ) ) {
+        if ( ++D_80115368_cacode == 3 ) {
+            D_80115368_cacode = 0;
+        }
+        if ( D_80115368_cacode == 2 && D_80115374_cacode[2] < 0 ) {
+            D_80115368_cacode = 0;
+        }
+        obj = &D_801157D8_cacode[D_80115368_cacode]->obj;
+        /* the selected camera fills the screen; the others are drawn small */
+        switch ( D_80115368_cacode ) {
+        case 0:
+            cam = &D_801157E4_cacode[0]->cam;
+            cam->width = 320;
+            cam->height = 240;
+            cam->unk_2C = 0;
+            cam->unk_2E = 0;
+            cam = &D_801157E4_cacode[1]->cam;
+            cam->width = 120;
+            cam->height = 120;
+            cam->unk_2C = 200;
+            cam->unk_2E = 0;
+            cam = &D_801157E4_cacode[2]->cam;
+            cam->width = 120;
+            cam->height = 120;
+            cam->unk_2C = 200;
+            cam->unk_2E = 120;
+            break;
+        case 1:
+            cam = &D_801157E4_cacode[0]->cam;
+            cam->width = 120;
+            cam->height = 120;
+            cam->unk_2C = 0;
+            cam->unk_2E = 0;
+            cam = &D_801157E4_cacode[1]->cam;
+            cam->width = 320;
+            cam->height = 240;
+            cam->unk_2C = 0;
+            cam->unk_2E = 0;
+            cam = &D_801157E4_cacode[2]->cam;
+            cam->width = 120;
+            cam->height = 120;
+            cam->unk_2C = 200;
+            cam->unk_2E = 120;
+            break;
+        case 2:
+            cam = &D_801157E4_cacode[0]->cam;
+            cam->width = 120;
+            cam->height = 120;
+            cam->unk_2C = 0;
+            cam->unk_2E = 0;
+            cam = &D_801157E4_cacode[1]->cam;
+            cam->width = 120;
+            cam->height = 120;
+            cam->unk_2C = 200;
+            cam->unk_2E = 0;
+            cam = &D_801157E4_cacode[2]->cam;
+            cam->width = 320;
+            cam->height = 240;
+            cam->unk_2C = 0;
+            cam->unk_2E = 0;
+            break;
+        }
+    }
+
+    if ( D_800994BC & L_JPAD ) {
+        if ( ( D_800E4D62 & L_JPAD ) || D_80115360_cacode >= 7 ) {
+            --D_80115370_cacode;
+            if ( D_80115370_cacode < 0 ) {
+                D_80115370_cacode = D_80115374_cacode[0] - 1;
+            }
+            memcpy( D_8013E870, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], sizeof( D_8013E870 ) );
+        }
+        D_80115360_cacode++;
+    }
+    if ( D_800994BC & R_JPAD ) {
+        if ( ( D_800E4D62 & R_JPAD ) || D_80115360_cacode >= 7 ) {
+            ++D_80115370_cacode;
+            if ( D_80115370_cacode >= D_80115374_cacode[0] ) {
+                D_80115370_cacode = 0;
+            }
+            memcpy( D_8013E870, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], sizeof( D_8013E870 ) );
+        }
+        D_80115360_cacode++;
+    }
+
+    if ( D_800E4D62 & U_JPAD ) {
+        if ( D_800994BC & Z_TRIG ) {
+            if ( D_80115370_cacode == D_80115374_cacode[0] - 1 ) {
+                i = 0;
+            } else {
+                i = D_80115370_cacode + 1;
+            }
+        } else if ( D_80115370_cacode == 0 ) {
+            i = D_80115374_cacode[0] - 1;
+        } else {
+            i = D_80115370_cacode - 1;
+        }
+        for ( j = 0; j < 2; j++ ) {
+            memcpy( D_8012FE10[j][D_80115370_cacode], D_8012FE10[j][i], sizeof( D_8012FE10[j][i] ) );
+            memcpy( D_80139410[j][D_80115370_cacode], D_80139410[j][i], sizeof( D_80139410[j][i] ) );
+            memcpy( D_8013B030[j][D_80115370_cacode], D_8013B030[j][i], sizeof( D_8013B030[j][i] ) );
+            memcpy( D_8013CC50[j][D_80115370_cacode], D_8013CC50[j][i], sizeof( D_8013CC50[j][i] ) );
+        }
+        for ( j = 0; j < 30; j++ ) {
+            memcpy( D_80115830_cacode[j][D_80115370_cacode], D_80115830_cacode[j][i],
+                    sizeof( D_80115830_cacode[j][i] ) );
+        }
+    }
+
+    if ( D_80115368_cacode != 0 && ( D_800E4D62 & D_JPAD ) ) {
+        func_8011268C_cacode( D_80115370_cacode, D_80115368_cacode );
+    }
+
+    if ( D_80115364_cacode <= CAMODE_ROTATE && !( D_800994BC & Z_TRIG ) ) {
+        if ( D_800E4D62 & A_BUTTON ) {
+            if ( ++D_8011536C_cacode == model->numParts ) {
+                D_8011536C_cacode = 0;
+            }
+            memcpy( D_8013E870, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], sizeof( D_8013E870 ) );
+        }
+        if ( D_800E4D62 & B_BUTTON ) {
+            if ( --D_8011536C_cacode == -1 ) {
+                D_8011536C_cacode = model->numParts - 1;
+            }
+            memcpy( D_8013E870, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], sizeof( D_8013E870 ) );
+        }
+    }
+
+    /* pose the object for the frame */
+    for ( i = 0; i < model->numParts; i++ ) {
+        memcpy( model->parts[i]->unk_08, D_80115830_cacode[i][D_80115370_cacode], sizeof( model->parts[i]->unk_08 ) );
+    }
+    if ( D_80115368_cacode == 0 ) {
+        memcpy( obj->mtx, D_801157F0_cacode, sizeof( obj->mtx ) );
+    } else {
+        memcpy( obj->mtx, D_8012FE10[D_80115368_cacode - 1][D_80115370_cacode], sizeof( obj->mtx ) );
+    }
+    for ( i = 1; i < 3; i++ ) {
+        memcpy( D_801157D8_cacode[i]->obj.mtx, D_8012FE10[i - 1][D_80115370_cacode], sizeof( D_801157D8_cacode[i]->obj.mtx ) );
+        memcpy( D_801157E4_cacode[i]->cam.at, D_80139410[i - 1][D_80115370_cacode], sizeof( D_801157E4_cacode[i]->cam.at ) );
+        memcpy( D_801157E4_cacode[i]->cam.eye, D_8013B030[i - 1][D_80115370_cacode], sizeof( D_801157E4_cacode[i]->cam.eye ) );
+        memcpy( D_801157E4_cacode[i]->cam.unk_18, D_8013CC50[i - 1][D_80115370_cacode],
+                sizeof( D_801157E4_cacode[i]->cam.unk_18 ) );
+    }
+
+    func_80031250();
+    func_80035074();
+    for ( i = 0; i < 3; i++ ) {
+        func_8002C324( &D_801157E4_cacode[i]->cam );
+        func_8002B9CC( &D_801157D8_cacode[i]->obj );
+    }
+    func_80031E40();
+
+    switch ( D_80115364_cacode ) {
+    case CAMODE_ROTATE:
+        cam = &D_801157E4_cacode[D_80115368_cacode]->cam;
+        cam->frame = -1;
+        if ( D_800994BC & R_TRIG ) {
+            /* R: the stick moves the camera, with Z in depth */
+            move[0] = move[1] = move[2] = 0.0f;
+            if ( D_800994BC & Z_TRIG ) {
+                if ( D_8009D05C > STICK_DEAD || D_8009D05C < -STICK_DEAD ) {
+                    move[2] = D_8009D05C / 8.0f;
+                }
+            } else {
+                if ( D_8009D05C > STICK_DEAD || D_8009D05C < -STICK_DEAD ) {
+                    move[0] = -D_8009D05C / 8.0f;
+                }
+                if ( D_800DF628 > STICK_DEAD || D_800DF628 < -STICK_DEAD ) {
+                    move[1] = -D_800DF628 / 8.0f;
+                }
+            }
+            if ( move[0] != 0.0f || move[1] != 0.0f || move[2] != 0.0f ) {
+                cam->at[0] += move[0];
+                cam->at[1] += move[1];
+                cam->at[2] += move[2];
+                cam->eye[0] += move[0];
+                cam->eye[1] += move[1];
+                cam->eye[2] += move[2];
+                cam->unk_18[0] += move[0];
+                cam->unk_18[1] += move[1];
+                cam->unk_18[2] += move[2];
+            }
+        }
+        if ( D_800994BC & Z_TRIG ) {
+            /* Z with A or B scales the object */
+            scale[0] = 1.0f;
+            if ( D_800994BC & A_BUTTON ) {
+                scale[0] = 1.01f;
+            }
+            if ( D_800994BC & B_BUTTON ) {
+                scale[0] = 0.99f;
+            }
+            if ( scale[0] != 1.0 ) {
+                guScaleF( m, scale[0], scale[0], scale[0] );
+                guMtxCatF( obj->mtx, m, obj->mtx );
+            }
+        }
+        if ( !( D_800994BC & R_TRIG ) ) {
+            /* the stick turns the object, with Z about its roll */
+            rot[0] = rot[1] = rot[2] = 0.0f;
+            if ( D_800994BC & Z_TRIG ) {
+                if ( D_8009D05C > STICK_DEAD || D_8009D05C < -STICK_DEAD ) {
+                    rot[2] = -D_8009D05C / 8.0f;
+                }
+            } else {
+                if ( D_8009D05C > STICK_DEAD || D_8009D05C < -STICK_DEAD ) {
+                    rot[1] = D_8009D05C / 8.0f;
+                }
+                if ( D_800DF628 > STICK_DEAD || D_800DF628 < -STICK_DEAD ) {
+                    rot[0] = -D_800DF628 / 8.0f;
+                }
+            }
+            if ( rot[0] != 0.0f || rot[1] != 0.0f || rot[2] != 0.0f ) {
+                guRotateRPYF( m, rot[0], rot[1], rot[2] );
+                guMtxCatF( obj->mtx, m, obj->mtx );
+            }
+        }
+        /* the C buttons turn the selected part a degree a frame, with Z about its roll */
+        rot[0] = rot[1] = rot[2] = 0.0f;
+        if ( D_800994BC & Z_TRIG ) {
+            if ( D_800994BC & R_CBUTTONS ) {
+                rot[2] = -1.0f;
+            }
+            if ( D_800994BC & L_CBUTTONS ) {
+                rot[2] = 1.0f;
+            }
+        } else {
+            if ( D_800994BC & R_CBUTTONS ) {
+                rot[1] = 1.0f;
+            }
+            if ( D_800994BC & L_CBUTTONS ) {
+                rot[1] = -1.0f;
+            }
+            if ( D_800994BC & U_CBUTTONS ) {
+                rot[0] = -1.0f;
+            }
+            if ( D_800994BC & D_CBUTTONS ) {
+                rot[0] = 1.0f;
+            }
+        }
+        if ( rot[0] != 0.0f || rot[1] != 0.0f || rot[2] != 0.0f ) {
+            guRotateRPYF( rotM, rot[0], rot[1], rot[2] );
+            guMtxCatF( obj->joints[D_8011536C_cacode].mtx, rotM, m );
+            if ( D_8011536C_cacode > 0 ) {
+                /* back to the parent's frame, and store the part's new rotation */
+                func_8011306C_cacode( obj->joints[model->parts[D_8011536C_cacode]->unk_04].mtx, inv );
+                guMtxCatF( m, inv, m );
+                func_80112CDC_cacode( m, move, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], scale );
+            }
+        }
+        if ( ( D_800E4D62 & START_BUTTON ) && ( D_800994BC & Z_TRIG ) ) {
+            memcpy( swap, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], sizeof( swap ) );
+            memcpy( D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], D_8013E870, sizeof( D_8013E870 ) );
+            memcpy( D_8013E870, swap, sizeof( D_8013E870 ) );
+        }
+        break;
+    case CAMODE_IMAGE:
+        if ( D_800994BC & Z_TRIG ) {
+            if ( D_800994BC & A_BUTTON ) {
+                D_80115374_cacode[2]++;
+            }
+            if ( D_800994BC & B_BUTTON ) {
+                D_80115374_cacode[2]--;
+            }
+        } else {
+            if ( D_800994BC & A_BUTTON ) {
+                D_80115374_cacode[1]++;
+            }
+            if ( D_800994BC & B_BUTTON ) {
+                D_80115374_cacode[1]--;
+            }
+        }
+        break;
+    }
+
+    /* keep what was edited */
+    if ( D_80115368_cacode == 0 ) {
+        memcpy( D_801157F0_cacode, obj->mtx, sizeof( D_801157F0_cacode ) );
+    } else {
+        memcpy( D_8012FE10[D_80115368_cacode - 1][D_80115370_cacode], obj->mtx, sizeof( obj->mtx ) );
+        memcpy( D_80139410[D_80115368_cacode - 1][D_80115370_cacode], D_801157E4_cacode[D_80115368_cacode]->cam.at,
+                sizeof( D_80139410[0][0] ) );
+        memcpy( D_8013B030[D_80115368_cacode - 1][D_80115370_cacode], D_801157E4_cacode[D_80115368_cacode]->cam.eye,
+                sizeof( D_8013B030[0][0] ) );
+        memcpy( D_8013CC50[D_80115368_cacode - 1][D_80115370_cacode], D_801157E4_cacode[D_80115368_cacode]->cam.unk_18,
+                sizeof( D_8013CC50[0][0] ) );
+    }
+
+    if ( D_80115368_cacode != 0 ) {
+        if ( D_800994BC & Z_TRIG ) {
+            if ( D_800994BC & D_CBUTTONS ) {
+                D_80115540_cacode += 8;
+                if ( D_80115540_cacode > 247 ) {
+                    D_80115540_cacode = 247;
+                }
+            }
+            if ( D_800994BC & U_CBUTTONS ) {
+                D_80115540_cacode -= 8;
+                if ( D_80115540_cacode < 10 ) {
+                    D_80115540_cacode = 10;
+                }
+            }
+        }
+        func_80112350_cacode( D_80115370_cacode, D_80115368_cacode, D_80115540_cacode );
+    }
+
+    gSPLoadUcode( D_800F8094++, D_592F0, D_5FC20 );
+    func_800316C0( &D_801157E4_cacode[D_80115368_cacode]->cam );
+
+    /* the selected part's axes */
+    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+    gDPSetRenderMode( D_800F8094++, G_RM_AA_XLU_LINE, G_RM_AA_XLU_LINE2 );
+    gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
+    gDPSetCombineLERP( D_800F8094++, 1, 0, SHADE, ENVIRONMENT, 0, 0, 0, ENVIRONMENT, 1, 0, SHADE, ENVIRONMENT, 0, 0, 0,
+                       ENVIRONMENT );
+    gDPSetPrimColor( D_800F8094++, 0, 0, 128, 128, 128, 128 );
+    gDPSetEnvColor( D_800F8094++, 0, 0, 0, 128 );
+    gSPMatrix( D_800F8094++, &obj->joints[D_8011536C_cacode].mtxL[D_8005C0B1],
+               G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
+    gSPVertex( D_800F8094++, D_80115380_cacode, 4, 0 );
+    gSPLine3D( D_800F8094++, 0, 1, 0 );
+    gSPLine3D( D_800F8094++, 0, 2, 0 );
+    gSPLine3D( D_800F8094++, 0, 3, 0 );
+    gDPPipeSync( D_800F8094++ );
+    func_80031BB0();
+
+    func_80028A0C( &D_800F8094 );
+    func_80028950( &D_800F8094, 0 );
+    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+    switch ( D_80115364_cacode ) {
+    case CAMODE_ROTATE:
+        func_80028DA4( &D_800F8094, 20, 20, "ROTATE" );
+        sprintf( str, "H=%3.1f P=%3.1f B=%3.1f", model->parts[D_8011536C_cacode]->unk_08[0] * RAD_TO_DEG,
+                 model->parts[D_8011536C_cacode]->unk_08[1] * RAD_TO_DEG,
+                 model->parts[D_8011536C_cacode]->unk_08[2] * RAD_TO_DEG );
+        func_80028DA4( &D_800F8094, 64, 215, str );
+        break;
+    case CAMODE_FILE:
+        func_80028DA4( &D_800F8094, 20, 20, "FILE" );
+        break;
+    case CAMODE_IMAGE:
+        func_80028DA4( &D_800F8094, 20, 20, "IMAGE" );
+        sprintf( str, "IMG1=%d IMG2=%d", D_80115374_cacode[1], D_80115374_cacode[2] );
+        func_80028DA4( &D_800F8094, 84, 30, str );
+        break;
+    }
+    sprintf( str, "CAM=%d OBJ=%d FRAME=%d", D_80115368_cacode, D_8011536C_cacode, D_80115370_cacode );
+    func_80028DA4( &D_800F8094, 84, 20, str );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/cacode/67370", func_80113280_cacode);
+#endif

@@ -449,3 +449,10 @@ opImage_t	opcode.h	invented: an image of the Controller Pak screen (id, x, y, al
 opNoteName_t	opcode.h	invented: a pak note's name in glyphs (16 + extension + 0xFFFF end) for func_80029088
 PAK_MAX_NOTES	opcode.h	invented: the 16 notes of a Controller Pak func_80113168_opcode lists
 PAK_NOTES_SHOWN	opcode.h	invented: the five note lines of the Controller Pak screen
+CAMODE_ROTATE	include/cacode/cacode.h	evidence: the mode text "ROTATE" func_80113280_cacode draws
+CAMODE_FILE	include/cacode/cacode.h	evidence: the mode text "FILE" func_80113280_cacode draws
+CAMODE_IMAGE	include/cacode/cacode.h	evidence: the mode text "IMAGE" func_80113280_cacode draws
+CAMODE_COUNT	include/cacode/cacode.h	invented: number of cacode viewer modes (D_80115364_cacode wraps at 3)
+MOTION_FILE_SIZE	src/cacode/67370.c	invented: size of the "motion.dat" file func_80113280_cacode loads and saves (from the file name)
+STICK_DEAD	src/cacode/67370.c	invented: stick dead zone of 8 in func_80113280_cacode
+RAD_TO_DEG	src/cacode/67370.c	invented: the 180 / pi constant func_80113280_cacode prints H, P, B angles with

@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "libultra.h"
+#include "object.h"
 
 #define DRAW_BUCKETS        0x400       /* keys of the draw list */
 #define DRAW_NONE           -1          /* end of a chain of draw entries; an empty bucket */
@@ -50,7 +51,16 @@ extern u16 D_8005C1D0[];             /* 2, 4, ... 512 */
 extern Vp D_8010A290;               /* the screen's viewport, in the KNSTATICSYS file */
 extern u16 D_80000400[];            /* depth buffer, in the low RAM */
 
+/*
+Identity TODO: linked values 0x592F0 and 0x5FC20 loaded as microcode text and data (G_LOAD_UCODE); presumably the
+physical addresses of main's graphics microcode.
+*/
+extern u8 D_592F0[];
+extern u8 D_5FC20[];
+
 void func_80031250( void );
+void func_800316C0( sceneCamera_t *cam );
+void func_80031E40( void );
 void func_80031650( void );
 void func_80031BB0( void );
 void func_80031CD0( void );

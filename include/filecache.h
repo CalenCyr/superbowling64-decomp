@@ -29,8 +29,9 @@ typedef struct {
 } fileType1Ref_t;
 
 typedef struct {
-    /* 0x00 */ u8 unk_00[0x08];
-    /* 0x08 */ f32 unk_08[3];       /* cacode copies it as a joint's position */
+    /* 0x00 */ u8 unk_00[0x04];
+    /* 0x04 */ s32 unk_04;          /* the parent part, whose joint cacode divides out */
+    /* 0x08 */ f32 unk_08[3];       /* rotation (radians); cacode's viewer copies it per frame */
     /* 0x14 */ u8 unk_14[0x1A];
     /* 0x2E */ s16 numRefs;
     /* 0x30 */ fileType1Ref_t refs[1];   /* numRefs entries */
