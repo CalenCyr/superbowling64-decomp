@@ -630,6 +630,13 @@ D_80120655_gscode = 0x80120655; // segment:gscode size:0x1
 // 6CC50's character-code table (u16, codes 0x10-0x94; the asm reaches it as D_801140A0 = table - 0x20)
 D_801140B0_opcode = 0x801140B0; // segment:opcode size:0x1
 D_801140C0_opcode = 0x801140C0; // segment:opcode size:0x10A
+// opcode: unit 6CC50's images of the Controller Pak screen (8-byte entries, ended by id -1), and its list of the pak's notes
+D_801141CC_opcode = 0x801141CC; // segment:opcode size:0xD0
+D_801143B8_opcode = 0x801143B8; // segment:opcode size:0x240
+D_801142A2_opcode = 0x801142A2; // segment:opcode size:0x1
+D_801142A3_opcode = 0x801142A3; // segment:opcode size:0x1
+D_80114374_opcode = 0x80114374; // segment:opcode size:0x2
+D_80114376_opcode = 0x80114376; // segment:opcode size:0x2
 
 // gscode: the options screen of unit 605D0 (menu, credits script, settings images, state, credits sprites and their script position)
 D_8011FC90_gscode = 0x8011FC90; // segment:gscode size:0xC8

@@ -23,13 +23,6 @@ MAIN (functions and globals of main units without a header yet, under their curr
 */
 
 extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
-/* Main's D_80066C00 (0x24 bytes): only the member the overlay uses. Name invented. */
-typedef struct {
-    /* 0x00 */ u8 unk_00[0x20];
-    /* 0x20 */ u8 unk_20[4];               /* per player: frames of the pin diagram's second page, 9 on */
-} unk80066C00_t;                        /* size 0x24 */
-
-extern unk80066C00_t D_80066C00;
 extern u16 D_8009CF80[4];            /* per player of a duel: games won */
 extern u16 D_8009D030[2][3];        /* per player of a duel and game: score */
 extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */

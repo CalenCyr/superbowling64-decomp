@@ -44,6 +44,22 @@ extern OSMesgQueue D_800E6690;
 extern OSMesgQueue D_800F8098;
 extern s32 D_80066B8C;              /* result of the last request */
 extern s32 D_800E4FC8;
+extern s32 D_800E6584;              /* request 10: the note to read */
+/* Main's D_80066C00 (0x24 bytes). Name invented. */
+typedef struct {
+    /* 0x00 */ OSPfsState note;            /* request 10: the state of the note read */
+    /* 0x20 */ u8 unk_20[4];               /* per player: frames of the pin diagram's second page, 9 on */
+} unk80066C00_t;                        /* size 0x24 */
+
+extern unk80066C00_t D_80066C00;
+extern s32 D_80066C28;              /* request 4: notes in all (with D_800692D4) */
+extern s32 D_800692D4;
+extern s32 D_8009944C;              /* request 4: free bytes */
+/* request 1: the note to delete */
+extern u8 D_800F7C78[16];           /* game name */
+extern u8 D_80066E10[4];            /* extension */
+extern u16 D_8009D090;              /* company code */
+extern u32 D_8009CF6C;              /* game code */
 extern u8 D_800E6578;
 
 void func_800279F0( void );

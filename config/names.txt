@@ -445,3 +445,7 @@ puff_t	ground.h	invented: 12-byte camera-facing square (D_800E4D70, 50): flags, 
 # rscode overlay (include/rscode/rscode.h): invented from use
 rsState_t	rscode.h	invented: main-loop state function of the results overlay (D_801142AC_rscode), as gacode's gaState_t
 frameSlot_t	include/cacode/cacode.h	invented: a slot of cacode's cache of BMP frames (frame, clip, LRU stamp, 40 RGBA16 tiles)
+opImage_t	opcode.h	invented: an image of the Controller Pak screen (id, x, y, alpha), lists end with id -1
+opNoteName_t	opcode.h	invented: a pak note's name in glyphs (16 + extension + 0xFFFF end) for func_80029088
+PAK_MAX_NOTES	opcode.h	invented: the 16 notes of a Controller Pak func_80113168_opcode lists
+PAK_NOTES_SHOWN	opcode.h	invented: the five note lines of the Controller Pak screen
