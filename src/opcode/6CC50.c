@@ -29,7 +29,8 @@ confirms. Returns FALSE when the screen is over.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: needs the unit at -O3 (or inline on func_80113130_opcode); then only reorg's delay-slot choices differ: retail fills the delete's last cursor test as bnel where this draft gets bne, and keeps state 3's first lui 0x6666 in place where this draft moves it into the state dispatch's beq delay slot
+// NON_MATCHING: needs the unit at -O3 (or inline on func_80113130_opcode); then only reorg's delay-slot choices differ: retail fills the delete's last cursor test as bnel where this draft gets bne, and keeps state 3's first lui 0x6666 (D_8005B0F4 / 5) in place where this draft moves it into the state dispatch's beq delay slot
+// (both are reorg treating v0/v1 as live on the not-taken path where this draft's flow info has them dead; moving the leave test after the outer switch breaks state 0's exit)
 s32 func_80113168_opcode( void ) {
     s32 i;
     s32 j;
