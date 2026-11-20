@@ -311,10 +311,6 @@ the scene (Z with the down and up C buttons sets its alpha), and the selected pa
 drawn over it.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with D_80115370_cacode declared volatile: retail reads it twice
-// after each frame step at L_JPAD and R_JPAD (the first read unused), which only a volatile read emits. Without
-// it each step loses one lw. Pending a ruling on declaring it volatile with a `// volatile:` evidence note.
 void func_80113280_cacode( void ) {
     u8 str[80];
     f32 inv[4][4];
@@ -739,6 +735,3 @@ void func_80113280_cacode( void ) {
     sprintf( str, "CAM=%d OBJ=%d FRAME=%d", D_80115368_cacode, D_8011536C_cacode, D_80115370_cacode );
     func_80028DA4( &D_800F8094, 84, 20, str );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/cacode/67370", func_80113280_cacode);
-#endif

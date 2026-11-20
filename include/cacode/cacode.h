@@ -30,7 +30,8 @@ extern s32 D_80115360_cacode;           /* frames the D-pad has been held; frame
 extern s32 D_80115364_cacode;           /* the viewer's mode, a CAMODE_ value */
 extern s32 D_80115368_cacode;           /* the selected camera and object (0 to 2) */
 extern s32 D_8011536C_cacode;           /* the selected model part */
-extern s32 D_80115370_cacode;           /* the frame shown */
+// volatile: func_80113280_cacode reads it twice after each D-pad frame step, the first read unused
+extern volatile s32 D_80115370_cacode;           /* the frame shown */
 extern s32 D_80115374_cacode[3];        /* [0]: frames of the animation; [1], [2]: first BMP frame of clips 1, 2 */
 extern Vtx D_80115380_cacode[4];        /* the origin and the ends of the three axes, drawn as lines */
 
