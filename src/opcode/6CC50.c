@@ -14,14 +14,10 @@ Looks up a character code's entry in the table (codes 0x10-0x94); any other code
 ================
 */
 u16 func_80113130_opcode( u8 code ) {
-    u16 entry;
-
-    if ( (u8)( code - 0x10 ) < 0x85 ) {
-        entry = D_801140C0_opcode[code - 0x10];
-    } else {
-        entry = 0x57;
+    if ( (u8)( code - 0x10 ) >= 0x85 ) {
+        return 0x57;
     }
-    return entry;
+    return D_801140C0_opcode[code - 0x10];
 }
 
 /*
@@ -33,7 +29,7 @@ confirms. Returns FALSE when the screen is over.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: the unit needs -O3 (or inline on func_80113130_opcode); its inlined copies in the note list branch to the table load and keep one store (this draft branches to 0x57 and stores in both arms), and the delete's last test schedules as bne, not bnel
+// NON_MATCHING: needs the unit at -O3 (or inline on func_80113130_opcode); then only reorg's delay-slot choices differ: retail fills the delete's last cursor test as bnel where this draft gets bne, and keeps state 3's first lui 0x6666 in place where this draft moves it into the state dispatch's beq delay slot
 s32 func_80113168_opcode( void ) {
     s32 i;
     s32 j;
@@ -114,8 +110,8 @@ s32 func_80113168_opcode( void ) {
                 func_80029088( &D_800F8094, 0xF9, 0x49 + i * 18, 8, glyphs );
             }
         }
-        func_800292D4( glyphs, D_801145F8_opcode, 2 );
         i = D_801145F8_opcode < 10;
+        func_800292D4( glyphs, D_801145F8_opcode, 2 );
         func_80029088( &D_800F8094, 0x74 + i * 8, 0xA9, 8, glyphs );
         if ( D_801145FC_opcode >= 100 ) {
             i = 0;
@@ -185,10 +181,12 @@ s32 func_80113168_opcode( void ) {
             case 2:
                 func_8002DF3C( D_8011429C_opcode[D_8005B0F4 / 5 % 3], 0x12, D_801142A4_opcode * 18 + 0x48 );
                 func_80030058( 0x25, D_801142A4_opcode * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
-                D_800E57E0[0] = D_800DF590[0] = D_800DF590[1] = 0x24;
+                D_800DF590[0] = D_800DF590[1] = 0x24;
                 D_800E6538[0] = D_800E6538[1] = 0x10;
+                D_800E57E0[0] = 0x24;
+                D_800E4D68[0] = 0x1E;
                 D_800E57E0[1] = 0x4E;
-                D_800E4D68[1] = D_800E4D68[0] = 0x1E;
+                D_800E4D68[1] = 0x1E;
                 func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
                 if ( func_80036E60( 0x94B, PROMPT_CHOICE2_H ) ) {
                     if ( D_80066C44 == 0 ) {
