@@ -402,8 +402,9 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
-    # bss: from the end of the file to past its last referenced symbol (0x801142B4, a byte); the end is an estimate
-    bss_size: 0x18
+    # bss: from the end of the file to 0x801142C0, the end main's loader (func_80026B44) clears to before it calls
+    # func_80112350; the last referenced object is a byte at 0x801142B4
+    bss_size: 0x20
     subsegments:
       - [0x56FF0, c, rscode/56FF0]
       - [0x58EF0, data]
@@ -416,8 +417,8 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
-    # bss: from the end of the file to past its last referenced symbol (0x80120A68, at least three bytes); the end is
-    # an estimate
+    # bss: from the end of the file to 0x80120A70, the end main's loader (func_80026B44) clears to before it calls
+    # func_80112350; the last referenced object is at 0x80120A68
     bss_size: 0x2F0
     subsegments:
       - [0x58F40, c, gscode/58F40]
@@ -463,6 +464,7 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
+    # no bss: main's loader (func_80026B44) clears to 0x80113790, which is the end of the file
     subsegments:
       - [0x6A650, c, pvcode/6A650]
       - [0x6A940, c, pvcode/6A940]
@@ -475,9 +477,10 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
-    # bss: one u8 grid of 21 x 21 cells at 0x80112730 (the maze func_80038214 builds for 10 x 10); the end is an
-    # estimate
-    bss_size: 0x1C0
+    # bss: from the end of the file to 0x80113730, the end main's loader (func_80026B44) clears to before it calls
+    # func_80112350; its only referenced object is the u8 grid of 21 x 21 cells at 0x80112730 (the maze
+    # func_80038214 builds for 10 x 10), so what fills the rest of the 0x1000 bytes is unknown
+    bss_size: 0x1000
     subsegments:
       - [0x6BA90, c, mgcode/6BA90]
       - [0x6BC90, data]
@@ -490,7 +493,8 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
-    # bss: from the end of the file to past its last referenced symbol (0x801145FC, a word); the end is an estimate
+    # bss: from the end of the file to 0x80114600, the end main's loader (func_80026B44) clears to before it calls
+    # func_80112350; the last referenced object is a word at 0x801145FC
     bss_size: 0x2B0
     subsegments:
       - [0x6BE70, c, opcode/6BE70]
