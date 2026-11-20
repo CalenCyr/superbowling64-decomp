@@ -448,9 +448,9 @@ segments:
     vram: 0x80112350
     exclusive_ram_id: ovl
     symbol_name_format: $VRAM_$SEG
-    # bss: from the end of the file through the first 300-frame track of D_80115830 (0xE10 bytes, indexed by
-    # object); the track count is a runtime value, so the end is an estimate
-    bss_size: 0x1010
+    # bss: from the end of the file to 0x8013E890, the end main's loader (func_80026B44) clears to before it calls
+    # func_801128F4; the last object is the BMP buffer pointer at 0x8013E880, after the motion tables
+    bss_size: 0x29260
     subsegments:
       - [0x67370, c, cacode/67370]
       - [0x6A380, data]

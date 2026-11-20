@@ -48,15 +48,15 @@ extern f32 D_80115830_cacode[30][300][3];   /* by model part, per frame: the par
 /*
 The motion tables, saved to and loaded from the host's "motion.dat" in this order, followed by D_80115374_cacode[1]
 and [2]. Cameras and objects 1 and 2 follow the tables of index 0 and 1; camera 0 has the one matrix
-D_801157F0_cacode. They lie contiguously after D_80115830_cacode, so they are presumably the overlay's own bss
-(identity TODO: splat names them without the segment suffix, and the bss size is still an estimate).
+D_801157F0_cacode. They lie contiguously after D_80115830_cacode, inside the overlay's bss (which main's loader
+clears up to 0x8013E890).
 */
-extern f32 D_8012FE10[2][300][4][4];    /* per frame, for objects 1 and 2 */
-extern f32 D_80139410[2][300][3];       /* per frame: the at of cameras 1 and 2 */
-extern f32 D_8013B030[2][300][3];       /* the eye */
-extern f32 D_8013CC50[2][300][3];       /* the up point */
-extern f32 D_8013E870[3];               /* the rotation of the selected part, kept while frames are stepped */
-extern u8 *D_8013E880;                  /* buffer one BMP file is read into */
+extern f32 D_8012FE10_cacode[2][300][4][4];    /* per frame, for objects 1 and 2 */
+extern f32 D_80139410_cacode[2][300][3];       /* per frame: the at of cameras 1 and 2 */
+extern f32 D_8013B030_cacode[2][300][3];       /* the eye */
+extern f32 D_8013CC50_cacode[2][300][3];       /* the up point */
+extern f32 D_8013E870_cacode[3];               /* the rotation of the selected part, kept while frames are stepped */
+extern u8 *D_8013E880_cacode;                  /* buffer one BMP file is read into */
 
 /* D_80115364_cacode */
 #define CAMODE_ROTATE       0           /* the pad moves the camera, the object and the selected part */
