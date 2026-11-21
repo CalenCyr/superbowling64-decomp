@@ -9,6 +9,7 @@
 #include "object.h"
 #include "ground.h"
 #include "heap.h"
+#include "input.h"
 #include "libc.h"
 
 /*
@@ -101,7 +102,87 @@ objNode_t *func_8002BFD8( objParams_t *params ) {
     return &node->node;
 }
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_8002C324);
+/*
+================
+func_8002C324
+
+Updates cam: at from its target joint, eye and up point from the path's current frame, the viewport, the
+projection, and the view (with the eye's light) or, while D_800EA0C0 is set, the controller's zoom, pan and
+rotation of the last view.
+================
+*/
+void func_8002C324( sceneCamera_t *cam ) {
+    f32 *data;
+    s32 i;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    // RULE-EXCEPTION: R30, one local for both normalisations: retail keeps the two in one register
+    f32 norm;
+    f32 m[4][4];
+
+    if ( cam->frame >= 0 ) {
+        data = cam->path->frames + cam->path->frameSize * cam->frame;
+        if ( cam->targetObj != 0 ) {
+            guMtxXFMF( ( (sceneObject_t *)D_800EA120[cam->targetObj] )->joints[cam->targetJoint].mtx, 0.0f, 0.0f,
+                       0.0f, &cam->at[0], &cam->at[1], &cam->at[2] );
+        }
+        for ( i = 0; i < 3; i++ ) {
+            if ( cam->path->eyeMask & ( 4 >> i ) ) {
+                cam->eye[i] = *data++;
+            }
+        }
+        for ( i = 0; i < 3; i++ ) {
+            if ( cam->path->unk_12 & ( 4 >> i ) ) {
+                cam->unk_18[i] = *data++;
+            }
+        }
+    }
+    cam->vp[D_8005C0B1].vp.vscale[0] = cam->vp[D_8005C0B1].vp.vtrans[0] = cam->width * 2;
+    cam->vp[D_8005C0B1].vp.vscale[1] = cam->vp[D_8005C0B1].vp.vtrans[1] = cam->height * 2;
+    guPerspective( &cam->projL[D_8005C0B1], &D_8009CF9E, cam->path->fovy, (f32)cam->width / (f32)cam->height,
+                   20.0f, 16000.0f, 1.0f );
+    /* the up vector is divided by the sum of its components, not by its length */
+    norm = ( cam->unk_18[0] - cam->eye[0] ) + ( cam->unk_18[1] - cam->eye[1] ) + ( cam->unk_18[2] - cam->eye[2] );
+    cam->up[0] = ( cam->unk_18[0] - cam->eye[0] ) / norm;
+    cam->up[1] = ( cam->unk_18[1] - cam->eye[1] ) / norm;
+    cam->up[2] = ( cam->unk_18[2] - cam->eye[2] ) / norm;
+    if ( D_800EA0C0 == 0 ) {
+        guLookAtReflectF( cam->mtx, &cam->lookAt[D_8005C0B1], cam->eye[0], cam->eye[1], cam->eye[2], cam->at[0],
+                          cam->at[1], cam->at[2], cam->up[0], cam->up[1], cam->up[2] );
+        dx = cam->eye[0] - cam->at[0];
+        dy = cam->eye[1] - cam->at[1];
+        dz = cam->eye[2] - cam->at[2];
+        norm = 127.0f / sqrtf( dx * dx + dy * dy + dz * dz );
+        cam->lights[D_8005C0B1].l[1].l.dir[0] = dx * norm;
+        cam->lights[D_8005C0B1].l[1].l.dir[1] = dy * norm;
+        cam->lights[D_8005C0B1].l[1].l.dir[2] = dz * norm;
+    } else {
+        if ( D_800994BC & 0x8000 ) {
+            guScaleF( m, 1.01f, 1.01f, 1.01f );
+            guMtxCatF( m, cam->mtx, cam->mtx );
+        }
+        if ( D_800994BC & 0x4000 ) {
+            guScaleF( m, 0.99f, 0.99f, 0.99f );
+            guMtxCatF( m, cam->mtx, cam->mtx );
+        }
+        if ( D_800994BC & 0x2000 ) {
+            if ( D_8009D05C * D_8009D05C + D_800DF628 * D_800DF628 > 20 ) {
+                guTranslateF( m, D_8009D05C / 4, D_800DF628 / 4, 0.0f );
+                guMtxCatF( cam->mtx, m, cam->mtx );
+            }
+        } else {
+            if ( D_8009D05C * D_8009D05C + D_800DF628 * D_800DF628 > 20 ) {
+                guRotateRPYF( m, -D_800DF628 / 10.0f, D_8009D05C / 10.0f, 0.0f );
+                guMtxCatF( m, cam->mtx, cam->mtx );
+            }
+        }
+    }
+    guMtxF2L( cam->mtx, &cam->viewL[D_8005C0B1] );
+    for ( i = 0; i < 3; i++ ) {
+        cam->dir[i] = cam->at[i] - cam->eye[i];
+    }
+}
 
 /*
 ================

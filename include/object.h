@@ -100,6 +100,7 @@ typedef struct {
 } sceneCamera_t;                        /* size 0x248 */
 
 extern sceneCamera_t *D_8009CFA0[];
+extern u16 D_8009CF9E;              /* perspNorm of the cameras' projections (guPerspective) */
 
 /* What the classes func_8002B610 and func_8002BFD8 create: the list header, then the scene object or camera. */
 typedef struct {
