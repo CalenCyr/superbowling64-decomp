@@ -215,6 +215,9 @@ once the setup is taken, 2 once it is backed out of, else 0.
 // NON_MATCHING: complete; three register choices differ: in case 0 the team searched for sits in a0 (retail
 // a1, the count copied to a0), and in case 5 the human flag and the copy loop's team sit in a0 (retail v1).
 // A u8 team fixes the copy loop but adds andi in case 0; a u8 flag adds andi to its tests.
+// Permuter clue: holding the human flag in `j` (or `i`) instead of its own local cuts most of the case 5
+// difference, so retail's flag likely shares a pseudo with another variable; a block-scoped flag, `team`, or
+// another declaration order does not.
 s32 func_80114D1C_gscode( void ) {
     u8 minPlayers;
     u8 maxPlayers;
