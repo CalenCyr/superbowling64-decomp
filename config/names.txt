@@ -412,6 +412,8 @@ fileRefA_t	include/filecache.h	invented: first file of a fileType1Ref_t pair (of
 fileRefB_t	include/filecache.h	invented: second file of a fileType1Ref_t pair (offsets 0x2C, 0x30)
 fileType2_t	include/filecache.h	invented: file relocated by func_80030C04 type 2
 fileType3_t	include/filecache.h	invented: file relocated by func_80030C04 type 3
+FILE3_FOG	include/filecache.h	invented: fileType3_t.unk_38 bit func_800316C0 tests before drawing fog
+fileType3_t.fogColor, fogNear, fogFar	include/filecache.h	invented: the gDPSetFogColor and gSPFogPosition arguments of func_800316C0
 bmpHeader_t	include/gamesnd.h	evidence: D_8005CA40 is a BMP file and info header ("BM", 54-byte offset, 320x240, 24 bpp) written by func_80037E30
 bmpFile_t	include/gamesnd.h	evidence: func_80037E30 writes the header and 320x240 BGR pixels to the host as "BW%3.3d.BMP"
 

@@ -59,6 +59,8 @@ extern u8 D_80099448;
 extern void *D_80099420;            /* drawEntry_t.unk_08 of the entries func_8003128C adds */
 extern u16 D_80066E14;
 extern u8 D_800693AC;
+extern u8 D_800DF682;               /* set when the fog setting D_800E6588 changes */
+extern u8 D_80066B30;               /* set when the fog setting D_800E6588 changes */
 extern Vp D_8010A290;               /* the screen's viewport, in the KNSTATICSYS file */
 extern u16 D_80000400[];            /* depth buffer, in the low RAM */
 

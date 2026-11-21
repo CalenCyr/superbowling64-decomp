@@ -140,7 +140,47 @@ void func_80031650( void ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/C650", func_800316C0);
+/*
+================
+func_800316C0
+
+Starts drawing the view of cam: the depth and colour images at its corner, its fog (turning the fog setting on or
+off when it changes), its matrices, look-at, viewport, scissor and lights.
+================
+*/
+void func_800316C0( sceneCamera_t *cam ) {
+    gDPPipeSync( D_800F8094++ );
+    gDPSetDepthImage( D_800F8094++,
+                      osVirtualToPhysical( D_80000400 + ( cam->unk_2C & 0xFFC ) + cam->unk_2E * SCREEN_WIDTH ) );
+    gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                      osVirtualToPhysical( D_80066C38[D_8005B0F8] + ( cam->unk_2C & 0xFFC ) + cam->unk_2E * SCREEN_WIDTH ) );
+    if ( cam->path->unk_38 & FILE3_FOG ) {
+        if ( D_800E6588 == 0 ) {
+            D_800E6588 = 1;
+            D_800DF682 = 1;
+            D_80066B30 = 1;
+            func_80031CD0();
+        }
+        gSPFogPosition( D_800F8094++, cam->path->fogNear, cam->path->fogFar );
+        gDPSetFogColor( D_800F8094++, cam->path->fogColor >> 24, cam->path->fogColor >> 16, cam->path->fogColor >> 8,
+                        cam->path->fogColor );
+    } else {
+        if ( D_800E6588 == 1 ) {
+            D_800E6588 = 0;
+            D_800DF682 = 1;
+            D_80066B30 = 1;
+            func_80031CD0();
+        }
+        gDPSetFogColor( D_800F8094++, 0, 0, 0, 0 );
+        gSPFogPosition( D_800F8094++, 1000, 1200 );
+    }
+    gSPMatrix( D_800F8094++, &cam->projL[D_8005C0B1], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH );
+    gSPMatrix( D_800F8094++, &cam->viewL[D_8005C0B1], G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH );
+    gSPLookAt( D_800F8094++, &cam->lookAt[D_8005C0B1] );
+    gSPViewport( D_800F8094++, &cam->vp[D_8005C0B1] );
+    gDPSetScissor( D_800F8094++, G_SC_NON_INTERLACE, 0, 0, cam->width, cam->height );
+    gSPSetLights2( D_800F8094++, cam->lights[D_8005C0B1] );
+}
 
 /*
 ================
