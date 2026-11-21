@@ -9,6 +9,7 @@
 #include "object.h"
 #include "ground.h"
 #include "heap.h"
+#include "libc.h"
 
 /*
 ================
@@ -158,7 +159,51 @@ void func_8002DF3C( u16 id, s16 x, s16 y ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_8002E0EC);
+/*
+================
+func_8002E0EC
+
+Draws image id unscaled at (x, y), in copy mode, from a copy of its palette: the RDP loads the palette after
+the file cache may have moved the image, so a colour-indexed image's palette goes to the next of the frame's
+four palette slots.
+================
+*/
+void func_8002E0EC( u16 id, s16 x, s16 y ) {
+    fileImage_t *image;
+    u32 type;
+    u32 width;
+    u32 height;
+    u8 *data;
+
+    if ( D_8005C190 != DRAW2D_COPY ) {
+        D_8005C190 = DRAW2D_COPY;
+        gDPSetCycleType( D_800F8094++, G_CYC_COPY );
+        gDPSetRenderMode( D_800F8094++, G_RM_NOOP, G_RM_NOOP2 );
+        gDPSetAlphaCompare( D_800F8094++, G_AC_THRESHOLD );
+    }
+    if ( D_800F80B0[id].refCount == 0 ) {
+        func_80030C04( id, FILE_RAW );
+    }
+    image = D_800F80B0[id].data;
+    type = image->type;
+    width = image->width;
+    height = image->height;
+    data = image->data;
+    if ( type == IMAGE_CI4 ) {
+        memcpy( D_80062A70[D_8005C0B1][D_8005C194], data, CI4_PALETTE_SIZE );
+        func_8002CE24( type, x, y, width, height, D_80062A70[D_8005C0B1][D_8005C194],
+                       data + CI4_PALETTE_SIZE );
+    } else if ( type == IMAGE_CI8 ) {
+        memcpy( D_80062A70[D_8005C0B1][D_8005C194], data, CI8_PALETTE_SIZE );
+        func_8002CE24( type, x, y, width, height, D_80062A70[D_8005C0B1][D_8005C194],
+                       data + CI8_PALETTE_SIZE );
+    } else {
+        func_8002CE24( type, x, y, width, height, D_80062A70[D_8005C0B1][D_8005C194], data );
+    }
+    if ( ++D_8005C194 == 4 ) {
+        D_8005C194 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/7250", func_8002E4B0);
 
