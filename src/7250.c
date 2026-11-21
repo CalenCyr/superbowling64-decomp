@@ -242,7 +242,135 @@ void func_8002C950( s16 x, s16 y, u16 w, u16 h, u8 r, u8 g, u8 b, u8 a ) {
     gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
 }
 
+/*
+================
+func_8002CE24
+
+Draws a colour-indexed image of width by height pixels at (x, y), in copy mode: loads its palette, then draws
+it in strips of whole rows that fit texture memory, first in the widest power-of-two columns that fit the
+padded width, then in the power-of-two columns that cover the rest. The pixels are stored strip after strip.
+Any type other than IMAGE_CI4 draws as IMAGE_CI8 (without loading a palette, and with the strip sizes unset).
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: 144 instructions differ, all register/schedule: retail sets pos = 0 after (not before) each loop's
+// invariant tile words, loads the shift constant 1 before width + pad, and multiplies rows * width (not width *
+// rows) for the offset; the pad truncation needs the (s16) cast, which a plain s16 pad drops
+void func_8002CE24( s16 type, s16 x, s16 y, s16 width, s16 height, void *palette, void *pixels ) {
+    s32 texels;         /* pixels in texture memory */
+    s32 pad;
+    s32 i;
+    s32 stripWidth;
+    s32 restWidth;
+    s32 remaining;
+    s32 rows;
+    s32 pos;
+    s32 offset;
+
+    offset = 0;
+    switch ( type ) {
+    case IMAGE_CI4:
+        texels = 0x1000;
+        pad = (s16)( width % 16 );
+        gDPLoadTLUT_pal16( D_800F8094++, 0, palette );
+        break;
+    case IMAGE_CI8:
+        texels = 0x800;
+        pad = (s16)( width % 8 );
+        gDPLoadTLUT_pal256( D_800F8094++, palette );
+        break;
+    }
+    for ( i = 1; i < 10; i++ ) {
+        if ( width + pad < ( 1 << i ) ) {
+            break;
+        }
+    }
+    stripWidth = 1 << ( i - 1 );
+    if ( width + pad == stripWidth ) {
+        restWidth = 0;
+    } else {
+        for ( i = 1; i < 10; i++ ) {
+            if ( width + pad - stripWidth <= ( 1 << i ) ) {
+                break;
+            }
+        }
+        restWidth = 1 << i;
+    }
+    if ( type == IMAGE_CI4 ) {
+        for ( remaining = height, pos = 0; remaining > 0; pos += texels ) {
+            rows = texels / stripWidth;
+            if ( remaining < rows ) {
+                rows = remaining;
+                remaining = 0;
+            } else {
+                remaining -= rows;
+            }
+            gDPLoadTextureBlock_4b( D_800F8094++, (u16 *)pixels + offset, G_IM_FMT_CI, stripWidth, rows, 0,
+                                    G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD );
+            offset += stripWidth * rows / 4;
+            gSPScisTextureRectangle( D_800F8094++, x << 2, ( y + pos / stripWidth ) << 2,
+                                     ( x + stripWidth - 1 ) << 2, ( y + pos / stripWidth + rows - 1 ) << 2,
+                                     G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10 );
+        }
+        if ( restWidth != 0 ) {
+            for ( remaining = height, pos = 0; remaining > 0; pos += texels ) {
+                rows = texels / restWidth;
+                if ( remaining < rows ) {
+                    rows = remaining;
+                    remaining = 0;
+                } else {
+                    remaining -= rows;
+                }
+                gDPLoadTextureBlock_4b( D_800F8094++, (u16 *)pixels + offset, G_IM_FMT_CI, restWidth, rows, 0,
+                                        G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD );
+                offset += restWidth * rows / 4;
+                gSPScisTextureRectangle( D_800F8094++, ( x + stripWidth ) << 2, ( y + pos / restWidth ) << 2,
+                                         ( x + stripWidth + restWidth - 1 ) << 2,
+                                         ( y + pos / restWidth + rows - 1 ) << 2, G_TX_RENDERTILE, 0, 0, 4 << 10,
+                                         1 << 10 );
+            }
+        }
+    } else {
+        for ( remaining = height, pos = 0; remaining > 0; pos += texels ) {
+            rows = texels / stripWidth;
+            if ( remaining < rows ) {
+                rows = remaining;
+                remaining = 0;
+            } else {
+                remaining -= rows;
+            }
+            gDPLoadTextureBlock( D_800F8094++, (u16 *)pixels + offset, G_IM_FMT_CI, G_IM_SIZ_8b, stripWidth, rows,
+                                 0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD );
+            offset += stripWidth * rows / 2;
+            gSPScisTextureRectangle( D_800F8094++, x << 2, ( y + pos / stripWidth ) << 2,
+                                     ( x + stripWidth - 1 ) << 2, ( y + pos / stripWidth + rows - 1 ) << 2,
+                                     G_TX_RENDERTILE, 0, 0, 4 << 10, 1 << 10 );
+        }
+        if ( restWidth != 0 ) {
+            for ( remaining = height, pos = 0; remaining > 0; pos += texels ) {
+                rows = texels / restWidth;
+                if ( remaining < rows ) {
+                    rows = remaining;
+                    remaining = 0;
+                } else {
+                    remaining -= rows;
+                }
+                gDPLoadTextureBlock( D_800F8094++, (u16 *)pixels + offset, G_IM_FMT_CI, G_IM_SIZ_8b, restWidth,
+                                     rows, 0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                                     G_TX_NOLOD );
+                offset += restWidth * rows / 2;
+                gSPScisTextureRectangle( D_800F8094++, ( x + stripWidth ) << 2, ( y + pos / restWidth ) << 2,
+                                         ( x + stripWidth + restWidth - 1 ) << 2,
+                                         ( y + pos / restWidth + rows - 1 ) << 2, G_TX_RENDERTILE, 0, 0, 4 << 10,
+                                         1 << 10 );
+            }
+        }
+    }
+    gDPPipeSync( D_800F8094++ );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/7250", func_8002CE24);
+#endif
 
 /*
 ================
