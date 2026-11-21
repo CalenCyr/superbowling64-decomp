@@ -119,9 +119,59 @@ INCLUDE_ASM("asm/nonmatchings/7250", func_8002E0EC);
 
 INCLUDE_ASM("asm/nonmatchings/7250", func_8002E4B0);
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_8002FDE4);
+/*
+================
+func_8002FDE4
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_80030058);
+Fills the rectangle of width by height pixels at (x, y) with colour (r, g, b, a), clipped at the screen's top and
+left edges; translucent unless a is 0xFF.
+================
+*/
+void func_8002FDE4( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a ) {
+    D_8005C190 = DRAW2D_FILL;
+    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+    if ( a == 0xFF ) {
+        gDPSetRenderMode( D_800F8094++, G_RM_OPA_SURF, G_RM_OPA_SURF2 );
+    } else {
+        gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
+        gDPSetRenderMode( D_800F8094++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
+    }
+    gDPSetCombineMode( D_800F8094++, G_CC_PRIMITIVE, G_CC_PRIMITIVE );
+    gDPSetPrimColor( D_800F8094++, 0, 0, r, g, b, a );
+    gSPScisTextureRectangle( D_800F8094++, x << 2, y << 2, ( x + width + 1 ) << 2, ( y + height + 1 ) << 2,
+                             G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
+    gDPPipeSync( D_800F8094++ );
+}
+
+/*
+================
+func_80030058
+
+Draws the one-pixel outline of the rectangle of width by height at (x, y) in colour (r, g, b, a), as func_8002FDE4
+does its fill.
+================
+*/
+void func_80030058( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a ) {
+    D_8005C190 = DRAW2D_FILL;
+    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+    if ( a == 0xFF ) {
+        gDPSetRenderMode( D_800F8094++, G_RM_OPA_SURF, G_RM_OPA_SURF2 );
+    } else {
+        gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
+        gDPSetRenderMode( D_800F8094++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
+    }
+    gDPSetCombineMode( D_800F8094++, G_CC_PRIMITIVE, G_CC_PRIMITIVE );
+    gDPSetPrimColor( D_800F8094++, 0, 0, r, g, b, a );
+    gSPScisTextureRectangle( D_800F8094++, x << 2, y << 2, ( x + width ) << 2, ( y + 1 ) << 2,
+                             G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
+    gSPScisTextureRectangle( D_800F8094++, x << 2, ( y + height - 1 ) << 2, ( x + width ) << 2,
+                             ( y + height ) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
+    gSPScisTextureRectangle( D_800F8094++, x << 2, y << 2, ( x + 1 ) << 2, ( y + height ) << 2,
+                             G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
+    gSPScisTextureRectangle( D_800F8094++, ( x + width - 1 ) << 2, y << 2, ( x + width ) << 2,
+                             ( y + height ) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
+    gDPPipeSync( D_800F8094++ );
+}
 
 /*
 ================
