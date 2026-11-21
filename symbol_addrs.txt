@@ -663,3 +663,5 @@ D_8013B030_cacode = 0x8013B030; // segment:cacode size:0x1C20
 D_8013CC50_cacode = 0x8013CC50; // segment:cacode size:0x1C20
 D_8013E870_cacode = 0x8013E870; // segment:cacode size:0xC
 D_8013E880_cacode = 0x8013E880; // segment:cacode size:0x4
+D_8011B8D0_gscode = 0x8011B8D0; // segment:gscode size:0x136
+D_80120791_gscode = 0x80120791; // segment:gscode size:0x2

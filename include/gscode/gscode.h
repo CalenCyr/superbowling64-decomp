@@ -78,6 +78,16 @@ extern menuItem_t D_8011BA08_gscode[7];  /* the name entry: id 0x17 its backgrou
 extern s32 D_8011BA6C_gscode;       /* step of the name entry: 1 next player, 2 backed out, 5 done */
 extern u16 D_8011BA70_gscode[3 * 2 * 5 * 12]; /* the characters of the name entry: per set, case, row (5) and column (12) */
 extern u8 D_8011BD40_gscode;        /* column the cursor left the grid from */
+extern menuItem_t D_8011B8D0_gscode[31]; /* the player setup: [5] its title, ids 9-0x10 the players' names */
+extern s16 D_8011BA50_gscode[4];    /* images of the Rumble Pak marker's blink */
+extern u16 D_8011BA58_gscode[10];   /* image of each digit of a handicap */
+extern s32 D_8011BD44_gscode;       /* answer of the prompt to clear a team's record */
+extern s32 D_8011BD48_gscode;       /* frame counter of the player setup */
+extern u8 D_8011BD4C_gscode;        /* slide step of the player setup */
+extern u8 D_8011BD4D_gscode;        /* CHOICE_IN etc. */
+extern u8 D_8011BD4E_gscode;        /* frames a C button is held */
+extern u8 D_80120790_gscode;        /* choice of the team prompt: 0 keep the name, 1 clear the record */
+extern u8 D_80120791_gscode[2];     /* per port: controller status the Rumble Pak check compares with */
 extern u8 D_80120793_gscode;        /* player whose name is entered */
 extern s8 D_80120794_gscode;        /* column of the cursor; on the row below the grid, 4 to 6 the sets, 7 the end */
 extern s8 D_80120795_gscode;        /* row of the cursor, 0 to 4; -1: the row below the grid */
