@@ -38,6 +38,14 @@ typedef struct {
 #define ROLL_STRIKE         -1
 #define ROLL_SPARE          -2
 
+/* func_80038214: work space of a maze's construction, on the heap */
+typedef struct {
+    /* 0x0000 */ u16 set[0x400];        /* per cell, the lowest cell it is connected to */
+    /* 0x0800 */ u8 closed[0x800];      /* per wall, 0: opened */
+    /* 0x1000 */ u16 weight[0x800];     /* per wall, its random weight; 0 once ordered */
+    /* 0x2000 */ u16 order[0x800];      /* the walls by decreasing weight */
+} mazeWork_t;                           /* size 0x3000 */
+
 extern u16 D_8005CA80[MENU_SLIDE_STEPS];    /* position of a sliding item at each step, 0x1000: in place */
 extern u16 D_8005CAC0[16];
 extern u16 D_8005CB18[10];          /* image of each digit */
@@ -55,7 +63,7 @@ extern f32 D_800A2FE8[3][4];        /* unk_16, percent of 10 a game */
 extern f32 D_80099488[3][4];        /* unk_18, percent of 10 a game */            /* number shown on each player's name plate; 0: none */
 
 void func_80038090( u16 image, u32 width, u32 height, u8 *maze );
-void func_80038214( s32 width, s32 height, u8 *maze );
+void func_80038214( u32 width, u32 height, u8 *maze );
 void func_800386E0( menuItem_t *items, u8 step );
 void func_800389D0( s32 player, u8 cpu, u16 *name, s16 x, s16 y );
 void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );

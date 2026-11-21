@@ -6,6 +6,7 @@
 #include "dbgtext.h"
 #include "filecache.h"
 #include "game.h"
+#include "heap.h"
 #include "save.h"
 #include "sprite.h"
 #include "menu.h"
@@ -45,7 +46,119 @@ void func_80038090( u16 image, u32 width, u32 height, u8 *maze ) {
     }
 }
 
+/*
+================
+func_80038214
+
+Builds a random width x height maze into maze, (2 * width + 1) rows of (2 * height + 1) bytes (1: wall), by
+opening the walls between cells in a random order whenever the two cells are not yet connected; the entrance is
+on the left of the first row, the exit on the right of the last.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: calls, CFG, constants and the frame match; registers differ only in the inner loops: retail keeps
+// the inner counter j (and the first cell of a wall) in a1 and the walking pointer or bound in a0, this draft swaps
+// them (declaration order of the locals tried, no effect).
+void func_80038214( u32 width, u32 height, u8 *maze ) {
+    s32 i;
+    s32 j;
+    mazeWork_t *work;
+    u16 *set;
+    u8 *closed;
+    u16 *weight;
+    u16 *order;
+    u16 walls;          /* (width - 1) * height between rows, then width * (height - 1) within them */
+    u16 best;
+    u16 bestWall;
+    u32 wall;
+    u32 cell;
+    u32 next;
+    u16 from;
+    u16 to;
+    u32 row;
+    u32 col;
+
+    work = func_80029E28( sizeof( mazeWork_t ) );
+    set = work->set;
+    closed = work->closed;
+    weight = work->weight;
+    order = work->order;
+    walls = ( width - 1 ) * height + width * ( height - 1 );
+    memset( work->closed, 1, sizeof( work->closed ) );
+    for ( i = 0; i < walls; i++ ) {
+        weight[i] = guRandom() % 0xFFFE + 1;
+    }
+    for ( i = 0; i < walls; i++ ) {
+        best = 0;
+        bestWall = 0;
+        for ( j = 0; j < walls; j++ ) {
+            if ( best < weight[j] ) {
+                best = weight[j];
+                bestWall = j;
+            }
+        }
+        order[i] = bestWall;
+        weight[bestWall] = 0;
+    }
+    for ( i = 0; i < width * height; i++ ) {
+        set[i] = i;
+    }
+    for ( i = 0; i < walls; i++ ) {
+        wall = order[i];
+        if ( wall < ( width - 1 ) * height ) {
+            cell = wall % ( width - 1 ) * height + wall / ( width - 1 );
+            next = cell + height;
+        } else {
+            wall -= ( width - 1 ) * height;
+            cell = wall % width * height + wall / width;
+            next = cell + 1;
+        }
+        if ( set[cell] != set[next] ) {
+            closed[order[i]] = 0;
+            if ( set[cell] < set[next] ) {
+                from = set[next];
+                to = set[cell];
+            } else {
+                from = set[cell];
+                to = set[next];
+            }
+            for ( j = 0; j < width * height; j++ ) {
+                if ( set[j] == from ) {
+                    set[j] = to;
+                }
+            }
+        }
+    }
+    memset( maze, 0, width * height );
+    for ( i = 0; i < width * 2 + 1; i++ ) {
+        for ( j = 0; j < height * 2 + 1; j++ ) {
+            maze[i * ( height * 2 + 1 ) + j] = 1;
+        }
+    }
+    for ( i = 0; i < width; i++ ) {
+        for ( j = 0; j < height; j++ ) {
+            maze[( i * 2 + 1 ) * ( height * 2 + 1 ) + j * 2 + 1] = 0;
+        }
+    }
+    for ( i = 0; i < walls; i++ ) {
+        if ( closed[i] == 0 ) {
+            if ( i < ( width - 1 ) * height ) {
+                col = i / ( width - 1 ) * 2 + 1;
+                row = i % ( width - 1 ) * 2 + 2;
+            } else {
+                col = ( i - ( width - 1 ) * height ) / width * 2 + 2;
+                row = ( i - ( width - 1 ) * height ) % width * 2 + 1;
+            }
+            maze[row * ( height * 2 + 1 ) + col] = 0;
+        }
+    }
+    maze[height * 2 + 1] = 0;
+    maze[( width * 2 - 1 ) * ( height * 2 + 1 ) + height * 2] = 0;
+    func_80029F18( work );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/13490", func_80038214);
+#endif
 
 /*
 ================
@@ -500,34 +613,24 @@ ten frames.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: needs `inline` on func_800389D0 (retail expands it here, the unit is -O2); calls, CFG and
-// constants match; registers differ: retail keeps x in s7 and the plate's x and y as copies (s2 = x, s0 = y + 9,
-// then s5 = s0) from which the second loop's frameX and frameY come; this draft re-derives them from x and y.
+// NON_MATCHING: written like func_8003A3F0 (inline headers, y += 9, a plate cursor frameX = x); calls, CFG and
+// constants match; registers differ: retail keeps x in s7 and computes the headers' x + 0x38 from a1 before the
+// copy, and y + 9 goes to a fresh register (s0, then copied to s5) instead of updating y's. A s16 frameY = y + 9
+// is further off; the permuter (8 min) found only a u8 temporary for D_8005C0E4[player], not adopted.
 void func_8003A658( s32 player, s32 x, s32 y ) {
     s32 i;
     s16 frameX;
-    s16 frameY;
-    u16 *images;
 
-    images = D_8005CAC0;
-    frameX = x + 0x38;
-    for ( i = 0; i < 10; i++ ) {
-        if ( i == 9 ) {
-            func_8002DF3C( 0x87B, frameX, y );
-        } else {
-            func_8002DF3C( 0x87C, frameX, y );
-            func_8002DF3C( images[i + 1], frameX + 7, y + 1 );
-        }
-        frameX += 20;
-    }
-    frameY = y + 9;
-    func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, frameY );
-    frameX = x + 0x38;
+    func_80038C1C( 10, 0, x + 0x38, y );
+    y += 9;
+    frameX = x;
+    func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, frameX, y );
+    frameX += 0x38;
     for ( i = 0; i < 9; i++ ) {
-        func_80038DD4( player, i, 9, D_80068A50[player], D_800994BE[player], frameX, frameY );
+        func_80038DD4( player, i, 9, D_80068A50[player], D_800994BE[player], frameX, y );
         frameX += 20;
     }
-    func_80038DD4( player, 9, 9, D_80068A50[player], D_800994BE[player], frameX, frameY );
+    func_80038DD4( player, 9, 9, D_80068A50[player], D_800994BE[player], frameX, y );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A658);
