@@ -14,3 +14,5 @@ report.json
 objdiff.json
 *.d
 .claude/skills/
+nonmatchings/
+.permuter-venv/
