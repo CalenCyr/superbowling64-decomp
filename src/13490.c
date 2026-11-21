@@ -339,7 +339,69 @@ void func_80039554( s16 *digits, s16 value, u8 small, u8 tens ) {
 
 INCLUDE_ASM("asm/nonmatchings/13490", func_80039700);
 
-INCLUDE_ASM("asm/nonmatchings/13490", func_80039CBC);
+/*
+================
+func_80039CBC
+
+Draws the score card at (x, y): its title, then a row of frame numbers, a row of each frame's par and the par
+total, and a row per player with its name plate, its frames (func_8003A074, by kind and all) and its total
+(func_8003A21C, kind as duel).
+================
+*/
+void func_80039CBC( u8 kind, u8 all, s16 x, s16 y ) {
+    s32 row;
+    s32 player;
+    s32 i;
+    s16 rowX;
+    s16 rowY;
+
+    func_8002DF3C( !kind ? 0xA1C : 0xA2D, x, y );
+    rowY = y + 16;
+    for ( row = 0; row < D_8005C161 + 2; row++ ) {
+        player = row - 2;
+        rowX = x;
+        switch ( row ) {
+        case 0:
+            func_8002DF3C( 0xA3A, rowX, rowY );
+            break;
+        case 1:
+            func_8002DF3C( 0xA2C, rowX, rowY );
+            break;
+        default:
+            func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, rowX, rowY );
+            break;
+        }
+        rowX += 0x38;
+        for ( i = 0; i < 9; i++ ) {
+            func_8002DF3C( D_8005CB40[row], rowX, rowY );
+            switch ( row ) {
+            case 0:
+                func_8002DF3C( D_8005CB2C[i], rowX + 6, rowY + 3 );
+                break;
+            case 1:
+                func_800393D8( D_80099458[i], rowX - 6, rowY + 4 );
+                break;
+            default:
+                func_8003A074( player, i, kind, all, rowX, rowY );
+                break;
+            }
+            rowX += 18;
+        }
+        func_8002DF3C( D_8005CB4C[row], rowX, rowY );
+        switch ( row ) {
+        case 0:
+            func_8002DF3C( 0x9E8, rowX, rowY );
+            break;
+        case 1:
+            func_800393D8( D_8009CF80[0], rowX + 2, rowY + 4 );
+            break;
+        default:
+            func_8003A21C( player, kind, rowX, rowY );
+            break;
+        }
+        rowY += row < 2 ? 15 : 20;
+    }
+}
 
 /*
 ================

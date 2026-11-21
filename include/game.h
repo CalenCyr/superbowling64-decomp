@@ -35,5 +35,7 @@ extern playerName_t D_8005C0F8[8];   /* per character: its default name */
 extern playerName_t D_80068218[];    /* per player: name */
 extern u8 D_80068A50[];             /* per player (func_8003A658) */
 extern u8 D_800994BE[];             /* per player (func_8003A658) */
+extern u8 D_80099458[9];            /* per frame: par of the frame (func_80122140_gacode) */
+extern u16 D_8009CF80[4];           /* per player of a duel: games won */
 
 #endif

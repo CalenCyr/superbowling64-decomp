@@ -45,6 +45,9 @@ extern u16 D_8005CB04[10];          /* image of each small digit */
 extern s16 D_8005CAE4[];           /* icon of each player, then of the computer */
 extern s8 D_800DF5D0[];
 extern u16 D_8005CB58[4];          /* func_8003A074: sign of a score: negative, zero, positive */
+extern u16 D_8005CB2C[9];          /* func_80039CBC: image of each frame's number */
+extern u16 D_8005CB40[6];          /* func_80039CBC: per row, the image of a frame's box */
+extern u16 D_8005CB4C[6];          /* func_80039CBC: per row, the image of the total's box */
 /* func_8003B034: per kind of record (0: D_800E44E8, 1: D_8009D098), per character, the record's figures */
 extern f32 D_800E66B0[3][4];        /* average score */
 extern f32 D_800DF5D8[3][4];        /* unk_14, percent of 12 a game */
@@ -56,7 +59,7 @@ void func_80038214( s32 width, s32 height, u8 *maze );
 void func_800386E0( menuItem_t *items, u8 step );
 void func_800389D0( s32 player, u8 cpu, u16 *name, s16 x, s16 y );
 void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );
-void func_80039CBC( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );
+void func_80039CBC( u8 kind, u8 all, s16 x, s16 y );
 void func_8003A3F0( s32 arg0, s16 x, s16 y );
 void func_8003A658( s32 player, s32 x, s32 y );
 void func_8003A970( s16 count, UnkRecord *records, u8 arg2, s16 x, s16 y );
