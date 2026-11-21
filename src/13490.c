@@ -657,7 +657,79 @@ void func_8003A8B4( s32 arg0, u8 count, u8 small, s16 x, s16 y ) {
     }
 }
 
+/*
+================
+func_8003A970
+
+Draws the table of count records of the given kind at (x, y): its column heads, then a row per record with its
+name plate and, once it holds a game, its games, average, high and low scores and its three percentages.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: prologue, calls, CFG and constants match; the frame is 8 bytes short (0x98, retail 0xA0) and
+// retail keeps x on the stack, reloading it each row and adding 0x2C there (s5 = x + 0x2C, then s5 + 2 ...), while
+// this draft keeps x in s5 and folds the offsets (x + 0x2E); rowY + 2 as topY reproduces retail's early s2. Tried:
+// rowX/rowY/played as s16/s32/u8, the inline small plate func_80038AE8 (no change).
+void func_8003A970( u16 count, UnkRecord *records, u8 kind, s16 x, s32 y ) {
+    s16 digits[4];
+    s32 i;
+    s32 played;
+    s16 rowY;
+    s16 rowX;
+    s16 topY;      /* of the upper number */
+
+    func_8002DF3C( 0x9E1, x + 0x2C, y );
+    func_8002DF3C( 0xA15, x + 0x52, y );
+    func_8002DF3C( 0xA11, x + 0x78, y );
+    func_8002DF3C( 0x9E2, x + 0x9E, y );
+    func_8002DF3C( 0x9E4, x + 0xC4, y );
+    func_8002DF3C( 0x9E3, x + 0xEA, y );
+    rowY = y + 16;
+    for ( i = 0; i < count; i++ ) {
+        played = records[i].games != 0;
+        rowX = x;
+        func_8002DF3C( 0x9FE, rowX, rowY );
+        func_80029088( &D_800F8094, rowX + 3, rowY + 6, 8, records[i].name );
+        rowX += 0x2C;
+        topY = rowY + 2;
+        func_8002DF3C( 0x9E7, rowX, rowY );
+        if ( played ) {
+            func_80039554( digits, records[i].games, TRUE, FALSE );
+            func_8003B1CC( digits[0], rowX + 2, rowY + 7 );
+            func_8003B1CC( digits[1], rowX + 10, rowY + 7 );
+            func_8003B1CC( digits[2], rowX + 18, rowY + 7 );
+            func_8003B1CC( digits[3], rowX + 26, rowY + 7 );
+        }
+        func_8002DF3C( played ? 0x9E6 : 0x9E7, rowX + 0x26, rowY );
+        if ( played ) {
+            func_80039554( digits, D_800E66B0[kind][i] * 10.0f, TRUE, TRUE );
+            func_8003B1CC( digits[0], rowX + 0x2A, rowY + 7 );
+            func_8003B1CC( digits[1], rowX + 0x31, rowY + 7 );
+            func_8003B1CC( digits[2], rowX + 0x39, rowY + 7 );
+            func_8003B1CC( digits[3], rowX + 0x43, rowY + 7 );
+        }
+        func_8002DF3C( 0x9E7, rowX + 0x4C, rowY );
+        if ( played ) {
+            func_80039554( digits, records[i].high, FALSE, FALSE );
+            func_8003B1CC( digits[0], rowX + 0x4E, topY );
+            func_8003B1CC( digits[1], rowX + 0x56, topY );
+            func_8003B1CC( digits[2], rowX + 0x5E, topY );
+            func_8003B1CC( digits[3], rowX + 0x66, topY );
+            func_80039554( digits, records[i].low, FALSE, FALSE );
+            func_8003B1CC( digits[0], rowX + 0x4E, rowY + 14 );
+            func_8003B1CC( digits[1], rowX + 0x56, rowY + 14 );
+            func_8003B1CC( digits[2], rowX + 0x5E, rowY + 14 );
+            func_8003B1CC( digits[3], rowX + 0x66, rowY + 14 );
+        }
+        func_8003AE9C( records[i].unk_14, D_800DF5D8[kind][i] * 10.0f, played, rowX + 0x72, rowY );
+        func_8003AE9C( records[i].unk_16, D_800A2FE8[kind][i] * 10.0f, played, rowX + 0x98, rowY );
+        func_8003AE9C( records[i].unk_18, D_80099488[kind][i] * 10.0f, played, rowX + 0xBE, rowY );
+        rowY += 0x1C;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A970);
+#endif
 
 /*
 ================

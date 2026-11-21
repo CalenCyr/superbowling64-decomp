@@ -70,7 +70,7 @@ void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );
 void func_80039CBC( u8 kind, u8 all, s16 x, s16 y );
 void func_8003A3F0( s32 arg0, s16 x, s16 y );
 void func_8003A658( s32 player, s32 x, s32 y );
-void func_8003A970( s16 count, UnkRecord *records, u8 arg2, s16 x, s16 y );
+void func_8003A970( u16 count, UnkRecord *records, u8 kind, s16 x, s32 y );
 void func_80038AE8( s32 player, u8 cpu, u16 *name, u8 noIcon, s16 x, s16 y );
 void func_80038C1C( u8 count, u8 first, s16 x, s16 y );
 void func_80038D0C( u8 tenth, s16 x, s16 y );
