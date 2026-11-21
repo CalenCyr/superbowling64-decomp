@@ -139,7 +139,7 @@ Draws the name plate of player at (x, y): its frame, its number, the icon of the
 and name.
 ================
 */
-void func_800389D0( s32 player, u8 cpu, u16 *name, s16 x, s16 y ) {
+inline void func_800389D0( s32 player, u8 cpu, u16 *name, s16 x, s16 y ) {
     s16 *icons;
 
     icons = D_8005CAE4;
@@ -179,7 +179,7 @@ Draws the headers of count frames of the scoreboard from frame first, at (x, y):
 tenth frame's own header.
 ================
 */
-void func_80038C1C( u8 count, u8 first, s16 x, s16 y ) {
+inline void func_80038C1C( u8 count, u8 first, s16 x, s16 y ) {
     u16 *images;
     s32 i;
     s32 frame;
@@ -399,7 +399,35 @@ void func_8003A21C( s32 player, u8 duel, s16 x, s16 y ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/13490", func_8003A3F0);
+/*
+================
+func_8003A3F0
+
+Draws the scoreboard of every player at (x, y): the numbered heads of the ten frames, then per player its name
+plate and its ten frames, marking the frames already played.
+================
+*/
+void func_8003A3F0( s32 arg0, s16 x, s16 y ) {
+    s32 i;
+    s32 player;
+    s16 frameX;
+
+    func_80038C1C( 10, 0, x + 0x38, y );
+    y += 9;
+    for ( player = 0; player < D_8005C161; player++ ) {
+        frameX = x;
+        func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, frameX, y );
+        frameX += 0x38;
+        for ( i = 0; i < 10; i++ ) {
+            func_8002DF3C( i == 9 ? 0xA36 : 0xAD3, frameX, y );
+            if ( i < D_8009D19C[player] ) {
+                func_8002DF3C( 0x9EB, frameX + ( i == 9 ? 10 : 5 ), y + 3 );
+            }
+            frameX += 20;
+        }
+        y += 20;
+    }
+}
 
 /*
 ================

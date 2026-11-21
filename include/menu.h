@@ -57,7 +57,7 @@ void func_800386E0( menuItem_t *items, u8 step );
 void func_800389D0( s32 player, u8 cpu, u16 *name, s16 x, s16 y );
 void func_80039700( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );
 void func_80039CBC( s32 arg0, s32 arg1, s32 arg2, s32 arg3 );
-void func_8003A3F0( s32 arg0, s32 arg1, s32 arg2 );
+void func_8003A3F0( s32 arg0, s16 x, s16 y );
 void func_8003A658( s32 player, s32 x, s32 y );
 void func_8003A970( s16 count, UnkRecord *records, u8 arg2, s16 x, s16 y );
 void func_80038AE8( s32 player, u8 cpu, u16 *name, u8 noIcon, s16 x, s16 y );
