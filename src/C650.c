@@ -25,7 +25,9 @@ void func_80031250( void ) {
 #ifdef NON_MATCHING
 // NON_MATCHING: the inline helper and its s16 *link store reproduce retail's frame (0x18) and its per-iteration
 // reloads; still differs in the insertion's block order (retail places the append arm before the search loop and
-// takes &D_8009D1A0[entry] in a register for the insert) and in the key expressions' schedule
+// takes &D_8009D1A0[entry] in a register for the insert) and in the key expressions' schedule; retail also re-masks
+// D_80066E14 (lhu, then andi 0xffff) for the test and the key but shifts the unmasked value for the bucket, so it is
+// probably read into a wider local (a u16 local alone does not do it)
 /*
 ================
 func_8003128C_insert
