@@ -25,8 +25,6 @@ MAIN (functions and globals of main units without a header yet, under their curr
 ==============================================================================
 */
 
-extern u8 D_800994BE[];
-extern u8 D_80068A50[];
 extern s8 D_80066E18[4][10];        /* per player and frame */
 extern u8 D_80099458[9];            /* per frame: par of the frame (func_80122140_gacode) */
 extern f32 D_800E6560[2][3];        /* per lane: position of the ball */
@@ -50,7 +48,6 @@ typedef struct {
 } unkImage_t;
 
 
-void func_8003A658( s32 arg0, s32 x, s32 y );                   /* unit 13490 */
 void func_8002E0EC( s32 id, s32 x, s32 y );                    /* unit 7250 */
 
 /*

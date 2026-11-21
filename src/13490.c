@@ -401,7 +401,47 @@ void func_8003A21C( s32 player, u8 duel, s16 x, s16 y ) {
 
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A3F0);
 
+/*
+================
+func_8003A658
+
+Draws the scoreboard of player at (x, y): the numbered heads of the ten frames, the player's name plate, then the
+ten frames.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: needs `inline` on func_800389D0 (retail expands it here, the unit is -O2); calls, CFG and
+// constants match; registers differ: retail keeps x in s7 and the plate's x and y as copies (s2 = x, s0 = y + 9,
+// then s5 = s0) from which the second loop's frameX and frameY come; this draft re-derives them from x and y.
+void func_8003A658( s32 player, s32 x, s32 y ) {
+    s32 i;
+    s16 frameX;
+    s16 frameY;
+    u16 *images;
+
+    images = D_8005CAC0;
+    frameX = x + 0x38;
+    for ( i = 0; i < 10; i++ ) {
+        if ( i == 9 ) {
+            func_8002DF3C( 0x87B, frameX, y );
+        } else {
+            func_8002DF3C( 0x87C, frameX, y );
+            func_8002DF3C( images[i + 1], frameX + 7, y + 1 );
+        }
+        frameX += 20;
+    }
+    frameY = y + 9;
+    func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, frameY );
+    frameX = x + 0x38;
+    for ( i = 0; i < 9; i++ ) {
+        func_80038DD4( player, i, 9, D_80068A50[player], D_800994BE[player], frameX, frameY );
+        frameX += 20;
+    }
+    func_80038DD4( player, 9, 9, D_80068A50[player], D_800994BE[player], frameX, frameY );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/13490", func_8003A658);
+#endif
 
 /*
 ================

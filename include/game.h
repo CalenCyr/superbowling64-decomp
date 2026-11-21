@@ -33,5 +33,7 @@ extern u32 D_8005C0F0;               /* demo the opening overlay plays next, 0 t
 extern u8 D_8005C0F4;                /* counts the demos' characters */
 extern playerName_t D_8005C0F8[8];   /* per character: its default name */
 extern playerName_t D_80068218[];    /* per player: name */
+extern u8 D_80068A50[];             /* per player (func_8003A658) */
+extern u8 D_800994BE[];             /* per player (func_8003A658) */
 
 #endif
