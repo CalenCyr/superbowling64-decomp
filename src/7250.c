@@ -7,6 +7,7 @@
 #include "filecache.h"
 #include "sprite.h"
 #include "object.h"
+#include "ground.h"
 
 /*
 ================
@@ -122,6 +123,55 @@ INCLUDE_ASM("asm/nonmatchings/7250", func_8002FDE4);
 
 INCLUDE_ASM("asm/nonmatchings/7250", func_80030058);
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_8003068C);
+/*
+================
+func_8003068C
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_800308C4);
+Clears the depth buffer and fills the framebuffer being drawn with colour (r, g, b), leaving the RDP in fill mode.
+================
+*/
+void func_8003068C( u32 r, u32 g, u32 b ) {
+    gDPSetCycleType( D_800F8094++, G_CYC_FILL );
+    gDPSetRenderMode( D_800F8094++, G_RM_NOOP, G_RM_NOOP2 );
+    gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical( D_80000400 ) );
+    gDPSetFillColor( D_800F8094++, GPACK_ZDZ( G_MAXFBZ, 0 ) << 16 | GPACK_ZDZ( G_MAXFBZ, 0 ) );
+    gDPFillRectangle( D_800F8094++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
+    gDPPipeSync( D_800F8094++ );
+    gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                      osVirtualToPhysical( D_80066C38[D_8005B0F8] ) );
+    D_8005C190 = DRAW2D_FILL;
+    gDPSetCycleType( D_800F8094++, G_CYC_FILL );
+    gDPSetFillColor( D_800F8094++, GPACK_RGBA5551( r, g, b, 1 ) << 16 | GPACK_RGBA5551( r, g, b, 1 ) );
+    gDPFillRectangle( D_800F8094++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
+    gDPSetTexturePersp( D_800F8094++, G_TP_NONE );
+    gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
+    gDPSetPrimColor( D_800F8094++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF );
+}
+
+/*
+================
+func_800308C4
+
+Draws a line from start to end in the view of camera index, in colour (red, green, blue, alpha), color[4] pixels
+wide, through the camera's two vertices D_80063A70[index].
+================
+*/
+void func_800308C4( s32 index, f32 *start, f32 *end, u8 *color ) {
+    u32 i;
+
+    for ( i = 0; i < 3; i++ ) {
+        D_80063A70[index][0].v.ob[i] = *start++;
+        D_80063A70[index][1].v.ob[i] = *end++;
+    }
+    guMtxIdent( &D_80063AB0 );
+    gSPLoadUcode( D_800F8094++, D_592F0, D_5FC20 );
+    func_800316C0( D_8009CFA0[index] );
+    gDPSetRenderMode( D_800F8094++, G_RM_AA_XLU_LINE, G_RM_AA_XLU_LINE2 );
+    gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
+    gDPSetCombineMode( D_800F8094++, G_CC_PRIMITIVE, G_CC_PRIMITIVE );
+    gDPSetPrimColor( D_800F8094++, 0, 0, color[0], color[1], color[2], color[3] );
+    gSPMatrix( D_800F8094++, &D_80063AB0, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
+    gSPVertex( D_800F8094++, D_80063A70[index], 2, 0 );
+    gSPLineW3D( D_800F8094++, 0, 1, color[4], 0 );
+    func_80031BB0();
+}
