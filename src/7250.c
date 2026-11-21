@@ -8,6 +8,7 @@
 #include "sprite.h"
 #include "object.h"
 #include "ground.h"
+#include "heap.h"
 
 /*
 ================
@@ -55,7 +56,49 @@ void func_8002BED8( s16 file, s16 frame, f32 *eye, f32 *unk_2C ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_8002BFD8);
+/*
+================
+func_8002BFD8
+
+Creates a camera from params: its path (unk_08[0]) with the starting eye, at and up point, its viewport size and
+target (unk_08[1] to unk_08[6]), the path's light and a grey one from the eye, and lists it in D_8009CFA0 and,
+by priority, in D_800EA120.
+================
+*/
+objNode_t *func_8002BFD8( objParams_t *params ) {
+    sceneCameraNode_t *node;
+    sceneCamera_t *cam;
+    s32 i;
+
+    node = func_80029E28( sizeof( sceneCameraNode_t ) );
+    cam = &node->cam;
+    cam->path = func_80030C04( params->unk_08[0], FILE_TYPE3 );
+    for ( i = 0; i < 3; i++ ) {
+        cam->at[i] = cam->path->at[i];
+        cam->eye[i] = cam->path->eye[i];
+        cam->unk_18[i] = cam->path->unk_2C[i];
+    }
+    D_8009CFA0[D_80099480++] = cam;
+    cam->width = params->unk_08[1];
+    cam->height = params->unk_08[2];
+    cam->unk_2C = params->unk_08[3];
+    cam->unk_2E = params->unk_08[4];
+    cam->targetObj = params->unk_08[5];
+    cam->targetJoint = params->unk_08[6];
+    for ( i = 0; i < 2; i++ ) {
+        /* the path's Lights1 is the ambient and first light of the Lights2: one 0x18-byte copy */
+        *(Lights1 *)&cam->lights[i] = *cam->path->light;
+        cam->lights[i].l[1].l.col[0] = cam->lights[i].l[1].l.colc[0] = 0x40;
+        cam->lights[i].l[1].l.col[1] = cam->lights[i].l[1].l.colc[1] = 0x40;
+        cam->lights[i].l[1].l.col[2] = cam->lights[i].l[1].l.colc[2] = 0x40;
+    }
+    for ( i = 0; i < 2; i++ ) {
+        cam->vp[i].vp.vscale[2] = cam->vp[i].vp.vtrans[2] = G_MAXZ / 2;
+        cam->vp[i].vp.vscale[3] = cam->vp[i].vp.vtrans[3] = 0;
+    }
+    D_800EA120[(s32)params->priority] = cam;
+    return &node->node;
+}
 
 INCLUDE_ASM("asm/nonmatchings/7250", func_8002C324);
 
