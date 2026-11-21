@@ -48,6 +48,17 @@ extern u8 D_800E6588;               /* fog on */
 extern u32 D_801000B4;              /* render mode of the first cycle */
 extern u32 D_800E4D64;              /* render mode of the second cycle */
 extern u16 D_8005C1D0[];             /* 2, 4, ... 512 */
+extern u8 D_8009CF89;               /* cameras that draw, a bit per index in D_8009CFA0 */
+extern u8 D_8009CF9C;
+extern u16 D_8009D064;
+extern u8 D_800E6580;
+extern u8 D_800F8090;
+extern u16 D_800DF6BC;
+extern u8 D_801000B0;
+extern u8 D_80099448;
+extern void *D_80099420;            /* drawEntry_t.unk_08 of the entries func_8003128C adds */
+extern u16 D_80066E14;
+extern u8 D_800693AC;
 extern Vp D_8010A290;               /* the screen's viewport, in the KNSTATICSYS file */
 extern u16 D_80000400[];            /* depth buffer, in the low RAM */
 
@@ -59,6 +70,7 @@ extern u8 D_592F0[];
 extern u8 D_5FC20[];
 
 void func_80031250( void );
+void func_8003128C( void );
 void func_800316C0( sceneCamera_t *cam );
 void func_80031E40( void );
 void func_80031650( void );

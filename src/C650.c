@@ -21,7 +21,104 @@ void func_80031250( void ) {
     memset( D_800E4FE0, 0xFF, sizeof( D_800E4FE0 ) );
 }
 
+#ifdef NON_MATCHING
+// NON_MATCHING: the inline helper and its s16 *link store reproduce retail's frame (0x18) and its per-iteration
+// reloads; still differs in the insertion's block order (retail places the append arm before the search loop and
+// takes &D_8009D1A0[entry] in a register for the insert) and in the key expressions' schedule
+/*
+================
+func_8003128C_insert
+
+Adds entry D_800E8070 of the draw list to bucket, after the entries of a lower key.
+================
+*/
+static inline void func_8003128C_insert( u16 key, u16 bucket ) {
+    s16 *link;
+    u16 entry;
+    u16 next;
+
+    D_8009D1A0[D_800E8070].key = key;
+    if ( D_800E4FE0[bucket] == DRAW_NONE ) {
+        D_800E4FE0[bucket] = D_800E8070;
+        D_800E4560[bucket] = D_800E8070;
+        D_8009D1A0[D_800E8070].next = DRAW_NONE;
+    } else {
+        entry = D_800E4FE0[bucket];
+        if ( D_8009D1A0[entry].key >= key ) {
+            D_800E4FE0[bucket] = D_800E8070;
+            D_8009D1A0[D_800E8070].next = entry;
+        } else {
+            for ( ;; ) {
+                if ( D_8009D1A0[entry].next == DRAW_NONE ) {
+                    D_8009D1A0[entry].next = D_800E8070;
+                    D_8009D1A0[D_800E8070].next = DRAW_NONE;
+                    D_800E4560[bucket] = D_800E8070;
+                    break;
+                }
+                link = &D_8009D1A0[entry].next;
+                next = *link;
+                if ( D_8009D1A0[next].key >= key ) {
+                    *link = D_800E8070;
+                    D_8009D1A0[D_800E8070].next = next;
+                    break;
+                }
+                entry = next;
+            }
+        }
+    }
+    D_800E8070++;
+}
+
+/*
+================
+func_8003128C
+
+Adds an entry to the draw list for each camera that draws, keeping its bucket in key order.
+================
+*/
+void func_8003128C( void ) {
+    u8 mask;
+    u32 i;
+    u32 key;
+    u32 bucket;
+
+    mask = D_8009CF89;
+    for ( i = 0; i < D_80099480; i++ ) {
+        if ( ( mask & 1 ) && D_8009CFA0[i]->height != 0 ) {
+            D_8009D1A0[D_800E8070].unk_04 = D_8009D064 | ( D_8009CF9C << 11 ) | ( i << 14 );
+            D_8009D1A0[D_800E8070].unk_06 = D_800DF6BC | ( D_800F8090 << 11 ) | ( D_800E6580 << 13 ) | ( D_801000B0 << 14 );
+            if ( D_80099448 == 0 ) {
+                D_8009D1A0[D_800E8070].unk_06 |= 0x1000;
+            }
+            D_8009D1A0[D_800E8070].unk_08 = D_80099420;
+            if ( D_80066E14 != 0 ) {
+                key = ( D_80066E14 << 15 ) | ( D_8009D064 << 4 ) | ( D_801000B0 << 2 ) | i;
+                bucket = ( D_80066E14 << 3 ) | ( D_8009D064 & 3 );
+            } else if ( D_8009CF9C >= 3 ) {
+                if ( D_800693AC != 0 ) {
+                    key = ( D_8009D064 << 4 ) | ( ( D_801000B0 << 2 ) | 0x8000 ) | i;
+                    bucket = ( D_8009D064 & 0x7F ) | 0x80;
+                } else {
+                    key = ( D_801000B0 << 2 ) | ( i | 0x20 );
+                    bucket = key << 3;
+                }
+            } else {
+                if ( D_800693AC != 0 ) {
+                    key = ( D_8009D064 << 4 ) | ( ( D_801000B0 << 2 ) | 0x18000 ) | i;
+                    bucket = ( D_8009D064 & 0x7F ) | 0x180;
+                } else {
+                    key = ( D_801000B0 << 2 ) | ( i | 0x40 );
+                    bucket = key << 3;
+                }
+            }
+            func_8003128C_insert( key, bucket );
+        }
+        mask >>= 1;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/C650", func_8003128C);
+#endif
 
 /*
 ================
