@@ -118,7 +118,48 @@ void func_8002C908( sceneCamera_t *cam ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_8002C950);
+/*
+================
+func_8002C950
+
+Draws a translucent box of w by h pixels at (x, y) in colour (r, g, b, a), with rounded corners 8 pixels
+outside it: one 16 by 16 intensity image (file 0xB33) drawn in four quadrants, each mirrored away from the box.
+================
+*/
+void func_8002C950( s16 x, s16 y, u16 w, u16 h, u8 r, u8 g, u8 b, u8 a ) {
+    D_8005C190 = DRAW2D_FILL;
+    if ( D_800F80B0[0xB33].refCount == 0 ) {
+        func_80030C04( 0xB33, FILE_RAW );
+    }
+    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+    gDPSetRenderMode( D_800F8094++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
+    gDPSetCombineLERP( D_800F8094++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, TEXEL0, 0,
+                       PRIMITIVE, 0 );
+    gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
+    gDPSetPrimColor( D_800F8094++, 0, 0, r, g, b, a );
+    gDPLoadTextureBlock_4b( D_800F8094++, ( (fileImage_t *)D_800F80B0[0xB33].data )->data + CI4_PALETTE_SIZE,
+                            G_IM_FMT_I, 16, 16, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                            G_TX_NOLOD );
+    gSPTextureRectangle( D_800F8094++, ( x - 8 ) << 2, ( y - 8 ) << 2, ( x + w ) << 2, ( y + h ) << 2,
+                         G_TX_RENDERTILE, 8 << 5, 8 << 5, 1 << 10, 1 << 10 );
+    gDPPipeSync( D_800F8094++ );
+    gDPSetTile( D_800F8094++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, G_TX_CLAMP, 4, G_TX_NOLOD,
+                G_TX_MIRROR, 4, G_TX_NOLOD );
+    gSPTextureRectangle( D_800F8094++, ( x + w ) << 2, ( y - 8 ) << 2, ( x + w + 8 ) << 2, ( y + h ) << 2,
+                         G_TX_RENDERTILE, 16 << 5, 8 << 5, 1 << 10, 1 << 10 );
+    gDPPipeSync( D_800F8094++ );
+    gDPSetTile( D_800F8094++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, G_TX_MIRROR, 4, G_TX_NOLOD,
+                G_TX_CLAMP, 4, G_TX_NOLOD );
+    gSPTextureRectangle( D_800F8094++, ( x - 8 ) << 2, ( y + h ) << 2, ( x + w ) << 2, ( y + h + 8 ) << 2,
+                         G_TX_RENDERTILE, 8 << 5, 16 << 5, 1 << 10, 1 << 10 );
+    gDPPipeSync( D_800F8094++ );
+    gDPSetTile( D_800F8094++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, G_TX_MIRROR, 4, G_TX_NOLOD,
+                G_TX_MIRROR, 4, G_TX_NOLOD );
+    gSPTextureRectangle( D_800F8094++, ( x + w ) << 2, ( y + h ) << 2, ( x + w + 8 ) << 2, ( y + h + 8 ) << 2,
+                         G_TX_RENDERTILE, 16 << 5, 16 << 5, 1 << 10, 1 << 10 );
+    gDPPipeSync( D_800F8094++ );
+    gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
+}
 
 INCLUDE_ASM("asm/nonmatchings/7250", func_8002CE24);
 
