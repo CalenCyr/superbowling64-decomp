@@ -80,12 +80,18 @@ void func_80031BB0( void );
 void func_80031CD0( void );
 s32 func_80031C9C( u32 value );
 extern puff_t D_800E4D70[NUM_PUFFS];
-extern s16 D_8005C1E4[2];           /* image files of the two kinds of puff */
+extern u16 D_8005C1E4[2];           /* image files of the two kinds of puff */
 extern Vtx D_8005C1F0[NUM_PUFF_SIZES * 4]; /* squares of four vertices, by size */
 extern Mtx D_800E6770[2][NUM_PUFFS];    /* each puff turned to face camera 0, then camera 1 */
+extern u8 D_8005C970[2][3];         /* rgb of the two kinds of puff */
+extern u8 D_800A3018;               /* index in D_8009CFA0 of the camera func_800316C0 last set up; 2: none */
+extern u8 D_80066C34;               /* 1: main's graphics microcode D_592F0 is loaded */
+extern u8 D_57F60[];                /* microcode text and data the puffs are drawn with (G_LOAD_UCODE) */
+extern u8 D_5F800[];
 
 void func_80035074( void );
 void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz );
 void func_80035380( u16 flags, f32 x, f32 y, f32 z );
+void func_80035748( void );
 
 #endif

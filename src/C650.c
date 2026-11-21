@@ -7,6 +7,7 @@
 #include "ground.h"
 #include "filecache.h"
 #include "object.h"
+#include "sprite.h"
 
 /*
 ================
@@ -153,7 +154,8 @@ void func_800316C0( sceneCamera_t *cam ) {
     gDPSetDepthImage( D_800F8094++,
                       osVirtualToPhysical( D_80000400 + ( cam->unk_2C & 0xFFC ) + cam->unk_2E * SCREEN_WIDTH ) );
     gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-                      osVirtualToPhysical( D_80066C38[D_8005B0F8] + ( cam->unk_2C & 0xFFC ) + cam->unk_2E * SCREEN_WIDTH ) );
+                      osVirtualToPhysical( D_80066C38[D_8005B0F8] + ( cam->unk_2C & 0xFFC ) +
+                                           cam->unk_2E * SCREEN_WIDTH ) );
     if ( cam->path->unk_38 & FILE3_FOG ) {
         if ( D_800E6588 == 0 ) {
             D_800E6588 = 1;
@@ -401,4 +403,87 @@ void func_80035380( u16 flags, f32 x, f32 y, f32 z ) {
 INCLUDE_ASM("asm/nonmatchings/C650", func_80035380);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/C650", func_80035748);
+/*
+================
+func_80035748
+
+Ages the puffs, then draws the live ones: by kind, its texture, and for each camera that draws a puff, its square
+turned to face that camera in the kind's colour and the puff's alpha.
+================
+*/
+void func_80035748( void ) {
+    u32 count[2];
+    u32 i;
+    u32 kind;   /* RULE-EXCEPTION: R30, also the "a puff is live" flag: retail keeps both in one register ($s2) */
+    u32 view;
+
+    for ( i = 0; i < 2; i++ ) {
+        count[i] = 0;
+    }
+    kind = FALSE;
+    for ( i = 0; i < NUM_PUFFS; i++ ) {
+        if ( D_800E4D70[i].life != 0 ) {
+            count[D_800E4D70[i].flags & PUFF_KIND]++;
+            D_800E4D70[i].life--;
+            D_800E4D70[i].size += D_800E4D70[i].sizeStep;
+            kind = TRUE;
+            if ( D_800E4D70[i].size >= NUM_PUFF_SIZES ) {
+                D_800E4D70[i].size = NUM_PUFF_SIZES - 1;
+            }
+            D_800E4D70[i].alpha += D_800E4D70[i].alphaStep;
+            if ( D_800E4D70[i].alpha < 0 ) {
+                D_800E4D70[i].alpha = 0;
+            }
+        }
+    }
+    if ( !kind ) {
+        return;
+    }
+
+    if ( D_80066C34 != 1 ) {
+        D_800A3018 = 2;
+        gSPLoadUcode( D_800F8094++, D_57F60, D_5F800 );
+        gSPClipRatio( D_800F8094++, FRUSTRATIO_1 );
+    }
+    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+    gDPSetRenderMode( D_800F8094++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2 );
+    /* (0 - 0) * K5 + PRIMITIVE: the colour is the primitive's, whatever the multiplier */
+    gDPSetCombineLERP( D_800F8094++, 0, 0, K5, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, K5, PRIMITIVE, TEXEL0, 0,
+                       PRIMITIVE, 0 );
+    gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
+    for ( kind = 0; kind < 2; kind++ ) {
+        if ( count[kind] == 0 ) {
+            continue;
+        }
+        gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
+        gDPLoadTextureBlock_4b( D_800F8094++,
+                                ( (fileImage_t *)D_800F80B0[D_8005C1E4[kind]].data )->data + CI4_PALETTE_SIZE, G_IM_FMT_I,
+                                64, 64, 0, G_TX_WRAP | G_TX_NOMIRROR, G_TX_WRAP | G_TX_NOMIRROR, 6, 6, G_TX_NOLOD,
+                                G_TX_NOLOD );
+        if ( kind == 1 ) {
+            gDPSetAlphaDither( D_800F8094++, G_AD_NOISE );
+            gDPSetAlphaCompare( D_800F8094++, G_AC_DITHER );
+        }
+        for ( view = 0; view < 2; view++ ) {
+            if ( D_800A3018 != view ) {
+                D_800A3018 = view;
+                func_800316C0( D_8009CFA0[D_800A3018] );
+            }
+            gSPTexture( D_800F8094++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
+            gSPClearGeometryMode( D_800F8094++, G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN |
+                                                G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH );
+            gSPSetGeometryMode( D_800F8094++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH );
+            for ( i = 0; i < NUM_PUFFS; i++ ) {
+                if ( ( D_800E4D70[i].flags & PUFF_KIND ) == kind && D_800E4D70[i].life != 0 &&
+                     ( D_800E4D70[i].flags & PUFF_CAMERA( view ) ) ) {
+                    gSPMatrix( D_800F8094++, &D_800E6770[view][i], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
+                    gSPVertex( D_800F8094++, &D_8005C1F0[D_800E4D70[i].size * 4], 4, 0 );
+                    gDPSetPrimColor( D_800F8094++, 0, 0, D_8005C970[kind][0], D_8005C970[kind][1], D_8005C970[kind][2],
+                                     D_800E4D70[i].alpha );
+                    gSP2Triangles( D_800F8094++, 0, 2, 1, 0, 2, 3, 1, 0 );
+                    gDPPipeSync( D_800F8094++ );
+                }
+            }
+        }
+    }
+}
