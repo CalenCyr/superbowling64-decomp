@@ -40,7 +40,7 @@ Also record:
     earlier functions at the call sites without `inline` (gcc 2.7.2's `-O3` turns on `-finline-functions`); each
     fails the gate at `-O2`. Unit `53B0` also builds with `-O3`: `func_8002A67C` holds the bodies of `func_8002A624`
     and `func_80029FB0` and fails at plain `-O2`; `-O2` with `inline` on those two matches as well, so the bytes don't
-    decide, and the unit follows the other units' `-O3`. Overlay unit `gscode/58F40` also builds with `-O3`: `func_80112414_gscode` inlines the unit's earlier `func_801123C4`/`func_801123E8`, and fails both at `-O2` and with `inline` at `-O2`. Unit `166B0` instead matches at `-O2` with `inline` on `Snd_SetFxType` and fails at
+    decide, and the unit follows the other units' `-O3`. Overlay unit `gscode/58F40` also builds with `-O3`: `func_80112414_gscode` inlines the unit's earlier `func_801123C4`/`func_801123E8`, and fails both at `-O2` and with `inline` at `-O2`. Overlay unit `gscode/5EC00` builds with `-O3` too: retail `func_80118040_gscode` holds `func_80118010_gscode`'s body twice. Unit `166B0` instead matches at `-O2` with `inline` on `Snd_SetFxType` and fails at
     `-O3`.
 - **C pipeline:** a C unit is a splat `c` subsegment (`src/<unit>.c`); unmatched functions stay as
   `INCLUDE_ASM("asm/nonmatchings/<unit>", <func>);`. C is compiled by the KMC `gcc` driver, so KMC `as` 2.6

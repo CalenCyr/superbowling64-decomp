@@ -122,6 +122,37 @@ extern u32 D_80120A60_gscode;       /* step of the pak check */
 extern s32 D_80120A64_gscode;       /* 1: a second controller is in play */
 extern u8 D_80120A68_gscode[2];     /* per port: controller status of the last frame */
 
+/* the team select (unit 5EC00): each team's players take characters in turn */
+extern f32 D_8011F8C0_gscode[8];    /* per character: scale of its model */
+extern s16 D_8011F8E0_gscode[8];    /* per character: file of its model */
+extern s16 D_8011F8F0_gscode[8];    /* per character: file of its animation */
+extern objParams_t D_8011F900_gscode[]; /* the scene of the team select */
+extern menuItem_t D_8011FA80_gscode[28]; /* the team select: ids 0-7 the characters, 8-11 the players' names, 12-15
+                                            the titles, 16-19 the players' cursors; [5]: its title */
+extern menuItem_t D_8011FB98_gscode[9];  /* the players' character names: ids 24-27 and 28-31 */
+extern s16 D_8011FBF4_gscode[8];    /* per character: image of the second line of its name */
+extern s16 D_8011FC04_gscode[8];    /* per character: image of the first line of its name */
+extern s16 D_8011FC14_gscode[8];    /* per character: its image once unlocked */
+extern s16 D_8011FC24_gscode[8];    /* per character: x of a player's cursor on it */
+extern s16 D_8011FC34_gscode[8];    /* per character: image of a player's cursor on it */
+extern u8 D_8011FC44_gscode[3][3];  /* per bar of a character's figures: its colour */
+extern u8 D_8011FC50_gscode[8][3];  /* per character: height of its three bars, to 40 */
+extern s16 D_8011FC68_gscode[4];    /* per player: image of its name */
+extern s16 D_8011FC70_gscode[4];    /* per player: image of its name, the computer playing */
+extern s16 D_8011FC78_gscode[4];    /* per player: image of its name while it waits its turn */
+extern u8 D_8011FC80_gscode;        /* slide step of the team select */
+extern u8 D_8011FC81_gscode;        /* CHOICE_IN etc.; 4: the name entry */
+extern u8 D_8011FC82_gscode;        /* 0 choosing, 1 every team is done */
+extern u8 D_8011FC84_gscode[2];     /* per team: its player choosing; bit 7: the team is done */
+extern u8 D_801207B2_gscode;        /* frames before the team select leaves, once every team is done */
+extern u16 D_801207B4_gscode[4];    /* per player: character whose model is shown; 0xFFFF: none */
+extern fileType1_t *D_801207C0_gscode[8]; /* per character: its loaded model */
+extern s32 *D_801207E0_gscode[8];   /* per character: its loaded animation */
+extern s16 D_80120800_gscode[4][3]; /* per player: position of its model */
+extern u8 D_80120818_gscode[4][3];  /* per player: heights of its bars, growing to the character's */
+extern s16 D_80120828_gscode[4][3]; /* per player: x of its bars */
+extern s16 D_80120840_gscode[4][3]; /* per player: y of the bottom of its bars */
+
 /* D_80120426_gscode: line of the options screen */
 #define OPTION_SOUND        0           /* D_8009D098.unk_78, 0 to 2 */
 #define OPTION_79           1           /* D_8009D098.unk_79, 0 or 1 */
