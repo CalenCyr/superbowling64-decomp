@@ -347,6 +347,7 @@ void func_80113384_gacode( void );
 void func_80113594_gacode( gaState_t state, gaPlayerFunc_t mode );
 s32 func_80113968_gacode( void );
 s32 func_80113D48_gacode( void );
+s32 func_80113AD4_gacode( void );
 void func_801136FC_gacode( void );
 s32 func_80113EE4_gacode( void );
 s32 func_80114024_gacode( void );

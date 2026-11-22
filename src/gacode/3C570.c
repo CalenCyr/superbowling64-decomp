@@ -132,7 +132,63 @@ void func_801132B0_gacode( void ) {
     func_801136FC_gacode();
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113384_gacode);
+/*
+================
+func_80113384_gacode
+
+Sets up the game of mode 0 by its sub-mode (bits 4-5 of D_8005C160): its main loop state and handler, the
+frames' setups (the par game also sums its pars into D_8009CF80[0]) and the BGM.
+================
+*/
+void func_80113384_gacode( void ) {
+    s32 i;
+
+    switch ( ( D_8005C160 >> 4 ) & 3 ) {
+    case 0:
+        /* the arguments that share a state still have a case each (retail keeps one block per case) */
+        switch ( D_8005C160 >> 6 ) {
+        case 0:
+            func_80113594_gacode( func_80113968_gacode, func_801151A0_gacode );
+            break;
+        case 2:
+            func_80113594_gacode( func_80113968_gacode, func_801151A0_gacode );
+            break;
+        case 1:
+            func_80113594_gacode( func_80113AD4_gacode, func_801151A0_gacode );
+            break;
+        }
+        D_8012CE00_gacode = D_8012D220_gacode->unk_1A;
+        break;
+    case 1:
+        func_801209C0_gacode( D_800DF59C.unk_04, 25, 0 );
+        for ( i = 0; i < 9; i++ ) {
+            D_80099458[0][i] = D_80123950_gacode[D_800DF59C.unk_04[i]].unk_00;
+            D_8009CF80[0] += D_80099458[0][i];
+        }
+        /* the arguments that share a state still have a case each (retail keeps one block per case) */
+        switch ( D_8005C160 >> 6 ) {
+        case 0:
+            func_80113594_gacode( func_80113D48_gacode, func_801155BC_gacode );
+            break;
+        case 1:
+            func_80113594_gacode( func_80113D48_gacode, func_801155BC_gacode );
+            break;
+        }
+        D_8012CE00_gacode = D_8012D220_gacode->unk_1A;
+        break;
+    case 2:
+        func_801209C0_gacode( &D_800DF59C.unk_04[0], 5, 0 );
+        func_801209C0_gacode( &D_800DF59C.unk_04[3], 5, 5 );
+        func_801209C0_gacode( &D_800DF59C.unk_04[6], 5, 10 );
+        D_800DF59C.unk_04[9] = 15;
+        for ( i = 0; i < D_8005C161; i++ ) {
+            D_80068A50[i] = 5;
+        }
+        func_80113594_gacode( func_80113968_gacode, func_801156D8_gacode );
+        D_8012CE00_gacode = 11;
+        break;
+    }
+}
 
 /*
 ================
