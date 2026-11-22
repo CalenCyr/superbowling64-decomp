@@ -1993,7 +1993,7 @@ one (from the scores of the lane's team player in a team game), and the games wo
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: register residue only: retail loads D_8009D19C[scorer] for first into a1, mine into v1; if/else, ternary, a u8 or s32 frame local, s32 first and an inline helper were compiled, all the same;
-// 12k permuter iterations (function-only scoring) found nothing better
+// the permuter (target-only scoring, 2.5k iterations from 35) found nothing better
 void func_8011917C_gacode( s32 player, u8 lane ) {
     s32 x;
     s16 y;
@@ -2159,7 +2159,8 @@ mark, and a mark per throw of the frame, the last one blended.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: register residue only: retail has the lane base and later mark x in s1, frame x in s2 (mine swapped), and does not fold numberX (frameX + 0x24) into base + 0x5C
+// NON_MATCHING: register residue only: retail has the lane base and later mark x in s1, frame x in s2 (mine swapped), and does not fold numberX (frameX + 0x24) into base + 0x5C;
+// the permuter (target-only scoring) went 300 -> 105 only by loading D_8012D238_gacode + 1 into a temporary before numberX, which in the real unit still swaps and folds (as func_80119C50_gacode's frameX + 0xF)
 void func_801198E4_gacode( s32 player, u8 lane ) {
     s32 frameX;
     s32 x;
@@ -2228,28 +2229,31 @@ count, the last one blended.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: register residue only: retail keeps the lane base in s1 and frame x in s0 (mine: one register), and computes the last digit x (+0x38) into s0; a separate frameX local folds markX into base + 0x47 instead
+// NON_MATCHING: one instruction: retail adds 0xF to frameX (addiu s1,s0,0xF) where cse here folds base + 0x38 + 0xF into
+// addiu s1,s1,0x47; registers otherwise as retail. The permuter reached retail only by holding 0x38 in a pseudo set
+// before the lane ternary (x += k), which no source would do; the original's frameX may have come from elsewhere
 void func_80119C50_gacode( s32 player, u8 lane ) {
     s16 digits[4];
     s32 x;
-    s32 markX;
+    s32 frameX;
     s16 y;
     s32 i;
 
     x = lane != 0 ? 0xA8 : 0x18;
     func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x18 );
-    x += 0x38;
-    markX = x + 0xF;
-    func_8002DF3C( 0xAB7, x, 0x10 );
+    frameX = x + 0x38;
+    x = frameX + 0xF;
+    func_8002DF3C( 0xAB7, frameX, 0x10 );
     func_80039554( digits, D_8009D19C[player] + 1, 0, 0 );
-    func_8003B1CC( digits[2], x + 0x30, 0x11 );
-    func_8003B1CC( digits[3], x + 0x38, 0x11 );
+    func_8003B1CC( digits[2], frameX + 0x30, 0x11 );
+    func_8003B1CC( digits[3], frameX + 0x38, 0x11 );
     y = 0x20;
     for ( i = 0; i < D_80068A50[player] - 1; i++ ) {
-        func_8002DF3C( 0xADB, markX, y );
-        markX += 0xA;
+        func_8002DF3C( 0xADB, x, y );
+        x += 0xA;
     }
-    func_8002E4B0( 0xADB, markX, y, (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
+    func_8002E4B0( 0xADB, x, y,
+ (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119C50_gacode);
