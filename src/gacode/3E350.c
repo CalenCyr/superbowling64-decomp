@@ -2462,7 +2462,84 @@ void func_8011B5C8_gacode( s32 lane ) {
     }
 }
 
+/*
+================
+func_8011B634_gacode
+
+Sets the lane's camera to one of five views of the ball (view, clamped to 0 to 4): behind it, high behind
+it, behind it looking up the lane's middle, in front of it, and high to the lane's outer side.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: byte-exact, but view 0 needs `+ 0.0f` (retail adds a zero, mtc1 zero / add.s), an R17 identity; the original spelling of that offset (a macro or tuning constant) is open
+void func_8011B634_gacode( gaPlayer_t *pl, s32 view ) {
+    gaCamera_t *camera = pl->lane->camera;
+    gaLane_t *lane = pl->lane;
+    s32 side;
+
+    view = view < 0 ? 0 : ( view > 4 ? 4 : view );
+    side = pl->laneIndex != 0 ? -1 : 1;
+    switch ( view ) {
+    case 0:
+        camera->eye[2] = lane->bodies[0].pos[2] + 0.0f;
+        camera->eye[0] = lane->bodies[0].pos[0];
+        camera->eye[1] = lane->bodies[0].pos[1] + 20.0f;
+        camera->at[2] = lane->bodies[0].pos[2] - 1000.0f;
+        camera->at[0] = lane->bodies[0].pos[0];
+        camera->at[1] = lane->bodies[0].pos[1];
+        camera->unk_18[2] = camera->eye[2];
+        camera->unk_18[0] = camera->eye[0];
+        camera->unk_18[1] = 512.0f;
+        break;
+    case 1:
+        camera->eye[2] = lane->bodies[0].pos[2] + 100.0f;
+        camera->eye[0] = lane->bodies[0].pos[0];
+        camera->eye[1] = lane->bodies[0].pos[1] + 75.0f;
+        camera->at[2] = lane->bodies[0].pos[2] - 50.0f;
+        camera->at[0] = lane->bodies[0].pos[0];
+        camera->at[1] = lane->bodies[0].pos[1];
+        camera->unk_18[2] = camera->eye[2];
+        camera->unk_18[0] = camera->eye[0];
+        camera->unk_18[1] = 512.0f;
+        break;
+    case 2:
+        camera->eye[2] = lane->bodies[0].pos[2] + 100.0f;
+        camera->eye[0] = lane->bodies[0].pos[0];
+        camera->eye[1] = lane->bodies[0].pos[1] + 20.0f;
+        camera->at[2] = lane->bodies[0].pos[2] - 1000.0f;
+        camera->at[0] = lane->bodies[0].pos[0];
+        camera->at[1] = lane->bodies[0].pos[1];
+        camera->unk_18[2] = camera->eye[2];
+        camera->unk_18[0] = -pl->lane->spots[0].pos[0] + pl->lane->unk_B14;
+        camera->unk_18[1] = 512.0f;
+        break;
+    case 3:
+        camera->eye[2] = lane->bodies[0].pos[2] - 125.0f;
+        camera->eye[0] = lane->bodies[0].pos[0];
+        camera->eye[1] = lane->bodies[0].pos[1] + 50.0f;
+        camera->at[2] = lane->bodies[0].pos[2] + 25.0f;
+        camera->at[0] = lane->bodies[0].pos[0];
+        camera->at[1] = lane->bodies[0].pos[1];
+        camera->unk_18[2] = camera->eye[2];
+        camera->unk_18[0] = camera->eye[0];
+        camera->unk_18[1] = 512.0f;
+        break;
+    case 4:
+        camera->eye[2] = lane->bodies[0].pos[2] + 128.0f;
+        camera->eye[0] = lane->bodies[0].pos[0] + side * 128;
+        camera->eye[1] = lane->bodies[0].pos[1] + 256.0f;
+        camera->at[2] = lane->bodies[0].pos[2];
+        camera->at[0] = lane->bodies[0].pos[0];
+        camera->at[1] = lane->bodies[0].pos[1];
+        camera->unk_18[2] = camera->eye[2];
+        camera->unk_18[0] = camera->eye[0];
+        camera->unk_18[1] = 512.0f;
+        break;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011B634_gacode);
+#endif
 
 /*
 ================
