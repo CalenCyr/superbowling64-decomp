@@ -1206,9 +1206,6 @@ step.
 Declared inline: nothing calls this copy, and func_80117124_gacode repeats its body.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: the code is exact, but seIds' initialiser is D_8012CA20_gacode, which the asm
-// func_80117124_gacode also reads: compiled here it duplicates the INCLUDE_RODATA copy. Enable with that function.
 inline s32 func_80116FF0_gacode( s32 lane, s8 port, f32 x, u8 step ) {
     s16 seIds[5] = { 0x69, 0x68, 0x67, 0x66, 0x65 };
 
@@ -1231,11 +1228,86 @@ inline s32 func_80116FF0_gacode( s32 lane, s8 port, f32 x, u8 step ) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80116FF0_gacode);
-#endif
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117124_gacode);
+/*
+================
+func_80117124_gacode
+
+Moves the lane's aim marker (unk_A68[2]) while its object is shown: D_8012D228_gacode unk_04 (kept within
+999 either way) pushes it on 5 per frame and counts down (rumbling the port on the first push), a negative
+one pulls it back 5; else it creeps on 1. Past 730 every player is done and both lanes hand over to the
+func_8011C650_gacode view (returns 1); otherwise steps the aim by func_80116FF0_gacode, step 6 once below
+every mark. Returns 0.
+================
+*/
+s32 func_80117124_gacode( s32 player, gaPlayer_t *pl ) {
+    f32 move;
+    s32 i;
+
+    if ( pl->lane->unk_AF4[2]->viewMask != 0 ) {
+        D_8012D228_gacode[player].unk_04 = D_8012D228_gacode[player].unk_04 < -999 ? -999
+                                         : D_8012D228_gacode[player].unk_04 > 999  ? 999
+                                                                                   : D_8012D228_gacode[player].unk_04;
+        if ( D_8012D228_gacode[player].unk_04 > 0 ) {
+            func_80120D30_gacode( pl->laneIndex, 0x4E );
+            if ( D_8012D228_gacode[player].unk_07 == 0 ) {
+                D_8012D228_gacode[player].unk_07 = 1;
+                if ( pl->port >= 0 ) {
+                    D_800DF680[pl->port] = 3;
+                    D_8006940D[pl->port] = D_8012D228_gacode[player].unk_04;
+                }
+            }
+            D_8012D228_gacode[player].unk_04--;
+            move = 5.0f;
+        } else if ( D_8012D228_gacode[player].unk_04 < 0 ) {
+            func_80120D30_gacode( pl->laneIndex, 0x4F );
+            move = -5.0f;
+            D_8012D228_gacode[player].unk_07 = 0;
+            D_8012D228_gacode[player].unk_04++;
+        } else {
+            move = 1.0f;
+            D_8012D228_gacode[player].unk_07 = 0;
+        }
+        if ( ( pl->lane->unk_A68[2].pos[2] += move ) < -1096.0f ) {
+            pl->lane->unk_A68[2].pos[2] = -1096.0f;
+        }
+        pl->lane->unk_A68[2].pos[1] = func_8011F87C_gacode( pl->lane->unk_A68[2].pos[0], pl->lane->unk_A68[2].pos[2], 0 );
+        if ( pl->lane->unk_A68[2].pos[2] >= 730.0f ) {
+            pl->lane->unk_A68[2].pos[2] = 730.0f;
+            for ( i = 0; i != 2; i++ ) {
+                D_800994BE[i] = 1;
+                if ( i != player ) {
+                    D_800EA090[i] = 1;
+                } else {
+                    func_80120D30_gacode( player, 0x6A );
+                    if ( pl->port >= 0 ) {
+                        D_800DF680[pl->port] = 7;
+                        D_8006940D[pl->port] = 20;
+                    }
+                }
+                func_80120D7C_gacode( &D_8012DCF0_gacode[i].unk_B18 );
+                D_8012DCF0_gacode[i].unk_B24 = 1;
+                D_8012DCF0_gacode[i].unk_B25 = 0x20;
+                D_8012DCF0_gacode[i].unk_B20 = 0;
+                D_8012DCF0_gacode[i].bodies[0].unk_5D = 0;
+                D_8012DCF0_gacode[i].bodyObjs[0]->viewMask = D_8012DCF0_gacode[i].unk_AF4[0]->viewMask =
+                    D_8012DCF0_gacode[i].unk_AF4[1]->viewMask = 0;
+                D_8012DCF0_gacode[i].unk_B0C = func_8011C650_gacode;
+                D_8012DCF0_gacode[i].unk_B08 = func_8011B5C8_gacode;
+                D_8012DCF0_gacode[i].unk_B10 = func_80118E04_gacode;
+            }
+            return 1;
+        }
+        if ( !func_80116FF0_gacode( player, pl->port, pl->lane->unk_A68[2].pos[2], 1 )
+             && !func_80116FF0_gacode( player, pl->port, pl->lane->unk_A68[2].pos[2], 2 )
+             && !func_80116FF0_gacode( player, pl->port, pl->lane->unk_A68[2].pos[2], 3 )
+             && !func_80116FF0_gacode( player, pl->port, pl->lane->unk_A68[2].pos[2], 4 )
+             && !func_80116FF0_gacode( player, pl->port, pl->lane->unk_A68[2].pos[2], 5 ) ) {
+            D_8012D228_gacode[player].unk_06 = 6;
+        }
+    }
+    return 0;
+}
 
 /*
 ================
@@ -1330,7 +1402,6 @@ s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     return 0;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/gacode/3E350", D_8012CA20_gacode);
 
 /*
 ================
