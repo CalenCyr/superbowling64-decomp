@@ -2870,7 +2870,7 @@ func_80118014_gacode) frames or when the animation reaches the character's frame
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: retail keeps the func_80117D20_gacode block's unk_B20 test apart (here cross-jumped into the
-// func_80117BDC_gacode block's) and tests the func_8011840C_gacode frame with branches (here xor/sltiu)
+// func_80117BDC_gacode block's, 0x30 bytes shorter); the rest is the same up to the branch offsets that shifts
 s32 func_8011C658_gacode( gaPlayer_t *pl, s32 player ) {
     s16 wait = pl->character.unk_2C;
     s16 longWait = wait * 2;
@@ -2916,7 +2916,6 @@ s32 func_8011C658_gacode( gaPlayer_t *pl, s32 player ) {
         if ( pl->obj->frame == pl->character.unk_00->unk_19 ) {
             return 1;
         }
-        return 0;
     }
     return 0;
 }
