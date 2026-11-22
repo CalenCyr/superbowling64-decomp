@@ -190,7 +190,7 @@ Advances *cur to the next player of the team, wrapping at the end of the list, a
 whose D_800994BE flag is set, but stops at start.
 ================
 */
-void func_801138EC_gacode( u8 *cur, s32 start, s32 team ) {
+inline void func_801138EC_gacode( u8 *cur, s32 start, s32 team ) {
     if ( D_8012CE02_gacode[team][++( *cur )] == -1 ) {
         *cur = 0;
     }
@@ -199,11 +199,90 @@ void func_801138EC_gacode( u8 *cur, s32 start, s32 team ) {
     }
 }
 
+/*
+================
+func_80113968_gacode
+
+Main loop state of a team game: runs the current player of each team; when one is done, ends the game for
+the team if every player has the D_800994BE flag set, else passes the turn to the team's next player.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: schedule only: in the flag-count loop retail increments i before the row pointer, the draft
+// after it (tried: if/++ count, i++ in the index, local order; 20k permuter iterations found nothing). The
+// turn pass is func_801138EC_gacode inlined (its inline is what puts the body here at -O2).
+s32 func_80113968_gacode( void ) {
+    s32 team;
+    s32 flagged;
+    s32 i;
+
+    for ( team = 0; team <= D_8005C162; team++ ) {
+        if ( func_80114640_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] ) ) {
+            flagged = 0;
+            for ( i = 0; D_8012CE02_gacode[team][i] != -1; i++ ) {
+                flagged += D_800994BE[D_8012CE02_gacode[team][i]] != 0;
+            }
+            if ( flagged == i ) {
+                func_80115D70_gacode( D_8012CE02_gacode[team][0], 0 );
+            } else {
+                func_801138EC_gacode( &D_8012CDF8_gacode[team], D_8012CDF8_gacode[team], team );
+            }
+        }
+    }
+    return func_80115E24_gacode( D_8005C162 );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113968_gacode);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113AD4_gacode);
 
+/*
+================
+func_80113D48_gacode
+
+Main loop state of the par game: runs the current player of each team, passes the turn on when one is
+done, and ends the game for the team when every player has the D_800994BE flag set (or, without that,
+when the turn comes back to the first player). Then advances the frame when the lanes are done.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: schedule only, the same residue as func_80113968_gacode: retail increments i before the
+// row pointer in the flag-count loop (tried an inline helper over the row, pointer-walk counts).
+s32 func_80113D48_gacode( void ) {
+    s32 team;
+    s32 i;
+    s32 flagged;
+    s32 showFrame;
+
+    for ( team = 0; team <= D_8005C162; team++ ) {
+        if ( func_80114640_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] ) ) {
+            if ( D_8012CE02_gacode[team][++D_8012CDF8_gacode[team]] == -1 ) {
+                D_8012CDF8_gacode[team] = 0;
+            }
+            flagged = 0;
+            for ( i = 0; D_8012CE02_gacode[team][i] != -1; i++ ) {
+                flagged += D_800994BE[D_8012CE02_gacode[team][i]] != 0;
+            }
+            if ( flagged == i ) {
+                func_80115D70_gacode( D_8012CE02_gacode[team][0], 0 );
+            } else if ( D_8012CDF8_gacode[team] == 0 ) {
+                func_80115D70_gacode( D_8012CE02_gacode[team][0], 1 );
+            }
+        }
+    }
+    showFrame = ( D_8005C160 >> 6 ) == 1;
+    if ( D_8012D238_gacode < 9 && func_80115ED4_gacode( D_8005C162 ) ) {
+        if ( showFrame ) {
+            func_8012224C_gacode( D_8012D238_gacode );
+        }
+        D_8012D238_gacode++;
+    }
+    return func_80115E24_gacode( D_8005C162 ) != 0;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113D48_gacode);
+#endif
 
 /*
 ================

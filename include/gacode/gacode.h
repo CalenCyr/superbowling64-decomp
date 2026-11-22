@@ -345,6 +345,8 @@ void func_801138EC_gacode( u8 *cur, s32 start, s32 team );
 void func_801132B0_gacode( void );
 void func_80113384_gacode( void );
 void func_80113594_gacode( gaState_t state, gaPlayerFunc_t mode );
+s32 func_80113968_gacode( void );
+s32 func_80113D48_gacode( void );
 void func_801136FC_gacode( void );
 s32 func_80113EE4_gacode( void );
 s32 func_80114024_gacode( void );
