@@ -36,8 +36,12 @@ for name in sorted({a or b for a, b in members}):
         "target_path": str(Path("expected") / o),
         "metadata": metadata,
     })
+# `make split` never deletes asm files, so a unit converted to C (src/<seg>/<unit>.c) can leave its old whole-unit
+# asm/<unit>.s behind; skip those, or the stale copy is counted a second time. Unit names are ROM offsets, so they
+# are unique across segments.
+c_units = {c.stem for c in Path("src").rglob("*.c")}
 for s in sorted(Path("asm").rglob("*.s")):
-    if "nonmatchings" in s.parts or "data" in s.parts or s.name in ("header.s",):
+    if "nonmatchings" in s.parts or "data" in s.parts or s.name in ("header.s",) or s.stem in c_units:
         continue
     o = Path("build") / s.with_suffix(".o")
     units.append({
