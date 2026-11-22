@@ -268,6 +268,7 @@ extern u16 D_8012C8B6_gacode;          /* angle of func_8011A8AC_gacode's colour
 extern u8 D_8012C8B8_gacode;           /* channel order of func_8011A8AC_gacode's colour, mod 3 */
 extern gaStage_t D_80123EB0_gacode[];
 extern gaStage_t *D_8012D220_gacode;
+extern u8 D_8012D224_gacode;             /* nonzero: Z steers the rolling ball by the stick (func_801187D0_gacode) */
 extern u8 D_8012D225_gacode;            /* nonzero: B commits the throw early (func_8011840C_gacode) */
 
 /* Per lane: state of func_80117124_gacode's aiming. Name invented. */

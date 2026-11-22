@@ -1669,7 +1669,48 @@ s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80118524_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801187D0_gacode);
+/*
+================
+func_801187D0_gacode
+
+Lane input handler while the ball rolls: halves the character's unk_44 when the ball's motion flag bit 6 is set,
+hands the view to the ball at the character's unk_1A frame, rolls the ball (func_80116DC8_gacode while bit 1
+is set and the ball is short of the stage's unk_08, else func_80116BA4_gacode), switches the camera at -1050,
+lets Z steer it by the stick when D_8012D224_gacode is set, and at -1186 stops the roll's sound and hands
+over to func_801189C4_gacode.
+================
+*/
+s32 func_801187D0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    if ( ( pl->lane->motion[0].flags >> 6 ) & 1 ) {
+        pl->character.unk_44 /= 2.0f;
+    }
+    if ( pl->obj->frame == pl->character.unk_00->unk_1A ) {
+        pl->obj->frame--;
+        pl->lane->bodyObjs[0]->viewMask = 3;
+        pl->obj->viewMask = 0;
+        pl->lane->unk_B08 = func_8011B400_gacode;
+        pl->lane->unk_B0C = func_8011BB44_gacode;
+    }
+    if ( ( ( pl->lane->motion[0].flags >> 1 ) & 1 ) && pl->lane->spots[0].pos[2] < D_8012D220_gacode->unk_08 ) {
+        pl->lane->bodies[0].rot[2] = pl->lane->motion[0].spin[2] = 0.0f;
+        func_80116DC8_gacode( player, pl );
+    } else {
+        func_80116BA4_gacode( player, pl );
+    }
+    if ( pl->lane->spots[0].pos[2] <= -1050.0 ) {
+        pl->lane->unk_B0C = func_8011BC10_gacode;
+    }
+    if ( D_8012D224_gacode && pl->port >= 0 && ( D_800E57E4[pl->port] & Z_TRIG ) ) {
+        pl->lane->motion[0].vel[0] += stickX / 1800.0f;
+    }
+    if ( pl->lane->spots[0].pos[2] <= -1186.0f ) {
+        func_80120D7C_gacode( &pl->lane->unk_B18 );
+        pl->lane->unk_B10 = func_801189C4_gacode;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801189C4_gacode);
 
