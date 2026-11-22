@@ -1732,7 +1732,37 @@ void func_80119C50_gacode( s32 player, u8 lane ) {
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119C50_gacode);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119DD8_gacode);
+/*
+================
+func_80119DD8_gacode
+
+Draws the pin panel of a player's frame on the lane's side: the frame, a chart of the pins the frame's
+setup starts with, the frame number, the setup's image and a mark per unk_00 count.
+================
+*/
+void func_80119DD8_gacode( s32 player, u8 lane ) {
+    u8 pins[NUM_PINS];
+    s16 x;
+    s16 y;
+    s32 setup;
+    s32 i;
+
+    x = lane != 0 ? 0xBC : 0x24;
+    y = 0x40;
+    setup = D_800DF59C.unk_04[D_8009D19C[player]];
+    func_8002DF3C( 0xABA, x, y );
+    func_80120980_gacode( pins, D_801237F0_gacode[setup].pins );
+    for ( i = 0; i < NUM_PINS; i++ ) {
+        if ( pins[i] == 1 ) {
+            func_8002DF3C( 0xAB9, x + D_8012C858_gacode[i][0], y + D_8012C858_gacode[i][1] );
+        }
+    }
+    func_800393D8( D_8009D19C[player] + 1, x + 0x3E, y + 6 );
+    func_8002DF3C( D_801237F0_gacode[setup].unk_04, x + 7, y + 0x11 );
+    for ( i = 0; i < D_801237F0_gacode[setup].unk_00; i++ ) {
+        func_8002DF3C( 0xAB8, x + 0x26 + i * 0xA, y + 0x68 );
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119F8C_gacode);
 
@@ -1745,13 +1775,13 @@ the lane's unk_A68[2] body from 730 units, in four digits.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: calls, constants and CFG match; registers differ: retail holds the digits' y (0x69) in s0 after x and adds 4 with ori (y set before the abs if/else, not folded), hoists the name's 0x69 into s6, and gives i, i * 0xA0, i * 0xC s3-s5; a y = 0x69 in both arms of the if/else gets closest, which is not natural source
+// NON_MATCHING: calls, constants and CFG match; registers differ: retail hoists the name's 0x69 into s6 (a pseudo, not a reload constant) and loads cpu before name, and keeps the abs value in v0 with the sll in each arm; giving y two sets (0x60, then 0x69) keeps y + 4 unfolded in s0 as retail does
 void func_8011A26C_gacode( void ) {
     gaPlayer_t *pl;
     s16 digits[4];
     s32 i;
     s16 x;
-    s16 frameX;
+    s32 frameX;
     s16 y;
     s16 value;
     f32 distance;
@@ -1760,11 +1790,12 @@ void func_8011A26C_gacode( void ) {
         x = i != 0 ? 0xB8 : 0x28;
         frameX = x + 0x38;
         pl = &D_8012D658_gacode[i];
-        func_8002DF3C( 0x9DF, frameX, 0x60 );
+        y = 0x60;
+        func_8002DF3C( 0x9DF, frameX, y );
         func_800389D0( i, D_8005C0E4[i] >> 7, D_80068218[i].chars, x, 0x69 );
-        func_8002DF3C( 0x86B, frameX, 0x69 );
-        distance = 730.0f - pl->lane->unk_A68[2].pos[2];
         y = 0x69;
+        func_8002DF3C( 0x86B, frameX, y );
+        distance = 730.0f - pl->lane->unk_A68[2].pos[2];
         if ( distance < 0.0f ) {
             value = 0.0f - distance;
         } else {
