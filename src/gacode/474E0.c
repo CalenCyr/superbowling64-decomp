@@ -1112,7 +1112,122 @@ func_80120DD0_gacode
 void func_80120DD0_gacode( void ) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120DD8_gacode);
+/*
+================
+func_80120DD8_gacode
+
+Scores the first ball of player's frame from the D_8012D8DA_gacode pins it knocked down, by
+D_8012CDE0_gacode (0 nothing owed, 1 a spare's bonus, 2 a strike's, 3 two strikes'): the scores owed
+are settled as far as this ball allows and D_8012CDE0_gacode takes its next state (4 to 6 past this
+ball, as func_801213B4_gacode reads them). A strike before the tenth frame ends the frame.
+================
+*/
+void func_80120DD8_gacode( u8 player ) {
+    if ( D_8012D8DA_gacode == 10 ) {
+        if ( D_8009D19C[player] == 9 ) {
+            D_80066E18[player][D_8009D19C[player]] = -1;
+            D_800DF630[player][D_8009D19C[player]] = -1;
+            switch ( D_8012CDE0_gacode[player] ) {
+            case 0:
+                D_8012CDE0_gacode[player] = 5;
+                D_8012D8DA_gacode = 0;
+                D_80068A50[player] = 1;
+                break;
+            case 1:
+                D_800DF630[player][D_8009D19C[player] - 1] = D_800DF630[player][D_8009D19C[player] - 2] + 20;
+                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 1];
+                D_8012CDE0_gacode[player] = 5;
+                D_8012D8DA_gacode = 0;
+                D_80068A50[player] = 1;
+                break;
+            case 2:
+                D_8012CDE0_gacode[player] = 6;
+                D_8012D8DA_gacode = 0;
+                D_80068A50[player] = 1;
+                break;
+            case 3:
+                D_800DF630[player][D_8009D19C[player] - 2] = D_800DF630[player][D_8009D19C[player] - 3] + 30;
+                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 2];
+                D_8012CDE0_gacode[player] = 6;
+                D_8012D8DA_gacode = 0;
+                D_80068A50[player] = 1;
+                break;
+            }
+        } else {
+            D_80066E18[player][D_8009D19C[player]] = -1;
+            D_800A3020[player][D_8009D19C[player]] = -2;
+            D_800DF630[player][D_8009D19C[player]] = -1;
+            switch ( D_8012CDE0_gacode[player] ) {
+            case 0:
+                D_8012CDE0_gacode[player] = 2;
+                D_8012D8DA_gacode = 0;
+                D_80068A50[player] = 0;
+                D_8009D19C[player]++;
+                break;
+            case 1:
+                D_800DF630[player][D_8009D19C[player] - 1] = D_800DF630[player][D_8009D19C[player] - 2] + 20;
+                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 1];
+                D_8012CDE0_gacode[player] = 2;
+                D_8012D8DA_gacode = 0;
+                D_80068A50[player] = 0;
+                D_8009D19C[player]++;
+                break;
+            case 2:
+                D_8012CDE0_gacode[player] = 3;
+                D_8012D8DA_gacode = 0;
+                D_80068A50[player] = 0;
+                D_8009D19C[player]++;
+                break;
+            case 3:
+                if ( D_8009D19C[player] == 2 ) {
+                    D_800DF630[player][D_8009D19C[player] - 2] = 30;
+                } else {
+                    D_800DF630[player][D_8009D19C[player] - 2] = D_800DF630[player][D_8009D19C[player] - 3] + 30;
+                }
+                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 2];
+                D_8012CDE0_gacode[player] = 3;
+                D_8012D8DA_gacode = 0;
+                D_80068A50[player] = 0;
+                D_8009D19C[player]++;
+                break;
+            }
+        }
+    } else {
+        D_80066E18[player][D_8009D19C[player]] = D_8012D8DA_gacode;
+        switch ( D_8012CDE0_gacode[player] ) {
+        case 0:
+            D_8012CDE0_gacode[player] = 0;
+            D_8012D8DA_gacode = 0;
+            D_80068A50[player] = 1;
+            break;
+        case 1:
+            D_800DF630[player][D_8009D19C[player] - 1] =
+                10 + D_80066E18[player][D_8009D19C[player]] + D_800DF630[player][D_8009D19C[player] - 2];
+            D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 1];
+            D_8012CDE0_gacode[player] = 0;
+            D_8012D8DA_gacode = 0;
+            D_80068A50[player] = 1;
+            break;
+        case 2:
+            D_8012CDE0_gacode[player] = 4;
+            D_8012D8DA_gacode = 0;
+            D_80068A50[player] = 1;
+            break;
+        case 3:
+            if ( D_8009D19C[player] == 2 ) {
+                D_800DF630[player][D_8009D19C[player] - 2] = 20 + D_80066E18[player][D_8009D19C[player]];
+            } else {
+                D_800DF630[player][D_8009D19C[player] - 2] =
+                    20 + D_80066E18[player][D_8009D19C[player]] + D_800DF630[player][D_8009D19C[player] - 3];
+            }
+            D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 2];
+            D_8012CDE0_gacode[player] = 4;
+            D_8012D8DA_gacode = 0;
+            D_80068A50[player] = 1;
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801213B4_gacode);
 
