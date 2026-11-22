@@ -251,47 +251,41 @@ from a's path over the sum of the radii.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: register allocation and CSE: retail keeps along and push in $f20, t and the clamped distance in
-// $f22, and reloads vel[] and the 0.0f constant after the speedSq test; this draft caches vel[] and 0.0f
-// (in $f20) across it, and also allocates s1/s2 to b/a the other way round. Same calls and blocks.
+// NON_MATCHING: register allocation in the two expansions of func_8011D424_gacode only: retail copies the
+// first one's length into $f4 before the zero test and divides by $f4, and in the second takes sqrt.s into $f0
+// and copies it to $f2 after the sqrtf fallback joins; this draft uses the sqrt register directly. Everything
+// else matches, including $f20/$f22, which need along reused as the push and t as the clamped distance (with
+// separate push and dist locals they land in caller-saved registers instead).
 f32 func_8011DCB8_gacode( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     f32 along;
     f32 speedSq;
     f32 t;
-    f32 dist;
-    f32 push;
     vec3_t dir;
     vec3_t gap;
 
     along = ( b->pos[0] - a->pos[0] ) * vel[0] + ( b->pos[1] - a->pos[1] ) * vel[1] + ( b->pos[2] - a->pos[2] ) * vel[2];
     speedSq = vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2];
-    if ( speedSq != 0.0f ) {
-        t = along / speedSq;
-    } else {
+    if ( speedSq == 0.0f ) {
         t = 0.0f;
+    } else {
+        t = along / speedSq;
     }
     dir[0] = vel[0] * t + a->pos[0];
     dir[1] = vel[1] * t + a->pos[1];
     dir[2] = vel[2] * t + a->pos[2];
-    gap[0] = b->pos[0] - dir[0];
-    gap[1] = b->pos[1] - dir[1];
-    gap[2] = b->pos[2] - dir[2];
-    dist = func_8011D3D4_gacode( gap );
-    if ( dist < 0.0 ) {
-        dist = 0.0f;
-    } else if ( a->unk_18 + b->unk_18 < dist ) {
-        dist = a->unk_18 + b->unk_18;
-    }
-    push = a->unk_18 + b->unk_18 - dist * 0.85;
+    func_8011D3A0_gacode( gap, dir, b->pos );
+    t = func_8011D3D4_gacode( gap );
+    t = t < 0.0 ? 0.0f : a->unk_18 + b->unk_18 < t ? a->unk_18 + b->unk_18 : t;
+    along = a->unk_18 + b->unk_18 - t * 0.85;
     func_8011D424_gacode( dir, vel );
-    dir[0] *= push;
-    dir[1] *= push;
-    dir[2] *= push;
+    dir[0] *= along;
+    dir[1] *= along;
+    dir[2] *= along;
     gap[0] += dir[0];
     gap[1] += dir[1];
     gap[2] += dir[2];
     func_8011D424_gacode( normal, gap );
-    return 1.0 - dist / ( a->unk_18 + b->unk_18 );
+    return 1.0 - t / ( a->unk_18 + b->unk_18 );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011DCB8_gacode);
