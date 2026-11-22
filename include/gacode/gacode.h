@@ -94,17 +94,20 @@ typedef struct gaCamera_s {
 #define NUM_BODIES      11              /* the ball, then the ten pins */
 #define NUM_PINS        10
 
+/* Motion of a body of a lane, stepped each frame by func_80114898_gacode. Name invented. */
+typedef struct {
+    /* 0x00 */ vec3_t vel;              /* added to the body's spot each frame; the ball's is turned into its spin
+                                           by func_8011D7CC_gacode */
+    /* 0x0C */ vec3_t spin;             /* added to the body's rot each frame (degrees, kept within -180..180) */
+    /* 0x18 */ u8 unk_18[0x18];
+    /* 0x30 */ f32 unk_30;              /* the ball's from D_801239E8_gacode, by gaPlayer_t.unk_93 */
+    /* 0x34 */ u32 flags;
+} gaMotion_t;                           /* size 0x38 */
+
 /* One of the two lanes (D_8012DCF0_gacode), shared by the players bowling on it. Name invented. */
 typedef struct {
     /* 0x000 */ gaBody_t bodies[NUM_BODIES];
-    /* 0x420 */ vec3_t unk_420;         /* turned into the ball's spin by func_8011D7CC_gacode */
-    /* 0x42C */ f32 unk_42C;
-    /* 0x430 */ f32 unk_430;
-    /* 0x434 */ f32 unk_434;
-    /* 0x438 */ u8 unk_438[0x18];
-    /* 0x450 */ f32 unk_450;            /* from D_801239E8_gacode, by gaPlayer_t.unk_93 */
-    /* 0x454 */ u32 unk_454;            /* flags */
-    /* 0x458 */ u8 unk_458[0x688 - 0x458];
+    /* 0x420 */ gaMotion_t motion[NUM_BODIES];
     /* 0x688 */ gaSpot_t spots[NUM_BODIES];
     /* 0x7E8 */ gaSpot_t unk_7E8[NUM_BODIES];
     /* 0x948 */ gaBody_t unk_948[3];
@@ -275,7 +278,7 @@ extern u16 D_8012D8D8_gacode;
 extern u8 D_8012D8DA_gacode;
 extern gaLane_t D_8012DCF0_gacode[2];
 extern gaBody_t D_8012BCF0_gacode[NUM_BODIES];     /* initial bodies of a lane (func_8011641C_gacode) */
-extern u8 D_8012C230_gacode[0x688 - 0x420];        /* initial gaLane_t.unk_420 onwards, up to the spots */
+extern gaMotion_t D_8012C230_gacode[NUM_BODIES];   /* initial gaLane_t.motion */
 extern gaSpot_t D_8012C498_gacode[2][NUM_BODIES];  /* initial gaLane_t.spots and unk_7E8 */
 extern gaBody_t D_8012C110_gacode[3];              /* initial gaLane_t.unk_948 */
 

@@ -225,7 +225,7 @@ void func_80114CB4_gacode( gaBody_t *body, gaSpot_t *spot, sceneObject_t *obj, f
 func_80114DD4_gacode
 
 Publishes the ball of the player's lane to main: its position, and in D_800DF595 its state (0: no ball,
-1 or 2 (the lane in func_80118F68_gacode): unk_454 bit 1 set, 3: below -190).
+1 or 2 (the lane in func_80118F68_gacode): motion[0].flags bit 1 set, 3: below -190).
 ================
 */
 void func_80114DD4_gacode( gaPlayer_t *pl ) {
@@ -240,7 +240,7 @@ void func_80114DD4_gacode( gaPlayer_t *pl ) {
         D_800DF595[pl->laneIndex] = 0;
         return;
     }
-    if ( ( lane->unk_454 >> 1 ) & 1 ) {
+    if ( ( lane->motion[0].flags >> 1 ) & 1 ) {
         if ( pl->lane->unk_B10 == func_80118F68_gacode ) {
             state = 2;
         } else {
@@ -944,7 +944,7 @@ void func_8011641C_gacode( s32 player, u8 *pins ) {
     pl->character.unk_30 = pl->character.unk_14[0] = pl->character.unk_20[0] = 0.0f;
     pl->character.unk_2C = pl->character.unk_0C;
     memmove( lane->bodies, D_8012BCF0_gacode, sizeof( lane->bodies ) );
-    memmove( lane->unk_420, D_8012C230_gacode, sizeof( D_8012C230_gacode ) );
+    memmove( lane->motion, D_8012C230_gacode, sizeof( D_8012C230_gacode ) );
     spot = lane->spots;
     memmove( spot, D_8012C498_gacode, sizeof( D_8012C498_gacode ) );
     body = lane->bodies;
@@ -1040,7 +1040,7 @@ void func_80116798_gacode( gaLane_t *lane ) {
 func_801167C0_gacode
 
 Sounds the result of a throw from the stage's list: 0x49 for a ball in the gutter, else by how far the
-lane's unk_420[2] got, the second list when strong is set; keeps the sound in the lane's unk_B18.
+lane's motion[0].vel[2] got, the second list when strong is set; keeps the sound in the lane's unk_B18.
 
 Declared inline: nothing calls this copy; func_80116BA4_gacode and func_80116DC8_gacode expand it.
 ================
@@ -1050,9 +1050,9 @@ inline void func_801167C0_gacode( s32 player, gaPlayer_t *pl, u8 strong ) {
 
     if ( pl->lane->spots[0].pos[1] <= -190.0f ) {
         id = 0x49;
-    } else if ( pl->lane->unk_420[2] >= -13.0f ) {
+    } else if ( pl->lane->motion[0].vel[2] >= -13.0f ) {
         id = strong ? D_8012D220_gacode->unk_1E[5] : D_8012D220_gacode->unk_1E[2];
-    } else if ( pl->lane->unk_420[2] <= -16.0f ) {
+    } else if ( pl->lane->motion[0].vel[2] <= -16.0f ) {
         id = strong ? D_8012D220_gacode->unk_1E[7] : D_8012D220_gacode->unk_1E[4];
     } else {
         id = strong ? D_8012D220_gacode->unk_1E[6] : D_8012D220_gacode->unk_1E[3];
@@ -1072,10 +1072,10 @@ inline s32 func_801168D0_gacode( gaPlayer_t *pl ) {
 
     if ( lane->spots[0].pos[2] > -1186.0f
          && height < D_8012D220_gacode->unk_14
-         && ( lane->unk_454 & 1 ) ) {
+         && ( lane->motion[0].flags & 1 ) ) {
         func_80120D7C_gacode( &lane->unk_B18 );
         func_80120D30_gacode( pl->laneIndex, 0x2F );
-        pl->lane->bodies[0].rot[2] = pl->lane->unk_434 = 0.0f;
+        pl->lane->bodies[0].rot[2] = pl->lane->motion[0].spin[2] = 0.0f;
         pl->lane->unk_B25 = 3;
         pl->lane->unk_B10 = func_80118F68_gacode;
         return 1;
@@ -1090,7 +1090,7 @@ Declared inline: nothing calls this copy; func_80116BA4_gacode and func_80116DC8
 ================
 */
 inline s32 func_80116998_gacode( gaPlayer_t *pl ) {
-    if ( pl->lane->unk_420[2] >= 0.0f ) {
+    if ( pl->lane->motion[0].vel[2] >= 0.0f ) {
         func_80120D7C_gacode( &pl->lane->unk_B18 );
         pl->lane->unk_B10 = func_801189C4_gacode;
         return 1;
@@ -1145,7 +1145,7 @@ inline void func_80116A64_gacode( gaPlayer_t *pl, s16 stickX, s16 stickY ) {
 func_80116BA4_gacode
 
 Rolls the ball of a player's throw, unless func_801168D0_gacode or func_80116998_gacode ends it: while the
-lane's unk_454 bit 1 is set, adds the character's unk_44 to its unk_420[0] and starts the roll's sound;
+lane's motion[0].flags bit 1 is set, adds the character's unk_44 to its motion[0].vel[0] and starts the roll's sound;
 else stops it.
 ================
 */
@@ -1156,16 +1156,16 @@ void func_80116BA4_gacode( s32 player, gaPlayer_t *pl ) {
     if ( func_80116998_gacode( pl ) ) {
         return;
     }
-    if ( ( pl->lane->unk_454 >> 1 ) & 1 ) {
-        pl->lane->unk_420[0] += pl->character.unk_44;
+    if ( ( pl->lane->motion[0].flags >> 1 ) & 1 ) {
+        pl->lane->motion[0].vel[0] += pl->character.unk_44;
         if ( pl->lane->unk_B18 == 0 ) {
             func_801167C0_gacode( player, pl, 0 );
         }
     } else {
         func_80120D7C_gacode( &pl->lane->unk_B18 );
     }
-    pl->lane->unk_42C = 2.0f;
-    pl->lane->unk_434 = pl->lane->unk_430 * 2.0f;
+    pl->lane->motion[0].spin[0] = 2.0f;
+    pl->lane->motion[0].spin[2] = pl->lane->motion[0].spin[1] * 2.0f;
 }
 
 /*
@@ -1173,7 +1173,7 @@ void func_80116BA4_gacode( s32 player, gaPlayer_t *pl ) {
 func_80116DC8_gacode
 
 As func_80116BA4_gacode, scaling the character's unk_44 by the stage's unk_10, and turns the lane's
-unk_420 into the ball's spin.
+motion[0].vel into the ball's spin.
 ================
 */
 void func_80116DC8_gacode( s32 player, gaPlayer_t *pl ) {
@@ -1183,16 +1183,16 @@ void func_80116DC8_gacode( s32 player, gaPlayer_t *pl ) {
     if ( func_80116998_gacode( pl ) ) {
         return;
     }
-    if ( ( pl->lane->unk_454 >> 1 ) & 1 ) {
-        pl->lane->unk_420[0] += pl->character.unk_44 * D_8012D220_gacode->unk_10;
+    if ( ( pl->lane->motion[0].flags >> 1 ) & 1 ) {
+        pl->lane->motion[0].vel[0] += pl->character.unk_44 * D_8012D220_gacode->unk_10;
         if ( pl->lane->unk_B18 == 0 ) {
             func_801167C0_gacode( player, pl, 0 );
         }
     } else {
         func_80120D7C_gacode( &pl->lane->unk_B18 );
     }
-    pl->lane->unk_42C = pl->lane->unk_420[2] * 1.5;
-    func_8011D7CC_gacode( pl->lane->unk_420, &pl->lane->bodies[0] );
+    pl->lane->motion[0].spin[0] = pl->lane->motion[0].vel[2] * 1.5;
+    func_8011D7CC_gacode( pl->lane->motion[0].vel, &pl->lane->bodies[0] );
 }
 
 /*
@@ -1496,7 +1496,7 @@ s32 func_80117EFC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
     pl->obj->frame = 0;
     func_80123430_gacode( pl->laneIndex, 0, pl->unk_93 );
-    pl->lane->unk_450 = D_801239E8_gacode[pl->unk_93];
+    pl->lane->motion[0].unk_30 = D_801239E8_gacode[pl->unk_93];
     pl->lane->bodyObjs[0]->viewMask = pl->obj->viewMask = pl->laneIndex != 0 ? 2 : 1;
     if ( pl->port >= 0 ) {
         D_800DF680[pl->port] = 8;
