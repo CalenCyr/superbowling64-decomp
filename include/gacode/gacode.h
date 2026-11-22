@@ -311,6 +311,8 @@ typedef struct {
 extern gaLaneAim_t D_8012D228_gacode[2];
 extern gaPlayer_t D_8012D658_gacode[MAX_PLAYERS];
 extern u8 D_8012D651_gacode;
+extern u8 D_8012D650_gacode;
+extern u8 D_8012D239_gacode;           /* pause menu: the item under the cursor (0 to 3) */
 extern u8 D_8012CDE0_gacode[4];        /* per player (func_801219CC_gacode) */
 extern u16 D_8012D8D8_gacode;
 extern u8 D_8012D8DA_gacode;
@@ -337,6 +339,7 @@ extern u8 D_80123684_gacode[2];         /* per pair of players: the index the tu
 s32 func_80112AF0_gacode( void );
 s32 func_80112D94_gacode( void );
 void func_80112E04_gacode( void );
+s32 func_80112EBC_gacode( void );
 s32 func_80113210_gacode( void );
 s32 func_80113270_gacode( void );
 s32 func_801132A8_gacode( void );

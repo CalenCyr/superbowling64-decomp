@@ -23,7 +23,68 @@ void func_80112A74_gacode( void ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80112AF0_gacode);
+/*
+================
+func_80112AF0_gacode
+
+Pause menu: draws it with the cursor on one of its four items and the on/off mark of D_8009D098.unk_79,
+moves the cursor with the D-pad, and on A or Z runs the item; B closes the menu.
+================
+*/
+s32 func_80112AF0_gacode( void ) {
+    s16 cursorY[4] = { 0x8A, 0x5A, 0x6A, 0x7A };
+    s16 markX[2] = { 0xB6, 0x9C };
+    u8 isMode2;
+
+    isMode2 = ( D_8005C160 & 0xF ) == 2;
+    func_8002DF3C( isMode2 ? 0x882 : 0x89E, 0x50, 0x40 );
+    func_8002E4B0( 0x8A0, 0x66, cursorY[D_8012D239_gacode], D_80123601_gacode + 0x40, 1.0f, 1.0f );
+    func_8002E4B0( 0x89F, markX[D_8009D098.unk_79], 0x6C, D_80123601_gacode + 0x40, 1.0f, 1.0f );
+    if ( D_800E6758 & U_JPAD ) {
+        func_80037870( 0, 0 );
+        if ( D_8012D239_gacode == 0 ) {
+            D_8012D239_gacode = 3;
+        } else {
+            D_8012D239_gacode--;
+        }
+    }
+    if ( D_800E6758 & D_JPAD ) {
+        func_80037870( 0, 0 );
+        if ( D_8012D239_gacode == 3 ) {
+            D_8012D239_gacode = 0;
+        } else {
+            D_8012D239_gacode++;
+        }
+    }
+    if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+        switch ( D_8012D239_gacode ) {
+        case 0:
+            D_8012D650_gacode = 0;
+            func_80037870( 1, 0 );
+            break;
+        case 1:
+            D_8012CDF0_gacode = isMode2 ? func_80112EBC_gacode : func_80112D94_gacode;
+            func_80037870( 1, 0 );
+            break;
+        case 2:
+            D_8009D098.unk_79 = !D_8009D098.unk_79;
+            if ( D_8009D098.unk_79 ) {
+                func_800379C8( D_8012CE00_gacode );
+            } else {
+                func_80037B18();
+            }
+            break;
+        case 3:
+            D_8012CDF0_gacode = func_80113210_gacode;
+            func_80037870( 1, 0 );
+            break;
+        }
+    } else if ( D_800E4D62 & B_BUTTON ) {
+        D_8012D650_gacode = 0;
+        func_80037870( 2, 0 );
+    }
+    return 0;
+}
 
 /*
 ================
@@ -542,4 +603,3 @@ s32 func_80114108_gacode( void ) {
     return 0;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/gacode/3C570", D_8012CA00_gacode);
