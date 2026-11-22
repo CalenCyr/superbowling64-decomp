@@ -203,11 +203,166 @@ s32 func_8011DB54_gacode( gaSpot_t *spot, vec3_t from, vec3_t to, f32 radius ) {
     return 1;
 }
 
+/*
+================
+func_8011DCB8_gacode
+
+Contact of spot a, moving along vel, with spot b: normal = the unit vector from a's centre, pushed back
+along vel by what the spheres overlap, to b's centre; returns 1 minus the closest distance of b's centre
+from a's path over the sum of the radii.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: register allocation and CSE: retail keeps along and push in $f20, t and the clamped distance in
+// $f22, and reloads vel[] and the 0.0f constant after the speedSq test; this draft caches vel[] and 0.0f
+// (in $f20) across it, and also allocates s1/s2 to b/a the other way round. Same calls and blocks.
+f32 func_8011DCB8_gacode( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
+    f32 along;
+    f32 speedSq;
+    f32 t;
+    f32 dist;
+    f32 push;
+    vec3_t dir;
+    vec3_t gap;
+
+    along = ( b->pos[0] - a->pos[0] ) * vel[0] + ( b->pos[1] - a->pos[1] ) * vel[1] + ( b->pos[2] - a->pos[2] ) * vel[2];
+    speedSq = vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2];
+    if ( speedSq != 0.0f ) {
+        t = along / speedSq;
+    } else {
+        t = 0.0f;
+    }
+    dir[0] = vel[0] * t + a->pos[0];
+    dir[1] = vel[1] * t + a->pos[1];
+    dir[2] = vel[2] * t + a->pos[2];
+    gap[0] = b->pos[0] - dir[0];
+    gap[1] = b->pos[1] - dir[1];
+    gap[2] = b->pos[2] - dir[2];
+    dist = func_8011D3D4_gacode( gap );
+    if ( dist < 0.0 ) {
+        dist = 0.0f;
+    } else if ( a->unk_18 + b->unk_18 < dist ) {
+        dist = a->unk_18 + b->unk_18;
+    }
+    push = a->unk_18 + b->unk_18 - dist * 0.85;
+    func_8011D424_gacode( dir, vel );
+    dir[0] *= push;
+    dir[1] *= push;
+    dir[2] *= push;
+    gap[0] += dir[0];
+    gap[1] += dir[1];
+    gap[2] += dir[2];
+    func_8011D424_gacode( normal, gap );
+    return 1.0 - dist / ( a->unk_18 + b->unk_18 );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011DCB8_gacode);
+#endif
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011E014_gacode);
+/*
+================
+func_8011E014_gacode
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011E12C_gacode);
+Collision of bodies a and b (spots sa and sb): the one with more momentum is the mover of
+func_8011E12C_gacode, and when it had strictly more, the other takes its spin about y, reversed and cut by
+the restitution.
+================
+*/
+void func_8011E014_gacode( gaMotion_t *a, gaMotion_t *b, gaSpot_t *sa, gaSpot_t *sb ) {
+    gaMotion_t *in[2];
+    gaMotion_t *out[2];
+    gaSpot_t *spots[2];
+    f32 momentum[2];
+    f32 swap;
+    f32 restitution;
+    f32 keep;
+
+    momentum[0] = ( a->vel[0] * a->vel[0] + a->vel[1] * a->vel[1] + a->vel[2] * a->vel[2] ) * ( a->unk_30 * a->unk_30 );
+    momentum[1] = ( b->vel[0] * b->vel[0] + b->vel[1] * b->vel[1] + b->vel[2] * b->vel[2] ) * ( b->unk_30 * b->unk_30 );
+    if ( momentum[1] <= momentum[0] ) {
+        in[0] = out[0] = a;
+        in[1] = out[1] = b;
+        spots[0] = sa;
+        spots[1] = sb;
+    } else {
+        in[0] = out[0] = b;
+        in[1] = out[1] = a;
+        spots[0] = sb;
+        spots[1] = sa;
+        swap = momentum[0];
+        momentum[0] = momentum[1];
+        momentum[1] = swap;
+    }
+    restitution = func_8011E12C_gacode( out, in, spots );
+    if ( momentum[0] > momentum[1] ) {
+        keep = 1.0 - restitution;
+        out[1]->spin[1] = -( in[0]->spin[1] * keep );
+    }
+}
+
+/*
+================
+func_8011E12C_gacode
+
+Collision of in[0] (moving) with in[1], weighted by their unk_30, with the restitution of
+func_8011DCB8_gacode: out[1] leaves along the contact normal, out[0] keeps the rest of the momentum at its own
+speed. Returns the restitution.
+================
+*/
+f32 func_8011E12C_gacode( gaMotion_t **out, gaMotion_t **in, gaSpot_t **spots ) {
+    gaMotion_t after[2];
+    vec3_t normal;
+    vec3_t vel0;
+    vec3_t vel1;
+    f32 restitution;
+    f32 speed;
+    f32 speed0;
+
+    restitution = func_8011DCB8_gacode( in[0]->vel, spots[0], spots[1], normal );
+    after[0].vel[0] = ( ( in[0]->unk_30 - restitution * in[1]->unk_30 ) * in[0]->vel[0] +
+                        ( in[1]->unk_30 + restitution * in[1]->unk_30 ) * in[1]->vel[0] ) /
+                      ( in[0]->unk_30 + in[1]->unk_30 );
+    after[0].vel[1] = ( ( in[0]->unk_30 - restitution * in[1]->unk_30 ) * in[0]->vel[1] +
+                        ( in[1]->unk_30 + restitution * in[1]->unk_30 ) * in[1]->vel[1] ) /
+                      ( in[0]->unk_30 + in[1]->unk_30 );
+    after[0].vel[2] = ( ( in[0]->unk_30 - restitution * in[1]->unk_30 ) * in[0]->vel[2] +
+                        ( in[1]->unk_30 + restitution * in[1]->unk_30 ) * in[1]->vel[2] ) /
+                      ( in[0]->unk_30 + in[1]->unk_30 );
+    after[1].vel[0] = ( ( in[0]->unk_30 + restitution * in[0]->unk_30 ) * in[0]->vel[0] +
+                        ( in[1]->unk_30 - restitution * in[0]->unk_30 ) * in[1]->vel[0] ) /
+                      ( in[0]->unk_30 + in[1]->unk_30 );
+    after[1].vel[1] = ( ( in[0]->unk_30 + restitution * in[0]->unk_30 ) * in[0]->vel[1] +
+                        ( in[1]->unk_30 - restitution * in[0]->unk_30 ) * in[1]->vel[1] ) /
+                      ( in[0]->unk_30 + in[1]->unk_30 );
+    after[1].vel[2] = ( ( in[0]->unk_30 + restitution * in[0]->unk_30 ) * in[0]->vel[2] +
+                        ( in[1]->unk_30 - restitution * in[0]->unk_30 ) * in[1]->vel[2] ) /
+                      ( in[0]->unk_30 + in[1]->unk_30 );
+    speed = func_8011D3D4_gacode( after[1].vel );
+    vel1[0] = normal[0] * speed;
+    vel1[1] = normal[1] * speed;
+    vel1[2] = normal[2] * speed;
+    vel0[0] = ( after[0].vel[0] * in[0]->unk_30 + after[1].vel[0] * in[1]->unk_30 - vel1[0] * in[1]->unk_30 ) /
+              in[0]->unk_30;
+    vel0[1] = ( after[0].vel[1] * in[0]->unk_30 + after[1].vel[1] * in[1]->unk_30 - vel1[1] * in[1]->unk_30 ) /
+              in[0]->unk_30;
+    vel0[2] = ( after[0].vel[2] * in[0]->unk_30 + after[1].vel[2] * in[1]->unk_30 - vel1[2] * in[1]->unk_30 ) /
+              in[0]->unk_30;
+    speed = func_8011D3D4_gacode( after[0].vel );
+    speed0 = func_8011D3D4_gacode( vel0 );
+    if ( speed0 == 0.0f ) {
+        speed = speed0 = 1.0f;
+    }
+    vel0[0] *= speed / speed0;
+    vel0[1] *= speed / speed0;
+    vel0[2] *= speed / speed0;
+    out[0]->vel[0] = vel0[0];
+    out[0]->vel[1] = vel0[1];
+    out[0]->vel[2] = vel0[2];
+    out[1]->vel[0] = vel1[0];
+    out[1]->vel[1] = vel1[1];
+    out[1]->vel[2] = vel1[2];
+    return restitution;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011E504_gacode);
 
