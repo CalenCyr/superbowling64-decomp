@@ -331,6 +331,7 @@ extern s16 D_8012CE00_gacode;          /* BGM of the game (func_800379C8) */
 extern s64 D_8012CDE8_gacode;           /* sound handle (func_80037870) */
 extern u8 D_8012CDF8_gacode[2];         /* per team: index in D_8012CE02_gacode of the current player */
 extern s8 D_8012CE02_gacode[2][5];      /* per team: player numbers, -1 ends */
+extern u8 D_80123684_gacode[2];         /* per pair of players: the index the turn passes to next (func_80113AD4_gacode) */
 
 /* unit 3C570 */
 s32 func_80112AF0_gacode( void );

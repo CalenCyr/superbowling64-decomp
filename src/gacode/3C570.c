@@ -346,7 +346,72 @@ s32 func_80113968_gacode( void ) {
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113968_gacode);
 #endif
 
+/*
+================
+func_80113AD4_gacode
+
+Main loop state of the pair game: runs the current player of each team; with three or more players the
+turn alternates between the pair of players 0 and 1 and the pair 2 and 3 (D_80123684_gacode keeps each
+pair's next index), else it passes to the team's next player. Ends the game for the team once the flag in
+D_800994BE of the current player's pair is set (with four players on one team, once both pairs' flags are).
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: allocation only: retail reads the D_800994BE[pair] flag through its absolute address and keeps
+// the array's base (in fp) for the four-player test alone; the draft reuses the hoisted base for both, which
+// renumbers s5-s8 (tried: the test as a ternary, inverted test order; the permuter only helped a little, with
+// the pair index in a local).
+s32 func_80113AD4_gacode( void ) {
+    s32 team;
+    s32 result;
+    s32 done;
+
+    done = 0;
+    for ( team = 0; team <= D_8005C162; team++ ) {
+        result = func_80114640_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
+        if ( result < 0 ) {
+            if ( D_8012CE02_gacode[0][2] != -1 ) {
+                if ( D_8012CDF8_gacode[team] >= 2 ) {
+                    D_80123684_gacode[1] = D_8012CDF8_gacode[team];
+                    D_8012CDF8_gacode[team] = D_8012CDF8_gacode[team] == 3 ? 2 : 3;
+                } else {
+                    D_80123684_gacode[0] = D_8012CDF8_gacode[team];
+                    D_8012CDF8_gacode[team] = D_8012CDF8_gacode[team] == 1 ? 0 : 1;
+                }
+            } else if ( D_8012CE02_gacode[team][++D_8012CDF8_gacode[team]] == -1 ) {
+                D_8012CDF8_gacode[team] = 0;
+            }
+        } else if ( result > 0 ) {
+            if ( D_8012CE02_gacode[0][2] != -1 ) {
+                if ( D_8012CDF8_gacode[team] >= 2 ) {
+                    D_8012CDF8_gacode[team] = D_80123684_gacode[0];
+                    D_80123684_gacode[0] = D_80123684_gacode[0] == 1 ? 0 : 1;
+                } else {
+                    D_8012CDF8_gacode[team] = D_80123684_gacode[1];
+                    D_80123684_gacode[1] = D_80123684_gacode[1] == 3 ? 2 : 3;
+                }
+            } else if ( D_8012CE02_gacode[team][++D_8012CDF8_gacode[team]] == -1 ) {
+                D_8012CDF8_gacode[team] = 0;
+            }
+        }
+        if ( result != 0 ) {
+            if ( !D_8005C162 && D_8005C161 == 4 ) {
+                if ( D_800994BE[0] && D_800994BE[1] ) {
+                    done = 1;
+                }
+            } else if ( D_800994BE[D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] >= 2] ) {
+                done = 1;
+            }
+            if ( done ) {
+                func_80115D70_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]], 0 );
+            }
+        }
+    }
+    return func_80115E24_gacode( D_8005C162 );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113AD4_gacode);
+#endif
 
 /*
 ================
