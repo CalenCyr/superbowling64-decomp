@@ -334,7 +334,90 @@ void func_80038D0C( u8 tenth, s16 x, s16 y ) {
     }
 }
 
+/*
+================
+func_80038DD4
+
+Draws the player's frame of the scoreboard at (x, y), last being the frame in play and throw its throw: the
+frame's box, the image of each roll played, and the frame's score.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: calls, CFG and constants match; registers differ: retail gives rowY s4 (frame s5, arg4 s6) and
+// the rolls v0 (filling bne delay slots), and in the else branch keeps y + 2 as a spilled int at sp+0x1C.
+void func_80038DD4( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s16 y ) {
+    s16 rowY;
+    s32 pins;
+    s16 roll;
+    s32 foul;
+
+    if ( frame == 9 ) {
+        func_8002DF3C( 0x87D, x, y );
+        rowY = y + 2;
+        if ( last == 9 && throw != 0 ) {
+            if ( ( D_80099458[player][9] & 1 ) && ( D_80099458[player][9] & 0x10 ) ) {
+                func_8002DF3C( 0x85F, x - 1, y );
+            }
+            pins = D_80066E18[player][frame];
+            if ( pins == -1 ) {
+                roll = -2;
+            } else {
+                roll = pins;
+            }
+            func_8003B1CC( func_80039340( roll, FALSE ), x + 1, rowY );
+        }
+        if ( last == 9 && ( throw >= 2 || arg4 ) ) {
+            if ( ( D_80099458[player][frame] & 1 ) && ( D_80099458[player][frame] & 0x20 ) ) {
+                func_8002DF3C( 0x85F, x + 9, rowY - 2 );
+            }
+            pins = D_800A3020[player][frame];
+            roll = pins == -1 && D_80066E18[player][frame] == pins ? -2 : pins;
+            foul = TRUE;
+            if ( roll == 0 ) {
+                foul = D_80066E18[player][frame] != -2;
+            }
+            func_8003B1CC( func_80039340( roll, foul ), x + 11, rowY );
+        }
+        if ( arg4 ) {
+            if ( D_80066E18[player][frame] == -1 || D_800A3020[player][frame] == -1 ) {
+                pins = D_800994B8[player];
+                roll = pins == -1 && D_800A3020[player][frame] == pins ? -2 : pins;
+                foul = TRUE;
+                if ( roll == 0 ) {
+                    foul = D_800A3020[player][frame] >= 0;
+                }
+                func_8003B1CC( func_80039340( roll, foul ), x + 21, rowY );
+            }
+            pins = D_800DF630[player][frame];
+            if ( pins >= 0 ) {
+                pins += D_800DF5D0[player];
+            }
+            rowY += 9;
+            func_800393D8( pins, x + 5, rowY );
+        }
+    } else {
+        func_8002DF3C( 0x87E, x, y );
+        rowY = y + 2;
+        if ( frame < last || ( frame == last && throw != 0 ) ) {
+            if ( D_80099458[player][frame] != 0 ) {
+                func_8002DF3C( 0x85F, x - 1, y );
+            }
+            func_8003B1CC( func_80039340( D_80066E18[player][frame], FALSE ), x + 1, rowY );
+        }
+        if ( frame < last ) {
+            func_8003B1CC( func_80039340( D_800A3020[player][frame], TRUE ), x + 11, rowY );
+            pins = D_800DF630[player][frame];
+            if ( pins >= 0 ) {
+                pins += D_800DF5D0[player];
+            }
+            rowY += 9;
+            func_800393D8( pins, x, rowY );
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/13490", func_80038DD4);
+#endif
 
 /*
 ================
@@ -450,7 +533,63 @@ void func_80039554( s16 *digits, s16 value, u8 small, u8 tens ) {
     digits[3] = images[ones];
 }
 
+/*
+================
+func_80039700
+
+Draws the scoreboard of the game at (x, y), mode 1 by teams of two players and mode 2 in two teams with their
+totals: the numbered heads of the ten frames, then per player (or team) its name plates and its ten frames, all
+of them when all is set.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: calls, CFG and constants match; registers and induction variables differ: retail keeps i * 12
+// (not &D_80068218[i]) at sp+0x54 and reloads count from the stack each pass.
+void func_80039700( u8 mode, u8 all, s16 x, s16 y ) {
+    s32 i;
+    s32 frame;
+    s32 count;
+    s32 player;
+    s16 frameX;
+
+    if ( mode == 2 ) {
+        func_8002DF3C( 0xA12, x, y - 3 );
+    }
+    func_80038C1C( 10, 0, x + 0x38, y );
+    y += 9;
+    count = mode == 1 ? D_8005C161 / 2 : D_8005C161;
+    for ( i = 0; i < count; i++ ) {
+        frameX = x;
+        if ( mode == 2 && i == 2 ) {
+            func_8002DF3C( 0x9FB, frameX, y + 4 );
+            y += 16;
+        }
+        if ( mode == 1 ) {
+            player = i == 1 ? 2 : 0;
+            func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, frameX, y );
+            func_800389D0( player + 1, D_8005C0E4[player + 1] >> 7, D_80068218[player + 1].chars, frameX, y + 20 );
+        } else {
+            func_800389D0( i, D_8005C0E4[i] >> 7, D_80068218[i].chars, frameX, y );
+        }
+        frameX += 0x38;
+        if ( mode == 1 ) {
+            y += 10;
+        }
+        for ( frame = 0; frame < 9; frame++ ) {
+            func_80038DD4( i, frame, all ? 9 : D_8009D19C[i], D_80068A50[i], D_800994BE[i], frameX, y );
+            frameX += 20;
+        }
+        func_80038DD4( i, 9, all ? 9 : D_8009D19C[i], D_80068A50[i], D_800994BE[i], frameX, y );
+        y += mode == 1 ? 40 : 20;
+        if ( mode == 2 && i % 2 == 1 ) {
+            func_8002DF3C( i == 1 ? 0xA13 : 0x9FC, 0xCC, y );
+            func_800393D8( D_800EA090[i - 1] + D_800EA090[i], 0x10E, y + 4 );
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/13490", func_80039700);
+#endif
 
 /*
 ================
@@ -492,7 +631,7 @@ void func_80039CBC( u8 kind, u8 all, s16 x, s16 y ) {
                 func_8002DF3C( D_8005CB2C[i], rowX + 6, rowY + 3 );
                 break;
             case 1:
-                func_800393D8( D_80099458[i], rowX - 6, rowY + 4 );
+                func_800393D8( D_80099458[0][i], rowX - 6, rowY + 4 );
                 break;
             default:
                 func_8003A074( player, i, kind, all, rowX, rowY );

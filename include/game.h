@@ -24,6 +24,7 @@ extern u8 D_800693DC[2];            /* per lane: games won */
 extern u8 D_8009D19C[4];            /* per player: current frame (10: the game is over) */
 extern s16 D_800DF630[4][10];       /* per player and frame: score */
 extern s8 D_800A3020[4][10];        /* per player and frame */
+extern s8 D_80066E18[4][10];        /* per player and frame */
 extern s8 D_800994B8[2];            /* per player of a duel: frames won */
 extern s16 D_800EA090[];
 extern u8 D_8005C0B6;               /* restored by the results overlay on leaving */
@@ -35,7 +36,7 @@ extern playerName_t D_8005C0F8[8];   /* per character: its default name */
 extern playerName_t D_80068218[];    /* per player: name */
 extern u8 D_80068A50[];             /* per player (func_8003A658) */
 extern u8 D_800994BE[];             /* per player (func_8003A658) */
-extern u8 D_80099458[9];            /* per frame: par of the frame (func_80122140_gacode) */
+extern u8 D_80099458[4][10];        /* per player and frame: flags; in the par game, [0] holds each frame's par (func_80122140_gacode) */
 extern u16 D_8009CF80[4];           /* per player of a duel: games won */
 
 #endif

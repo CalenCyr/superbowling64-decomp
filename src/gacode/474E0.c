@@ -491,8 +491,8 @@ s32 func_80122140_gacode( u8 player, s32 force ) {
     frame = D_8009D19C[player];
     throws = ++D_80066E18[player][frame];
 
-    if ( force || throws >= D_80099458[frame] + 5 ) {
-        D_800EA090[player] += D_800DF630[player][frame] = throws - D_80099458[frame];
+    if ( force || throws >= D_80099458[0][frame] + 5 ) {
+        D_800EA090[player] += D_800DF630[player][frame] = throws - D_80099458[0][frame];
         D_8009D19C[player]++;
         advanced = 1;
     }
