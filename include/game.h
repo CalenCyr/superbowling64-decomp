@@ -19,6 +19,7 @@ extern u8 D_8005C160;               /* low nibble the game mode; bits 4-5 a sub-
 extern u8 D_8005C161;               /* number of players */
 extern u8 D_8005C162;               /* index of the last team */
 extern u8 D_8005C163;
+extern u8 D_8005C164;               /* set to 1 by the game reset (func_80121E34_gacode) */
 extern u8 D_8005CB60;
 extern u8 D_800693DC[2];            /* per lane: games won */
 extern u8 D_8009D19C[4];            /* per player: current frame (10: the game is over) */

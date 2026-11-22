@@ -426,7 +426,44 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801213B4_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801219CC_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80121E34_gacode);
+/*
+================
+func_80121E34_gacode
+
+Clears every player's scores, results and counters for a new game.
+================
+*/
+void func_80121E34_gacode( void ) {
+    u8 player;
+    u8 frame;
+
+    for ( player = 0; player < 4; player++ ) {
+        for ( frame = 0; frame < 10; frame++ ) {
+            D_80066E18[player][frame] = 0;
+            D_800A3020[player][frame] = 0;
+            D_80099458[player][frame] = 0;
+            D_800DF630[player][frame] = 0;
+        }
+        for ( frame = 0; frame < 12; frame++ ) {
+            D_800A3050[player][frame] = 0;
+            D_800F7C18[player][frame] = 0;
+        }
+        D_800DF6B4[player] = 0;
+        D_8009D088[player] = 0;
+        D_8009CF80[player] = 0;
+        D_800EA090[player] = 0;
+        D_800994B8[player] = 0;
+        D_8009D19C[player] = 0;
+        D_80068A50[player] = 0;
+        D_8012CDE0_gacode[player] = 0;
+        D_800994BE[player] = 0;
+        D_800A304C[player] = 0;
+        D_80066C00.unk_20[player] = 0;
+    }
+    D_8012D8DA_gacode = 0;
+    D_8012D651_gacode = 0;
+    D_8005C164 = 1;
+}
 
 /*
 ================

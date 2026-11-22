@@ -288,6 +288,7 @@ typedef struct {
 extern gaLaneAim_t D_8012D228_gacode[2];
 extern gaPlayer_t D_8012D658_gacode[MAX_PLAYERS];
 extern u8 D_8012D651_gacode;
+extern u8 D_8012CDE0_gacode[4];        /* per player (func_801219CC_gacode) */
 extern u16 D_8012D8D8_gacode;
 extern u8 D_8012D8DA_gacode;
 extern gaLane_t D_8012DCF0_gacode[2];
