@@ -1033,8 +1033,8 @@ void func_8011641C_gacode( s32 player, u8 *pins ) {
         spot[i].pos[0] = body[i].pos[0];
         spot[i].pos[1] = body[i].pos[1];
         spot[i].pos[2] = body[i].pos[2];
-        spot2->unk_1C = 0.0f;
-        spot[i].unk_1C = 0.0f;
+        spot2->unk_1C = 0;
+        spot[i].unk_1C = 0;
     }
     body = lane->unk_948;
     spot = lane->unk_A68;

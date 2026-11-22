@@ -209,9 +209,10 @@ func_8011DB54_gacode
 
 Nonzero when the segment from from to to passes within radius plus the spot's radius of the spot's centre,
 at a point between its ends.
+Declared inline: func_8011E6F8_gacode (parked draft) expands it.
 ================
 */
-s32 func_8011DB54_gacode( gaSpot_t *spot, vec3_t from, vec3_t to, f32 radius ) {
+inline s32 func_8011DB54_gacode( gaSpot_t *spot, vec3_t from, vec3_t to, f32 radius ) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -299,9 +300,10 @@ func_8011E014_gacode
 Collision of bodies a and b (spots sa and sb): the one with more momentum is the mover of
 func_8011E12C_gacode, and when it had strictly more, the other takes its spin about y, reversed and cut by
 the restitution.
+Declared inline: func_8011E6F8_gacode (parked draft) expands it.
 ================
 */
-void func_8011E014_gacode( gaMotion_t *a, gaMotion_t *b, gaSpot_t *sa, gaSpot_t *sb ) {
+inline void func_8011E014_gacode( gaMotion_t *a, gaMotion_t *b, gaSpot_t *sa, gaSpot_t *sb ) {
     gaMotion_t *in[2];
     gaMotion_t *out[2];
     gaSpot_t *spots[2];
@@ -449,7 +451,148 @@ inline s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit ) {
     return 0;
 }
 
+/*
+================
+func_8011E6F8_gacode
+
+Collisions between the bodies of a lane. Each spot in use (spots[0..10], then spot2 of each body in
+spots[11..21]) of a body still in play is tested against each later body in play, first against its
+spot (or the segment from that spot to the midpoint with its spot2), then against its spot2 (or the
+segment from that midpoint to spot2). A new contact runs func_8011E014_gacode on the two bodies, and each
+of them that stands flat (unk_5C 1, rot[0] 0) and was hit at 1 or more starts to tip toward its new
+heading, falls (unk_5D 2) and plays its sound (0x4B under the lane, else 0x32). unk_1C of a spot holds
+bit 0 (it was hit this frame) and one bit per spot it touches. Returns 1 when the last contact with
+the first spots knocked a body over.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: same calls, CFG and inline expansions (func_8011DB54_gacode, func_8011E014_gacode,
+// func_8011D3D4_gacode); register allocation differs: retail keeps lane in s7, a in s8 and hit on the stack
+// (0x7C), recomputes &bodies[a] at each use, and spills which as a word (andi 0xFF in the inner loop's
+// preheader, so it may be (u8)( i / NUM_BODIES ) inside the inner loop); this draft hoists the constant 1 into
+// s7 and &bodies[a] into s8, and its frame is 8 bytes larger
+s32 func_8011E6F8_gacode( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots, u8 lane ) {
+    gaSpot_t mid;
+    s32 hit = 0;
+    s32 i;
+    s32 a;
+    s32 b;
+    s32 b2;
+    u8 which;
+
+    for ( b = 0; b < NUM_BODIES; b++ ) {
+        spots[b].unk_1C &= ~1;
+    }
+    for ( i = 0; i < NUM_BODIES * 2; i++ ) {
+        if ( spots[i].unk_18 == 0.0f ) {
+            continue;
+        }
+        a = i % NUM_BODIES;
+        which = i / NUM_BODIES;
+        if ( bodies[a].unk_5D == 0 ) {
+            continue;
+        }
+        for ( b = a + 1; b < NUM_BODIES; b++ ) {
+            b2 = b + NUM_BODIES;
+            if ( bodies[b].unk_5D == 0 ) {
+                continue;
+            }
+            if ( spots[b2].unk_18 != 0.0f ) {
+                mid.pos[0] = ( spots[b].pos[0] + spots[b2].pos[0] ) / 2.0f;
+                mid.pos[1] = ( spots[b].pos[1] + spots[b2].pos[1] ) / 2.0f;
+                mid.pos[2] = ( spots[b].pos[2] + spots[b2].pos[2] ) / 2.0f;
+                mid.unk_18 = spots[b2].unk_18;
+            }
+            if ( !( ( spots[i].unk_1C >> ( b2 ) ) & 1 ) &&
+                 ( func_8011D9CC_gacode( &spots[i], &spots[b] ) ||
+                   ( spots[b2].unk_18 != 0.0f &&
+                     func_8011DB54_gacode( &spots[i], spots[b].pos, mid.pos, spots[b].unk_18 ) ) ) ) {
+                if ( !( ( spots[i].unk_1C >> b ) & 1 ) ) {
+                    func_8011E014_gacode( &motion[a], &motion[b], &spots[i], &spots[b] );
+                    lane = spots[i].pos[1] < -190.0f ? lane | 2 : lane;
+                    if ( bodies[b].unk_5C == 1 ) {
+                        if ( bodies[b].rot[0] == 0.0f && func_8011D3D4_gacode( motion[b].vel ) >= 1.0 ) {
+                            motion[b].spin[0] = 1.5f;
+                            func_8011D7CC_gacode( motion[b].vel, &bodies[b] );
+                            if ( bodies[b].unk_5D == 1 ) {
+                                bodies[b].unk_5D = 2;
+                            }
+                            func_80120D30_gacode( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
+                            hit = 1;
+                        } else {
+                            hit = 0;
+                        }
+                    }
+                    if ( bodies[a].unk_5C == 1 ) {
+                        if ( bodies[a].rot[0] == 0.0f && func_8011D3D4_gacode( motion[a].vel ) >= 1.0 ) {
+                            switch ( which ) {
+                            case 0:
+                                motion[a].spin[0] = 1.5f;
+                                break;
+                            case 1:
+                                motion[a].spin[0] = -2.0f;
+                                break;
+                            }
+                            func_8011D7CC_gacode( motion[a].vel, &bodies[a] );
+                            if ( bodies[a].unk_5D == 1 ) {
+                                bodies[a].unk_5D = 2;
+                            }
+                            func_80120D30_gacode( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
+                            hit = 1;
+                        } else {
+                            hit = 0;
+                        }
+                    }
+                    spots[i].unk_1C |= 1 << b;
+                    spots[b].unk_1C |= 1;
+                }
+            } else if ( spots[b2].unk_18 != 0.0f && !( spots[b].unk_1C & 1 ) &&
+                        !( ( spots[i].unk_1C >> b ) & 1 ) &&
+                        ( func_8011D9CC_gacode( &spots[i], &spots[b2] ) ||
+                          func_8011DB54_gacode( &spots[i], mid.pos, spots[b2].pos,
+                                                spots[b2].unk_18 ) ) ) {
+                if ( !( ( spots[i].unk_1C >> ( b2 ) ) & 1 ) ) {
+                    func_8011E014_gacode( &motion[a], &motion[b], &spots[i], &spots[b2] );
+                    lane = spots[i].pos[1] < -190.0f ? lane | 2 : lane;
+                    if ( bodies[b].unk_5C == 1 && bodies[b].rot[0] == 0.0f &&
+                         func_8011D3D4_gacode( motion[b].vel ) >= 1.0 ) {
+                        motion[b].spin[0] = -2.0f;
+                        func_8011D7CC_gacode( motion[b].vel, &bodies[b] );
+                        if ( bodies[b].unk_5D == 1 ) {
+                            bodies[b].unk_5D = 2;
+                        }
+                        func_80120D30_gacode( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
+                    }
+                    if ( bodies[a].unk_5C == 1 && bodies[a].rot[0] == 0.0f &&
+                         func_8011D3D4_gacode( motion[a].vel ) >= 1.0 ) {
+                        switch ( which ) {
+                        case 0:
+                            motion[a].spin[0] = 1.5f;
+                            break;
+                        case 1:
+                            motion[a].spin[0] = -2.0f;
+                            break;
+                        }
+                        func_8011D7CC_gacode( motion[a].vel, &bodies[a] );
+                        if ( bodies[a].unk_5D == 1 ) {
+                            bodies[a].unk_5D = 2;
+                        }
+                        func_80120D30_gacode( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
+                    }
+                    spots[i].unk_1C |= 1 << ( b2 );
+                    spots[b].unk_1C |= 1;
+                }
+            } else {
+                spots[i].unk_1C &= ~( 1 << b );
+                spots[i].unk_1C &= ~( 1 << ( b2 ) );
+            }
+        }
+    }
+    return hit;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011E6F8_gacode);
+#endif
 
 /*
 ================

@@ -80,7 +80,7 @@ typedef struct {
     /* 0x00 */ vec3_t pos;
     /* 0x0C */ vec3_t unk_0C;
     /* 0x18 */ f32 unk_18;
-    /* 0x1C */ f32 unk_1C;
+    /* 0x1C */ u32 unk_1C;              /* contact bits of func_8011E6F8_gacode: bit 0 hit this frame, bit n touching spots[n] */
 } gaSpot_t;                             /* size 0x20 */
 
 /* View of a lane, set each frame by the lane's unk_B0C handler. Name invented. */
