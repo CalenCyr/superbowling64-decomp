@@ -66,6 +66,11 @@ rm -f "$settings"
 dir=$(comm -13 <(echo "$before") <(find nonmatchings -mindepth 1 -maxdepth 1 -type d | sort) | head -1)
 [ -n "$dir" ] || { echo "import made no directory" >&2; exit 1; }
 
+# With --no-prune the candidate object holds the whole unit, and the default objdump scores all of its .text
+# against the one-function target, so shorter (broken) candidates win. Disassemble only the target function.
+printf 'objdump_command = "mips64-linux-gnu-objdump -drz -m mips:4300 --disassemble=%s"\n%s\n' \
+    "$func" "$(cat "$dir/settings.toml")" > "$dir/settings.toml"
+
 # The permuter compiles every candidate with the bodies of all other non-`inline` functions reduced to declarations.
 # In an -O3 unit that removes the implicit inlining of the unit's earlier functions, so mark the functions defined
 # before the target `inline` in the (disposable) work copy; at -O3 gcc 2.7.2 inlines them the same way.
