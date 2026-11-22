@@ -2924,7 +2924,107 @@ s32 func_8011C658_gacode( gaPlayer_t *pl, s32 player ) {
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C658_gacode);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C93C_gacode);
+/*
+================
+func_8011C93C_gacode
+
+Set-up of a player the game plays: picks unk_2C at random between the character's limits, takes the
+func_801203AC_gacode target with a random sideways error (bounded by the mode and D_8009D098.unk_78), then
+chooses unk_98 and unk_9C (where func_8011C658_gacode moves unk_14 and unk_20) and the unk_30 that
+func_801205A0_gacode gives for them. A character whose unk_10 exceeds 12 tries a crossing set-up first; when
+unk_30 falls outside the character's range, a set-up from 30.48 to the side follows, and last one with unk_30 0.
+================
+*/
+void func_8011C93C_gacode( gaPlayer_t *pl, s32 player ) {
+    s32 side = pl->character.unk_05 ? -1 : 1;
+    s32 range = ( pl->character.unk_08 - pl->character.unk_0C ) * 100.0f;
+    s32 spread;
+    s32 bias;
+    f32 gutter;
+    vec3_t target;
+    vec3_t dir;
+    vec3_t to;
+    vec3_t from;
+
+    pl->character.unk_2C = RAND( range ) / 100.0f + pl->character.unk_0C;
+    func_801203AC_gacode( target, pl->lane->bodies, pl->lane->spots, pl->character.unk_05 );
+    if ( ( D_8005C160 & 0xF ) == 3 || ( ( D_8005C160 >> 4 ) & 3 ) == 1 ) {
+        switch ( D_8009D098.unk_78 ) {
+            case 0:
+                spread = 32;
+                bias = 16;
+                break;
+            case 1:
+                spread = 6;
+                bias = 3;
+                break;
+            case 2:
+                spread = 2;
+                bias = 1;
+                break;
+        }
+    } else {
+        switch ( D_8009D098.unk_78 ) {
+            case 0:
+                spread = 96;
+                bias = 48;
+                break;
+            case 1:
+                spread = 16;
+                bias = 8;
+                break;
+            case 2:
+                spread = 2;
+                bias = 1;
+                break;
+        }
+    }
+    target[0] += ( spread != 0 ? RAND( spread ) * 100 / 100.0f : 0.0f ) - bias;
+
+    if ( pl->character.unk_10 > 12.0 ) {
+        target[0] -= side * 0.9;
+        pl->unk_98 = side * 5.0;
+        pl->unk_9C = side * -5.0;
+        to[0] = pl->unk_98;
+        to[1] = pl->character.unk_14[1];
+        to[2] = pl->character.unk_14[2];
+        from[0] = pl->unk_9C;
+        from[1] = pl->character.unk_20[1];
+        from[2] = pl->character.unk_20[2];
+        func_8011D4E4_gacode( dir, from, to );
+        pl->character.unk_30 = func_801205A0_gacode( target, dir, from[0], pl->character.unk_2C );
+        if ( D_8012D220_gacode->unk_14 >= 0.0f && FABS( pl->character.unk_30 ) <= FABS( pl->character.unk_10 ) ) {
+            return;
+        }
+    }
+
+    target[0] += side * 0.9;
+    pl->unk_98 = side * 30.48;
+    if ( ( side > 0 && target[0] >= pl->unk_98 ) || ( side < 0 && target[0] <= pl->unk_98 ) ) {
+        gutter = FABS( target[2] - 730.0f );
+        pl->unk_9C = target[0] - ( target[0] - pl->unk_98 ) * gutter / ( gutter - 395.0f );
+        pl->character.unk_30 = 0.0f;
+    } else {
+        pl->unk_9C = pl->unk_98;
+        to[0] = pl->unk_98;
+        to[1] = pl->character.unk_14[1];
+        to[2] = pl->character.unk_14[2];
+        from[0] = pl->unk_9C;
+        from[1] = pl->character.unk_20[1];
+        from[2] = pl->character.unk_20[2];
+        func_8011D4E4_gacode( dir, from, to );
+        pl->character.unk_30 = func_801205A0_gacode( target, dir, from[0], pl->character.unk_2C );
+    }
+    if ( D_8012D220_gacode->unk_14 >= 0.0f && FABS( pl->character.unk_30 ) <= FABS( pl->character.unk_10 ) ) {
+        return;
+    }
+
+    target[0] += side * 2.0;
+    pl->unk_9C = side * 30.48;
+    gutter = FABS( target[2] - 730.0f );
+    pl->unk_98 = target[0] + ( pl->unk_9C - target[0] ) * ( gutter - 395.0f ) / gutter;
+    pl->character.unk_30 = 0.0f;
+}
 
 /*
 ================
