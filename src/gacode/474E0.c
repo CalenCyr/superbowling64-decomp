@@ -974,29 +974,23 @@ s32 func_801203AC_gacode( vec3_t out, gaBody_t *bodies, gaSpot_t *spots, s32 sid
 func_801205A0_gacode
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: schedule only; retail loads pos[0] and x and subtracts dx before dz (dz's f10 and dx's f12 swap
-// slots, and one nop more here); every product and sum is the same
 f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale ) {
     f32 dx = x - pos[0];
-    f32 dz = pos[2] - 730.0f;
     f32 width = 730.0f - D_8012D220_gacode->unk_08;
+    f32 dz;
     f32 vx;
     f32 vz;
 
-    if ( dz < 0.0f ) {
-        dz = 0.0f - dz - width;
+    if ( pos[2] - 730.0f < 0.0f ) {
+        dz = 0.0f - ( pos[2] - 730.0f ) - width;
     } else {
-        dz = dz - width;
+        dz = pos[2] - 730.0f - width;
     }
     vz = scale * vel[2];
     vx = scale * vel[0];
     return ( vz * vz * 2 * dx - vx * 2 * vz * ( width + dz ) )
          / ( width * width + width * 2 * dz + D_8012D220_gacode->unk_10 * ( dz * dz ) ) * 15.0 / D_8012D220_gacode->unk_0C;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801205A0_gacode);
-#endif
 
 /*
 ================
