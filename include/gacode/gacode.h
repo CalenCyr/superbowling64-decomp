@@ -97,9 +97,9 @@ typedef struct gaCamera_s {
 /* One of the two lanes (D_8012DCF0_gacode), shared by the players bowling on it. Name invented. */
 typedef struct {
     /* 0x000 */ gaBody_t bodies[NUM_BODIES];
-    /* 0x420 */ u8 unk_420[0x8];
-    /* 0x428 */ f32 unk_428;
-    /* 0x42C */ u8 unk_42C[0x8];
+    /* 0x420 */ vec3_t unk_420;         /* turned into the ball's spin by func_8011D7CC_gacode */
+    /* 0x42C */ f32 unk_42C;
+    /* 0x430 */ f32 unk_430;
     /* 0x434 */ f32 unk_434;
     /* 0x438 */ u8 unk_438[0x18];
     /* 0x450 */ f32 unk_450;            /* from D_801239E8_gacode, by gaPlayer_t.unk_93 */
@@ -157,7 +157,7 @@ typedef struct {
     /* 0x30 */ f32 unk_30;
     /* 0x34 */ f32 unk_34;              /* an angle (radians; func_8011B1A0_gacode, func_8011840C_gacode) */
     /* 0x38 */ vec3_t unk_38;            /* func_8011D4E4_gacode of unk_20 and unk_14 */
-    /* 0x44 */ u8 unk_44[0x04];
+    /* 0x44 */ f32 unk_44;
 } gaCharacter_t;                        /* size 0x48 */
 
 extern gaCharacter_t D_80123BE0_gacode[];
@@ -401,6 +401,7 @@ void func_8011D304_gacode( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos );
 f32 func_8011D3D4_gacode( vec3_t v );
 f32 func_8011D424_gacode( vec3_t out, vec3_t in );
 f32 func_8011D4E4_gacode( vec3_t out, vec3_t from, vec3_t to );
+void func_8011D7CC_gacode( vec3_t v, gaBody_t *ball );
 f32 func_8011D5B8_gacode( vec3_t a, vec3_t b );
 void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b );
 s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit );

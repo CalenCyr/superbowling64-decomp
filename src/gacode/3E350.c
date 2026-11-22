@@ -709,17 +709,19 @@ void func_80116798_gacode( gaLane_t *lane ) {
 func_801167C0_gacode
 
 Sounds the result of a throw from the stage's list: 0x49 for a ball in the gutter, else by how far the
-lane's unk_428 got, the second list when strong is set; keeps the sound in the lane's unk_B18.
+lane's unk_420[2] got, the second list when strong is set; keeps the sound in the lane's unk_B18.
+
+Declared inline: nothing calls this copy; func_80116BA4_gacode and func_80116DC8_gacode expand it.
 ================
 */
-void func_801167C0_gacode( s32 player, gaPlayer_t *pl, u8 strong ) {
+inline void func_801167C0_gacode( s32 player, gaPlayer_t *pl, u8 strong ) {
     s32 id;
 
     if ( pl->lane->spots[0].pos[1] <= -190.0f ) {
         id = 0x49;
-    } else if ( pl->lane->unk_428 >= -13.0f ) {
+    } else if ( pl->lane->unk_420[2] >= -13.0f ) {
         id = strong ? D_8012D220_gacode->unk_1E[5] : D_8012D220_gacode->unk_1E[2];
-    } else if ( pl->lane->unk_428 <= -16.0f ) {
+    } else if ( pl->lane->unk_420[2] <= -16.0f ) {
         id = strong ? D_8012D220_gacode->unk_1E[7] : D_8012D220_gacode->unk_1E[4];
     } else {
         id = strong ? D_8012D220_gacode->unk_1E[6] : D_8012D220_gacode->unk_1E[3];
@@ -730,9 +732,10 @@ void func_801167C0_gacode( s32 player, gaPlayer_t *pl, u8 strong ) {
 /*
 ================
 func_801168D0_gacode
+Declared inline: nothing calls this copy; func_80116BA4_gacode and func_80116DC8_gacode expand it.
 ================
 */
-s32 func_801168D0_gacode( gaPlayer_t *pl ) {
+inline s32 func_801168D0_gacode( gaPlayer_t *pl ) {
     gaLane_t *lane = pl->lane;
     f32 height = lane->spots[0].pos[1] - lane->spots[0].unk_18;
 
@@ -752,10 +755,11 @@ s32 func_801168D0_gacode( gaPlayer_t *pl ) {
 /*
 ================
 func_80116998_gacode
+Declared inline: nothing calls this copy; func_80116BA4_gacode and func_80116DC8_gacode expand it.
 ================
 */
-s32 func_80116998_gacode( gaPlayer_t *pl ) {
-    if ( pl->lane->unk_428 >= 0.0f ) {
+inline s32 func_80116998_gacode( gaPlayer_t *pl ) {
+    if ( pl->lane->unk_420[2] >= 0.0f ) {
         func_80120D7C_gacode( &pl->lane->unk_B18 );
         pl->lane->unk_B10 = func_801189C4_gacode;
         return 1;
@@ -805,9 +809,60 @@ inline void func_80116A64_gacode( gaPlayer_t *pl, s16 stickX, s16 stickY ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80116BA4_gacode);
+/*
+================
+func_80116BA4_gacode
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80116DC8_gacode);
+Rolls the ball of a player's throw, unless func_801168D0_gacode or func_80116998_gacode ends it: while the
+lane's unk_454 bit 1 is set, adds the character's unk_44 to its unk_420[0] and starts the roll's sound;
+else stops it.
+================
+*/
+void func_80116BA4_gacode( s32 player, gaPlayer_t *pl ) {
+    if ( func_801168D0_gacode( pl ) ) {
+        return;
+    }
+    if ( func_80116998_gacode( pl ) ) {
+        return;
+    }
+    if ( ( pl->lane->unk_454 >> 1 ) & 1 ) {
+        pl->lane->unk_420[0] += pl->character.unk_44;
+        if ( pl->lane->unk_B18 == 0 ) {
+            func_801167C0_gacode( player, pl, 0 );
+        }
+    } else {
+        func_80120D7C_gacode( &pl->lane->unk_B18 );
+    }
+    pl->lane->unk_42C = 2.0f;
+    pl->lane->unk_434 = pl->lane->unk_430 * 2.0f;
+}
+
+/*
+================
+func_80116DC8_gacode
+
+As func_80116BA4_gacode, scaling the character's unk_44 by the stage's unk_10, and turns the lane's
+unk_420 into the ball's spin.
+================
+*/
+void func_80116DC8_gacode( s32 player, gaPlayer_t *pl ) {
+    if ( func_801168D0_gacode( pl ) ) {
+        return;
+    }
+    if ( func_80116998_gacode( pl ) ) {
+        return;
+    }
+    if ( ( pl->lane->unk_454 >> 1 ) & 1 ) {
+        pl->lane->unk_420[0] += pl->character.unk_44 * D_8012D220_gacode->unk_10;
+        if ( pl->lane->unk_B18 == 0 ) {
+            func_801167C0_gacode( player, pl, 0 );
+        }
+    } else {
+        func_80120D7C_gacode( &pl->lane->unk_B18 );
+    }
+    pl->lane->unk_42C = pl->lane->unk_420[2] * 1.5;
+    func_8011D7CC_gacode( pl->lane->unk_420, &pl->lane->bodies[0] );
+}
 
 /*
 ================
