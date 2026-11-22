@@ -126,7 +126,8 @@ typedef struct {
     /* 0xB26 */ u8 unk_B26;
     /* 0xB27 */ u8 unk_B27;
     /* 0xB28 */ f32 unk_B28;            /* camera height offset of func_8011B8AC_gacode */
-    /* 0xB2C */ u8 unk_B2C[4];
+    /* 0xB2C */ u16 unk_B2C;            /* from gaStage_t.unk_1E[0] */
+    /* 0xB2E */ u8 unk_B2E[2];
 } gaLane_t;                             /* size 0xB30 */
 
 /* What gaCharacter_t.unk_00 points to. Name invented. */
@@ -216,6 +217,8 @@ typedef struct {
 extern gaImageList_t D_801236B0_gacode[2];
 extern u16 D_8012C9A0_gacode[][4];      /* image files of func_80123430_gacode, by its index */
 extern gaSprite_t D_8012D8E0_gacode[2];   /* per lane */
+extern gaSprite_t D_8012D240_gacode[2];   /* per lane (func_80114140_gacode) */
+extern gaSprite_t D_8012CE10_gacode[2];   /* per lane (func_80114140_gacode) */
 
 /* A pin setup of a game mode, by frame (D_801237F0_gacode, D_80123950_gacode). Name invented. */
 typedef struct {
@@ -304,6 +307,7 @@ s32 func_80114024_gacode( void );
 
 /* unit 3E350 */
 void func_80114130_gacode( void );
+void func_80114140_gacode( u8 arg0, f32 offset, u8 arg2 );
 void func_80114550_gacode( s32 player, s8 port, u8 character, u8 lane );
 void func_80114138_gacode( void );
 s32 func_80114640_gacode( s32 player );

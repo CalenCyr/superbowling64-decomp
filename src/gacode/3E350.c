@@ -21,7 +21,64 @@ func_80114138_gacode
 void func_80114138_gacode( void ) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80114140_gacode);
+/*
+================
+func_80114140_gacode
+
+Sets up both lanes: their sprites, scene objects, camera and state; lane 1 is shifted by offset. With
+arg2 set, also clears a flag of the lanes' body objects and shows their unk_AF4[2] objects.
+================
+*/
+void func_80114140_gacode( u8 arg0, f32 offset, u8 arg2 ) {
+    s32 i;
+    s32 j;
+    s32 base;
+    s32 player;
+
+    func_80120A7C_gacode( &D_8012D240_gacode[0], 0xA49, 0x10, 0x41 );
+    func_80120A7C_gacode( &D_8012D240_gacode[1], 0xA47, 0x10, 0x41 );
+    func_80120A7C_gacode( &D_8012CE10_gacode[0], 0xA49, 0x50, 0x7D );
+    func_80120A7C_gacode( &D_8012CE10_gacode[1], 0xA47, 0x50, 0x7D );
+    func_80120A7C_gacode( &D_8012D8E0_gacode[0], 0xA48, 0x10, 0x58 );
+    func_80120A7C_gacode( &D_8012D8E0_gacode[1], 0xA46, 0x10, 0x58 );
+    for ( i = 0; i < 2; i++ ) {
+        base = i != 0 ? 120 : 100;
+        D_8012DCF0_gacode[i].unk_B14 = i != 0 ? offset : 0.0f;
+        D_8012DCF0_gacode[i].camera = D_800EA120[i];
+        D_8012DCF0_gacode[i].camera->unk_24 = -1;
+        for ( j = 0; j < NUM_BODIES; j++ ) {
+            D_8012DCF0_gacode[i].bodyObjs[j] = D_800EA120[base + j];
+            if ( arg0 ) {
+                D_8012DCF0_gacode[i].bodyObjs[j]->flags &= i == 0 ? ~0x8000 : ~0x4000;
+            }
+        }
+        D_8012DCF0_gacode[i].unk_AF4[0] = D_800EA120[base + j++];
+        D_8012DCF0_gacode[i].unk_AF4[1] = D_800EA120[base + j++];
+        D_8012DCF0_gacode[i].unk_AF4[2] = D_800EA120[base + j];
+        if ( arg2 ) {
+            D_8012DCF0_gacode[i].unk_AF4[2]->viewMask = i + 1;
+            D_8012C110_gacode[2].pos[1] = D_8012D220_gacode->unk_14;
+        }
+        D_8012DCF0_gacode[i].unk_B28 = 2700.0f;
+        func_80120B10_gacode( &D_8012D240_gacode[i] );
+        func_80120B10_gacode( &D_8012CE10_gacode[i] );
+        func_80120B10_gacode( &D_8012D8E0_gacode[i] );
+        D_8012DCF0_gacode[i].unk_B23 = 0;
+        D_8012DCF0_gacode[i].unk_B22 = 0;
+        D_8012DCF0_gacode[i].unk_B24 = 0;
+        D_8012DCF0_gacode[i].unk_B18 = 0;
+        D_8012DCF0_gacode[i].unk_B20 = 0;
+        D_8012DCF0_gacode[i].unk_B2C = D_8012D220_gacode->unk_1E[0];
+        D_8012D228_gacode[i].unk_00 = -1096.0f;
+        D_8012D228_gacode[i].unk_04 = 0;
+        D_8012D228_gacode[i].unk_06 = 6;
+        D_8012D228_gacode[i].unk_07 = 0;
+    }
+    D_8012D8D8_gacode = 0;
+    for ( player = 0; player < MAX_PLAYERS; player++ ) {
+        D_8012D658_gacode[player].obj = D_800EA120[140 + player];
+    }
+}
 
 /*
 ================
