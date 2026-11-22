@@ -31,7 +31,8 @@ that names it):
                never used, or only ever assigned (unless the declaration carries an `R36` note); empty
                if/else/plain blocks; bare `;` statements (empty loop bodies, `case X: ;`, `label: ;` are
                allowed); `do { } while (0)` in a function body; self-assignment; `+ 0`, `- 0`, `* 1`,
-               `/ 1`; padding members (`pad`, `_pad3`, `padding`, `filler`, `dummy`) without a
+               `/ 1` (unless the line or the line above carries an `// identity: <evidence>` note, for an
+               operation retail really performs, such as a tuned offset left at zero); padding members (`pad`, `_pad3`, `padding`, `filler`, `dummy`) without a
                `// pad: <evidence>` note naming the SDK or file format.
   R18 [match]  `asm`/`__asm`/`__asm__` outside `INCLUDE_ASM`, unless the function or macro is listed in
                config/rules.txt as `asm-helper NAME` (counted, listed) or `original-asm NAME` (listed
@@ -1000,6 +1001,8 @@ class Checker:
                 return None
         binary_left = lambda p: p.kind in ("ident", "number") or p.text in (")", "]")
         for k, t in enumerate(body):
+            if src.note(t.line, r"identity:\s*\S"):
+                continue
             if t.text in ("+", "-", "*", "/") and 0 < k < len(body) - 1 and body[k + 1].kind == "number" \
                     and binary_left(body[k - 1]):
                 v = num(body[k + 1])

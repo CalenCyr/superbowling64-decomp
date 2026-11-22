@@ -28,6 +28,8 @@ s32 func_80000040(Padded *p, s32 x) {
     x = x; // expect: R17
     p->a = p->a; // expect: R17
     x = x + 0; // expect: R17
+    // identity: a tuned offset left at zero, which retail adds
+    x = x + 0.0f;
     x = p->b * 1; // expect: R17
     for (i = 0; i < 4; i++) {
     }
