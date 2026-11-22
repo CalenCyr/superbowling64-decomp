@@ -419,7 +419,7 @@ void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b );
 s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit );
 f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale );
 s32 func_80120680_gacode( u16 key, s32 count, u16 *table );
-s32 func_801206E0_gacode( gaLane_t *lane );
+u8 func_801206E0_gacode( gaLane_t *lane );
 void func_80120980_gacode( u8 *pins, u16 mask );
 void func_801209C0_gacode( u8 *order, u8 count, u8 first );
 void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, u16 first, u16 last );

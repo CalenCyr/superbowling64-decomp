@@ -362,7 +362,96 @@ void func_801150B4_gacode( s32 player ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801151A0_gacode);
+/*
+================
+func_801151A0_gacode
+
+A game mode. The player scores for their team when the sub-mode's argument is 1 (players 2 and 3 for player
+1). After a func_80116398_gacode turn (unless D_80068A50 is 2), records func_801206E0_gacode's result in the
+frame's flags. When the throw ends the frame, counts the run D_800A304C on after a func_80116398_gacode turn
+(returns 2), else ends it (returns 1); otherwise plays the throw's sound and ends the run, returning 3 when
+the lane's unk_B25 was 3 or the run had reached 3, else 0.
+================
+*/
+s32 func_801151A0_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    s32 strike = 0;
+    s32 scorer;
+    s32 frame;
+    s32 result;
+
+    if ( ( D_8005C160 >> 6 ) == 1 ) {
+        scorer = player >= 2;
+    } else {
+        scorer = player;
+    }
+    frame = D_8009D19C[scorer];
+    if ( pl->lane->unk_B04 == func_80116398_gacode && D_80068A50[scorer] != 2 ) {
+        strike = func_801206E0_gacode( pl->lane );
+        if ( strike != 0 ) {
+            D_8009CF80[scorer]++;
+        }
+        D_80099458[scorer][frame] = strike | ( D_80099458[scorer][frame] & 0xF0 );
+        if ( frame == 9 && strike != 0 ) {
+            D_80099458[scorer][frame] |= 0x10 << D_80068A50[scorer];
+        }
+    }
+    func_80121FD0_gacode( scorer, pl->lane->unk_B22 );
+    if ( pl->lane->unk_B23 == 10 ) {
+        if ( pl->lane->unk_B04 == func_80116398_gacode ) {
+            func_80120D30_gacode( pl->laneIndex, D_8012C7CC_gacode[D_800A304C[scorer]] );
+            pl->lane->unk_B25 = D_800A304C[scorer] + 6;
+            D_800A304C[scorer]++;
+            D_800DF6B4[scorer]++;
+            if ( D_800A304C[scorer] >= 3 ) {
+                func_80120D30_gacode( pl->laneIndex, 0x36 );
+            } else {
+                func_80120D30_gacode( pl->laneIndex, 0x37 );
+            }
+            result = 2;
+        } else {
+            if ( frame != 9 ? D_80099458[scorer][frame] != 0
+                            : ( D_80099458[scorer][9] & 1 )
+                              && ( ( D_80099458[scorer][9] & 0x10 ) || ( D_80099458[scorer][9] & 0x20 ) ) ) {
+                func_80120D30_gacode( pl->laneIndex, 0x7E );
+            } else {
+                func_80120D30_gacode( pl->laneIndex, 0x5A );
+            }
+            pl->lane->unk_B25 = D_80099458[scorer][frame] ? 5 : 1;
+            D_800A304C[scorer] = 0;
+            D_8009D088[scorer]++;
+            func_80120D30_gacode( pl->laneIndex, 0x38 );
+            result = 1;
+        }
+        pl->lane->unk_B24 = 1;
+    } else {
+        result = 0;
+        if ( pl->lane->unk_B25 == 3 ) {
+            if ( pl->lane->unk_B04 == func_80116414_gacode ) {
+                pl->lane->unk_B25 = 4;
+            }
+            func_80120D30_gacode( pl->laneIndex, 0x62 );
+            result = 3;
+        } else if ( D_800A304C[scorer] >= 3 ) {
+            if ( strike != 0 ) {
+                func_80120D30_gacode( pl->laneIndex, 0x7C );
+                pl->lane->unk_B25 = 2;
+            } else {
+                func_80120D30_gacode( pl->laneIndex, 0x63 );
+            }
+            result = 3;
+        } else if ( pl->lane->unk_B22 == 0 ) {
+            func_80120D30_gacode( pl->laneIndex, 0x62 );
+            pl->lane->unk_B25 = 4;
+        } else if ( strike != 0 ) {
+            func_80120D30_gacode( pl->laneIndex, 0x7C );
+            pl->lane->unk_B25 = 2;
+        }
+        pl->lane->unk_B24 = pl->lane->unk_B04 == func_80116414_gacode;
+        D_800A304C[scorer] = 0;
+    }
+    return result;
+}
 
 /*
 ================
