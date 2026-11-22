@@ -137,7 +137,44 @@ inline void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b ) {
     func_8011D424_gacode( out, cross );
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D7CC_gacode);
+/*
+================
+func_8011D7CC_gacode
+
+Sets the ball's rot[1] (degrees) from the heading of v in the x-z plane, approximated from |v[0] / v[2]|
+(45 * its square root below 1) rather than an arctangent; with v[2] zero it turns rot[1] by 90 instead.
+Clamped to -180..179.9999.
+================
+*/
+void func_8011D7CC_gacode( vec3_t v, gaBody_t *ball ) {
+    f32 ratio;
+    f32 angle;
+
+    if ( v[2] == 0.0f ) {
+        ball->rot[1] += v[0] == 0.0f ? 0.0f : v[0] > 0.0f ? -90.0f : 90.0f;
+    } else {
+        ratio = FABS( v[0] / v[2] );
+        if ( ratio < 1.0 ) {
+            angle = sqrtf( ratio ) * 45.0f;
+        } else {
+            angle = ( ratio - 1.0 ) * 0.02 + 45.0;
+        }
+        if ( v[0] <= 0.0f ) {
+            if ( v[2] < 0.0f ) {
+                ball->rot[1] = angle;
+            } else {
+                ball->rot[1] = -angle + 180.0f;
+            }
+        } else {
+            if ( v[2] < 0.0f ) {
+                ball->rot[1] = -angle;
+            } else {
+                ball->rot[1] = angle - 180.0f;
+            }
+        }
+    }
+    ball->rot[1] = ball->rot[1] < -180.0f ? -180.0f : ball->rot[1] > 179.9999 ? 179.9999f : ball->rot[1];
+}
 
 /*
 ================
