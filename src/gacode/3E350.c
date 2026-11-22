@@ -1818,7 +1818,46 @@ s32 func_80118F38_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80118F68_gacode);
+/*
+================
+func_80118F68_gacode
+
+Lane input handler while the ball rolls, as func_801187D0_gacode with the strong sounds: hands the view to the ball once the player's animation is past
+the character's unk_18 frame, spins the ball by its speed down the lane, sounds the roll from the stage's
+second list while motion[0].flags bit 1 is set (else stops it), switches the camera at -1050, and at -1186
+or once the ball stops going down the lane stops the sound and hands over to func_801189C4_gacode.
+================
+*/
+s32 func_80118F68_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+
+    if ( pl->obj->frame <= pl->character.unk_00->unk_18 ) {
+        pl->obj->frame = pl->character.unk_00->unk_1A;
+        pl->lane->bodyObjs[0]->viewMask = 3;
+        pl->obj->viewMask = 0;
+        pl->lane->unk_B0C = func_8011BB44_gacode;
+    }
+    pl->lane->motion[0].spin[0] = pl->lane->motion[0].vel[2];
+    if ( ( pl->lane->motion[0].flags >> 1 ) & 1 ) {
+        if ( pl->lane->unk_B18 == 0 ) {
+            func_801167C0_gacode( player, pl, 1 );
+        }
+    } else {
+        func_80120D7C_gacode( &pl->lane->unk_B18 );
+    }
+    if ( pl->lane->spots[0].pos[2] <= -1050.0 ) {
+        pl->lane->unk_B0C = func_8011BC10_gacode;
+    }
+    if ( pl->lane->spots[0].pos[2] <= -1186.0f ) {
+        func_80120D7C_gacode( &pl->lane->unk_B18 );
+        pl->lane->unk_B10 = func_801189C4_gacode;
+    }
+    if ( pl->lane->motion[0].vel[2] >= 0.0f ) {
+        func_80120D7C_gacode( &pl->lane->unk_B18 );
+        pl->lane->unk_B10 = func_801189C4_gacode;
+    }
+    return 0;
+}
 
 /*
 ================
