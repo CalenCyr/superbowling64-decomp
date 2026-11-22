@@ -260,6 +260,9 @@ extern f32 D_8012C764_gacode[2];       /* per lane: angle of func_8011C158_gacod
 extern u8 D_8012C7C8_gacode;           /* func_8011C57C_gacode's camera has started (func_801150B4_gacode) */
 extern s16 D_8012C8D4_gacode[10];      /* path files of func_8011C468_gacode's camera */
 extern s16 D_8012C8E8_gacode[5];       /* path files of func_8011C57C_gacode's camera */
+extern u8 D_8012C8AC_gacode[3][3];     /* channel orders of func_8011A8AC_gacode's aim line colour */
+extern u16 D_8012C8B6_gacode;          /* angle of func_8011A8AC_gacode's colour cycle */
+extern u8 D_8012C8B8_gacode;           /* channel order of func_8011A8AC_gacode's colour, mod 3 */
 extern gaStage_t D_80123EB0_gacode[];
 extern gaStage_t *D_8012D220_gacode;
 extern u8 D_8012D225_gacode;            /* nonzero: B commits the throw early (func_8011840C_gacode) */

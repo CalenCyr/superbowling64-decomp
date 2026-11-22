@@ -2109,7 +2109,32 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A26C_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A404_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A8AC_gacode);
+/*
+================
+func_8011A8AC_gacode
+
+Draws the lane's aim line between its unk_948[0] and unk_948[1] bodies, in a colour that cycles: two
+channels follow the cosine of D_8012C8B6_gacode, the third is full, and the channels rotate (D_8012C8AC_gacode)
+each time the angle passes half a turn.
+================
+*/
+void func_8011A8AC_gacode( gaPlayer_t *pl ) {
+    u8 color[5] = { 0x7F, 0x7F, 0x7F, 0xC0, 0x01 };
+    u8 channel;
+
+    channel = D_8012C8AC_gacode[D_8012C8B8_gacode % 3][0];
+    color[channel] = -coss( D_8012C8B6_gacode ) / 256 + 0x7F;
+    channel = D_8012C8AC_gacode[D_8012C8B8_gacode % 3][1];
+    color[channel] = coss( D_8012C8B6_gacode ) / 256 + 0x7F;
+    channel = D_8012C8AC_gacode[D_8012C8B8_gacode % 3][2];
+    color[channel] = 0xFF;
+    func_800308C4( pl->laneIndex, pl->lane->unk_948[0].pos, pl->lane->unk_948[1].pos, color );
+    D_8012C8B6_gacode += 0x5B0;
+    if ( D_8012C8B6_gacode >= 0x8000 ) {
+        D_8012C8B6_gacode = 0;
+        D_8012C8B8_gacode++;
+    }
+}
 
 /*
 ================
@@ -2209,7 +2234,6 @@ void func_8011B07C_gacode( s32 player ) {
     func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, 0xA8 + 0x11 );
 }
 
-INCLUDE_RODATA("asm/nonmatchings/gacode/3E350", D_8012CB38_gacode);
 
 /*
 ================
