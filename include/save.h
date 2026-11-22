@@ -37,7 +37,7 @@ extern u16 D_80066C44;              /* choice under the cursor */
 extern u8 D_8005C9C4;               /* alpha of the blinking cursor, 0x40 to 0x80 */
 extern s8 D_8005C9C5;               /* added to D_8005C9C4 each frame; turned at either end */
 /* cursor rectangle of each choice, from the prompt's corner. Two entries each: the next bss objects
-   (D_800E57E4, D_800E4D6C, __osContLastCmd) start right after the first three; a three-choice
+   (D_800E57E4, D_800E4D6C, __osContLastCmd; unused bss after the heights) follow each; a three-choice
    prompt's third rectangle overruns them (func_80112958_opcode) */
 extern u16 D_800E57E0[2];           /* x */
 extern u16 D_800E4D68[2];           /* y */

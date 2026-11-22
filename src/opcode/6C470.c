@@ -182,7 +182,7 @@ s32 func_80112958_opcode( void ) {
         break;
     case 25:
         /* BUG: the rectangle arrays hold two entries; the third choice's stores land on the next
-           globals (__osContLastCmd and D_800DF595, D_800E57E4[0], D_800E4D6C) */
+           globals (__osContLastCmd and D_800DF595, D_800E57E4[0], D_800E4D6C; the height lands in unused bss) */
         D_800DF590[0] = 0x34;
         D_800E6538[0] = 0xE;
         D_800DF590[1] = 0x34;
@@ -245,7 +245,7 @@ s32 func_80112958_opcode( void ) {
         break;
     case 28:
         /* BUG: the rectangle arrays hold two entries; the third choice's stores land on the next
-           globals (__osContLastCmd and D_800DF595, D_800E57E4[0], D_800E4D6C) */
+           globals (__osContLastCmd and D_800DF595, D_800E57E4[0], D_800E4D6C; the height lands in unused bss) */
         D_800DF590[0] = 0x34;
         D_800E6538[0] = 0xE;
         D_800DF590[1] = 0x34;

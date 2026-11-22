@@ -675,3 +675,10 @@ D_8013E870_cacode = 0x8013E870; // segment:cacode size:0xC
 D_8013E880_cacode = 0x8013E880; // segment:cacode size:0x4
 D_8011B8D0_gscode = 0x8011B8D0; // segment:gscode size:0x136
 D_80120791_gscode = 0x80120791; // segment:gscode size:0x2
+
+// main: the prompt's cursor rectangles (save.h), two entries each; the asm's second-entry references
+// (D_800E57E2, D_800E4D6A, D_800DF592, D_800E653A) are their [1]
+D_800E57E0 = 0x800E57E0; // size:0x4
+D_800E4D68 = 0x800E4D68; // size:0x4
+D_800DF590 = 0x800DF590; // size:0x4
+D_800E6538 = 0x800E6538; // size:0x4
