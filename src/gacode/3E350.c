@@ -2395,7 +2395,7 @@ it down.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: retail tests the cursor for the up move's sound as a signed int (slti 6, then bltz), which a u8 >= 0 test folds away; and the pin toggle swaps v0 and v1
+// NON_MATCHING: register swap only: in the A/Z pin toggle retail computes the cursor index in v0 and the body address in v1 (here the other way round); tried 1 + cursor, != 0, ^= 1, ?: and a (u8) index
 void func_8011A404_gacode( gaPlayer_t *pl ) {
     u8 pins[NUM_PINS];
     s16 x;
@@ -2427,8 +2427,15 @@ void func_8011A404_gacode( gaPlayer_t *pl ) {
             D_8012C8A9_gacode = 1;
             D_8012C8A8_gacode = 0;
         } else {
-            if ( D_8012C8A8_gacode >= 0 && D_8012C8A8_gacode < 6 ) {
-                func_80037870( 0, 0 );
+            switch ( D_8012C8A8_gacode ) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                    func_80037870( 0, 0 );
+                    break;
             }
             switch ( D_8012C8A8_gacode ) {
                 case 0:
