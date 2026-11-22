@@ -46,4 +46,18 @@ extern u8 D_800A304C[4];            /* per player: a run counter (to 255) the ga
 extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
 extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */
 
+/* The lane's floor height grid: a file (the stage's gaStage_t.unk_18) main loads at boot; a copy of it
+   follows at D_80100100 + 0xFAC. Name invented. */
+typedef struct {
+    /* 0x000 */ u16 numX;                  /* grid points along x */
+    /* 0x002 */ u16 numZ;                  /* grid points along z */
+    /* 0x004 */ u16 stepX;                 /* spacing of the points along x */
+    /* 0x006 */ u16 stepZ;                 /* spacing of the points along z */
+    /* 0x008 */ s16 originX;               /* x of the first point */
+    /* 0x00A */ s16 originZ;               /* z of the first point */
+    /* 0x00C */ s16 heights[2000];         /* by z, then x */
+} floorGrid_t;                          /* size 0xFAC */
+
+extern floorGrid_t D_80100100;
+
 #endif

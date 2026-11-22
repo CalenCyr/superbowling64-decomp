@@ -470,3 +470,4 @@ MAT_I4	include/filecache.h	invented: fileRefB_t.fmt values 0-4 (MAT_I4, MAT_CI4,
 gaLaneAim_t	gacode.h	invented: 8-byte per-lane aiming state (two, D_8012D228_gacode): a position, a counter within 999, the step reached
 gaMotion_t	gacode.h	invented: 0x38-byte motion of a lane body (gaLane_t.motion, 11 from 0x420; initial copy D_8012C230_gacode): velocity, spin, flags; stepped by func_80114898_gacode
 FABS	include/gacode/gacode.h	invented: float absolute value macro (0 - x), func_80119638_gacode
+floorGrid_t	include/game.h	invented: 0xFAC-byte file at D_80100100 (point counts, spacing and origin along x and z, then s16 heights); func_8012016C_gacode clamps to its edges, func_8011F87C_gacode interpolates its heights

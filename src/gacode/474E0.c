@@ -215,7 +215,50 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011F87C_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011FD08_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8012016C_gacode);
+/*
+================
+func_8012016C_gacode
+
+Keeps spot inside the floor grid (along z and x) and below ceiling: a spot past an edge is put back on
+it, spot2 moved with it unless its unk_18 is 0, and the velocity across that edge bounced (z: -0.1, motion
+flag 4; x: 0.5, flag 1; y: -0.0001).
+================
+*/
+void func_8012016C_gacode( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, f32 ceiling ) {
+    f32 edge;
+
+    motion->flags &= ~4;
+    motion->flags &= ~1;
+
+    edge = (f32)( ( D_80100100.numZ - 1 ) * D_80100100.stepZ + D_80100100.originZ ) - 0.0002;
+    if ( spot->pos[2] > edge || spot->pos[2] < ( edge = D_80100100.originZ ) ) {
+        spot->pos[2] -= spot->pos[2] - edge;
+        if ( spot2->unk_18 != 0.0f ) {
+            spot2->pos[2] -= spot->pos[2] - edge;
+        }
+        motion->vel[2] *= -0.1;
+        motion->flags |= 4;
+    }
+
+    edge = ( D_80100100.numX - 1 ) * D_80100100.stepX + D_80100100.originX;
+    if ( spot->pos[0] > edge || spot->pos[0] < ( edge = D_80100100.originX ) ) {
+        spot->pos[0] -= spot->pos[0] - edge;
+        if ( spot2->unk_18 != 0.0f ) {
+            spot2->pos[0] -= spot2->pos[0] - edge;
+        }
+        motion->vel[0] *= 0.5;
+        motion->flags |= 1;
+    }
+
+    edge = ceiling - 0.0002;
+    if ( spot->pos[1] > edge ) {
+        spot->pos[1] -= spot->pos[1] - edge;
+        if ( spot2->unk_18 != 0.0f ) {
+            spot2->pos[1] -= spot2->pos[1] - edge;
+        }
+        motion->vel[1] *= -0.0001;
+    }
+}
 
 /*
 ================
