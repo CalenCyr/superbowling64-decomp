@@ -421,8 +421,10 @@ void func_8011B490_gacode( s32 lane );
 void func_8011C57C_gacode( s32 player, gaCamera_t *camera );
 void func_8011CEE4_gacode( gaPlayer_t *pl, s32 player );
 void func_8011C93C_gacode( gaPlayer_t *pl, s32 player );
+void func_8011CF30_gacode( s32 player );
 
 /* unit 474E0 */
+s32 func_801203AC_gacode( vec3_t out, gaBody_t *bodies, gaSpot_t *spots, u8 side );
 void func_8011D2C0_gacode( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale );
 void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to );
 void func_8011D304_gacode( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos );

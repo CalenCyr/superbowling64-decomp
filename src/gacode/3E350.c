@@ -2942,4 +2942,62 @@ void func_8011CEE4_gacode( gaPlayer_t *pl, s32 player ) {
     pl->character.unk_30 = values[3];
 }
 
+/*
+================
+func_8011CF30_gacode
+
+Debug text for the player: the stage's unk_10, the animation frame, unk_2C and unk_30, the pin table (in the
+modes that have one), and a value of the lane's current unk_B10 step.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: register allocation only; retail gives row s2, lane s3, player s4 and &D_800F8094 s5 (here
+// player s2, &D_800F8094 s3, row s4, lane s5); instructions, constants and relocations are the same
+void func_8011CF30_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    u8 lane;
+    s32 row;
+    u8 text[40];
+    vec3_t target;
+
+    lane = pl->laneIndex;
+    sprintf( text, "SL[%8.4f]", D_8012D220_gacode->unk_10 );
+    func_80028DA4( &D_800F8094, lane * 144 + 16, 128, text );
+    sprintf( text, "FRM[%3d]", pl->obj->frame );
+    func_80028DA4( &D_800F8094, lane * 144 + 16, 136, text );
+    sprintf( text, "T[%6.2f]R[%6.2f]", pl->character.unk_2C, pl->character.unk_30 );
+    func_80028DA4( &D_800F8094, lane * 144 + 16, 144, text );
+    row = 17;
+    if ( D_8012CDF4_gacode == func_801156D8_gacode || D_8012CDF4_gacode == func_801155BC_gacode ) {
+        row = 18;
+        sprintf( text, "TABLE[%d]", D_800DF59C.unk_04[D_8009D19C[player]] );
+        func_80028DA4( &D_800F8094, lane * 144 + 16, 152, text );
+    }
+    if ( pl->lane->unk_B10 == func_80117BDC_gacode ) {
+        sprintf( text, "ATX[%6.2f]", pl->character.unk_14[0] );
+    } else if ( pl->lane->unk_B10 == func_80117D20_gacode ) {
+        sprintf( text, "STX[%6.2f]", pl->character.unk_20[0] );
+    } else if ( pl->lane->unk_B10 == func_80118014_gacode ) {
+        if ( pl->port < 0 ) {
+            return;
+        }
+        func_801203AC_gacode( target, pl->lane->bodies, pl->lane->spots, pl->character.unk_05 );
+        sprintf( text, "TECH RO[%6.2f]",
+            func_801205A0_gacode( target, pl->character.unk_38, pl->character.unk_20[0], pl->character.unk_2C ) );
+    } else if ( pl->lane->unk_B10 == func_80118270_gacode || pl->lane->unk_B10 == func_8011840C_gacode
+        || pl->lane->unk_B10 == func_80118524_gacode ) {
+        sprintf( text, "FR SIN[%8.4f]", sinf( pl->character.unk_34 ) );
+    } else if ( pl->lane->unk_B10 == func_801187D0_gacode || pl->lane->unk_B10 == func_80118F68_gacode ) {
+        sprintf( text, "NOW Z[%8.4f]", pl->lane->spots[0].pos[2] );
+    } else if ( pl->lane->unk_B10 == func_80118CCC_gacode || pl->lane->unk_B10 == func_80118E04_gacode ) {
+        return;
+    } else if ( pl->lane->unk_B10 == func_80118F08_gacode || pl->lane->unk_B10 == func_80118F38_gacode ) {
+        sprintf( text, " WAIT... " );
+    } else {
+        return;
+    }
+    func_80028DA4( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011CF30_gacode);
+#endif
