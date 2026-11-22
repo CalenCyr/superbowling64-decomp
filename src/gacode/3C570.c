@@ -124,7 +124,73 @@ void func_80112E04_gacode( void ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80112EBC_gacode);
+/*
+================
+func_80112EBC_gacode
+
+Main loop state of the pause menu's page browser (mode 2): draws the current page of D_80123608_gacode with
+the cursor on an item or on the back item, moves the cursor with the D-pad, and on A or Z opens the item's
+page or goes back to the parent page (from the first page, to the pause menu); B goes back to the pause menu.
+================
+*/
+s32 func_80112EBC_gacode( void ) {
+    s16 x = 0x28;
+    s16 y = 0x28;
+
+    func_8002DF3C( D_80123608_gacode[D_80123680_gacode].image, x, y );
+    if ( D_80123608_gacode[D_80123680_gacode].cursor >= 0
+        && D_80123608_gacode[D_80123680_gacode].cursor < D_80123608_gacode[D_80123680_gacode].backItem ) {
+        func_8002E4B0( 0x885, x + 8, y + 0x18 + D_80123608_gacode[D_80123680_gacode].cursor * 16,
+                       D_80123601_gacode + 0x7F, 1.0f, 1.0f );
+    } else {
+        func_8002E4B0( 0x884, x + 0xBB, y + D_80123608_gacode[D_80123680_gacode].backY,
+                       D_80123601_gacode + 0x10, 1.0f, 1.0f );
+    }
+    if ( D_80123608_gacode[D_80123680_gacode].cursor >= 0 ) {
+        if ( D_800E6758 & U_JPAD ) {
+            func_80037870( 0, 0 );
+            if ( D_80123608_gacode[D_80123680_gacode].cursor != 0 ) {
+                D_80123608_gacode[D_80123680_gacode].cursor--;
+            } else {
+                D_80123608_gacode[D_80123680_gacode].cursor = D_80123608_gacode[D_80123680_gacode].backItem;
+            }
+        }
+        if ( D_800E6758 & D_JPAD ) {
+            func_80037870( 0, 0 );
+            if ( D_80123608_gacode[D_80123680_gacode].cursor != D_80123608_gacode[D_80123680_gacode].backItem ) {
+                D_80123608_gacode[D_80123680_gacode].cursor++;
+            } else {
+                D_80123608_gacode[D_80123680_gacode].cursor = 0;
+            }
+        }
+        if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+            if ( D_80123608_gacode[D_80123680_gacode].cursor == D_80123608_gacode[D_80123680_gacode].backItem ) {
+                D_80123608_gacode[D_80123680_gacode].cursor = 0;
+                if ( D_80123608_gacode[D_80123680_gacode].parent < 0 ) {
+                    func_80037870( 11, 0 );
+                    D_80123680_gacode = 0;
+                    D_8012CDF0_gacode = func_80112AF0_gacode;
+                } else {
+                    func_80037870( 0x33, 0 );
+                    D_80123680_gacode = D_80123608_gacode[D_80123680_gacode].parent;
+                }
+            } else {
+                func_80037870( 0x33, 0 );
+                D_80123680_gacode = D_80123608_gacode[D_80123680_gacode].firstPage
+                                  + D_80123608_gacode[D_80123680_gacode].cursor;
+            }
+        }
+    } else if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+        func_80037870( 0x33, 0 );
+        D_80123680_gacode = D_80123608_gacode[D_80123680_gacode].firstPage;
+    }
+    if ( D_800E4D62 & B_BUTTON ) {
+        func_80037870( 2, 0 );
+        D_80123680_gacode = 0;
+        D_8012CDF0_gacode = func_80112AF0_gacode;
+    }
+    return 0;
+}
 
 /*
 ================

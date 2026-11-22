@@ -312,6 +312,18 @@ extern gaLaneAim_t D_8012D228_gacode[2];
 extern gaPlayer_t D_8012D658_gacode[MAX_PLAYERS];
 extern u8 D_8012D651_gacode;
 extern u8 D_8012D650_gacode;
+/* A page of the pause menu's page browser (D_80123608_gacode, func_80112EBC_gacode). Name invented. */
+typedef struct {
+    /* 0x00 */ u16 backY;                  /* y of the back item, from the page's top */
+    /* 0x02 */ s8 cursor;                  /* item under the cursor; -1: the page has no items */
+    /* 0x03 */ s8 backItem;                /* index of the back item (the items before it open pages) */
+    /* 0x04 */ u16 image;                  /* image id of the page */
+    /* 0x06 */ u8 firstPage;               /* page that item 0 opens; item n opens firstPage + n */
+    /* 0x07 */ s8 parent;                  /* page the back item returns to; -1: the pause menu */
+} gaMenuPage_t;                              /* size 0x08 */
+
+extern gaMenuPage_t D_80123608_gacode[15];
+extern u8 D_80123680_gacode;           /* current page of D_80123608_gacode */
 extern u8 D_8012D239_gacode;           /* pause menu: the item under the cursor (0 to 3) */
 extern u8 D_8012CDE0_gacode[4];        /* per player (func_801219CC_gacode) */
 extern u16 D_8012D8D8_gacode;
