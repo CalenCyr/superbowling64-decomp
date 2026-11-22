@@ -109,9 +109,10 @@ f32 func_8011D4E4_gacode( vec3_t out, vec3_t from, vec3_t to ) {
 func_8011D5B8_gacode
 
 Cosine of the angle between a and b; 1 when either is zero.
+Declared inline: func_8011FD08_gacode expands it.
 ================
 */
-f32 func_8011D5B8_gacode( vec3_t a, vec3_t b ) {
+inline f32 func_8011D5B8_gacode( vec3_t a, vec3_t b ) {
     f32 lengths = func_8011D3D4_gacode( a ) * func_8011D3D4_gacode( b );
 
     if ( lengths == 0.0f ) {
@@ -642,7 +643,70 @@ f32 func_8011F87C_gacode( f32 x, f32 z, vec3_t normal ) {
     return height;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011FD08_gacode);
+/*
+================
+func_8011FD08_gacode
+
+Contact of a body's spot with a sloped floor (normal not straight up), unless motion flag 1: the slope is
+taken along x or z, whichever the normal leans more; against a slope steeper than 30 degrees from the
+spot's unk_0C the velocity along it bounces back (motion flag 0x40) or is pushed down the slope, else it
+slides down the slope (motion flag 0x10 along x, 0x20 along z). Returns 1 on a bounce; else the spot's
+unk_0C takes the normal.
+================
+*/
+s32 func_8011FD08_gacode( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal ) {
+    vec3_t from;
+    vec3_t slope;
+    s32 hit = 0;
+
+    if ( ( normal[0] != 0.0f || normal[2] != 0.0f ) && !( motion->flags & 1 ) ) {
+        from[1] = spot->unk_0C[1];
+        slope[1] = normal[1];
+        if ( FABS( normal[0] ) > FABS( normal[2] ) ) {
+            from[2] = 0.0f;
+            from[0] = spot->unk_0C[0];
+            slope[2] = 0.0f;
+            slope[0] = normal[0];
+            if ( func_8011D5B8_gacode( from, slope ) < 0.866 ) {
+                hit = 1;
+                if ( motion->vel[0] * normal[0] <= 0.0f ) {
+                    motion->vel[0] = -motion->vel[0];
+                    motion->flags |= 0x40;
+                } else {
+                    motion->vel[0] += normal[0] * 1.0889;
+                }
+                motion->flags &= ~0x10;
+            } else {
+                motion->vel[0] += normal[0] * 1.0889;
+                motion->flags |= 0x10;
+            }
+        } else {
+            from[2] = spot->unk_0C[2];
+            from[0] = 0.0f;
+            slope[2] = normal[2];
+            slope[0] = 0.0f;
+            if ( func_8011D5B8_gacode( from, slope ) < 0.866 ) {
+                hit = 1;
+                if ( motion->vel[2] * normal[2] <= 0.0f ) {
+                    motion->vel[2] = -motion->vel[2];
+                    motion->flags |= 0x40;
+                } else {
+                    motion->vel[2] += normal[2] * 1.0889;
+                }
+                motion->flags &= ~0x20;
+            } else {
+                motion->vel[2] += normal[2] * 1.0889;
+                motion->flags |= 0x20;
+            }
+        }
+    }
+    if ( !hit ) {
+        spot->unk_0C[0] = normal[0];
+        spot->unk_0C[1] = normal[1];
+        spot->unk_0C[2] = normal[2];
+    }
+    return hit;
+}
 
 /*
 ================
