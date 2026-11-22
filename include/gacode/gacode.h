@@ -222,6 +222,14 @@ typedef struct {
 
 extern gaImageList_t D_801236B0_gacode[2];
 extern u16 D_8012C9A0_gacode[][4];      /* image files of func_80123430_gacode, by its index */
+/* image files of func_80122788_gacode's animated palettes, by animation frame */
+extern u16 D_8012C928_gacode[11];
+extern u16 D_8012C940_gacode[11];
+extern u16 D_8012C958_gacode[2];
+extern u16 D_8012C95C_gacode[2];
+extern u16 D_8012C960_gacode[2];
+extern u16 D_8012C964_gacode[9];
+extern void *D_8012CDD0_gacode[2];      /* texels of resources 1523 and 1524, saved by func_80122788_gacode */
 /* image files of func_80122CE8_gacode's four palette slots, by brightness step */
 extern u16 D_8012C978_gacode[4];
 extern u16 D_8012C980_gacode[4];

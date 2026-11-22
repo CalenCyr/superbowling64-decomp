@@ -38,7 +38,7 @@ extern s8 D_8009D05C;
 extern s8 D_800DF628;
 extern s32 D_8005C0EC;
 extern u32 D_800693B0;
-extern s32 D_8005B0F4;
+extern volatile s32 D_8005B0F4;    /* frame counter (func_80025FEC); volatile: it reloads it right after its own store */
 /* requests to the controller thread (func_80028064), and its replies */
 extern OSMesgQueue D_800E6690;
 extern OSMesgQueue D_800F8098;

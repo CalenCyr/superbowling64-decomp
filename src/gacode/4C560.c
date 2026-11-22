@@ -99,7 +99,59 @@ void func_801224F8_gacode( void ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/4C560", func_80122788_gacode);
+/*
+================
+func_80122788_gacode
+
+Animated textures: loads the frame images on the first frame and saves the texels of resources 1523 and 1524,
+then points the palettes of seven resources at the images of the current frame of D_8005B0F4. Every other
+64 frames, resources 1523 and 1524 show images 2682 and 2698 instead of their own texels.
+================
+*/
+void func_80122788_gacode( void ) {
+    s32 i;
+
+    if ( D_8012C920_gacode == 0 ) {
+        D_8012C920_gacode = 1;
+        func_8012239C_gacode( 0 );
+        func_80030C04( 2682, FILE_RAW );
+        func_80030C04( 2698, FILE_RAW );
+        D_8012CDD0_gacode[0] = ( (fileRefB_t *)D_800F80B0[1523].data )->unk_30;
+        D_8012CDD0_gacode[1] = ( (fileRefB_t *)D_800F80B0[1524].data )->unk_30;
+        for ( i = 0; i < 11; i++ ) {
+            func_80030C04( D_8012C928_gacode[i], FILE_RAW );
+            func_80030C04( D_8012C940_gacode[i], FILE_RAW );
+        }
+        for ( i = 0; i < 2; i++ ) {
+            func_80030C04( D_8012C958_gacode[i], FILE_RAW );
+            func_80030C04( D_8012C95C_gacode[i], FILE_RAW );
+            func_80030C04( D_8012C960_gacode[i], FILE_RAW );
+        }
+        for ( i = 0; i < 9; i++ ) {
+            func_80030C04( D_8012C964_gacode[i], FILE_RAW );
+        }
+    }
+    ( (fileRefB_t *)D_800F80B0[1648].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C964_gacode[D_8005B0F4 / 20 % 9]].data )->palette;
+    ( (fileRefB_t *)D_800F80B0[1528].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C95C_gacode[D_8005B0F4 / 64 & 1]].data )->palette;
+    ( (fileRefB_t *)D_800F80B0[1529].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C960_gacode[D_8005B0F4 / 64 & 1]].data )->palette;
+    ( (fileRefB_t *)D_800F80B0[1496].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C958_gacode[D_8005B0F4 / 2 & 1]].data )->palette;
+    ( (fileRefB_t *)D_800F80B0[1663].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C928_gacode[D_8005B0F4 / 20 % 11]].data )->palette;
+    ( (fileRefB_t *)D_800F80B0[1664].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C940_gacode[D_8005B0F4 / 20 % 11]].data )->palette;
+    if ( D_8005B0F4 & 0x40 ) {
+        ( (fileRefB_t *)D_800F80B0[1523].data )->unk_30 = ( (unkImage_t *)D_800F80B0[2682].data )->palette;
+        ( (fileRefB_t *)D_800F80B0[1524].data )->unk_30 = ( (unkImage_t *)D_800F80B0[2698].data )->palette;
+    } else {
+        ( (fileRefB_t *)D_800F80B0[1523].data )->unk_30 = D_8012CDD0_gacode[0];
+        ( (fileRefB_t *)D_800F80B0[1524].data )->unk_30 = D_8012CDD0_gacode[1];
+    }
+    func_80122340_gacode();
+}
 
 /*
 ================
@@ -181,7 +233,38 @@ void func_80122CE8_gacode( void ) {
     func_80122340_gacode();
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/4C560", func_80123004_gacode);
+/*
+================
+func_80123004_gacode
+
+Scrolls the texture of resource 883 by one texel step in s, then puts 0x301 effects near each lane's ball
+while its state is 3: with two lanes on frames 0 (first lane) and 2 (second lane) of every four, with one lane
+on every other frame.
+================
+*/
+void func_80123004_gacode( void ) {
+    if ( D_8012C920_gacode == 0 ) {
+        D_8012C920_gacode = 1;
+        func_8012239C_gacode( 1 );
+    }
+    ( (fileRefB_t *)D_800F80B0[883].data )->scroll[0]--;
+    func_80122340_gacode();
+    if ( D_8005C162 == 1 ) {
+        if ( D_800DF595[0] == 3 && ( D_8012C924_gacode & 3 ) == 0 ) {
+            func_80035380( 0x301, D_800E6560[0][0] + guRandom() % 10 - 5.0f,
+                           D_800E6560[0][1] + 15.0f + guRandom() % 10 - 5.0f, D_800E6560[0][2] + 10.0f );
+        }
+        if ( D_800DF595[1] == 3 && ( D_8012C924_gacode & 3 ) == 2 ) {
+            func_80035380( 0x301, D_800E6560[1][0] + guRandom() % 10 - 5.0f,
+                           D_800E6560[1][1] + 15.0f + guRandom() % 20 - 10.0f, D_800E6560[1][2] + 10.0f );
+        }
+    } else {
+        if ( D_800DF595[0] == 3 && ( D_8012C924_gacode & 1 ) == 0 ) {
+            func_80035380( 0x301, D_800E6560[0][0] + guRandom() % 10 - 5.0f,
+                           D_800E6560[0][1] + 15.0f + guRandom() % 10 - 5.0f, D_800E6560[0][2] + 10.0f );
+        }
+    }
+}
 
 /*
 ================
