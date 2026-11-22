@@ -373,6 +373,7 @@ s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118524_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 func_801187D0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118CCC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118D9C_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80118E04_gacode( s32 player, s32 input, s16 stickX, s16 stickY );

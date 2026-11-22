@@ -1666,7 +1666,52 @@ s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80118524_gacode);
+/*
+================
+func_80118524_gacode
+
+Lane input handler at the release: sets the ball's unk_5D, aims from the ball's spot towards the character's
+unk_14 (into unk_38), sets the ball's velocity from unk_2C (turned by the sine and cosine of unk_34, the sideways
+part curved by its square), its spin from unk_30, scales unk_44 by the spin, picks the stage's unk_1E[1] or
+unk_1E[0] by how far unk_34 turns the throw, and hands over to func_801187D0_gacode.
+================
+*/
+s32 func_80118524_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    vec3_t from;
+    s32 side;
+    f32 bend;
+    f32 dir;
+
+    func_80123430_gacode( pl->laneIndex, 1, pl->unk_93 );
+    if ( pl->obj->frame == pl->character.unk_00->unk_1A ) {
+        pl->obj->frame--;
+    }
+    pl->lane->bodies[0].unk_5D = 1;
+    from[0] = pl->lane->spots[0].pos[0];
+    from[1] = pl->character.unk_20[1];
+    from[2] = pl->character.unk_20[2];
+    func_8011D4E4_gacode( pl->character.unk_38, from, pl->character.unk_14 );
+    pl->lane->motion[0].vel[1] = pl->character.unk_2C * pl->character.unk_38[2];
+    pl->lane->motion[0].vel[2] = pl->character.unk_2C * pl->character.unk_38[2];
+    pl->lane->motion[0].vel[0] = pl->character.unk_2C * pl->character.unk_38[0];
+    side = pl->character.unk_00->unk_08 < 0 ? -1 : 1;
+    pl->lane->motion[0].vel[1] *= sinf( pl->character.unk_34 ) * side;
+    pl->lane->motion[0].vel[2] *= cosf( pl->character.unk_34 );
+    side = pl->character.unk_05 ? -1 : 1;
+    bend = sinf( pl->character.unk_34 ) * 10.0f;
+    dir = bend < 0.0f ? -1.0f : 1.0f;
+    pl->lane->motion[0].vel[0] += pl->character.unk_2C / 2.0f * ( dir * bend * bend / 100.0f ) * side;
+    pl->lane->motion[0].spin[1] = pl->character.unk_30;
+    pl->character.unk_44 = pl->character.unk_44 * ( -pl->lane->motion[0].spin[1] / 15.0 );
+    if ( FABS( sinf( pl->character.unk_34 ) ) >= 0.15 ) {
+        pl->lane->unk_B2C = D_8012D220_gacode->unk_1E[1];
+    } else {
+        pl->lane->unk_B2C = D_8012D220_gacode->unk_1E[0];
+    }
+    pl->lane->unk_B10 = func_801187D0_gacode;
+    return 0;
+}
 
 /*
 ================
