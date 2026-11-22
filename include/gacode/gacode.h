@@ -255,6 +255,16 @@ extern s16 D_8012C8E8_gacode[5];       /* path files of func_8011C57C_gacode's c
 extern gaStage_t D_80123EB0_gacode[];
 extern gaStage_t *D_8012D220_gacode;
 extern u8 D_8012D225_gacode;            /* nonzero: B commits the throw early (func_8011840C_gacode) */
+
+/* Per lane: state of func_80117124_gacode's aiming. Name invented. */
+typedef struct {
+    /* 0x00 */ f32 unk_00;
+    /* 0x04 */ s16 unk_04;                 /* within 999 either way */
+    /* 0x06 */ u8 unk_06;                  /* step reached (func_80116FF0_gacode), 6 at start */
+    /* 0x07 */ u8 unk_07;
+} gaLaneAim_t;                              /* size 0x08 */
+
+extern gaLaneAim_t D_8012D228_gacode[2];
 extern gaPlayer_t D_8012D658_gacode[MAX_PLAYERS];
 extern u8 D_8012D651_gacode;
 extern u16 D_8012D8D8_gacode;

@@ -328,7 +328,48 @@ s32 func_801157F8_gacode( s32 player ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011582C_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80115B9C_gacode);
+/*
+================
+func_80115B9C_gacode
+
+Ends a player's turn: picks the lane's next unk_B04 handler and returns 1 when the game goes on, 0 when it
+does not, or -1 instead of 0 when the sub-mode's argument is 1 (in which players 2 and 3 play for player 1, the
+others for player 0).
+================
+*/
+s32 func_80115B9C_gacode( s32 player ) {
+    gaLane_t *lane = D_8012D658_gacode[player].lane;
+    s32 result;
+    s32 frame;
+
+    if ( ( D_8005C160 >> 6 ) == 1 ) {
+        player = player < 2 ? 0 : 1;
+    }
+    frame = D_8009D19C[player];
+    if ( D_800994BE[player] != 0 ) {
+        lane->unk_B04 = func_80116248_gacode;
+        D_80066C00.unk_20[player]++;
+        lane->unk_B24 = 0;
+        return 1;
+    }
+    result = 0;
+    if ( lane->unk_B24 != 0 ) {
+        lane->unk_B04 = func_80116248_gacode;
+        D_80066C00.unk_20[player]++;
+        if ( frame != 9 ) {
+            result = 1;
+        } else if ( D_80066E18[player][9] != -1 && D_800A3020[player][9] != -1 ) {
+            result = 1;
+        }
+    } else {
+        lane->unk_B04 = func_801163A0_gacode;
+    }
+    if ( result == 0 && ( D_8005C160 >> 6 ) == 1 ) {
+        result = -1;
+    }
+    lane->unk_B24 = 0;
+    return result;
+}
 
 /*
 ================
@@ -728,7 +769,45 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80116BA4_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80116DC8_gacode);
 
+/*
+================
+func_80116FF0_gacode
+
+Steps the lane's aim to step once x passes its mark (730 - 60 per step): from the step below it the lane just
+takes it; from the step above it also plays the step's SE and rumbles the port. Returns 1 when the lane is at
+step.
+
+Declared inline: nothing calls this copy, and func_80117124_gacode repeats its body.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: the code is exact, but seIds' initialiser is D_8012CA20_gacode, which the asm
+// func_80117124_gacode also reads: compiled here it duplicates the INCLUDE_RODATA copy. Enable with that function.
+inline s32 func_80116FF0_gacode( s32 lane, s8 port, f32 x, u8 step ) {
+    s16 seIds[5] = { 0x69, 0x68, 0x67, 0x66, 0x65 };
+
+    if ( 730 - step * 60 < x ) {
+        if ( D_8012D228_gacode[lane].unk_06 == step ) {
+            return 1;
+        } else if ( D_8012D228_gacode[lane].unk_06 == step - 1 ) {
+            D_8012D228_gacode[lane].unk_06 = step;
+            return 1;
+        } else if ( D_8012D228_gacode[lane].unk_06 == step + 1 ) {
+            func_80120D30_gacode( (u8)lane, seIds[step - 1] );
+            if ( port >= 0 ) {
+                D_800DF680[port] = 8 - step;
+                D_8006940D[port] = 10;
+            }
+            D_8012D228_gacode[lane].unk_06 = step;
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80116FF0_gacode);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117124_gacode);
 

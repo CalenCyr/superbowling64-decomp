@@ -467,3 +467,4 @@ MAT_LIGHTING	include/filecache.h	invented: fileRefB_t.flags bit 2, sets G_LIGHTI
 MAT_SMOOTH	include/filecache.h	invented: fileRefB_t.flags bit 3, sets G_SHADING_SMOOTH in func_80031E40
 MAT_TEXGEN	include/filecache.h	invented: fileRefB_t.flags bit 4, sets G_TEXTURE_GEN and the 0x7C0 texture scale in func_80031E40
 MAT_I4	include/filecache.h	invented: fileRefB_t.fmt values 0-4 (MAT_I4, MAT_CI4, MAT_CI8, MAT_RGBA16, MAT_I8), from the texture loads of func_80031E40
+gaLaneAim_t	gacode.h	invented: 8-byte per-lane aiming state (two, D_8012D228_gacode): a position, a counter within 999, the step reached
