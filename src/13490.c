@@ -343,8 +343,9 @@ frame's box, the image of each roll played, and the frame's score.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: calls, CFG and constants match; registers differ: retail gives rowY s4 (frame s5, arg4 s6) and
-// the rolls v0 (filling bne delay slots), and in the else branch keeps y + 2 as a spilled int at sp+0x1C.
+// NON_MATCHING: calls, CFG, constants and stack match; registers differ: retail gives rowY s4 (frame s5, arg4 s6)
+// and roll v0 (so its bne delay slots are not likely-branches). Tried: rowY as s32 (worse), y itself as the cursor
+// (same), roll by ternary/if (block 1 needs the if), foul as an s32 local (needed for retail's andi).
 void func_80038DD4( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;
@@ -388,17 +389,17 @@ void func_80038DD4( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s16
                 }
                 func_8003B1CC( func_80039340( roll, foul ), x + 21, rowY );
             }
+            rowY += 9;
             pins = D_800DF630[player][frame];
             if ( pins >= 0 ) {
                 pins += D_800DF5D0[player];
             }
-            rowY += 9;
             func_800393D8( pins, x + 5, rowY );
         }
     } else {
         func_8002DF3C( 0x87E, x, y );
         rowY = y + 2;
-        if ( frame < last || ( frame == last && throw != 0 ) ) {
+        if ( last > frame || ( last == frame && throw != 0 ) ) {
             if ( D_80099458[player][frame] != 0 ) {
                 func_8002DF3C( 0x85F, x - 1, y );
             }
@@ -406,11 +407,11 @@ void func_80038DD4( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s16
         }
         if ( frame < last ) {
             func_8003B1CC( func_80039340( D_800A3020[player][frame], TRUE ), x + 11, rowY );
+            rowY += 9;
             pins = D_800DF630[player][frame];
             if ( pins >= 0 ) {
                 pins += D_800DF5D0[player];
             }
-            rowY += 9;
             func_800393D8( pins, x, rowY );
         }
     }
@@ -543,8 +544,9 @@ of them when all is set.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: calls, CFG and constants match; registers and induction variables differ: retail keeps i * 12
-// (not &D_80068218[i]) at sp+0x54 and reloads count from the stack each pass.
+// NON_MATCHING: calls, CFG, constants and stack match; only the team plates' registers differ: retail gives the
+// computer flag s0, player * 2 s5 and the icons s6 (this draft s6, s0, s5). Declaration order and spellings of
+// player (ternary, if/else, u8) don't change it.
 void func_80039700( u8 mode, u8 all, s16 x, s16 y ) {
     s32 i;
     s32 frame;
