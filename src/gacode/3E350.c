@@ -2470,8 +2470,6 @@ Sets the lane's camera to one of five views of the ball (view, clamped to 0 to 4
 it, behind it looking up the lane's middle, in front of it, and high to the lane's outer side.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact, but view 0 needs `+ 0.0f` (retail adds a zero, mtc1 zero / add.s), an R17 identity; the original spelling of that offset (a macro or tuning constant) is open
 void func_8011B634_gacode( gaPlayer_t *pl, s32 view ) {
     gaCamera_t *camera = pl->lane->camera;
     gaLane_t *lane = pl->lane;
@@ -2481,6 +2479,7 @@ void func_8011B634_gacode( gaPlayer_t *pl, s32 view ) {
     side = pl->laneIndex != 0 ? -1 : 1;
     switch ( view ) {
     case 0:
+        // identity: view 0's eye offset is tuned to zero, and retail still adds it (mtc1 zero / add.s)
         camera->eye[2] = lane->bodies[0].pos[2] + 0.0f;
         camera->eye[0] = lane->bodies[0].pos[0];
         camera->eye[1] = lane->bodies[0].pos[1] + 20.0f;
@@ -2537,9 +2536,6 @@ void func_8011B634_gacode( gaPlayer_t *pl, s32 view ) {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011B634_gacode);
-#endif
 
 /*
 ================
