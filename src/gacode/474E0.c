@@ -138,9 +138,70 @@ void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D7CC_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D9CC_gacode);
+/*
+================
+func_8011D9CC_gacode
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011DB54_gacode);
+Nonzero when the spheres of spots a and b (centre pos, radius unk_18) overlap: their boxes first, axis by
+axis, then the distance.
+================
+*/
+s32 func_8011D9CC_gacode( gaSpot_t *a, gaSpot_t *b ) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+
+    if ( FABS( a->pos[0] - b->pos[0] ) < a->unk_18 + b->unk_18 &&
+         FABS( a->pos[1] - b->pos[1] ) < a->unk_18 + b->unk_18 &&
+         FABS( a->pos[2] - b->pos[2] ) < a->unk_18 + b->unk_18 ) {
+        dx = a->pos[0] - b->pos[0];
+        dy = a->pos[1] - b->pos[1];
+        dz = a->pos[2] - b->pos[2];
+        if ( dx * dx + dy * dy + dz * dz < ( a->unk_18 + b->unk_18 ) * ( a->unk_18 + b->unk_18 ) ) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/*
+================
+func_8011DB54_gacode
+
+Nonzero when the segment from from to to passes within radius plus the spot's radius of the spot's centre,
+at a point between its ends.
+================
+*/
+s32 func_8011DB54_gacode( gaSpot_t *spot, vec3_t from, vec3_t to, f32 radius ) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 lengthSq;
+    f32 t;
+    f32 ox;
+    f32 oy;
+    f32 oz;
+
+    dx = to[0] - from[0];
+    dy = to[1] - from[1];
+    dz = to[2] - from[2];
+    lengthSq = dx * dx + dy * dy + dz * dz;
+    if ( lengthSq == 0.0f ) {
+        return 0;
+    }
+    t = ( ( spot->pos[0] - from[0] ) * dx + ( spot->pos[1] - from[1] ) * dy + ( spot->pos[2] - from[2] ) * dz ) /
+        lengthSq;
+    if ( t < 0.0f || 1.0f < t ) {
+        return 0;
+    }
+    ox = dx * t + from[0] - spot->pos[0];
+    oy = dy * t + from[1] - spot->pos[1];
+    oz = dz * t + from[2] - spot->pos[2];
+    if ( ( spot->unk_18 + radius ) * ( spot->unk_18 + radius ) <= ox * ox + oy * oy + oz * oz ) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011DCB8_gacode);
 

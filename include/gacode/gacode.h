@@ -460,6 +460,8 @@ f32 func_8011D3D4_gacode( vec3_t v );
 f32 func_8011D424_gacode( vec3_t out, vec3_t in );
 f32 func_8011D4E4_gacode( vec3_t out, vec3_t from, vec3_t to );
 void func_8011D7CC_gacode( vec3_t v, gaBody_t *ball );
+s32 func_8011D9CC_gacode( gaSpot_t *a, gaSpot_t *b );
+s32 func_8011DB54_gacode( gaSpot_t *spot, vec3_t from, vec3_t to, f32 radius );
 f32 func_8011D5B8_gacode( vec3_t a, vec3_t b );
 void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b );
 s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit );
