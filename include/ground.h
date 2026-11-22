@@ -71,6 +71,22 @@ physical addresses of main's graphics microcode.
 extern u8 D_592F0[];
 extern u8 D_5FC20[];
 
+extern rgba8_t D_80068ACC;          /* the primitive colour set */
+extern rgba8_t D_800EA0C8;          /* the environment colour set */
+extern combine_t D_8009CF70;        /* the combiner of the last material */
+extern u8 D_800EA0CC;               /* set: the combiner is set again */
+extern u8 D_8006940C;               /* texturing on */
+extern u8 D_800F7BE0;               /* texture generation on (MAT_TEXGEN) */
+extern u8 D_800E6579;               /* MAT_SMOOTH of the last material */
+extern u8 D_80066B32;               /* MAT_LIGHTING of the last material */
+extern u8 D_80066B31;               /* 1: cull back faces, 0: front faces */
+extern u32 D_800DF570;              /* the geometry mode set when D_800DF682 is */
+extern u16 D_8009CF68;              /* tmem words of the first texture: where the second is loaded */
+extern u16 D_800DF5D4;              /* the material (file index) last set up; 0xFFFF: none */
+extern void *D_800A30B0;            /* the model matrix last loaded */
+extern u8 D_56DD0[];                /* microcode text and data of draw entries of microcode 0 (G_LOAD_UCODE) */
+extern u8 D_5F3F0[];
+
 void func_80031250( void );
 void func_8003128C( void );
 void func_800316C0( sceneCamera_t *cam );

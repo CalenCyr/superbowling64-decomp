@@ -459,3 +459,11 @@ MOTION_FILE_SIZE	src/cacode/67370.c	invented: size of the "motion.dat" file func
 STICK_DEAD	src/cacode/67370.c	invented: stick dead zone of 8 in func_80113280_cacode
 RAD_TO_DEG	src/cacode/67370.c	invented: the 180 / pi constant func_80113280_cacode prints H, P, B angles with
 mazeWork_t	include/menu.h	invented: the 0x3000-byte heap block func_80038214 builds a maze in (cell sets, wall flags, weights, order)
+rgba8_t	include/filecache.h	invented: 4-byte colour of a material, compared with memcmp and copied whole by func_80031E40 (gDPSetPrimColor/gDPSetEnvColor)
+combine_t	include/filecache.h	invented: the 16 gDPSetCombineLERP arguments of a material, emitted by func_80031E40
+MAT_TEXTURE	include/filecache.h	invented: fileRefB_t.flags bit 0, func_80031E40 loads the texture at unk_30 into tile 0
+MAT_TEXTURE2	include/filecache.h	invented: fileRefB_t.flags bit 1, func_80031E40 loads the texture at unk_38 into tile 1
+MAT_LIGHTING	include/filecache.h	invented: fileRefB_t.flags bit 2, sets G_LIGHTING in func_80031E40
+MAT_SMOOTH	include/filecache.h	invented: fileRefB_t.flags bit 3, sets G_SHADING_SMOOTH in func_80031E40
+MAT_TEXGEN	include/filecache.h	invented: fileRefB_t.flags bit 4, sets G_TEXTURE_GEN and the 0x7C0 texture scale in func_80031E40
+MAT_I4	include/filecache.h	invented: fileRefB_t.fmt values 0-4 (MAT_I4, MAT_CI4, MAT_CI8, MAT_RGBA16, MAT_I8), from the texture loads of func_80031E40

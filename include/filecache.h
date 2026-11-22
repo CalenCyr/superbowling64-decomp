@@ -43,18 +43,59 @@ typedef struct {
     /* 0x08 */ fileType1Part_t *parts[1];    /* numParts entries */
 } fileType1_t;
 
+/* A mesh: its vertices, loaded at 0, and the commands that draw them (func_80031E40). */
 typedef struct {
-    /* 0x00 */ u8 unk_00[0x04];
-    /* 0x04 */ void *unk_04;
+    /* 0x00 */ u16 numVerts;
+    /* 0x02 */ u8 unk_02[0x02];
+    /* 0x04 */ void *unk_04;        /* numVerts Vtx */
     /* 0x08 */ Gfx *unk_08;         /* model commands, converted by func_8002B380 */
 } fileRefA_t;
 
+/* An 8-bit colour, compared and copied whole (memcmp, assignment). */
 typedef struct {
-    /* 0x00 */ u8 unk_00[0x2C];
-    /* 0x2C */ void *unk_2C;
-    /* 0x30 */ void *unk_30;
-    /* 0x34 */ void *unk_34;
-    /* 0x38 */ void *unk_38;
+    u8 r, g, b, a;
+} rgba8_t;
+
+/* The arguments of gDPSetCombineLERP, cycle 0 then cycle 1. */
+typedef struct {
+    u8 a0, b0, c0, d0, Aa0, Ab0, Ac0, Ad0;
+    u8 a1, b1, c1, d1, Aa1, Ab1, Ac1, Ad1;
+} combine_t;
+
+/* fileRefB_t.flags */
+#define MAT_TEXTURE         1           /* loads the texture at unk_30 into tile 0 */
+#define MAT_TEXTURE2        2           /* else, loads the texture at unk_38 into tile 1, after the first */
+#define MAT_LIGHTING        4
+#define MAT_SMOOTH          8
+#define MAT_TEXGEN          0x10
+
+/* fileRefB_t.fmt: how a texture is loaded */
+#define MAT_I4              0
+#define MAT_CI4             1
+#define MAT_CI8             2
+#define MAT_RGBA16          3
+#define MAT_I8              4
+
+/* A material (func_80031E40): colours, combiner, and up to two textures. */
+typedef struct {
+    /* 0x00 */ u32 flags;           /* MAT_* */
+    /* 0x04 */ rgba8_t prim;
+    /* 0x08 */ rgba8_t env;
+    /* 0x0C */ combine_t combine;
+    /* 0x1C */ u8 width;            /* of the texture at unk_30 */
+    /* 0x1D */ u8 height;
+    /* 0x1E */ u8 fmt;              /* MAT_I4 ... */
+    /* 0x1F */ u8 wrap;             /* s in bits 0-1, t in bits 2-3: 0 wrap, 1 clamp, 2 mirror */
+    /* 0x20 */ u8 width2;           /* of the texture at unk_38 */
+    /* 0x21 */ u8 height2;
+    /* 0x22 */ u8 fmt2;
+    /* 0x23 */ u8 wrap2;
+    /* 0x24 */ u16 scroll[2];       /* s, t of tile 0 in 10.2 fixed point */
+    /* 0x28 */ u8 unk_28[0x04];
+    /* 0x2C */ void *unk_2C;         /* palette of unk_30 */
+    /* 0x30 */ void *unk_30;         /* texels */
+    /* 0x34 */ void *unk_34;         /* palette of unk_38 */
+    /* 0x38 */ void *unk_38;         /* texels */
 } fileRefB_t;
 
 /* Animation of a model (FILE_TYPE2): per frame, the floats its joints' masks select. */
