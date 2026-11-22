@@ -261,7 +261,6 @@ extern u16 D_8012C7C6_gacode;              /* pins of func_801157F8_gacode */
 typedef s32 (*gaPlayerFunc_t)( s32 player );
 
 extern s16 D_80123600_gacode;          /* blink level, 0 to 0x80 by 8 (func_801125A0_gacode) */
-extern u8 D_80123601_gacode;
 extern s8 D_80123602_gacode;           /* 1: D_80123600_gacode falls, else it rises */
 extern u8 D_80123603_gacode;           /* what the main loop state returned: nonzero, the game is done */
 extern u8 D_80123604_gacode;           /* what the pause menu's state returned: nonzero, leave the game */
