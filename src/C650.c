@@ -729,9 +729,6 @@ func_80035220
 Sets m to stand at (x, y, z) and face (tx, ty, tz), turned about y then tilted.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: register allocation: dx and dz * dz trade $f26 and $f24; the rest is exact. inline: func_80035380
-// expands it twice
 inline void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz ) {
     f32 dx, dy, dz;
     f32 dist, distXZ;
@@ -742,10 +739,10 @@ inline void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32
     dz = tz - z;
     dist = sqrtf( dx * dx + dy * dy + dz * dz );
     distXZ = sqrtf( dx * dx + dz * dz );
+    sinPitch = ( y - ty ) / dist;
     cosPitch = distXZ / dist;
     sinYaw = dx / distXZ;
     cosYaw = dz / distXZ;
-    sinPitch = ( y - ty ) / dist;
     m[0][0] = cosYaw;
     m[0][1] = 0.0f;
     m[0][2] = -sinYaw;
@@ -763,9 +760,6 @@ inline void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32
     m[3][2] = z;
     m[3][3] = 1.0f;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/C650", func_80035220);
-#endif
 
 /*
 ================
@@ -774,9 +768,6 @@ func_80035380
 Starts a puff of flags at (x, y, z), in the first free slot, facing each camera.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: exact but for the second func_80035220 expansion, where dx and dz * dz trade $f26 and $f24 as in
-// func_80035220 itself; the first expansion is exact
 void func_80035380( u16 flags, f32 x, f32 y, f32 z ) {
     f32 m[4][4];
     u32 i;
@@ -808,9 +799,6 @@ void func_80035380( u16 flags, f32 x, f32 y, f32 z ) {
     func_80035220( m, x, y, z, D_8009CFA0[1]->eye[0], D_8009CFA0[1]->eye[1], D_8009CFA0[1]->eye[2] );
     guMtxF2L( m, &D_800E6770[1][i] );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/C650", func_80035380);
-#endif
 
 /*
 ================
