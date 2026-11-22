@@ -261,6 +261,8 @@ extern u16 D_8012C858_gacode[NUM_PINS][2];  /* x and y of each pin in the pin pa
 extern u8 D_8012D238_gacode;           /* current frame of the par game (0 to 9; par in D_80099458[0][]) */
 extern f32 D_8012C764_gacode[2];       /* per lane: angle of func_8011C158_gacode's camera */
 extern u8 D_8012C7C8_gacode;           /* func_8011C57C_gacode's camera has started (func_801150B4_gacode) */
+extern u16 D_8012C8BC_gacode[5];       /* path files of func_8011C254_gacode's camera, late in the throw */
+extern u16 D_8012C8C8_gacode[5];       /* path files of func_8011C254_gacode's camera */
 extern s16 D_8012C8D4_gacode[10];      /* path files of func_8011C468_gacode's camera */
 extern s16 D_8012C8E8_gacode[5];       /* path files of func_8011C57C_gacode's camera */
 extern u8 D_8012C8AC_gacode[3][3];     /* channel orders of func_8011A8AC_gacode's aim line colour */

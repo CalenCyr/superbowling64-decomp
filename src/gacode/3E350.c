@@ -2619,7 +2619,47 @@ void func_8011C158_gacode( s32 player, gaCamera_t *camera ) {
     D_8012C764_gacode[pl->laneIndex] += M_PI / 600.0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C254_gacode);
+/*
+================
+func_8011C254_gacode
+
+Camera handler during the throw: shows the ball and the player in both views, puts the eye on one of five
+paths (D_8012C8BC_gacode while the lane's unk_B10 is func_80118CCC_gacode or func_80118EA0_gacode, else
+D_8012C8C8_gacode; by D_8012D8D8_gacode) at the frame that follows the player's animation, and looks at the
+player object's second joint.
+================
+*/
+void func_8011C254_gacode( s32 player, gaCamera_t *camera ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    s32 joint;
+    u16 file;
+    u8 frames;
+    s16 frame;
+
+    if ( pl->lane->bodyObjs[0]->viewMask ) {
+        pl->lane->bodyObjs[0]->viewMask |= 2;
+    }
+    if ( pl->obj->viewMask ) {
+        pl->obj->viewMask |= 2;
+    }
+    joint = 1;
+    if ( pl->lane->unk_B10 == func_80118CCC_gacode || pl->lane->unk_B10 == func_80118EA0_gacode ) {
+        file = D_8012C8BC_gacode[D_8012D8D8_gacode % 5];
+        frames = pl->character.unk_00->unk_1B[pl->lane->unk_B26];
+    } else {
+        file = D_8012C8C8_gacode[D_8012D8D8_gacode % 5];
+        frames = pl->character.unk_00->unk_1A;
+    }
+    frame = pl->obj->frame * 200 / frames;
+    frame = frame < 0 ? 0 : ( frame > 200 ? 200 : frame );
+    func_8002BED8( file, frame, camera->eye, camera->unk_18 );
+    camera->at[2] = pl->obj->joints[joint].mtx[3][2];
+    camera->at[0] = pl->obj->joints[joint].mtx[3][0];
+    camera->at[1] = pl->obj->joints[joint].mtx[3][1];
+    camera->unk_18[2] = camera->eye[2];
+    camera->unk_18[0] = camera->eye[0];
+    camera->unk_18[1] = 512.0f;
+}
 
 /*
 ================
