@@ -42,5 +42,7 @@ extern u16 D_8009CF80[4];           /* per player of a duel: games won */
 extern u16 D_800DF6B4[4];           /* per player: counted up with D_800A304C (func_801151A0_gacode) */
 extern u16 D_8009D088[4];           /* per player: counted when the frame ends after a non-run turn (func_801151A0_gacode) */
 extern u8 D_800A304C[4];            /* per player: a run counter (to 255) the game modes read and reset (func_8011582C_gacode) */
+extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
+extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */
 
 #endif

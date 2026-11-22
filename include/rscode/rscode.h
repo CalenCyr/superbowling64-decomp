@@ -17,18 +17,6 @@
 /*
 ==============================================================================
 
-MAIN (functions and globals of main units without a header yet, under their current names)
-
-==============================================================================
-*/
-
-extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
-extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */
-
-
-/*
-==============================================================================
-
 OVERLAY
 
 ==============================================================================

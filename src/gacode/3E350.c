@@ -1756,7 +1756,87 @@ s32 func_801187D0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801189C4_gacode);
+/*
+================
+func_801189C4_gacode
+
+Lane input handler after the roll: waits 45 frames, then (outside modes 2 and sub-mode 2) raises the stage's
+unk_10 by 0.05, hides the ball, counts the pins knocked down this throw (unk_5D 2: marked in the frame's
+first pin mask after a func_80116398_gacode turn, else in the second) into unk_B22 and the pins down into
+unk_B23, and asks the game mode for the result: nonzero shows the player again, hides the fallen pins, picks
+the character's reaction (1 to 3) and hands over to func_80118CCC_gacode, else to func_80118E04_gacode.
+================
+*/
+s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    s16 *files = pl->character.unk_00->unk_00;
+    s32 scorer;
+    s32 result;
+    s32 reaction;
+    s32 i;
+
+    pl->obj->frame = 0;
+    if ( ++pl->lane->unk_B20 != 45 ) {
+        return 0;
+    }
+    pl->lane->unk_B20 = 0;
+    if ( ( D_8005C160 & 0xF ) != 2 && ( ( D_8005C160 >> 4 ) & 3 ) != 2 ) {
+        D_8012D220_gacode->unk_10 += 0.05;
+    }
+    pl->lane->bodies[0].unk_5D = 0;
+    pl->lane->bodyObjs[0]->viewMask = 0;
+    if ( ( D_8005C160 >> 6 ) == 1 ) {
+        scorer = player >= 2;
+    } else {
+        scorer = player;
+    }
+    pl->lane->unk_B22 = pl->lane->unk_B23 = 0;
+    for ( i = 1; i < NUM_BODIES; i++ ) {
+        if ( pl->lane->bodies[i].unk_5D == 2 ) {
+            pl->lane->bodies[i].unk_5D = 0;
+            pl->lane->unk_B22++;
+            if ( pl->lane->unk_B04 == func_80116398_gacode ) {
+                D_800A3050[scorer][D_80066C00.unk_20[scorer]] |= 1 << ( 10 - i );
+            } else {
+                D_800F7C18[scorer][D_80066C00.unk_20[scorer]] |= 1 << ( 10 - i );
+            }
+        }
+        if ( pl->lane->bodies[i].unk_5D == 0 ) {
+            pl->lane->unk_B23++;
+        }
+    }
+    if ( pl->lane->unk_B25 == 3 && pl->lane->unk_B22 != 0 ) {
+        pl->lane->unk_B25 = 0;
+    }
+    result = D_8012CDF4_gacode( player );
+    if ( result != 0 ) {
+        pl->obj->viewMask = pl->laneIndex ? 2 : 1;
+        for ( i = 1; i < NUM_BODIES; i++ ) {
+            if ( pl->lane->bodies[i].unk_5D == 0 ) {
+                pl->lane->bodyObjs[i]->viewMask = 0;
+            }
+        }
+        if ( result > 0 ) {
+            if ( result < 4 ) {
+                reaction = result;
+            } else {
+                reaction = 3;
+            }
+        } else {
+            reaction = 1;
+        }
+        pl->lane->unk_B26 = reaction - 1;
+        pl->obj->frame = 0;
+        pl->obj->anim = func_80030C04( files[pl->lane->unk_B26 + 2], 2 );
+        pl->lane->unk_B10 = func_80118CCC_gacode;
+    } else {
+        pl->lane->unk_B10 = func_80118E04_gacode;
+    }
+    if ( pl->lane->unk_B25 != 0 ) {
+        pl->lane->unk_B08 = func_8011B408_gacode;
+    }
+    return 0;
+}
 
 /*
 ================
@@ -2206,7 +2286,56 @@ void func_80119DD8_gacode( s32 player, u8 lane ) {
     }
 }
 
+/*
+================
+func_80119F8C_gacode
+
+Draws a player's aim panel on the lane's side (over a dark band while the lane's aim step is below 6): the
+frame, the name, the aim value of D_8012D228_gacode with its sign mark (blended when positive), and the
+distance of the lane's unk_A68[2] body from 730 units, in four digits.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: calls, constants and CFG match; registers differ: retail keeps x + 0x38 (s3), its s16 copy (s4) and x (s1) apart and pl in s5 (frame 0x48), adds 0xB and 3 to s3 rather than folding x + 0x43, and computes x + 0x20 into a1 before copying it to s1; x here also skips the s16 sign extensions retail does on x + 0x58 and the name's x
+void func_80119F8C_gacode( s32 player, u8 lane ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    s16 digits[4];
+    s32 x;
+    s32 frameX;
+    s16 y;
+    s16 aim;
+
+    if ( D_8012D228_gacode[lane].unk_06 < 6 ) {
+        func_8002FDE4( lane ? 0xA0 : 0, 0, 0xA0, 0xF0, 0xFF, 0x7F, 0, D_80123601_gacode );
+    }
+    x = lane ? 0xA8 : 0x18;
+    frameX = x + 0x38;
+    func_8002DF3C( 0x9E0, frameX, 0x10 );
+    func_8002DF3C( 0x9DF, x + 0x58, 0x10 );
+    func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x19 );
+    func_8002DF3C( 0x86D, frameX, 0x19 );
+    aim = D_8012D228_gacode[player].unk_04;
+    func_800393D8( aim < 0 ? -aim : aim, frameX + 0xB, 0x20 );
+    x = frameX;
+    y = 0x19;
+    if ( D_8012D228_gacode[player].unk_04 != 0 ) {
+        func_8002DF3C( D_8012D228_gacode[player].unk_04 < 0 ? 0x9F0 : 0x9EF, frameX + 3, 0x1D );
+        if ( D_8012D228_gacode[player].unk_04 > 0 ) {
+            func_8002E4B0( 0x86C, frameX, 0x19, D_80123601_gacode + 0x40, 1.0f, 1.0f );
+        }
+    }
+    x += 0x20;
+    func_8002DF3C( 0x86B, x, y );
+    func_80039554( digits, FABS( 730.0f - pl->lane->unk_A68[2].pos[2] ), 1, 0 );
+    y += 4;
+    func_8003B1CC( digits[0], x + 0x5, y );
+    func_8003B1CC( digits[1], x + 0xD, y );
+    func_8003B1CC( digits[2], x + 0x15, y );
+    func_8003B1CC( digits[3], x + 0x1D, y );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119F8C_gacode);
+#endif
 
 /*
 ================
