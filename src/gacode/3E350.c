@@ -970,17 +970,61 @@ s32 func_80117BDC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
         pl->lane->unk_B10 = func_80117D20_gacode;
         return 0;
     }
-    pl->character.unk_14 += stickX / 50.0f;
-    if ( pl->character.unk_14 < -50.0f ) {
-        pl->character.unk_14 = -50.0f;
-    } else if ( pl->character.unk_14 > 50.0f ) {
-        pl->character.unk_14 = 50.0f;
+    pl->character.unk_14[0] += stickX / 50.0f;
+    if ( pl->character.unk_14[0] < -50.0f ) {
+        pl->character.unk_14[0] = -50.0f;
+    } else if ( pl->character.unk_14[0] > 50.0f ) {
+        pl->character.unk_14[0] = 50.0f;
     }
-    pl->lane->unk_A68[0].pos[0] = pl->character.unk_14;
+    pl->lane->unk_A68[0].pos[0] = pl->character.unk_14[0];
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80117D20_gacode);
+/*
+================
+func_80117D20_gacode
+
+Lane input handler: unless func_80117124_gacode handles the frame, turns the lane's unk_948[1]; 1 moves the
+player's object across to the character's unk_20, sets its unk_38 from unk_20 and unk_14 and goes on to
+func_80117EFC_gacode, -1 goes back to func_80117BDC_gacode; else the stick moves the character's unk_20[0]
+(within 50) and the lane's unk_A68[1] with it.
+================
+*/
+s32 func_80117D20_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    f32 mf[4][4];
+
+    if ( func_80117124_gacode( player, pl ) ) {
+        return 0;
+    }
+    pl->obj->frame = pl->character.unk_00->unk_19;
+    pl->lane->unk_948[0].rot[1] = 0.0f;
+    pl->lane->unk_948[1].rot[1] += 8.0;
+    if ( input == 1 ) {
+        func_80120D30_gacode( pl->laneIndex, 0xB );
+        pl->obj->frame = 0;
+        pl->lane->unk_AF4[0]->viewMask = pl->lane->unk_AF4[1]->viewMask = 0;
+        guTranslateF( mf, pl->character.unk_20[0] - pl->lane->spots[0].pos[0], 0.0f, 0.0f );
+        guMtxCatF( pl->obj->mtx, mf, pl->obj->mtx );
+        func_8011D4E4_gacode( pl->character.unk_38, pl->character.unk_20, pl->character.unk_14 );
+        pl->lane->unk_B10 = func_80117EFC_gacode;
+        return 0;
+    }
+    if ( input == -1 ) {
+        func_80120D30_gacode( pl->laneIndex, 0xC );
+        pl->lane->unk_B0C = func_8011B974_gacode;
+        pl->lane->unk_B10 = func_80117BDC_gacode;
+        return 0;
+    }
+    pl->character.unk_20[0] += stickX / 50.0f;
+    if ( pl->character.unk_20[0] < -50.0f ) {
+        pl->character.unk_20[0] = -50.0f;
+    } else if ( pl->character.unk_20[0] > 50.0f ) {
+        pl->character.unk_20[0] = 50.0f;
+    }
+    pl->lane->unk_A68[1].pos[0] = pl->character.unk_20[0];
+    return 0;
+}
 
 /*
 ================
@@ -1677,10 +1721,10 @@ void func_8011B974_gacode( s32 player, gaCamera_t *camera ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
 
     camera->eye[2] = 960.0f;
-    camera->eye[0] = pl->character.unk_14 + pl->lane->unk_B14;
+    camera->eye[0] = pl->character.unk_14[0] + pl->lane->unk_B14;
     camera->eye[1] = 150.0f;
     camera->at[2] = 335.0f;
-    camera->at[0] = pl->character.unk_14 + pl->lane->unk_B14;
+    camera->at[0] = pl->character.unk_14[0] + pl->lane->unk_B14;
     camera->at[1] = 0.0f;
     camera->unk_18[2] = camera->eye[2];
     camera->unk_18[0] = camera->eye[0];
@@ -1696,10 +1740,10 @@ void func_8011BA00_gacode( s32 player, gaCamera_t *camera ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
 
     camera->eye[2] = 1130.0f;
-    camera->eye[0] = pl->character.unk_20 + pl->lane->unk_B14;
+    camera->eye[0] = pl->character.unk_20[0] + pl->lane->unk_B14;
     camera->eye[1] = 200.0f;
     camera->at[2] = D_8012C158_gacode[0];
-    camera->at[0] = pl->character.unk_20 + pl->lane->unk_B14;
+    camera->at[0] = pl->character.unk_20[0] + pl->lane->unk_B14;
     camera->at[1] = 0.0f;
     camera->unk_18[2] = camera->eye[2];
     camera->unk_18[0] = camera->eye[0];

@@ -151,14 +151,13 @@ typedef struct {
     /* 0x08 */ f32 unk_08;              /* upper limit of unk_2C */
     /* 0x0C */ f32 unk_0C;              /* lower limit of unk_2C */
     /* 0x10 */ f32 unk_10;              /* range of unk_30 */
-    /* 0x14 */ f32 unk_14;
-    /* 0x18 */ u8 unk_18[0x08];
-    /* 0x20 */ f32 unk_20;
-    /* 0x24 */ u8 unk_24[0x08];
+    /* 0x14 */ vec3_t unk_14;
+    /* 0x20 */ vec3_t unk_20;
     /* 0x2C */ f32 unk_2C;
     /* 0x30 */ f32 unk_30;
     /* 0x34 */ f32 unk_34;              /* an angle (radians; func_8011B1A0_gacode, func_8011840C_gacode) */
-    /* 0x38 */ u8 unk_38[0x10];
+    /* 0x38 */ vec3_t unk_38;            /* func_8011D4E4_gacode of unk_20 and unk_14 */
+    /* 0x44 */ u8 unk_44[0x04];
 } gaCharacter_t;                        /* size 0x48 */
 
 extern gaCharacter_t D_80123BE0_gacode[];
