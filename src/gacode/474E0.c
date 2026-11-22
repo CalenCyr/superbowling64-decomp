@@ -217,7 +217,78 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011FD08_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8012016C_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801203AC_gacode);
+/*
+================
+func_801203AC_gacode
+
+Picks the pin to aim at from side's view: with one pin standing, that pin; with the last standing pin
+checked 1 or 5, that pin, offset 4.9 toward side; else the group (of two, split by D_8012C900_gacode's
+order) with more standing pins, offset 15 (unless pin 7 or 10) or 5. Writes its x and z to out and
+returns the pin.
+================
+*/
+s32 func_801203AC_gacode( vec3_t out, gaBody_t *bodies, gaSpot_t *spots, s32 side ) {
+    s32 right = 0;
+    s32 left = 0;
+    s32 numRight = 0;
+    s32 numLeft = 0;
+    s32 numStanding = 0;
+    s32 dir = side ? -1 : 1;
+    s32 last;
+    s32 i;
+
+    for ( i = 0; i < NUM_PINS; i++ ) {
+        if ( bodies[D_8012C900_gacode[side][i]].unk_5D != 1 ) {
+            continue;
+        }
+        switch ( i ) {
+        case 2:
+        case 3:
+        case 5:
+        case 8:
+            right = D_8012C900_gacode[side][i];
+            numRight++;
+            break;
+        case 0:
+        case 1:
+        case 4:
+        case 7:
+            left = D_8012C900_gacode[side][i];
+            numLeft++;
+            break;
+        default:
+            right = left = D_8012C900_gacode[side][i];
+            numRight++;
+            numLeft++;
+            break;
+        }
+        last = D_8012C900_gacode[side][i];
+        numStanding++;
+    }
+    if ( numStanding == 1 ) {
+        out[0] = spots[last].pos[0];
+        out[2] = spots[last].pos[2];
+        return last;
+    }
+    if ( last == 1 || last == 5 ) {
+        out[0] = spots[last].pos[0];
+        out[2] = spots[last].pos[2];
+        out[0] += dir * 4.9;
+        return last;
+    }
+    if ( numLeft >= numRight ) {
+        out[0] = spots[left].pos[0];
+        out[2] = spots[left].pos[2];
+        if ( left != 7 && left != 10 ) {
+            out[0] += dir * 15;
+        }
+        return left;
+    }
+    out[0] = spots[right].pos[0];
+    out[2] = spots[right].pos[2];
+    out[0] += dir * 5;
+    return right;
+}
 
 /*
 ================

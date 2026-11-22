@@ -242,6 +242,7 @@ extern u16 D_8012C7C6_gacode;              /* pins of func_801157F8_gacode */
 typedef s32 (*gaPlayerFunc_t)( s32 player );
 
 extern u8 D_80123601_gacode;
+extern u8 D_8012C900_gacode[2][NUM_PINS];  /* per side: the pins (1 to 10) from the back row forward (func_801203AC_gacode) */
 extern s32 D_8012C920_gacode;
 extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];
@@ -429,7 +430,7 @@ void func_8011C93C_gacode( gaPlayer_t *pl, s32 player );
 void func_8011CF30_gacode( s32 player );
 
 /* unit 474E0 */
-s32 func_801203AC_gacode( vec3_t out, gaBody_t *bodies, gaSpot_t *spots, u8 side );
+s32 func_801203AC_gacode( vec3_t out, gaBody_t *bodies, gaSpot_t *spots, s32 side );
 void func_8011D2C0_gacode( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale );
 void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to );
 void func_8011D304_gacode( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos );
