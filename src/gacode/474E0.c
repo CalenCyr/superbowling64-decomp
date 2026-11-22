@@ -125,9 +125,10 @@ f32 func_8011D5B8_gacode( vec3_t a, vec3_t b ) {
 func_8011D6C4_gacode
 
 out = the unit vector of a x b, or (0, -1, 0) when a and b are parallel.
+Declared inline: func_8011F87C_gacode expands it.
 ================
 */
-void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b ) {
+inline void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b ) {
     vec3_t cross;
 
     cross[0] = a[1] * b[2] - a[2] * b[1];
@@ -427,7 +428,78 @@ void func_8011F334_gacode( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011F4CC_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011F87C_gacode);
+/*
+================
+func_8011F87C_gacode
+
+Height of the floor grid at (x, z), interpolated over the triangle of its cell that holds the point; when
+normal is not 0 it receives the unit normal of that triangle.
+================
+*/
+f32 func_8011F87C_gacode( f32 x, f32 z, vec3_t normal ) {
+    s32 cell[2];
+    f32 pos[2];
+    f32 h[4];
+    vec3_t alongZ;
+    vec3_t alongX;
+    f32 dx;
+    f32 dz;
+    f32 edge;
+    f32 a;
+    f32 b;
+    f32 height;
+
+    pos[0] = x + -D_80100100.originX;
+    pos[1] = z + -D_80100100.originZ;
+    cell[0] = (s16)pos[0] / D_80100100.stepX;
+    cell[1] = (s16)pos[1] / D_80100100.stepZ;
+    if ( cell[0] < 0 ) {
+        cell[0] = 0;
+    } else if ( cell[0] >= D_80100100.numX - 1 ) {
+        cell[0] = D_80100100.numX - 2;
+    }
+    if ( cell[1] < 0 ) {
+        cell[1] = 0;
+    } else if ( cell[1] >= D_80100100.numZ - 1 ) {
+        cell[1] = D_80100100.numZ - 2;
+    }
+    h[0] = D_80100100.heights[cell[1] * D_80100100.numX + cell[0]];
+    h[1] = D_80100100.heights[cell[1] * D_80100100.numX + cell[0] + 1];
+    h[2] = D_80100100.heights[( cell[1] + 1 ) * D_80100100.numX + cell[0]];
+    h[3] = D_80100100.heights[( cell[1] + 1 ) * D_80100100.numX + cell[0] + 1];
+
+    dx = pos[0] - cell[0] * D_80100100.stepX;
+    dz = pos[1] - cell[1] * D_80100100.stepZ;
+    edge = D_80100100.stepZ * dx / D_80100100.stepX;
+    if ( dz < edge && dx != 0.0f ) {
+        a = ( h[1] - h[0] ) * dx / D_80100100.stepX + h[0];
+        b = ( h[3] - h[0] ) * dx / D_80100100.stepX + h[0];
+        height = ( b - a ) * dz / edge + a;
+        if ( normal != 0 ) {
+            alongZ[2] = D_80100100.stepZ;
+            alongZ[0] = 0.0f;
+            alongX[2] = 0.0f;
+            alongX[0] = D_80100100.stepX;
+            alongX[1] = h[1] - h[0];
+            alongZ[1] = h[3] - h[1];
+            func_8011D6C4_gacode( normal, alongZ, alongX );
+        }
+    } else {
+        a = ( h[3] - h[0] ) * dx / D_80100100.stepX + h[0];
+        b = ( h[3] - h[2] ) * dx / D_80100100.stepX + h[2];
+        height = ( b - a ) * ( dz - edge ) / ( D_80100100.stepZ - edge ) + a;
+        if ( normal != 0 ) {
+            alongZ[2] = D_80100100.stepZ;
+            alongZ[0] = 0.0f;
+            alongX[2] = 0.0f;
+            alongX[0] = D_80100100.stepX;
+            alongX[1] = h[3] - h[2];
+            alongZ[1] = h[2] - h[0];
+            func_8011D6C4_gacode( normal, alongZ, alongX );
+        }
+    }
+    return height;
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011FD08_gacode);
 

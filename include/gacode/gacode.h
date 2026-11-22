@@ -478,7 +478,7 @@ s32 func_8011E6F8_gacode( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSp
 void func_8011F334_gacode( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots );
 void func_8012016C_gacode( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, f32 ceiling );
 s32 func_8011F4CC_gacode( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 arg3, f32 arg4 );
-f32 func_8011F87C_gacode( f32 x, f32 z, s32 arg2 );
+f32 func_8011F87C_gacode( f32 x, f32 z, vec3_t normal );
 f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale );
 s32 func_80120680_gacode( u16 key, s32 count, u16 *table );
 u8 func_801206E0_gacode( gaLane_t *lane );
