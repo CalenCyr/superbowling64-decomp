@@ -156,9 +156,10 @@ func_8011E63C_gacode
 
 Moves *speed one step toward limit's side; once *value reaches limit (from below for a positive limit,
 from above for a negative one) clamps it there, stops *speed and returns 1.
+Declared inline: func_8011F334_gacode expands it.
 ================
 */
-s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit ) {
+inline s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit ) {
     if ( ( limit > 0.0f && *value >= limit ) || ( limit < 0.0f && *value <= limit ) ) {
         *value = limit;
         *speed = 0.0f;
@@ -174,7 +175,39 @@ s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011E6F8_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011F334_gacode);
+/*
+================
+func_8011F334_gacode
+
+Each frame, for every standing body that is down (unk_5C 1) and has motion flag 2: one lying flat slows to
+0.75 of its speed along the lane; one still tipping turns toward 90 degrees on its side and, once there,
+slows to 0.85. The spin about y decays to 0.925 either way.
+================
+*/
+void func_8011F334_gacode( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots ) {
+    s32 i;
+    s32 down;
+
+    for ( i = 0; i < NUM_BODIES; i++ ) {
+        if ( bodies[i].unk_5D != 0 && bodies[i].unk_5C == 1 && ( ( motion[i].flags >> 1 ) & 1 ) ) {
+            if ( bodies[i].rot[0] == 0.0f ) {
+                motion[i].vel[0] *= 0.75;
+                motion[i].vel[2] *= 0.75;
+            } else {
+                if ( bodies[i].rot[0] >= 0.0f ) {
+                    down = func_8011E63C_gacode( &bodies[i].rot[0], &motion[i].spin[0], 90.0f );
+                } else {
+                    down = func_8011E63C_gacode( &bodies[i].rot[0], &motion[i].spin[0], -90.0f );
+                }
+                if ( down ) {
+                    motion[i].vel[0] *= 0.85;
+                    motion[i].vel[2] *= 0.85;
+                }
+            }
+            motion[i].spin[1] *= 0.925;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011F4CC_gacode);
 
