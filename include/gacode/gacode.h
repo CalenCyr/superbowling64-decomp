@@ -413,7 +413,7 @@ void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, u16 first, u16 last );
 void func_80120B10_gacode( gaSprite_t *sprite );
 void func_80120B50_gacode( gaSprite_t *sprite, u16 color, u16 index );
 void func_80120C0C_gacode( gaSprite_t *sprite, u16 color, f32 t );
-u64 func_80120D30_gacode( s32 lane, s32 id );
+u64 func_80120D30_gacode( u8 lane, s32 id );
 void func_80120D7C_gacode( s64 *handle );
 void func_80120DD0_gacode( void );
 void func_80120DD8_gacode( u8 arg0 );

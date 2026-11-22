@@ -497,7 +497,47 @@ s32 func_80115ED4_gacode( u8 twoLanes ) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80115FCC_gacode);
+/*
+================
+func_80115FCC_gacode
+
+Ends a game of a duel: records both scores, sets both lanes to the result handlers with each player's win (3)
+or loss (4) animation, and plays SE 0x7A for the winner, or sound 0x63 on a tie. Returns the winning lane, or
+-1 on a tie.
+================
+*/
+s32 func_80115FCC_gacode( void ) {
+    s32 winner;
+    s32 i;
+
+    if ( D_800EA090[0] > D_800EA090[1] ) {
+        winner = 0;
+    } else {
+        winner = D_800EA090[0] < D_800EA090[1] ? 1 : -1;
+    }
+    for ( i = 0; i < 2; i++ ) {
+        gaPlayer_t *pl;
+        s16 *files;
+        s32 rival;
+
+        D_8009D030[i][D_800693DC[0] + D_800693DC[1]] = D_800EA090[i];
+        pl = &D_8012D658_gacode[i];
+        files = pl->character.unk_00->unk_00;
+        pl->lane->unk_B10 = func_80118EA0_gacode;
+        pl->lane->unk_B08 = func_8011B490_gacode;
+        pl->lane->unk_B0C = func_8011BCA8_gacode;
+        rival = i != 1;
+        pl->lane->unk_B26 = D_800EA090[i] > D_800EA090[rival] ? 3 : 4;
+        pl->obj->frame = 0;
+        pl->obj->anim = func_80030C04( files[pl->lane->unk_B26 + 2], FILE_TYPE2 );
+    }
+    if ( winner >= 0 ) {
+        func_80120D30_gacode( winner, 0x7A );
+    } else {
+        func_80037870( 0x63, 0 );
+    }
+    return winner;
+}
 
 /*
 ================
@@ -793,7 +833,7 @@ inline s32 func_80116FF0_gacode( s32 lane, s8 port, f32 x, u8 step ) {
             D_8012D228_gacode[lane].unk_06 = step;
             return 1;
         } else if ( D_8012D228_gacode[lane].unk_06 == step + 1 ) {
-            func_80120D30_gacode( (u8)lane, seIds[step - 1] );
+            func_80120D30_gacode( lane, seIds[step - 1] );
             if ( port >= 0 ) {
                 D_800DF680[port] = 8 - step;
                 D_8006940D[port] = 10;

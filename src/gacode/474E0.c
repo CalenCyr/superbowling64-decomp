@@ -384,7 +384,7 @@ func_80120D30_gacode
 Starts sound id for a lane; returns its handle.
 ================
 */
-u64 func_80120D30_gacode( s32 lane, s32 id ) {
+u64 func_80120D30_gacode( u8 lane, s32 id ) {
     u8 flags;
 
     if ( D_8005C162 ) {

@@ -27,6 +27,7 @@ extern s8 D_800A3020[4][10];        /* per player and frame */
 extern s8 D_80066E18[4][10];        /* per player and frame */
 extern s8 D_800994B8[2];            /* per player of a duel: frames won */
 extern s16 D_800EA090[];
+extern u16 D_8009D030[2][3];        /* per player of a duel and game: score */
 extern u8 D_8005C0B6;               /* restored by the results overlay on leaving */
 extern u8 D_8005C0BF;               /* 0, then 1 once an overlay asks to leave, 2 when it goes */
 extern s16 D_8005C0C0;
