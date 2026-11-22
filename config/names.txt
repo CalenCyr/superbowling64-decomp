@@ -472,3 +472,4 @@ gaLaneAim_t	gacode.h	invented: 8-byte per-lane aiming state (two, D_8012D228_gac
 gaMotion_t	gacode.h	invented: 0x38-byte motion of a lane body (gaLane_t.motion, 11 from 0x420; initial copy D_8012C230_gacode): velocity, spin, flags; stepped by func_80114898_gacode
 FABS	include/gacode/gacode.h	invented: float absolute value macro (0 - x), func_80119638_gacode
 floorGrid_t	include/game.h	invented: 0xFAC-byte file at D_80100100 (point counts, spacing and origin along x and z, then s16 heights); func_8012016C_gacode clamps to its edges, func_8011F87C_gacode interpolates its heights
+GA_TogglePin	3E350.c	invented: the inline helper of func_8011A404_gacode that toggles a lane body's standing flag (unk_5D) and returns the new state

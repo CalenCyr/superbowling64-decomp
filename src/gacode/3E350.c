@@ -2385,6 +2385,19 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A26C_gacode);
 
 /*
 ================
+GA_TogglePin
+
+Stands body i of a lane's bodies up if it is not standing, else knocks it down (unk_5D 1 or 0), and returns the
+new state. Retail has no out-of-line copy; func_8011A404_gacode expands it (the call gives the cursor index and
+the body address their own registers, which the open-coded toggle does not).
+================
+*/
+static inline u8 GA_TogglePin( gaBody_t *bodies, s32 i ) {
+    return bodies[i].unk_5D = bodies[i].unk_5D != 1;
+}
+
+/*
+================
 func_8011A404_gacode
 
 Pin editor of func_801157F8_gacode's mode: draws the pin chart of D_8012C7C6_gacode with the cursor (on a pin,
@@ -2394,8 +2407,6 @@ along a row, and A or Z on the button starts the throw (func_80117AE0_gacode), o
 it down.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: register swap only: in the A/Z pin toggle retail computes the cursor index in v0 and the body address in v1 (here the other way round); tried 1 + cursor, != 0, ^= 1, ?: and a (u8) index
 void func_8011A404_gacode( gaPlayer_t *pl ) {
     u8 pins[NUM_PINS];
     s16 x;
@@ -2521,7 +2532,7 @@ void func_8011A404_gacode( gaPlayer_t *pl ) {
             pl->lane->unk_B08 = func_8011AB0C_gacode;
         } else {
             func_80037870( 0xB, 0 );
-            if ( ( pl->lane->bodies[D_8012C8A8_gacode + 1].unk_5D = pl->lane->bodies[D_8012C8A8_gacode + 1].unk_5D != 1 ) == 1 ) {
+            if ( GA_TogglePin( pl->lane->bodies, D_8012C8A8_gacode + 1 ) == 1 ) {
                 D_8012C7C6_gacode |= 1 << ( 9 - D_8012C8A8_gacode );
             } else {
                 D_8012C7C6_gacode &= ~( 1 << ( 9 - D_8012C8A8_gacode ) );
@@ -2529,9 +2540,6 @@ void func_8011A404_gacode( gaPlayer_t *pl ) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A404_gacode);
-#endif
 
 /*
 ================
