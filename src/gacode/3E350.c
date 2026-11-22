@@ -183,7 +183,83 @@ s32 func_80114640_gacode( s32 player ) {
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80114640_gacode);
 #endif
 
+/*
+================
+func_80114898_gacode
+
+The per-frame physics step of the player's lane: turns each standing body by its spin (keeping its angles
+within -180..180) and moves its spot by its velocity, then lets func_8011F4CC_gacode collide each one, playing
+the sounds and rumbling the port for the ball's hits, and finally func_8011E6F8_gacode and
+func_8011F334_gacode.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: calls and constants as retail (CFG not yet compared past the prologue); retail keeps pointers into the lane (bodies in s7,
+// spots in fp, &lane->motion spilled to the stack and walked by both loops, and loop 2 reaches unk_7E8 as
+// spots + 0x160), which suggests pointer locals walked per body instead of lane->x[i]; frame 0x68 here 0x70.
+// unk_B2C is read with lh (s16 in retail?) against gaStage_t.unk_1E[1].
+/* An angle in degrees brought back within -180..180. */
+#define GA_WRAP_DEGREES( a ) ( ( a ) < -180.0f ? ( a ) + 360.0f : ( a ) >= 180.0f ? ( a ) - 360.0f : ( a ) )
+
+void func_80114898_gacode( s32 player, s32 port ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    gaLane_t *lane = pl->lane;
+    s32 i;
+
+    for ( i = 0; i < NUM_BODIES; i++ ) {
+        if ( lane->bodies[i].unk_5D != 0 ) {
+            if ( lane->bodies[i].unk_5C == 1 ) {
+                lane->bodies[i].rot[1] += lane->motion[i].spin[1];
+            }
+            lane->bodies[i].rot[1] = GA_WRAP_DEGREES( lane->bodies[i].rot[1] );
+            lane->bodies[i].rot[2] += lane->motion[i].spin[2];
+            lane->bodies[i].rot[2] = GA_WRAP_DEGREES( lane->bodies[i].rot[2] );
+            lane->bodies[i].rot[0] += lane->motion[i].spin[0];
+            lane->bodies[i].rot[0] = GA_WRAP_DEGREES( lane->bodies[i].rot[0] );
+            lane->spots[i].pos[0] += lane->motion[i].vel[0];
+            lane->spots[i].pos[1] += lane->motion[i].vel[1];
+            lane->spots[i].pos[2] += lane->motion[i].vel[2];
+            if ( lane->unk_7E8[i].unk_18 != 0.0f ) {
+                func_8011D304_gacode( lane->unk_7E8[i].pos, D_8012C758_gacode, lane->bodies[i].rot, lane->spots[i].pos );
+            }
+        }
+    }
+    for ( i = 0; i < NUM_BODIES; i++ ) {
+        if ( lane->bodies[i].unk_5D != 0 ) {
+            s32 hit = func_8011F4CC_gacode( &lane->motion[i], &lane->spots[i], &lane->unk_7E8[i], 180.0f,
+                                            D_8012D220_gacode->unk_14 );
+
+            if ( lane->bodies[i].unk_5C == 0 ) {
+                if ( hit && lane->spots[i].pos[2] > -1050.0 ) {
+                    if ( lane->spots[i].pos[1] <= -190.0f ) {
+                        func_80120D30_gacode( pl->laneIndex, 0x48 );
+                    } else {
+                        func_80120D30_gacode( pl->laneIndex, pl->lane->unk_B2C );
+                    }
+                    if ( port >= 0 ) {
+                        D_800DF680[port] = pl->lane->unk_B2C == D_8012D220_gacode->unk_1E[1] ? 6 : 4;
+                        D_8006940D[port] = 10;
+                    }
+                }
+                if ( ( ( lane->motion[i].flags >> 2 ) & 1 ) || ( ( lane->motion[i].flags >> 6 ) & 1 ) ) {
+                    func_80120D30_gacode( pl->laneIndex, lane->spots[i].pos[1] <= -190.0f ? 0x4C : 0x2F );
+                    if ( port >= 0 && ( ( lane->motion[i].flags >> 6 ) & 1 ) ) {
+                        D_800DF680[port] = 5;
+                        D_8006940D[port] = 10;
+                    }
+                }
+            }
+        }
+    }
+    if ( func_8011E6F8_gacode( player, lane->bodies, lane->motion, lane->spots, pl->laneIndex ) && port >= 0 ) {
+        D_800DF680[port] = 5;
+        D_8006940D[port] = 15;
+    }
+    func_8011F334_gacode( lane->bodies, lane->motion, lane->spots );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80114898_gacode);
+#endif
 
 /*
 ================

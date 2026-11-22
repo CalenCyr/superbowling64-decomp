@@ -244,6 +244,7 @@ extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];
 extern f32 D_80123850_gacode[][4];     /* unk_98, unk_9C, unk_2C, unk_30 of a player, by D_800DF59C.unk_04[] */
 extern s16 D_8012C784_gacode[];
+extern vec3_t D_8012C758_gacode;      /* (0, 24, 0) (func_80114898_gacode) */
 extern s16 D_8012C7CC_gacode[];      /* sound ids, by D_800A304C[] up to 10 (func_8011582C_gacode) */
 /* by score against par; TODO identity: scores below par read before the label, so the table likely starts
    earlier */
@@ -421,6 +422,9 @@ void func_8011D7CC_gacode( vec3_t v, gaBody_t *ball );
 f32 func_8011D5B8_gacode( vec3_t a, vec3_t b );
 void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b );
 s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit );
+s32 func_8011E6F8_gacode( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots, u8 lane );
+void func_8011F334_gacode( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots );
+s32 func_8011F4CC_gacode( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 arg3, f32 arg4 );
 f32 func_8011F87C_gacode( f32 x, f32 z, s32 arg2 );
 f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale );
 s32 func_80120680_gacode( u16 key, s32 count, u16 *table );
