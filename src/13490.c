@@ -807,10 +807,11 @@ name plate and, once it holds a game, its games, average, high and low scores an
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: prologue, calls, CFG and constants match; the frame is 8 bytes short (0x98, retail 0xA0) and
-// retail keeps x on the stack, reloading it each row and adding 0x2C there (s5 = x + 0x2C, then s5 + 2 ...), while
-// this draft keeps x in s5 and folds the offsets (x + 0x2E); rowY + 2 as topY reproduces retail's early s2. Tried:
-// rowX/rowY/played as s16/s32/u8, the inline small plate func_80038AE8 (no change).
+// NON_MATCHING: prologue, calls, CFG and constants match (func_8003AE9C takes s32 numbers: retail passes the
+// lhu field and the truncated float as they are); the frame is 8 bytes short (0x98, retail 0xA0): retail spills x
+// to sp+0x2E, reloads it each row and adds 0x2C there (s5 = x + 0x2C, then s5 + 2 ...), while this draft keeps x
+// in s5 and folds the offsets (x + 0x2E); rowY + 2 as topY reproduces retail's early s2. Tried: rowX/rowY/played
+// as s16/s32/u8, the inline small plate func_80038AE8 (no change).
 void func_8003A970( u16 count, UnkRecord *records, u8 kind, s16 x, s32 y ) {
     s16 digits[4];
     s32 i;
@@ -879,7 +880,7 @@ func_8003AE9C
 Draws the box of two numbers at (x, y), a above b, or the empty box when show is clear.
 ================
 */
-void func_8003AE9C( s16 a, s16 b, u8 show, s16 x, s16 y ) {
+void func_8003AE9C( s32 a, s32 b, u8 show, s16 x, s16 y ) {
     s16 digits[4];
     s16 topY;      /* of the upper number */
 
