@@ -18,7 +18,8 @@ scores, sets up the game mode, takes two options from D_8009D098.unk_04 and star
 #ifdef NON_MATCHING
 // NON_MATCHING: loop strength reduction only: retail's pointer walks &params[i].unk_08[4] (stores at -0x10,
 // -0xC, 0), the draft's walks &params[i] (8, 0xC, 0x18); statement order and a per-iteration params pointer
-// were tried
+// were tried. The permuter's best (175 against 245, 4k iterations) only reads D_8005C161 into a u8 local before
+// the loop; the pointer base stays
 void func_80112350_gacode( void ) {
     s32 character;
     s32 i;
@@ -595,7 +596,8 @@ the team if every player has the D_800994BE flag set, else passes the turn to th
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: schedule only: in the flag-count loop retail increments i before the row pointer, the draft
-// after it (tried: if/++ count, i++ in the index, local order; 20k permuter iterations found nothing). The
+// after it (tried: if/++ count, i++ in the index, local order; 6k permuter iterations scored on this function
+// alone found nothing below the base). The
 // turn pass is func_801138EC_gacode inlined (its inline is what puts the body here at -O2).
 s32 func_80113968_gacode( void ) {
     s32 team;

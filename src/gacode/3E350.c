@@ -129,7 +129,7 @@ result.
 #ifdef NON_MATCHING
 // NON_MATCHING: register only: before the body loop retail loads pl->lane into a0 (this into v0); the
 // loops' pointer order (spot set and stepped first) was found by A/B, and indexed &pl->lane->bodies[i] or a
-// lane local miss the loop-invariant base.
+// lane local miss the loop-invariant base; 11k permuter iterations (function-only scoring) found nothing better.
 s32 func_80114640_gacode( s32 player ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
     s32 port;
@@ -1992,7 +1992,8 @@ one (from the scores of the lane's team player in a team game), and the games wo
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: register residue only: retail loads D_8009D19C[scorer] for first into a1, mine into v1; if/else, ternary, a u8 or s32 frame local, s32 first and an inline helper were compiled, all the same
+// NON_MATCHING: register residue only: retail loads D_8009D19C[scorer] for first into a1, mine into v1; if/else, ternary, a u8 or s32 frame local, s32 first and an inline helper were compiled, all the same;
+// 12k permuter iterations (function-only scoring) found nothing better
 void func_8011917C_gacode( s32 player, u8 lane ) {
     s32 x;
     s16 y;
@@ -3381,7 +3382,8 @@ modes that have one), and a value of the lane's current unk_B10 step.
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: register allocation only; retail gives row s2, lane s3, player s4 and &D_800F8094 s5 (here
-// player s2, &D_800F8094 s3, row s4, lane s5); instructions, constants and relocations are the same
+// player s2, &D_800F8094 s3, row s4, lane s5); instructions, constants and relocations are the same. The
+// permuter's best (score 110 against 365) sets row = 18 after the TABLE sprintf: fewer moves differ, none closed
 void func_8011CF30_gacode( s32 player ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
     u8 lane;
