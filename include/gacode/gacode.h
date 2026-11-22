@@ -258,6 +258,9 @@ extern u16 D_8012C80A_gacode[11];      /* image ids of the numbers 1 to 9, by nu
 extern u16 D_8012C820_gacode[NUM_PINS][2];  /* x and y of each pin in the pin chart (func_80119ACC_gacode) */
 extern u16 D_8012C848_gacode[8];       /* image ids, by D_8005C163 */
 extern u16 D_8012C858_gacode[NUM_PINS][2];  /* x and y of each pin in the pin panel (func_80119DD8_gacode) */
+extern u16 D_8012C880_gacode[NUM_PINS][2];  /* x and y of each pin in the pin editor (func_8011A404_gacode) */
+extern u8 D_8012C8A8_gacode;           /* pin editor: the pin under the cursor (0 to 9) */
+extern u8 D_8012C8A9_gacode;           /* pin editor: nonzero while the cursor is on the pins */
 extern u8 D_8012D238_gacode;           /* current frame of the par game (0 to 9; par in D_80099458[0][]) */
 extern f32 D_8012C764_gacode[2];       /* per lane: angle of func_8011C158_gacode's camera */
 extern vec3_t D_8012C76C_gacode[2];    /* per lane: position of func_8011BD34_gacode's camera (x and z) */

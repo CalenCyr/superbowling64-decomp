@@ -2383,7 +2383,148 @@ void func_8011A26C_gacode( void ) {
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A26C_gacode);
 #endif
 
+/*
+================
+func_8011A404_gacode
+
+Pin editor of func_801157F8_gacode's mode: draws the pin chart of D_8012C7C6_gacode with the cursor (on a pin,
+or on the button below the chart), and unless the overlay is leaving reads the first controller: up enters
+the chart or moves up a row, down moves down a row (off the top row back to the button), left and right move
+along a row, and A or Z on the button starts the throw (func_80117AE0_gacode), on a pin stands it up or knocks
+it down.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: retail tests the cursor for the up move's sound as a signed int (slti 6, then bltz), which a u8 >= 0 test folds away; and the pin toggle swaps v0 and v1
+void func_8011A404_gacode( gaPlayer_t *pl ) {
+    u8 pins[NUM_PINS];
+    s16 x;
+    s16 y;
+    s32 i;
+
+    x = 0x20;
+    y = 0x30;
+    func_8002DF3C( 0x881, x, y );
+    func_80120980_gacode( pins, D_8012C7C6_gacode );
+    for ( i = 0; i < NUM_PINS; i++ ) {
+        if ( pins[i] == 1 ) {
+            func_8002DF3C( 0x883, x + D_8012C880_gacode[i][0], y + D_8012C880_gacode[i][1] );
+        }
+    }
+    if ( D_8012C8A9_gacode ) {
+        func_8002E4B0( 0x887, x + D_8012C880_gacode[D_8012C8A8_gacode][0] - 1,
+                       y + D_8012C880_gacode[D_8012C8A8_gacode][1] - 1, D_80123601_gacode + 0x7F, 1.0f, 1.0f );
+    }
+    if ( !D_8012C8A9_gacode ) {
+        func_8002E4B0( 0x886, x + 8, y + 0x7A, D_80123601_gacode + 0x30, 1.0f, 1.0f );
+    }
+    if ( D_8005C0BF ) {
+        return;
+    }
+    if ( D_800E6760[0] & U_JPAD ) {
+        if ( !D_8012C8A9_gacode ) {
+            func_80037870( 0, 0 );
+            D_8012C8A9_gacode = 1;
+            D_8012C8A8_gacode = 0;
+        } else {
+            if ( D_8012C8A8_gacode >= 0 && D_8012C8A8_gacode < 6 ) {
+                func_80037870( 0, 0 );
+            }
+            switch ( D_8012C8A8_gacode ) {
+                case 0:
+                    D_8012C8A8_gacode = 1;
+                    break;
+                case 1:
+                case 2:
+                    D_8012C8A8_gacode = 4;
+                    break;
+                case 3:
+                    D_8012C8A8_gacode = 6;
+                    break;
+                case 4:
+                    D_8012C8A8_gacode = 7;
+                    break;
+                case 5:
+                    D_8012C8A8_gacode = 8;
+                    break;
+            }
+        }
+    }
+    if ( D_8012C8A9_gacode == 1 ) {
+        if ( D_800E6760[0] & D_JPAD ) {
+            func_80037870( 0, 0 );
+            switch ( D_8012C8A8_gacode ) {
+                case 0:
+                    D_8012C8A9_gacode = 0;
+                    break;
+                case 1:
+                case 2:
+                    D_8012C8A8_gacode = 0;
+                    break;
+                case 3:
+                case 4:
+                    D_8012C8A8_gacode = 1;
+                    break;
+                case 5:
+                    D_8012C8A8_gacode = 2;
+                    break;
+                case 6:
+                    D_8012C8A8_gacode = 3;
+                    break;
+                case 7:
+                case 8:
+                    D_8012C8A8_gacode = 4;
+                    break;
+                case 9:
+                    D_8012C8A8_gacode = 5;
+                    break;
+            }
+        }
+        if ( D_800E6760[0] & L_JPAD ) {
+            switch ( D_8012C8A8_gacode ) {
+                case 2:
+                case 4:
+                case 5:
+                case 7:
+                case 8:
+                case 9:
+                    func_80037870( 0, 0 );
+                    D_8012C8A8_gacode--;
+                    break;
+            }
+        }
+        if ( D_800E6760[0] & R_JPAD ) {
+            switch ( D_8012C8A8_gacode ) {
+                case 1:
+                case 3:
+                case 4:
+                case 6:
+                case 7:
+                case 8:
+                    func_80037870( 0, 0 );
+                    D_8012C8A8_gacode++;
+                    break;
+            }
+        }
+    }
+    if ( D_800E44E0[0] & ( A_BUTTON | Z_TRIG ) ) {
+        if ( !D_8012C8A9_gacode ) {
+            func_80037870( 1, 0 );
+            pl->lane->unk_B10 = func_80117AE0_gacode;
+            pl->lane->unk_B08 = func_8011AB0C_gacode;
+        } else {
+            func_80037870( 0xB, 0 );
+            if ( ( pl->lane->bodies[D_8012C8A8_gacode + 1].unk_5D = pl->lane->bodies[D_8012C8A8_gacode + 1].unk_5D != 1 ) == 1 ) {
+                D_8012C7C6_gacode |= 1 << ( 9 - D_8012C8A8_gacode );
+            } else {
+                D_8012C7C6_gacode &= ~( 1 << ( 9 - D_8012C8A8_gacode ) );
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A404_gacode);
+#endif
 
 /*
 ================
