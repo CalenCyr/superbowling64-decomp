@@ -1185,7 +1185,33 @@ inline void func_80119800_gacode( s32 player, u8 full ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801198E4_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119ACC_gacode);
+/*
+================
+func_80119ACC_gacode
+
+Draws the par game's frame panel on the lane's side: the frame number, its par, and a chart of the pins
+the frame starts with.
+================
+*/
+void func_80119ACC_gacode( s32 player, u8 lane ) {
+    u8 pins[NUM_PINS];
+    s16 x;
+    s16 y;
+    s32 i;
+
+    x = lane != 0 ? 0xB0 : 0x20;
+    y = 0x30;
+    func_8002DF3C( 0xA1D, x, y );
+    func_8002DF3C( D_8012C80A_gacode[D_8012D238_gacode + 1], x + 0x48, 0x36 );
+    func_8002DF3C( D_8012C80A_gacode[D_80099458[0][D_8012D238_gacode]], x + 0x48, 0x46 );
+    func_80120980_gacode( pins, D_80123950_gacode[D_800DF59C.unk_04[D_8012D238_gacode]].pins );
+    for ( i = 0; i < NUM_PINS; i++ ) {
+        if ( pins[i] == 1 ) {
+            func_8002DF3C( 0xA2B, x + D_8012C820_gacode[i][0], y + D_8012C820_gacode[i][1] );
+        }
+    }
+    func_8002DF3C( D_8012C848_gacode[D_8005C163], x + 0xC, y + 0x80 );
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119C50_gacode);
 

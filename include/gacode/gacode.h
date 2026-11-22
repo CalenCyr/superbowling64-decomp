@@ -244,6 +244,10 @@ extern s16 D_8012C784_gacode[];
 extern s16 D_8012C7E6_gacode[];
 extern f32 D_801239E8_gacode[11];      /* by gaPlayer_t.unk_93 */
 extern u16 D_8012C7F4_gacode[11];      /* image ids, by gaPlayer_t.unk_93 */
+extern u16 D_8012C80A_gacode[11];      /* image ids of the numbers 1 to 9, by number ([0] and [10] none) */
+extern u16 D_8012C820_gacode[NUM_PINS][2];  /* x and y of each pin in the pin chart (func_80119ACC_gacode) */
+extern u16 D_8012C848_gacode[8];       /* image ids, by D_8005C163 */
+extern u8 D_8012D238_gacode;           /* current frame of the par game (0 to 9; par in D_80099458[0][]) */
 extern f32 D_8012C764_gacode[2];       /* per lane: angle of func_8011C158_gacode's camera */
 extern u8 D_8012C7C8_gacode;           /* func_8011C57C_gacode's camera has started (func_801150B4_gacode) */
 extern s16 D_8012C8D4_gacode[10];      /* path files of func_8011C468_gacode's camera */
