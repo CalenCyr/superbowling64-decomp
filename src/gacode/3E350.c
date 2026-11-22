@@ -717,7 +717,68 @@ An unk_B04 handler that does nothing.
 void func_80116414_gacode( s32 player ) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011641C_gacode);
+/*
+================
+func_8011641C_gacode
+
+Resets a player's lane for a new turn: puts the player's object back, resets the character's aim, copies the
+lane's initial bodies and spots with the given pins standing, and starts the turn's handlers.
+================
+*/
+void func_8011641C_gacode( s32 player, u8 *pins ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    gaLane_t *lane = pl->lane;
+    gaBody_t *body;
+    gaSpot_t *spot;
+    gaSpot_t *spot2;
+    s32 i;
+
+    memmove( pl->obj->mtx, pl->unk_48, sizeof( pl->unk_48 ) );
+    pl->character.unk_44 = D_8012D220_gacode->unk_0C;
+    pl->character.unk_34 = 1.5707964f;
+    pl->character.unk_30 = pl->character.unk_14[0] = pl->character.unk_20[0] = 0.0f;
+    pl->character.unk_2C = pl->character.unk_0C;
+    memmove( lane->bodies, D_8012BCF0_gacode, sizeof( lane->bodies ) );
+    memmove( lane->unk_420, D_8012C230_gacode, sizeof( D_8012C230_gacode ) );
+    spot = lane->spots;
+    memmove( spot, D_8012C498_gacode, sizeof( D_8012C498_gacode ) );
+    body = lane->bodies;
+    spot2 = lane->unk_7E8;
+    for ( i = 0; i < NUM_BODIES; i++, spot2++ ) {
+        if ( i != 0 ) {
+            body[i].unk_5D = pins[i - 1];
+            body[i].pos[1] += D_8012D220_gacode->unk_14;
+        }
+        spot[i].pos[0] = body[i].pos[0];
+        spot[i].pos[1] = body[i].pos[1];
+        spot[i].pos[2] = body[i].pos[2];
+        spot2->unk_1C = 0.0f;
+        spot[i].unk_1C = 0.0f;
+    }
+    body = lane->unk_948;
+    spot = lane->unk_A68;
+    for ( i = 0; i < 3; i++ ) {
+        if ( i == 2 && D_8012D8D8_gacode ) {
+            D_8012D228_gacode[pl->laneIndex].unk_00 = body[2].pos[2];
+        }
+        memmove( &body[i], &D_8012C110_gacode[i], sizeof( gaBody_t ) );
+        if ( i == 2 && D_8012D8D8_gacode ) {
+            body[2].pos[2] = D_8012D228_gacode[pl->laneIndex].unk_00;
+        }
+        spot[i].pos[0] = body[i].pos[0];
+        spot[i].pos[1] = body[i].pos[1];
+        spot[i].pos[2] = body[i].pos[2];
+    }
+    lane->bodyObjs[0]->viewMask = 0;
+    lane->unk_B08 = func_8011AB0C_gacode;
+    lane->unk_B0C = func_8011B974_gacode;
+    lane->unk_B25 = 0;
+    lane->unk_B10 = func_80117AE0_gacode;
+    if ( pl->port >= 0 ) {
+        D_800DF680[pl->port] = 8;
+        D_8006940D[pl->port] = 0;
+    }
+}
 
 /*
 ================

@@ -106,7 +106,7 @@ typedef struct {
     /* 0x454 */ u32 unk_454;            /* flags */
     /* 0x458 */ u8 unk_458[0x688 - 0x458];
     /* 0x688 */ gaSpot_t spots[NUM_BODIES];
-    /* 0x7E8 */ u8 unk_7E8[0x948 - 0x7E8];
+    /* 0x7E8 */ gaSpot_t unk_7E8[NUM_BODIES];
     /* 0x948 */ gaBody_t unk_948[3];
     /* 0xA68 */ gaSpot_t unk_A68[3];
     /* 0xAC8 */ sceneObject_t *bodyObjs[NUM_BODIES];
@@ -269,6 +269,10 @@ extern u8 D_8012D651_gacode;
 extern u16 D_8012D8D8_gacode;
 extern u8 D_8012D8DA_gacode;
 extern gaLane_t D_8012DCF0_gacode[2];
+extern gaBody_t D_8012BCF0_gacode[NUM_BODIES];     /* initial bodies of a lane (func_8011641C_gacode) */
+extern u8 D_8012C230_gacode[0x688 - 0x420];        /* initial gaLane_t.unk_420 onwards, up to the spots */
+extern gaSpot_t D_8012C498_gacode[2][NUM_BODIES];  /* initial gaLane_t.spots and unk_7E8 */
+extern gaBody_t D_8012C110_gacode[3];              /* initial gaLane_t.unk_948 */
 
 /* A state of the overlay's main loop; returns nonzero when the state is done. */
 typedef s32 (*gaState_t)( void );
