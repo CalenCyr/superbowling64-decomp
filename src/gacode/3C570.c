@@ -180,7 +180,62 @@ void func_80113594_gacode( gaState_t state, gaPlayerFunc_t mode ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_801136FC_gacode);
+/*
+================
+func_801136FC_gacode
+
+Fills the teams' player lists: with one team every player in order; with two, players 0 and 1 apart with
+two players, players 0 and 1 against the rest with three or four.
+================
+*/
+void func_801136FC_gacode( void ) {
+    s32 i;
+
+    if ( !D_8005C162 ) {
+        for ( i = 0; i < D_8005C161; i++ ) {
+            D_8012CE02_gacode[0][i] = i;
+        }
+        for ( ; i < 5; i++ ) {
+            D_8012CE02_gacode[0][i] = -1;
+        }
+        return;
+    }
+    switch ( D_8005C161 ) {
+    case 2:
+        D_8012CE02_gacode[0][0] = 0;
+        for ( i = 1; i < 5; i++ ) {
+            D_8012CE02_gacode[0][i] = -1;
+        }
+        D_8012CE02_gacode[1][0] = 1;
+        for ( i = 1; i < 5; i++ ) {
+            D_8012CE02_gacode[1][i] = -1;
+        }
+        break;
+    case 3:
+        D_8012CE02_gacode[0][0] = 0;
+        D_8012CE02_gacode[0][1] = 1;
+        for ( i = 2; i < 5; i++ ) {
+            D_8012CE02_gacode[0][i] = -1;
+        }
+        D_8012CE02_gacode[1][0] = 2;
+        for ( i = 1; i < 5; i++ ) {
+            D_8012CE02_gacode[1][i] = -1;
+        }
+        break;
+    case 4:
+        D_8012CE02_gacode[0][0] = 0;
+        D_8012CE02_gacode[0][1] = 1;
+        for ( i = 2; i < 5; i++ ) {
+            D_8012CE02_gacode[0][i] = -1;
+        }
+        D_8012CE02_gacode[1][0] = 2;
+        D_8012CE02_gacode[1][1] = 3;
+        for ( i = 2; i < 5; i++ ) {
+            D_8012CE02_gacode[1][i] = -1;
+        }
+        break;
+    }
+}
 
 /*
 ================
