@@ -1890,7 +1890,30 @@ void func_801194D0_gacode( gaPlayer_t *pl ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119638_gacode);
+/*
+================
+func_80119638_gacode
+
+Sets the lane's two gauge sprites from the player's unk_2C (between its limits) and unk_30 (against its
+range), and picks the lane's D_801236B0_gacode image by the size of unk_30 (full at 15), from the second
+half of the list when unk_05 is set.
+================
+*/
+void func_80119638_gacode( gaPlayer_t *pl ) {
+    f32 t;
+
+    func_80120C0C_gacode( &D_8012D240_gacode[pl->laneIndex], 0,
+                          ( pl->character.unk_2C - pl->character.unk_0C ) / ( pl->character.unk_08 - pl->character.unk_0C ) );
+    t = FABS( pl->character.unk_30 ) / FABS( pl->character.unk_10 );
+    func_80120C0C_gacode( &D_8012CE10_gacode[pl->laneIndex], 0, t );
+    t = FABS( pl->character.unk_30 ) / 15.0;
+    if ( t < 0.0 ) {
+        t = 0.0f;
+    } else if ( t > 1.0 ) {
+        t = 1.0f;
+    }
+    D_801236B0_gacode[pl->laneIndex].cur = (u16)( D_801236B0_gacode[pl->laneIndex].count * t ) + ( pl->character.unk_05 ? 8 : 0 );
+}
 
 /*
 ================

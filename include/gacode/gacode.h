@@ -104,6 +104,9 @@ typedef struct {
     /* 0x34 */ u32 flags;
 } gaMotion_t;                           /* size 0x38 */
 
+/* Absolute value of a float, as 0 - x. */
+#define FABS( x )       ( ( x ) < 0.0f ? 0.0f - ( x ) : ( x ) )
+
 /* One of the two lanes (D_8012DCF0_gacode), shared by the players bowling on it. Name invented. */
 typedef struct {
     /* 0x000 */ gaBody_t bodies[NUM_BODIES];
