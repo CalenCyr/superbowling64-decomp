@@ -59,7 +59,72 @@ void func_80114550_gacode( s32 player, s8 port, u8 character, u8 lane ) {
     func_8011B8AC_gacode( player, pl->lane->camera );
 }
 
+/*
+================
+func_80114640_gacode
+
+Runs a player's frame: the lane's unk_B04 handler, then its input handler with the controller's buttons
+(1: A or B, -1: the other button) and the stick (only its dominant axis), or the game's own input for a
+player without a port; then places the lane's bodies and sets its camera. Returns the input handler's
+result.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: register only: before the body loop retail loads pl->lane into a0 (this into v0); the
+// loops' pointer order (spot set and stepped first) was found by A/B, and indexed &pl->lane->bodies[i] or a
+// lane local miss the loop-invariant base.
+s32 func_80114640_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    s32 port;
+    s32 input;
+    s16 stick[2];
+    s32 result;
+    gaSpot_t *spot;
+    gaBody_t *body;
+    s32 i;
+
+    pl->lane->unk_B04( player );
+    port = pl->port;
+    input = 0;
+    stick[1] = 0;
+    stick[0] = 0;
+    if ( D_8005C0BF == 0 ) {
+        if ( port >= 0 ) {
+            stick[1] = D_800A2FD8[port];
+            stick[0] = D_800692D0[port];
+            if ( ( stick[1] < 0 ? -stick[1] : stick[1] ) * 2 <= ( stick[0] < 0 ? -stick[0] : stick[0] ) ) {
+                stick[1] = 0;
+            } else if ( ( stick[0] < 0 ? -stick[0] : stick[0] ) * 2 <= ( stick[1] < 0 ? -stick[1] : stick[1] ) ) {
+                stick[0] = 0;
+            }
+            if ( D_800E44E0[port] & 0x4000 ) {
+                input = -1;
+            } else {
+                input = ( D_800E44E0[port] & 0xA000 ) != 0;
+            }
+        } else {
+            input = func_8011C658_gacode( pl, player );
+        }
+    }
+    result = pl->lane->unk_B10( player, input, stick[0], stick[1] );
+    func_80114898_gacode( player, port );
+    spot = pl->lane->spots;
+    body = pl->lane->bodies;
+    for ( i = 0; i < NUM_BODIES; spot++, body++, i++ ) {
+        func_80114CB4_gacode( body, spot, pl->lane->bodyObjs[i], pl->lane->unk_B14 );
+    }
+    spot = pl->lane->unk_A68;
+    body = pl->lane->unk_948;
+    for ( i = 0; i < 3; spot++, body++, i++ ) {
+        func_80114CB4_gacode( body, spot, pl->lane->unk_AF4[i], pl->lane->unk_B14 );
+    }
+    pl->lane->unk_B0C( player, pl->lane->camera );
+    func_80114DD4_gacode( pl );
+    return result;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80114640_gacode);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80114898_gacode);
 
