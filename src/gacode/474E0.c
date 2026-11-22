@@ -994,7 +994,71 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120DD8_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801213B4_gacode);
 
+/*
+================
+func_801219CC_gacode
+
+Scores the third ball of player's frame (D_80068A50_gacode 2) from the D_8012D8DA_gacode pins it knocked
+down, by D_8012CDE0_gacode: 1 and 3 add 10 or 20 to the previous score, 2 adds 10 plus the frame's
+first ball; a third ball of 10 (or of 10 together with that first ball) counts 10 more. Then passes on
+to the next ball.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: same calls and stores; retail loads each score for D_800EA090_gacode before the two byte
+// stores (matched here by assigning it first), but the sums with D_800994B8 (prev + 10 first, then the s8),
+// the spare branch's index registers and two bnel/bne choices still differ; the arg copy is t0, here t2
+void func_801219CC_gacode( u8 player ) {
+    if ( D_8012CDE0_gacode[player] == 1 || D_8012CDE0_gacode[player] == 3 ) {
+        if ( D_8012D8DA_gacode == 10 ) {
+            D_800994B8[player] = -1;
+            if ( D_8012CDE0_gacode[player] == 1 ) {
+                D_800DF630[player][D_8009D19C[player]] = D_800DF630[player][D_8009D19C[player] - 1] + 20;
+                D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
+                D_80068A50[player]++;
+                D_800994BE[player] = 1;
+            }
+            if ( D_8012CDE0_gacode[player] == 3 ) {
+                D_800DF630[player][D_8009D19C[player]] = D_800DF630[player][D_8009D19C[player] - 1] + 30;
+                D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
+                D_80068A50[player]++;
+                D_800994BE[player] = 1;
+            }
+        } else {
+            D_800994B8[player] = D_8012D8DA_gacode;
+            if ( D_8012CDE0_gacode[player] == 1 ) {
+                D_800DF630[player][D_8009D19C[player]] =
+                    D_800DF630[player][D_8009D19C[player] - 1] + 10 + D_800994B8[player];
+                D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
+                D_80068A50[player]++;
+                D_800994BE[player] = 1;
+            }
+            if ( D_8012CDE0_gacode[player] == 3 ) {
+                D_800DF630[player][D_8009D19C[player]] =
+                    D_800DF630[player][D_8009D19C[player] - 1] + 20 + D_800994B8[player];
+                D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
+                D_80068A50[player]++;
+                D_800994BE[player] = 1;
+            }
+        }
+    }
+    if ( D_8012CDE0_gacode[player] == 2 ) {
+        if ( D_8012D8DA_gacode + D_800A3020[player][D_8009D19C[player]] == 10 ) {
+            D_800994B8[player] = -1;
+            D_800DF630[player][D_8009D19C[player]] = D_800DF630[player][D_8009D19C[player] - 1] + 20;
+        } else {
+            D_800994B8[player] = D_8012D8DA_gacode;
+            D_800DF630[player][D_8009D19C[player]] =
+                D_800DF630[player][D_8009D19C[player] - 1] + 10 + D_800A3020[player][D_8009D19C[player]] + D_800994B8[player];
+        }
+        D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
+        D_80068A50[player]++;
+        D_800994BE[player] = 1;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801219CC_gacode);
+#endif
 
 /*
 ================
