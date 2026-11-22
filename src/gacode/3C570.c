@@ -7,7 +7,102 @@
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80112350_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_801125A0_gacode);
+/*
+================
+func_801125A0_gacode
+
+The overlay's frame: leaves once main has faded out after a request, requests leaving when the game mode
+is done or the pause menu quits, opens the pause menu on Start and, while C-up is held, func_80112E04_gacode's
+view (not in mode 2), runs the stage
+and the players, draws them, runs the main loop state (or, paused, the pause menu's state), and steps the
+blink of D_80123600_gacode between 0 and 0x80.
+================
+*/
+void func_801125A0_gacode( void ) {
+    s32 team;
+    s32 cUpHeld = FALSE;
+
+    if ( D_8005C0BF == 1 && D_8005C0C0 == 0xFF ) {
+        func_80120D7C_gacode( &D_8012CDE8_gacode );
+        D_8005C0BF = 2;
+        D_8005C0C0 = 0x107;
+        D_8005C0B6 = D_80123603_gacode == 1 ? 6 : 4;
+    }
+    if ( D_8005C0BF == 0 ) {
+        if ( D_80123603_gacode ) {
+            func_80037870( 0x7F, 0 );
+            D_8005C0BF = 1;
+        } else if ( D_8012D650_gacode && D_80123604_gacode ) {
+            func_80037870( 0x32, 0 );
+            D_8005CB60 = 0;
+            D_8005C0BF = 1;
+        }
+        if ( !D_8012D650_gacode ) {
+            if ( D_800E4D62 & START_BUTTON ) {
+                func_80037870( 6, 0 );
+                D_8012D650_gacode = 1;
+                D_800DF680[0] = D_800DF680[1] = 8;
+                D_8006940D[0] = D_8006940D[1] = 0;
+            }
+            if ( ( D_8005C160 & 0xF ) != 2 && ( ( D_800E57E4[0] | D_800E57E4[1] ) & U_CBUTTONS ) ) {
+                cUpHeld = TRUE;
+                D_800DF680[0] = D_800DF680[1] = 8;
+                D_8006940D[0] = D_8006940D[1] = 0;
+            }
+        }
+    }
+    if ( !D_8012D650_gacode ) {
+        D_8012D239_gacode = 0;
+    }
+    D_8012D220_gacode->update();
+    func_8002A2F0();
+    for ( team = 0; team <= D_8005C162; team++ ) {
+        func_80114EC4_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
+    }
+    func_80028EA8( &D_800F8094 );
+    func_8002FDE4( 0x9F, 0, 2, 0xF0, 0, 0, 0, 0xFF );
+    if ( !D_8012D650_gacode && !cUpHeld ) {
+        func_80114FC4_gacode( D_8012CE02_gacode[0][D_8012CDF8_gacode[0]] );
+        if ( D_8005C162 ) {
+            func_80114FC4_gacode( D_8012CE02_gacode[1][D_8012CDF8_gacode[1]] );
+        } else {
+            func_8002E4B0( 0x926, 0xD2, 0x10, D_80123601_gacode + 0x40, 1.0f, 1.0f );
+        }
+    }
+    if ( !D_8012D650_gacode && !cUpHeld ) {
+        D_80123603_gacode = D_8012CDFC_gacode();
+        if ( !D_8005C162 ) {
+            func_801150B4_gacode( D_8012CE02_gacode[0][D_8012CDF8_gacode[0]] );
+        }
+    } else {
+        for ( team = 0; team <= D_8005C162; team++ ) {
+            func_80114FFC_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
+        }
+    }
+    if ( D_8012D650_gacode ) {
+        func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x10, 0x10, 0x10, 0x80 );
+        D_80123604_gacode = D_8012CDF0_gacode();
+    }
+    if ( cUpHeld ) {
+        func_80112E04_gacode();
+    }
+    if ( D_80123602_gacode == 1 ) {
+        D_80123600_gacode -= 8;
+        if ( D_80123600_gacode <= 0 ) {
+            D_80123600_gacode = 0;
+            D_80123602_gacode = 0;
+        }
+    } else {
+        D_80123600_gacode += 8;
+        if ( D_80123600_gacode >= 0x80 ) {
+            D_80123600_gacode = 0x80;
+            D_80123602_gacode = 1;
+        }
+    }
+    func_80028A0C( &D_800F8094 );
+    func_80028950( &D_800F8094, 0 );
+    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+}
 
 /*
 ================

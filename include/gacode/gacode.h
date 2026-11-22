@@ -256,7 +256,11 @@ extern u16 D_8012C7C6_gacode;              /* pins of func_801157F8_gacode */
 /* Handler of a player: the game mode (D_8012CDF4_gacode) or what starts a turn (D_8012D23C_gacode). */
 typedef s32 (*gaPlayerFunc_t)( s32 player );
 
+extern s16 D_80123600_gacode;          /* blink level, 0 to 0x80 by 8 (func_801125A0_gacode) */
 extern u8 D_80123601_gacode;
+extern s8 D_80123602_gacode;           /* 1: D_80123600_gacode falls, else it rises */
+extern u8 D_80123603_gacode;           /* what the main loop state returned: nonzero, the game is done */
+extern u8 D_80123604_gacode;           /* what the pause menu's state returned: nonzero, leave the game */
 extern u8 D_8012C900_gacode[2][NUM_PINS];  /* per side: the pins (1 to 10) from the back row forward (func_801203AC_gacode) */
 /* By 2 to 6 standing pins (head pin down): a count, then that many sorted masks of the standing pins
    (bit 10 - n for pin n), the leaves func_801206E0_gacode accepts */
@@ -374,6 +378,8 @@ void func_80114140_gacode( u8 arg0, f32 offset, u8 arg2 );
 void func_80114550_gacode( s32 player, s32 port, u8 character, u8 lane );
 void func_80114138_gacode( void );
 s32 func_80114640_gacode( s32 player );
+void func_80114EC4_gacode( s32 player );
+void func_801150B4_gacode( s32 player );
 void func_80114898_gacode( s32 player, s32 port );
 void func_8011A26C_gacode( void );
 void func_801144C4_gacode( u8 lastLane );
