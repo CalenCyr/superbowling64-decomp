@@ -139,15 +139,19 @@ typedef struct {
 /* What gaCharacter_t.unk_00 points to. Name invented. */
 typedef struct {
     /* 0x00 */ s16 *unk_00;                 /* file indices */
-    /* 0x04 */ u8 unk_04[0x04];
+    /* 0x04 */ f32 unk_04;                  /* objParams_t.unk_08[4] of the player's scene object */
     /* 0x08 */ s8 unk_08;                   /* +-: a joint of the player's object */
     /* 0x09 */ u8 unk_09[0x03];
     /* 0x0C */ vec3_t unk_0C;               /* offset of the ball from that joint */
     /* 0x18 */ u8 unk_18;
     /* 0x19 */ u8 unk_19;
     /* 0x1A */ u8 unk_1A;
-    /* 0x1B */ u8 unk_1B[1];            /* indexed by gaLane_t.unk_B26 */
-} gaCharacterData_t;
+    /* 0x1B */ u8 unk_1B[5];            /* indexed by gaLane_t.unk_B26 */
+} gaCharacterData_t;                        /* size 0x20 */
+
+/* Per character (the last two empty): file indices, [0] and [1] the player's scene object's (func_80112350_gacode) */
+extern s16 D_80123A14_gacode[10][7];
+extern gaCharacterData_t D_80123AA0_gacode[10];   /* per character; unk_00 points to its row of D_80123A14_gacode */
 
 /* Character record (D_80123BE0_gacode), copied into gaPlayer_t. Name invented. */
 typedef struct {
@@ -189,13 +193,13 @@ typedef struct {
 
 /* Configuration of a stage (D_80123EB0_gacode); D_8012D220_gacode points to the current one. Name invented. */
 typedef struct {
-    /* 0x00 */ void *unk_00;
+    /* 0x00 */ objParams_t *unk_00;      /* the scene (func_8002A1EC); one object per player first */
     /* 0x04 */ f32 unk_04;
     /* 0x08 */ f32 unk_08;
     /* 0x0C */ f32 unk_0C;
     /* 0x10 */ f32 unk_10;
     /* 0x14 */ f32 unk_14;
-    /* 0x18 */ u16 unk_18;
+    /* 0x18 */ u16 unk_18;              /* archive index of the floor grid (D_80100100) */
     /* 0x1A */ u16 unk_1A;
     /* 0x1C */ s16 unk_1C;              /* sound id; -1: none */
     /* 0x1E */ s16 unk_1E[9];
@@ -301,6 +305,7 @@ extern u16 D_8012C8B6_gacode;          /* angle of func_8011A8AC_gacode's colour
 extern u8 D_8012C8B8_gacode;           /* channel order of func_8011A8AC_gacode's colour, mod 3 */
 extern gaStage_t D_80123EB0_gacode[];
 extern gaStage_t *D_8012D220_gacode;
+extern objClass_t D_80124050_gacode[12];   /* the classes of the game's scene */
 extern u8 D_8012D224_gacode;             /* nonzero: Z steers the rolling ball by the stick (func_801187D0_gacode) */
 extern u8 D_8012D225_gacode;            /* nonzero: B commits the throw early (func_8011840C_gacode) */
 

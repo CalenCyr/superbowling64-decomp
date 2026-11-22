@@ -5,16 +5,69 @@
 #include "input.h"
 #include "gacode/gacode.h"
 
+/*
+================
+func_80112350_gacode
+
+The overlay's init: stops the BGM, resets the teams' current players and the pause menu, enters the pause
+menu's state as the state to come back to, loads the stage's floor grid, places each player's character in
+the stage's scene and creates it, starts the stage's sound, sets up the lanes, clears the games won and the
+scores, sets up the game mode, takes two options from D_8009D098.unk_04 and starts the game's BGM.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: loop strength reduction only: retail's pointer walks &params[i].unk_08[4] (stores at -0x10,
+// -0xC, 0), the draft's walks &params[i] (8, 0xC, 0x18); statement order and a per-iteration params pointer
+// were tried
+void func_80112350_gacode( void ) {
+    s32 character;
+    s32 i;
+    objParams_t *params;
+
+    func_80037B18();
+    func_80037870( 0x36, 0 );
+    D_8012CDF8_gacode[0] = D_8012CDF8_gacode[1] = 0;
+    D_8012D220_gacode = &D_80123EB0_gacode[D_8005C163];
+    D_8012D650_gacode = 0;
+    D_8012D238_gacode = 0;
+    D_8012D239_gacode = 0;
+    D_8012CDF0_gacode = func_80112AF0_gacode;
+    func_80029AF4( D_8012D220_gacode->unk_18, (u8 *)&D_80100100 );
+    params = D_8012D220_gacode->unk_00;
+    for ( i = 0; i < D_8005C161; i++ ) {
+        character = D_8005C0E4[i] & 0xF;
+        params[i].unk_08[0] = D_80123A14_gacode[character][0];
+        params[i].unk_08[1] = D_80123A14_gacode[character][1];
+        params[i].unk_08[4] = D_80123AA0_gacode[character].unk_04;
+    }
+    func_8002A1EC( D_80124050_gacode, D_8012D220_gacode->unk_00 );
+    if ( D_8012D220_gacode->unk_1C >= 0 ) {
+        D_8012CDE8_gacode = func_80037870( D_8012D220_gacode->unk_1C, 0 );
+    } else {
+        D_8012CDE8_gacode = 0;
+    }
+    func_80114140_gacode( D_8005C162, D_8012D220_gacode->unk_04, ( D_8005C160 & 0xF ) == 3 );
+    func_80121E34_gacode();
+    for ( i = 0; i < 2; i++ ) {
+        D_800693DC[i] = 0;
+        D_8009D030[i][0] = D_8009D030[i][1] = D_8009D030[i][2] = 0;
+    }
+    func_801132B0_gacode();
+    D_8012D225_gacode = ( D_8009D098.unk_04 >> 9 ) & 1;
+    D_8012D224_gacode = ( D_8009D098.unk_04 >> 8 ) & 1;
+    func_800379C8( D_8012CE00_gacode );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80112350_gacode);
+#endif
 
 /*
 ================
 func_801125A0_gacode
 
 The overlay's frame: leaves once main has faded out after a request, requests leaving when the game mode
-is done or the pause menu quits, opens the pause menu on Start and, while C-up is held, func_80112E04_gacode's
-view (not in mode 2), runs the stage
-and the players, draws them, runs the main loop state (or, paused, the pause menu's state), and steps the
+is done or the pause menu quits, opens the pause menu on Start and, while C-up is held (not in mode 2),
+func_80112E04_gacode's view, runs the stage and the players, draws them, runs the main loop state (or, paused, the pause menu's state), and steps the
 blink of D_80123600_gacode between 0 and 0x80.
 ================
 */
