@@ -426,7 +426,90 @@ void func_8011F334_gacode( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots
     }
 }
 
+/*
+================
+func_8011F4CC_gacode
+
+Keeps a body's spot (and spot2, unless its unk_18 is 0) inside the floor grid and on the floor: a spot
+that sank under the floor is lifted back onto it (unless func_8011FD08_gacode handles the contact) and its
+fall turned into a damped bounce (motion flag 2). Returns 1 when the body lands with spot, 2 when it
+bounces with spot, else 0. Gravity (1.0889) is then applied.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: byte-exact, but only with the empty `else if` branch (R17): retail skips the in-air case with
+// `and` of the two booleans (spot2 in use, spot2 on the floor); `!( a && b ) && c`, a nested if and a named
+// flag all give `or` or a different body. The empty branch may stand for a compiled-out macro (debug print)
+s32 func_8011F4CC_gacode( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 ceiling, f32 arg4 ) {
+    vec3_t normal;
+    f32 floor;
+    f32 bottom2;
+    f32 bottom;
+    s32 handled;
+    s32 landed;
+
+    func_8012016C_gacode( spot, spot2, motion, ceiling );
+    floor = func_8011F87C_gacode( spot->pos[0], spot->pos[2], normal );
+    motion->flags &= ~0x40;
+    landed = 0;
+    if ( spot2->unk_18 != 0.0f && ( bottom2 = spot2->pos[1] - spot2->unk_18 ) < floor ) {
+        if ( !func_8011FD08_gacode( motion, spot2, normal ) ) {
+            spot->pos[1] += floor - bottom2;
+            spot2->pos[1] += floor - bottom2;
+        }
+        motion->vel[1] = -motion->vel[1] - motion->unk_30 * 0.7;
+        if ( motion->vel[1] <= 0.0f ) {
+            motion->vel[1] = 0.0f;
+        }
+        if ( spot2->pos[2] <= -1186.0f ) {
+            motion->vel[1] = 0.0f;
+        }
+        motion->flags |= 2;
+    } else if ( ( bottom = spot->pos[1] - spot->unk_18 ) < floor ) {
+        handled = func_8011FD08_gacode( motion, spot, normal );
+        if ( !handled ) {
+            spot->pos[1] += floor - bottom;
+            if ( spot2->unk_18 != 0.0f ) {
+                spot2->pos[1] += floor - bottom;
+            }
+        }
+        motion->vel[1] = -motion->vel[1] - motion->unk_30 * 0.7;
+        if ( motion->vel[1] <= 0.0f ) {
+            motion->vel[1] = 0.0f;
+            landed = 1;
+        } else {
+            landed = 2;
+        }
+        if ( spot->pos[2] <= -1186.0f ) {
+            motion->vel[1] = 0.0f;
+        }
+        if ( handled || ( ( motion->flags >> 4 ) & 1 ) || ( ( motion->flags >> 5 ) & 1 ) ) {
+            landed = 0;
+        }
+        motion->flags |= 2;
+    } else if ( spot2->unk_18 != 0.0f && bottom2 == floor ) {
+    } else if ( bottom != floor ) {
+        if ( ( motion->flags >> 4 ) & 1 ) {
+            spot->pos[1] += floor - bottom;
+            if ( spot2->unk_18 != 0.0f ) {
+                spot2->pos[1] += floor - bottom;
+            }
+            motion->vel[2] += normal[2] * 1.0889;
+        } else {
+            motion->flags &= ~0x10;
+            motion->flags &= ~0x20;
+            motion->flags &= ~2;
+        }
+    }
+    if ( ( motion->flags >> 1 ) & 1 ) {
+        motion->vel[1] += 1.0889;
+    }
+    motion->vel[1] -= 1.0889;
+    return landed;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011F4CC_gacode);
+#endif
 
 /*
 ================
