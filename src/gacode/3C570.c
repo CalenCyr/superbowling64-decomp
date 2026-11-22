@@ -134,7 +134,51 @@ void func_801132B0_gacode( void ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113384_gacode);
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113594_gacode);
+/*
+================
+func_80113594_gacode
+
+Starts a game mode: sets the main loop state and the mode's handler, picks the handler that starts a turn,
+and sets up each player on the lane of their team (with two players the second, with three or four players
+2 and up, on the second lane, when there are two teams); players without a controller get port -1.
+================
+*/
+void func_80113594_gacode( gaState_t state, gaPlayerFunc_t mode ) {
+    s32 player;
+    u8 team;
+    u8 lane;
+
+    D_8012CDFC_gacode = state;
+    D_8012CDF4_gacode = mode;
+    if ( mode == func_801157F8_gacode ) {
+        D_8012D23C_gacode = func_80115D38_gacode;
+    } else if ( mode == func_801155BC_gacode ) {
+        D_8012D23C_gacode = func_80115CDC_gacode;
+    } else if ( mode == func_801156D8_gacode ) {
+        D_8012D23C_gacode = func_80115D38_gacode;
+    } else if ( mode == func_8011582C_gacode ) {
+        D_8012D23C_gacode = func_80115CDC_gacode;
+    } else {
+        D_8012D23C_gacode = func_80115B9C_gacode;
+    }
+    for ( player = 0; player < D_8005C161; player++ ) {
+        /* team stays unset with one player (or more than four); D_8005C162 is then 0 */
+        switch ( D_8005C161 ) {
+        case 2:
+            team = player > 0;
+            break;
+        case 3:
+        case 4:
+            team = player >= 2;
+            break;
+        }
+        lane = D_8005C162 ? team : 0;
+        func_80114550_gacode( player, ( D_8005C0E4[player] >> 7 ) ? -1 : lane, D_8005C0E4[player] & 0xF, lane );
+    }
+    if ( !D_8005C162 ) {
+        func_80115054_gacode();
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_801136FC_gacode);
 

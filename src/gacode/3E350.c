@@ -103,7 +103,7 @@ func_80114550_gacode
 Sets up a player: its controller port (-1: played by the game), character and lane.
 ================
 */
-void func_80114550_gacode( s32 player, s8 port, u8 character, u8 lane ) {
+void func_80114550_gacode( s32 player, s32 port, u8 character, u8 lane ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
 
     pl->lane = &D_8012DCF0_gacode[lane];

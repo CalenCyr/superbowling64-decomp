@@ -326,6 +326,7 @@ typedef s32 (*gaState_t)( void );
 extern gaState_t D_8012CDF0_gacode;     /* current state */
 extern gaPlayerFunc_t D_8012CDF4_gacode;  /* game mode */
 extern gaPlayerFunc_t D_8012D23C_gacode;
+extern gaState_t D_8012CDFC_gacode;     /* main loop state of the game mode (func_80113594_gacode) */
 extern s16 D_8012CE00_gacode;          /* BGM of the game (func_800379C8) */
 extern s64 D_8012CDE8_gacode;           /* sound handle (func_80037870) */
 extern u8 D_8012CDF8_gacode[2];         /* per team: index in D_8012CE02_gacode of the current player */
@@ -351,7 +352,7 @@ s32 func_80114024_gacode( void );
 /* unit 3E350 */
 void func_80114130_gacode( void );
 void func_80114140_gacode( u8 arg0, f32 offset, u8 arg2 );
-void func_80114550_gacode( s32 player, s8 port, u8 character, u8 lane );
+void func_80114550_gacode( s32 player, s32 port, u8 character, u8 lane );
 void func_80114138_gacode( void );
 s32 func_80114640_gacode( s32 player );
 void func_80114898_gacode( s32 player, s32 port );
@@ -374,6 +375,8 @@ s32 func_801155BC_gacode( s32 player );
 s32 func_801151A0_gacode( s32 player );
 s32 func_8011582C_gacode( s32 player );
 s32 func_801156D8_gacode( s32 player );
+void func_80115054_gacode( void );
+s32 func_80115B9C_gacode( s32 player );
 void func_80116248_gacode( s32 player );
 void func_80116398_gacode( s32 player );
 void func_801163A0_gacode( s32 player );
