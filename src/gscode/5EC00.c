@@ -40,7 +40,8 @@ Returns 1 once every team is done, 2 when backed out, else 0.
 // NON_MATCHING: complete, same instructions and branches; registers only: retail keeps `character` in s1 and `pad`
 // in s0 in the team loop and `character` in s4 in the model and bar loops (the draft: s0, s1, s0), and allocates the
 // model loop's pointers s0/s1/s3 differently; relocation addends to D_8005C0E5-7, D_8005C0D4, D_8011FABB are splat's
-// names for D_8005C0E4[] and D_8011FA80_gscode[5].slide
+// names for D_8005C0E4[] and D_8011FA80_gscode[5].slide. Permuter (target-only scoring, 5 min at -O3):
+// nothing below the base score 1355.
 s32 func_80118040_gscode( void ) {
     u8 slots[2][4];         /* per team: its players in turn order; 0xFF: none */
     u8 shown[4];            /* per player: has taken, or is taking, a character */

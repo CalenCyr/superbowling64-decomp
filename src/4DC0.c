@@ -60,7 +60,9 @@ Reads file index of the str segment into dst, decompressing it if it is stored c
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: register/schedule; retail keeps the addresses of D_800A30C0's fields in registers (hoisting
-// &D_800A30C0[index].romOffset out of the loop) where this draft addresses them with %hi/%lo each time
+// &D_800A30C0[index].romOffset out of the loop) where this draft addresses them with %hi/%lo each time; an
+// ArchiveEntry *entry local is worse. Permuter (target-only scoring, 5 min): best 2560 from 3030 only through noise
+// (a pointer temporary for D_800A30C0 after the last DMA), no source clue.
 u32 func_80029AF4( s32 index, u8 *dst ) {
     u8 *out;
     s32 compressed;

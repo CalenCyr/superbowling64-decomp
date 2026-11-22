@@ -58,7 +58,9 @@ on the left of the first row, the exit on the right of the last.
 #ifdef NON_MATCHING
 // NON_MATCHING: calls, CFG, constants and the frame match; registers differ only in the inner loops: retail keeps
 // the inner counter j (and the first cell of a wall) in a1 and the walking pointer or bound in a0, this draft swaps
-// them (declaration order of the locals tried, no effect).
+// them (declaration order of the locals tried, no effect; a stride = height * 2 + 1 local is much worse).
+// Permuter clue (target-only scoring, best 325 from 415): reusing a u32 local for height * 2 in the two final
+// stores (maze[row + 1], ... * (row + 1)) moves allocation toward retail; the inner-loop a0/a1 swap remains.
 void func_80038214( u32 width, u32 height, u8 *maze ) {
     s32 i;
     s32 j;
@@ -346,6 +348,8 @@ frame's box, the image of each roll played, and the frame's score.
 // NON_MATCHING: calls, CFG, constants and stack match; registers differ: retail gives rowY s4 (frame s5, arg4 s6)
 // and roll v0 (so its bne delay slots are not likely-branches). Tried: rowY as s32 (worse), y itself as the cursor
 // (same), roll by ternary/if (block 1 needs the if), foul as an s32 local (needed for retail's andi).
+// Permuter (target-only scoring, 7 min): best 615 from 865 only through noise (a u16 temporary for the third
+// roll, a duplicated if/else), no source clue.
 void func_80038DD4( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;
@@ -546,7 +550,8 @@ of them when all is set.
 #ifdef NON_MATCHING
 // NON_MATCHING: calls, CFG, constants and stack match; only the team plates' registers differ: retail gives the
 // computer flag s0, player * 2 s5 and the icons s6 (this draft s6, s0, s5). Declaration order and spellings of
-// player (ternary, if/else, u8) don't change it.
+// player (ternary, if/else, u8) don't change it. Permuter (target-only scoring, 8 min): nothing below the base
+// score 100.
 void func_80039700( u8 mode, u8 all, s16 x, s16 y ) {
     s32 i;
     s32 frame;
@@ -757,7 +762,9 @@ ten frames.
 // NON_MATCHING: written like func_8003A3F0 (inline headers, y += 9, a plate cursor frameX = x); calls, CFG and
 // constants match; registers differ: retail keeps x in s7 and computes the headers' x + 0x38 from a1 before the
 // copy, and y + 9 goes to a fresh register (s0, then copied to s5) instead of updating y's. A s16 frameY = y + 9
-// is further off; the permuter (8 min) found only a u8 temporary for D_8005C0E4[player], not adopted.
+// is further off, as are an s32 frameY and passing y + 9 to each call. Permuter clue (target-only scoring, best
+// 150 from 310): the frame calls read a copy of y taken after y += 9, while the plate reads y itself, so retail's
+// plate argument and the frames' y are likely two pseudos; no natural spelling of that found yet.
 void func_8003A658( s32 player, s32 x, s32 y ) {
     s32 i;
     s16 frameX;
