@@ -1366,7 +1366,50 @@ s32 func_80118F38_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80118F68_gacode);
 
+/*
+================
+func_8011917C_gacode
+
+Draws a player's score panel on the lane's side: the name, the row of three frames ending at the current
+one (from the scores of the lane's team player in a team game), and the games won.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: register residue only: retail loads D_8009D19C[scorer] for first into a1, mine into v1; if/else, ternary, a u8 or s32 frame local, s32 first and an inline helper were compiled, all the same
+void func_8011917C_gacode( s32 player, u8 lane ) {
+    s32 x;
+    s16 y;
+    s32 scorer;
+    u8 first;
+    s32 i;
+
+    x = 0xAC;
+    if ( lane == 0 ) {
+        x = 0x18;
+    }
+    func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x19 );
+    x += 0x38;
+    y = 0x10;
+    if ( ( D_8005C160 >> 6 ) == 1 ) {
+        scorer = player >= 2;
+    } else {
+        scorer = player;
+    }
+    first = D_8009D19C[scorer] < 2 ? 0 : D_8009D19C[scorer] - 2;
+    func_80038C1C( 3, first, x, y );
+    for ( i = 0; i < 3; i++ ) {
+        func_80038DD4( scorer, first + i, D_8009D19C[scorer], D_80068A50[scorer], D_800994BE[scorer], x, y + 9 );
+        x += 0x14;
+    }
+    x = 0xAC;
+    if ( lane == 0 ) {
+        x = 0x78;
+    }
+    func_8003A8B4( player, D_800693DC[player], 0, x, y + 0x20 );
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011917C_gacode);
+#endif
 
 /*
 ================
@@ -1575,7 +1618,50 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119DD8_gacode);
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119F8C_gacode);
 
+/*
+================
+func_8011A26C_gacode
+
+Draws both players' distance panels: for each lane side the frame, the player's name, and the distance of
+the lane's unk_A68[2] body from 730 units, in four digits.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: calls, constants and CFG match; registers differ: retail holds the digits' y (0x69) in s0 after x and adds 4 with ori (y set before the abs if/else, not folded), hoists the name's 0x69 into s6, and gives i, i * 0xA0, i * 0xC s3-s5; a y = 0x69 in both arms of the if/else gets closest, which is not natural source
+void func_8011A26C_gacode( void ) {
+    gaPlayer_t *pl;
+    s16 digits[4];
+    s32 i;
+    s16 x;
+    s16 frameX;
+    s16 y;
+    s16 value;
+    f32 distance;
+
+    for ( i = 0; i < 2; i++ ) {
+        x = i != 0 ? 0xB8 : 0x28;
+        frameX = x + 0x38;
+        pl = &D_8012D658_gacode[i];
+        func_8002DF3C( 0x9DF, frameX, 0x60 );
+        func_800389D0( i, D_8005C0E4[i] >> 7, D_80068218[i].chars, x, 0x69 );
+        func_8002DF3C( 0x86B, frameX, 0x69 );
+        distance = 730.0f - pl->lane->unk_A68[2].pos[2];
+        y = 0x69;
+        if ( distance < 0.0f ) {
+            value = 0.0f - distance;
+        } else {
+            value = distance;
+        }
+        func_80039554( digits, value, 1, 0 );
+        func_8003B1CC( digits[0], frameX + 5, y + 4 );
+        func_8003B1CC( digits[1], frameX + 0xD, y + 4 );
+        func_8003B1CC( digits[2], frameX + 0x15, y + 4 );
+        func_8003B1CC( digits[3], frameX + 0x1D, y + 4 );
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A26C_gacode);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A404_gacode);
 
