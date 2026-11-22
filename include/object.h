@@ -38,7 +38,7 @@ extern s32 D_800A2FDC;              /* TRUE when the records ended with OBJ_PARA
 extern s32 D_80099480;              /* cameras in D_8009CFA0 */
 extern s32 D_800EA0C0;
 extern s32 D_800F7BF8;              /* frames each update advances; 1 at start */
-extern u8 D_800F30E0[0x8000];       /* func_8002A7EC reads a host file here */
+extern u8 D_800F30E0[0x4B00];       /* func_8002A7EC reads a host file here (D_800F7BE0 follows) */
 
 /* Model commands func_8002B380 converts: the opcode byte, then its arguments. */
 #define MDLCMD_END          0           /* end of the list */
