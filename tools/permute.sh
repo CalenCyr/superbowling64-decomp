@@ -53,17 +53,19 @@ opt=$(make -n --no-print-directory "build/src/$unit.o" -W "$c_file" 2>/dev/null 
 [ -n "$opt" ] || { echo "could not read the unit's -O level from the Makefile" >&2; exit 1; }
 
 mkdir -p nonmatchings
-settings=nonmatchings/.settings-$func.toml
+settings=nonmatchings/.settings-$func-$$.toml
 cat > "$settings" <<EOF
 compiler_type = "gcc"
 compiler_command = "env COMPILER_PATH=tools/gcc_2.7.2 tools/gcc_2.7.2/gcc -Btools/gcc_2.7.2/ -c -G0 -mips3 -mgp32 -mfp32 -O2 $opt -nostdinc -I include -I src -I lib/ultralib/include"
 assembler_command = "mips64-linux-gnu-as -EB -march=vr4300 -mabi=32 -G0 -I include"
 EOF
 
-before=$(find nonmatchings -mindepth 1 -maxdepth 1 -type d | sort)
-"$py" "$permuter/import.py" --no-prune --settings "$settings" "$c_file" "$asm_file"
+# Take the work directory from import.py's own "Imported into <dir>" line: a listing diff picks the wrong one when
+# two imports run at the same time.
+out=$("$py" "$permuter/import.py" --no-prune --settings "$settings" "$c_file" "$asm_file")
 rm -f "$settings"
-dir=$(comm -13 <(echo "$before") <(find nonmatchings -mindepth 1 -maxdepth 1 -type d | sort) | head -1)
+echo "$out"
+dir=$(printf '%s\n' "$out" | sed -n 's/.*Imported into \(nonmatchings\/[^ ]*\).*/\1/p' | tail -1)
 [ -n "$dir" ] || { echo "import made no directory" >&2; exit 1; }
 
 # With --no-prune the candidate object holds the whole unit, and the default objdump scores all of its .text
