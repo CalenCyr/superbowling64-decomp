@@ -260,6 +260,7 @@ extern u16 D_8012C848_gacode[8];       /* image ids, by D_8005C163 */
 extern u16 D_8012C858_gacode[NUM_PINS][2];  /* x and y of each pin in the pin panel (func_80119DD8_gacode) */
 extern u8 D_8012D238_gacode;           /* current frame of the par game (0 to 9; par in D_80099458[0][]) */
 extern f32 D_8012C764_gacode[2];       /* per lane: angle of func_8011C158_gacode's camera */
+extern vec3_t D_8012C76C_gacode[2];    /* per lane: position of func_8011BD34_gacode's camera (x and z) */
 extern u8 D_8012C7C8_gacode;           /* func_8011C57C_gacode's camera has started (func_801150B4_gacode) */
 extern u16 D_8012C8BC_gacode[5];       /* path files of func_8011C254_gacode's camera, late in the throw */
 extern u16 D_8012C8C8_gacode[5];       /* path files of func_8011C254_gacode's camera */
@@ -419,6 +420,7 @@ s32 func_8011C658_gacode( gaPlayer_t *pl, s32 player );
 void func_8011B490_gacode( s32 lane );
 void func_8011C57C_gacode( s32 player, gaCamera_t *camera );
 void func_8011CEE4_gacode( gaPlayer_t *pl, s32 player );
+void func_8011C93C_gacode( gaPlayer_t *pl, s32 player );
 
 /* unit 474E0 */
 void func_8011D2C0_gacode( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale );

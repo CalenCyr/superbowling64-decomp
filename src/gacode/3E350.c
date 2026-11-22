@@ -1300,7 +1300,6 @@ inline s32 func_80116FF0_gacode( s32 lane, s8 port, f32 x, u8 step ) {
             D_8012D228_gacode[lane].unk_06 = step;
             return 1;
         }
-        return 0;
     }
     return 0;
 }
@@ -2687,7 +2686,44 @@ void func_8011BCA8_gacode( s32 player, gaCamera_t *camera ) {
     camera->unk_18[1] = 512.0f;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011BD34_gacode);
+/*
+================
+func_8011BD34_gacode
+
+An unk_B0C handler: a free camera. The stick turns the lane's D_8012C764_gacode angle, or with Z held
+moves D_8012C76C_gacode sideways; stick y moves it along the angle. D_8012C76C_gacode stays within -50 to 50
+across and -1000 to 0 along the lane, and the eye looks 1024 out along the angle.
+================
+*/
+void func_8011BD34_gacode( s32 player, gaCamera_t *camera ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    f32 angle = D_8012C764_gacode[pl->laneIndex] + M_PI;
+    f32 speed;
+
+    if ( D_800E57E4[pl->laneIndex] & Z_TRIG ) {
+        speed = D_800692D0[pl->laneIndex] / 16.0f;
+        D_8012C76C_gacode[pl->laneIndex][2] -= speed * sinf( -angle );
+        D_8012C76C_gacode[pl->laneIndex][0] -= speed * cosf( -angle );
+    } else {
+        D_8012C764_gacode[pl->laneIndex] -= D_800692D0[pl->laneIndex] * 0.01 * ( M_PI / 180.0 );
+    }
+    speed = D_800A2FD8[pl->laneIndex] / 8.0f;
+    D_8012C76C_gacode[pl->laneIndex][2] += speed * cosf( angle );
+    D_8012C76C_gacode[pl->laneIndex][0] += speed * sinf( angle );
+    D_8012C76C_gacode[pl->laneIndex][2] = D_8012C76C_gacode[pl->laneIndex][2] < -1000.0f ? -1000.0f
+        : ( D_8012C76C_gacode[pl->laneIndex][2] > 0.0f ? 0.0f : D_8012C76C_gacode[pl->laneIndex][2] );
+    D_8012C76C_gacode[pl->laneIndex][0] = D_8012C76C_gacode[pl->laneIndex][0] < -50.0f ? -50.0f
+        : ( D_8012C76C_gacode[pl->laneIndex][0] > 50.0f ? 50.0f : D_8012C76C_gacode[pl->laneIndex][0] );
+    camera->eye[2] = D_8012C76C_gacode[pl->laneIndex][2] + 730.0f;
+    camera->eye[0] = pl->lane->unk_B14 + D_8012C76C_gacode[pl->laneIndex][0];
+    camera->eye[1] = 150.0f;
+    camera->at[2] = camera->eye[2] + cosf( angle ) * 1024.0f;
+    camera->at[0] = camera->eye[0] + sinf( angle ) * 1024.0f;
+    camera->at[1] = 20.0f;
+    camera->unk_18[2] = camera->eye[2];
+    camera->unk_18[0] = camera->eye[0];
+    camera->unk_18[1] = 512.0f;
+}
 
 /*
 ================
@@ -2823,7 +2859,70 @@ An unk_B0C handler that leaves the camera as it is.
 void func_8011C650_gacode( s32 player, gaCamera_t *camera ) {
 }
 
+/*
+================
+func_8011C658_gacode
+
+Input of a player the game plays, by the lane's unk_B10 step: sets the player up first, then moves the
+character's unk_14 and unk_20 towards unk_98 and unk_9C, and presses after unk_2C (doubled in
+func_80118014_gacode) frames or when the animation reaches the character's frame.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: retail keeps the func_80117D20_gacode block's unk_B20 test apart (here cross-jumped into the
+// func_80117BDC_gacode block's) and tests the func_8011840C_gacode frame with branches (here xor/sltiu)
+s32 func_8011C658_gacode( gaPlayer_t *pl, s32 player ) {
+    s16 wait = pl->character.unk_2C;
+    s16 longWait = wait * 2;
+    s32 steps;
+
+    steps = ( D_8005C160 & 0xF ) == 3 ? 20 : 25;
+    if ( pl->lane->unk_B10 == func_80117AE0_gacode ) {
+        if ( ( ( D_8005C160 >> 4 ) & 3 ) == 2 && D_8005C163 == 0 && ( D_8005C0E4[player] & 0xF ) == 0 ) {
+            func_8011CEE4_gacode( pl, player );
+        } else {
+            func_8011C93C_gacode( pl, player );
+        }
+        return 0;
+    } else if ( pl->lane->unk_B10 == func_80117BDC_gacode ) {
+        if ( FABS( pl->character.unk_14[0] ) >= FABS( pl->unk_98 ) ) {
+            pl->character.unk_14[0] = pl->unk_98;
+            if ( pl->lane->unk_B20++ < wait ) {
+                return 0;
+            }
+            pl->lane->unk_B20 = 0;
+            return 1;
+        } else {
+            pl->character.unk_14[0] += pl->unk_98 / steps;
+        }
+    } else if ( pl->lane->unk_B10 == func_80117D20_gacode ) {
+        if ( FABS( pl->character.unk_20[0] ) >= FABS( pl->unk_9C ) ) {
+            pl->character.unk_20[0] = pl->unk_9C;
+            if ( pl->lane->unk_B20++ < wait ) {
+                return 0;
+            }
+            pl->lane->unk_B20 = 0;
+            return 1;
+        } else {
+            pl->character.unk_20[0] += pl->unk_9C / steps;
+        }
+    } else if ( pl->lane->unk_B10 == func_80118014_gacode ) {
+        if ( pl->lane->unk_B20++ < longWait ) {
+            return 0;
+        }
+        pl->lane->unk_B20 = 0;
+        return 1;
+    } else if ( pl->lane->unk_B10 == func_8011840C_gacode ) {
+        if ( pl->obj->frame == pl->character.unk_00->unk_19 ) {
+            return 1;
+        }
+        return 0;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C658_gacode);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C93C_gacode);
 
