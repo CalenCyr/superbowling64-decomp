@@ -471,6 +471,7 @@ s32 func_8011DB54_gacode( gaSpot_t *spot, vec3_t from, vec3_t to, f32 radius );
 f32 func_8011DCB8_gacode( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal );
 void func_8011E014_gacode( gaMotion_t *a, gaMotion_t *b, gaSpot_t *sa, gaSpot_t *sb );
 f32 func_8011E12C_gacode( gaMotion_t **out, gaMotion_t **in, gaSpot_t **spots );
+s32 func_8011E504_gacode( u8 kind, gaMotion_t *motion, gaBody_t *body, u8 flags );
 f32 func_8011D5B8_gacode( vec3_t a, vec3_t b );
 void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b );
 s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit );

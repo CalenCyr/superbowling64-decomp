@@ -402,7 +402,34 @@ f32 func_8011E12C_gacode( gaMotion_t **out, gaMotion_t **in, gaSpot_t **spots ) 
     return restitution;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011E504_gacode);
+/*
+================
+func_8011E504_gacode
+
+For a body with rot[0] 0 that moves at speed 1 or more: by kind 0 or 1 sets its spin about x, heads it along
+its velocity (func_8011D7CC_gacode), moves unk_5D from 1 (still standing) to 2, and plays sound 0x32 (0x4B with
+flags bit 1) on the lane of flags bit 0; returns 1. Otherwise returns 0.
+================
+*/
+s32 func_8011E504_gacode( u8 kind, gaMotion_t *motion, gaBody_t *body, u8 flags ) {
+    if ( body->rot[0] == 0.0f && func_8011D3D4_gacode( motion->vel ) >= 1.0 ) {
+        switch ( kind ) {
+        case 0:
+            motion->spin[0] = 1.5f;
+            break;
+        case 1:
+            motion->spin[0] = -2.0f;
+            break;
+        }
+        func_8011D7CC_gacode( motion->vel, body );
+        if ( body->unk_5D == 1 ) {
+            body->unk_5D = 2;
+        }
+        func_80120D30_gacode( flags & 1, flags & 2 ? 0x4B : 0x32 );
+        return 1;
+    }
+    return 0;
+}
 
 /*
 ================
