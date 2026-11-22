@@ -15,11 +15,6 @@ the stage's scene and creates it, starts the stage's sound, sets up the lanes, c
 scores, sets up the game mode, takes two options from D_8009D098.unk_04 and starts the game's BGM.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: loop strength reduction only: retail's pointer walks &params[i].unk_08[4] (stores at -0x10,
-// -0xC, 0), the draft's walks &params[i] (8, 0xC, 0x18); statement order and a per-iteration params pointer
-// were tried. The permuter's best (175 against 245, 4k iterations) only reads D_8005C161 into a u8 local before
-// the loop; the pointer base stays
 void func_80112350_gacode( void ) {
     s32 character;
     s32 i;
@@ -35,11 +30,11 @@ void func_80112350_gacode( void ) {
     D_8012CDF0_gacode = func_80112AF0_gacode;
     func_80029AF4( D_8012D220_gacode->unk_18, (u8 *)&D_80100100 );
     params = D_8012D220_gacode->unk_00;
-    for ( i = 0; i < D_8005C161; i++ ) {
+    for ( i = 0; i < D_8005C161; i++, params++ ) {
         character = D_8005C0E4[i] & 0xF;
-        params[i].unk_08[0] = D_80123A14_gacode[character][0];
-        params[i].unk_08[1] = D_80123A14_gacode[character][1];
-        params[i].unk_08[4] = D_80123AA0_gacode[character].unk_04;
+        params->unk_08[0] = D_80123A14_gacode[character][0];
+        params->unk_08[1] = D_80123A14_gacode[character][1];
+        params->unk_08[4] = D_80123AA0_gacode[character].unk_04;
     }
     func_8002A1EC( D_80124050_gacode, D_8012D220_gacode->unk_00 );
     if ( D_8012D220_gacode->unk_1C >= 0 ) {
@@ -58,9 +53,6 @@ void func_80112350_gacode( void ) {
     D_8012D224_gacode = ( D_8009D098.unk_04 >> 8 ) & 1;
     func_800379C8( D_8012CE00_gacode );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80112350_gacode);
-#endif
 
 /*
 ================
