@@ -243,6 +243,13 @@ typedef s32 (*gaPlayerFunc_t)( s32 player );
 
 extern u8 D_80123601_gacode;
 extern u8 D_8012C900_gacode[2][NUM_PINS];  /* per side: the pins (1 to 10) from the back row forward (func_801203AC_gacode) */
+/* By 2 to 6 standing pins (head pin down): a count, then that many sorted masks of the standing pins
+   (bit 10 - n for pin n), the leaves func_801206E0_gacode accepts */
+extern u16 D_801236C0_gacode[1 + 23];
+extern u16 D_801236F0_gacode[1 + 42];
+extern u16 D_80123748_gacode[1 + 57];
+extern u16 D_801237BC_gacode[1 + 23];
+extern u16 D_801237EC_gacode[1 + 1];
 extern s32 D_8012C920_gacode;
 extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];

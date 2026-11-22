@@ -367,9 +367,10 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801205A0_gacode);
 func_80120680_gacode
 
 Binary search of the count sorted entries of table for key; its index, or -1.
+Declared inline: func_801206E0_gacode expands it.
 ================
 */
-s32 func_80120680_gacode( u16 key, s32 count, u16 *table ) {
+inline s32 func_80120680_gacode( u16 key, s32 count, u16 *table ) {
     s32 lo = 0;
     s32 hi = count - 1;
     s32 mid;
@@ -388,7 +389,58 @@ s32 func_80120680_gacode( u16 key, s32 count, u16 *table ) {
     return -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801206E0_gacode);
+/*
+================
+func_801206E0_gacode
+
+1 when the head pin is down and the mask of the standing pins is one of the leaves listed for their
+number (2 to 6, tables D_801236C0_gacode to D_801237EC_gacode); else 0.
+================
+*/
+u8 func_801206E0_gacode( gaLane_t *lane ) {
+    u8 listed = 0;
+    s32 mask = 0;
+    s32 numStanding = 0;
+    s32 i;
+
+    if ( lane->bodies[1].unk_5D == 1 ) {
+        return 0;
+    }
+    for ( i = 2; i < NUM_BODIES; i++ ) {
+        if ( lane->bodies[i].unk_5D == 1 ) {
+            mask |= lane->bodies[i].unk_5D << ( 10 - i );
+            numStanding++;
+        }
+    }
+    switch ( numStanding ) {
+    case 2:
+        if ( func_80120680_gacode( mask, D_801236C0_gacode[0], &D_801236C0_gacode[1] ) >= 0 ) {
+            listed = 1;
+        }
+        break;
+    case 3:
+        if ( func_80120680_gacode( mask, D_801236F0_gacode[0], &D_801236F0_gacode[1] ) >= 0 ) {
+            listed = 1;
+        }
+        break;
+    case 4:
+        if ( func_80120680_gacode( mask, D_80123748_gacode[0], &D_80123748_gacode[1] ) >= 0 ) {
+            listed = 1;
+        }
+        break;
+    case 5:
+        if ( func_80120680_gacode( mask, D_801237BC_gacode[0], &D_801237BC_gacode[1] ) >= 0 ) {
+            listed = 1;
+        }
+        break;
+    case 6:
+        if ( func_80120680_gacode( mask, D_801237EC_gacode[0], &D_801237EC_gacode[1] ) >= 0 ) {
+            listed = 1;
+        }
+        break;
+    }
+    return listed;
+}
 
 /*
 ================
