@@ -455,7 +455,159 @@ void func_8002E0EC( u16 id, s16 x, s16 y ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/7250", func_8002E4B0);
+/*
+================
+func_8002E4B0
+
+Draws image id at (x, y) scaled by (scaleX, scaleY), in one-cycle mode with its alpha multiplied by alpha:
+loads its palette, then draws it in strips of whole rows that fit texture memory, as func_8002CE24 does.
+Any type other than IMAGE_CI4 draws as IMAGE_CI8 (without loading a palette, and with the strip sizes unset).
+The strips' screen positions are scaled in floating point and truncated to whole pixels.
+================
+*/
+void func_8002E4B0( u16 id, s16 x, s16 y, u8 alpha, f32 scaleX, f32 scaleY ) {
+    fileImage_t *image;
+    s32 type;
+    s32 width;
+    s32 height;
+    u8 *data;
+    s32 texels;         /* pixels in texture memory */
+    s32 pad;
+    s32 i;
+    s32 strip;
+    s32 stripWidth;
+    s32 restWidth;
+    s32 remaining;
+    s32 rows;
+    s32 offset;
+
+    if ( D_8005C190 != DRAW2D_1CYCLE ) {
+        D_8005C190 = DRAW2D_1CYCLE;
+        gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+        gDPSetRenderMode( D_800F8094++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
+        gDPSetCombineLERP( D_800F8094++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, TEXEL0, TEXEL0, 0,
+                           PRIMITIVE, 0 );
+        gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
+    }
+    gDPSetTextureFilter( D_800F8094++, G_TF_POINT );
+    gDPSetPrimColor( D_800F8094++, 0, 0, 0xFF, 0xFF, 0xFF, alpha );
+    if ( D_800F80B0[id].refCount == 0 ) {
+        func_80030C04( id, FILE_RAW );
+    }
+    image = D_800F80B0[id].data;
+    type = image->type;
+    width = image->width;
+    height = image->height;
+    data = image->data;
+    offset = 0;
+    switch ( type ) {
+    case IMAGE_CI4:
+        texels = 0x1000;
+        pad = width % 16;
+        gDPLoadTLUT_pal16( D_800F8094++, 0, data );
+        offset = CI4_PALETTE_SIZE / sizeof( u16 );
+        break;
+    case IMAGE_CI8:
+        texels = 0x800;
+        pad = width % 8;
+        gDPLoadTLUT_pal256( D_800F8094++, data );
+        offset = CI8_PALETTE_SIZE / sizeof( u16 );
+        break;
+    }
+    /* the original's bug: any other type leaves texels and pad unset */
+    for ( i = 1; i < 10; i++ ) {
+        if ( ( 1 << i ) > width + pad ) {
+            break;
+        }
+    }
+    stripWidth = 1 << ( i - 1 );
+    if ( width + pad == stripWidth ) {
+        restWidth = 0;
+    } else {
+        for ( i = 1; i < 10; i++ ) {
+            if ( ( 1 << i ) >= width + pad - stripWidth ) {
+                break;
+            }
+        }
+        restWidth = 1 << i;
+    }
+    if ( type == IMAGE_CI4 ) {
+        for ( remaining = height, strip = 0; remaining > 0; strip++ ) {
+            rows = texels / stripWidth;
+            if ( remaining < rows ) {
+                rows = remaining;
+                remaining = 0;
+            } else {
+                remaining -= rows;
+            }
+            gDPLoadTextureBlock_4b( D_800F8094++, (u16 *)data + offset, G_IM_FMT_CI, stripWidth, rows, 0,
+                                    G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD );
+            offset += rows * stripWidth / 4;
+            /* the original's bug: the top edge is scaled by scaleX */
+            gSPScisTextureRectangle( D_800F8094++, x << 2, (s16)( y + scaleX * strip * texels / stripWidth ) << 2,
+                                     (s16)( x + scaleX * stripWidth ) << 2,
+                                     (s16)( y + scaleY * strip * texels / stripWidth + scaleY * rows ) << 2,
+                                     G_TX_RENDERTILE, 0, 0, 1024.0f / scaleX, 1024.0f / scaleY );
+        }
+        if ( restWidth != 0 ) {
+            for ( remaining = height, strip = 0; remaining > 0; strip++ ) {
+                rows = texels / restWidth;
+                if ( remaining < rows ) {
+                    rows = remaining;
+                    remaining = 0;
+                } else {
+                    remaining -= rows;
+                }
+                gDPLoadTextureBlock_4b( D_800F8094++, (u16 *)data + offset, G_IM_FMT_CI, restWidth, rows, 0,
+                                        G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD );
+                offset += rows * restWidth / 4;
+                gSPScisTextureRectangle( D_800F8094++, (s16)( x + scaleX * stripWidth ) << 2,
+                                         (s16)( y + scaleY * strip * texels / restWidth ) << 2,
+                                         (s16)( x + scaleX * ( stripWidth + restWidth ) ) << 2,
+                                         (s16)( y + scaleY * ( strip * texels / restWidth + rows ) ) << 2, G_TX_RENDERTILE,
+                                         0, 0, 1024.0f / scaleX, 1024.0f / scaleY );
+            }
+        }
+    } else {
+        for ( remaining = height, strip = 0; remaining > 0; strip++ ) {
+            rows = texels / stripWidth;
+            if ( remaining < rows ) {
+                rows = remaining;
+                remaining = 0;
+            } else {
+                remaining -= rows;
+            }
+            gDPLoadTextureBlock( D_800F8094++, (u16 *)data + offset, G_IM_FMT_CI, G_IM_SIZ_8b, stripWidth, rows,
+                                 0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD );
+            offset += rows * stripWidth / 2;
+            gSPScisTextureRectangle( D_800F8094++, x << 2, (s16)( y + scaleY * strip * texels / stripWidth ) << 2,
+                                     (s16)( x + scaleX * stripWidth ) << 2,
+                                     (s16)( y + scaleY * ( strip * texels / stripWidth + rows ) ) << 2, G_TX_RENDERTILE,
+                                     0, 0, 1024.0f / scaleX, 1024.0f / scaleY );
+        }
+        if ( restWidth != 0 ) {
+            for ( remaining = height, strip = 0; remaining > 0; strip++ ) {
+                rows = texels / restWidth;
+                if ( remaining < rows ) {
+                    rows = remaining;
+                    remaining = 0;
+                } else {
+                    remaining -= rows;
+                }
+                gDPLoadTextureBlock( D_800F8094++, (u16 *)data + offset, G_IM_FMT_CI, G_IM_SIZ_8b, restWidth,
+                                     rows, 0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                                     G_TX_NOLOD );
+                offset += rows * restWidth / 2;
+                gSPScisTextureRectangle( D_800F8094++, (s16)( x + scaleX * stripWidth ) << 2,
+                                         (s16)( y + scaleY * strip * texels / restWidth ) << 2,
+                                         (s16)( x + scaleX * ( stripWidth + restWidth ) ) << 2,
+                                         (s16)( y + scaleY * ( strip * texels / restWidth + rows ) ) << 2, G_TX_RENDERTILE,
+                                         0, 0, 1024.0f / scaleX, 1024.0f / scaleY );
+            }
+        }
+    }
+    gDPPipeSync( D_800F8094++ );
+}
 
 /*
 ================
