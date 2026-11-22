@@ -241,6 +241,7 @@ extern s32 D_8012C924_gacode;          /* frame counter */
 extern f32 D_8012C158_gacode[];
 extern f32 D_80123850_gacode[][4];     /* unk_98, unk_9C, unk_2C, unk_30 of a player, by D_800DF59C.unk_04[] */
 extern s16 D_8012C784_gacode[];
+extern s16 D_8012C7CC_gacode[];      /* sound ids, by D_800A304C[] up to 10 (func_8011582C_gacode) */
 /* by score against par; TODO identity: scores below par read before the label, so the table likely starts
    earlier */
 extern s16 D_8012C7E6_gacode[];
@@ -418,6 +419,7 @@ void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b );
 s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit );
 f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale );
 s32 func_80120680_gacode( u16 key, s32 count, u16 *table );
+s32 func_801206E0_gacode( gaLane_t *lane );
 void func_80120980_gacode( u8 *pins, u16 mask );
 void func_801209C0_gacode( u8 *order, u8 count, u8 first );
 void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, u16 first, u16 last );

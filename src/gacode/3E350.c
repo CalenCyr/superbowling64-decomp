@@ -448,7 +448,66 @@ s32 func_801157F8_gacode( s32 player ) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011582C_gacode);
+/*
+================
+func_8011582C_gacode
+
+A game mode. When the throw ends the frame (unk_B23 is 10): after a func_80116398_gacode turn plays the sound
+for the player's run D_800A304C, adds to the other player's D_8012D228_gacode unk_04 and counts the run on;
+otherwise scores by D_80068A50 and D_80099458 and ends the run. Else scores the throw by func_801206E0_gacode.
+Returns 0.
+================
+*/
+s32 func_8011582C_gacode( s32 player ) {
+    gaPlayer_t *pl = &D_8012D658_gacode[player];
+    s32 other = player == 0;
+    u8 run;
+    u8 result;
+
+    if ( ( pl->lane->unk_B24 = pl->lane->unk_B23 == 10 ) ) {
+        if ( pl->lane->unk_B04 == func_80116398_gacode ) {
+            run = D_800A304C[player];
+            if ( run > 10 ) {
+                run = 10;
+            }
+            func_80120D30_gacode( pl->laneIndex, D_8012C7CC_gacode[run] );
+            pl->lane->unk_B25 = run < 10 ? run + 6 : 0;
+            D_8012D228_gacode[other].unk_04 += 25 + D_800A304C[player] * 10;
+            if ( D_800A304C[player] < 255 ) {
+                D_800A304C[player]++;
+            }
+        } else {
+            if ( D_80068A50[player] == 1 ) {
+                func_80120D30_gacode( pl->laneIndex, D_80099458[player][0] ? 0x7E : 0x5A );
+                pl->lane->unk_B25 = D_80099458[player][0] ? 5 : 1;
+                D_8012D228_gacode[other].unk_04 += D_80099458[player][0] ? 30 : 0;
+                D_8012D228_gacode[player].unk_04 -= 15;
+            } else {
+                D_8012D228_gacode[other].unk_04 += D_80099458[player][0] ? 10 : 0;
+            }
+            D_8012D228_gacode[player].unk_04 -= 10;
+            D_800A304C[player] = 0;
+        }
+        D_80068A50[player] = 0;
+    } else {
+        result = func_801206E0_gacode( pl->lane );
+        D_80099458[player][0] = result;
+        if ( pl->lane->unk_B25 == 3 ) {
+            func_80120D30_gacode( pl->laneIndex, 0x62 );
+            D_8012D228_gacode[player].unk_04 += 30;
+        } else if ( pl->lane->unk_B22 == 0 ) {
+            func_80120D30_gacode( pl->laneIndex, 0x62 );
+            pl->lane->unk_B25 = 4;
+            D_8012D228_gacode[player].unk_04 += 20;
+        } else if ( result != 0 ) {
+            func_80120D30_gacode( pl->laneIndex, 0x7C );
+            pl->lane->unk_B25 = 2;
+        }
+        D_80068A50[player]++;
+    }
+    D_8012D228_gacode[player].unk_07 = 0;
+    return 0;
+}
 
 /*
 ================
