@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "libultra.h"
+#include "ground.h"
 #include "gacode/gacode.h"
 
 /*
@@ -74,7 +75,29 @@ void func_80122470_gacode( void ) {
     func_80122340_gacode();
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/4C560", func_801224F8_gacode);
+/*
+================
+func_801224F8_gacode
+
+Like func_80122BD8_gacode, then on every other frame puts a 0x300 effect near each lane's ball while that
+ball's state is 1 (the second lane only when D_8005C162 is 1).
+================
+*/
+void func_801224F8_gacode( void ) {
+    if ( D_8012C920_gacode == 0 ) {
+        D_8012C920_gacode = 1;
+        func_8012239C_gacode( 1 );
+    }
+    func_80122340_gacode();
+    if ( D_800DF595[0] == 1 && ( D_8012C924_gacode & 1 ) ) {
+        func_80035380( 0x300, D_800E6560[0][0] + guRandom() % 20 - 10.0f,
+                       D_800E6560[0][1] - 10.0f + guRandom() % 20 - 10.0f, D_800E6560[0][2] + 10.0f );
+    }
+    if ( D_800DF595[1] == 1 && D_8005C162 == 1 && ( D_8012C924_gacode & 1 ) ) {
+        func_80035380( 0x300, D_800E6560[1][0] + guRandom() % 20 - 10.0f,
+                       D_800E6560[1][1] - 10.0f + guRandom() % 20 - 10.0f, D_800E6560[1][2] + 10.0f );
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/4C560", func_80122788_gacode);
 
@@ -104,7 +127,59 @@ void func_80122C60_gacode( void ) {
     func_80122340_gacode();
 }
 
-INCLUDE_ASM("asm/nonmatchings/gacode/4C560", func_80122CE8_gacode);
+/*
+================
+func_80122CE8_gacode
+
+Flickering light: loads the four palette images of every brightness step on the first frame, then counts down
+to a random flicker; in its last five frames the brightness is random (100 to 254), else 100. The brightness
+sets lights 0 and 1 and picks the palettes of resources 1903 to 1906.
+================
+*/
+void func_80122CE8_gacode( void ) {
+    s32 i;
+    u8 color[3];
+    u8 level;
+    s32 step;              /* brightness step, 0 to 3 */
+
+    if ( D_8012C920_gacode == 0 ) {
+        D_8012C920_gacode = 1;
+        func_8012239C_gacode( 1 );
+        for ( i = 0; i < 4; i++ ) {
+            func_80030C04( D_8012C978_gacode[i], FILE_RAW );
+            func_80030C04( D_8012C980_gacode[i], FILE_RAW );
+            func_80030C04( D_8012C988_gacode[i], FILE_RAW );
+            func_80030C04( D_8012C990_gacode[i], FILE_RAW );
+        }
+    }
+    if ( --D_8012C99C_gacode == 0 ) {
+        D_8012C99C_gacode = guRandom() % 140 + 10;
+    }
+    if ( --D_8012CDD8_gacode == 0 ) {
+        func_80037870( 70, 3 );
+    }
+    if ( D_8012C99C_gacode < 6 ) {
+        if ( D_8012C99C_gacode == 1 ) {
+            D_8012CDD8_gacode = 30;
+        }
+        level = guRandom() % 155 + 100;
+    } else {
+        level = 100;
+    }
+    color[0] = color[1] = color[2] = level;
+    func_8002BE50( 0, color );
+    func_8002BE50( 1, color );
+    step = ( level - 100 ) / 39;
+    ( (fileRefB_t *)D_800F80B0[1903].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C988_gacode[step]].data )->palette;
+    ( (fileRefB_t *)D_800F80B0[1904].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C978_gacode[step]].data )->palette;
+    ( (fileRefB_t *)D_800F80B0[1905].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C980_gacode[step]].data )->palette;
+    ( (fileRefB_t *)D_800F80B0[1906].data )->unk_30 =
+        ( (unkImage_t *)D_800F80B0[D_8012C990_gacode[step]].data )->palette;
+    func_80122340_gacode();
+}
 
 INCLUDE_ASM("asm/nonmatchings/gacode/4C560", func_80123004_gacode);
 

@@ -222,6 +222,13 @@ typedef struct {
 
 extern gaImageList_t D_801236B0_gacode[2];
 extern u16 D_8012C9A0_gacode[][4];      /* image files of func_80123430_gacode, by its index */
+/* image files of func_80122CE8_gacode's four palette slots, by brightness step */
+extern u16 D_8012C978_gacode[4];
+extern u16 D_8012C980_gacode[4];
+extern u16 D_8012C988_gacode[4];
+extern u16 D_8012C990_gacode[4];
+extern u16 D_8012C99C_gacode;           /* frames to the next flicker of func_80122CE8_gacode */
+extern u16 D_8012CDD8_gacode;           /* frames to func_80122CE8_gacode's flicker sound */
 extern gaSprite_t D_8012D8E0_gacode[2];   /* per lane */
 extern gaSprite_t D_8012D240_gacode[2];   /* per lane (func_80114140_gacode) */
 extern gaSprite_t D_8012CE10_gacode[2];   /* per lane (func_80114140_gacode) */
