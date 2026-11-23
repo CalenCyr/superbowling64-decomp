@@ -31,9 +31,6 @@ The opening's modes: two logo screens, the title with its demo games, then func_
 func_80113168_opcode's screens. Each logo and the title count frames in D_80114350_opcode, then ask to leave.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: in mode 1's leave block the first scheduling pass places `li a0,2` (D_8005C0BF = 2) after the D_8005C0C0 store; retail hoists it under the D_8005C0F0 load
-// (stores keep source order, so the store order is retail's; BF = 2 first, D_8005C0BF++, and case 3's D_8005C161 = D_8005C162 + 1 don't move it; -O3 changes nothing)
 // RULE-EXCEPTION: s32 with no return value: retail keeps v0 live at the exit
 s32 func_801123A8_opcode( void ) {
     s32 i;
@@ -77,9 +74,9 @@ s32 func_801123A8_opcode( void ) {
             D_8005C0BF = 1;
             if ( D_8005C0C0 == 0xFF ) {
                 D_8005C0C0 = 0x107;
-                D_800693B0 = 1200;
                 D_8005C0B6 = 0;
                 D_8005C0BF = 2;
+                D_800693B0 = 1200;
                 D_8005C0EC = 1;
                 D_8009D098.unk_79 = 0;
                 if ( ++D_8005C0F0 == 4 ) {
@@ -152,7 +149,4 @@ s32 func_801123A8_opcode( void ) {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/opcode/6BE70", func_801123A8_opcode);
-#endif
 
