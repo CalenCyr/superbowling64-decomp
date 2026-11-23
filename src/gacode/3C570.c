@@ -625,15 +625,11 @@ pair's next index), else it passes to the team's next player. Ends the game for 
 D_800994BE of the current player's pair is set (with four players on one team, once both pairs' flags are).
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: allocation only: retail reads the D_800994BE[pair] flag through its absolute address and keeps
-// the array's base (in fp) for the four-player test alone; the draft reuses the hoisted base for both, which
-// renumbers s5-s8 (tried: the test as a ternary, inverted test order; the permuter only helped a little, with
-// the pair index in a local).
 s32 func_80113AD4_gacode( void ) {
     s32 team;
     s32 result;
     s32 done;
+    s32 pair;
 
     done = 0;
     for ( team = 0; team <= D_8005C162; team++ ) {
@@ -668,8 +664,11 @@ s32 func_80113AD4_gacode( void ) {
                 if ( D_800994BE[0] && D_800994BE[1] ) {
                     done = 1;
                 }
-            } else if ( D_800994BE[D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] >= 2] ) {
-                done = 1;
+            } else {
+                pair = D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] >= 2;
+                if ( D_800994BE[pair] ) {
+                    done = 1;
+                }
             }
             if ( done ) {
                 func_80115D70_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]], 0 );
@@ -678,9 +677,6 @@ s32 func_80113AD4_gacode( void ) {
     }
     return func_80115E24_gacode( D_8005C162 );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113AD4_gacode);
-#endif
 
 /*
 ================
