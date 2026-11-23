@@ -2302,14 +2302,10 @@ frame, the name, the aim value of D_8012D228_gacode with its sign mark (blended 
 distance of the lane's unk_A68[2] body from 730 units, in four digits.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: calls, constants and CFG match; registers differ: retail keeps x + 0x38 (s3), its s16 copy (s4) and x (s1) apart and pl in s5 (frame 0x48), adds 0xB and 3 to s3 rather than folding x + 0x43, and computes x + 0x20 into a1 before copying it to s1; x here also skips the s16 sign extensions retail does on x + 0x58 and the name's x
-// moving x = frameX; y = 0x19; above the aim (func_80119C50_gacode's closure) stops the + 0xB fold, but base, frame x and x then share one register; an s16 frameX gives retail's s3/s4 pair but still folds + 0xB
 void func_80119F8C_gacode( s32 player, u8 lane ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
     s16 digits[4];
-    s32 x;
-    s32 frameX;
+    s16 x;
     s16 y;
     s16 aim;
 
@@ -2317,19 +2313,18 @@ void func_80119F8C_gacode( s32 player, u8 lane ) {
         func_8002FDE4( lane ? 0xA0 : 0, 0, 0xA0, 0xF0, 0xFF, 0x7F, 0, (u8)D_80123600_gacode );
     }
     x = lane ? 0xA8 : 0x18;
-    frameX = x + 0x38;
-    func_8002DF3C( 0x9E0, frameX, 0x10 );
+    func_8002DF3C( 0x9E0, x + 0x38, 0x10 );
     func_8002DF3C( 0x9DF, x + 0x58, 0x10 );
     func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x19 );
-    func_8002DF3C( 0x86D, frameX, 0x19 );
-    aim = D_8012D228_gacode[player].unk_04;
-    func_800393D8( aim < 0 ? -aim : aim, frameX + 0xB, 0x20 );
-    x = frameX;
+    x += 0x38;
     y = 0x19;
+    func_8002DF3C( 0x86D, x, y );
+    aim = D_8012D228_gacode[player].unk_04;
+    func_800393D8( aim < 0 ? -aim : aim, x + 0xB, 0x20 );
     if ( D_8012D228_gacode[player].unk_04 != 0 ) {
-        func_8002DF3C( D_8012D228_gacode[player].unk_04 < 0 ? 0x9F0 : 0x9EF, frameX + 3, 0x1D );
+        func_8002DF3C( D_8012D228_gacode[player].unk_04 < 0 ? 0x9F0 : 0x9EF, x + 3, 0x1D );
         if ( D_8012D228_gacode[player].unk_04 > 0 ) {
-            func_8002E4B0( 0x86C, frameX, 0x19, (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
+            func_8002E4B0( 0x86C, x, y, (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
         }
     }
     x += 0x20;
@@ -2341,9 +2336,6 @@ void func_80119F8C_gacode( s32 player, u8 lane ) {
     func_8003B1CC( digits[2], x + 0x15, y );
     func_8003B1CC( digits[3], x + 0x1D, y );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119F8C_gacode);
-#endif
 
 /*
 ================
