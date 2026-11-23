@@ -14,8 +14,11 @@ Builds the placement matrix of a body: rotation rot (degrees), then scale, then 
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: stack frame; retail's is 0xA8 bytes, 0x80 more than this body needs, as if two 4x4 float
-// matrices were declared and never used; every instruction else is the same
-void func_8011D2C0_gacode( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale ) {
+// matrices were declared and never used; every instruction else is the same. Two unused f32[4][4] locals,
+// or the same declared in an if ( 0 ) block, give the exact bytes here and in func_8011D304_gacode (which
+// expands this function, frame included); neither is adopted (R17) without evidence of what they were.
+// Declared inline: func_8011D304_gacode expands it.
+inline void func_8011D2C0_gacode( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale ) {
     guPositionF( mf, rot[0], rot[1], rot[2], scale, pos[0], pos[1], pos[2] );
 }
 #else
@@ -23,7 +26,9 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D2C0_gacode);
 #endif
 
 #ifdef NON_MATCHING
-// NON_MATCHING: stack frame; retail's is 0xF0 bytes, 0x80 more than this body needs (as func_8011D2C0_gacode)
+// NON_MATCHING: stack frame only; retail's is 0xF0 bytes. This expands func_8011D2C0_gacode (an inline's
+// frame stays in its caller's: retail's &mf is held in s2, which the expansion gives and guPositionF called
+// directly does not), so the missing 0x80 are func_8011D2C0_gacode's; exact (whole frame) once that function's frame is found
 /*
 ================
 func_8011D304_gacode
@@ -34,7 +39,7 @@ out = in placed by rotation rot (degrees) and translation pos.
 void func_8011D304_gacode( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos ) {
     f32 mf[4][4];
 
-    guPositionF( mf, rot[0], rot[1], rot[2], 1.0f, pos[0], pos[1], pos[2] );
+    func_8011D2C0_gacode( mf, pos, rot, 1.0f );
     guMtxXFMF( mf, in[0], in[1], in[2], &out[0], &out[1], &out[2] );
 }
 #else

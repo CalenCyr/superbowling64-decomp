@@ -16,7 +16,9 @@ has slid out after a choice.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: retail's frame is 0x60, this draft's 0x30 (0x30 bytes of unused stack, likely an inlined helper's locals); cases 1 to 3 of the first switch share one tail in retail. Banking it needs symbol_addrs entries D_8011B5B0_gscode size:0x78 and D_8011B664_gscode size:0x3C
+// NON_MATCHING: retail's frame is 0x60, this draft's 0x30 (0x30 bytes of unused stack, likely an inlined helper's locals); cases 1 to 3 of the first switch share one tail in retail. Banking it needs symbol_addrs entries D_8011B5B0_gscode size:0x78 and D_8011B664_gscode size:0x3C.
+// An unused 48-byte local gives retail's frame (not adopted, R17); no callee here is a same-unit inline whose frame
+// could carry it in.
 s32 func_801128A0_gscode( void ) {
     s32 i;
     u8 choice;

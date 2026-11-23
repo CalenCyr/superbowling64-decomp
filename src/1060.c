@@ -325,7 +325,8 @@ CPU time of the frame.
 // NON_MATCHING: the frame is 0x48 bytes, retail's 0x58 (16 bytes of locals no instruction uses); retail's lbu
 // and separate andi of D_8005C0B6 before each switch need it volatile (game.h); otherwise only relocation
 // names differ (D_8005C0BA is retail's D_8005C0B8 + 2). One local holds the counter, the file size and the
-// second switch's index, as retail's s2 does.
+// second switch's index, as retail's s2 does. An unused 16-byte local gives retail's frame (not adopted, R17);
+// the inlined func_80026B10 and func_80026B28 have no locals, so their frames add nothing.
 void func_80026B44( void *arg ) {
     s32 i;
 

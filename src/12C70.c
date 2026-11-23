@@ -69,7 +69,9 @@ settings skip it.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: stack frame; retail's is 0x30 bytes, 0x10 more than this needs, as if from an unused 16-byte local; the code is exact
+// NON_MATCHING: stack frame; retail's is 0x30 bytes, 0x10 more than this needs, as if from an unused 16-byte local; the code is exact.
+// An unused 16-byte local gives the exact bytes (not adopted, R17); a dead call with 6 to 8 argument words would
+// too (gcc 2.7.2 keeps outgoing-argument space for calls it deletes), but this unit has none to point to.
 void func_800379C8( s32 index ) {
     if ( D_8005C9D8 != 0 ) {
         Snd_Stop( D_8005C9D8, 5 );

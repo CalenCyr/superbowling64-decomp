@@ -927,7 +927,8 @@ D_8012D8D8_gacode at 0 through the lane's opening handlers, else through func_80
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: stack frame only; retail's is 0x50 bytes, 0x20 more than this body needs (as func_8011D2C0_gacode:
-// as if a 32-byte local were declared and never used); every instruction else is the same
+// as if a 32-byte local were declared and never used); every instruction else is the same. A 32-byte unused local
+// after pins (or two more u8[NUM_PINS]) gives the exact bytes; not adopted (R17) without evidence of what it was.
 void func_80116248_gacode( s32 player ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
     u8 pins[NUM_PINS];
