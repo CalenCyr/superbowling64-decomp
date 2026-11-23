@@ -11,6 +11,10 @@
 #include "filecache.h"
 #include "game.h"
 #include "gamesnd.h"
+#include "ground.h"
+#include "sprite.h"
+#include "dbgtext.h"
+#include "overlay.h"
 
 #define HEAP_START  0x80150000
 #define HEAP_END    0x8038F7FF
@@ -292,9 +296,8 @@ func_80026B10
 Sets D_800DF680 of both ports to 8.
 ================
 */
-void func_80026B10( void ) {
-    D_800DF680[1] = 8;
-    D_800DF680[0] = 8;
+inline void func_80026B10( void ) {
+    D_800DF680[0] = D_800DF680[1] = 8;
 }
 
 /*
@@ -302,9 +305,285 @@ void func_80026B10( void ) {
 func_80026B28
 ================
 */
-void func_80026B28( void ) {
+inline void func_80026B28( void ) {
     D_8009CFB0 = 75;
     D_800619A0 = 12;
 }
 
+/*
+================
+func_80026B44
+
+Game thread: finishes the first three frames empty, sets the VI mode for the TV type, loads the floor grid,
+then draws a frame each time the main thread asks: it moves the cursor by the stick, starts the display list,
+and when the scene changed, draws two blank frames, then loads the scene's overlay and runs its init; then
+the scene's per-frame function, the demo's titles, the fade of D_8005C0BF with the master volume, and the
+CPU time of the frame.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: the frame is 0x48 bytes, retail's 0x58 (16 bytes of locals no instruction uses); retail's lbu
+// and separate andi of D_8005C0B6 before each switch need it volatile (game.h); otherwise only relocation
+// names differ (D_8005C0BA is retail's D_8005C0B8 + 2). One local holds the counter, the file size and the
+// second switch's index, as retail's s2 does.
+void func_80026B44( void *arg ) {
+    s32 i;
+
+    func_80026B28();
+    for ( i = 0; i < 3; i++ ) {
+        osRecvMesg( &D_800DF688, NULL, OS_MESG_BLOCK );
+        D_80102070 = &D_80069410[D_8005C0B1];
+        D_800F8094 = D_80102070->list;
+        gDPFullSync( D_800F8094++ );
+        gSPEndDisplayList( D_800F8094++ );
+        osSendMesg( &D_80099428, &D_800A2FD4, OS_MESG_NOBLOCK );
+    }
+    if ( osTvType == OS_TV_NTSC ) {
+        osViSetMode( &osViModeTable[OS_VI_NTSC_LPN1] );
+    } else if ( osTvType == OS_TV_MPAL ) {
+        osViSetMode( &osViModeTable[OS_VI_MPAL_LPN1] );
+    } else {
+        for ( ;; ) {
+        }
+    }
+    osViSetSpecialFeatures( OS_VI_GAMMA_OFF | OS_VI_DITHER_FILTER_ON );
+    func_80027BC0();
+    i = func_80029AF4( 0xB5C, (u8 *)&D_80100100[0] );
+    memcpy( &D_80100100[1], &D_80100100[0], i );
+
+    for ( ;; ) {
+        osRecvMesg( &D_800DF688, NULL, OS_MESG_BLOCK );
+        guRandom();
+        func_80027BC0();
+        D_8009CFB0 += D_800619A0;
+        if ( D_8009CFB0 == 255 || D_8009CFB0 == 75 ) {
+            D_800619A0 *= -1;
+        }
+
+        if ( D_8005B198 == 0 ) {
+            if ( D_8009D05C > 60 ) {
+                D_8005C0B8 += D_8005B134[D_8005C0BE][3];
+            } else if ( D_8009D05C > 45 ) {
+                D_8005C0B8 += D_8005B134[D_8005C0BE][2];
+            } else if ( D_8009D05C > 35 ) {
+                D_8005C0B8 += D_8005B134[D_8005C0BE][1];
+            } else if ( D_8009D05C > 25 ) {
+                D_8005C0B8 += D_8005B134[D_8005C0BE][0];
+            } else if ( D_8009D05C > 10 ) {
+                D_8005C0B8 += 1;
+            } else if ( D_8009D05C < -9 ) {
+                if ( D_8009D05C > -25 ) {
+                    D_8005C0B8 -= 1;
+                } else if ( D_8009D05C > -35 ) {
+                    D_8005C0B8 -= D_8005B134[D_8005C0BE][0];
+                } else if ( D_8009D05C > -45 ) {
+                    D_8005C0B8 -= D_8005B134[D_8005C0BE][1];
+                } else if ( D_8009D05C > -60 ) {
+                    D_8005C0B8 -= D_8005B134[D_8005C0BE][2];
+                } else {
+                    D_8005C0B8 -= D_8005B134[D_8005C0BE][3];
+                }
+            }
+            if ( D_800DF628 > 60 ) {
+                D_8005C0BA -= D_8005B134[D_8005C0BE][3];
+            } else if ( D_800DF628 > 45 ) {
+                D_8005C0BA -= D_8005B134[D_8005C0BE][2];
+            } else if ( D_800DF628 > 35 ) {
+                D_8005C0BA -= D_8005B134[D_8005C0BE][1];
+            } else if ( D_800DF628 > 25 ) {
+                D_8005C0BA -= D_8005B134[D_8005C0BE][0];
+            } else if ( D_800DF628 > 10 ) {
+                D_8005C0BA -= 1;
+            } else if ( D_800DF628 < -9 ) {
+                if ( D_800DF628 > -25 ) {
+                    D_8005C0BA += 1;
+                } else if ( D_800DF628 > -35 ) {
+                    D_8005C0BA += D_8005B134[D_8005C0BE][0];
+                } else if ( D_800DF628 > -45 ) {
+                    D_8005C0BA += D_8005B134[D_8005C0BE][1];
+                } else if ( D_800DF628 > -60 ) {
+                    D_8005C0BA += D_8005B134[D_8005C0BE][2];
+                } else {
+                    D_8005C0BA += D_8005B134[D_8005C0BE][3];
+                }
+            }
+            if ( D_8005C0B8 < CURSOR_MIN_X ) {
+                D_8005C0B8 = CURSOR_MIN_X;
+            }
+            if ( D_8005C0B8 > CURSOR_MAX_X ) {
+                D_8005C0B8 = CURSOR_MAX_X;
+            }
+            if ( D_8005C0BA < CURSOR_MIN_Y ) {
+                D_8005C0BA = CURSOR_MIN_Y;
+            }
+            if ( D_8005C0BA > CURSOR_MAX_Y ) {
+                D_8005C0BA = CURSOR_MAX_Y;
+            }
+        }
+
+        D_80102070 = &D_80069410[D_8005C0B1];
+        D_800F8094 = D_80102070->list;
+        gSPSegment( D_800F8094++, 0, 0 );
+        gSPDisplayList( D_800F8094++, D_8010A2C8 );
+        gSPDisplayList( D_800F8094++, D_8010A2A0 );
+        gDPSetDepthImage( D_800F8094++, osVirtualToPhysical( D_80000400 ) );
+        gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                          osVirtualToPhysical( D_80066C38[D_8005B0F8] ) );
+        gDPPipeSync( D_800F8094++ );
+
+        if ( D_8005B0E0 != D_8005C0B6 ) {
+            if ( D_8005B188 < 2 ) {
+                gDPSetCycleType( D_800F8094++, G_CYC_FILL );
+                gDPSetFillColor( D_800F8094++, ( GPACK_RGBA5551( 192, 192, 192, 1 ) << 16 ) |
+                                               GPACK_RGBA5551( 192, 192, 192, 1 ) );
+                gDPFillRectangle( D_800F8094++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
+                gDPPipeSync( D_800F8094++ );
+                gDPFullSync( D_800F8094++ );
+                gSPEndDisplayList( D_800F8094++ );
+                D_80102070->size = ( D_800F8094 - D_80102070->list ) * sizeof( Gfx );
+                osSendMesg( &D_80099428, &D_800A2FD4, OS_MESG_NOBLOCK );
+                D_8005B188++;
+                continue;
+            }
+            D_8005B188 = 0;
+            func_80029DF0( NULL, NULL );
+            func_80030AF0();
+            func_80029FB0();
+            switch ( D_8005C0B6 ) {
+            case SCENE_GACODE:
+                i = func_8002889C( "GACODE  SYS" );
+                memset( gacode_VRAM + i, 0, gacode_BSS_END - gacode_VRAM - i );
+                osInvalICache( gacode_VRAM, i );
+                osInvalDCache( gacode_VRAM, i );
+                func_80028744( "GACODE  SYS", gacode_VRAM, i, 0 );
+                func_80026B10();
+                func_80112350_gacode();
+                break;
+            case SCENE_RSCODE:
+                i = func_8002889C( "RSCODE  SYS" );
+                memset( rscode_VRAM + i, 0, rscode_BSS_END - rscode_VRAM - i );
+                osInvalICache( rscode_VRAM, i );
+                osInvalDCache( rscode_VRAM, i );
+                func_80028744( "RSCODE  SYS", rscode_VRAM, i, 0 );
+                func_80026B10();
+                func_80112350_rscode();
+                break;
+            case SCENE_GSCODE:
+                i = func_8002889C( "GSCODE  SYS" );
+                memset( gscode_VRAM + i, 0, gscode_BSS_END - gscode_VRAM - i );
+                osInvalICache( gscode_VRAM, i );
+                osInvalDCache( gscode_VRAM, i );
+                func_80028744( "GSCODE  SYS", gscode_VRAM, i, 0 );
+                func_80026B10();
+                func_80112350_gscode();
+                break;
+            case SCENE_CACODE:
+                i = func_8002889C( "CACODE  SYS" );
+                memset( cacode_VRAM + i, 0, cacode_BSS_END - cacode_VRAM - i );
+                osInvalICache( cacode_VRAM, i );
+                osInvalDCache( cacode_VRAM, i );
+                func_80028744( "CACODE  SYS", cacode_VRAM, i, 0 );
+                func_80026B10();
+                func_801128F4_cacode();
+                break;
+            case SCENE_PVCODE:
+                i = func_8002889C( "PVCODE  SYS" );
+                memset( pvcode_VRAM + i, 0, pvcode_BSS_END - pvcode_VRAM - i );
+                osInvalICache( pvcode_VRAM, i );
+                osInvalDCache( pvcode_VRAM, i );
+                func_80028744( "PVCODE  SYS", pvcode_VRAM, i, 0 );
+                func_80026B10();
+                func_80112350_pvcode();
+                break;
+            case SCENE_MGCODE:
+                i = func_8002889C( "MGCODE  SYS" );
+                memset( mgcode_VRAM + i, 0, mgcode_BSS_END - mgcode_VRAM - i );
+                osInvalICache( mgcode_VRAM, i );
+                osInvalDCache( mgcode_VRAM, i );
+                func_80028744( "MGCODE  SYS", mgcode_VRAM, i, 0 );
+                func_80026B10();
+                func_80112350_mgcode();
+                break;
+            case SCENE_OPCODE:
+                i = func_8002889C( "OPCODE  SYS" );
+                memset( opcode_VRAM + i, 0, opcode_BSS_END - opcode_VRAM - i );
+                osInvalICache( opcode_VRAM, i );
+                osInvalDCache( opcode_VRAM, i );
+                func_80028744( "OPCODE  SYS", opcode_VRAM, i, 0 );
+                func_80026B10();
+                func_80112350_opcode();
+                break;
+            }
+            D_8005B0E0 = D_8005C0B6;
+        }
+
+        i = D_8005C0B6;
+        switch ( i ) {
+        case SCENE_GACODE:
+            func_801125A0_gacode();
+            break;
+        case SCENE_RSCODE:
+            func_801123A8_rscode();
+            break;
+        case SCENE_GSCODE:
+            func_80112414_gscode();
+            break;
+        case SCENE_CACODE:
+            func_80113280_cacode();
+            break;
+        case SCENE_PVCODE:
+            func_801123D8_pvcode();
+            break;
+        case SCENE_MGCODE:
+            func_801123AC_mgcode();
+            break;
+        case SCENE_OPCODE:
+            func_801123A8_opcode();
+            break;
+        }
+
+        if ( D_8005C0EC != 0 ) {
+            D_8005C190 = DRAW2D_FILL;
+            func_8002E4B0( 0xA71, 80, 120, D_8009CFB0, 1.0f, 1.0f );
+            func_8002DF3C( 0x87F, 200, 152 );
+            func_8002DF3C( D_8005B180[D_8005C0F0], 200, 200 );
+            if ( --D_800693B0 < 40 ) {
+                D_8005C0BF = 1;
+                if ( D_8005C0C0 >= 248 ) {
+                    func_80112A74_gacode();
+                    D_8005C0BF = 2;
+                    D_8005C0C0 = 263;
+                    D_8005C0B6 = SCENE_OPCODE;
+                    D_8005C0EC = 0;
+                    D_8009D098.unk_79 = 1;
+                }
+            }
+        }
+
+        if ( D_8005C0BF != 0 ) {
+            if ( D_8005C0BF == 1 ) {
+                D_8005C0C0 += 8;
+                if ( D_8005C0C0 > 255 ) {
+                    D_8005C0C0 = 255;
+                }
+            } else {
+                D_8005C0C0 -= 8;
+                if ( D_8005C0C0 < 0 ) {
+                    D_8005C0C0 = 0;
+                    D_8005C0BF = 0;
+                }
+            }
+            func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 192, 192, 192, D_8005C0C0 );
+            Snd_SetMasterVolume( SND_BGM, ( 255 - D_8005C0C0 ) * 96 + 0x2000 );
+        }
+
+        gDPFullSync( D_800F8094++ );
+        gSPEndDisplayList( D_800F8094++ );
+        D_80102070->size = ( D_800F8094 - D_80102070->list ) * sizeof( Gfx );
+        D_8005B0EC = OS_CYCLES_TO_USEC( osGetTime() - D_80099440 );
+        osSendMesg( &D_80099428, &D_800A2FD4, OS_MESG_NOBLOCK );
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/1060", func_80026B44);
+#endif
