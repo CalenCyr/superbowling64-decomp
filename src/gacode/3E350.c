@@ -2323,43 +2323,30 @@ Draws both players' distance panels: for each lane side the frame, the player's 
 the lane's unk_A68[2] body from 730 units, in four digits.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: calls, constants and CFG match; registers differ: retail hoists the name's 0x69 into s6 (a pseudo, not a reload constant) and loads cpu before name, and keeps the abs value in v0 with the sll in each arm; giving y two sets (0x60, then 0x69) keeps y + 4 unfolded in s0 as retail does
 void func_8011A26C_gacode( void ) {
     gaPlayer_t *pl;
     s16 digits[4];
     s32 i;
     s16 x;
-    s32 frameX;
     s16 y;
-    s16 value;
-    f32 distance;
 
     for ( i = 0; i < 2; i++ ) {
         x = i != 0 ? 0xB8 : 0x28;
-        frameX = x + 0x38;
-        pl = &D_8012D658_gacode[i];
         y = 0x60;
-        func_8002DF3C( 0x9DF, frameX, y );
-        func_800389D0( i, D_8005C0E4[i] >> 7, D_80068218[i].chars, x, 0x69 );
-        y = 0x69;
-        func_8002DF3C( 0x86B, frameX, y );
-        distance = 730.0f - pl->lane->unk_A68[2].pos[2];
-        if ( distance < 0.0f ) {
-            value = 0.0f - distance;
-        } else {
-            value = distance;
-        }
-        func_80039554( digits, value, 1, 0 );
-        func_8003B1CC( digits[0], frameX + 5, y + 4 );
-        func_8003B1CC( digits[1], frameX + 0xD, y + 4 );
-        func_8003B1CC( digits[2], frameX + 0x15, y + 4 );
-        func_8003B1CC( digits[3], frameX + 0x1D, y + 4 );
+        pl = &D_8012D658_gacode[i];
+        func_8002DF3C( 0x9DF, x + 0x38, y );
+        y += 9;
+        func_800389D0( i, D_8005C0E4[i] >> 7, D_80068218[i].chars, x, y );
+        x += 0x38;
+        func_8002DF3C( 0x86B, x, y );
+        func_80039554( digits, FABS( 730.0f - pl->lane->unk_A68[2].pos[2] ), 1, 0 );
+        y += 4;
+        func_8003B1CC( digits[0], x + 5, y );
+        func_8003B1CC( digits[1], x + 0xD, y );
+        func_8003B1CC( digits[2], x + 0x15, y );
+        func_8003B1CC( digits[3], x + 0x1D, y );
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011A26C_gacode);
-#endif
 
 /*
 ================
