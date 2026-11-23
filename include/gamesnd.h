@@ -46,7 +46,7 @@ extern s16 D_8005CA76;              /* number of the next screenshot */
 extern OSMesgQueue D_800E6520;
 extern OSMesgQueue D_80099428;      /* takes the audio task requests */
 extern OSMesgQueue D_8009D040;      /* where the audio task reports completion */
-extern u8 D_800DF6A4[];             /* the audio task request message */
+extern s32 D_800DF6A4;              /* the audio task request message: its code, SCHED_MSG_AUDIO */
 extern u8 D_800ABD70[];             /* audio heap */
 extern OSTime D_80099450;           /* when the last audio task started */
 extern s32 D_8005B0F0;              /* microseconds the last audio task took */

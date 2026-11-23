@@ -387,6 +387,16 @@ FatTable	include/fat.h	evidence: the BW64FAT file at ROM 0x3C2A0, header "BW64FA
 ArchiveEntry	include/archive.h	invented: {ROM offset into the str segment, stored size, decompressed size} record read by the LZSS loader
 HeapBlock	include/heap.h	invented: free-list block header (next, size) of the block allocator in unit 51F0
 HostPacket	include/hostio.h	invented: request header (command, size, file name) exchanged with the development host link in unit 4890
+GfxFrame	include/boot.h	invented: a display list the game thread builds (list, size, framebuffer index), two at D_80069410
+SCHED_MSG_RETRACE	include/boot.h	invented: code 0 of the main thread's messages, set by osViSetEvent
+SCHED_MSG_SP_DONE	include/boot.h	invented: code 1, set by osSetEventMesg(OS_EVENT_SP)
+SCHED_MSG_DP_DONE	include/boot.h	invented: code 2, set by osSetEventMesg(OS_EVENT_DP)
+SCHED_MSG_PRENMI	include/boot.h	invented: code 3, set by osSetEventMesg(OS_EVENT_PRENMI)
+SCHED_MSG_GFX	include/boot.h	invented: code 4, a display list is built
+SCHED_MSG_AUDIO	include/boot.h	invented: code 5, sent by the audio thread (12C70) for its task
+CONT_STACK_SIZE	include/boot.h	invented: bytes of the controller thread's stack (0x80068250-0x80068A50)
+GAME_STACK_SIZE	include/boot.h	invented: bytes of the game thread's stack (0x800E8090-0x800EA090)
+GFX_LIST_LEN	include/boot.h	invented: Gfx commands of a GfxFrame list (0x18000 bytes)
 
 # gacode overlay (include/gacode/gacode.h): types and members, all invented from use
 vec3_t	gacode.h	invented: three floats (x, y, z); the Quake-style vector type

@@ -88,6 +88,68 @@ extern s32 D_8005C9E0;              /* frames until the sequence D_8005C9E4 star
 extern s32 D_8005C9E4;
 extern seqHeader_t *D_800A3048;
 
+/* The main thread (func_80025FEC) schedules the RSP and RDP; these are its messages, queues and state. */
+#define SCHED_MSG_RETRACE   0           /* VI retrace (D_80069408) */
+#define SCHED_MSG_SP_DONE   1           /* RSP task done (D_800E4558) */
+#define SCHED_MSG_DP_DONE   2           /* RDP done (D_80066B90) */
+#define SCHED_MSG_PRENMI    3           /* reset button pressed (D_8009D058) */
+#define SCHED_MSG_GFX       4           /* the game thread finished a display list (D_800A2FD4) */
+#define SCHED_MSG_AUDIO     5           /* the audio thread asks for its task (D_800DF6A4) */
+
+/* each message is a pointer to its code */
+extern s32 D_80069408;
+extern s32 D_800E4558;
+extern s32 D_80066B90;
+extern s32 D_8009D058;
+extern s32 D_800A2FD4;
+
+extern OSMesg D_800E675C[1];        /* buffer of D_800DF578 */
+extern OSMesg D_801000C0[8];        /* buffer of D_80099428 */
+extern OSMesgQueue D_800E57E8;      /* gets the retrace message each VI */
+extern OSMesg D_8009D060[1];
+extern OSMesg D_8009CF8C[1];        /* buffer of D_800E6520 */
+extern OSMesgQueue D_800E8078;
+extern OSMesg D_8009CF98[1];
+extern OSMesg D_800DF6A0[1];        /* buffer of D_8009D040 */
+extern OSMesg D_80066C2C[1];        /* buffer of D_800E6690 */
+extern OSMesg D_8009D02C[1];        /* buffer of D_800F8098 */
+extern OSMesgQueue D_800DF688;      /* tells the game thread which framebuffer to draw next */
+extern OSMesg D_8009D068[1];
+
+#define CONT_STACK_SIZE     0x800       /* bytes of stack of the controller thread */
+#define GAME_STACK_SIZE     0x2000      /* bytes of stack of the game thread */
+extern OSThread D_800617F0;         /* controller thread, func_80028064 */
+extern u64 D_80068250[CONT_STACK_SIZE / sizeof( u64 )];
+extern OSThread D_80061640;         /* game thread, func_80026B44 */
+extern u64 D_800E8090[GAME_STACK_SIZE / sizeof( u64 )];
+
+/* A display list the game thread builds, two of them used in turn. */
+#define GFX_LIST_LEN        0x3000
+typedef struct {
+    /* 0x00000 */ Gfx list[GFX_LIST_LEN];
+    /* 0x18000 */ u32 size;             /* bytes of list, the task's data_size */
+    /* 0x18004 */ s32 fbIndex;          /* index in D_80066C38 of the framebuffer it draws */
+} GfxFrame;                             /* size 0x18008 */
+
+extern GfxFrame D_80069410[2];
+extern OSTask D_8005B140;           /* the graphics task */
+extern u64 D_8005F3F0[];            /* the graphics microcode's data */
+extern s32 D_8005B120;              /* index in D_80069410 of the list the RSP runs */
+extern s32 D_8005B124[2];           /* state of each list of D_80069410: 0 building, 1 built, 2 running, 3 done */
+extern s32 D_8005B114[3];           /* state of each framebuffer of D_80066C38: 1 drawn, 4 shown */
+extern s8 D_8005C0B2;               /* framebuffer to show next */
+extern s8 D_8005C0B3;               /* framebuffer shown */
+extern u8 D_8005C0B4[2];            /* [0]: reset pressed; [1]: tasks stopped after it */
+extern s32 D_8005B104;              /* the graphics task was asked to yield */
+extern s32 D_8005B108;              /* the game thread is building a list */
+extern s32 D_8005B10C;              /* graphics task state: 0 idle, 1 running, 2 yielded */
+extern s32 D_8005B12C;              /* retraces since the last swap */
+extern s32 D_8005B130;              /* swaps this second */
+extern OSTime D_80066C48;           /* when the graphics task started */
+extern OSTime D_80099440;           /* when the game thread was told to draw */
+
+void func_80026B44( void *arg );
+
 extern u8 D_8009CFB0;
 extern u8 D_800619A0;
 

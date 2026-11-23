@@ -150,7 +150,7 @@ void func_80037C08( UnkRspProgram *program ) {
     D_80099450 = osGetTime();
     D_80066B50 = program;
     osWritebackDCache( D_800ABD70, 0x33800 );
-    osSendMesg( &D_80099428, D_800DF6A4, OS_MESG_NOBLOCK );
+    osSendMesg( &D_80099428, &D_800DF6A4, OS_MESG_NOBLOCK );
     osRecvMesg( &D_8009D040, NULL, OS_MESG_BLOCK );
     D_8005B0F0 = OS_CYCLES_TO_USEC( osGetTime() - D_80099450 );
 }

@@ -68,5 +68,6 @@ void func_80027B18( s32 chan );
 void func_80027B6C( s32 chan );
 void func_80027BC0( void );
 void func_80027FF0( void );
+void func_80028064( void *arg );
 
 #endif

@@ -23,6 +23,10 @@ typedef struct {
 } FatTable;
 
 extern FatTable D_8010A080;
+extern u8 fat_ROM_START[];          /* linker: ROM address of the fat segment */
+extern u8 fat_ROM_END[];
+extern u8 knstatic_ROM_START[];     /* linker: ROM address of the knstatic segment (the KNSTATICSYS file) */
+extern u8 knstatic_ROM_END[];
 
 s16 func_800286D0( u8 *name );
 s32 func_80028744( u8 *name, void *dst, s32 size, u32 offset );
