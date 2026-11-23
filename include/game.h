@@ -29,7 +29,9 @@ extern s8 D_80066E18[4][10];        /* per player and frame */
 extern s8 D_800994B8[2];            /* per player of a duel: frames won */
 extern s16 D_800EA090[];
 extern u16 D_8009D030[2][3];        /* per player of a duel and game: score */
-extern u8 D_8005C0B6;               /* the scene to run, SCENE_* (overlay.h); restored by the results overlay on leaving */
+/* the scheduler thread reads it too, while the overlays write it */
+// volatile: the game thread reads it with lbu and a separate andi 0xFF before both scene switches (func_80026B44)
+extern volatile u8 D_8005C0B6;      /* the scene to run, SCENE_* (overlay.h); restored by the results overlay on leaving */
 extern u8 D_8005C0BF;               /* 0, then 1 once an overlay asks to leave, 2 when it goes */
 extern s16 D_8005C0C0;
 extern u32 D_8005C0F0;               /* demo the opening overlay plays next, 0 to 3 */
