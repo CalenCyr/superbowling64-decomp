@@ -3163,9 +3163,6 @@ character's unk_14 and unk_20 towards unk_98 and unk_9C, and presses after unk_2
 func_80118014_gacode) frames or when the animation reaches the character's frame.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: retail keeps the func_80117D20_gacode block's unk_B20 test apart (here cross-jumped into the
-// func_80117BDC_gacode block's, 0x30 bytes shorter); the rest is the same up to the branch offsets that shifts
 s32 func_8011C658_gacode( gaPlayer_t *pl, s32 player ) {
     s16 wait = pl->character.unk_2C;
     s16 longWait = wait * 2;
@@ -3193,11 +3190,10 @@ s32 func_8011C658_gacode( gaPlayer_t *pl, s32 player ) {
     } else if ( pl->lane->unk_B10 == func_80117D20_gacode ) {
         if ( FABS( pl->character.unk_20[0] ) >= FABS( pl->unk_9C ) ) {
             pl->character.unk_20[0] = pl->unk_9C;
-            if ( pl->lane->unk_B20++ < wait ) {
-                return 0;
+            if ( pl->lane->unk_B20++ >= wait ) {
+                pl->lane->unk_B20 = 0;
+                return 1;
             }
-            pl->lane->unk_B20 = 0;
-            return 1;
         } else {
             pl->character.unk_20[0] += pl->unk_9C / steps;
         }
@@ -3214,9 +3210,6 @@ s32 func_8011C658_gacode( gaPlayer_t *pl, s32 player ) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011C658_gacode);
-#endif
 
 /*
 ================
