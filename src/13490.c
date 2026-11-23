@@ -758,14 +758,7 @@ Draws the scoreboard of player at (x, y): the numbered heads of the ten frames, 
 ten frames.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: written like func_8003A3F0 (inline headers, y += 9, a plate cursor frameX = x); calls, CFG and
-// constants match; registers differ: retail keeps x in s7 and computes the headers' x + 0x38 from a1 before the
-// copy, and y + 9 goes to a fresh register (s0, then copied to s5) instead of updating y's. A s16 frameY = y + 9
-// is further off, as are an s32 frameY and passing y + 9 to each call. Permuter clue (target-only scoring, best
-// 150 from 310): the frame calls read a copy of y taken after y += 9, while the plate reads y itself, so retail's
-// plate argument and the frames' y are likely two pseudos; no natural spelling of that found yet.
-void func_8003A658( s32 player, s32 x, s32 y ) {
+void func_8003A658( s32 player, s16 x, s16 y ) {
     s32 i;
     s16 frameX;
 
@@ -780,9 +773,6 @@ void func_8003A658( s32 player, s32 x, s32 y ) {
     }
     func_80038DD4( player, 9, 9, D_80068A50[player], D_800994BE[player], frameX, y );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/13490", func_8003A658);
-#endif
 
 /*
 ================
