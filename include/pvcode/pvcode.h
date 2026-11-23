@@ -14,10 +14,7 @@
 #include "filecache.h"
 #include "hostio.h"
 #include "save.h"
-
-/* main unit 111A0 (no header yet) */
-extern u8 D_8005C980;               /* set: func_80035DA0 runs each frame; it clears it when done */
-void func_80035DA0( void );
+#include "gridedit.h"
 
 extern s32 D_80112650_pvcode;       /* 0: func_80037410 is still stepping */
 extern u8 D_80112654_pvcode;        /* sound the D-pad picks */

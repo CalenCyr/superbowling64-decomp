@@ -500,3 +500,4 @@ gaMotion_t	gacode.h	invented: 0x38-byte motion of a lane body (gaLane_t.motion, 
 FABS	include/gacode/gacode.h	invented: float absolute value macro (0 - x), func_80119638_gacode
 floorGrid_t	include/game.h	invented: 0xFAC-byte file at D_80100100 (point counts, spacing and origin along x and z, then s16 heights); func_8012016C_gacode clamps to its edges, func_8011F87C_gacode interpolates its heights
 GA_TogglePin	3E350.c	invented: the inline helper of func_8011A404_gacode that toggles a lane body's standing flag (unk_5D) and returns the new state
+GRIDEDIT_EXIT, GRIDEDIT_LOAD, GRIDEDIT_SAVE, GRIDEDIT_SIZE, GRIDEDIT_STEP, GRIDEDIT_ORIGIN, GRIDEDIT_SELECT, GRIDEDIT_HEIGHT, GRIDEDIT_PAGES, GRIDEDIT_POINTS	include/gridedit.h	invented: the pages of the floor grid editor func_80035DA0 (from its page titles "EXIT", "FILE LOAD", "FILE SAVE", "MTX FORM", "MTX WH", "MTX OFS", "VTX SEL", "VTX Y"), and floorGrid_t.heights' 2000 points
