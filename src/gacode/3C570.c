@@ -588,7 +588,8 @@ the team if every player has the D_800994BE flag set, else passes the turn to th
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: schedule only: in the flag-count loop retail increments i before the row pointer, the draft
-// after it (tried: if/++ count, i++ in the index, local order, a row pointer local, pointer-walk counts; 28k
+// after it (tried: if/++ count, i++ in the index, local order, a row pointer local, pointer-walk counts, a
+// player local, unsigned counts, while and ++i loops; 28k
 // permuter iterations from base 20 found nothing lower). The
 // turn pass is func_801138EC_gacode inlined (its inline is what puts the body here at -O2).
 s32 func_80113968_gacode( void ) {

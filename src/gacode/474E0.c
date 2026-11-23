@@ -1202,7 +1202,8 @@ func_80120B50_gacode at fraction t of the sprite's palette range.
 #ifdef NON_MATCHING
 // NON_MATCHING: register colouring only: retail keeps the unclamped index in a3 and its u16 copy in t1; this
 // swaps them (tried: an index local, operand order, u16/u32/s32 offsets, the inline's local order and clamp
-// spelling; 22k permuter iterations from base 50 found nothing lower)
+// spelling, the inline's body written out with an index local; 22k permuter iterations from base 50 found
+// nothing lower)
 void func_80120C0C_gacode( gaSprite_t *sprite, u16 color, f32 t ) {
     u16 count = sprite->last - sprite->first + 1;
 
