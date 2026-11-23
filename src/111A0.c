@@ -23,11 +23,11 @@ height under the cursor.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: frame 0xC8 against retail's 0x88: combine leaves a USE of a dead pseudo (stack slot) at the loops'
-// entry tests and the cursor tests; register choices in pages SIZE and STEP; retail's reloads of D_80063AF0 after
-// each store and before the switch need it volatile (with volatile those match)
+// NON_MATCHING: with D_80063AF0 volatile (retail reloads it after each store and before the switch, and orders the
+// first block's stores that way) everything but register choices matches: `resized` and the numZ address in page
+// SIZE, and retail keeps &D_800994BC in a register across the STEP and ORIGIN tests
 void func_80035DA0( void ) {
-    u8 text[0x68];
+    u8 text[40];
     s32 x, z;
     s32 i;
     s32 resized;
