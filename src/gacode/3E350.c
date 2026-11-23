@@ -2159,25 +2159,17 @@ Draws the par game's panel for a player on the lane's side: the name, the frame 
 mark, and a mark per throw of the frame, the last one blended.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: register residue only: retail has the lane base and later mark x in s1, frame x in s2 (mine swapped), and does not fold numberX (frameX + 0x24) into base + 0x5C;
-// the permuter (target-only scoring) went 300 -> 105 only by loading D_8012D238_gacode + 1 into a temporary before numberX, which in the real unit still swaps and folds (as func_80119C50_gacode's frameX + 0xF)
-// moving x = frameX above numberX (func_80119C50_gacode's closure: reassigning x kills cse's x + 0x38 equivalence) stops the fold, but cse then makes x canonical and frameX and x share one register
 void func_801198E4_gacode( s32 player, u8 lane ) {
-    s32 frameX;
-    s32 x;
-    s16 numberX;
+    s16 x;
     s16 y;
     s32 i;
 
     x = lane != 0 ? 0xA8 : 0x18;
     func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x18 );
-    frameX = x + 0x38;
-    func_8002DF3C( 0xA3B, frameX, 0x10 );
-    numberX = frameX + 0x24;
-    func_800393D8( D_8012D238_gacode + 1, numberX, 0x15 );
-    func_800393D8( D_80099458[0][D_8012D238_gacode], numberX, 0x21 );
-    x = frameX;
+    x += 0x38;
+    func_8002DF3C( 0xA3B, x, 0x10 );
+    func_800393D8( D_8012D238_gacode + 1, x + 0x24, 0x15 );
+    func_800393D8( D_80099458[0][D_8012D238_gacode], x + 0x24, 0x21 );
     y = 0x30;
     if ( lane != 0 ) {
         x -= 0x38;
@@ -2190,9 +2182,6 @@ void func_801198E4_gacode( s32 player, u8 lane ) {
     }
     func_8002E4B0( 0xA19, x, y, (u8)D_80123600_gacode + 0x1F, 1.0f, 1.0f );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_801198E4_gacode);
-#endif
 
 /*
 ================
