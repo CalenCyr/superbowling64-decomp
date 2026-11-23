@@ -1992,14 +1992,11 @@ Draws a player's score panel on the lane's side: the name, the row of three fram
 one (from the scores of the lane's team player in a team game), and the games won.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: register residue only: retail loads D_8009D19C[scorer] for first into a1, mine into v1; if/else, ternary, a u8 or s32 frame local, s32 first and an inline helper were compiled, all the same;
-// the permuter (target-only scoring, 2.5k iterations from 35) found nothing better
 void func_8011917C_gacode( s32 player, u8 lane ) {
     s32 x;
     s16 y;
     s32 scorer;
-    u8 first;
+    s32 first;
     s32 i;
 
     x = 0xAC;
@@ -2014,7 +2011,11 @@ void func_8011917C_gacode( s32 player, u8 lane ) {
     } else {
         scorer = player;
     }
-    first = D_8009D19C[scorer] < 2 ? 0 : D_8009D19C[scorer] - 2;
+    if ( D_8009D19C[scorer] < 2 ) {
+        first = 0;
+    } else {
+        first = D_8009D19C[scorer] - 2;
+    }
     func_80038C1C( 3, first, x, y );
     for ( i = 0; i < 3; i++ ) {
         func_80038DD4( scorer, first + i, D_8009D19C[scorer], D_80068A50[scorer], D_800994BE[scorer], x, y + 9 );
@@ -2026,9 +2027,6 @@ void func_8011917C_gacode( s32 player, u8 lane ) {
     }
     func_8003A8B4( player, D_800693DC[player], 0, x, y + 0x20 );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011917C_gacode);
-#endif
 
 /*
 ================
