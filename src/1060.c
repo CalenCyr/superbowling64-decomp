@@ -6,6 +6,11 @@
 #include "heap.h"
 #include "input.h"
 #include "libc.h"
+#include "fat.h"
+#include "archive.h"
+#include "filecache.h"
+#include "game.h"
+#include "gamesnd.h"
 
 #define HEAP_START  0x80150000
 #define HEAP_END    0x8038F7FF
@@ -98,7 +103,196 @@ void func_80025EBC( void ) {
     }
 }
 
+/*
+================
+func_80025FEC
+
+Main thread: creates the message queues, loads the file table, IDX and KNSTATICSYS, starts the controller
+and game threads, then schedules the RSP and RDP for ever: it swaps the framebuffers on retrace, runs the
+audio task when asked (making the graphics task yield), and starts each display list the game thread builds.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: D_8005C0B2, D_8005C0B3 and D_8005B0F8 are read as volatile (lbu then a separate sign
+// extension, and a reload right after each store, as D_8005C0B1); declared plain until that is signed off.
+// The task's ucode is a symbol of its own at 0x80056DD0 (rspbootTextEnd's address; retail loads it apart):
+// the F3DEX FIFO text (output_buff is set), gspF3DEX_fifoTextStart or the NoN variant; it needs a definition.
+void func_80025FEC( void *arg ) {
+    OSMesg msg;
+    s32 index;
+
+    osCreateMesgQueue( &D_800DF578, D_800E675C, 1 );
+    osCreateMesgQueue( &D_80099428, D_801000C0, 8 );
+    osCreateMesgQueue( &D_800E57E8, D_8009D060, 1 );
+    osCreateMesgQueue( &D_800E6520, D_8009CF8C, 1 );
+    osCreateMesgQueue( &D_800E8078, D_8009CF98, 1 );
+    osCreateMesgQueue( &D_8009D040, D_800DF6A0, 1 );
+    osCreateMesgQueue( &D_800E6690, D_80066C2C, 1 );
+    osCreateMesgQueue( &D_800F8098, D_8009D02C, 1 );
+    osCreateMesgQueue( &D_800DF688, D_8009D068, 1 );
+    D_800E4558 = SCHED_MSG_SP_DONE;
+    D_80066B90 = SCHED_MSG_DP_DONE;
+    D_8009D058 = SCHED_MSG_PRENMI;
+    D_800DF6A4 = SCHED_MSG_AUDIO;
+    D_80069408 = SCHED_MSG_RETRACE;
+    D_800A2FD4 = SCHED_MSG_GFX;
+    osSetEventMesg( OS_EVENT_SP, &D_80099428, &D_800E4558 );
+    osSetEventMesg( OS_EVENT_DP, &D_80099428, &D_80066B90 );
+    osSetEventMesg( OS_EVENT_PRENMI, &D_80099428, &D_8009D058 );
+    osViSetEvent( &D_80099428, &D_80069408, 1 );
+
+    osInvalDCache( &D_8010A080, fat_ROM_END - fat_ROM_START );
+    D_80066B70.hdr.pri = OS_MESG_PRI_NORMAL;
+    D_80066B70.hdr.retQueue = &D_800DF578;
+    D_80066B70.dramAddr = &D_8010A080;
+    D_80066B70.devAddr = (u32)fat_ROM_START;
+    D_80066B70.size = fat_ROM_END - fat_ROM_START;
+    osEPiStartDma( D_800ABD60, &D_80066B70, OS_READ );
+    osRecvMesg( &D_800DF578, NULL, OS_MESG_BLOCK );
+    func_80028744( "IDX     SYS", D_800A30C0, func_8002889C( "IDX     SYS" ), 0 );
+    osInvalDCache( D_8010A250, knstatic_ROM_END - knstatic_ROM_START );
+    func_80028744( "KNSTATICSYS", D_8010A250, func_8002889C( "KNSTATICSYS" ), 0 );
+    func_800279F0();
+    osContStartReadData( &D_80066B38 );
+    osCreateThread( &D_800617F0, 2, func_80028064, arg, &D_80068250[CONT_STACK_SIZE / sizeof( u64 )], 0x11 );
+    osStartThread( &D_800617F0 );
+    osCreateThread( &D_80061640, 5, func_80026B44, arg, &D_800E8090[GAME_STACK_SIZE / sizeof( u64 )], 8 );
+    osStartThread( &D_80061640 );
+    func_80037CD0();
+
+    for ( ;; ) {
+        osRecvMesg( &D_80099428, &msg, OS_MESG_BLOCK );
+        switch ( *(s32 *)msg ) {
+        case SCHED_MSG_PRENMI:
+            D_8005C0B4[0] = TRUE;
+            if ( osAfterPreNMI() == 0 ) {
+                D_8005C0B4[1] = TRUE;
+            }
+            break;
+        case SCHED_MSG_RETRACE:
+            if ( D_8005B0F4 & 1 ) {
+                osSendMesg( &D_800E6520, &msg, OS_MESG_NOBLOCK );
+            }
+            osSendMesg( &D_800E57E8, &D_80069408, OS_MESG_NOBLOCK );
+            ++D_8005B0F4;
+            if ( D_8005B0F4 % 60 == 0 ) {
+                D_8005B0FC = D_8005B130;
+                D_8005B130 = 0;
+            }
+            if ( D_8005B12C++ != 0 ) {
+                D_8005B114[D_8005C0B3] = 4;
+                if ( D_8005B114[D_8005C0B2] == 1 ) {
+                    osViSwapBuffer( D_80066C38[D_8005C0B2] );
+                    D_8005C0B3 = D_8005C0B2;
+                    D_8005C0B2++;
+                    if ( D_8005C0B2 == 3 ) {
+                        D_8005C0B2 = 0;
+                    }
+                    D_8005B12C = 0;
+                    D_8005B130++;
+                }
+            }
+            break;
+        case SCHED_MSG_SP_DONE:
+            D_8005B100 = 0;
+            if ( D_8005C0B4[0] == TRUE && D_8005C0B4[1] == FALSE ) {
+                if ( osAfterPreNMI() == 0 ) {
+                    D_8005C0B4[1] = TRUE;
+                }
+            } else if ( D_8005B110 == 2 ) {
+                D_8005B110 = 0;
+                if ( D_8005B10C == 2 ) {
+                    D_8005B100 = 1;
+                    D_8005B10C = 1;
+                    osSpTaskLoad( &D_8005B140 );
+                    osSpTaskStartGo( &D_8005B140 );
+                }
+                osSendMesg( &D_8009D040, &msg, OS_MESG_NOBLOCK );
+            } else if ( D_8005B110 == 1 ) {
+                if ( D_8005B104 != 0 ) {
+                    D_8005B104 = 0;
+                    if ( osSpTaskYielded( &D_8005B140 ) ) {
+                        D_8005B10C = 2;
+                    }
+                }
+                func_80025EBC();
+            } else if ( D_8005B10C == 1 ) {
+                D_8005B0E4 = OS_CYCLES_TO_USEC( osGetTime() - D_80066C48 );
+            }
+            break;
+        case SCHED_MSG_DP_DONE:
+            D_8005B124[D_8005B120] = 3;
+            D_8005B114[D_80069410[D_8005B120].fbIndex] = 1;
+            D_8005B10C = 0;
+            if ( D_8005B114[D_8005C0B2] != 1 ) {
+                D_8005C0B2 = D_80069410[D_8005B120].fbIndex;
+            }
+            D_8005B0E8 = OS_CYCLES_TO_USEC( osGetTime() - D_80066C48 );
+            if ( D_8005C0BC != 0 && D_8005C0B6 != 1 && ( D_800994BC & Z_TRIG ) && ( D_800E4D62 & L_TRIG ) ) {
+                func_80037E30();
+            }
+            break;
+        case SCHED_MSG_AUDIO:
+            if ( D_8005C0B4[0] == FALSE ) {
+                if ( D_8005B100 != 0 ) {
+                    osSpTaskYield();
+                    D_8005B104 = 1;
+                    D_8005B110 = 1;
+                    continue;
+                }
+                func_80025EBC();
+            }
+            break;
+        case SCHED_MSG_GFX:
+            D_8005B108 = 0;
+            D_8005B124[D_8005C0B1] = 1;
+            break;
+        }
+
+        index = D_8005B0F8 + 1;
+        if ( index == 3 ) {
+            index = 0;
+        }
+        if ( D_8005B108 == 0 && D_8005B124[( D_8005C0B1 + 1 ) & 1] == 3 ) {
+            if ( ++D_8005B0F8 == 3 ) {
+                D_8005B0F8 = 0;
+            }
+            if ( ++D_8005C0B1 == 2 ) {
+                D_8005C0B1 = 0;
+            }
+            D_8005B108 = 1;
+            D_8005B124[D_8005C0B1] = 0;
+            D_80069410[D_8005C0B1].fbIndex = D_8005B0F8;
+            osSendMesg( &D_800DF688, &index, OS_MESG_NOBLOCK );
+            D_80099440 = osGetTime();
+        }
+        if ( D_8005B100 == 0 && D_8005B10C == 0 && D_8005C0B4[0] == FALSE ) {
+            index = ( D_8005B120 + 1 ) & 1;
+            if ( D_8005B124[index] != 0 &&
+                 D_80066C38[D_80069410[index].fbIndex] != osViGetCurrentFramebuffer() &&
+                 D_80066C38[D_80069410[index].fbIndex] != osViGetNextFramebuffer() ) {
+                D_8005B120 = ( D_8005B120 + 1 ) & 1;
+                D_8005B124[D_8005B120] = 2;
+                D_8005B140.t.flags = OS_TASK_LOADABLE;
+                D_8005B140.t.ucode_boot_size = (u8 *)rspbootTextEnd - (u8 *)rspbootTextStart;
+                D_8005B140.t.ucode_boot = (u64 *)rspbootTextStart;
+                D_8005B140.t.ucode = (u64 *)gspF3DEX_fifoTextStart;
+                D_8005B140.t.ucode_data = D_8005F3F0;
+                D_8005B140.t.data_ptr = (u64 *)D_80069410[D_8005B120].list;
+                D_8005B140.t.data_size = D_80069410[D_8005B120].size;
+                D_8005B100 = 1;
+                D_8005B10C = 1;
+                osWritebackDCacheAll();
+                osSpTaskLoad( &D_8005B140 );
+                osSpTaskStartGo( &D_8005B140 );
+                D_80066C48 = osGetTime();
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/1060", func_80025FEC);
+#endif
 
 /*
 ================
