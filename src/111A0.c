@@ -23,9 +23,8 @@ height under the cursor.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: with D_80063AF0 volatile (retail reloads it after each store and before the switch, and orders the
-// first block's stores that way) everything but register choices matches: `resized` and the numZ address in page
-// SIZE, and retail keeps &D_800994BC in a register across the STEP and ORIGIN tests
+// NON_MATCHING: register choices only: `resized` and the numZ address in page SIZE, and retail keeps &D_800994BC
+// in a register across the STEP and ORIGIN tests
 void func_80035DA0( void ) {
     u8 text[40];
     s32 x, z;

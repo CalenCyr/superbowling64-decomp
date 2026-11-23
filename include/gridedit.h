@@ -25,7 +25,8 @@ extern s16 D_8005C988;              /* the cursor's point along x */
 extern s16 D_8005C98A;              /* the cursor's point along z */
 extern u16 D_8005C98C;              /* the mark Z with the D-pad paints */
 extern u8 D_8005C98E;               /* frames the D-pad has been held, to 100; from 7 the cursor repeats */
-extern u8 D_80063AF0;               /* the page, GRIDEDIT_* */
+// volatile: retail loads it again, unused, right after each ++ and -- store, and re-reads and re-masks it before the switch
+extern volatile u8 D_80063AF0;      /* the page, GRIDEDIT_* */
 extern Mtx D_80063AF8;              /* identity, the model matrix of the grid */
 extern u8 D_80063B40[GRIDEDIT_POINTS]; /* per point: marked */
 
