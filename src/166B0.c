@@ -1600,7 +1600,20 @@ INCLUDE_ASM("asm/nonmatchings/166B0", Snd_Exp2);
 #endif
 
 #ifdef NON_MATCHING
-// NON_MATCHING: register/schedule: retail has a 0x30 frame (0x28 here), reloads tune->value before the add and copies the digit before SEXT8; an inline SetTune( tune, digit ) helper gave a worse schedule
+// NON_MATCHING: registers: the sign extension as an inline helper gives retail's 0x30 frame and its reload of tune->value,
+// and the flag test gives its prologue; retail still copies the digit before the sign test, converts the first tune in
+// $f2 and reads the wave pointer into a0 (into v1 here)
+/*
+================
+Snd_SignExtend8
+
+Returns the low byte of x as a signed number.
+================
+*/
+static inline s32 Snd_SignExtend8( s32 x ) {
+    return SEXT8( x );
+}
+
 /*
 ================
 Snd_RelocateWaveBank
@@ -1617,7 +1630,7 @@ void Snd_RelocateWaveBank( void *data, s32 romBase ) {
     waveTune_t *tune;
 
     bank = data;
-    if ( bank->flags < 0 ) {
+    if ( bank->flags & WAVEBANK_RELOCATED ) {
         return;
     }
     bank->flags |= WAVEBANK_RELOCATED;
@@ -1626,9 +1639,8 @@ void Snd_RelocateWaveBank( void *data, s32 romBase ) {
     for ( i = 0; i < bank->numWaves; i++ ) {
         tune = &bank->tunes[i];
         value = tune->raw;
-        tune->value = (f32)SEXT8( value ) / 100.0;
-        value = bank->unk_24[i] - '0';
-        tune->value += (f32)SEXT8( value );
+        tune->value = (f32)Snd_SignExtend8( value ) / 100.0;
+        tune->value += (f32)Snd_SignExtend8( bank->unk_24[i] - '0' );
         if ( bank->waves[i]->flags == 0 ) {
             if ( ( (u32)bank->waves[i]->base & 0xFF000000 ) != 0xFF000000 ) {
                 bank->waves[i]->base += romBase;
