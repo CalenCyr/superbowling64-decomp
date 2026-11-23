@@ -112,11 +112,6 @@ and game threads, then schedules the RSP and RDP for ever: it swaps the framebuf
 audio task when asked (making the graphics task yield), and starts each display list the game thread builds.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: D_8005C0B2, D_8005C0B3 and D_8005B0F8 are read as volatile (lbu then a separate sign
-// extension, and a reload right after each store, as D_8005C0B1); declared plain until that is signed off.
-// The task's ucode is a symbol of its own at 0x80056DD0 (rspbootTextEnd's address; retail loads it apart):
-// the F3DEX FIFO text (output_buff is set), gspF3DEX_fifoTextStart or the NoN variant; it needs a definition.
 void func_80025FEC( void *arg ) {
     OSMesg msg;
     s32 index;
@@ -184,8 +179,7 @@ void func_80025FEC( void *arg ) {
                 if ( D_8005B114[D_8005C0B2] == 1 ) {
                     osViSwapBuffer( D_80066C38[D_8005C0B2] );
                     D_8005C0B3 = D_8005C0B2;
-                    D_8005C0B2++;
-                    if ( D_8005C0B2 == 3 ) {
+                    if ( ++D_8005C0B2 == 3 ) {
                         D_8005C0B2 = 0;
                     }
                     D_8005B12C = 0;
@@ -276,8 +270,8 @@ void func_80025FEC( void *arg ) {
                 D_8005B140.t.flags = OS_TASK_LOADABLE;
                 D_8005B140.t.ucode_boot_size = (u8 *)rspbootTextEnd - (u8 *)rspbootTextStart;
                 D_8005B140.t.ucode_boot = (u64 *)rspbootTextStart;
-                D_8005B140.t.ucode = (u64 *)gspF3DEX_fifoTextStart;
-                D_8005B140.t.ucode_data = D_8005F3F0;
+                D_8005B140.t.ucode = (u64 *)gspF3DEX2_Rej_fifoTextStart;
+                D_8005B140.t.ucode_data = (u64 *)gspF3DEX2_Rej_fifoDataStart;
                 D_8005B140.t.data_ptr = (u64 *)D_80069410[D_8005B120].list;
                 D_8005B140.t.data_size = D_80069410[D_8005B120].size;
                 D_8005B100 = 1;
@@ -290,9 +284,6 @@ void func_80025FEC( void *arg ) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/1060", func_80025FEC);
-#endif
 
 /*
 ================
