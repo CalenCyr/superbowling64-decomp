@@ -2219,36 +2219,27 @@ Draws a player's frame panel on the lane's side: the name, the frame number and 
 count, the last one blended.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) with `x = frameX; y = 0x20; x += 0xF;`, but that split step only steers
-// cse (written `x = frameX + 0xF`, cse folds it into the lane base, x + 0x47, which retail does not), so it reads as
-// a split made to steer codegen (R17) and is not counted; the real spelling, with a reason of its own for the separate step, is still open
 void func_80119C50_gacode( s32 player, u8 lane ) {
     s16 digits[4];
-    s32 x;
-    s32 frameX;
+    s16 x;
     s16 y;
     s32 i;
 
     x = lane != 0 ? 0xA8 : 0x18;
     func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x18 );
-    frameX = x + 0x38;
-    func_8002DF3C( 0xAB7, frameX, 0x10 );
-    x = frameX;
-    y = 0x20;
-    x += 0xF;
+    x += 0x38;
+    func_8002DF3C( 0xAB7, x, 0x10 );
     func_80039554( digits, D_8009D19C[player] + 1, 0, 0 );
-    func_8003B1CC( digits[2], frameX + 0x30, 0x11 );
-    func_8003B1CC( digits[3], frameX + 0x38, 0x11 );
+    func_8003B1CC( digits[2], x + 0x30, 0x11 );
+    func_8003B1CC( digits[3], x + 0x38, 0x11 );
+    x += 0xF;
+    y = 0x20;
     for ( i = 0; i < D_80068A50[player] - 1; i++ ) {
         func_8002DF3C( 0xADB, x, y );
         x += 0xA;
     }
     func_8002E4B0( 0xADB, x, y, (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_80119C50_gacode);
-#endif
 
 /*
 ================
