@@ -98,13 +98,6 @@ void func_80025EBC( void ) {
     }
 }
 
-/*
-Parked: the rodata of func_80025FEC and func_80026B44 (file names "IDX     SYS" ... "OPCODE  SYS" and three
-jump tables, 0x800602C0-0x80060388) sits in the 3A7F0 data blob; 2DF0's func_80028064 jump table follows at
-0x80060388, which is not 16-aligned, so a separate 1060 .rodata subsegment cannot link under the main segment's
-SUBALIGN(16), and SUBALIGN(8) misplaces libultra rodata at 0x80060B78. Compiling either function needs that
-ownership resolved first (one possibility: 1060 and 2DF0 are one source file).
-*/
 INCLUDE_ASM("asm/nonmatchings/1060", func_80025FEC);
 
 /*

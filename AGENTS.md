@@ -93,7 +93,7 @@ Also record:
 
   | segment | ROM | VRAM | notes |
   |---|---|---|---|
-  | main | 0x1060-0x3C2A0 | 0x80025C60 | 604 functions; BSS to 0x8010A080 |
+  | main | 0x1060-0x3C2A0 | 0x80025C60 | 604 functions; BSS to 0x8010A080. No `SUBALIGN` (`subalign: null`): each object's sections keep their own alignment, as in the original link (KMC as gives `.text`/`.data`/`.bss` 2**4 and pads `.text` to 16; `.rodata` takes its contents' alignment, so 2DF0's `.rodata` follows 1060's at 0x80060388). Per-unit `.rodata` subsegments after the 3A7F0 data blob: 1060 (0x3B6C0), 2DF0 (0x3B788), 53B0, ... |
   | fat | 0x3C2A0-0x3C470 | 0x8010A080 | `BW64FAT` table: {name ptr, ROM start, ROM end, 0} |
   | knstatic | 0x3C470-0x3C570 | 0x8010A250 | `KNSTATICSYS` |
   | gacode | 0x3C570-0x56FF0 | 0x80112350 | game overlay (`GACODE  SYS`): C units 3C570, 3E350, 474E0, 4C560; .data 0x4D820; .rodata 0x56C20 (per unit, confirmed by the gate); bss 0x8012CDD0-0x8012F350 (ends with the second lane) |

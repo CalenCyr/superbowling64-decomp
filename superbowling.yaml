@@ -68,6 +68,7 @@ segments:
     vram: 0x80025C60
     follows_vram: entry
     bss_size: 0xA91E0
+    subalign: null
     subsegments:
       - [0x1060, c]
       - [0x2DF0, c]
@@ -315,6 +316,8 @@ segments:
       - [0x3A4F0, .data, libkmc/atan]
       - [0x3A6F0, .data, libkmc/ctype]
       - [0x3A7F0, data]
+      - [0x3B6C0, .rodata, 1060]
+      - [0x3B788, .rodata, 2DF0]
       - [0x3B7C0, .rodata, 53B0]
       - [0x3B7D0, rodata]  # BEF0 .rodata: one string shared by two functions
       - [0x3B7E0, .rodata, C650]
