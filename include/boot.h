@@ -134,6 +134,7 @@ typedef struct {
 } GfxFrame;                             /* size 0x18008 */
 
 extern GfxFrame D_80069410[2];
+extern GfxFrame *D_80102070;        /* the one of D_80069410 the game thread builds */
 extern OSTask D_8005B140;           /* the graphics task */
 extern s32 D_8005B120;              /* index in D_80069410 of the list the RSP runs */
 extern s32 D_8005B124[2];           /* state of each list of D_80069410: 0 building, 1 built, 2 running, 3 done */
@@ -155,8 +156,23 @@ extern OSTime D_80099440;           /* when the game thread was told to draw */
 
 void func_80026B44( void *arg );
 
-extern u8 D_8009CFB0;
-extern u8 D_800619A0;
+/* The game thread (func_80026B44): its state. */
+#define CURSOR_MIN_X        16          /* bounds of the cursor D_8005C0B8 */
+#define CURSOR_MAX_X        303
+#define CURSOR_MIN_Y        16
+#define CURSOR_MAX_Y        227
+extern u8 D_8009CFB0;               /* pulses between 75 and 255 by D_800619A0 a frame */
+extern s8 D_800619A0;               /* +12 or -12 */
+extern s16 D_8005C0B8;              /* a cursor's x, moved by the stick; 160 at boot */
+extern s16 D_8005C0BA;              /* its y; 120 at boot */
+extern u8 D_8005C0BE;               /* row of D_8005B134 the cursor moves by */
+extern u8 D_8005B134[3][4];         /* pixels a frame the cursor moves by, from the least to the most tilt */
+extern u8 D_8005B198;               /* when set, the cursor stays */
+extern u8 D_8005B188;               /* blank frames drawn before the next scene loads */
+extern u8 D_8005B0E0;               /* the scene loaded (D_8005C0B6); 0xFF at boot */
+extern u16 D_8005B180[4];           /* per demo (D_8005C0F0): the image the demo shows its title by */
+extern Gfx D_8010A2C8[];            /* display lists of the KNSTATICSYS file each frame starts with */
+extern Gfx D_8010A2A0[];
 
 void func_80025E10( void *arg );
 void func_80025EBC( void );

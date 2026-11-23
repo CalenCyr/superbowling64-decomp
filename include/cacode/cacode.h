@@ -4,6 +4,7 @@
 /* cacode.h -- the cacode overlay (file CACODE  SYS, ROM 0x67370, loaded at 0x80112350) */
 
 #include "common.h"
+#include "overlay.h"
 #include "libultra.h"
 #include "boot.h"
 #include "input.h"

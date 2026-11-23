@@ -29,7 +29,7 @@ extern s8 D_80066E18[4][10];        /* per player and frame */
 extern s8 D_800994B8[2];            /* per player of a duel: frames won */
 extern s16 D_800EA090[];
 extern u16 D_8009D030[2][3];        /* per player of a duel and game: score */
-extern u8 D_8005C0B6;               /* restored by the results overlay on leaving */
+extern u8 D_8005C0B6;               /* the scene to run, SCENE_* (overlay.h); restored by the results overlay on leaving */
 extern u8 D_8005C0BF;               /* 0, then 1 once an overlay asks to leave, 2 when it goes */
 extern s16 D_8005C0C0;
 extern u32 D_8005C0F0;               /* demo the opening overlay plays next, 0 to 3 */
@@ -46,8 +46,7 @@ extern u8 D_800A304C[4];            /* per player: a run counter (to 255) the ga
 extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
 extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */
 
-/* The lane's floor height grid: a file (the stage's gaStage_t.unk_18) main loads at boot; a copy of it
-   follows at D_80100100 + 0xFAC. Name invented. */
+/* The lane's floor height grid: a file (the stage's gaStage_t.unk_18). Name invented. */
 typedef struct {
     /* 0x000 */ u16 numX;                  /* grid points along x */
     /* 0x002 */ u16 numZ;                  /* grid points along z */
@@ -58,6 +57,6 @@ typedef struct {
     /* 0x00C */ s16 heights[2000];         /* by z, then x */
 } floorGrid_t;                          /* size 0xFAC */
 
-extern floorGrid_t D_80100100;
+extern floorGrid_t D_80100100[2];   /* [0] the stage's; [1] a copy of the grid main loads at boot */
 
 #endif

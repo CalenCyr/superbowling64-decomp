@@ -4,6 +4,7 @@
 /* gscode.h -- the game-select overlay (file GSCODE  SYS, ROM 0x58F40, loaded at 0x80112350) */
 
 #include "common.h"
+#include "overlay.h"
 #include "game.h"
 #include "menu.h"
 #include "libultra.h"
@@ -224,10 +225,8 @@ extern u16 D_80120A18_gscode;        /* frames before the next credits command; 
 extern u16 D_80120A1A_gscode;        /* next command of the credits script */
 
 /* unit 58F40 */
-void func_80112350_gscode( void );
 void func_801123C4_gscode( u8 screen );
 void func_801123E8_gscode( void );
-s32 func_80112414_gscode( void );
 void func_8011288C_gscode( void );
 void func_80112894_gscode( void );
 

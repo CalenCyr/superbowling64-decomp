@@ -3,7 +3,7 @@
 
 #include "structs.h"
 
-void Snd_SetMasterVolume( s32 flags, s16 value );
+void Snd_SetMasterVolume( s32 flags, s32 value );
 void Snd_LoadWaveBank( waveBank_t *bank, s32 romBase );
 void Snd_Resume( s32 id );
 void Snd_LoadSeTable( void *data );

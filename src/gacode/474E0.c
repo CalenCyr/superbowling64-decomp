@@ -734,50 +734,50 @@ f32 func_8011F87C_gacode( f32 x, f32 z, vec3_t normal ) {
     f32 b;
     f32 height;
 
-    pos[0] = x + -D_80100100.originX;
-    pos[1] = z + -D_80100100.originZ;
-    cell[0] = (s16)pos[0] / D_80100100.stepX;
-    cell[1] = (s16)pos[1] / D_80100100.stepZ;
+    pos[0] = x + -D_80100100[0].originX;
+    pos[1] = z + -D_80100100[0].originZ;
+    cell[0] = (s16)pos[0] / D_80100100[0].stepX;
+    cell[1] = (s16)pos[1] / D_80100100[0].stepZ;
     if ( cell[0] < 0 ) {
         cell[0] = 0;
-    } else if ( cell[0] >= D_80100100.numX - 1 ) {
-        cell[0] = D_80100100.numX - 2;
+    } else if ( cell[0] >= D_80100100[0].numX - 1 ) {
+        cell[0] = D_80100100[0].numX - 2;
     }
     if ( cell[1] < 0 ) {
         cell[1] = 0;
-    } else if ( cell[1] >= D_80100100.numZ - 1 ) {
-        cell[1] = D_80100100.numZ - 2;
+    } else if ( cell[1] >= D_80100100[0].numZ - 1 ) {
+        cell[1] = D_80100100[0].numZ - 2;
     }
-    h[0] = D_80100100.heights[cell[1] * D_80100100.numX + cell[0]];
-    h[1] = D_80100100.heights[cell[1] * D_80100100.numX + cell[0] + 1];
-    h[2] = D_80100100.heights[( cell[1] + 1 ) * D_80100100.numX + cell[0]];
-    h[3] = D_80100100.heights[( cell[1] + 1 ) * D_80100100.numX + cell[0] + 1];
+    h[0] = D_80100100[0].heights[cell[1] * D_80100100[0].numX + cell[0]];
+    h[1] = D_80100100[0].heights[cell[1] * D_80100100[0].numX + cell[0] + 1];
+    h[2] = D_80100100[0].heights[( cell[1] + 1 ) * D_80100100[0].numX + cell[0]];
+    h[3] = D_80100100[0].heights[( cell[1] + 1 ) * D_80100100[0].numX + cell[0] + 1];
 
-    dx = pos[0] - cell[0] * D_80100100.stepX;
-    dz = pos[1] - cell[1] * D_80100100.stepZ;
-    edge = D_80100100.stepZ * dx / D_80100100.stepX;
+    dx = pos[0] - cell[0] * D_80100100[0].stepX;
+    dz = pos[1] - cell[1] * D_80100100[0].stepZ;
+    edge = D_80100100[0].stepZ * dx / D_80100100[0].stepX;
     if ( dz < edge && dx != 0.0f ) {
-        a = ( h[1] - h[0] ) * dx / D_80100100.stepX + h[0];
-        b = ( h[3] - h[0] ) * dx / D_80100100.stepX + h[0];
+        a = ( h[1] - h[0] ) * dx / D_80100100[0].stepX + h[0];
+        b = ( h[3] - h[0] ) * dx / D_80100100[0].stepX + h[0];
         height = ( b - a ) * dz / edge + a;
         if ( normal != 0 ) {
-            alongZ[2] = D_80100100.stepZ;
+            alongZ[2] = D_80100100[0].stepZ;
             alongZ[0] = 0.0f;
             alongX[2] = 0.0f;
-            alongX[0] = D_80100100.stepX;
+            alongX[0] = D_80100100[0].stepX;
             alongX[1] = h[1] - h[0];
             alongZ[1] = h[3] - h[1];
             func_8011D6C4_gacode( normal, alongZ, alongX );
         }
     } else {
-        a = ( h[3] - h[0] ) * dx / D_80100100.stepX + h[0];
-        b = ( h[3] - h[2] ) * dx / D_80100100.stepX + h[2];
-        height = ( b - a ) * ( dz - edge ) / ( D_80100100.stepZ - edge ) + a;
+        a = ( h[3] - h[0] ) * dx / D_80100100[0].stepX + h[0];
+        b = ( h[3] - h[2] ) * dx / D_80100100[0].stepX + h[2];
+        height = ( b - a ) * ( dz - edge ) / ( D_80100100[0].stepZ - edge ) + a;
         if ( normal != 0 ) {
-            alongZ[2] = D_80100100.stepZ;
+            alongZ[2] = D_80100100[0].stepZ;
             alongZ[0] = 0.0f;
             alongX[2] = 0.0f;
-            alongX[0] = D_80100100.stepX;
+            alongX[0] = D_80100100[0].stepX;
             alongX[1] = h[3] - h[2];
             alongZ[1] = h[2] - h[0];
             func_8011D6C4_gacode( normal, alongZ, alongX );
@@ -866,8 +866,8 @@ void func_8012016C_gacode( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, 
     motion->flags &= ~4;
     motion->flags &= ~1;
 
-    edge = (f32)( ( D_80100100.numZ - 1 ) * D_80100100.stepZ + D_80100100.originZ ) - 0.0002;
-    if ( spot->pos[2] > edge || spot->pos[2] < ( edge = D_80100100.originZ ) ) {
+    edge = (f32)( ( D_80100100[0].numZ - 1 ) * D_80100100[0].stepZ + D_80100100[0].originZ ) - 0.0002;
+    if ( spot->pos[2] > edge || spot->pos[2] < ( edge = D_80100100[0].originZ ) ) {
         spot->pos[2] -= spot->pos[2] - edge;
         if ( spot2->unk_18 != 0.0f ) {
             spot2->pos[2] -= spot->pos[2] - edge;
@@ -876,8 +876,8 @@ void func_8012016C_gacode( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, 
         motion->flags |= 4;
     }
 
-    edge = ( D_80100100.numX - 1 ) * D_80100100.stepX + D_80100100.originX;
-    if ( spot->pos[0] > edge || spot->pos[0] < ( edge = D_80100100.originX ) ) {
+    edge = ( D_80100100[0].numX - 1 ) * D_80100100[0].stepX + D_80100100[0].originX;
+    if ( spot->pos[0] > edge || spot->pos[0] < ( edge = D_80100100[0].originX ) ) {
         spot->pos[0] -= spot->pos[0] - edge;
         if ( spot2->unk_18 != 0.0f ) {
             spot2->pos[0] -= spot2->pos[0] - edge;

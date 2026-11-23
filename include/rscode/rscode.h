@@ -4,6 +4,7 @@
 /* rscode.h -- the results overlay (file RSCODE  SYS, ROM 0x56FF0, loaded at 0x80112350) */
 
 #include "common.h"
+#include "overlay.h"
 #include "game.h"
 #include "menu.h"
 #include "libultra.h"
@@ -41,8 +42,6 @@ extern u8 D_801142A8_rscode;        /* copied back to D_8005C0B6 on leaving */
 extern rsState_t D_801142AC_rscode; /* current state */
 extern rsState_t D_801142B0_rscode; /* state to return to */
 
-void func_80112350_rscode( void );
-void func_801123A8_rscode( void );
 void func_80112574_rscode( void );
 void func_80112674_rscode( void );
 void func_8011286C_rscode( void );

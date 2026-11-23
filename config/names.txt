@@ -403,6 +403,17 @@ SCHED_MSG_AUDIO	include/boot.h	invented: code 5, sent by the audio thread (12C70
 CONT_STACK_SIZE	include/boot.h	invented: bytes of the controller thread's stack (0x80068250-0x80068A50)
 GAME_STACK_SIZE	include/boot.h	invented: bytes of the game thread's stack (0x800E8090-0x800EA090)
 GFX_LIST_LEN	include/boot.h	invented: Gfx commands of a GfxFrame list (0x18000 bytes)
+CURSOR_MIN_X	include/boot.h	invented: the game thread clamps the cursor x D_8005C0B8 to 16 or more
+CURSOR_MAX_X	include/boot.h	invented: the game thread clamps the cursor x to 303 or less
+CURSOR_MIN_Y	include/boot.h	invented: the game thread clamps the cursor y D_8005C0BA to 16 or more
+CURSOR_MAX_Y	include/boot.h	invented: the game thread clamps the cursor y to 227 or less
+SCENE_GACODE	include/overlay.h	invented: D_8005C0B6 value 0, for which the game thread loads "GACODE  SYS" (ROM string)
+SCENE_CACODE	include/overlay.h	invented: value 1, loads "CACODE  SYS"
+SCENE_PVCODE	include/overlay.h	invented: value 2, loads "PVCODE  SYS"
+SCENE_OPCODE	include/overlay.h	invented: value 3, loads "OPCODE  SYS"
+SCENE_GSCODE	include/overlay.h	invented: value 4, loads "GSCODE  SYS"
+SCENE_MGCODE	include/overlay.h	invented: value 5, loads "MGCODE  SYS"
+SCENE_RSCODE	include/overlay.h	invented: value 6, loads "RSCODE  SYS"
 
 # gacode overlay (include/gacode/gacode.h): types and members, all invented from use
 vec3_t	gacode.h	invented: three floats (x, y, z); the Quake-style vector type

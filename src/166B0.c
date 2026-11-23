@@ -188,7 +188,7 @@ Snd_SetMasterVolume
 Sets the volume scale (VOLUME_MAX: 1) of the channel groups in flags (SND_SE, SND_BGM).
 ================
 */
-void Snd_SetMasterVolume( s32 flags, s16 value ) {
+void Snd_SetMasterVolume( s32 flags, s32 value ) {
     if ( flags & SND_SE ) {
         snd_seVolume = value;
     }

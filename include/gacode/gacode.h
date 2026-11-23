@@ -4,6 +4,7 @@
 /* gacode.h -- the game overlay (file GACODE  SYS, ROM 0x3C570, loaded at 0x80112350) */
 
 #include "common.h"
+#include "overlay.h"
 #include "game.h"
 #include "menu.h"
 #include "libultra.h"
@@ -364,7 +365,6 @@ s32 func_80113210_gacode( void );
 s32 func_80113270_gacode( void );
 s32 func_801132A8_gacode( void );
 s32 func_80114108_gacode( void );
-void func_80112A74_gacode( void );
 void func_801138EC_gacode( u8 *cur, s32 start, s32 team );
 void func_801132B0_gacode( void );
 void func_80113384_gacode( void );

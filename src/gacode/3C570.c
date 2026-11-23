@@ -28,7 +28,7 @@ void func_80112350_gacode( void ) {
     D_8012D238_gacode = 0;
     D_8012D239_gacode = 0;
     D_8012CDF0_gacode = func_80112AF0_gacode;
-    func_80029AF4( D_8012D220_gacode->unk_18, (u8 *)&D_80100100 );
+    func_80029AF4( D_8012D220_gacode->unk_18, (u8 *)&D_80100100[0] );
     params = D_8012D220_gacode->unk_00;
     for ( i = 0; i < D_8005C161; i++, params++ ) {
         character = D_8005C0E4[i] & 0xF;
