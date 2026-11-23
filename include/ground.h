@@ -64,12 +64,6 @@ extern u8 D_80066B30;               /* set when the fog setting D_800E6588 chang
 extern Vp D_8010A290;               /* the screen's viewport, in the KNSTATICSYS file */
 extern u16 D_80000400[];            /* depth buffer, in the low RAM */
 
-/*
-Identity TODO: linked values 0x592F0 and 0x5FC20 loaded as microcode text and data (G_LOAD_UCODE); presumably the
-physical addresses of main's graphics microcode.
-*/
-extern u8 D_592F0[];
-extern u8 D_5FC20[];
 
 extern rgba8_t D_80068ACC;          /* the primitive colour set */
 extern rgba8_t D_800EA0C8;          /* the environment colour set */
@@ -84,8 +78,6 @@ extern u32 D_800DF570;              /* the geometry mode set when D_800DF682 is 
 extern u16 D_8009CF68;              /* tmem words of the first texture: where the second is loaded */
 extern u16 D_800DF5D4;              /* the material (file index) last set up; 0xFFFF: none */
 extern void *D_800A30B0;            /* the model matrix last loaded */
-extern u8 D_56DD0[];                /* microcode text and data of draw entries of microcode 0 (G_LOAD_UCODE) */
-extern u8 D_5F3F0[];
 
 void func_80031250( void );
 void func_8003128C( void );
@@ -101,9 +93,7 @@ extern Vtx D_8005C1F0[NUM_PUFF_SIZES * 4]; /* squares of four vertices, by size 
 extern Mtx D_800E6770[2][NUM_PUFFS];    /* each puff turned to face camera 0, then camera 1 */
 extern u8 D_8005C970[2][3];         /* rgb of the two kinds of puff */
 extern u8 D_800A3018;               /* index in D_8009CFA0 of the camera func_800316C0 last set up; 2: none */
-extern u8 D_80066C34;               /* 1: main's graphics microcode D_592F0 is loaded */
-extern u8 D_57F60[];                /* microcode text and data the puffs are drawn with (G_LOAD_UCODE) */
-extern u8 D_5F800[];
+extern u8 D_80066C34;               /* microcode loaded: 0 gspF3DEX2_Rej_fifo, 1 gspF3DEX2_fifo, 2 gspL3DEX2_fifo */
 
 void func_80035074( void );
 void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz );

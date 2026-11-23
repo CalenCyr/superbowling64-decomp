@@ -697,7 +697,7 @@ void func_800308C4( s32 index, f32 *start, f32 *end, u8 *color ) {
         D_80063A70[index][1].v.ob[i] = *end++;
     }
     guMtxIdent( &D_80063AB0 );
-    gSPLoadUcode( D_800F8094++, D_592F0, D_5FC20 );
+    gSPLoadUcodeL( D_800F8094++, gspL3DEX2_fifo );
     func_800316C0( D_8009CFA0[index] );
     gDPSetRenderMode( D_800F8094++, G_RM_AA_XLU_LINE, G_RM_AA_XLU_LINE2 );
     gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );

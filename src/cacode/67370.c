@@ -692,7 +692,7 @@ void func_80113280_cacode( void ) {
         func_80112350_cacode( D_80115370_cacode, D_80115368_cacode, D_80115540_cacode );
     }
 
-    gSPLoadUcode( D_800F8094++, D_592F0, D_5FC20 );
+    gSPLoadUcodeL( D_800F8094++, gspL3DEX2_fifo );
     func_800316C0( &D_801157E4_cacode[D_80115368_cacode]->cam );
 
     /* the selected part's axes */

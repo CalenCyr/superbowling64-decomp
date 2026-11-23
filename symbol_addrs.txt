@@ -567,7 +567,13 @@ __fixdfdi = 0x80056AD0; // type:func
 __floatdidf = 0x80056BF0; // type:func
 matherr = 0x80056CF0; // type:func
 rspbootTextStart = 0x80056D00;
-rspbootTextEnd = 0x80056DD0;
+// F3DEX2 2.08 microcode (data ID strings "F3DEX.Rej fifo 2.08", "F3DEX fifo 2.08", "L3DEX fifo 2.08"), each text paired with its data by gSPLoadUcodeL in C650
+gspF3DEX2_Rej_fifoTextStart = 0x80056DD0;
+gspF3DEX2_fifoTextStart = 0x80057F60;
+gspL3DEX2_fifoTextStart = 0x800592F0;
+gspF3DEX2_Rej_fifoDataStart = 0x8005F3F0;
+gspF3DEX2_fifoDataStart = 0x8005F800;
+gspL3DEX2_fifoDataStart = 0x8005FC20;
 errno = 0x80068210; // size:0x4
 _ctype = 0x8005F2F0; // size:0x100 (name invented)
 // strcat's strcpy resolves to the game's own copy routine in unit 4890

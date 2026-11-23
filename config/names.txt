@@ -377,6 +377,12 @@ __floatdidf	0x80056BF0	evidence: long long a0:a1 to double in $f0; the CORDIC ke
 matherr	0x80056CF0	evidence: SVID hook called with struct exception by the libm error path; default returns 0
 rspbootTextStart	0x80056D00	evidence: start of RSP boot microcode; game code computes TextEnd - TextStart as the boot size
 rspbootTextEnd	0x80056DD0	evidence: end of rspboot (0xD0 bytes), used as the boot microcode's end
+gspF3DEX2_Rej_fifoTextStart	0x80056DD0	evidence: SDK name; its data block carries the ID string "RSP Gfx ucode F3DEX.Rej   fifo 2.08" (F3DEX2 2.08), text paired with data by the G_LOAD_UCODE in func_80031E40 and the scheduler's task
+gspF3DEX2_Rej_fifoDataStart	0x8005F3F0	evidence: SDK name; ID string "RSP Gfx ucode F3DEX.Rej   fifo 2.08" at +0x138
+gspF3DEX2_fifoTextStart	0x80057F60	evidence: SDK name; paired by G_LOAD_UCODE with gspF3DEX2_fifoDataStart
+gspF3DEX2_fifoDataStart	0x8005F800	evidence: SDK name; ID string "RSP Gfx ucode F3DEX       fifo 2.08" at +0x138
+gspL3DEX2_fifoTextStart	0x800592F0	evidence: SDK name; paired by G_LOAD_UCODE with gspL3DEX2_fifoDataStart
+gspL3DEX2_fifoDataStart	0x8005FC20	evidence: SDK name; ID string "RSP Gfx ucode L3DEX       fifo 2.08" at +0x138
 errno	0x80068210	evidence: set to 33/34 (EDOM/ERANGE) by the libm error path
 _ctype	0x8005F2F0	invented: 256-byte ctype class table used by atol (space bit 0x01, digit bit 0x08)
 strcpy	0x80029578	evidence: libkmc strcat calls strcpy by name; this routine copies a string with its terminator

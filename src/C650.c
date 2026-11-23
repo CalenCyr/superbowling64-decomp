@@ -389,15 +389,15 @@ void func_80031E40( void ) {
             D_800A3018 = 0xFF;
             switch ( D_80066C34 ) {
             case 0:
-                gSPLoadUcode( D_800F8094++, D_56DD0, D_5F3F0 );
+                gSPLoadUcodeL( D_800F8094++, gspF3DEX2_Rej_fifo );
                 gSPClipRatio( D_800F8094++, FRUSTRATIO_3 );
                 break;
             case 1:
-                gSPLoadUcode( D_800F8094++, D_57F60, D_5F800 );
+                gSPLoadUcodeL( D_800F8094++, gspF3DEX2_fifo );
                 gSPClipRatio( D_800F8094++, FRUSTRATIO_1 );
                 break;
             case 2:
-                gSPLoadUcode( D_800F8094++, D_592F0, D_5FC20 );
+                gSPLoadUcodeL( D_800F8094++, gspL3DEX2_fifo );
                 gSPClipRatio( D_800F8094++, FRUSTRATIO_1 );
                 break;
             }
@@ -839,7 +839,7 @@ void func_80035748( void ) {
 
     if ( D_80066C34 != 1 ) {
         D_800A3018 = 2;
-        gSPLoadUcode( D_800F8094++, D_57F60, D_5F800 );
+        gSPLoadUcodeL( D_800F8094++, gspF3DEX2_fifo );
         gSPClipRatio( D_800F8094++, FRUSTRATIO_1 );
     }
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );

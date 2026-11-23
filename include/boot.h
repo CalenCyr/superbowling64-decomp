@@ -59,7 +59,9 @@ extern OSMesgQueue D_800DF578;      /* where ROM DMAs report completion */
 extern u8 D_8010A250[];             /* start of the memory main clears at boot (the KNSTATICSYS file) */
 extern u8 D_800A2FE4;
 extern u16 *D_80066C38[3];          /* RGBA5551 320x240 framebuffers: 0x8038F800, 0x803B5000, 0x803DA800 at boot */
-extern s32 D_8005B0F8;              /* index in D_80066C38 of the framebuffer being drawn */
+/* index in D_80066C38 of the framebuffer being drawn */
+// volatile: the scheduler (1060) reloads it after its own increment, before the compare with 3
+extern volatile s32 D_8005B0F8;
 extern s32 D_8005B0E4;              /* RSP time of the last frame (mgcode's meter shows it as RSP) */
 extern s32 D_8005B0E8;              /* RDP time of the last frame (shown as RDP) */
 extern s32 D_8005B0EC;              /* CPU time of the last frame (shown as CPU) */
@@ -133,12 +135,15 @@ typedef struct {
 
 extern GfxFrame D_80069410[2];
 extern OSTask D_8005B140;           /* the graphics task */
-extern u64 D_8005F3F0[];            /* the graphics microcode's data */
 extern s32 D_8005B120;              /* index in D_80069410 of the list the RSP runs */
 extern s32 D_8005B124[2];           /* state of each list of D_80069410: 0 building, 1 built, 2 running, 3 done */
 extern s32 D_8005B114[3];           /* state of each framebuffer of D_80066C38: 1 drawn, 4 shown */
-extern s8 D_8005C0B2;               /* framebuffer to show next */
-extern s8 D_8005C0B3;               /* framebuffer shown */
+/* framebuffer to show next */
+// volatile: the scheduler (1060) reads it with lbu and a separate sign extension, and reloads it right after each store
+extern volatile s8 D_8005C0B2;
+/* framebuffer shown */
+// volatile: the scheduler (1060) reads it with lbu and a separate sign extension, and reloads it right after each store
+extern volatile s8 D_8005C0B3;
 extern u8 D_8005C0B4[2];            /* [0]: reset pressed; [1]: tasks stopped after it */
 extern s32 D_8005B104;              /* the graphics task was asked to yield */
 extern s32 D_8005B108;              /* the game thread is building a list */
