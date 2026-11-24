@@ -6,12 +6,12 @@
 
 /*
 ================
-func_80118010_gscode
+GS_UnlockMask
 
 Flag 4 adds 0x18, flag 8 adds 0x20 and flag 0x10 adds 0xC0; flag 4 is always set in the result.
 ================
 */
-u8 func_80118010_gscode( u8 flags ) {
+u8 GS_UnlockMask( u8 flags ) {
     u8 result;
 
     result = flags | 4;
@@ -29,7 +29,7 @@ u8 func_80118010_gscode( u8 flags ) {
 
 /*
 ================
-func_80118040_gscode
+GS_TeamSelect
 
 One frame of the team select: in turn, each team's players take a character with the D-pad and A or Start (B steps
 back), while the characters' models and their three figure bars are drawn; the menu slides in and out around it.
@@ -39,7 +39,7 @@ Returns 1 once every team is done, 2 when backed out, else 0.
 #ifdef NON_MATCHING
 // NON_MATCHING: byte-exact (gate green) only with the character cursor held in the loop counter j (marked R30
 // below); with one local per meaning the s0/s1 order flips, and a reused counter is not counted as a match
-s32 func_80118040_gscode( void ) {
+s32 GS_TeamSelect( void ) {
     u8 slots[2][4];         /* per team: its players in turn order; 0xFF: none */
     u8 shown[4];            /* per player: has taken, or is taking, a character */
     u8 unlocked;            /* bit per character that can be taken */
@@ -105,7 +105,7 @@ s32 func_80118040_gscode( void ) {
                 slots[0][0] = 0;
                 slots[0][1] = 1;
                 if ( D_8011FC84_gscode[0] ) {
-                    unlocked = func_80118010_gscode( D_8009D098.unk_04 );
+                    unlocked = GS_UnlockMask( D_8009D098.unk_04 );
                 }
             }
             func_8003893C( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
@@ -295,7 +295,7 @@ s32 func_80118040_gscode( void ) {
                         D_8011FC84_gscode[i]++;
                         if ( ( D_8005C160 & 0xF ) == 1 && D_8011FC84_gscode[i] == 1 ) {
                             D_8005C0E4[1] = ( D_8005C0E4[1] & 0xF0 ) | 1;
-                            unlocked = func_80118010_gscode( D_8009D098.unk_04 );
+                            unlocked = GS_UnlockMask( D_8009D098.unk_04 );
                             /* BUG: this reuses the team loop's counter, so the team loop goes on from the character
                                found (or ends) */
                             for ( i = 0; i < 8; i++ ) {
@@ -498,7 +498,7 @@ s32 func_80118040_gscode( void ) {
             for ( i = 0; i < 4; i++ ) {
                 shown[i] = 0;
             }
-            func_8002A67C();
+            Obj_FreeAll();
             D_8011FC82_gscode = 0;
             Cache_FreeBelow( 0x825 );
             D_8011FC84_gscode[0] = D_8011FC84_gscode[1] = 0;
@@ -520,5 +520,5 @@ s32 func_80118040_gscode( void ) {
     return 0;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gscode/5EC00", func_80118040_gscode);
+INCLUDE_ASM("asm/nonmatchings/gscode/5EC00", GS_TeamSelect);
 #endif

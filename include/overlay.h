@@ -2,7 +2,7 @@
 #define OVERLAY_H
 
 /*
-overlay.h -- the code overlays the game thread (func_80026B44) loads at 0x80112350, one at a time: the
+overlay.h -- the code overlays the game thread (Game_Thread) loads at 0x80112350, one at a time: the
 linker's bounds of each, and the entry points main calls in them
 */
 
@@ -40,7 +40,7 @@ void func_80112A74_gacode( void );
 void RS_Init( void );
 void RS_Frame( void );
 void GS_Init( void );
-s32 func_80112414_gscode( void );
+s32 GS_Frame( void );
 void CA_Init( void );
 void CA_Frame( void );
 void PV_Init( void );

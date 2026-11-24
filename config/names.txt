@@ -367,7 +367,7 @@ rand	0x80056220	evidence: 1103515245/12345 LCG returning 15 bits
 srand	0x80056254	evidence: stores its argument into rand's state
 sqrt	0x80056260	evidence: passes "sqrt" to the matherr path; called by GCC's inline sqrt.d NaN fallback
 strcat	0x80056480	evidence: finds dst's terminator then calls strcpy(end, src), returns dst
-strncmp	0x80056530	evidence: behaviour matches ANSI strncmp (stops at terminator, n-bounded); called with n=11 by the FAT lookup func_8002889C
+strncmp	0x80056530	evidence: behaviour matches ANSI strncmp (stops at terminator, n-bounded); called with n=11 by the FAT lookup FAT_GetFileSize
 __divdi3	0x80056900	evidence: called by libultra (ldiv.o) under this name
 __moddi3	0x800569B0	evidence: signed counterpart of __divdi3 returning the remainder; branches to __umoddi3
 __udivdi3	0x80056A70	evidence: called by libultra under this name
@@ -479,7 +479,7 @@ Min	src/rscode/56FF0.c	invented: inline lesser of two values, Max's pair (func_8
 frameSlot_t	include/cacode/cacode.h	invented: a slot of cacode's cache of BMP frames (frame, clip, LRU stamp, 40 RGBA16 tiles)
 opImage_t	opcode.h	invented: an image of the Controller Pak screen (id, x, y, alpha), lists end with id -1
 opNoteName_t	opcode.h	invented: a pak note's name in glyphs (16 + extension + 0xFFFF end) for Txt_DrawGlyphs
-PAK_MAX_NOTES	opcode.h	invented: the 16 notes of a Controller Pak func_80113168_opcode lists
+PAK_MAX_NOTES	opcode.h	invented: the 16 notes of a Controller Pak OP_PakScreen lists
 PAK_NOTES_SHOWN	opcode.h	invented: the five note lines of the Controller Pak screen
 CAMODE_ROTATE	include/cacode/cacode.h	evidence: the mode text "ROTATE" func_80113280_cacode draws
 CAMODE_FILE	include/cacode/cacode.h	evidence: the mode text "FILE" func_80113280_cacode draws
@@ -565,10 +565,10 @@ OP_Frame	0x801123A8	invented: the overlay's per-frame function (overlay.h); runs
 OP_Null	0x80112950	invented: does nothing; nothing calls it
 OP_CheckSettings	0x80112958	invented: one frame of the boot-time Controller Pak / saved-settings check
 op_checkStep	0x801140B0	invented: step of OP_CheckSettings
-op_charEntries	0x801140C0	invented: entry of each character code 0x10-0x94 (func_80113130_opcode)
+op_charEntries	0x801140C0	invented: entry of each character code 0x10-0x94 (OP_ConvertPakChar)
 op_pakImages	0x801141CC	invented: images of the Controller Pak screen
 op_cursorImages	0x8011429C	invented: cursor images, a frame each
-op_pakStep	0x801142A2	invented: step of the Controller Pak screen (func_80113168_opcode)
+op_pakStep	0x801142A2	invented: step of the Controller Pak screen (OP_PakScreen)
 op_promptChoice	0x801142A3	invented: choice of the Controller Pak screen's first prompt
 op_cursorLine	0x801142A4	invented: line of the cursor
 op_pakState	0x801142A5	invented: state of the Controller Pak screen
@@ -758,3 +758,19 @@ Save_ShowPrompt	0x80036E60	invented: shows a prompt image for one frame, zooming
 Sound_PlaySe	0x80037870	invented: plays a sound effect and returns its sound id
 Sound_Stop	0x800379A8	invented: stops a sound by id
 Cache_GetFile	0x80030C04	invented: returns a file, loading and relocating it when not cached
+
+# BW64FAT lookup, game thread, object list, AGENTS.md's overlay examples
+Game_Thread	0x80026B44	invented: the game thread: loads each scene's overlay and draws a frame each time the main thread asks
+FAT_FindFile	0x800286D0	invented: returns the BW64FAT table index of a file name, or -1
+FAT_ReadFile	0x80028744	invented: reads part of a BW64FAT file from ROM into memory
+FAT_GetFileSize	0x8002889C	invented: returns the size of a BW64FAT file, or 0 if there is none
+Obj_ClearList	0x80029FB0	invented: empties the object list without freeing its objects
+Obj_Free	0x8002A624	invented: removes an object from the list and frees it
+Obj_FreeAll	0x8002A67C	invented: frees every object and empties the list
+GS_Frame	0x80112414	invented: per-frame entry of the game-select overlay (overlay.h): runs the current screen
+GS_PushScreen	0x801123C4	invented: pushes a screen to go back to
+GS_PopScreen	0x801123E8	invented: goes back to the last pushed screen
+GS_UnlockMask	0x80118010	invented: expands the saved unlock flags into the mask of unlocked choices of the team select
+GS_TeamSelect	0x80118040	invented: one frame of the team select, where each team's players pick characters
+OP_ConvertPakChar	0x80113130	invented: converts a Controller Pak note-name character code through the overlay's table
+OP_PakScreen	0x80113168	invented: one frame of the Controller Pak screen that lists and deletes notes

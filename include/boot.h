@@ -122,7 +122,7 @@ extern OSMesg D_8009D068[1];
 #define GAME_STACK_SIZE     0x2000      /* bytes of stack of the game thread */
 extern OSThread D_800617F0;         /* controller thread, func_80028064 */
 extern u64 D_80068250[CONT_STACK_SIZE / sizeof( u64 )];
-extern OSThread D_80061640;         /* game thread, func_80026B44 */
+extern OSThread D_80061640;         /* game thread, Game_Thread */
 extern u64 D_800E8090[GAME_STACK_SIZE / sizeof( u64 )];
 
 /* A display list the game thread builds, two of them used in turn. */
@@ -154,9 +154,9 @@ extern s32 D_8005B130;              /* swaps this second */
 extern OSTime D_80066C48;           /* when the graphics task started */
 extern OSTime D_80099440;           /* when the game thread was told to draw */
 
-void func_80026B44( void *arg );
+void Game_Thread( void *arg );
 
-/* The game thread (func_80026B44): its state. */
+/* The game thread (Game_Thread): its state. */
 #define CURSOR_MIN_X        16          /* bounds of the cursor D_8005C0B8 */
 #define CURSOR_MAX_X        303
 #define CURSOR_MIN_Y        16

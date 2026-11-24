@@ -42,7 +42,7 @@ s32 GS_CharacterSelect( void ) {
     if ( D_8011F8BA_gscode < 15 && D_8011F8B9_gscode == CHOICE_RUN ) {
         D_8011F8BA_gscode++;
         if ( D_8011F8BA_gscode == 10 ) {
-            func_8002A67C();
+            Obj_FreeAll();
             Cache_FreeBelow( 0x825 );
             func_8002A1EC( gs_classes, D_8011F880_gscode[D_8005C163] );
             D_8011F8A0_gscode = 30;
@@ -152,7 +152,7 @@ s32 GS_CharacterSelect( void ) {
                 D_8005C0C0 = 0x107;
             }
             D_8011F8BA_gscode = 8;
-            func_8002A67C();
+            Obj_FreeAll();
             Cache_FreeBelow( 0x825 );
             if ( D_8011F8B9_gscode == CHOICE_TAKEN ) {
                 D_8011F8B9_gscode = CHOICE_IN;

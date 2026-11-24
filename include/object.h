@@ -115,12 +115,12 @@ typedef struct {
 extern void *D_800EA120[];          /* main's scene objects, of several kinds: [1] gacode's camera (gaCamera_t), the
                                        others mostly sceneObject_t */
 
-void func_80029FB0( void );
+void Obj_ClearList( void );
 void func_80029FF4( objParams_t *params );
 void func_8002A1EC( objClass_t *classes, objParams_t *params );
 void func_8002A2F0( void );
-void func_8002A624( objNode_t *obj );
-void func_8002A67C( void );
+void Obj_Free( objNode_t *obj );
+void Obj_FreeAll( void );
 f32 func_8002A724( u8 *str );
 void func_8002A7EC( u8 *name );
 void func_8002A810( f32 m[4][4], f32 x, f32 y, f32 z );

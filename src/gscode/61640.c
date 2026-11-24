@@ -114,7 +114,7 @@ s32 GS_CharacterMenu( void ) {
         D_80120654_gscode += 2;
         if ( D_80120654_gscode == 30 ) {
             Sound_PlayBgm( 1 );
-            func_8002A67C();
+            Obj_FreeAll();
             Cache_FreeBelow( 0x825 );
             D_80120430_gscode[5].slide = SLIDE_LEFT;
             if ( D_80120655_gscode == CHOICE_TAKEN ) {

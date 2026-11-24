@@ -148,14 +148,14 @@ void Main_Thread( void *arg ) {
     D_80066B70.size = fat_ROM_END - fat_ROM_START;
     osEPiStartDma( D_800ABD60, &D_80066B70, OS_READ );
     osRecvMesg( &D_800DF578, NULL, OS_MESG_BLOCK );
-    func_80028744( "IDX     SYS", D_800A30C0, func_8002889C( "IDX     SYS" ), 0 );
+    FAT_ReadFile( "IDX     SYS", D_800A30C0, FAT_GetFileSize( "IDX     SYS" ), 0 );
     osInvalDCache( D_8010A250, knstatic_ROM_END - knstatic_ROM_START );
-    func_80028744( "KNSTATICSYS", D_8010A250, func_8002889C( "KNSTATICSYS" ), 0 );
+    FAT_ReadFile( "KNSTATICSYS", D_8010A250, FAT_GetFileSize( "KNSTATICSYS" ), 0 );
     Cont_Init();
     osContStartReadData( &D_80066B38 );
     osCreateThread( &D_800617F0, 2, func_80028064, arg, &D_80068250[CONT_STACK_SIZE / sizeof( u64 )], 0x11 );
     osStartThread( &D_800617F0 );
-    osCreateThread( &D_80061640, 5, func_80026B44, arg, &D_800E8090[GAME_STACK_SIZE / sizeof( u64 )], 8 );
+    osCreateThread( &D_80061640, 5, Game_Thread, arg, &D_800E8090[GAME_STACK_SIZE / sizeof( u64 )], 8 );
     osStartThread( &D_80061640 );
     func_80037CD0();
 
@@ -312,7 +312,7 @@ inline void func_80026B28( void ) {
 
 /*
 ================
-func_80026B44
+Game_Thread
 
 Game thread: finishes the first three frames empty, sets the VI mode for the TV type, loads the floor grid,
 then draws a frame each time the main thread asks: it moves the cursor by the stick, starts the display list,
@@ -327,7 +327,7 @@ CPU time of the frame.
 // names differ (D_8005C0BA is retail's D_8005C0B8 + 2). One local holds the counter, the file size and the
 // second switch's index, as retail's s2 does. An unused 16-byte local gives retail's frame (not adopted, R17);
 // the inlined func_80026B10 and func_80026B28 have no locals, so their frames add nothing.
-void func_80026B44( void *arg ) {
+void Game_Thread( void *arg ) {
     s32 i;
 
     func_80026B28();
@@ -449,68 +449,68 @@ void func_80026B44( void *arg ) {
             D_8005B188 = 0;
             func_80029DF0( NULL, NULL );
             Cache_Clear();
-            func_80029FB0();
+            Obj_ClearList();
             switch ( D_8005C0B6 ) {
             case SCENE_GACODE:
-                i = func_8002889C( "GACODE  SYS" );
+                i = FAT_GetFileSize( "GACODE  SYS" );
                 memset( gacode_VRAM + i, 0, gacode_BSS_END - gacode_VRAM - i );
                 osInvalICache( gacode_VRAM, i );
                 osInvalDCache( gacode_VRAM, i );
-                func_80028744( "GACODE  SYS", gacode_VRAM, i, 0 );
+                FAT_ReadFile( "GACODE  SYS", gacode_VRAM, i, 0 );
                 func_80026B10();
                 func_80112350_gacode();
                 break;
             case SCENE_RSCODE:
-                i = func_8002889C( "RSCODE  SYS" );
+                i = FAT_GetFileSize( "RSCODE  SYS" );
                 memset( rscode_VRAM + i, 0, rscode_BSS_END - rscode_VRAM - i );
                 osInvalICache( rscode_VRAM, i );
                 osInvalDCache( rscode_VRAM, i );
-                func_80028744( "RSCODE  SYS", rscode_VRAM, i, 0 );
+                FAT_ReadFile( "RSCODE  SYS", rscode_VRAM, i, 0 );
                 func_80026B10();
                 RS_Init();
                 break;
             case SCENE_GSCODE:
-                i = func_8002889C( "GSCODE  SYS" );
+                i = FAT_GetFileSize( "GSCODE  SYS" );
                 memset( gscode_VRAM + i, 0, gscode_BSS_END - gscode_VRAM - i );
                 osInvalICache( gscode_VRAM, i );
                 osInvalDCache( gscode_VRAM, i );
-                func_80028744( "GSCODE  SYS", gscode_VRAM, i, 0 );
+                FAT_ReadFile( "GSCODE  SYS", gscode_VRAM, i, 0 );
                 func_80026B10();
                 GS_Init();
                 break;
             case SCENE_CACODE:
-                i = func_8002889C( "CACODE  SYS" );
+                i = FAT_GetFileSize( "CACODE  SYS" );
                 memset( cacode_VRAM + i, 0, cacode_BSS_END - cacode_VRAM - i );
                 osInvalICache( cacode_VRAM, i );
                 osInvalDCache( cacode_VRAM, i );
-                func_80028744( "CACODE  SYS", cacode_VRAM, i, 0 );
+                FAT_ReadFile( "CACODE  SYS", cacode_VRAM, i, 0 );
                 func_80026B10();
                 CA_Init();
                 break;
             case SCENE_PVCODE:
-                i = func_8002889C( "PVCODE  SYS" );
+                i = FAT_GetFileSize( "PVCODE  SYS" );
                 memset( pvcode_VRAM + i, 0, pvcode_BSS_END - pvcode_VRAM - i );
                 osInvalICache( pvcode_VRAM, i );
                 osInvalDCache( pvcode_VRAM, i );
-                func_80028744( "PVCODE  SYS", pvcode_VRAM, i, 0 );
+                FAT_ReadFile( "PVCODE  SYS", pvcode_VRAM, i, 0 );
                 func_80026B10();
                 PV_Init();
                 break;
             case SCENE_MGCODE:
-                i = func_8002889C( "MGCODE  SYS" );
+                i = FAT_GetFileSize( "MGCODE  SYS" );
                 memset( mgcode_VRAM + i, 0, mgcode_BSS_END - mgcode_VRAM - i );
                 osInvalICache( mgcode_VRAM, i );
                 osInvalDCache( mgcode_VRAM, i );
-                func_80028744( "MGCODE  SYS", mgcode_VRAM, i, 0 );
+                FAT_ReadFile( "MGCODE  SYS", mgcode_VRAM, i, 0 );
                 func_80026B10();
                 MG_Init();
                 break;
             case SCENE_OPCODE:
-                i = func_8002889C( "OPCODE  SYS" );
+                i = FAT_GetFileSize( "OPCODE  SYS" );
                 memset( opcode_VRAM + i, 0, opcode_BSS_END - opcode_VRAM - i );
                 osInvalICache( opcode_VRAM, i );
                 osInvalDCache( opcode_VRAM, i );
-                func_80028744( "OPCODE  SYS", opcode_VRAM, i, 0 );
+                FAT_ReadFile( "OPCODE  SYS", opcode_VRAM, i, 0 );
                 func_80026B10();
                 OP_Init();
                 break;
@@ -527,7 +527,7 @@ void func_80026B44( void *arg ) {
             RS_Frame();
             break;
         case SCENE_GSCODE:
-            func_80112414_gscode();
+            GS_Frame();
             break;
         case SCENE_CACODE:
             CA_Frame();
@@ -586,5 +586,5 @@ void func_80026B44( void *arg ) {
     }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/1060", func_80026B44);
+INCLUDE_ASM("asm/nonmatchings/1060", Game_Thread);
 #endif

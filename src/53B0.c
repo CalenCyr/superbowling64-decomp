@@ -11,12 +11,12 @@
 
 /*
 ================
-func_80029FB0
+Obj_ClearList
 
 Empties the object list, without freeing its objects.
 ================
 */
-void func_80029FB0( void ) {
+void Obj_ClearList( void ) {
     D_80066E00.next = NULL;
     D_80066E00.priority = 0;
     D_80099480 = 0;
@@ -78,12 +78,12 @@ INCLUDE_ASM("asm/nonmatchings/53B0", func_8002A2F0);
 
 /*
 ================
-func_8002A624
+Obj_Free
 
 Removes obj from the list and frees it.
 ================
 */
-void func_8002A624( objNode_t *obj ) {
+void Obj_Free( objNode_t *obj ) {
     objNode_t *prev;
 
     prev = &D_80066E00;
@@ -100,12 +100,12 @@ void func_8002A624( objNode_t *obj ) {
 
 /*
 ================
-func_8002A67C
+Obj_FreeAll
 
 Frees every object, and empties the list.
 ================
 */
-void func_8002A67C( void ) {
+void Obj_FreeAll( void ) {
     objNode_t *head;
 
     head = &D_80066E00;
@@ -113,9 +113,9 @@ void func_8002A67C( void ) {
         if ( head->next == NULL ) {
             break;
         }
-        func_8002A624( head->next );
+        Obj_Free( head->next );
     }
-    func_80029FB0();
+    Obj_ClearList();
 }
 
 /*

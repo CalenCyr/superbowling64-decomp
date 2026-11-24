@@ -8,12 +8,12 @@
 
 /*
 ================
-func_80113130_opcode
+OP_ConvertPakChar
 
 Looks up a character code's entry in the table (codes 0x10-0x94); any other code gives 0x57.
 ================
 */
-u16 func_80113130_opcode( u8 code ) {
+u16 OP_ConvertPakChar( u8 code ) {
     if ( (u8)( code - 0x10 ) >= 0x85 ) {
         return 0x57;
     }
@@ -22,13 +22,13 @@ u16 func_80113130_opcode( u8 code ) {
 
 /*
 ================
-func_80113168_opcode
+OP_PakScreen
 
 Runs one frame of the Controller Pak screen: lists the pak's notes, and deletes the one picked once the player
 confirms. Returns FALSE when the screen is over.
 ================
 */
-s32 func_80113168_opcode( void ) {
+s32 OP_PakScreen( void ) {
     s32 i;
     s32 j;
     s32 n;
@@ -55,9 +55,9 @@ s32 func_80113168_opcode( void ) {
                 op_noteIndex[n] = i;
                 op_notePages[n] = ( D_80066C00.note.file_size + 0xFF ) >> 8;
                 for ( j = 0; j < 16; j++ ) {
-                    op_noteNames[n].name[j] = func_80113130_opcode( D_80066C00.note.game_name[j] );
+                    op_noteNames[n].name[j] = OP_ConvertPakChar( D_80066C00.note.game_name[j] );
                 }
-                op_noteNames[op_numNotes].ext = func_80113130_opcode( D_80066C00.note.ext_name[0] );
+                op_noteNames[op_numNotes].ext = OP_ConvertPakChar( D_80066C00.note.ext_name[0] );
                 op_noteNames[op_numNotes].end = 0xFFFF;
                 op_numNotes++;
             } else if ( D_80066B8C != 5 ) {

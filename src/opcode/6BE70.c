@@ -28,7 +28,7 @@ void OP_Init( void ) {
 OP_Frame
 
 The opening's modes: two logo screens, the title with its demo games, then OP_CheckSettings's and
-func_80113168_opcode's screens. Each logo and the title count frames in op_modeFrames, then ask to leave.
+OP_PakScreen's screens. Each logo and the title count frames in op_modeFrames, then ask to leave.
 ================
 */
 // RULE-EXCEPTION: s32 with no return value: retail keeps v0 live at the exit
@@ -143,7 +143,7 @@ s32 OP_Frame( void ) {
         Draw_Image( 0xB5A, 0x48, 0x60 );
         break;
     case 0xFE:
-        if ( !func_80113168_opcode() ) {
+        if ( !OP_PakScreen() ) {
             D_8005C0E8 = 10;
         }
         break;

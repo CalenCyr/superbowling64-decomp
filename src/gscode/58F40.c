@@ -30,29 +30,29 @@ void GS_Init( void ) {
 
 /*
 ================
-func_801123C4_gscode
+GS_PushScreen
 
 Pushes a screen to go back to.
 ================
 */
-void func_801123C4_gscode( u8 screen ) {
+void GS_PushScreen( u8 screen ) {
     gs_screenStack[gs_screenDepth++] = screen;
 }
 
 /*
 ================
-func_801123E8_gscode
+GS_PopScreen
 
 Goes back to the last pushed screen.
 ================
 */
-void func_801123E8_gscode( void ) {
+void GS_PopScreen( void ) {
     gs_screen = gs_screenStack[--gs_screenDepth];
 }
 
 /*
 ================
-func_80112414_gscode
+GS_Frame
 
 Frame of the game-select overlay: runs the current screen and, on its result, pushes it and opens the
 next screen, or goes back to the last pushed one. The screens after the first depend on the game mode.
@@ -60,11 +60,11 @@ Declared s32 but returns nothing (the caller ignores it): the original's return 
 exit, which keeps the delay slot of the game-mode switch's range check empty.
 ================
 */
-s32 func_80112414_gscode( void ) {
+s32 GS_Frame( void ) {
     switch ( gs_screen ) {
     case 0:
         if ( GS_ModeMenu() == 1 ) {
-            func_801123C4_gscode( 0 );
+            GS_PushScreen( 0 );
             switch ( D_8005C160 & 0xF ) {
             case 0:
                 gs_screen = 1;
@@ -96,7 +96,7 @@ s32 func_80112414_gscode( void ) {
     case 1:
         switch ( GS_SubModeMenu() ) {
         case 1:
-            func_801123C4_gscode( 1 );
+            GS_PushScreen( 1 );
             switch ( ( D_8005C160 >> 4 ) & 3 ) {
             case 0:
                 gs_screen = 2;
@@ -110,43 +110,43 @@ s32 func_80112414_gscode( void ) {
             }
             break;
         case 2:
-            func_801123E8_gscode();
+            GS_PopScreen();
             break;
         }
         break;
     case 2:
         switch ( GS_TeamSizeMenu() ) {
         case 1:
-            func_801123C4_gscode( 2 );
+            GS_PushScreen( 2 );
             gs_screen = 5;
             break;
         case 2:
-            func_801123E8_gscode();
+            GS_PopScreen();
             break;
         }
         break;
     case 3:
         switch ( GS_PlayersMenu() ) {
         case 1:
-            func_801123C4_gscode( 3 );
+            GS_PushScreen( 3 );
             gs_screen = 5;
             break;
         case 2:
-            func_801123E8_gscode();
+            GS_PopScreen();
             break;
         }
         break;
     case 4:
         switch ( GS_TwoChoiceMenu() ) {
         case 1:
-            func_801123C4_gscode( 4 );
+            GS_PushScreen( 4 );
             gs_screen = 6;
             break;
         case 2:
-            func_801123E8_gscode();
+            GS_PopScreen();
             break;
         case 3:
-            func_801123C4_gscode( 4 );
+            GS_PushScreen( 4 );
             gs_screen = 9;
             Sound_PlayBgm( 13 );
             break;
@@ -155,18 +155,18 @@ s32 func_80112414_gscode( void ) {
     case 5:
         switch ( GS_PlayerSetup() ) {
         case 1:
-            func_801123C4_gscode( 5 );
+            GS_PushScreen( 5 );
             gs_screen = 6;
             break;
         case 2:
-            func_801123E8_gscode();
+            GS_PopScreen();
             break;
         }
         break;
     case 6:
-        switch ( func_80118040_gscode() ) {
+        switch ( GS_TeamSelect() ) {
         case 1:
-            func_801123C4_gscode( 6 );
+            GS_PushScreen( 6 );
             switch ( D_8005C160 & 0xF ) {
             case 0:
             case 2:
@@ -181,7 +181,7 @@ s32 func_80112414_gscode( void ) {
             }
             break;
         case 2:
-            func_801123E8_gscode();
+            GS_PopScreen();
             break;
         }
         break;
@@ -192,7 +192,7 @@ s32 func_80112414_gscode( void ) {
             D_8005C0B6 = 0;
             break;
         case 2:
-            func_801123E8_gscode();
+            GS_PopScreen();
             break;
         }
         break;
@@ -200,7 +200,7 @@ s32 func_80112414_gscode( void ) {
         switch ( GS_Options() ) {
         case 1:
         case 2:
-            func_801123E8_gscode();
+            GS_PopScreen();
             break;
         }
         break;
@@ -208,7 +208,7 @@ s32 func_80112414_gscode( void ) {
         switch ( GS_CharacterMenu() ) {
         case 1:
         case 2:
-            func_801123E8_gscode();
+            GS_PopScreen();
             break;
         }
         break;

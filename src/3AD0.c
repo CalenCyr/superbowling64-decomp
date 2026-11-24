@@ -8,12 +8,12 @@
 
 /*
 ================
-func_800286D0
+FAT_FindFile
 
 Returns the table index of the file name, or -1.
 ================
 */
-s16 func_800286D0( u8 *name ) {
+s16 FAT_FindFile( u8 *name ) {
     s32 i;
 
     for ( i = 0; ; i++ ) {
@@ -28,18 +28,18 @@ s16 func_800286D0( u8 *name ) {
 
 /*
 ================
-func_80028744
+FAT_ReadFile
 
 Reads size bytes of the file name, from offset on, into dst, one FAT_DMA_CHUNK at a time; returns 0, or -1
 if there is no such file.
 ================
 */
-s32 func_80028744( u8 *name, void *dst, s32 size, u32 offset ) {
+s32 FAT_ReadFile( u8 *name, void *dst, s32 size, u32 offset ) {
     s16 index;
     s32 i;
     s32 len;
 
-    index = func_800286D0( name );
+    index = FAT_FindFile( name );
     if ( index == -1 ) {
         return -1;
     }
@@ -60,15 +60,15 @@ s32 func_80028744( u8 *name, void *dst, s32 size, u32 offset ) {
 
 /*
 ================
-func_8002889C
+FAT_GetFileSize
 
 Returns the size of the file name, or 0 if there is no such file.
 ================
 */
-s32 func_8002889C( u8 *name ) {
+s32 FAT_GetFileSize( u8 *name ) {
     s16 index;
 
-    index = func_800286D0( name );
+    index = FAT_FindFile( name );
     if ( index == -1 ) {
         return 0;
     }

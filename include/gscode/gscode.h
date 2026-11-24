@@ -225,8 +225,8 @@ extern u16 gs_creditsWait;                /* frames before the next credits comm
 extern u16 gs_creditsPos;                 /* next command of the credits script */
 
 /* unit 58F40 */
-void func_801123C4_gscode( u8 screen );
-void func_801123E8_gscode( void );
+void GS_PushScreen( u8 screen );
+void GS_PopScreen( void );
 void GS_NullCreate( void );
 void GS_NullHandler( void );
 
@@ -249,8 +249,8 @@ s32 GS_PlayerSetup( void );
 s32 GS_CharacterSelect( void );
 
 /* unit 5EC00 */
-u8 func_80118010_gscode( u8 flags );
-s32 func_80118040_gscode( void );
+u8 GS_UnlockMask( u8 flags );
+s32 GS_TeamSelect( void );
 
 /* units 605D0, 61640 */
 s32 GS_Options( void );

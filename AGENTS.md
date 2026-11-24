@@ -22,7 +22,7 @@ This file is project-independent. Fill in the **Project adapter** section once p
 | `report` | refresh the progress report (objdiff or similar) | `make report` (objdiff 3.8.2; targets are `expected/`, refreshed by `make expected` only on a green gate) |
 | `gate` | the checks that must stay green before a commit or merge | `make gate` (about 2 s): deletes `build/`, rebuilds, checks SHA-1 `56937a9e9536af55ebed06480413265848c4a04a`; success line starts `GATE OK` |
 | `disasm` / `xref` / `class` | retail assembly, callers and callees, vtable and hierarchy evidence | `make split` (splat) → `asm/`, `assets/` |
-| `permute <function>` | the permuter, if there is one | `tools/permute.sh <unit> <func> [permuter.py args]` (decomp-permuter, submodule `tools/decomp-permuter`; e.g. `tools/permute.sh gscode/5EC00 func_80118040_gscode -j8 --best-only`). Imports the unit with `NON_MATCHING` defined and its Makefile `-O` level into ignored `nonmatchings/<func>/`; Python deps (`toml`, `Levenshtein`) go in an ignored `.permuter-venv/` made on first use. An explicit `inline` the draft lacks must be added to the work copy's `base.c`. Only the target function is disassembled for scoring (the work copy keeps the whole unit); several imports may run at once. `timeout` on a run does not stop the permuter's worker processes: kill them by PID afterwards. Scores include a constant penalty where splat names an interior address (`D_8005C0E5` for `D_8005C0E4[1]`), so a true match can score above 0 |
+| `permute <function>` | the permuter, if there is one | `tools/permute.sh <unit> <func> [permuter.py args]` (decomp-permuter, submodule `tools/decomp-permuter`; e.g. `tools/permute.sh gscode/5EC00 GS_TeamSelect -j8 --best-only`). Imports the unit with `NON_MATCHING` defined and its Makefile `-O` level into ignored `nonmatchings/<func>/`; Python deps (`toml`, `Levenshtein`) go in an ignored `.permuter-venv/` made on first use. An explicit `inline` the draft lacks must be added to the work copy's `base.c`. Only the target function is disassembled for scoring (the work copy keeps the whole unit); several imports may run at once. `timeout` on a run does not stop the permuter's worker processes: kill them by PID afterwards. Scores include a constant penalty where splat names an interior address (`D_8005C0E5` for `D_8005C0E4[1]`), so a true match can score above 0 |
 | `rules [<unit>]` | the rule checker: [match] findings (`MATCH-PENDING`) and advisory findings (naming, readability) | `make rules [UNIT=src/<unit>]` (`tools/rules.py`; `--report report.json` limits MATCH-PENDING to exact functions, `--json` feeds `make report`'s headline; allow list `config/rules.txt`; its tests: `make rules-test`). It can't see Section F patterns that need the reader test (see its docstring) |
 
 Also record:
@@ -38,9 +38,9 @@ Also record:
     arguments in source order, which `-O2`'s scheduler reorders; every libkmc C function matches at `-O`.
   - Per-unit override: units `3AD0`, `4890` and `4DC0` build with `-O3` (Makefile). Evidence: they inline their own
     earlier functions at the call sites without `inline` (gcc 2.7.2's `-O3` turns on `-finline-functions`); each
-    fails the gate at `-O2`. Unit `53B0` also builds with `-O3`: `func_8002A67C` holds the bodies of `func_8002A624`
-    and `func_80029FB0` and fails at plain `-O2`; `-O2` with `inline` on those two matches as well, so the bytes don't
-    decide, and the unit follows the other units' `-O3`. Overlay unit `gscode/58F40` also builds with `-O3`: `func_80112414_gscode` inlines the unit's earlier `func_801123C4`/`func_801123E8`, and fails both at `-O2` and with `inline` at `-O2`. Overlay unit `gscode/5EC00` builds with `-O3` too: retail `func_80118040_gscode` holds `func_80118010_gscode`'s body twice. Overlay unit `opcode/6CC50` builds with `-O3` as well: `func_80113168_opcode` holds `func_80113130_opcode`'s body at its two call sites; `inline` on `func_80113130_opcode` at `-O2` matches too, so the bytes don't decide, and the unit follows 53B0's choice. Unit `166B0` instead matches at `-O2` with `inline` on `Snd_SetFxType` and fails at
+    fails the gate at `-O2`. Unit `53B0` also builds with `-O3`: `Obj_FreeAll` holds the bodies of `Obj_Free`
+    and `Obj_ClearList` and fails at plain `-O2`; `-O2` with `inline` on those two matches as well, so the bytes don't
+    decide, and the unit follows the other units' `-O3`. Overlay unit `gscode/58F40` also builds with `-O3`: `GS_Frame` inlines the unit's earlier `GS_PushScreen`/`GS_PopScreen`, and fails both at `-O2` and with `inline` at `-O2`. Overlay unit `gscode/5EC00` builds with `-O3` too: retail `GS_TeamSelect` holds `GS_UnlockMask`'s body twice. Overlay unit `opcode/6CC50` builds with `-O3` as well: `OP_PakScreen` holds `OP_ConvertPakChar`'s body at its two call sites; `inline` on `OP_ConvertPakChar` at `-O2` matches too, so the bytes don't decide, and the unit follows 53B0's choice. Unit `166B0` instead matches at `-O2` with `inline` on `Snd_SetFxType` and fails at
     `-O3`.
 - **C pipeline:** a C unit is a splat `c` subsegment (`src/<unit>.c`); unmatched functions stay as
   `INCLUDE_ASM("asm/nonmatchings/<unit>", <func>);`. C is compiled by the KMC `gcc` driver, so KMC `as` 2.6
@@ -89,7 +89,7 @@ Also record:
   Symbols outside every splat segment live in `undefined_syms.txt`. Retail ROM: `rom.z64`, SHA-1
   `56937a9e9536af55ebed06480413265848c4a04a`, F3DEX 2.08, libultra 2.0K.
 - **ROM map** (from the game's `BW64FAT` file table at ROM 0x3C2A0, which main loads to 0x8010A080 at boot and
-  `func_8002889C` searches by 8.3 name):
+  `FAT_GetFileSize` searches by 8.3 name):
 
   | segment | ROM | VRAM | notes |
   |---|---|---|---|
@@ -97,12 +97,12 @@ Also record:
   | fat | 0x3C2A0-0x3C470 | 0x8010A080 | `BW64FAT` table: {name ptr, ROM start, ROM end, 0} |
   | knstatic | 0x3C470-0x3C570 | 0x8010A250 | `KNSTATICSYS` |
   | gacode | 0x3C570-0x56FF0 | 0x80112350 | game overlay (`GACODE  SYS`): C units 3C570, 3E350, 474E0, 4C560; .data 0x4D820; .rodata 0x56C20 (per unit, confirmed by the gate); bss 0x8012CDD0-0x8012F350 (ends with the second lane) |
-  | rscode | 0x56FF0-0x58F40 | 0x80112350 | results overlay (`RSCODE  SYS`): C unit 56FF0; .data 0x58EF0; .rodata 0x58F30 (one auto array initialiser); bss 0x801142A0, 0x20 (the end 0x801142C0 is what main's loader `func_80026B44` clears to) |
-  | gscode | 0x58F40-0x67370 | 0x80112350 | game-select overlay (`GSCODE  SYS`): 12 C units 58F40-61CA0; .data 0x62130; .rodata 0x67260 (per unit: 58F40, 59490, 5AD50, 5E2B0, 605D0, 61640); bss 0x80120780, 0x2F0 (the end 0x80120A70 is what main's loader `func_80026B44` clears to) |
-  | cacode | 0x67370-0x6A650 | 0x80112350 | overlay (`CACODE  SYS`): C unit 67370 (text to 0x6A37C; no alignment padding between its six functions, and its rodata follows their order); .data 0x6A380; .rodata 0x6A570 (file names, debug format strings, doubles); bss 0x80115630, 0x29260 (the motion tables saved as "motion.dat"; the end 0x8013E890 is what main's loader `func_80026B44` clears to) |
-  | pvcode | 0x6A650-0x6BA90 | 0x80112350 | overlay (`PVCODE  SYS`): C units 6A650, 6A940 (the scene's two empty class handlers; text to 0x6A950); .data 0x6A950; .rodata 0x6BA40 (a file name and debug format strings); no bss (the file end 0x80113790 is what main's loader `func_80026B44` clears to) |
-  | mgcode | 0x6BA90-0x6BE70 | 0x80112350 | overlay (`MGCODE  SYS`): C unit 6BA90 (text to 0x6BC88); .data 0x6BC90; .rodata 0x6BE30 (debug format strings); bss 0x80112730, 0x1000 (a 21 x 21 maze grid, the rest unreferenced; the end 0x80113730 is what main's loader `func_80026B44` clears to) |
-  | opcode | 0x6BE70-0x6DE70 | 0x80112350 | overlay (`OPCODE  SYS`): C units 6BE70, 6C470, 6CC50 (text to 0x6DBC8); .data 0x6DBD0; .rodata 0x6DDD0 (6C470's jump table); bss 0x80114350, 0x2B0 (the end 0x80114600 is what main's loader `func_80026B44` clears to) |
+  | rscode | 0x56FF0-0x58F40 | 0x80112350 | results overlay (`RSCODE  SYS`): C unit 56FF0; .data 0x58EF0; .rodata 0x58F30 (one auto array initialiser); bss 0x801142A0, 0x20 (the end 0x801142C0 is what main's loader `Game_Thread` clears to) |
+  | gscode | 0x58F40-0x67370 | 0x80112350 | game-select overlay (`GSCODE  SYS`): 12 C units 58F40-61CA0; .data 0x62130; .rodata 0x67260 (per unit: 58F40, 59490, 5AD50, 5E2B0, 605D0, 61640); bss 0x80120780, 0x2F0 (the end 0x80120A70 is what main's loader `Game_Thread` clears to) |
+  | cacode | 0x67370-0x6A650 | 0x80112350 | overlay (`CACODE  SYS`): C unit 67370 (text to 0x6A37C; no alignment padding between its six functions, and its rodata follows their order); .data 0x6A380; .rodata 0x6A570 (file names, debug format strings, doubles); bss 0x80115630, 0x29260 (the motion tables saved as "motion.dat"; the end 0x8013E890 is what main's loader `Game_Thread` clears to) |
+  | pvcode | 0x6A650-0x6BA90 | 0x80112350 | overlay (`PVCODE  SYS`): C units 6A650, 6A940 (the scene's two empty class handlers; text to 0x6A950); .data 0x6A950; .rodata 0x6BA40 (a file name and debug format strings); no bss (the file end 0x80113790 is what main's loader `Game_Thread` clears to) |
+  | mgcode | 0x6BA90-0x6BE70 | 0x80112350 | overlay (`MGCODE  SYS`): C unit 6BA90 (text to 0x6BC88); .data 0x6BC90; .rodata 0x6BE30 (debug format strings); bss 0x80112730, 0x1000 (a 21 x 21 maze grid, the rest unreferenced; the end 0x80113730 is what main's loader `Game_Thread` clears to) |
+  | opcode | 0x6BE70-0x6DE70 | 0x80112350 | overlay (`OPCODE  SYS`): C units 6BE70, 6C470, 6CC50 (text to 0x6DBC8); .data 0x6DBD0; .rodata 0x6DDD0 (6C470's jump table); bss 0x80114350, 0x2B0 (the end 0x80114600 is what main's loader `Game_Thread` clears to) |
   | idx, str, bgmptr, bgmwbk, septr, sewbk, bfx | 0x6DE70-0x656CD0 | - | asset files (bin) |
 - **Toolchain:** compiler and linker version and build, flags, per-unit flag overrides.
 - **Annotations:** the address marker format (for example `// FUNCTION: <MODULE> 0x...`), the stub marker and
