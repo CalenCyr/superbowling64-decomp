@@ -37,18 +37,16 @@ Returns 1 once every team is done, 2 when backed out, else 0.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: complete, same instructions and branches; registers only: retail keeps `character` in s1 and `pad`
-// in s0 in the team loop and `character` in s4 in the model and bar loops (the draft: s0, s1, s0), and allocates the
-// model loop's pointers s0/s1/s3 differently; relocation addends to D_8005C0E5-7, D_8005C0D4, D_8011FABB are splat's
-// names for D_8005C0E4[] and D_8011FA80_gscode[5].slide. Permuter (target-only scoring, 5 min at -O3):
-// nothing below the base score 1355.
+// NON_MATCHING: byte-exact (gate green) only with the character cursor held in the loop counter j (marked R30
+// below); with one local per meaning the s0/s1 order flips, and a reused counter is not counted as a match
 s32 func_80118040_gscode( void ) {
     u8 slots[2][4];         /* per team: its players in turn order; 0xFF: none */
     u8 shown[4];            /* per player: has taken, or is taking, a character */
     u8 unlocked;            /* bit per character that can be taken */
     s32 i;
-    s32 j;
-    u16 pad;
+    s32 j;                  /* a team's player or bar; in the team loop, the character being chosen */
+    u16 repeat;             /* D-pad presses, with auto-repeat */
+    u16 pad;                /* buttons pressed this frame */
     s32 character;
     u8 player;
 
@@ -254,34 +252,36 @@ s32 func_80118040_gscode( void ) {
                 if ( !( D_8011FC84_gscode[i] & 0x80 ) ) {
                     player = slots[i][D_8011FC84_gscode[i]];
                     if ( player != 0xFF ) {
-                    character = D_8005C0E4[player] & 0xF;
+                    // RULE-EXCEPTION: R30, the character cursor shares j's register: retail allocates repeat and
+                    // pad ahead of it, which a separate local reverses
+                    j = D_8005C0E4[player] & 0xF;
                     func_8003893C( D_8011FA80_gscode, player + 16, MENU_NONE, MENU_NONE, MENU_NONE, D_8009CFB0 );
 
                     if ( D_8011FC84_gscode[1] == 0x80 ) {
-                        pad = D_800E6758;
+                        repeat = D_800E6758;
                     } else {
-                        pad = D_800E6760[i];
+                        repeat = D_800E6760[i];
                     }
-                    if ( pad & L_JPAD ) {
+                    if ( repeat & L_JPAD ) {
                         do {
-                            character--;
-                            if ( character < 0 ) {
-                                character = 7;
+                            j--;
+                            if ( j < 0 ) {
+                                j = 7;
                             }
-                        } while ( !( ( unlocked >> character ) & 1 ) );
+                        } while ( !( ( unlocked >> j ) & 1 ) );
                         D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] =
-                            ( D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | character;
+                            ( D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | j;
                         func_80037870( SE_CURSOR, 0 );
                     }
-                    if ( pad & R_JPAD ) {
+                    if ( repeat & R_JPAD ) {
                         do {
-                            character++;
-                            if ( character == 8 ) {
-                                character = 0;
+                            j++;
+                            if ( j == 8 ) {
+                                j = 0;
                             }
-                        } while ( !( ( unlocked >> character ) & 1 ) );
+                        } while ( !( ( unlocked >> j ) & 1 ) );
                         D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] =
-                            ( D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | character;
+                            ( D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | j;
                         func_80037870( SE_CURSOR, 0 );
                     }
 
@@ -404,25 +404,30 @@ s32 func_80118040_gscode( void ) {
     func_8003068C( 0xE0, 0xE0, 0xE0 );
     func_8002DF3C( 0xA58, 0, 0 );
     func_800386E0( D_8011FA80_gscode, D_8011FC80_gscode );
+    /* an empty loop: retail still counts it out */
     for ( i = 0; i < 4; i++ ) {
     }
 
     if ( D_8011FC81_gscode == CHOICE_RUN ) {
         for ( i = 0; i < 4; i++ ) {
-            if ( i < D_8005C161 && shown[i] ) {
+            if ( i < D_8005C161 ) {
                 character = D_8005C0E4[i] & 0xF;
-                ( (sceneObject_t *)D_800EA120[10 + i] )->viewMask = 1;
-                if ( D_801207B4_gscode[i] != character ) {
-                    D_801207B4_gscode[i] = character;
-                    ( (sceneObject_t *)D_800EA120[10 + i] )->frame = 0;
-                    ( (sceneObject_t *)D_800EA120[10 + i] )->model = D_801207C0_gscode[character];
-                    ( (sceneObject_t *)D_800EA120[10 + i] )->anim = D_801207E0_gscode[character];
-                    if ( character == 6 ) {
-                        D_80120800_gscode[i][1] += 40;
+                if ( shown[i] ) {
+                    ( (sceneObject_t *)D_800EA120[10 + i] )->viewMask = 1;
+                    if ( D_801207B4_gscode[i] != character ) {
+                        D_801207B4_gscode[i] = character;
+                        ( (sceneObject_t *)D_800EA120[10 + i] )->frame = 0;
+                        ( (sceneObject_t *)D_800EA120[10 + i] )->model = D_801207C0_gscode[character];
+                        ( (sceneObject_t *)D_800EA120[10 + i] )->anim = D_801207E0_gscode[character];
+                        if ( character == 6 ) {
+                            D_80120800_gscode[i][1] += 40;
+                        }
+                        func_8002AAD0( ( (sceneObject_t *)D_800EA120[10 + i] )->mtx, 0.0f, 0.0f, 0.0f,
+                                       D_8011F8C0_gscode[character], D_80120800_gscode[i][0], D_80120800_gscode[i][1],
+                                       D_80120800_gscode[i][2] );
                     }
-                    func_8002AAD0( ( (sceneObject_t *)D_800EA120[10 + i] )->mtx, 0.0f, 0.0f, 0.0f,
-                                   D_8011F8C0_gscode[character], D_80120800_gscode[i][0], D_80120800_gscode[i][1],
-                                   D_80120800_gscode[i][2] );
+                } else {
+                    ( (sceneObject_t *)D_800EA120[10 + i] )->viewMask = 0;
                 }
             } else {
                 ( (sceneObject_t *)D_800EA120[10 + i] )->viewMask = 0;

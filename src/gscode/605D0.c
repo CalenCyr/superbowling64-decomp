@@ -7,20 +7,18 @@
 
 /* ===== func_801199E0_gscode ===== */
 
-#ifdef NON_MATCHING
-// NON_MATCHING: i gets s0 where retail has s1 (and s0/s1 swap in every loop); the sound test loads
-// D_80120427_gscode before saving D_8009D098.unk_79 (retail after); the credits' clear loop keeps its counter
-// where retail counts down the byte offset alone
 /*
  * One frame of the options screen: its settings, the sound test, the records page and the credits, which the
  * script D_8011FD58_gscode drives. Returns 1 when the screen slid out, 2 when it was backed out of, else 0.
  */
+#ifdef NON_MATCHING
+// NON_MATCHING: byte-exact (gate green) only with the sound test's saved setting held in the loop counter i
+// (marked R30 below); with a separate local the s0/s1 order flips, and a reused counter is not counted as a match
 s32 func_801199E0_gscode( void ) {
     s32 i;
     s16 x;
     s16 y;
     u8 alpha;
-    u8 saved;
 
     if ( D_80120425_gscode == 1 && ( D_800E4D62 & B_BUTTON ) && D_80120428_gscode == 0 && D_8005C0BF == 0 ) {
         func_80037870( 2, 0 );
@@ -107,10 +105,12 @@ s32 func_801199E0_gscode( void ) {
             if ( D_80120400_gscode >= 16 && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
                 D_80120400_gscode = 0;
                 func_80037870( 1, 0x80 );
-                saved = D_8009D098.unk_79;
+                // RULE-EXCEPTION: R30, i holds the saved setting: retail gives the counter this longer life, which
+                // ranks it below each loop's hoisted values and orders this block's loads
+                i = D_8009D098.unk_79;
                 D_8009D098.unk_79 = 1;
                 func_800379C8( D_80120427_gscode );
-                D_8009D098.unk_79 = saved;
+                D_8009D098.unk_79 = i;
             }
             break;
         case OPTION_BGM_VOLUME:
@@ -168,7 +168,7 @@ s32 func_801199E0_gscode( void ) {
             D_80120428_gscode = 2;
             D_80120A18_gscode = 1;
             D_80120A1A_gscode = 0;
-            for ( i = NUM_CREDIT_SPRITES - 1; i >= 0; i-- ) {
+            for ( i = 0; i < NUM_CREDIT_SPRITES; i++ ) {
                 D_80120860_gscode[i].image = -1;
             }
         } else {
