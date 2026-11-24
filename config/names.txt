@@ -1013,3 +1013,18 @@ gaLane_t.soundHandle	gacode.h	invented: sound handle (Sound_PlaySe)
 gaLane_t.cameraRaise	gacode.h	invented: camera height offset that falls to 0 by 45 a frame
 gaPlayer_t.ballView	gacode.h	invented: which of GA_SetBallView's five views (0 to 4), stepped with R and L
 gaBody_t.standState	gacode.h	invented: 1 still standing, 2 falling (GA_TipBody), toggled by GA_TogglePin
+gaSpot_t.radius	gacode.h	invented: radius of the spot's sphere (GA_SpotsOverlap, GA_SegmentHitsSpot; 0 means no second spot)
+gaSpot_t.contacts	gacode.h	invented: contact bits of GA_CollideLane: bit 0 hit this frame, bit n touching spots[n]
+gaSpot_t.floorNormal	gacode.h	invented: normal of the floor the spot last slid on (GA_SlopeContact compares a new slope with it)
+gaLane_t.secondSpots	gacode.h	invented: each body's second sphere, placed by GA_PhysicsStep at a fixed offset turned by the body (radius 0: none)
+gaLane_t.markers	gacode.h	invented: the three marker bodies placed with the lane (GA_PlaceBody); turned while their step is chosen, [2] the aim marker
+gaLane_t.markerObjs	gacode.h	invented: scene objects of the markers (GA_SetupLanes)
+gaLane_t.offsetX	gacode.h	invented: the lane's x offset (GA_SetupLanes' offset for lane 1, else 0), added when bodies are placed
+gaLane_t.timer	gacode.h	invented: frame counter of the lane's input handlers (waits of 30, 45 frames)
+gaLane_t.pinsHit	gacode.h	invented: pins knocked down by this throw (func_801189C4_gacode)
+gaLane_t.pinsDown	gacode.h	invented: pins down after this throw; 10 ends the frame
+gaLane_t.frameOver	gacode.h	invented: set when the throw ends the frame; GA_EndTurn then starts a new one
+gaLane_t.callout	gacode.h	invented: index into D_8012C784_gacode of the image func_8011B408_gacode shows over the lane (strike, spare, ...); 0 none
+gaLane_t.reaction	gacode.h	invented: the character's reaction (animation files[reaction + 2], frame count unk_1B[reaction])
+gaLane_t.bounceSound	gacode.h	invented: sound of the ball's floor hits in GA_PhysicsStep, chosen from the stage by the throw's curve
+gaLane_t.markerSpots	gacode.h	invented: spots of the markers; [0] and [1] follow the stick, [2] the aim (func_80117BDC_gacode, func_80117D20_gacode)

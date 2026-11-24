@@ -9,7 +9,7 @@
    parked drafts must keep compiling). Each "has no member named `OLD'" error names a file and line; the `.OLD` or
    `->OLD` token on that line is renamed. When a line has more such tokens than errors (another type with a member
    OLD on the same line), each token is tried alone and kept only if it removes an error without adding a
-   "no member named `NEW'" one.
+   "no member named `NEW'" one. Fewer tokens than errors (a macro that repeats its argument) renames them all.
 3. Repeat until no error for OLD remains. Errors that exist before the rename are ignored.
 4. Comments that name the member as `TYPE.OLD` are updated, and with --note a provenance line
    `TYPE.NEW<TAB><header><TAB><note>` is appended to config/names.txt.
@@ -163,7 +163,9 @@ def main(argv=None):
             lines = path.read_text().split("\n")
             text = lines[lineno - 1]
             toks = tokens(text, a.old)
-            if len(toks) == count:
+            # As many tokens as errors, or fewer when a macro repeats its argument: rename them all (a wrong one
+            # shows up as a "no member named `NEW'" error in the final check).
+            if 0 < len(toks) <= count:
                 for m in reversed(toks):
                     text = replace_at(text, m, a.old, a.new)
                 lines[lineno - 1] = text
@@ -171,7 +173,7 @@ def main(argv=None):
                 sites.append((path, lineno, count))
                 progress = True
                 continue
-            if len(toks) < count:
+            if not toks:
                 stuck.append((path, lineno, text.strip()))
                 continue
             # More tokens than errors: try each one alone.

@@ -1,5 +1,11 @@
 #include "t.h"
 
+#define TWICE( x ) ( ( x ) + ( x ) )
+
+int Twice( Foo_t *foo ) {
+    return TWICE( foo->unk_04 );                        /* want 1 keep 0 */
+}
+
 int Sum( Bar_t *bar, Foo_t *foo ) {
     return foo->unk_04 + bar->unk_04;                   /* want 1 keep 1 */
 }

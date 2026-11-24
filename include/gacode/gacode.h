@@ -79,9 +79,9 @@ typedef struct {
 /* Where a body of a lane stands; GA_PlaceBody places the body there. Name invented. */
 typedef struct {
     /* 0x00 */ vec3_t pos;
-    /* 0x0C */ vec3_t unk_0C;
-    /* 0x18 */ f32 unk_18;
-    /* 0x1C */ u32 unk_1C;              /* contact bits of GA_CollideLane: bit 0 hit this frame, bit n touching spots[n] */
+    /* 0x0C */ vec3_t floorNormal;      /* of the slope the spot last slid on (GA_SlopeContact) */
+    /* 0x18 */ f32 radius;              /* of the spot's sphere; 0: no such spot */
+    /* 0x1C */ u32 contacts;            /* contact bits of GA_CollideLane: bit 0 hit this frame, bit n touching spots[n] */
 } gaSpot_t;                             /* size 0x20 */
 
 /* View of a lane, set each frame by the lane's cameraFunc handler. Name invented. */
@@ -113,27 +113,27 @@ typedef struct {
     /* 0x000 */ gaBody_t bodies[NUM_BODIES];
     /* 0x420 */ gaMotion_t motion[NUM_BODIES];
     /* 0x688 */ gaSpot_t spots[NUM_BODIES];
-    /* 0x7E8 */ gaSpot_t unk_7E8[NUM_BODIES];
-    /* 0x948 */ gaBody_t unk_948[3];
-    /* 0xA68 */ gaSpot_t unk_A68[3];
+    /* 0x7E8 */ gaSpot_t secondSpots[NUM_BODIES];   /* each body's second sphere; radius 0: none */
+    /* 0x948 */ gaBody_t markers[3];                /* the throw's markers; [2] the aim marker */
+    /* 0xA68 */ gaSpot_t markerSpots[3];
     /* 0xAC8 */ sceneObject_t *bodyObjs[NUM_BODIES];
-    /* 0xAF4 */ sceneObject_t *unk_AF4[3];
+    /* 0xAF4 */ sceneObject_t *markerObjs[3];
     /* 0xB00 */ gaCamera_t *camera;
     /* 0xB04 */ void (*turnFunc)( s32 player );
     /* 0xB08 */ void (*panelFunc)( s32 player );
     /* 0xB0C */ void (*cameraFunc)( s32 player, gaCamera_t *camera );
     /* 0xB10 */ s32 (*inputFunc)( s32 player, s32 input, s16 stickX, s16 stickY );
-    /* 0xB14 */ f32 unk_B14;
+    /* 0xB14 */ f32 offsetX;                 /* x of the lane (lane 1: GA_SetupLanes' offset) */
     /* 0xB18 */ s64 soundHandle;            /* sound handle (Sound_PlaySe) */
-    /* 0xB20 */ s16 unk_B20;
-    /* 0xB22 */ u8 unk_B22;
-    /* 0xB23 */ u8 unk_B23;
-    /* 0xB24 */ u8 unk_B24;
-    /* 0xB25 */ u8 unk_B25;
-    /* 0xB26 */ u8 unk_B26;
+    /* 0xB20 */ s16 timer;                   /* frames waited by the input handlers */
+    /* 0xB22 */ u8 pinsHit;                   /* pins knocked down by this throw */
+    /* 0xB23 */ u8 pinsDown;                  /* pins down after it; 10 ends the frame */
+    /* 0xB24 */ u8 frameOver;                 /* the throw ended the frame (GA_EndTurn) */
+    /* 0xB25 */ u8 callout;                   /* image shown over the lane, index into D_8012C784_gacode; 0: none */
+    /* 0xB26 */ u8 reaction;                  /* the character's reaction animation (files[reaction + 2]) */
     /* 0xB27 */ u8 unk_B27;
     /* 0xB28 */ f32 cameraRaise;            /* camera height offset of func_8011B8AC_gacode */
-    /* 0xB2C */ u16 unk_B2C;            /* from gaStage_t.unk_1E[0] */
+    /* 0xB2C */ u16 bounceSound;              /* of the ball's floor hits: gaStage_t.unk_1E[0], [1] for a curving throw */
     /* 0xB2E */ u8 unk_B2E[2];
 } gaLane_t;                             /* size 0xB30 */
 
@@ -147,7 +147,7 @@ typedef struct {
     /* 0x18 */ u8 unk_18;
     /* 0x19 */ u8 unk_19;
     /* 0x1A */ u8 unk_1A;
-    /* 0x1B */ u8 unk_1B[5];            /* indexed by gaLane_t.unk_B26 */
+    /* 0x1B */ u8 unk_1B[5];            /* indexed by gaLane_t.reaction */
 } gaCharacterData_t;                        /* size 0x20 */
 
 /* Per character (the last two empty): file indices, [0] and [1] the player's scene object's (GA_Init) */
@@ -340,8 +340,8 @@ extern u8 D_8012D8DA_gacode;
 extern gaLane_t ga_lanes[2];
 extern gaBody_t ga_initBodies[NUM_BODIES];     /* initial bodies of a lane (GA_ResetLane) */
 extern gaMotion_t ga_initMotion[NUM_BODIES];   /* initial gaLane_t.motion */
-extern gaSpot_t ga_initSpots[2][NUM_BODIES];  /* initial gaLane_t.spots and unk_7E8 */
-extern gaBody_t D_8012C110_gacode[3];              /* initial gaLane_t.unk_948 */
+extern gaSpot_t ga_initSpots[2][NUM_BODIES];  /* initial gaLane_t.spots and secondSpots */
+extern gaBody_t D_8012C110_gacode[3];              /* initial gaLane_t.markers */
 
 /* A state of the overlay's main loop; returns nonzero when the state is done. */
 typedef s32 (*gaState_t)( void );

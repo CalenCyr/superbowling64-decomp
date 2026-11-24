@@ -186,7 +186,7 @@ void GA_SetBallHeading( vec3_t v, gaBody_t *ball ) {
 ================
 GA_SpotsOverlap
 
-Nonzero when the spheres of spots a and b (centre pos, radius unk_18) overlap: their boxes first, axis by
+Nonzero when the spheres of spots a and b (centre pos, radius) overlap: their boxes first, axis by
 axis, then the distance.
 ================
 */
@@ -195,13 +195,13 @@ s32 GA_SpotsOverlap( gaSpot_t *a, gaSpot_t *b ) {
     f32 dy;
     f32 dz;
 
-    if ( FABS( a->pos[0] - b->pos[0] ) < a->unk_18 + b->unk_18 &&
-         FABS( a->pos[1] - b->pos[1] ) < a->unk_18 + b->unk_18 &&
-         FABS( a->pos[2] - b->pos[2] ) < a->unk_18 + b->unk_18 ) {
+    if ( FABS( a->pos[0] - b->pos[0] ) < a->radius + b->radius &&
+         FABS( a->pos[1] - b->pos[1] ) < a->radius + b->radius &&
+         FABS( a->pos[2] - b->pos[2] ) < a->radius + b->radius ) {
         dx = a->pos[0] - b->pos[0];
         dy = a->pos[1] - b->pos[1];
         dz = a->pos[2] - b->pos[2];
-        if ( dx * dx + dy * dy + dz * dz < ( a->unk_18 + b->unk_18 ) * ( a->unk_18 + b->unk_18 ) ) {
+        if ( dx * dx + dy * dy + dz * dz < ( a->radius + b->radius ) * ( a->radius + b->radius ) ) {
             return 1;
         }
     }
@@ -242,7 +242,7 @@ inline s32 GA_SegmentHitsSpot( gaSpot_t *spot, vec3_t from, vec3_t to, f32 radiu
     ox = dx * t + from[0] - spot->pos[0];
     oy = dy * t + from[1] - spot->pos[1];
     oz = dz * t + from[2] - spot->pos[2];
-    if ( ( spot->unk_18 + radius ) * ( spot->unk_18 + radius ) <= ox * ox + oy * oy + oz * oz ) {
+    if ( ( spot->radius + radius ) * ( spot->radius + radius ) <= ox * ox + oy * oy + oz * oz ) {
         return 0;
     }
     return 1;
@@ -283,8 +283,8 @@ f32 GA_SpotContact( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     dir[2] = vel[2] * t + a->pos[2];
     GA_VecSub( gap, dir, b->pos );
     t = GA_VecLength( gap );
-    t = t < 0.0 ? 0.0f : a->unk_18 + b->unk_18 < t ? a->unk_18 + b->unk_18 : t;
-    along = a->unk_18 + b->unk_18 - t * 0.85;
+    t = t < 0.0 ? 0.0f : a->radius + b->radius < t ? a->radius + b->radius : t;
+    along = a->radius + b->radius - t * 0.85;
     GA_VecNormalize( dir, vel );
     dir[0] *= along;
     dir[1] *= along;
@@ -293,7 +293,7 @@ f32 GA_SpotContact( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     gap[1] += dir[1];
     gap[2] += dir[2];
     GA_VecNormalize( normal, gap );
-    return 1.0 - t / ( a->unk_18 + b->unk_18 );
+    return 1.0 - t / ( a->radius + b->radius );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_SpotContact);
@@ -466,7 +466,7 @@ spots[11..21]) of a body still in play is tested against each later body in play
 spot (or the segment from that spot to the midpoint with its spot2), then against its spot2 (or the
 segment from that midpoint to spot2). A new contact runs GA_CollideBodies on the two bodies, and each
 of them that stands flat (unk_5C 1, rot[0] 0) and was hit at 1 or more starts to tip toward its new
-heading, falls (standState 2) and plays its sound (0x4B under the lane, else 0x32). unk_1C of a spot holds
+heading, falls (standState 2) and plays its sound (0x4B under the lane, else 0x32). contacts of a spot holds
 bit 0 (it was hit this frame) and one bit per spot it touches. Returns 1 when the last contact with
 the first spots knocked a body over.
 ================
@@ -487,10 +487,10 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
     u8 which;
 
     for ( b = 0; b < NUM_BODIES; b++ ) {
-        spots[b].unk_1C &= ~1;
+        spots[b].contacts &= ~1;
     }
     for ( i = 0; i < NUM_BODIES * 2; i++ ) {
-        if ( spots[i].unk_18 == 0.0f ) {
+        if ( spots[i].radius == 0.0f ) {
             continue;
         }
         a = i % NUM_BODIES;
@@ -503,17 +503,17 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
             if ( bodies[b].standState == 0 ) {
                 continue;
             }
-            if ( spots[b2].unk_18 != 0.0f ) {
+            if ( spots[b2].radius != 0.0f ) {
                 mid.pos[0] = ( spots[b].pos[0] + spots[b2].pos[0] ) / 2.0f;
                 mid.pos[1] = ( spots[b].pos[1] + spots[b2].pos[1] ) / 2.0f;
                 mid.pos[2] = ( spots[b].pos[2] + spots[b2].pos[2] ) / 2.0f;
-                mid.unk_18 = spots[b2].unk_18;
+                mid.radius = spots[b2].radius;
             }
-            if ( !( ( spots[i].unk_1C >> ( b2 ) ) & 1 ) &&
+            if ( !( ( spots[i].contacts >> ( b2 ) ) & 1 ) &&
                  ( GA_SpotsOverlap( &spots[i], &spots[b] ) ||
-                   ( spots[b2].unk_18 != 0.0f &&
-                     GA_SegmentHitsSpot( &spots[i], spots[b].pos, mid.pos, spots[b].unk_18 ) ) ) ) {
-                if ( !( ( spots[i].unk_1C >> b ) & 1 ) ) {
+                   ( spots[b2].radius != 0.0f &&
+                     GA_SegmentHitsSpot( &spots[i], spots[b].pos, mid.pos, spots[b].radius ) ) ) ) {
+                if ( !( ( spots[i].contacts >> b ) & 1 ) ) {
                     GA_CollideBodies( &motion[a], &motion[b], &spots[i], &spots[b] );
                     lane = spots[i].pos[1] < -190.0f ? lane | 2 : lane;
                     if ( bodies[b].unk_5C == 1 ) {
@@ -549,15 +549,15 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                             hit = 0;
                         }
                     }
-                    spots[i].unk_1C |= 1 << b;
-                    spots[b].unk_1C |= 1;
+                    spots[i].contacts |= 1 << b;
+                    spots[b].contacts |= 1;
                 }
-            } else if ( spots[b2].unk_18 != 0.0f && !( spots[b].unk_1C & 1 ) &&
-                        !( ( spots[i].unk_1C >> b ) & 1 ) &&
+            } else if ( spots[b2].radius != 0.0f && !( spots[b].contacts & 1 ) &&
+                        !( ( spots[i].contacts >> b ) & 1 ) &&
                         ( GA_SpotsOverlap( &spots[i], &spots[b2] ) ||
                           GA_SegmentHitsSpot( &spots[i], mid.pos, spots[b2].pos,
-                                                spots[b2].unk_18 ) ) ) {
-                if ( !( ( spots[i].unk_1C >> ( b2 ) ) & 1 ) ) {
+                                                spots[b2].radius ) ) ) {
+                if ( !( ( spots[i].contacts >> ( b2 ) ) & 1 ) ) {
                     GA_CollideBodies( &motion[a], &motion[b], &spots[i], &spots[b2] );
                     lane = spots[i].pos[1] < -190.0f ? lane | 2 : lane;
                     if ( bodies[b].unk_5C == 1 && bodies[b].rot[0] == 0.0f &&
@@ -585,12 +585,12 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                         }
                         GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
                     }
-                    spots[i].unk_1C |= 1 << ( b2 );
-                    spots[b].unk_1C |= 1;
+                    spots[i].contacts |= 1 << ( b2 );
+                    spots[b].contacts |= 1;
                 }
             } else {
-                spots[i].unk_1C &= ~( 1 << b );
-                spots[i].unk_1C &= ~( 1 << ( b2 ) );
+                spots[i].contacts &= ~( 1 << b );
+                spots[i].contacts &= ~( 1 << ( b2 ) );
             }
         }
     }
@@ -638,7 +638,7 @@ void GA_SettleBodies( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots ) {
 ================
 GA_KeepOnFloor
 
-Keeps a body's spot (and spot2, unless its unk_18 is 0) inside the floor grid and on the floor: a spot
+Keeps a body's spot (and spot2, unless its radius is 0) inside the floor grid and on the floor: a spot
 that sank under the floor is lifted back onto it (unless GA_SlopeContact handles the contact) and its
 fall turned into a damped bounce (motion flag 2). Returns 1 when the body lands with spot, 2 when it
 bounces with spot, else 0. Gravity (1.0889) is then applied.
@@ -660,7 +660,7 @@ s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 cei
     floor = GA_FloorHeight( spot->pos[0], spot->pos[2], normal );
     motion->flags &= ~0x40;
     landed = 0;
-    if ( spot2->unk_18 != 0.0f && ( bottom2 = spot2->pos[1] - spot2->unk_18 ) < floor ) {
+    if ( spot2->radius != 0.0f && ( bottom2 = spot2->pos[1] - spot2->radius ) < floor ) {
         if ( !GA_SlopeContact( motion, spot2, normal ) ) {
             spot->pos[1] += floor - bottom2;
             spot2->pos[1] += floor - bottom2;
@@ -673,11 +673,11 @@ s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 cei
             motion->vel[1] = 0.0f;
         }
         motion->flags |= 2;
-    } else if ( ( bottom = spot->pos[1] - spot->unk_18 ) < floor ) {
+    } else if ( ( bottom = spot->pos[1] - spot->radius ) < floor ) {
         handled = GA_SlopeContact( motion, spot, normal );
         if ( !handled ) {
             spot->pos[1] += floor - bottom;
-            if ( spot2->unk_18 != 0.0f ) {
+            if ( spot2->radius != 0.0f ) {
                 spot2->pos[1] += floor - bottom;
             }
         }
@@ -695,11 +695,11 @@ s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 cei
             landed = 0;
         }
         motion->flags |= 2;
-    } else if ( spot2->unk_18 != 0.0f && bottom2 == floor ) {
+    } else if ( spot2->radius != 0.0f && bottom2 == floor ) {
     } else if ( bottom != floor ) {
         if ( ( motion->flags >> 4 ) & 1 ) {
             spot->pos[1] += floor - bottom;
-            if ( spot2->unk_18 != 0.0f ) {
+            if ( spot2->radius != 0.0f ) {
                 spot2->pos[1] += floor - bottom;
             }
             motion->vel[2] += normal[2] * 1.0889;
@@ -798,9 +798,9 @@ GA_SlopeContact
 
 Contact of a body's spot with a sloped floor (normal not straight up), unless motion flag 1: the slope is
 taken along x or z, whichever the normal leans more; against a slope steeper than 30 degrees from the
-spot's unk_0C the velocity along it bounces back (motion flag 0x40) or is pushed down the slope, else it
+spot's floorNormal the velocity along it bounces back (motion flag 0x40) or is pushed down the slope, else it
 slides down the slope (motion flag 0x10 along x, 0x20 along z). Returns 1 on a bounce; else the spot's
-unk_0C takes the normal.
+floorNormal takes the normal.
 ================
 */
 s32 GA_SlopeContact( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal ) {
@@ -809,11 +809,11 @@ s32 GA_SlopeContact( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal ) {
     s32 hit = 0;
 
     if ( ( normal[0] != 0.0f || normal[2] != 0.0f ) && !( motion->flags & 1 ) ) {
-        from[1] = spot->unk_0C[1];
+        from[1] = spot->floorNormal[1];
         slope[1] = normal[1];
         if ( FABS( normal[0] ) > FABS( normal[2] ) ) {
             from[2] = 0.0f;
-            from[0] = spot->unk_0C[0];
+            from[0] = spot->floorNormal[0];
             slope[2] = 0.0f;
             slope[0] = normal[0];
             if ( GA_VecCosAngle( from, slope ) < 0.866 ) {
@@ -830,7 +830,7 @@ s32 GA_SlopeContact( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal ) {
                 motion->flags |= 0x10;
             }
         } else {
-            from[2] = spot->unk_0C[2];
+            from[2] = spot->floorNormal[2];
             from[0] = 0.0f;
             slope[2] = normal[2];
             slope[0] = 0.0f;
@@ -850,9 +850,9 @@ s32 GA_SlopeContact( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal ) {
         }
     }
     if ( !hit ) {
-        spot->unk_0C[0] = normal[0];
-        spot->unk_0C[1] = normal[1];
-        spot->unk_0C[2] = normal[2];
+        spot->floorNormal[0] = normal[0];
+        spot->floorNormal[1] = normal[1];
+        spot->floorNormal[2] = normal[2];
     }
     return hit;
 }
@@ -862,7 +862,7 @@ s32 GA_SlopeContact( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal ) {
 GA_KeepInGrid
 
 Keeps spot inside the floor grid (along z and x) and below ceiling: a spot past an edge is put back on
-it, spot2 moved with it unless its unk_18 is 0, and the velocity across that edge bounced (z: -0.1, motion
+it, spot2 moved with it unless its radius is 0, and the velocity across that edge bounced (z: -0.1, motion
 flag 4; x: 0.5, flag 1; y: -0.0001).
 ================
 */
@@ -875,7 +875,7 @@ void GA_KeepInGrid( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, f32 cei
     edge = (f32)( ( D_80100100[0].numZ - 1 ) * D_80100100[0].stepZ + D_80100100[0].originZ ) - 0.0002;
     if ( spot->pos[2] > edge || spot->pos[2] < ( edge = D_80100100[0].originZ ) ) {
         spot->pos[2] -= spot->pos[2] - edge;
-        if ( spot2->unk_18 != 0.0f ) {
+        if ( spot2->radius != 0.0f ) {
             spot2->pos[2] -= spot->pos[2] - edge;
         }
         motion->vel[2] *= -0.1;
@@ -885,7 +885,7 @@ void GA_KeepInGrid( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, f32 cei
     edge = ( D_80100100[0].numX - 1 ) * D_80100100[0].stepX + D_80100100[0].originX;
     if ( spot->pos[0] > edge || spot->pos[0] < ( edge = D_80100100[0].originX ) ) {
         spot->pos[0] -= spot->pos[0] - edge;
-        if ( spot2->unk_18 != 0.0f ) {
+        if ( spot2->radius != 0.0f ) {
             spot2->pos[0] -= spot2->pos[0] - edge;
         }
         motion->vel[0] *= 0.5;
@@ -895,7 +895,7 @@ void GA_KeepInGrid( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, f32 cei
     edge = ceiling - 0.0002;
     if ( spot->pos[1] > edge ) {
         spot->pos[1] -= spot->pos[1] - edge;
-        if ( spot2->unk_18 != 0.0f ) {
+        if ( spot2->radius != 0.0f ) {
             spot2->pos[1] -= spot2->pos[1] - edge;
         }
         motion->vel[1] *= -0.0001;
