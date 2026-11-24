@@ -58,20 +58,13 @@ Str_ReadFile
 Reads file index of the str segment into dst, decompressing it if it is stored compressed; returns its size.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: register/schedule; retail keeps the addresses of str_files's fields in registers (hoisting
-// &str_files[index].romOffset out of the loop) where this draft addresses them with %hi/%lo each time; an
-// ArchiveEntry *entry local is worse. Permuter (target-only scoring, 5 min): best 2560 from 3030 only through noise
-// (a pointer temporary for str_files after the last DMA), no source clue.
-// Retail forms each field's address from its own la of str_files + offset (CSE derives &size as &rawSize - 4); a
-// u32 [][3] table spells the same as the struct, and ( str_files + index )-> gives one shared base (both no closer).
 u32 Str_ReadFile( s32 index, u8 *dst ) {
     u8 *out;
     s32 compressed;
     u32 done;
     u32 remaining;
 
-    if ( str_files[index].rawSize == str_files[index].size ) {
+    if ( STR_FILE( index, STR_FILE_RAWSIZE ) == STR_FILE( index, STR_FILE_SIZE ) ) {
         compressed = FALSE;
     } else {
         compressed = TRUE;
@@ -80,25 +73,23 @@ u32 Str_ReadFile( s32 index, u8 *dst ) {
     }
     done = 0;
     osWritebackDCacheAll();
-    osInvalDCache( dst, str_files[index].size );
-    for ( remaining = str_files[index].size; remaining > ARCHIVE_DMA_CHUNK; remaining -= ARCHIVE_DMA_CHUNK ) {
+    osInvalDCache( dst, STR_FILE( index, STR_FILE_SIZE ) );
+    for ( remaining = STR_FILE( index, STR_FILE_SIZE ); remaining > ARCHIVE_DMA_CHUNK;
+          remaining -= ARCHIVE_DMA_CHUNK ) {
         boot_dmaRequest.dramAddr = dst + done;
-        boot_dmaRequest.devAddr = str_files[index].romOffset + ( done + (u32)str_ROM_START );
+        boot_dmaRequest.devAddr = (u32)str_ROM_START + STR_FILE( index, STR_FILE_ROMOFFSET ) + done;
         boot_dmaRequest.size = ARCHIVE_DMA_CHUNK;
-        done += ARCHIVE_DMA_CHUNK;
         osEPiStartDma( boot_romHandle, &boot_dmaRequest, OS_READ );
         osRecvMesg( &boot_dmaQueue, NULL, OS_MESG_BLOCK );
+        done += ARCHIVE_DMA_CHUNK;
     }
     boot_dmaRequest.dramAddr = dst + done;
+    boot_dmaRequest.devAddr = (u32)str_ROM_START + STR_FILE( index, STR_FILE_ROMOFFSET ) + done;
     boot_dmaRequest.size = ( remaining + 1 ) & ~1;
-    boot_dmaRequest.devAddr = str_files[index].romOffset + ( done + (u32)str_ROM_START );
     osEPiStartDma( boot_romHandle, &boot_dmaRequest, OS_READ );
     osRecvMesg( &boot_dmaQueue, NULL, OS_MESG_BLOCK );
     if ( compressed ) {
-        LZ_Decompress( out, dst, str_files[index].size );
+        LZ_Decompress( out, dst, STR_FILE( index, STR_FILE_SIZE ) );
     }
-    return str_files[index].rawSize;
+    return STR_FILE( index, STR_FILE_RAWSIZE );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/4DC0", Str_ReadFile);
-#endif

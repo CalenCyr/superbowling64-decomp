@@ -39,7 +39,7 @@ inline void Cache_LoadFile( s16 index ) {
         sprintf( name, "data.%4.4d", index );
         size = Host_GetFileSize( name );
     } else {
-        size = str_files[index].rawSize;
+        size = STR_FILE( index, STR_FILE_RAWSIZE );
     }
     data = Mem_Alloc( size );
     cache_files[index].refCount = 1;
@@ -58,17 +58,8 @@ Cache_GetFile
 Returns file index, loading it and relocating its offsets by type when it is not in the cache.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: register/schedule; in the two Cache_LoadFile expansions of the part loop, retail forms the address of
-// str_files[index].rawSize in $a3 (lui/addiu, then addu) where this folds it into the load (lui $at); everything else
-// is exact. Clue: reading the size through the field's address as a value (*&str_files[index].rawSize, or a u32 view
-// of the entry indexed [2]) gives exact bytes, so the original computes that address as a pointer; the human spelling
-// is open. Not it: (&str_files[index])->rawSize or (str_files + index)->rawSize (base in $a3, +8 in the load), an inline
-// accessor returning the field, an s32 index cast, a u32 [][3] table, a known array bound, s32/u32 loop counters, the
-// two reference indices read into s16 locals first (worse)
 void *Cache_GetFile( s16 index, s16 type ) {
     fileType1_t *file1;
-    fileType1Part_t *part;
     fileRefA_t *refA;
     fileRefB_t *refB;
     fileType2_t *file2;
@@ -119,9 +110,6 @@ void *Cache_GetFile( s16 index, s16 type ) {
     }
     return cache_files[index].data;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/BEF0", Cache_GetFile);
-#endif
 
 /*
 ================

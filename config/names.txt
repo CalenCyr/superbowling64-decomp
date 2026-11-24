@@ -390,7 +390,7 @@ strcpy	0x80029578	evidence: libkmc strcat calls strcpy by name; this routine cop
 # boot units 1060-51F0 (types; their functions keep placeholder names)
 FatEntry	include/fat.h	evidence: entry of the ROM's BW64FAT table (name pointer, ROM start, ROM end)
 FatTable	include/fat.h	evidence: the BW64FAT file at ROM 0x3C2A0, header "BW64FAT"
-ArchiveEntry	include/archive.h	invented: {ROM offset into the str segment, stored size, decompressed size} record read by the LZSS loader
+STR_FILE	include/archive.h	invented: word of a file's entry in str_files; STR_FILE_WORDS (3) words: STR_FILE_ROMOFFSET (ROM offset into the str segment), STR_FILE_SIZE (stored size), STR_FILE_RAWSIZE (decompressed size)
 HeapBlock	include/heap.h	invented: free-list block header (next, size) of the block allocator in unit 51F0
 HostPacket	include/hostio.h	invented: request header (command, size, file name) exchanged with the development host link in unit 4890
 GfxFrame	include/boot.h	invented: a display list the game thread builds (list, size, framebuffer index), two at sched_gfxFrames
@@ -1411,7 +1411,7 @@ cache_hostMode	0x8005C0BC	invented: development switch: with cache_hostFiles, fi
 cache_hostFiles	0x8005C0BD	invented: set by pvcode and cacode: with cache_hostMode, files are read from the host as "data.NNNN"
 host_packet	0x800692D8	invented: the request header sent before each host transfer (HostPacket)
 host_fileSize	0x800619F0	invented: bytes of the file announced by Host_GetFileSize, then received by Host_ReadFile
-str_files	0x800A30C0	invented: the str segment's file table, by file index (ArchiveEntry; Str_ReadFile)
+str_files	0x800A30C0	invented: the str segment's file table, STR_FILE_WORDS words per file index (Str_ReadFile)
 lz_window	0x80061A00	invented: the LZSS window
 lz_readBuffer	0x80102080	invented: where compressed files are read before decompression
 mem_first	0x80062A20	invented: the heap's first block, where the heap starts (Mem_Reset)
