@@ -389,11 +389,11 @@ void GA_SetupMode( void ) {
         ga_bgm = ga_stage->unk_1A;
         break;
     case 3:
-        GA_StartMode( func_80114024_gacode, func_8011582C_gacode );
+        GA_StartMode( func_80114024_gacode, GA_ScoreBattle );
         ga_bgm = 17;
         break;
     case 2:
-        GA_StartMode( func_80114108_gacode, func_801157F8_gacode );
+        GA_StartMode( func_80114108_gacode, GA_ScorePinEditor );
         ga_bgm = 16;
         break;
     }
@@ -452,7 +452,7 @@ void func_80113384_gacode( void ) {
         for ( i = 0; i < D_8005C161; i++ ) {
             D_80068A50[i] = 5;
         }
-        GA_StartMode( GA_TeamGameLoop, func_801156D8_gacode );
+        GA_StartMode( GA_TeamGameLoop, GA_ScoreSetupGame );
         ga_bgm = 11;
         break;
     }
@@ -474,13 +474,13 @@ void GA_StartMode( gaState_t state, gaPlayerFunc_t mode ) {
 
     ga_modeLoop = state;
     ga_gameMode = mode;
-    if ( mode == func_801157F8_gacode ) {
+    if ( mode == GA_ScorePinEditor ) {
         D_8012D23C_gacode = func_80115D38_gacode;
     } else if ( mode == GA_ScorePar ) {
         D_8012D23C_gacode = func_80115CDC_gacode;
-    } else if ( mode == func_801156D8_gacode ) {
+    } else if ( mode == GA_ScoreSetupGame ) {
         D_8012D23C_gacode = func_80115D38_gacode;
-    } else if ( mode == func_8011582C_gacode ) {
+    } else if ( mode == GA_ScoreBattle ) {
         D_8012D23C_gacode = func_80115CDC_gacode;
     } else {
         D_8012D23C_gacode = GA_EndTurn;

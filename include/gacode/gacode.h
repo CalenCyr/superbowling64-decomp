@@ -148,8 +148,8 @@ typedef struct {
     /* 0x08 */ f32 maxSpeed;            /* upper limit of speed */
     /* 0x0C */ f32 minSpeed;            /* lower limit of speed */
     /* 0x10 */ f32 maxSpin;             /* range of spin */
-    /* 0x14 */ vec3_t aim;              /* moved with the stick (func_80117BDC_gacode) */
-    /* 0x20 */ vec3_t stance;           /* where the player stands (func_80117D20_gacode) */
+    /* 0x14 */ vec3_t aim;              /* moved with the stick (GA_InputAim) */
+    /* 0x20 */ vec3_t stance;           /* where the player stands (GA_InputStance) */
     /* 0x2C */ f32 speed;               /* of the ball at release, between the limits */
     /* 0x30 */ f32 spin;                /* of the ball at release (motion[0].spin[1]) */
     /* 0x34 */ f32 timingAngle;         /* the throw's timing, -pi/2 to pi/2 (func_8011B1A0_gacode); 0 is straight */
@@ -239,9 +239,9 @@ typedef struct {
     /* 0x04 */ u16 unk_04;
 } gaPinSetup_t;                         /* size 0x6 */
 
-extern gaPinSetup_t D_801237F0_gacode[];   /* for func_801156D8_gacode, by D_800DF59C.unk_04[] */
+extern gaPinSetup_t D_801237F0_gacode[];   /* for GA_ScoreSetupGame, by D_800DF59C.unk_04[] */
 extern gaPinSetup_t D_80123950_gacode[];   /* for GA_ScorePar, by D_800DF59C.unk_04[] */
-extern u16 ga_editorPins;              /* pins of func_801157F8_gacode */
+extern u16 ga_editorPins;              /* pins of GA_ScorePinEditor */
 
 /* Handler of a player: the game mode (ga_gameMode) or what starts a turn (D_8012D23C_gacode). */
 typedef s32 (*gaPlayerFunc_t)( s32 player );
@@ -264,7 +264,7 @@ extern f32 D_8012C158_gacode[];
 extern f32 ga_cpuThrows[][4];     /* unk_98, unk_9C, unk_2C, unk_30 of a player, by D_800DF59C.unk_04[] */
 extern s16 D_8012C784_gacode[];
 extern vec3_t D_8012C758_gacode;      /* (0, 24, 0) (GA_PhysicsStep) */
-extern s16 ga_runSounds[];      /* sound ids, by D_800A304C[] up to 10 (func_8011582C_gacode) */
+extern s16 ga_runSounds[];      /* sound ids, by D_800A304C[] up to 10 (GA_ScoreBattle) */
 /* by score against par; TODO identity: scores below par read before the label, so the table likely starts
    earlier */
 extern s16 D_8012C7E6_gacode[];
@@ -291,8 +291,8 @@ extern u8 ga_aimChannelOrder;           /* channel order of GA_DrawAimLine's col
 extern gaStage_t ga_stages[];
 extern gaStage_t *ga_stage;
 extern objClass_t ga_classes[12];   /* the classes of the game's scene */
-extern u8 ga_steerBall;             /* nonzero: Z steers the rolling ball by the stick (func_801187D0_gacode) */
-extern u8 ga_earlyCommit;            /* nonzero: B commits the throw early (func_8011840C_gacode) */
+extern u8 ga_steerBall;             /* nonzero: Z steers the rolling ball by the stick (GA_InputRoll) */
+extern u8 ga_earlyCommit;            /* nonzero: B commits the throw early (GA_InputSwing) */
 
 /* Per lane: state of func_80117124_gacode's aiming. Name invented. */
 typedef struct {
@@ -377,7 +377,7 @@ s32 func_80115ED4_gacode( u8 twoLanes );
 void GA_PlaceBody( gaBody_t *body, gaSpot_t *spot, sceneObject_t *obj, f32 offset );
 void func_80114FC4_gacode( s32 player );
 void func_80114FFC_gacode( s32 player );
-s32 func_801157F8_gacode( s32 player );
+s32 GA_ScorePinEditor( s32 player );
 s32 func_80115CDC_gacode( s32 player );
 s32 func_80115D38_gacode( s32 player );
 void func_80115D70_gacode( s32 player, u8 arg1 );
@@ -387,8 +387,8 @@ s32 func_80115DF4_gacode( s32 player );
 s32 func_80115E24_gacode( u8 twoLanes );
 s32 GA_ScorePar( s32 player );
 s32 GA_ScoreStandard( s32 player );
-s32 func_8011582C_gacode( s32 player );
-s32 func_801156D8_gacode( s32 player );
+s32 GA_ScoreBattle( s32 player );
+s32 GA_ScoreSetupGame( s32 player );
 void func_80115054_gacode( void );
 s32 GA_EndTurn( s32 player );
 void GA_StartTurn( s32 player );
@@ -404,27 +404,27 @@ s32 func_801168D0_gacode( gaPlayer_t *pl );
 s32 func_80116998_gacode( gaPlayer_t *pl );
 void GA_StepClamped( s32 player, f32 *value, s16 delta );
 void func_80116A64_gacode( gaPlayer_t *pl, s16 stickX, s16 stickY );
-s32 func_801178D8_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_801179FC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80117ABC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputWaitCamera( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputWaitStart( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputIdle( s32 player, s32 input, s16 stickX, s16 stickY );
 s32 func_80117124_gacode( s32 player, gaPlayer_t *pl );
-s32 func_80117BDC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80117D20_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80117EFC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80118014_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80118270_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80118524_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_801187D0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80118CCC_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80118D9C_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80118E04_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80118EA0_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80118F08_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80118F38_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
-s32 func_80118F68_gacode( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputAim( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputStance( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputTakeBall( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputSetThrow( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputApproach( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputSwing( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputRelease( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputBeginTurn( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputCountPins( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputRoll( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputReaction( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputEndThrow( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputNextTurn( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputGameOver( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputParkedRestart( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputParked( s32 player, s32 input, s16 stickX, s16 stickY );
+s32 GA_InputGutter( s32 player, s32 input, s16 stickX, s16 stickY );
 void GA_DrawScorePanel( s32 player, u8 lane );
 void GA_DrawPinDiagram( gaPlayer_t *pl );
 void GA_DrawParPanel( s32 player, u8 lane );

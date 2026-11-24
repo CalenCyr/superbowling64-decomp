@@ -45,7 +45,7 @@ extern u16 D_8009CF80[4];           /* per player: splits this game (GA_IsSplit,
                                        playerRecord_t.splits; the par game keeps the sum of its pars in [0] */
 extern u16 D_800DF6B4[4];           /* per player: counted up with D_800A304C (GA_ScoreStandard) */
 extern u16 D_8009D088[4];           /* per player: counted when the frame ends after a non-run turn (GA_ScoreStandard) */
-extern u8 D_800A304C[4];            /* per player: a run counter (to 255) the game modes read and reset (func_8011582C_gacode) */
+extern u8 D_800A304C[4];            /* per player: a run counter (to 255) the game modes read and reset (GA_ScoreBattle) */
 extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
 extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */
 

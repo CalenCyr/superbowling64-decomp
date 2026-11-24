@@ -884,7 +884,7 @@ ga_splits5	0x801237BC	invented: the split leaves with 5 pins standing (GA_IsSpli
 ga_splits6	0x801237EC	invented: the split leaves with 6 pins standing (GA_IsSplit)
 ga_frameCount	0x8012C924	invented: frame counter (GA_CountFrame)
 ga_cpuThrows	0x80123850	invented: four throw values of a player the game plays, by character (GA_CpuSetup)
-ga_runSounds	0x8012C7CC	invented: sound ids by the player's run (func_8011582C_gacode)
+ga_runSounds	0x8012C7CC	invented: sound ids by the player's run (GA_ScoreBattle)
 ga_numberImages	0x8012C80A	invented: image ids of the numbers 1 to 9
 ga_parChartPins	0x8012C820	invented: x and y of each pin in the par game's pin chart
 ga_pinPanelPins	0x8012C858	invented: x and y of each pin in the pin panel
@@ -1020,18 +1020,18 @@ gaLane_t.markers	gacode.h	invented: the three marker bodies placed with the lane
 gaLane_t.markerObjs	gacode.h	invented: scene objects of the markers (GA_SetupLanes)
 gaLane_t.offsetX	gacode.h	invented: the lane's x offset (GA_SetupLanes' offset for lane 1, else 0), added when bodies are placed
 gaLane_t.timer	gacode.h	invented: frame counter of the lane's input handlers (waits of 30, 45 frames)
-gaLane_t.pinsHit	gacode.h	invented: pins knocked down by this throw (func_801189C4_gacode)
+gaLane_t.pinsHit	gacode.h	invented: pins knocked down by this throw (GA_InputCountPins)
 gaLane_t.pinsDown	gacode.h	invented: pins down after this throw; 10 ends the frame
 gaLane_t.frameOver	gacode.h	invented: set when the throw ends the frame; GA_EndTurn then starts a new one
 gaLane_t.callout	gacode.h	invented: index into D_8012C784_gacode of the image func_8011B408_gacode shows over the lane (strike, spare, ...); 0 none
 gaLane_t.reaction	gacode.h	invented: the character's reaction (animation files[reaction + 2], frame count unk_1B[reaction])
 gaLane_t.bounceSound	gacode.h	invented: sound of the ball's floor hits in GA_PhysicsStep, chosen from the stage by the throw's curve
-gaLane_t.markerSpots	gacode.h	invented: spots of the markers; [0] and [1] follow the stick, [2] the aim (func_80117BDC_gacode, func_80117D20_gacode)
+gaLane_t.markerSpots	gacode.h	invented: spots of the markers; [0] and [1] follow the stick, [2] the aim (GA_InputAim, GA_InputStance)
 gaMotion_t.mass	gacode.h	invented: weight of the body in GA_Collide's momentum exchange; the ball's from D_801239E8_gacode by its weight
 gaBody_t.kind	gacode.h	invented: 0 the ball (sounds its hits, height 11.25), 1 a pin (tips and turns, height 6.25), 2 flat (height 0) (GA_PlaceBody)
 gaPlayer_t.ballWeight	gacode.h	invented: the ball's weight, 0 to 10 drawn as 6 to 16 (func_801194D0_gacode); picks the ball's mass and palette
 gaPlayer_t.homeMtx	gacode.h	invented: the player object's matrix at set-up, restored for each throw
-gaPlayer_t.releaseFrame	gacode.h	invented: the player object's animation frame when the throw was committed (func_80118014_gacode)
+gaPlayer_t.releaseFrame	gacode.h	invented: the player object's animation frame when the throw was committed (GA_InputSetThrow)
 gaPlayer_t.cpuAim	gacode.h	invented: where GA_CpuInput moves the character's aim for a player the game plays (GA_CpuSetup)
 gaPlayer_t.cpuStance	gacode.h	invented: where GA_CpuInput moves the character's stance for a player the game plays (GA_CpuSetup)
 gaCharacter_t.data	gacode.h	invented: the character's gaCharacterData_t (file indices, joint, frame counts)
@@ -1040,8 +1040,8 @@ gaCharacter_t.reverseSpin	gacode.h	invented: nonzero: spin runs from -maxSpin to
 gaCharacter_t.maxSpeed	gacode.h	invented: upper limit of speed
 gaCharacter_t.minSpeed	gacode.h	invented: lower limit of speed
 gaCharacter_t.maxSpin	gacode.h	invented: range of spin
-gaCharacter_t.aim	gacode.h	invented: the aim point, moved by the stick in func_80117BDC_gacode with markerSpots[0]
-gaCharacter_t.stance	gacode.h	invented: where the player stands, moved by the stick in func_80117D20_gacode with markerSpots[1]; the player object is moved there
+gaCharacter_t.aim	gacode.h	invented: the aim point, moved by the stick in GA_InputAim with markerSpots[0]
+gaCharacter_t.stance	gacode.h	invented: where the player stands, moved by the stick in GA_InputStance with markerSpots[1]; the player object is moved there
 gaCharacter_t.speed	gacode.h	invented: the ball's launch speed (motion[0].vel = speed * direction)
 gaCharacter_t.spin	gacode.h	invented: the ball's launch spin (motion[0].spin[1])
 gaCharacter_t.direction	gacode.h	invented: GA_VecDirection of stance and aim, the ball's launch direction
@@ -1083,3 +1083,26 @@ gaCharacter_t.hook	gacode.h	invented: sideways pull added to the rolling ball's 
 sceneObject_t.floorHeight	object.h	invented: height of the floor under the object (GA_PlaceBody: the spot's y less the body's height), which func_8002B9CC draws at when flags & 0xC000; negative: none
 objNode_t.update	object.h	invented: function func_8002A2F0 calls each frame with the object after the header; objClass_t.update of its class
 objClass_t.update	object.h	invented: the class's per-frame function (ga_classes: Obj_Draw, Cam_Update, ...), copied into objNode_t.update
+GA_ScoreSetupGame	0x801156D8	invented: game mode of mode 0's sub-mode 2 (GA_TeamGameLoop over D_801237F0_gacode's pin setups): ends the frame by GA_EndFrame, the game after frame 10
+GA_ScorePinEditor	0x801157F8	invented: game mode of mode 2, the pin editor (ga_editorPins): every throw ends the frame, with no callout
+GA_ScoreBattle	0x8011582C	invented: game mode of mode 3 (two lanes): strikes, runs and splits push the other lane's aim marker on (ga_laneAim), misses pull the player's own back
+GA_InputWaitCamera	0x801178D8	invented: inputFunc handler: waits for the lane's camera to come down (cameraRaise), then sets the turn's handlers by the game mode
+GA_InputWaitStart	0x801179FC	invented: inputFunc handler: waits for input 1 (30 frames for the CPU), then goes on to GA_InputBeginTurn
+GA_InputIdle	0x80117ABC	invented: inputFunc handler of the pin-editor mode's turn: only hides the player
+GA_InputBeginTurn	0x80117AE0	invented: inputFunc handler: shows the standing pins and the markers, loads the character's animation, then goes on to GA_InputAim
+GA_InputAim	0x80117BDC	invented: inputFunc handler: the stick moves the character's aim (debug text 'ATX'); input 1 goes on to GA_InputStance
+GA_InputStance	0x80117D20	invented: inputFunc handler: the stick moves the character's stance (debug text 'STX'); 1 goes on to GA_InputTakeBall, -1 back to GA_InputAim
+GA_InputTakeBall	0x80117EFC	invented: inputFunc handler: shows the player and the ball (its weight's palette and mass), then GA_InputSetThrow or, with the aim marker shown, GA_InputApproach
+GA_InputSetThrow	0x80118014	invented: inputFunc handler: the stick sets the throw's speed and spin; 1 goes on to GA_InputApproach, -1 back to GA_InputStance
+GA_InputApproach	0x80118270	invented: inputFunc handler: the player's approach animation up to the character's release window, then GA_InputSwing
+GA_InputSwing	0x8011840C	invented: inputFunc handler: commits the release by the timingAngle's sine, B or input 1, then GA_InputRelease
+GA_InputRelease	0x80118524	invented: inputFunc handler at the release: sets the ball's velocity, spin and hook, then GA_InputRoll
+GA_InputRoll	0x801187D0	invented: inputFunc handler while the ball rolls down the lane (debug text 'NOW Z'), then GA_InputCountPins
+GA_InputCountPins	0x801189C4	invented: inputFunc handler after the roll: counts the pins hit and down and asks the game mode for the result
+GA_InputReaction	0x80118CCC	invented: inputFunc handler: plays the character's reaction animation to its end (or A/Z after 30 frames)
+GA_InputEndThrow	0x80118D9C	invented: inputFunc handler: hides the player and ends the throw by the game mode's D_8012D23C_gacode handler
+GA_InputNextTurn	0x80118E04	invented: inputFunc handler: after the throw (40 frames with a callout) starts the next turn
+GA_InputGameOver	0x80118EA0	invented: inputFunc handler at a duel game's end (GA_EndDuelGame): holds the reaction animation's last frame, returns -1 there
+GA_InputParkedRestart	0x80118F08	invented: inputFunc handler of a lane parked until the lanes restart at GA_StartTurn (debug text ' WAIT... ')
+GA_InputParked	0x80118F38	invented: inputFunc handler of a parked lane: the lanes' first handler (GA_SetupLanes), and where their players wait once done (debug text ' WAIT... ')
+GA_InputGutter	0x80118F68	invented: inputFunc handler while the ball rolls in the gutter (set when it drops off the lane, callout 3), then GA_InputCountPins

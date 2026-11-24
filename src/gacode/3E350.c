@@ -92,7 +92,7 @@ void GA_StopLanes( u8 lastLane ) {
 
     for ( i = 0; i <= lastLane; i++ ) {
         GA_StopLaneSound( &ga_lanes[i].soundHandle );
-        ga_lanes[i].inputFunc = func_80118F38_gacode;
+        ga_lanes[i].inputFunc = GA_InputParked;
     }
 }
 
@@ -303,7 +303,7 @@ void GA_PlaceBody( gaBody_t *body, gaSpot_t *spot, sceneObject_t *obj, f32 offse
 GA_PublishBall
 
 Publishes the ball of the player's lane to main: its position, and in D_800DF595 its state (0: no ball,
-1 or 2 (the lane in func_80118F68_gacode): motion[0].flags bit 1 set, 3: below -190).
+1 or 2 (the lane in GA_InputGutter): motion[0].flags bit 1 set, 3: below -190).
 ================
 */
 void GA_PublishBall( gaPlayer_t *pl ) {
@@ -319,7 +319,7 @@ void GA_PublishBall( gaPlayer_t *pl ) {
         return;
     }
     if ( ( lane->motion[0].flags >> 1 ) & 1 ) {
-        if ( pl->lane->inputFunc == func_80118F68_gacode ) {
+        if ( pl->lane->inputFunc == GA_InputGutter ) {
             state = 2;
         } else {
             state = 1;
@@ -569,13 +569,13 @@ s32 GA_ScorePar( s32 player ) {
 
 /*
 ================
-func_801156D8_gacode
+GA_ScoreSetupGame
 
 A game mode: when GA_EndFrame ends the player's frame, plays the sounds and sets the lane's callout
 when the game is over (returns 2) or not (returns 1); else sets callout by D_80068A50 and returns 0.
 ================
 */
-s32 func_801156D8_gacode( s32 player ) {
+s32 GA_ScoreSetupGame( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( ( pl->lane->frameOver = GA_EndFrame( player, pl->lane->pinsDown == 10 ) ) != 0 ) {
@@ -602,12 +602,12 @@ s32 func_801156D8_gacode( s32 player ) {
 
 /*
 ================
-func_801157F8_gacode
+GA_ScorePinEditor
 
 A game mode.
 ================
 */
-s32 func_801157F8_gacode( s32 player ) {
+s32 GA_ScorePinEditor( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
 
     pl->lane->callout = 0;
@@ -617,7 +617,7 @@ s32 func_801157F8_gacode( s32 player ) {
 
 /*
 ================
-func_8011582C_gacode
+GA_ScoreBattle
 
 A game mode. When the throw ends the frame (pinsDown is 10): after a func_80116398_gacode turn plays the sound
 for the player's run D_800A304C, adds to the other player's ga_laneAim unk_04 and counts the run on;
@@ -625,7 +625,7 @@ otherwise scores by D_80068A50 and D_80099458 and ends the run. Else scores the 
 Returns 0.
 ================
 */
-s32 func_8011582C_gacode( s32 player ) {
+s32 GA_ScoreBattle( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 other = player == 0;
     u8 run;
@@ -765,9 +765,9 @@ void func_80115D70_gacode( s32 player, u8 arg1 ) {
     lane->panelFunc = func_8011B564_gacode;
     lane->cameraFunc = GA_FreeCamera;
     if ( arg1 ) {
-        lane->inputFunc = func_80118F08_gacode;
+        lane->inputFunc = GA_InputParkedRestart;
     } else {
-        lane->inputFunc = func_80118F38_gacode;
+        lane->inputFunc = GA_InputParked;
     }
 }
 
@@ -777,7 +777,7 @@ func_80115DF4_gacode
 ================
 */
 s32 func_80115DF4_gacode( s32 player ) {
-    return ga_players[player].lane->inputFunc == func_80118F08_gacode;
+    return ga_players[player].lane->inputFunc == GA_InputParkedRestart;
 }
 
 /*
@@ -789,10 +789,10 @@ When the players of every lane are done (inputFunc parked), stops their panelFun
 */
 s32 func_80115E24_gacode( u8 twoLanes ) {
     if ( twoLanes ) {
-        if ( ga_lanes[0].inputFunc != func_80118F38_gacode ) {
+        if ( ga_lanes[0].inputFunc != GA_InputParked ) {
             return 0;
         }
-        if ( ga_lanes[1].inputFunc != func_80118F38_gacode ) {
+        if ( ga_lanes[1].inputFunc != GA_InputParked ) {
             return 0;
         }
         ga_lanes[1].panelFunc = func_8011B400_gacode;
@@ -801,7 +801,7 @@ s32 func_80115E24_gacode( u8 twoLanes ) {
         ga_lanes[0].cameraFunc = func_8011C650_gacode;
         return 1;
     }
-    if ( ga_lanes[0].inputFunc != func_80118F38_gacode ) {
+    if ( ga_lanes[0].inputFunc != GA_InputParked ) {
         return 0;
     }
     ga_lanes[0].panelFunc = func_8011B400_gacode;
@@ -813,18 +813,18 @@ s32 func_80115E24_gacode( u8 twoLanes ) {
 ================
 func_80115ED4_gacode
 
-When the players of every lane are done, or wait in func_80118F08_gacode (whose lanes then restart at
+When the players of every lane are done, or wait in GA_InputParkedRestart (whose lanes then restart at
 GA_StartTurn), stops their panelFunc handlers; returns 1 then.
 ================
 */
 s32 func_80115ED4_gacode( u8 twoLanes ) {
     if ( twoLanes ) {
-        if ( ga_lanes[0].inputFunc == func_80118F38_gacode && ga_lanes[1].inputFunc == ga_lanes[0].inputFunc ) {
+        if ( ga_lanes[0].inputFunc == GA_InputParked && ga_lanes[1].inputFunc == ga_lanes[0].inputFunc ) {
             ga_lanes[1].panelFunc = func_8011B400_gacode;
             ga_lanes[0].panelFunc = func_8011B400_gacode;
             return 1;
         }
-        if ( ga_lanes[0].inputFunc == func_80118F08_gacode && ga_lanes[1].inputFunc == ga_lanes[0].inputFunc ) {
+        if ( ga_lanes[0].inputFunc == GA_InputParkedRestart && ga_lanes[1].inputFunc == ga_lanes[0].inputFunc ) {
             ga_lanes[1].turnFunc = GA_StartTurn;
             ga_lanes[0].turnFunc = GA_StartTurn;
             ga_lanes[1].panelFunc = func_8011B400_gacode;
@@ -832,11 +832,11 @@ s32 func_80115ED4_gacode( u8 twoLanes ) {
             return 1;
         }
     } else {
-        if ( ga_lanes[0].inputFunc == func_80118F38_gacode ) {
+        if ( ga_lanes[0].inputFunc == GA_InputParked ) {
             ga_lanes[0].panelFunc = func_8011B400_gacode;
             return 1;
         }
-        if ( ga_lanes[0].inputFunc == func_80118F08_gacode ) {
+        if ( ga_lanes[0].inputFunc == GA_InputParkedRestart ) {
             ga_lanes[0].turnFunc = GA_StartTurn;
             ga_lanes[0].panelFunc = func_8011B400_gacode;
             return 1;
@@ -871,7 +871,7 @@ s32 GA_EndDuelGame( void ) {
         D_8009D030[i][D_800693DC[0] + D_800693DC[1]] = D_800EA090[i];
         pl = &ga_players[i];
         files = pl->character.data->unk_00;
-        pl->lane->inputFunc = func_80118EA0_gacode;
+        pl->lane->inputFunc = GA_InputGameOver;
         pl->lane->panelFunc = func_8011B490_gacode;
         pl->lane->cameraFunc = func_8011BCA8_gacode;
         rival = i != 1;
@@ -891,7 +891,7 @@ s32 GA_EndDuelGame( void ) {
 ================
 func_80116170_gacode
 
-Once both lanes wait in func_80118EA0_gacode, ends the turn of players 0 and 1: with skip set, parks
+Once both lanes wait in GA_InputGameOver, ends the turn of players 0 and 1: with skip set, parks
 their lanes' input; else first runs GA_ClearScores and sets the lanes' view handlers.
 ================
 */
@@ -899,7 +899,7 @@ void func_80116170_gacode( s32 skip ) {
     gaPlayer_t *pl;
     s32 i;
 
-    if ( ga_lanes[0].inputFunc != func_80118EA0_gacode || ga_lanes[1].inputFunc != ga_lanes[0].inputFunc ) {
+    if ( ga_lanes[0].inputFunc != GA_InputGameOver || ga_lanes[1].inputFunc != ga_lanes[0].inputFunc ) {
         return;
     }
     D_8012D8D8_gacode = 0;
@@ -909,7 +909,7 @@ void func_80116170_gacode( s32 skip ) {
     for ( i = 0; i < 2; i++ ) {
         pl = &ga_players[i];
         if ( skip ) {
-            pl->lane->inputFunc = func_80118F38_gacode;
+            pl->lane->inputFunc = GA_InputParked;
         } else {
             pl->lane->cameraRaise = 2700.0f;
             pl->lane->cameraFunc = func_8011C650_gacode;
@@ -936,9 +936,9 @@ void GA_StartTurn( s32 player ) {
     u8 pins[NUM_PINS];
     u16 mask;
 
-    if ( ga_gameMode == func_801157F8_gacode ) {
+    if ( ga_gameMode == GA_ScorePinEditor ) {
         mask = ga_editorPins;
-    } else if ( ga_gameMode == func_801156D8_gacode ) {
+    } else if ( ga_gameMode == GA_ScoreSetupGame ) {
         mask = D_801237F0_gacode[D_800DF59C.unk_04[D_8009D19C[player]]].pins;
     } else if ( ga_gameMode == GA_ScorePar ) {
         mask = D_80123950_gacode[D_800DF59C.unk_04[D_8009D19C[player]]].pins;
@@ -949,7 +949,7 @@ void GA_StartTurn( s32 player ) {
     GA_ResetLane( player, pins );
     pl->lane->turnFunc = func_80116398_gacode;
     if ( D_8012D8D8_gacode == 0 ) {
-        pl->lane->inputFunc = func_801178D8_gacode;
+        pl->lane->inputFunc = GA_InputWaitCamera;
         pl->lane->panelFunc = func_8011B400_gacode;
         pl->lane->cameraFunc = func_8011B8AC_gacode;
     } else {
@@ -1057,7 +1057,7 @@ void GA_ResetLane( s32 player, u8 *pins ) {
     lane->panelFunc = func_8011AB0C_gacode;
     lane->cameraFunc = func_8011B974_gacode;
     lane->callout = 0;
-    lane->inputFunc = func_80117AE0_gacode;
+    lane->inputFunc = GA_InputBeginTurn;
     if ( pl->port >= 0 ) {
         D_800DF680[pl->port] = 8;
         D_8006940D[pl->port] = 0;
@@ -1072,14 +1072,14 @@ Sets the handlers of a player's turn for the game mode.
 ================
 */
 void GA_SetTurnHandlers( gaPlayer_t *pl ) {
-    if ( ga_gameMode == func_801156D8_gacode || ga_gameMode == GA_ScorePar ) {
-        pl->lane->inputFunc = func_801179FC_gacode;
+    if ( ga_gameMode == GA_ScoreSetupGame || ga_gameMode == GA_ScorePar ) {
+        pl->lane->inputFunc = GA_InputWaitStart;
         pl->lane->panelFunc = func_8011AA78_gacode;
-    } else if ( ga_gameMode == func_801157F8_gacode ) {
-        pl->lane->inputFunc = func_80117ABC_gacode;
+    } else if ( ga_gameMode == GA_ScorePinEditor ) {
+        pl->lane->inputFunc = GA_InputIdle;
         pl->lane->panelFunc = func_8011AA78_gacode;
     } else {
-        pl->lane->inputFunc = func_80117AE0_gacode;
+        pl->lane->inputFunc = GA_InputBeginTurn;
         pl->lane->panelFunc = func_8011AB0C_gacode;
     }
     pl->lane->cameraFunc = func_8011B974_gacode;
@@ -1156,7 +1156,7 @@ inline s32 func_801168D0_gacode( gaPlayer_t *pl ) {
         GA_PlayLaneSound( pl->laneIndex, 0x2F );
         pl->lane->bodies[0].rot[2] = pl->lane->motion[0].spin[2] = 0.0f;
         pl->lane->callout = 3;
-        pl->lane->inputFunc = func_80118F68_gacode;
+        pl->lane->inputFunc = GA_InputGutter;
         return 1;
     }
     return 0;
@@ -1171,7 +1171,7 @@ Declared inline: nothing calls this copy; GA_RollBall and GA_RollBallSpin expand
 inline s32 func_80116998_gacode( gaPlayer_t *pl ) {
     if ( pl->lane->motion[0].vel[2] >= 0.0f ) {
         GA_StopLaneSound( &pl->lane->soundHandle );
-        pl->lane->inputFunc = func_801189C4_gacode;
+        pl->lane->inputFunc = GA_InputCountPins;
         return 1;
     }
     return 0;
@@ -1199,7 +1199,7 @@ func_80116A64_gacode
 
 Moves the character's speed by the stick's y and spin against its x, each kept in its range.
 
-Declared inline: nothing calls this copy, and func_80118014_gacode and func_80118270_gacode repeat its body.
+Declared inline: nothing calls this copy, and GA_InputSetThrow and GA_InputApproach repeat its body.
 ================
 */
 inline void func_80116A64_gacode( gaPlayer_t *pl, s16 stickX, s16 stickY ) {
@@ -1372,7 +1372,7 @@ s32 func_80117124_gacode( s32 player, gaPlayer_t *pl ) {
                     ga_lanes[i].markerObjs[1]->viewMask = 0;
                 ga_lanes[i].cameraFunc = func_8011C650_gacode;
                 ga_lanes[i].panelFunc = func_8011B5C8_gacode;
-                ga_lanes[i].inputFunc = func_80118E04_gacode;
+                ga_lanes[i].inputFunc = GA_InputNextTurn;
             }
             return 1;
         }
@@ -1389,13 +1389,13 @@ s32 func_80117124_gacode( s32 player, gaPlayer_t *pl ) {
 
 /*
 ================
-func_801178D8_gacode
+GA_InputWaitCamera
 
 Lane input handler: hides the player and, once the lane's cameraRaise camera offset is down to 0, plays SE 100
 (for player 0) and picks the lane's next handlers by the game mode.
 ================
 */
-s32 func_801178D8_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputWaitCamera( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     pl->obj->viewMask = 0;
@@ -1405,14 +1405,14 @@ s32 func_801178D8_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     if ( player == 0 ) {
         Sound_PlaySe( 100, 0 );
     }
-    if ( ga_gameMode == func_801156D8_gacode || ga_gameMode == GA_ScorePar ) {
-        pl->lane->inputFunc = func_801179FC_gacode;
+    if ( ga_gameMode == GA_ScoreSetupGame || ga_gameMode == GA_ScorePar ) {
+        pl->lane->inputFunc = GA_InputWaitStart;
         pl->lane->panelFunc = func_8011AA78_gacode;
-    } else if ( ga_gameMode == func_801157F8_gacode ) {
-        pl->lane->inputFunc = func_80117ABC_gacode;
+    } else if ( ga_gameMode == GA_ScorePinEditor ) {
+        pl->lane->inputFunc = GA_InputIdle;
         pl->lane->panelFunc = func_8011AA78_gacode;
     } else {
-        pl->lane->inputFunc = func_80117AE0_gacode;
+        pl->lane->inputFunc = GA_InputBeginTurn;
         pl->lane->panelFunc = func_8011AB0C_gacode;
     }
     pl->lane->cameraFunc = func_8011B974_gacode;
@@ -1421,13 +1421,13 @@ s32 func_801178D8_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_801179FC_gacode
+GA_InputWaitStart
 
 Lane input handler: on button 1 of a human player, or after 30 frames for the game's own player, sounds
-effect 1 and moves the lane on to func_80117AE0_gacode.
+effect 1 and moves the lane on to GA_InputBeginTurn.
 ================
 */
-s32 func_801179FC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputWaitStart( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
     s8 port;
 
@@ -1437,7 +1437,7 @@ s32 func_801179FC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     if ( ( port >= 0 && input == 1 ) || ( port < 0 && pl->lane->timer >= 30 ) ) {
         pl->lane->timer = 0;
         GA_PlayLaneSound( pl->laneIndex, 1 );
-        pl->lane->inputFunc = func_80117AE0_gacode;
+        pl->lane->inputFunc = GA_InputBeginTurn;
         pl->lane->panelFunc = func_8011AB0C_gacode;
     }
     return 0;
@@ -1445,24 +1445,26 @@ s32 func_801179FC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_80117ABC_gacode
+GA_InputIdle
+
+Lane input handler of the pin-editor mode's turn: only hides the player.
 ================
 */
-s32 func_80117ABC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputIdle( s32 player, s32 input, s16 stickX, s16 stickY ) {
     ga_players[player].obj->viewMask = 0;
     return 0;
 }
 
 /*
 ================
-func_80117AE0_gacode
+GA_InputBeginTurn
 
 Lane input handler: shows the standing pins (unk_4A 3) and hides the rest and the player, loads the
 character's file 1 for it, shows objects markerObjs (2 on lane 1, else 1) and moves on to
-func_80117BDC_gacode.
+GA_InputAim.
 ================
 */
-s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputBeginTurn( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
     s16 *files = pl->character.data->unk_00;
     gaLane_t *lane = pl->lane;
@@ -1476,21 +1478,21 @@ s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     pl->obj->frame = 0;
     pl->obj->anim = Cache_GetFile( files[1], FILE_TYPE2 );
     pl->lane->markerObjs[0]->viewMask = pl->lane->markerObjs[1]->viewMask = ga_players[player].laneIndex != 0 ? 2 : 1;
-    pl->lane->inputFunc = func_80117BDC_gacode;
+    pl->lane->inputFunc = GA_InputAim;
     return 0;
 }
 
 
 /*
 ================
-func_80117BDC_gacode
+GA_InputAim
 
 Lane input handler: unless func_80117124_gacode handles the frame, turns the lane's markers[0] and on 1 goes
-on to func_80117D20_gacode; else the stick moves the character's aim (within 50) and the lane's
+on to GA_InputStance; else the stick moves the character's aim (within 50) and the lane's
 markerSpots[0] with it.
 ================
 */
-s32 func_80117BDC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputAim( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( func_80117124_gacode( player, pl ) ) {
@@ -1502,7 +1504,7 @@ s32 func_80117BDC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     if ( input == 1 ) {
         GA_PlayLaneSound( pl->laneIndex, 0xB );
         pl->lane->cameraFunc = func_8011BA00_gacode;
-        pl->lane->inputFunc = func_80117D20_gacode;
+        pl->lane->inputFunc = GA_InputStance;
         return 0;
     }
     pl->character.aim[0] += stickX / 50.0f;
@@ -1517,15 +1519,15 @@ s32 func_80117BDC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_80117D20_gacode
+GA_InputStance
 
 Lane input handler: unless func_80117124_gacode handles the frame, turns the lane's markers[1]; 1 moves the
 player's object across to the character's stance, sets its direction from stance and aim and goes on to
-func_80117EFC_gacode, -1 goes back to func_80117BDC_gacode; else the stick moves the character's stance[0]
+GA_InputTakeBall, -1 goes back to GA_InputAim; else the stick moves the character's stance[0]
 (within 50) and the lane's markerSpots[1] with it.
 ================
 */
-s32 func_80117D20_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputStance( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
     f32 mf[4][4];
 
@@ -1542,13 +1544,13 @@ s32 func_80117D20_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
         guTranslateF( mf, pl->character.stance[0] - pl->lane->spots[0].pos[0], 0.0f, 0.0f );
         guMtxCatF( pl->obj->mtx, mf, pl->obj->mtx );
         GA_VecDirection( pl->character.direction, pl->character.stance, pl->character.aim );
-        pl->lane->inputFunc = func_80117EFC_gacode;
+        pl->lane->inputFunc = GA_InputTakeBall;
         return 0;
     }
     if ( input == -1 ) {
         GA_PlayLaneSound( pl->laneIndex, 0xC );
         pl->lane->cameraFunc = func_8011B974_gacode;
-        pl->lane->inputFunc = func_80117BDC_gacode;
+        pl->lane->inputFunc = GA_InputAim;
         return 0;
     }
     pl->character.stance[0] += stickX / 50.0f;
@@ -1563,13 +1565,13 @@ s32 func_80117D20_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_80117EFC_gacode
+GA_InputTakeBall
 
 inputFunc handler: shows the player and the ball and picks the lane's next handlers by whether its markerObjs[2]
 object is shown.
 ================
 */
-s32 func_80117EFC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputTakeBall( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     pl->obj->frame = 0;
@@ -1583,31 +1585,31 @@ s32 func_80117EFC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     pl->lane->cameraFunc = func_8011BA8C_gacode;
     if ( pl->lane->markerObjs[2]->viewMask != 0 ) {
         pl->lane->panelFunc = func_8011B07C_gacode;
-        pl->lane->inputFunc = func_80118270_gacode;
+        pl->lane->inputFunc = GA_InputApproach;
     } else {
         pl->lane->panelFunc = func_8011AD5C_gacode;
-        pl->lane->inputFunc = func_80118014_gacode;
+        pl->lane->inputFunc = GA_InputSetThrow;
     }
     return 0;
 }
 
 /*
 ================
-func_80118014_gacode
+GA_InputSetThrow
 
-Lane input handler: 1 goes on to func_80118270_gacode; -1 backs out (hides the player and the ball, restores
-the player's placement and goes back to func_80117D20_gacode); else the stick moves the character's speed and
+Lane input handler: 1 goes on to GA_InputApproach; -1 backs out (hides the player and the ball, restores
+the player's placement and goes back to GA_InputStance); else the stick moves the character's speed and
 spin.
 ================
 */
-s32 func_80118014_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputSetThrow( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     pl->obj->frame = 0;
     if ( input == 1 ) {
         GA_PlayLaneSound( pl->laneIndex, 0xB );
         pl->lane->panelFunc = func_8011B07C_gacode;
-        pl->lane->inputFunc = func_80118270_gacode;
+        pl->lane->inputFunc = GA_InputApproach;
         return 0;
     }
     if ( input == -1 ) {
@@ -1618,7 +1620,7 @@ s32 func_80118014_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
         memmove( pl->obj->mtx, pl->homeMtx, sizeof( pl->homeMtx ) );
         pl->lane->panelFunc = func_8011AB0C_gacode;
         pl->lane->cameraFunc = func_8011BA00_gacode;
-        pl->lane->inputFunc = func_80117D20_gacode;
+        pl->lane->inputFunc = GA_InputStance;
         return 0;
     }
     func_80116A64_gacode( pl, stickX, stickY );
@@ -1627,18 +1629,18 @@ s32 func_80118014_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_80118270_gacode
+GA_InputApproach
 
 Lane input handler: the stick moves the character's speed and spin until the player object's unk_48 passes
-the character's unk_18, then goes on to func_8011840C_gacode.
+the character's unk_18, then goes on to GA_InputSwing.
 ================
 */
-s32 func_80118270_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputApproach( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( pl->obj->frame > pl->character.data->unk_18 ) {
         pl->lane->panelFunc = func_8011B1A0_gacode;
-        pl->lane->inputFunc = func_8011840C_gacode;
+        pl->lane->inputFunc = GA_InputSwing;
         return 0;
     }
     func_80116A64_gacode( pl, stickX, stickY );
@@ -1647,14 +1649,14 @@ s32 func_80118270_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_8011840C_gacode
+GA_InputSwing
 
 Lane input handler: commits the throw (keeps the player object's unk_48 in releaseFrame and goes on to
-func_80118524_gacode) once the sine of the character's timingAngle is down to -0.3, on B at the last frame when
+GA_InputRelease) once the sine of the character's timingAngle is down to -0.3, on B at the last frame when
 ga_earlyCommit allows it, or on input 1 while the sine is at most 0.5.
 ================
 */
-s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputSwing( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( sinf( pl->character.timingAngle ) <= -0.3 ||
@@ -1662,7 +1664,7 @@ s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
            pl->obj->frame == pl->character.data->unk_19 ) ||
          ( sinf( pl->character.timingAngle ) <= 0.5 && input == 1 ) ) {
         pl->releaseFrame = pl->obj->frame;
-        pl->lane->inputFunc = func_80118524_gacode;
+        pl->lane->inputFunc = GA_InputRelease;
         pl->lane->panelFunc = func_8011B2E8_gacode;
         return 0;
     }
@@ -1671,15 +1673,15 @@ s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_80118524_gacode
+GA_InputRelease
 
 Lane input handler at the release: sets the ball's standState, aims from the ball's spot towards the character's
 aim (into direction), sets the ball's velocity from speed (turned by the sine and cosine of timingAngle, the sideways
 part curved by its square), its spin from spin, scales hook by the spin, picks the stage's unk_1E[1] or
-unk_1E[0] by how far timingAngle turns the throw, and hands over to func_801187D0_gacode.
+unk_1E[0] by how far timingAngle turns the throw, and hands over to GA_InputRoll.
 ================
 */
-s32 func_80118524_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputRelease( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
     vec3_t from;
     s32 side;
@@ -1712,22 +1714,22 @@ s32 func_80118524_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     } else {
         pl->lane->bounceSound = ga_stage->unk_1E[0];
     }
-    pl->lane->inputFunc = func_801187D0_gacode;
+    pl->lane->inputFunc = GA_InputRoll;
     return 0;
 }
 
 /*
 ================
-func_801187D0_gacode
+GA_InputRoll
 
 Lane input handler while the ball rolls: halves the character's hook when the ball's motion flag bit 6 is set,
 hands the view to the ball at the character's unk_1A frame, rolls the ball (GA_RollBallSpin while bit 1
 is set and the ball is short of the stage's unk_08, else GA_RollBall), switches the camera at -1050,
 lets Z steer it by the stick when ga_steerBall is set, and at -1186 stops the roll's sound and hands
-over to func_801189C4_gacode.
+over to GA_InputCountPins.
 ================
 */
-s32 func_801187D0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputRoll( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( ( pl->lane->motion[0].flags >> 6 ) & 1 ) {
@@ -1754,23 +1756,23 @@ s32 func_801187D0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     }
     if ( pl->lane->spots[0].pos[2] <= -1186.0f ) {
         GA_StopLaneSound( &pl->lane->soundHandle );
-        pl->lane->inputFunc = func_801189C4_gacode;
+        pl->lane->inputFunc = GA_InputCountPins;
     }
     return 0;
 }
 
 /*
 ================
-func_801189C4_gacode
+GA_InputCountPins
 
 Lane input handler after the roll: waits 45 frames, then (outside modes 2 and sub-mode 2) raises the stage's
 unk_10 by 0.05, hides the ball, counts the pins knocked down this throw (standState 2: marked in the frame's
 first pin mask after a func_80116398_gacode turn, else in the second) into pinsHit and the pins down into
 pinsDown, and asks the game mode for the result: nonzero shows the player again, hides the fallen pins, picks
-the character's reaction (1 to 3) and hands over to func_80118CCC_gacode, else to func_80118E04_gacode.
+the character's reaction (1 to 3) and hands over to GA_InputReaction, else to GA_InputNextTurn.
 ================
 */
-s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputCountPins( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
     s16 *files = pl->character.data->unk_00;
     s32 scorer;
@@ -1831,9 +1833,9 @@ s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
         pl->lane->reaction = reaction - 1;
         pl->obj->frame = 0;
         pl->obj->anim = Cache_GetFile( files[pl->lane->reaction + 2], 2 );
-        pl->lane->inputFunc = func_80118CCC_gacode;
+        pl->lane->inputFunc = GA_InputReaction;
     } else {
-        pl->lane->inputFunc = func_80118E04_gacode;
+        pl->lane->inputFunc = GA_InputNextTurn;
     }
     if ( pl->lane->callout != 0 ) {
         pl->lane->panelFunc = func_8011B408_gacode;
@@ -1843,10 +1845,12 @@ s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_80118CCC_gacode
+GA_InputReaction
+
+Lane input handler: plays the character's reaction animation to its end (or A/Z after 30 frames).
 ================
 */
-s32 func_80118CCC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputReaction( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     pl->lane->cameraFunc = func_8011BCA8_gacode;
@@ -1856,17 +1860,19 @@ s32 func_80118CCC_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
         pl->lane->timer = 0;
         pl->lane->cameraFunc = func_8011C650_gacode;
         D_8012D8D8_gacode++;
-        pl->lane->inputFunc = func_80118D9C_gacode;
+        pl->lane->inputFunc = GA_InputEndThrow;
     }
     return 0;
 }
 
 /*
 ================
-func_80118D9C_gacode
+GA_InputEndThrow
+
+Lane input handler: hides the player and ends the throw by the game mode's D_8012D23C_gacode handler.
 ================
 */
-s32 func_80118D9C_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputEndThrow( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     pl->obj->frame = 0;
@@ -1878,12 +1884,12 @@ s32 func_80118D9C_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_80118E04_gacode
+GA_InputNextTurn
 
 Lane input handler: after the throw (40 frames of it when callout is set), starts the next turn.
 ================
 */
-s32 func_80118E04_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputNextTurn( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( pl->obj->frame != 0 ) {
@@ -1905,10 +1911,13 @@ s32 func_80118E04_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_80118EA0_gacode
+GA_InputGameOver
+
+Lane input handler at a duel game's end (GA_EndDuelGame): holds the reaction animation's last frame, returns -1
+there.
 ================
 */
-s32 func_80118EA0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputGameOver( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     pl->obj->viewMask = pl->laneIndex ? 2 : 1;
@@ -1921,10 +1930,12 @@ s32 func_80118EA0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_80118F08_gacode
+GA_InputParkedRestart
+
+Lane input handler of a lane parked until the lanes restart at GA_StartTurn (debug text ' WAIT... ').
 ================
 */
-s32 func_80118F08_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputParkedRestart( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     pl->obj->viewMask = 0;
@@ -1934,10 +1945,13 @@ s32 func_80118F08_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_80118F38_gacode
+GA_InputParked
+
+Lane input handler of a parked lane: the lanes' first handler (GA_SetupLanes), and where their players wait
+once done (debug text ' WAIT... ').
 ================
 */
-s32 func_80118F38_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputParked( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     pl->obj->viewMask = 0;
@@ -1947,15 +1961,15 @@ s32 func_80118F38_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
 /*
 ================
-func_80118F68_gacode
+GA_InputGutter
 
-Lane input handler while the ball rolls, as func_801187D0_gacode with the strong sounds: hands the view to the ball once the player's animation is past
+Lane input handler while the ball rolls, as GA_InputRoll with the strong sounds: hands the view to the ball once the player's animation is past
 the character's unk_18 frame, spins the ball by its speed down the lane, sounds the roll from the stage's
 second list while motion[0].flags bit 1 is set (else stops it), switches the camera at -1050, and at -1186
-or once the ball stops going down the lane stops the sound and hands over to func_801189C4_gacode.
+or once the ball stops going down the lane stops the sound and hands over to GA_InputCountPins.
 ================
 */
-s32 func_80118F68_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
+s32 GA_InputGutter( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( pl->obj->frame <= pl->character.data->unk_18 ) {
@@ -1977,11 +1991,11 @@ s32 func_80118F68_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     }
     if ( pl->lane->spots[0].pos[2] <= -1186.0f ) {
         GA_StopLaneSound( &pl->lane->soundHandle );
-        pl->lane->inputFunc = func_801189C4_gacode;
+        pl->lane->inputFunc = GA_InputCountPins;
     }
     if ( pl->lane->motion[0].vel[2] >= 0.0f ) {
         GA_StopLaneSound( &pl->lane->soundHandle );
-        pl->lane->inputFunc = func_801189C4_gacode;
+        pl->lane->inputFunc = GA_InputCountPins;
     }
     return 0;
 }
@@ -2367,10 +2381,10 @@ static inline u8 GA_TogglePin( gaBody_t *bodies, s32 i ) {
 ================
 GA_PinEditor
 
-Pin editor of func_801157F8_gacode's mode: draws the pin chart of ga_editorPins with the cursor (on a pin,
+Pin editor of GA_ScorePinEditor's mode: draws the pin chart of ga_editorPins with the cursor (on a pin,
 or on the button below the chart), and unless the overlay is leaving reads the first controller: up enters
 the chart or moves up a row, down moves down a row (off the top row back to the button), left and right move
-along a row, and A or Z on the button starts the throw (func_80117AE0_gacode), on a pin stands it up or knocks
+along a row, and A or Z on the button starts the throw (GA_InputBeginTurn), on a pin stands it up or knocks
 it down.
 ================
 */
@@ -2495,7 +2509,7 @@ void GA_PinEditor( gaPlayer_t *pl ) {
     if ( D_800E44E0[0] & ( A_BUTTON | Z_TRIG ) ) {
         if ( !ga_editorOnPins ) {
             Sound_PlaySe( 1, 0 );
-            pl->lane->inputFunc = func_80117AE0_gacode;
+            pl->lane->inputFunc = GA_InputBeginTurn;
             pl->lane->panelFunc = func_8011AB0C_gacode;
         } else {
             Sound_PlaySe( 0xB, 0 );
@@ -2545,11 +2559,11 @@ Runs the part of the game mode's ending that belongs to the mode.
 void func_8011AA78_gacode( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
 
-    if ( ga_gameMode == func_801156D8_gacode ) {
+    if ( ga_gameMode == GA_ScoreSetupGame ) {
         func_80119DD8_gacode( player, pl->laneIndex );
     } else if ( ga_gameMode == GA_ScorePar ) {
         GA_DrawParFramePanel( player, pl->laneIndex );
-    } else if ( ga_gameMode == func_801157F8_gacode ) {
+    } else if ( ga_gameMode == GA_ScorePinEditor ) {
         GA_PinEditor( pl );
     }
 }
@@ -2565,13 +2579,13 @@ ball weight selector.
 void func_8011AB0C_gacode( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
 
-    if ( ga_gameMode == func_801157F8_gacode ) {
+    if ( ga_gameMode == GA_ScorePinEditor ) {
         GA_DrawAimLine( pl );
-    } else if ( ga_gameMode == func_801156D8_gacode ) {
+    } else if ( ga_gameMode == GA_ScoreSetupGame ) {
         func_80119C50_gacode( player, pl->laneIndex );
     } else if ( ga_gameMode == GA_ScorePar ) {
         GA_DrawParPanel( player, pl->laneIndex );
-    } else if ( ga_gameMode == func_8011582C_gacode ) {
+    } else if ( ga_gameMode == GA_ScoreBattle ) {
         func_80119F8C_gacode( player, pl->laneIndex );
     } else {
         GA_DrawScorePanel( player, pl->laneIndex );
@@ -2584,7 +2598,7 @@ void func_8011AB0C_gacode( s32 player ) {
 ================
 func_8011AD5C_gacode
 
-panelFunc handler: runs the game mode's part of the frame (none for func_801157F8_gacode), draws the lane's pin
+panelFunc handler: runs the game mode's part of the frame (none for GA_ScorePinEditor), draws the lane's pin
 diagram, runs func_80119638_gacode, clears the lane's D_8012D8E0_gacode sprite and draws a human player's
 full panel.
 ================
@@ -2592,12 +2606,12 @@ full panel.
 void func_8011AD5C_gacode( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
 
-    if ( ga_gameMode != func_801157F8_gacode ) {
-        if ( ga_gameMode == func_801156D8_gacode ) {
+    if ( ga_gameMode != GA_ScorePinEditor ) {
+        if ( ga_gameMode == GA_ScoreSetupGame ) {
             func_80119C50_gacode( player, pl->laneIndex );
         } else if ( ga_gameMode == GA_ScorePar ) {
             GA_DrawParPanel( player, pl->laneIndex );
-        } else if ( ga_gameMode == func_8011582C_gacode ) {
+        } else if ( ga_gameMode == GA_ScoreBattle ) {
             func_80119F8C_gacode( player, pl->laneIndex );
         } else {
             GA_DrawScorePanel( player, pl->laneIndex );
@@ -2719,7 +2733,7 @@ void func_8011B408_gacode( s32 player ) {
 func_8011B490_gacode
 
 Shows image 0x851 over the lane's side when its score leads, or 0xA6B when the two scores are level; then,
-except in mode func_8011582C_gacode, draws the lane's panel.
+except in mode GA_ScoreBattle, draws the lane's panel.
 ================
 */
 void func_8011B490_gacode( s32 lane ) {
@@ -2730,7 +2744,7 @@ void func_8011B490_gacode( s32 lane ) {
     } else if ( D_800EA090[lane] == D_800EA090[rival] ) {
         Draw_ImageScaled( 0xA6B, lane != 0 ? 0xB4 : 0x24, 0x94, (u8)ga_blinkLevel + 0x7F, 1.0f, 1.0f );
     }
-    if ( ga_gameMode != func_8011582C_gacode ) {
+    if ( ga_gameMode != GA_ScoreBattle ) {
         Score_DrawPlayerBoard( lane, 0x18, lane == 0 ? 0x10 : 0xC0 );
     }
 }
@@ -3069,7 +3083,7 @@ void func_8011C158_gacode( s32 player, sceneCamera_t *camera ) {
 func_8011C254_gacode
 
 Camera handler during the throw: shows the ball and the player in both views, puts the eye on one of five
-paths (ga_throwCamPathsLate while the lane's inputFunc is func_80118CCC_gacode or func_80118EA0_gacode, else
+paths (ga_throwCamPathsLate while the lane's inputFunc is GA_InputReaction or GA_InputGameOver, else
 ga_throwCamPaths; by D_8012D8D8_gacode) at the frame that follows the player's animation, and looks at the
 player object's second joint.
 ================
@@ -3088,7 +3102,7 @@ void func_8011C254_gacode( s32 player, sceneCamera_t *camera ) {
         pl->obj->viewMask |= 2;
     }
     joint = 1;
-    if ( pl->lane->inputFunc == func_80118CCC_gacode || pl->lane->inputFunc == func_80118EA0_gacode ) {
+    if ( pl->lane->inputFunc == GA_InputReaction || pl->lane->inputFunc == GA_InputGameOver ) {
         file = ga_throwCamPathsLate[D_8012D8D8_gacode % 5];
         frames = pl->character.data->unk_1B[pl->lane->reaction];
     } else {
@@ -3162,7 +3176,7 @@ GA_CpuInput
 
 Input of a player the game plays, by the lane's inputFunc step: sets the player up first, then moves the
 character's aim and stance towards cpuAim and cpuStance, and presses after speed (doubled in
-func_80118014_gacode) frames or when the animation reaches the character's frame.
+GA_InputSetThrow) frames or when the animation reaches the character's frame.
 ================
 */
 s32 GA_CpuInput( gaPlayer_t *pl, s32 player ) {
@@ -3171,14 +3185,14 @@ s32 GA_CpuInput( gaPlayer_t *pl, s32 player ) {
     s32 steps;
 
     steps = ( D_8005C160 & 0xF ) == 3 ? 20 : 25;
-    if ( pl->lane->inputFunc == func_80117AE0_gacode ) {
+    if ( pl->lane->inputFunc == GA_InputBeginTurn ) {
         if ( ( ( D_8005C160 >> 4 ) & 3 ) == 2 && D_8005C163 == 0 && ( D_8005C0E4[player] & 0xF ) == 0 ) {
             func_8011CEE4_gacode( pl, player );
         } else {
             GA_CpuSetup( pl, player );
         }
         return 0;
-    } else if ( pl->lane->inputFunc == func_80117BDC_gacode ) {
+    } else if ( pl->lane->inputFunc == GA_InputAim ) {
         if ( FABS( pl->character.aim[0] ) >= FABS( pl->cpuAim ) ) {
             pl->character.aim[0] = pl->cpuAim;
             if ( pl->lane->timer++ < wait ) {
@@ -3189,7 +3203,7 @@ s32 GA_CpuInput( gaPlayer_t *pl, s32 player ) {
         } else {
             pl->character.aim[0] += pl->cpuAim / steps;
         }
-    } else if ( pl->lane->inputFunc == func_80117D20_gacode ) {
+    } else if ( pl->lane->inputFunc == GA_InputStance ) {
         if ( FABS( pl->character.stance[0] ) >= FABS( pl->cpuStance ) ) {
             pl->character.stance[0] = pl->cpuStance;
             if ( pl->lane->timer++ >= wait ) {
@@ -3199,13 +3213,13 @@ s32 GA_CpuInput( gaPlayer_t *pl, s32 player ) {
         } else {
             pl->character.stance[0] += pl->cpuStance / steps;
         }
-    } else if ( pl->lane->inputFunc == func_80118014_gacode ) {
+    } else if ( pl->lane->inputFunc == GA_InputSetThrow ) {
         if ( pl->lane->timer++ < longWait ) {
             return 0;
         }
         pl->lane->timer = 0;
         return 1;
-    } else if ( pl->lane->inputFunc == func_8011840C_gacode ) {
+    } else if ( pl->lane->inputFunc == GA_InputSwing ) {
         if ( pl->obj->frame == pl->character.data->unk_19 ) {
             return 1;
         }
@@ -3362,30 +3376,30 @@ void GA_DebugText( s32 player ) {
     sprintf( text, "T[%6.2f]R[%6.2f]", pl->character.speed, pl->character.spin );
     Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
     row++;
-    if ( ga_gameMode == func_801156D8_gacode || ga_gameMode == GA_ScorePar ) {
+    if ( ga_gameMode == GA_ScoreSetupGame || ga_gameMode == GA_ScorePar ) {
         sprintf( text, "TABLE[%d]", D_800DF59C.unk_04[D_8009D19C[player]] );
         Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
         row++;
     }
-    if ( pl->lane->inputFunc == func_80117BDC_gacode ) {
+    if ( pl->lane->inputFunc == GA_InputAim ) {
         sprintf( text, "ATX[%6.2f]", pl->character.aim[0] );
-    } else if ( pl->lane->inputFunc == func_80117D20_gacode ) {
+    } else if ( pl->lane->inputFunc == GA_InputStance ) {
         sprintf( text, "STX[%6.2f]", pl->character.stance[0] );
-    } else if ( pl->lane->inputFunc == func_80118014_gacode ) {
+    } else if ( pl->lane->inputFunc == GA_InputSetThrow ) {
         if ( pl->port < 0 ) {
             return;
         }
         GA_PickAimPin( target, pl->lane->bodies, pl->lane->spots, pl->character.reverseSpin );
         sprintf( text, "TECH RO[%6.2f]",
             func_801205A0_gacode( target, pl->character.direction, pl->character.stance[0], pl->character.speed ) );
-    } else if ( pl->lane->inputFunc == func_80118270_gacode || pl->lane->inputFunc == func_8011840C_gacode
-        || pl->lane->inputFunc == func_80118524_gacode ) {
+    } else if ( pl->lane->inputFunc == GA_InputApproach || pl->lane->inputFunc == GA_InputSwing
+        || pl->lane->inputFunc == GA_InputRelease ) {
         sprintf( text, "FR SIN[%8.4f]", sinf( pl->character.timingAngle ) );
-    } else if ( pl->lane->inputFunc == func_801187D0_gacode || pl->lane->inputFunc == func_80118F68_gacode ) {
+    } else if ( pl->lane->inputFunc == GA_InputRoll || pl->lane->inputFunc == GA_InputGutter ) {
         sprintf( text, "NOW Z[%8.4f]", pl->lane->spots[0].pos[2] );
-    } else if ( pl->lane->inputFunc == func_80118CCC_gacode || pl->lane->inputFunc == func_80118E04_gacode ) {
+    } else if ( pl->lane->inputFunc == GA_InputReaction || pl->lane->inputFunc == GA_InputNextTurn ) {
         return;
-    } else if ( pl->lane->inputFunc == func_80118F08_gacode || pl->lane->inputFunc == func_80118F38_gacode ) {
+    } else if ( pl->lane->inputFunc == GA_InputParkedRestart || pl->lane->inputFunc == GA_InputParked ) {
         sprintf( text, " WAIT... " );
     } else {
         return;
