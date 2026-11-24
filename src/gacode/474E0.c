@@ -907,7 +907,7 @@ void GA_KeepInGrid( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, f32 cei
 GA_PickAimPin
 
 Picks the pin to aim at from side's view: with one pin standing, that pin; with the last standing pin
-checked 1 or 5, that pin, offset 4.9 toward side; else the group (of two, split by D_8012C900_gacode's
+checked 1 or 5, that pin, offset 4.9 toward side; else the group (of two, split by ga_pinRows's
 order) with more standing pins, offset 15 (unless pin 7 or 10) or 5. Writes its x and z to out and
 returns the pin.
 ================
@@ -923,7 +923,7 @@ s32 GA_PickAimPin( vec3_t out, gaBody_t *bodies, gaSpot_t *spots, s32 side ) {
     s32 i;
 
     for ( i = 0; i < NUM_PINS; i++ ) {
-        if ( bodies[D_8012C900_gacode[side][i]].unk_5D != 1 ) {
+        if ( bodies[ga_pinRows[side][i]].unk_5D != 1 ) {
             continue;
         }
         switch ( i ) {
@@ -931,23 +931,23 @@ s32 GA_PickAimPin( vec3_t out, gaBody_t *bodies, gaSpot_t *spots, s32 side ) {
         case 3:
         case 5:
         case 8:
-            right = D_8012C900_gacode[side][i];
+            right = ga_pinRows[side][i];
             numRight++;
             break;
         case 0:
         case 1:
         case 4:
         case 7:
-            left = D_8012C900_gacode[side][i];
+            left = ga_pinRows[side][i];
             numLeft++;
             break;
         default:
-            right = left = D_8012C900_gacode[side][i];
+            right = left = ga_pinRows[side][i];
             numRight++;
             numLeft++;
             break;
         }
-        last = D_8012C900_gacode[side][i];
+        last = ga_pinRows[side][i];
         numStanding++;
     }
     if ( numStanding == 1 ) {
@@ -982,7 +982,7 @@ func_801205A0_gacode
 */
 f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale ) {
     f32 dx = x - pos[0];
-    f32 width = 730.0f - D_8012D220_gacode->unk_08;
+    f32 width = 730.0f - ga_stage->unk_08;
     f32 dz;
     f32 vx;
     f32 vz;
@@ -995,7 +995,7 @@ f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale ) {
     vz = scale * vel[2];
     vx = scale * vel[0];
     return ( vz * vz * 2 * dx - vx * 2 * vz * ( width + dz ) )
-         / ( width * width + width * 2 * dz + D_8012D220_gacode->unk_10 * ( dz * dz ) ) * 15.0 / D_8012D220_gacode->unk_0C;
+         / ( width * width + width * 2 * dz + ga_stage->unk_10 * ( dz * dz ) ) * 15.0 / ga_stage->unk_0C;
 }
 
 /*
@@ -1030,7 +1030,7 @@ inline s32 GA_BinarySearch( u16 key, s32 count, u16 *table ) {
 GA_IsSplit
 
 1 when the head pin is down and the mask of the standing pins is one of the leaves listed for their
-number (2 to 6, tables D_801236C0_gacode to D_801237EC_gacode); else 0.
+number (2 to 6, tables ga_splits2 to ga_splits6); else 0.
 ================
 */
 u8 GA_IsSplit( gaLane_t *lane ) {
@@ -1050,27 +1050,27 @@ u8 GA_IsSplit( gaLane_t *lane ) {
     }
     switch ( numStanding ) {
     case 2:
-        if ( GA_BinarySearch( mask, D_801236C0_gacode[0], &D_801236C0_gacode[1] ) >= 0 ) {
+        if ( GA_BinarySearch( mask, ga_splits2[0], &ga_splits2[1] ) >= 0 ) {
             listed = 1;
         }
         break;
     case 3:
-        if ( GA_BinarySearch( mask, D_801236F0_gacode[0], &D_801236F0_gacode[1] ) >= 0 ) {
+        if ( GA_BinarySearch( mask, ga_splits3[0], &ga_splits3[1] ) >= 0 ) {
             listed = 1;
         }
         break;
     case 4:
-        if ( GA_BinarySearch( mask, D_80123748_gacode[0], &D_80123748_gacode[1] ) >= 0 ) {
+        if ( GA_BinarySearch( mask, ga_splits4[0], &ga_splits4[1] ) >= 0 ) {
             listed = 1;
         }
         break;
     case 5:
-        if ( GA_BinarySearch( mask, D_801237BC_gacode[0], &D_801237BC_gacode[1] ) >= 0 ) {
+        if ( GA_BinarySearch( mask, ga_splits5[0], &ga_splits5[1] ) >= 0 ) {
             listed = 1;
         }
         break;
     case 6:
-        if ( GA_BinarySearch( mask, D_801237EC_gacode[0], &D_801237EC_gacode[1] ) >= 0 ) {
+        if ( GA_BinarySearch( mask, ga_splits6[0], &ga_splits6[1] ) >= 0 ) {
             listed = 1;
         }
         break;

@@ -15,7 +15,7 @@ nothing calls (gcc 2.7 emits an extern inline function).
 ================
 */
 inline void GA_CountFrame( void ) {
-    D_8012C924_gacode++;
+    ga_frameCount++;
     if ( ( D_8005C160 & 0xF ) == 3 ) {
         ( (unkImage_t *)D_800F80B0[1673].data )->unk_07 = D_8009CFB0;
         ( (unkImage_t *)D_800F80B0[1674].data )->unk_07 = D_8009CFB0;
@@ -89,11 +89,11 @@ void func_801224F8_gacode( void ) {
         GA_SetPlayerObjectFlags( 1 );
     }
     GA_CountFrame();
-    if ( D_800DF595[0] == 1 && ( D_8012C924_gacode & 1 ) ) {
+    if ( D_800DF595[0] == 1 && ( ga_frameCount & 1 ) ) {
         func_80035380( 0x300, D_800E6560[0][0] + guRandom() % 20 - 10.0f,
                        D_800E6560[0][1] - 10.0f + guRandom() % 20 - 10.0f, D_800E6560[0][2] + 10.0f );
     }
-    if ( D_800DF595[1] == 1 && D_8005C162 == 1 && ( D_8012C924_gacode & 1 ) ) {
+    if ( D_800DF595[1] == 1 && D_8005C162 == 1 && ( ga_frameCount & 1 ) ) {
         func_80035380( 0x300, D_800E6560[1][0] + guRandom() % 20 - 10.0f,
                        D_800E6560[1][1] - 10.0f + guRandom() % 20 - 10.0f, D_800E6560[1][2] + 10.0f );
     }
@@ -116,8 +116,8 @@ void GA_AnimateTextures( void ) {
         GA_SetPlayerObjectFlags( 0 );
         Cache_GetFile( 2682, FILE_RAW );
         Cache_GetFile( 2698, FILE_RAW );
-        D_8012CDD0_gacode[0] = ( (fileRefB_t *)D_800F80B0[1523].data )->unk_30;
-        D_8012CDD0_gacode[1] = ( (fileRefB_t *)D_800F80B0[1524].data )->unk_30;
+        ga_savedTexels[0] = ( (fileRefB_t *)D_800F80B0[1523].data )->unk_30;
+        ga_savedTexels[1] = ( (fileRefB_t *)D_800F80B0[1524].data )->unk_30;
         for ( i = 0; i < 11; i++ ) {
             Cache_GetFile( D_8012C928_gacode[i], FILE_RAW );
             Cache_GetFile( D_8012C940_gacode[i], FILE_RAW );
@@ -147,8 +147,8 @@ void GA_AnimateTextures( void ) {
         ( (fileRefB_t *)D_800F80B0[1523].data )->unk_30 = ( (unkImage_t *)D_800F80B0[2682].data )->palette;
         ( (fileRefB_t *)D_800F80B0[1524].data )->unk_30 = ( (unkImage_t *)D_800F80B0[2698].data )->palette;
     } else {
-        ( (fileRefB_t *)D_800F80B0[1523].data )->unk_30 = D_8012CDD0_gacode[0];
-        ( (fileRefB_t *)D_800F80B0[1524].data )->unk_30 = D_8012CDD0_gacode[1];
+        ( (fileRefB_t *)D_800F80B0[1523].data )->unk_30 = ga_savedTexels[0];
+        ( (fileRefB_t *)D_800F80B0[1524].data )->unk_30 = ga_savedTexels[1];
     }
     GA_CountFrame();
 }
@@ -204,15 +204,15 @@ void GA_FlickerLight( void ) {
             Cache_GetFile( D_8012C990_gacode[i], FILE_RAW );
         }
     }
-    if ( --D_8012C99C_gacode == 0 ) {
-        D_8012C99C_gacode = guRandom() % 140 + 10;
+    if ( --ga_flickerTimer == 0 ) {
+        ga_flickerTimer = guRandom() % 140 + 10;
     }
-    if ( --D_8012CDD8_gacode == 0 ) {
+    if ( --ga_flickerSoundTimer == 0 ) {
         Sound_PlaySe( 70, 3 );
     }
-    if ( D_8012C99C_gacode < 6 ) {
-        if ( D_8012C99C_gacode == 1 ) {
-            D_8012CDD8_gacode = 30;
+    if ( ga_flickerTimer < 6 ) {
+        if ( ga_flickerTimer == 1 ) {
+            ga_flickerSoundTimer = 30;
         }
         level = guRandom() % 155 + 100;
     } else {
@@ -250,16 +250,16 @@ void func_80123004_gacode( void ) {
     ( (fileRefB_t *)D_800F80B0[883].data )->scroll[0]--;
     GA_CountFrame();
     if ( D_8005C162 == 1 ) {
-        if ( D_800DF595[0] == 3 && ( D_8012C924_gacode & 3 ) == 0 ) {
+        if ( D_800DF595[0] == 3 && ( ga_frameCount & 3 ) == 0 ) {
             func_80035380( 0x301, D_800E6560[0][0] + guRandom() % 10 - 5.0f,
                            D_800E6560[0][1] + 15.0f + guRandom() % 10 - 5.0f, D_800E6560[0][2] + 10.0f );
         }
-        if ( D_800DF595[1] == 3 && ( D_8012C924_gacode & 3 ) == 2 ) {
+        if ( D_800DF595[1] == 3 && ( ga_frameCount & 3 ) == 2 ) {
             func_80035380( 0x301, D_800E6560[1][0] + guRandom() % 10 - 5.0f,
                            D_800E6560[1][1] + 15.0f + guRandom() % 20 - 10.0f, D_800E6560[1][2] + 10.0f );
         }
     } else {
-        if ( D_800DF595[0] == 3 && ( D_8012C924_gacode & 1 ) == 0 ) {
+        if ( D_800DF595[0] == 3 && ( ga_frameCount & 1 ) == 0 ) {
             func_80035380( 0x301, D_800E6560[0][0] + guRandom() % 10 - 5.0f,
                            D_800E6560[0][1] + 15.0f + guRandom() % 10 - 5.0f, D_800E6560[0][2] + 10.0f );
         }
@@ -283,7 +283,7 @@ void func_801233A8_gacode( void ) {
 ================
 GA_LoadLanePalettes
 
-Loads the image files of D_8012C9A0_gacode[index] and points the palettes of the first four parts' second
+Loads the image files of ga_lanePaletteImages[index] and points the palettes of the first four parts' second
 files of the lane's scene object (100 or 120) at them; the first part takes file 1, or file 0 when alt is set.
 ================
 */
@@ -295,21 +295,21 @@ void GA_LoadLanePalettes( s32 lane, s32 alt, s32 index ) {
     } else {
         obj = D_800EA120[120];
     }
-    Cache_GetFile( D_8012C9A0_gacode[index][2], FILE_RAW );
-    Cache_GetFile( D_8012C9A0_gacode[index][3], FILE_RAW );
+    Cache_GetFile( ga_lanePaletteImages[index][2], FILE_RAW );
+    Cache_GetFile( ga_lanePaletteImages[index][3], FILE_RAW );
     ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[1].unk_02].data )->unk_30 =
-        ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][3]].data )->palette;
+        ( (unkImage_t *)D_800F80B0[ga_lanePaletteImages[index][3]].data )->palette;
     ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[2].unk_02].data )->unk_30 =
-        ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][2]].data )->palette;
+        ( (unkImage_t *)D_800F80B0[ga_lanePaletteImages[index][2]].data )->palette;
     ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[3].unk_02].data )->unk_30 =
-        ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][2]].data )->palette;
+        ( (unkImage_t *)D_800F80B0[ga_lanePaletteImages[index][2]].data )->palette;
     if ( alt == 0 ) {
-        Cache_GetFile( D_8012C9A0_gacode[index][1], FILE_RAW );
+        Cache_GetFile( ga_lanePaletteImages[index][1], FILE_RAW );
         ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[0].unk_02].data )->unk_30 =
-            ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][1]].data )->palette;
+            ( (unkImage_t *)D_800F80B0[ga_lanePaletteImages[index][1]].data )->palette;
     } else {
-        Cache_GetFile( D_8012C9A0_gacode[index][0], FILE_RAW );
+        Cache_GetFile( ga_lanePaletteImages[index][0], FILE_RAW );
         ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[0].unk_02].data )->unk_30 =
-            ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][0]].data )->palette;
+            ( (unkImage_t *)D_800F80B0[ga_lanePaletteImages[index][0]].data )->palette;
     }
 }

@@ -22,36 +22,36 @@ void GA_Init( void ) {
 
     Sound_StopBgm();
     Sound_PlaySe( 0x36, 0 );
-    D_8012CDF8_gacode[0] = D_8012CDF8_gacode[1] = 0;
-    D_8012D220_gacode = &D_80123EB0_gacode[D_8005C163];
+    ga_teamCurrent[0] = ga_teamCurrent[1] = 0;
+    ga_stage = &ga_stages[D_8005C163];
     D_8012D650_gacode = 0;
-    D_8012D238_gacode = 0;
-    D_8012D239_gacode = 0;
-    D_8012CDF0_gacode = GA_PauseMenu;
-    Str_ReadFile( D_8012D220_gacode->unk_18, (u8 *)&D_80100100[0] );
-    params = D_8012D220_gacode->unk_00;
+    ga_parFrame = 0;
+    ga_pauseCursor = 0;
+    ga_state = GA_PauseMenu;
+    Str_ReadFile( ga_stage->unk_18, (u8 *)&D_80100100[0] );
+    params = ga_stage->unk_00;
     for ( i = 0; i < D_8005C161; i++, params++ ) {
         character = D_8005C0E4[i] & 0xF;
         params->unk_08[0] = D_80123A14_gacode[character][0];
         params->unk_08[1] = D_80123A14_gacode[character][1];
-        params->unk_08[4] = D_80123AA0_gacode[character].unk_04;
+        params->unk_08[4] = ga_characterData[character].unk_04;
     }
-    func_8002A1EC( D_80124050_gacode, D_8012D220_gacode->unk_00 );
-    if ( D_8012D220_gacode->unk_1C >= 0 ) {
-        D_8012CDE8_gacode = Sound_PlaySe( D_8012D220_gacode->unk_1C, 0 );
+    func_8002A1EC( ga_classes, ga_stage->unk_00 );
+    if ( ga_stage->unk_1C >= 0 ) {
+        ga_sound = Sound_PlaySe( ga_stage->unk_1C, 0 );
     } else {
-        D_8012CDE8_gacode = 0;
+        ga_sound = 0;
     }
-    GA_SetupLanes( D_8005C162, D_8012D220_gacode->unk_04, ( D_8005C160 & 0xF ) == 3 );
+    GA_SetupLanes( D_8005C162, ga_stage->unk_04, ( D_8005C160 & 0xF ) == 3 );
     GA_ClearScores();
     for ( i = 0; i < 2; i++ ) {
         D_800693DC[i] = 0;
         D_8009D030[i][0] = D_8009D030[i][1] = D_8009D030[i][2] = 0;
     }
     GA_SetupMode();
-    D_8012D225_gacode = ( D_8009D098.unk_04 >> 9 ) & 1;
-    D_8012D224_gacode = ( D_8009D098.unk_04 >> 8 ) & 1;
-    Sound_PlayBgm( D_8012CE00_gacode );
+    ga_earlyCommit = ( D_8009D098.unk_04 >> 9 ) & 1;
+    ga_steerBall = ( D_8009D098.unk_04 >> 8 ) & 1;
+    Sound_PlayBgm( ga_bgm );
 }
 
 /*
@@ -61,7 +61,7 @@ GA_Frame
 The overlay's frame: leaves once main has faded out after a request, requests leaving when the game mode
 is done or the pause menu quits, opens the pause menu on Start and, while C-up is held (not in mode 2),
 func_80112E04_gacode's view, runs the stage and the players, draws them, runs the main loop state (or, paused, the pause menu's state), and steps the
-blink of D_80123600_gacode between 0 and 0x80.
+blink of ga_blinkLevel between 0 and 0x80.
 ================
 */
 void GA_Frame( void ) {
@@ -69,16 +69,16 @@ void GA_Frame( void ) {
     s32 cUpHeld = FALSE;
 
     if ( D_8005C0BF == 1 && D_8005C0C0 == 0xFF ) {
-        GA_StopLaneSound( &D_8012CDE8_gacode );
+        GA_StopLaneSound( &ga_sound );
         D_8005C0BF = 2;
         D_8005C0C0 = 0x107;
-        D_8005C0B6 = D_80123603_gacode == 1 ? 6 : 4;
+        D_8005C0B6 = ga_gameDone == 1 ? 6 : 4;
     }
     if ( D_8005C0BF == 0 ) {
-        if ( D_80123603_gacode ) {
+        if ( ga_gameDone ) {
             Sound_PlaySe( 0x7F, 0 );
             D_8005C0BF = 1;
-        } else if ( D_8012D650_gacode && D_80123604_gacode ) {
+        } else if ( D_8012D650_gacode && ga_leaveGame ) {
             Sound_PlaySe( 0x32, 0 );
             D_8005CB60 = 0;
             D_8005C0BF = 1;
@@ -98,51 +98,51 @@ void GA_Frame( void ) {
         }
     }
     if ( !D_8012D650_gacode ) {
-        D_8012D239_gacode = 0;
+        ga_pauseCursor = 0;
     }
-    D_8012D220_gacode->update();
+    ga_stage->update();
     func_8002A2F0();
     for ( team = 0; team <= D_8005C162; team++ ) {
-        GA_HoldBall( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
+        GA_HoldBall( ga_teamPlayers[team][ga_teamCurrent[team]] );
     }
     Txt_LoadGlyphSheet( &D_800F8094 );
     Draw_FillRect( 0x9F, 0, 2, 0xF0, 0, 0, 0, 0xFF );
     if ( !D_8012D650_gacode && !cUpHeld ) {
-        func_80114FC4_gacode( D_8012CE02_gacode[0][D_8012CDF8_gacode[0]] );
+        func_80114FC4_gacode( ga_teamPlayers[0][ga_teamCurrent[0]] );
         if ( D_8005C162 ) {
-            func_80114FC4_gacode( D_8012CE02_gacode[1][D_8012CDF8_gacode[1]] );
+            func_80114FC4_gacode( ga_teamPlayers[1][ga_teamCurrent[1]] );
         } else {
-            Draw_ImageScaled( 0x926, 0xD2, 0x10, (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
+            Draw_ImageScaled( 0x926, 0xD2, 0x10, (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
         }
     }
     if ( !D_8012D650_gacode && !cUpHeld ) {
-        D_80123603_gacode = D_8012CDFC_gacode();
+        ga_gameDone = ga_modeLoop();
         if ( !D_8005C162 ) {
-            GA_UpdateLaneCamera( D_8012CE02_gacode[0][D_8012CDF8_gacode[0]] );
+            GA_UpdateLaneCamera( ga_teamPlayers[0][ga_teamCurrent[0]] );
         }
     } else {
         for ( team = 0; team <= D_8005C162; team++ ) {
-            func_80114FFC_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
+            func_80114FFC_gacode( ga_teamPlayers[team][ga_teamCurrent[team]] );
         }
     }
     if ( D_8012D650_gacode ) {
         Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x10, 0x10, 0x10, 0x80 );
-        D_80123604_gacode = D_8012CDF0_gacode();
+        ga_leaveGame = ga_state();
     }
     if ( cUpHeld ) {
         func_80112E04_gacode();
     }
-    if ( D_80123602_gacode == 1 ) {
-        D_80123600_gacode -= 8;
-        if ( D_80123600_gacode <= 0 ) {
-            D_80123600_gacode = 0;
-            D_80123602_gacode = 0;
+    if ( ga_blinkFalling == 1 ) {
+        ga_blinkLevel -= 8;
+        if ( ga_blinkLevel <= 0 ) {
+            ga_blinkLevel = 0;
+            ga_blinkFalling = 0;
         }
     } else {
-        D_80123600_gacode += 8;
-        if ( D_80123600_gacode >= 0x80 ) {
-            D_80123600_gacode = 0x80;
-            D_80123602_gacode = 1;
+        ga_blinkLevel += 8;
+        if ( ga_blinkLevel >= 0x80 ) {
+            ga_blinkLevel = 0x80;
+            ga_blinkFalling = 1;
         }
     }
     Txt_LoadFont( &D_800F8094 );
@@ -158,9 +158,9 @@ func_80112A74_gacode
 void func_80112A74_gacode( void ) {
     s32 team;
 
-    GA_StopLaneSound( &D_8012CDE8_gacode );
+    GA_StopLaneSound( &ga_sound );
     for ( team = 0; team <= D_8005C162; team++ ) {
-        func_80114FFC_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
+        func_80114FFC_gacode( ga_teamPlayers[team][ga_teamCurrent[team]] );
     }
 }
 
@@ -179,44 +179,44 @@ s32 GA_PauseMenu( void ) {
 
     isMode2 = ( D_8005C160 & 0xF ) == 2;
     Draw_Image( isMode2 ? 0x882 : 0x89E, 0x50, 0x40 );
-    Draw_ImageScaled( 0x8A0, 0x66, cursorY[D_8012D239_gacode], (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
-    Draw_ImageScaled( 0x89F, markX[D_8009D098.unk_79], 0x6C, (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
+    Draw_ImageScaled( 0x8A0, 0x66, cursorY[ga_pauseCursor], (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
+    Draw_ImageScaled( 0x89F, markX[D_8009D098.unk_79], 0x6C, (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
     if ( D_800E6758 & U_JPAD ) {
         Sound_PlaySe( 0, 0 );
-        if ( D_8012D239_gacode == 0 ) {
-            D_8012D239_gacode = 3;
+        if ( ga_pauseCursor == 0 ) {
+            ga_pauseCursor = 3;
         } else {
-            D_8012D239_gacode--;
+            ga_pauseCursor--;
         }
     }
     if ( D_800E6758 & D_JPAD ) {
         Sound_PlaySe( 0, 0 );
-        if ( D_8012D239_gacode == 3 ) {
-            D_8012D239_gacode = 0;
+        if ( ga_pauseCursor == 3 ) {
+            ga_pauseCursor = 0;
         } else {
-            D_8012D239_gacode++;
+            ga_pauseCursor++;
         }
     }
     if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-        switch ( D_8012D239_gacode ) {
+        switch ( ga_pauseCursor ) {
         case 0:
             D_8012D650_gacode = 0;
             Sound_PlaySe( 1, 0 );
             break;
         case 1:
-            D_8012CDF0_gacode = isMode2 ? GA_PageBrowser : func_80112D94_gacode;
+            ga_state = isMode2 ? GA_PageBrowser : func_80112D94_gacode;
             Sound_PlaySe( 1, 0 );
             break;
         case 2:
             D_8009D098.unk_79 = !D_8009D098.unk_79;
             if ( D_8009D098.unk_79 ) {
-                Sound_PlayBgm( D_8012CE00_gacode );
+                Sound_PlayBgm( ga_bgm );
             } else {
                 Sound_StopBgm();
             }
             break;
         case 3:
-            D_8012CDF0_gacode = func_80113210_gacode;
+            ga_state = func_80113210_gacode;
             Sound_PlaySe( 1, 0 );
             break;
         }
@@ -237,7 +237,7 @@ s32 func_80112D94_gacode( void ) {
     func_80112E04_gacode();
     if ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
         Sound_PlaySe( 11, 0 );
-        D_8012CDF0_gacode = GA_PauseMenu;
+        ga_state = GA_PauseMenu;
     }
     return 0;
 }
@@ -269,7 +269,7 @@ void func_80112E04_gacode( void ) {
 ================
 GA_PageBrowser
 
-Main loop state of the pause menu's page browser (mode 2): draws the current page of D_80123608_gacode with
+Main loop state of the pause menu's page browser (mode 2): draws the current page of ga_menuPages with
 the cursor on an item or on the back item, moves the cursor with the D-pad, and on A or Z opens the item's
 page or goes back to the parent page (from the first page, to the pause menu); B goes back to the pause menu.
 ================
@@ -278,57 +278,57 @@ s32 GA_PageBrowser( void ) {
     s16 x = 0x28;
     s16 y = 0x28;
 
-    Draw_Image( D_80123608_gacode[D_80123680_gacode].image, x, y );
-    if ( D_80123608_gacode[D_80123680_gacode].cursor >= 0
-        && D_80123608_gacode[D_80123680_gacode].cursor < D_80123608_gacode[D_80123680_gacode].backItem ) {
-        Draw_ImageScaled( 0x885, x + 8, y + 0x18 + D_80123608_gacode[D_80123680_gacode].cursor * 16,
-                       (u8)D_80123600_gacode + 0x7F, 1.0f, 1.0f );
+    Draw_Image( ga_menuPages[ga_menuPage].image, x, y );
+    if ( ga_menuPages[ga_menuPage].cursor >= 0
+        && ga_menuPages[ga_menuPage].cursor < ga_menuPages[ga_menuPage].backItem ) {
+        Draw_ImageScaled( 0x885, x + 8, y + 0x18 + ga_menuPages[ga_menuPage].cursor * 16,
+                       (u8)ga_blinkLevel + 0x7F, 1.0f, 1.0f );
     } else {
-        Draw_ImageScaled( 0x884, x + 0xBB, y + D_80123608_gacode[D_80123680_gacode].backY,
-                       (u8)D_80123600_gacode + 0x10, 1.0f, 1.0f );
+        Draw_ImageScaled( 0x884, x + 0xBB, y + ga_menuPages[ga_menuPage].backY,
+                       (u8)ga_blinkLevel + 0x10, 1.0f, 1.0f );
     }
-    if ( D_80123608_gacode[D_80123680_gacode].cursor >= 0 ) {
+    if ( ga_menuPages[ga_menuPage].cursor >= 0 ) {
         if ( D_800E6758 & U_JPAD ) {
             Sound_PlaySe( 0, 0 );
-            if ( D_80123608_gacode[D_80123680_gacode].cursor != 0 ) {
-                D_80123608_gacode[D_80123680_gacode].cursor--;
+            if ( ga_menuPages[ga_menuPage].cursor != 0 ) {
+                ga_menuPages[ga_menuPage].cursor--;
             } else {
-                D_80123608_gacode[D_80123680_gacode].cursor = D_80123608_gacode[D_80123680_gacode].backItem;
+                ga_menuPages[ga_menuPage].cursor = ga_menuPages[ga_menuPage].backItem;
             }
         }
         if ( D_800E6758 & D_JPAD ) {
             Sound_PlaySe( 0, 0 );
-            if ( D_80123608_gacode[D_80123680_gacode].cursor != D_80123608_gacode[D_80123680_gacode].backItem ) {
-                D_80123608_gacode[D_80123680_gacode].cursor++;
+            if ( ga_menuPages[ga_menuPage].cursor != ga_menuPages[ga_menuPage].backItem ) {
+                ga_menuPages[ga_menuPage].cursor++;
             } else {
-                D_80123608_gacode[D_80123680_gacode].cursor = 0;
+                ga_menuPages[ga_menuPage].cursor = 0;
             }
         }
         if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-            if ( D_80123608_gacode[D_80123680_gacode].cursor == D_80123608_gacode[D_80123680_gacode].backItem ) {
-                D_80123608_gacode[D_80123680_gacode].cursor = 0;
-                if ( D_80123608_gacode[D_80123680_gacode].parent < 0 ) {
+            if ( ga_menuPages[ga_menuPage].cursor == ga_menuPages[ga_menuPage].backItem ) {
+                ga_menuPages[ga_menuPage].cursor = 0;
+                if ( ga_menuPages[ga_menuPage].parent < 0 ) {
                     Sound_PlaySe( 11, 0 );
-                    D_80123680_gacode = 0;
-                    D_8012CDF0_gacode = GA_PauseMenu;
+                    ga_menuPage = 0;
+                    ga_state = GA_PauseMenu;
                 } else {
                     Sound_PlaySe( 0x33, 0 );
-                    D_80123680_gacode = D_80123608_gacode[D_80123680_gacode].parent;
+                    ga_menuPage = ga_menuPages[ga_menuPage].parent;
                 }
             } else {
                 Sound_PlaySe( 0x33, 0 );
-                D_80123680_gacode = D_80123608_gacode[D_80123680_gacode].firstPage
-                                  + D_80123608_gacode[D_80123680_gacode].cursor;
+                ga_menuPage = ga_menuPages[ga_menuPage].firstPage
+                                  + ga_menuPages[ga_menuPage].cursor;
             }
         }
     } else if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
         Sound_PlaySe( 0x33, 0 );
-        D_80123680_gacode = D_80123608_gacode[D_80123680_gacode].firstPage;
+        ga_menuPage = ga_menuPages[ga_menuPage].firstPage;
     }
     if ( D_800E4D62 & B_BUTTON ) {
         Sound_PlaySe( 2, 0 );
-        D_80123680_gacode = 0;
-        D_8012CDF0_gacode = GA_PauseMenu;
+        ga_menuPage = 0;
+        ga_state = GA_PauseMenu;
     }
     return 0;
 }
@@ -341,10 +341,10 @@ func_80113210_gacode
 s32 func_80113210_gacode( void ) {
     switch ( func_8003B204() ) {
     case 1:
-        D_8012CDF0_gacode = func_80113270_gacode;
+        ga_state = func_80113270_gacode;
         break;
     case 2:
-        D_8012CDF0_gacode = GA_PauseMenu;
+        ga_state = GA_PauseMenu;
         break;
     }
     return 0;
@@ -359,7 +359,7 @@ s32 func_80113270_gacode( void ) {
     if ( Save_SaveSettings() ) {
         return 0;
     }
-    D_8012CDF0_gacode = func_801132A8_gacode;
+    ga_state = func_801132A8_gacode;
     return 1;
 }
 
@@ -386,15 +386,15 @@ void GA_SetupMode( void ) {
         break;
     case 1:
         GA_StartMode( GA_DuelLoop, func_801151A0_gacode );
-        D_8012CE00_gacode = D_8012D220_gacode->unk_1A;
+        ga_bgm = ga_stage->unk_1A;
         break;
     case 3:
         GA_StartMode( func_80114024_gacode, func_8011582C_gacode );
-        D_8012CE00_gacode = 17;
+        ga_bgm = 17;
         break;
     case 2:
         GA_StartMode( func_80114108_gacode, func_801157F8_gacode );
-        D_8012CE00_gacode = 16;
+        ga_bgm = 16;
         break;
     }
     GA_FillTeams();
@@ -425,7 +425,7 @@ void func_80113384_gacode( void ) {
             GA_StartMode( GA_PairGameLoop, func_801151A0_gacode );
             break;
         }
-        D_8012CE00_gacode = D_8012D220_gacode->unk_1A;
+        ga_bgm = ga_stage->unk_1A;
         break;
     case 1:
         GA_ShuffleOrder( D_800DF59C.unk_04, 25, 0 );
@@ -442,7 +442,7 @@ void func_80113384_gacode( void ) {
             GA_StartMode( GA_ParGameLoop, func_801155BC_gacode );
             break;
         }
-        D_8012CE00_gacode = D_8012D220_gacode->unk_1A;
+        ga_bgm = ga_stage->unk_1A;
         break;
     case 2:
         GA_ShuffleOrder( &D_800DF59C.unk_04[0], 5, 0 );
@@ -453,7 +453,7 @@ void func_80113384_gacode( void ) {
             D_80068A50[i] = 5;
         }
         GA_StartMode( GA_TeamGameLoop, func_801156D8_gacode );
-        D_8012CE00_gacode = 11;
+        ga_bgm = 11;
         break;
     }
 }
@@ -472,8 +472,8 @@ void GA_StartMode( gaState_t state, gaPlayerFunc_t mode ) {
     u8 team;
     u8 lane;
 
-    D_8012CDFC_gacode = state;
-    D_8012CDF4_gacode = mode;
+    ga_modeLoop = state;
+    ga_gameMode = mode;
     if ( mode == func_801157F8_gacode ) {
         D_8012D23C_gacode = func_80115D38_gacode;
     } else if ( mode == func_801155BC_gacode ) {
@@ -517,45 +517,45 @@ void GA_FillTeams( void ) {
 
     if ( !D_8005C162 ) {
         for ( i = 0; i < D_8005C161; i++ ) {
-            D_8012CE02_gacode[0][i] = i;
+            ga_teamPlayers[0][i] = i;
         }
         for ( ; i < 5; i++ ) {
-            D_8012CE02_gacode[0][i] = -1;
+            ga_teamPlayers[0][i] = -1;
         }
         return;
     }
     switch ( D_8005C161 ) {
     case 2:
-        D_8012CE02_gacode[0][0] = 0;
+        ga_teamPlayers[0][0] = 0;
         for ( i = 1; i < 5; i++ ) {
-            D_8012CE02_gacode[0][i] = -1;
+            ga_teamPlayers[0][i] = -1;
         }
-        D_8012CE02_gacode[1][0] = 1;
+        ga_teamPlayers[1][0] = 1;
         for ( i = 1; i < 5; i++ ) {
-            D_8012CE02_gacode[1][i] = -1;
+            ga_teamPlayers[1][i] = -1;
         }
         break;
     case 3:
-        D_8012CE02_gacode[0][0] = 0;
-        D_8012CE02_gacode[0][1] = 1;
+        ga_teamPlayers[0][0] = 0;
+        ga_teamPlayers[0][1] = 1;
         for ( i = 2; i < 5; i++ ) {
-            D_8012CE02_gacode[0][i] = -1;
+            ga_teamPlayers[0][i] = -1;
         }
-        D_8012CE02_gacode[1][0] = 2;
+        ga_teamPlayers[1][0] = 2;
         for ( i = 1; i < 5; i++ ) {
-            D_8012CE02_gacode[1][i] = -1;
+            ga_teamPlayers[1][i] = -1;
         }
         break;
     case 4:
-        D_8012CE02_gacode[0][0] = 0;
-        D_8012CE02_gacode[0][1] = 1;
+        ga_teamPlayers[0][0] = 0;
+        ga_teamPlayers[0][1] = 1;
         for ( i = 2; i < 5; i++ ) {
-            D_8012CE02_gacode[0][i] = -1;
+            ga_teamPlayers[0][i] = -1;
         }
-        D_8012CE02_gacode[1][0] = 2;
-        D_8012CE02_gacode[1][1] = 3;
+        ga_teamPlayers[1][0] = 2;
+        ga_teamPlayers[1][1] = 3;
         for ( i = 2; i < 5; i++ ) {
-            D_8012CE02_gacode[1][i] = -1;
+            ga_teamPlayers[1][i] = -1;
         }
         break;
     }
@@ -570,10 +570,10 @@ whose D_800994BE flag is set, but stops at start.
 ================
 */
 inline void GA_NextTeamPlayer( u8 *cur, s32 start, s32 team ) {
-    if ( D_8012CE02_gacode[team][++( *cur )] == -1 ) {
+    if ( ga_teamPlayers[team][++( *cur )] == -1 ) {
         *cur = 0;
     }
-    if ( *cur != start && D_800994BE[D_8012CE02_gacode[team][*cur]] ) {
+    if ( *cur != start && D_800994BE[ga_teamPlayers[team][*cur]] ) {
         GA_NextTeamPlayer( cur, start, team );
     }
 }
@@ -598,15 +598,15 @@ s32 GA_TeamGameLoop( void ) {
     s32 i;
 
     for ( team = 0; team <= D_8005C162; team++ ) {
-        if ( GA_RunPlayer( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] ) ) {
+        if ( GA_RunPlayer( ga_teamPlayers[team][ga_teamCurrent[team]] ) ) {
             flagged = 0;
-            for ( i = 0; D_8012CE02_gacode[team][i] != -1; i++ ) {
-                flagged += D_800994BE[D_8012CE02_gacode[team][i]] != 0;
+            for ( i = 0; ga_teamPlayers[team][i] != -1; i++ ) {
+                flagged += D_800994BE[ga_teamPlayers[team][i]] != 0;
             }
             if ( flagged == i ) {
-                func_80115D70_gacode( D_8012CE02_gacode[team][0], 0 );
+                func_80115D70_gacode( ga_teamPlayers[team][0], 0 );
             } else {
-                GA_NextTeamPlayer( &D_8012CDF8_gacode[team], D_8012CDF8_gacode[team], team );
+                GA_NextTeamPlayer( &ga_teamCurrent[team], ga_teamCurrent[team], team );
             }
         }
     }
@@ -621,7 +621,7 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3C570", GA_TeamGameLoop);
 GA_PairGameLoop
 
 Main loop state of the pair game: runs the current player of each team; with three or more players the
-turn alternates between the pair of players 0 and 1 and the pair 2 and 3 (D_80123684_gacode keeps each
+turn alternates between the pair of players 0 and 1 and the pair 2 and 3 (ga_pairNext keeps each
 pair's next index), else it passes to the team's next player. Ends the game for the team once the flag in
 D_800994BE of the current player's pair is set (with four players on one team, once both pairs' flags are).
 ================
@@ -634,30 +634,30 @@ s32 GA_PairGameLoop( void ) {
 
     done = 0;
     for ( team = 0; team <= D_8005C162; team++ ) {
-        result = GA_RunPlayer( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
+        result = GA_RunPlayer( ga_teamPlayers[team][ga_teamCurrent[team]] );
         if ( result < 0 ) {
-            if ( D_8012CE02_gacode[0][2] != -1 ) {
-                if ( D_8012CDF8_gacode[team] >= 2 ) {
-                    D_80123684_gacode[1] = D_8012CDF8_gacode[team];
-                    D_8012CDF8_gacode[team] = D_8012CDF8_gacode[team] == 3 ? 2 : 3;
+            if ( ga_teamPlayers[0][2] != -1 ) {
+                if ( ga_teamCurrent[team] >= 2 ) {
+                    ga_pairNext[1] = ga_teamCurrent[team];
+                    ga_teamCurrent[team] = ga_teamCurrent[team] == 3 ? 2 : 3;
                 } else {
-                    D_80123684_gacode[0] = D_8012CDF8_gacode[team];
-                    D_8012CDF8_gacode[team] = D_8012CDF8_gacode[team] == 1 ? 0 : 1;
+                    ga_pairNext[0] = ga_teamCurrent[team];
+                    ga_teamCurrent[team] = ga_teamCurrent[team] == 1 ? 0 : 1;
                 }
-            } else if ( D_8012CE02_gacode[team][++D_8012CDF8_gacode[team]] == -1 ) {
-                D_8012CDF8_gacode[team] = 0;
+            } else if ( ga_teamPlayers[team][++ga_teamCurrent[team]] == -1 ) {
+                ga_teamCurrent[team] = 0;
             }
         } else if ( result > 0 ) {
-            if ( D_8012CE02_gacode[0][2] != -1 ) {
-                if ( D_8012CDF8_gacode[team] >= 2 ) {
-                    D_8012CDF8_gacode[team] = D_80123684_gacode[0];
-                    D_80123684_gacode[0] = D_80123684_gacode[0] == 1 ? 0 : 1;
+            if ( ga_teamPlayers[0][2] != -1 ) {
+                if ( ga_teamCurrent[team] >= 2 ) {
+                    ga_teamCurrent[team] = ga_pairNext[0];
+                    ga_pairNext[0] = ga_pairNext[0] == 1 ? 0 : 1;
                 } else {
-                    D_8012CDF8_gacode[team] = D_80123684_gacode[1];
-                    D_80123684_gacode[1] = D_80123684_gacode[1] == 3 ? 2 : 3;
+                    ga_teamCurrent[team] = ga_pairNext[1];
+                    ga_pairNext[1] = ga_pairNext[1] == 3 ? 2 : 3;
                 }
-            } else if ( D_8012CE02_gacode[team][++D_8012CDF8_gacode[team]] == -1 ) {
-                D_8012CDF8_gacode[team] = 0;
+            } else if ( ga_teamPlayers[team][++ga_teamCurrent[team]] == -1 ) {
+                ga_teamCurrent[team] = 0;
             }
         }
         if ( result != 0 ) {
@@ -666,13 +666,13 @@ s32 GA_PairGameLoop( void ) {
                     done = 1;
                 }
             } else {
-                pair = D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] >= 2;
+                pair = ga_teamPlayers[team][ga_teamCurrent[team]] >= 2;
                 if ( D_800994BE[pair] ) {
                     done = 1;
                 }
             }
             if ( done ) {
-                func_80115D70_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]], 0 );
+                func_80115D70_gacode( ga_teamPlayers[team][ga_teamCurrent[team]], 0 );
             }
         }
     }
@@ -699,27 +699,27 @@ s32 GA_ParGameLoop( void ) {
     s32 showFrame;
 
     for ( team = 0; team <= D_8005C162; team++ ) {
-        if ( GA_RunPlayer( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] ) ) {
-            if ( D_8012CE02_gacode[team][++D_8012CDF8_gacode[team]] == -1 ) {
-                D_8012CDF8_gacode[team] = 0;
+        if ( GA_RunPlayer( ga_teamPlayers[team][ga_teamCurrent[team]] ) ) {
+            if ( ga_teamPlayers[team][++ga_teamCurrent[team]] == -1 ) {
+                ga_teamCurrent[team] = 0;
             }
             flagged = 0;
-            for ( i = 0; D_8012CE02_gacode[team][i] != -1; i++ ) {
-                flagged += D_800994BE[D_8012CE02_gacode[team][i]] != 0;
+            for ( i = 0; ga_teamPlayers[team][i] != -1; i++ ) {
+                flagged += D_800994BE[ga_teamPlayers[team][i]] != 0;
             }
             if ( flagged == i ) {
-                func_80115D70_gacode( D_8012CE02_gacode[team][0], 0 );
-            } else if ( D_8012CDF8_gacode[team] == 0 ) {
-                func_80115D70_gacode( D_8012CE02_gacode[team][0], 1 );
+                func_80115D70_gacode( ga_teamPlayers[team][0], 0 );
+            } else if ( ga_teamCurrent[team] == 0 ) {
+                func_80115D70_gacode( ga_teamPlayers[team][0], 1 );
             }
         }
     }
     showFrame = ( D_8005C160 >> 6 ) == 1;
-    if ( D_8012D238_gacode < 9 && func_80115ED4_gacode( D_8005C162 ) ) {
+    if ( ga_parFrame < 9 && func_80115ED4_gacode( D_8005C162 ) ) {
         if ( showFrame ) {
-            GA_DecideFrame( D_8012D238_gacode );
+            GA_DecideFrame( ga_parFrame );
         }
-        D_8012D238_gacode++;
+        ga_parFrame++;
     }
     return func_80115E24_gacode( D_8005C162 ) != 0;
 }
