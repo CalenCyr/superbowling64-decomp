@@ -227,6 +227,9 @@ func_8002A98C
 Rotates the axes of m by x, y and z radians.
 ================
 */
+#ifdef NON_MATCHING
+// NON_MATCHING: byte-exact (gate green) only with one float temporary for both shared products (marked R30
+// below); a reused local is not counted as a match
 void func_8002A98C( f32 m[4][4], f32 x, f32 y, f32 z ) {
     f32 rot[3][3];
     f32 sx, cx, sy, cy, sz, cz;
@@ -251,6 +254,9 @@ void func_8002A98C( f32 m[4][4], f32 x, f32 y, f32 z ) {
     rot[2][2] = cx * cy;
     func_8002A8B0( m, rot );
 }
+#else
+INCLUDE_ASM("asm/nonmatchings/53B0", func_8002A98C);
+#endif
 
 /*
 ================
@@ -303,6 +309,9 @@ func_8002AC84
 Moves m by trans, then rotates it by rot (radians) and scales it by scale.
 ================
 */
+#ifdef NON_MATCHING
+// NON_MATCHING: byte-exact (gate green) as written, but at -O3 it inlines func_8002A98C, which is parked, so it
+// can only be built from source together with that function
 void func_8002AC84( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale ) {
     func_8002A810( m, trans[0], trans[1], trans[2] );
     if ( rot[0] != 0.0 || rot[1] != 0.0 || rot[2] != 0.0 ) {
@@ -310,6 +319,9 @@ void func_8002AC84( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale ) {
     }
     func_8002A864( m, scale[0], scale[1], scale[2] );
 }
+#else
+INCLUDE_ASM("asm/nonmatchings/53B0", func_8002AC84);
+#endif
 
 /*
 ================
