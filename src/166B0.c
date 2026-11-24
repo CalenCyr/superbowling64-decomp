@@ -1580,43 +1580,38 @@ UTILITIES
 ==============================================================================
 */
 
-#ifdef NON_MATCHING
-// NON_MATCHING: FPU registers: x2 lives in $f16 in retail, $f10/$f14 here; the inline series (one copy per branch) put x in retail's $f6
 /*
 ================
-Snd_Exp2Series
+SND_EXP2_SERIES
 
-Returns the series sum of ( x ln 2 )^n / n! to n = 6, which is about 2 to the power x.
+The series sum of ( x ln 2 )^n / n! to n = 6, which is about 2 to the power x, given x and x2 = x * x.
 ================
 */
-static inline f64 Snd_Exp2Series( f32 x ) {
-    f32 x2;
-
-    x2 = x * x;
-    return 1.0 + x * 0.69314718055994495 + x2 * 0.240226506959101 + x2 * x * 0.0555041086648216
-           + x2 * x2 * 0.0096181291076284804 + x2 * x2 * x * 0.00133335581464284
-           + x2 * x2 * x2 * 0.000154035303933816;
-}
+#define SND_EXP2_SERIES( x, x2 ) ( 1.0 + ( x ) * 0.69314718055994495 + ( x2 ) * 0.240226506959101 \
+    + ( x2 ) * ( x ) * 0.0555041086648216 + ( x2 ) * ( x2 ) * 0.0096181291076284804 \
+    + ( x2 ) * ( x2 ) * ( x ) * 0.00133335581464284 + ( x2 ) * ( x2 ) * ( x2 ) * 0.000154035303933816 )
 
 /*
 ================
 Snd_Exp2
 
-Returns 2 to the power x; a negative x takes the reciprocal of the series.
+Returns 2 to the power x; a negative x takes the reciprocal of the series of -x.
 ================
 */
 f32 Snd_Exp2( f32 x ) {
+    f32 x2;
+
     if ( x == 0.0f ) {
         return 1.0f;
     }
     if ( x > 0.0f ) {
-        return Snd_Exp2Series( x );
+        x2 = x * x;
+        return SND_EXP2_SERIES( x, x2 );
     }
-    return 1.0 / Snd_Exp2Series( -x );
+    x = -x;
+    x2 = x * x;
+    return 1.0 / SND_EXP2_SERIES( x, x2 );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/166B0", Snd_Exp2);
-#endif
 
 #ifdef NON_MATCHING
 // NON_MATCHING: registers: the sign extension as an inline helper gives retail's 0x30 frame and its reload of tune->value,
