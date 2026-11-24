@@ -5,67 +5,67 @@
 #include "gscode/gscode.h"
 #include "dbgtext.h"
 
-/* ===== func_801199E0_gscode ===== */
+/* ===== GS_Options ===== */
 
 /*
  * One frame of the options screen: its settings, the sound test, the records page and the credits, which the
- * script D_8011FD58_gscode drives. Returns 1 when the screen slid out, 2 when it was backed out of, else 0.
+ * script gs_creditsScript drives. Returns 1 when the screen slid out, 2 when it was backed out of, else 0.
  */
 #ifdef NON_MATCHING
 // NON_MATCHING: byte-exact (gate green) only with the sound test's saved setting held in the loop counter i
 // (marked R30 below); with a separate local the s0/s1 order flips, and a reused counter is not counted as a match
-s32 func_801199E0_gscode( void ) {
+s32 GS_Options( void ) {
     s32 i;
     s16 x;
     s16 y;
     u8 alpha;
 
-    if ( D_80120425_gscode == 1 && ( D_800E4D62 & B_BUTTON ) && D_80120428_gscode == 0 && D_8005C0BF == 0 ) {
+    if ( gs_optionsState == 1 && ( D_800E4D62 & B_BUTTON ) && gs_optionsPage == 0 && D_8005C0BF == 0 ) {
         func_80037870( 2, 0 );
-        D_80120425_gscode = 3;
+        gs_optionsState = 3;
     }
 
     func_8003068C( 0, 0, 0 );
     func_8002DF3C( 0xA58, 0, 0 );
 
     for ( i = 0; i < 13; i++ ) {
-        func_8003893C( D_8011FC90_gscode, i, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+        func_8003893C( gs_optionsMenu, i, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     }
 
-    if ( D_80120425_gscode == 1 && D_8005C0BF == 0 ) {
-        func_8003893C( D_8011FC90_gscode, 10, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
-        func_8003893C( D_8011FC90_gscode, 11, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
-        func_8003893C( D_8011FC90_gscode, 1, D_80120404_gscode[D_8009D098.unk_78], MENU_NONE, MENU_NONE, 0xFF );
-        func_8003893C( D_8011FC90_gscode, 2, D_8012040C_gscode[D_8009D098.unk_79], MENU_NONE, MENU_NONE, 0xFF );
-        func_8003893C( D_8011FC90_gscode, 12, D_8012040C_gscode[D_8009D098.unk_7B], MENU_NONE, MENU_NONE, 0xFF );
-        if ( (u8)( D_80120427_gscode / 10 ) ) {
-            func_8003893C( D_8011FC90_gscode, 3, D_80120410_gscode[(u8)( D_80120427_gscode / 10 )], MENU_NONE,
+    if ( gs_optionsState == 1 && D_8005C0BF == 0 ) {
+        func_8003893C( gs_optionsMenu, 10, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
+        func_8003893C( gs_optionsMenu, 11, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
+        func_8003893C( gs_optionsMenu, 1, D_80120404_gscode[D_8009D098.unk_78], MENU_NONE, MENU_NONE, 0xFF );
+        func_8003893C( gs_optionsMenu, 2, D_8012040C_gscode[D_8009D098.unk_79], MENU_NONE, MENU_NONE, 0xFF );
+        func_8003893C( gs_optionsMenu, 12, D_8012040C_gscode[D_8009D098.unk_7B], MENU_NONE, MENU_NONE, 0xFF );
+        if ( (u8)( gs_soundTestSound / 10 ) ) {
+            func_8003893C( gs_optionsMenu, 3, D_80120410_gscode[(u8)( gs_soundTestSound / 10 )], MENU_NONE,
                            MENU_NONE, 0xFF );
         }
-        func_8003893C( D_8011FC90_gscode, 4, D_80120410_gscode[(u8)( D_80120427_gscode % 10 )], MENU_NONE,
+        func_8003893C( gs_optionsMenu, 4, D_80120410_gscode[(u8)( gs_soundTestSound % 10 )], MENU_NONE,
                        MENU_NONE, 0xFF );
         for ( i = 0; i < 4 - D_8009D098.unk_7A; i++ ) {
-            func_8003893C( D_8011FC90_gscode, i + 5, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
+            func_8003893C( gs_optionsMenu, i + 5, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
         }
 
-        if ( D_80120428_gscode == 0
-             && ( ( D_800E6758 & U_JPAD ) || ( D_80120426_gscode == OPTION_EXIT && ( D_800E6758 & L_JPAD ) ) ) ) {
-            if ( --D_80120426_gscode == 0xFF ) {
-                D_80120426_gscode = OPTION_EXIT;
+        if ( gs_optionsPage == 0
+             && ( ( D_800E6758 & U_JPAD ) || ( gs_optionsCursor == OPTION_EXIT && ( D_800E6758 & L_JPAD ) ) ) ) {
+            if ( --gs_optionsCursor == 0xFF ) {
+                gs_optionsCursor = OPTION_EXIT;
             }
             func_80026B28();
             func_80037870( 0, 0x80 );
-        } else if ( D_80120428_gscode == 0
+        } else if ( gs_optionsPage == 0
                     && ( ( D_800E6758 & D_JPAD )
-                         || ( D_80120426_gscode == OPTION_CREDITS && ( D_800E6758 & R_JPAD ) ) ) ) {
-            if ( ++D_80120426_gscode == 8 ) {
-                D_80120426_gscode = 0;
+                         || ( gs_optionsCursor == OPTION_CREDITS && ( D_800E6758 & R_JPAD ) ) ) ) {
+            if ( ++gs_optionsCursor == 8 ) {
+                gs_optionsCursor = 0;
             }
             func_80026B28();
             func_80037870( 0, 0x80 );
         }
 
-        switch ( D_80120426_gscode ) {
+        switch ( gs_optionsCursor ) {
         case OPTION_SOUND:
             if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || ( D_800E6758 & R_JPAD ) ) {
                 if ( ++D_8009D098.unk_78 == 3 ) {
@@ -89,27 +89,27 @@ s32 func_801199E0_gscode( void ) {
             }
             break;
         case OPTION_SOUND_TEST:
-            D_80120400_gscode++;
+            gs_soundTestFrames++;
             if ( D_800E6758 & R_JPAD ) {
-                if ( ++D_80120427_gscode == NUM_SOUND_TESTS ) {
-                    D_80120427_gscode = 0;
+                if ( ++gs_soundTestSound == NUM_SOUND_TESTS ) {
+                    gs_soundTestSound = 0;
                 }
                 func_80037870( 0, 0x80 );
             }
             if ( D_800E6758 & L_JPAD ) {
-                if ( --D_80120427_gscode == 0xFF ) {
-                    D_80120427_gscode = NUM_SOUND_TESTS - 1;
+                if ( --gs_soundTestSound == 0xFF ) {
+                    gs_soundTestSound = NUM_SOUND_TESTS - 1;
                 }
                 func_80037870( 0, 0x80 );
             }
-            if ( D_80120400_gscode >= 16 && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
-                D_80120400_gscode = 0;
+            if ( gs_soundTestFrames >= 16 && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
+                gs_soundTestFrames = 0;
                 func_80037870( 1, 0x80 );
                 // RULE-EXCEPTION: R30, i holds the saved setting: retail gives the counter this longer life, which
                 // ranks it below each loop's hoisted values and orders this block's loads
                 i = D_8009D098.unk_79;
                 D_8009D098.unk_79 = 1;
-                func_800379C8( D_80120427_gscode );
+                func_800379C8( gs_soundTestSound );
                 D_8009D098.unk_79 = i;
             }
             break;
@@ -140,7 +140,7 @@ s32 func_801199E0_gscode( void ) {
         case OPTION_RECORDS:
             if ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
                 func_80037870( 1, 0 );
-                D_80120428_gscode ^= 1;
+                gs_optionsPage ^= 1;
             }
             break;
         case OPTION_CREDITS:
@@ -153,43 +153,43 @@ s32 func_801199E0_gscode( void ) {
             break;
         }
 
-        if ( D_80120426_gscode < OPTION_EXIT ) {
-            func_8003893C( D_8011FC90_gscode, 0, 0x8F0, 0x49, D_80120426_gscode * 20 + 0x46, D_8009CFB0 );
+        if ( gs_optionsCursor < OPTION_EXIT ) {
+            func_8003893C( gs_optionsMenu, 0, 0x8F0, 0x49, gs_optionsCursor * 20 + 0x46, D_8009CFB0 );
         } else {
-            func_8003893C( D_8011FC90_gscode, 0, 0x8EF, 0xD0, 0xB0, D_8009CFB0 );
+            func_8003893C( gs_optionsMenu, 0, 0x8EF, 0xD0, 0xB0, D_8009CFB0 );
         }
     }
 
     if ( D_8005C0BF == 1 && D_8005C0C0 == 0xFF ) {
         D_8005C0BF = 2;
         D_8005C0C0 = 0x107;
-        if ( D_80120428_gscode == 0 ) {
+        if ( gs_optionsPage == 0 ) {
             func_800379C8( 0x13 );
-            D_80120428_gscode = 2;
-            D_80120A18_gscode = 1;
-            D_80120A1A_gscode = 0;
+            gs_optionsPage = 2;
+            gs_creditsWait = 1;
+            gs_creditsPos = 0;
             for ( i = 0; i < NUM_CREDIT_SPRITES; i++ ) {
-                D_80120860_gscode[i].image = -1;
+                gs_creditSprites[i].image = -1;
             }
         } else {
             func_800379C8( 1 );
-            D_80120428_gscode = 0;
+            gs_optionsPage = 0;
         }
     }
 
-    if ( D_80120428_gscode != 2 ) {
-        func_800386E0( D_8011FC90_gscode, D_80120424_gscode );
-        if ( D_80120425_gscode == 1 ) {
+    if ( gs_optionsPage != 2 ) {
+        func_800386E0( gs_optionsMenu, gs_optionsSlide );
+        if ( gs_optionsState == 1 ) {
             for ( i = 0; i < 5; i++ ) {
-                if ( D_80120426_gscode != i ) {
+                if ( gs_optionsCursor != i ) {
                     func_8002FDE4( 0xB0, i * 20 + 0x46, 0x46, 0x12, 0, 0, 0, 0x80 );
                 }
             }
-            if ( D_80120426_gscode == OPTION_EXIT && ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) ) {
+            if ( gs_optionsCursor == OPTION_EXIT && ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) ) {
                 func_80037870( 1, 0 );
-                D_80120425_gscode = 3;
+                gs_optionsState = 3;
             }
-            if ( D_80120428_gscode == 1 ) {
+            if ( gs_optionsPage == 1 ) {
                 for ( i = 0; i < 4; i++ ) {
                     func_8003B034( &D_8009D098.unk_08[i], i, 0 );
                 }
@@ -199,111 +199,111 @@ s32 func_801199E0_gscode( void ) {
             }
         }
     } else {
-        D_80120426_gscode = OPTION_CREDITS;
-        if ( --D_80120A18_gscode == 0 ) {
+        gs_optionsCursor = OPTION_CREDITS;
+        if ( --gs_creditsWait == 0 ) {
             do {
-                switch ( D_8011FD58_gscode[D_80120A1A_gscode].op ) {
+                switch ( gs_creditsScript[gs_creditsPos].op ) {
                 case CREDIT_SHOW:
-                    i = D_8011FD58_gscode[D_80120A1A_gscode].sprite;
-                    D_80120860_gscode[i].image = D_8011FD58_gscode[D_80120A1A_gscode].a;
-                    D_80120860_gscode[i].x = D_80120860_gscode[i].targetX = D_8011FD58_gscode[D_80120A1A_gscode].b;
-                    D_80120860_gscode[i].y = D_80120860_gscode[i].targetY = D_8011FD58_gscode[D_80120A1A_gscode].c;
-                    D_80120860_gscode[i].alpha = D_80120860_gscode[i].targetAlpha
-                        = D_8011FD58_gscode[D_80120A1A_gscode].alpha;
-                    D_80120860_gscode[i].moveFrames = D_80120860_gscode[i].moveFrame = 0;
-                    D_80120860_gscode[i].fadeFrames = D_80120860_gscode[i].fadeFrame = 0;
+                    i = gs_creditsScript[gs_creditsPos].sprite;
+                    gs_creditSprites[i].image = gs_creditsScript[gs_creditsPos].a;
+                    gs_creditSprites[i].x = gs_creditSprites[i].targetX = gs_creditsScript[gs_creditsPos].b;
+                    gs_creditSprites[i].y = gs_creditSprites[i].targetY = gs_creditsScript[gs_creditsPos].c;
+                    gs_creditSprites[i].alpha = gs_creditSprites[i].targetAlpha
+                        = gs_creditsScript[gs_creditsPos].alpha;
+                    gs_creditSprites[i].moveFrames = gs_creditSprites[i].moveFrame = 0;
+                    gs_creditSprites[i].fadeFrames = gs_creditSprites[i].fadeFrame = 0;
                     break;
                 case CREDIT_MOVE:
-                    i = D_8011FD58_gscode[D_80120A1A_gscode].sprite;
-                    D_80120860_gscode[i].targetX = D_8011FD58_gscode[D_80120A1A_gscode].a;
-                    D_80120860_gscode[i].targetY = D_8011FD58_gscode[D_80120A1A_gscode].b;
-                    D_80120860_gscode[i].moveFrames = D_8011FD58_gscode[D_80120A1A_gscode].c;
-                    D_80120860_gscode[i].moveFrame = 0;
+                    i = gs_creditsScript[gs_creditsPos].sprite;
+                    gs_creditSprites[i].targetX = gs_creditsScript[gs_creditsPos].a;
+                    gs_creditSprites[i].targetY = gs_creditsScript[gs_creditsPos].b;
+                    gs_creditSprites[i].moveFrames = gs_creditsScript[gs_creditsPos].c;
+                    gs_creditSprites[i].moveFrame = 0;
                     break;
                 case CREDIT_FADE:
-                    i = D_8011FD58_gscode[D_80120A1A_gscode].sprite;
-                    D_80120860_gscode[i].targetAlpha = D_8011FD58_gscode[D_80120A1A_gscode].a;
-                    D_80120860_gscode[i].fadeFrames = D_8011FD58_gscode[D_80120A1A_gscode].b;
-                    D_80120860_gscode[i].fadeFrame = 0;
+                    i = gs_creditsScript[gs_creditsPos].sprite;
+                    gs_creditSprites[i].targetAlpha = gs_creditsScript[gs_creditsPos].a;
+                    gs_creditSprites[i].fadeFrames = gs_creditsScript[gs_creditsPos].b;
+                    gs_creditSprites[i].fadeFrame = 0;
                     break;
                 case CREDIT_WAIT:
-                    D_80120A18_gscode = D_8011FD58_gscode[D_80120A1A_gscode].sprite;
+                    gs_creditsWait = gs_creditsScript[gs_creditsPos].sprite;
                     break;
                 case CREDIT_END:
-                    D_80120A18_gscode = 0xFFFF;
+                    gs_creditsWait = 0xFFFF;
                     D_8005C0BF = 1;
                     break;
                 }
-                D_80120A1A_gscode++;
-            } while ( D_80120A18_gscode == 0 );
+                gs_creditsPos++;
+            } while ( gs_creditsWait == 0 );
         }
 
         for ( i = 0; i < NUM_CREDIT_SPRITES; i++ ) {
-            if ( D_80120860_gscode[i].image == -1 ) {
+            if ( gs_creditSprites[i].image == -1 ) {
                 continue;
             }
-            if ( D_80120860_gscode[i].moveFrame < D_80120860_gscode[i].moveFrames ) {
-                D_80120860_gscode[i].moveFrame++;
-                if ( D_80120860_gscode[i].moveFrames == D_80120860_gscode[i].moveFrame ) {
-                    D_80120860_gscode[i].moveFrames = 0;
-                    D_80120860_gscode[i].x = D_80120860_gscode[i].targetX;
-                    D_80120860_gscode[i].y = D_80120860_gscode[i].targetY;
+            if ( gs_creditSprites[i].moveFrame < gs_creditSprites[i].moveFrames ) {
+                gs_creditSprites[i].moveFrame++;
+                if ( gs_creditSprites[i].moveFrames == gs_creditSprites[i].moveFrame ) {
+                    gs_creditSprites[i].moveFrames = 0;
+                    gs_creditSprites[i].x = gs_creditSprites[i].targetX;
+                    gs_creditSprites[i].y = gs_creditSprites[i].targetY;
                 }
             }
-            if ( D_80120860_gscode[i].fadeFrame < D_80120860_gscode[i].fadeFrames ) {
-                D_80120860_gscode[i].fadeFrame++;
-                if ( D_80120860_gscode[i].fadeFrames == D_80120860_gscode[i].fadeFrame ) {
-                    D_80120860_gscode[i].fadeFrames = 0;
-                    D_80120860_gscode[i].alpha = D_80120860_gscode[i].targetAlpha;
+            if ( gs_creditSprites[i].fadeFrame < gs_creditSprites[i].fadeFrames ) {
+                gs_creditSprites[i].fadeFrame++;
+                if ( gs_creditSprites[i].fadeFrames == gs_creditSprites[i].fadeFrame ) {
+                    gs_creditSprites[i].fadeFrames = 0;
+                    gs_creditSprites[i].alpha = gs_creditSprites[i].targetAlpha;
                 }
             }
-            if ( D_80120860_gscode[i].moveFrames != 0 ) {
-                x = D_80120860_gscode[i].targetX
-                    - ( D_80120860_gscode[i].targetX - D_80120860_gscode[i].x )
-                          * (f32)( D_80120860_gscode[i].moveFrames - D_80120860_gscode[i].moveFrame )
-                          / D_80120860_gscode[i].moveFrames;
-                y = D_80120860_gscode[i].targetY
-                    - ( D_80120860_gscode[i].targetY - D_80120860_gscode[i].y )
-                          * (f32)( D_80120860_gscode[i].moveFrames - D_80120860_gscode[i].moveFrame )
-                          / D_80120860_gscode[i].moveFrames;
+            if ( gs_creditSprites[i].moveFrames != 0 ) {
+                x = gs_creditSprites[i].targetX
+                    - ( gs_creditSprites[i].targetX - gs_creditSprites[i].x )
+                          * (f32)( gs_creditSprites[i].moveFrames - gs_creditSprites[i].moveFrame )
+                          / gs_creditSprites[i].moveFrames;
+                y = gs_creditSprites[i].targetY
+                    - ( gs_creditSprites[i].targetY - gs_creditSprites[i].y )
+                          * (f32)( gs_creditSprites[i].moveFrames - gs_creditSprites[i].moveFrame )
+                          / gs_creditSprites[i].moveFrames;
             } else {
-                x = D_80120860_gscode[i].x;
-                y = D_80120860_gscode[i].y;
+                x = gs_creditSprites[i].x;
+                y = gs_creditSprites[i].y;
             }
-            if ( D_80120860_gscode[i].fadeFrames != 0 ) {
-                alpha = D_80120860_gscode[i].targetAlpha
-                        - ( D_80120860_gscode[i].targetAlpha - D_80120860_gscode[i].alpha )
-                              * (f32)( D_80120860_gscode[i].fadeFrames - D_80120860_gscode[i].fadeFrame )
-                              / D_80120860_gscode[i].fadeFrames;
+            if ( gs_creditSprites[i].fadeFrames != 0 ) {
+                alpha = gs_creditSprites[i].targetAlpha
+                        - ( gs_creditSprites[i].targetAlpha - gs_creditSprites[i].alpha )
+                              * (f32)( gs_creditSprites[i].fadeFrames - gs_creditSprites[i].fadeFrame )
+                              / gs_creditSprites[i].fadeFrames;
             } else {
-                alpha = D_80120860_gscode[i].alpha;
+                alpha = gs_creditSprites[i].alpha;
             }
-            func_8002E4B0( D_80120860_gscode[i].image, x, y, alpha, 1.0f, 1.0f );
+            func_8002E4B0( gs_creditSprites[i].image, x, y, alpha, 1.0f, 1.0f );
         }
     }
 
-    switch ( D_80120425_gscode ) {
+    switch ( gs_optionsState ) {
     case 0:
-        D_8011FC90_gscode[5].slide = SLIDE_LEFT;
-        D_80120424_gscode -= 2;
-        if ( D_80120424_gscode == 0 ) {
-            D_80120425_gscode = 1;
+        gs_optionsMenu[5].slide = SLIDE_LEFT;
+        gs_optionsSlide -= 2;
+        if ( gs_optionsSlide == 0 ) {
+            gs_optionsState = 1;
             func_80026B28();
         }
         break;
     case 2:
     case 3:
-        D_8011FC90_gscode[5].slide = SLIDE_RIGHT;
-        D_80120424_gscode += 2;
-        if ( D_80120424_gscode == 30 ) {
+        gs_optionsMenu[5].slide = SLIDE_RIGHT;
+        gs_optionsSlide += 2;
+        if ( gs_optionsSlide == 30 ) {
             if ( D_8005C9E8 != 1 ) {
                 func_800379C8( 1 );
             }
-            if ( D_80120425_gscode == 2 ) {
-                D_80120425_gscode = 0;
+            if ( gs_optionsState == 2 ) {
+                gs_optionsState = 0;
                 return 1;
             }
-            D_80120425_gscode = 0;
+            gs_optionsState = 0;
             return 2;
         }
         break;
@@ -311,5 +311,5 @@ s32 func_801199E0_gscode( void ) {
     return 0;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gscode/605D0", func_801199E0_gscode);
+INCLUDE_ASM("asm/nonmatchings/gscode/605D0", GS_Options);
 #endif

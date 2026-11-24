@@ -39,7 +39,7 @@ void func_801125A0_gacode( void );
 void func_80112A74_gacode( void );
 void RS_Init( void );
 void RS_Frame( void );
-void func_80112350_gscode( void );
+void GS_Init( void );
 s32 func_80112414_gscode( void );
 void CA_Init( void );
 void CA_Frame( void );

@@ -6,7 +6,7 @@
 
 /*
 ================
-func_8011AA50_gscode
+GS_CharacterMenu
 
 Frame of the character menu: the eight characters' images (the locked ones as a blank) slide in, the
 highlighted character's model turns in the scene behind them, left and right move the cursor between the
@@ -17,7 +17,7 @@ it has slid out, 1 when a character was taken and 2 for backing out.
 #ifdef NON_MATCHING
 // NON_MATCHING: retail loads the argument of both func_80031184 calls with lhu (passed unconverted, as with no
 // prototype in scope); the s16 prototype makes it lh. Every other instruction is the same.
-s32 func_8011AA50_gscode( void ) {
+s32 GS_CharacterMenu( void ) {
     s32 i;
     sceneObject_t *obj;
 
@@ -97,7 +97,7 @@ s32 func_8011AA50_gscode( void ) {
         if ( D_80120654_gscode == 0 ) {
             D_80120655_gscode = CHOICE_RUN;
             func_80026B28();
-            func_8002A1EC( D_8011B540_gscode, D_801204EC_gscode );
+            func_8002A1EC( gs_classes, D_801204EC_gscode );
             D_80120A20_gscode = 0xFFFF;
             D_8009CFA0[0]->path->unk_38 |= 4;
         } else if ( D_80120654_gscode == 28 ) {
@@ -129,5 +129,5 @@ s32 func_8011AA50_gscode( void ) {
     return 0;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gscode/61640", func_8011AA50_gscode);
+INCLUDE_ASM("asm/nonmatchings/gscode/61640", GS_CharacterMenu);
 #endif

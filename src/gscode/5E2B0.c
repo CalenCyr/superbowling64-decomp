@@ -6,14 +6,14 @@
 
 /*
 ================
-func_801176C0_gscode
+GS_CharacterSelect
 
 One frame of the character select: the portraits of the unlocked characters, input, the viewport zooming in on the
 highlighted character's model as the camera circles it, and the menu sliding in and out. Returns 1 once a character
 is taken, 2 when backed out, else 0.
 ================
 */
-s32 func_801176C0_gscode( void ) {
+s32 GS_CharacterSelect( void ) {
     s32 i;
 
     for ( i = 0; i < 8; i++ ) {
@@ -26,7 +26,7 @@ s32 func_801176C0_gscode( void ) {
         if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
             func_80037870( SE_DECIDE, 0 );
             if ( D_8009D098.unk_7B ) {
-                func_8011B0B0_gscode();
+                GS_StartPakCheck();
                 D_8011F8B9_gscode = 4;
             } else {
                 D_8005C0BF = 1;
@@ -44,7 +44,7 @@ s32 func_801176C0_gscode( void ) {
         if ( D_8011F8BA_gscode == 10 ) {
             func_8002A67C();
             func_800311D0( 0x825 );
-            func_8002A1EC( D_8011B540_gscode, D_8011F880_gscode[D_8005C163] );
+            func_8002A1EC( gs_classes, D_8011F880_gscode[D_8005C163] );
             D_8011F8A0_gscode = 30;
             D_8011F8A4_gscode = 3.1415927f;
             D_8009CFA0[0]->path->unk_38 |= 4;
@@ -163,7 +163,7 @@ s32 func_801176C0_gscode( void ) {
         }
         break;
     case 4:
-        if ( func_8011B214_gscode() ) {
+        if ( GS_PakCheck() ) {
             D_8005C0BF = 1;
             D_8011F8B9_gscode = CHOICE_TAKEN;
         }

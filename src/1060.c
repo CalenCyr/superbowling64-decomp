@@ -476,7 +476,7 @@ void func_80026B44( void *arg ) {
                 osInvalDCache( gscode_VRAM, i );
                 func_80028744( "GSCODE  SYS", gscode_VRAM, i, 0 );
                 func_80026B10();
-                func_80112350_gscode();
+                GS_Init();
                 break;
             case SCENE_CACODE:
                 i = func_8002889C( "CACODE  SYS" );

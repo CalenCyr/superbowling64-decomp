@@ -610,3 +610,91 @@ ca_cameraEye	0x8013B030	invented: per frame, the eye of cameras 1 and 2 (motion.
 ca_cameraUp	0x8013CC50	invented: per frame, the up point of cameras 1 and 2 (motion.dat)
 ca_keptRotation	0x8013E870	invented: the selected part's rotation, kept while frames are stepped
 ca_bmpBuffer	0x8013E880	invented: buffer one BMP file is read into
+
+# gscode game-select overlay
+GS_Init	0x80112350	invented: the overlay's init, run once after main loads it (overlay.h)
+GS_NullCreate	0x8011288C	invented: empty function in the create slot of each of the scene classes gs_classes (objClass_t)
+GS_NullHandler	0x80112894	invented: empty function in the second slot of each of the scene classes gs_classes (objClass_t.unk_04)
+GS_ModeMenu	0x801128A0	invented: screen of the first menu, which sets the game mode (low nibble of D_8005C160)
+GS_SubModeMenu	0x80112F10	invented: three-choice screen that sets the sub-mode (bits 4-5 of D_8005C160)
+GS_TeamSizeMenu	0x80113430	invented: three-choice screen choosing the number of players on one team
+GS_PlayersMenu	0x80113990	invented: two-choice screen of one or two players
+GS_TwoChoiceMenu	0x80113DA0	invented: two-choice screen that slides in and out (left, right or back)
+GS_DrawTintedImage	0x80114160	invented: draws file 0x960's image tinted with a colour
+GS_NameEntry	0x80114680	invented: one frame of a player's name entry
+GS_PlayerSetup	0x80114D1C	invented: screen of the player setup (players, teams, handicaps)
+GS_CharacterSelect	0x801176C0	invented: screen of the character select (portraits and the highlighted model)
+GS_Options	0x801199E0	invented: screen of the options, sound test, records page and credits
+GS_CharacterMenu	0x8011AA50	invented: screen of the character menu (eight characters, the model's animations)
+GS_StartPakCheck	0x8011B0B0	invented: starts the controller pak check
+GS_PakCheck	0x8011B214	invented: one frame of the controller pak check
+gs_screenDepth	0x8011B5A0	invented: entries in the screen stack gs_screenStack
+gs_screen	0x80120780	invented: the current screen
+gs_screenStack	0x80120781	invented: screens to go back to, a stack
+gs_modeMenu	0x8011B5B0	invented: GS_ModeMenu's menu items
+gs_modeChoices	0x8011B628	invented: GS_ModeMenu's choices
+gs_modeBlink	0x8011B664	invented: per choice of GS_ModeMenu: images of its blink
+gs_modeSlide	0x8011B6A0	invented: slide step of GS_ModeMenu
+gs_modeState	0x8011B6A1	invented: CHOICE_ state of GS_ModeMenu
+gs_modeCursor	0x8011B6A2	invented: highlighted choice of GS_ModeMenu
+gs_modeBlinkFrame	0x8011B6A3	invented: blink frame of GS_ModeMenu
+gs_subModeMenu	0x8011B6B0	invented: GS_SubModeMenu's menu items
+gs_subModeBlink	0x8011B714	invented: per choice of GS_SubModeMenu: images of its blink
+gs_subModeSlide	0x8011B738	invented: slide step of GS_SubModeMenu
+gs_subModeState	0x8011B739	invented: CHOICE_ state of GS_SubModeMenu
+gs_subModeCursor	0x8011B73A	invented: highlighted choice of GS_SubModeMenu
+gs_subModeBlinkFrame	0x8011B73B	invented: blink frame of GS_SubModeMenu
+gs_teamSizeMenu	0x8011B740	invented: GS_TeamSizeMenu's menu items
+gs_teamSizeBlink	0x8011B7A4	invented: per choice of GS_TeamSizeMenu: images of its blink
+gs_teamSizeSlide	0x8011B7C8	invented: slide step of GS_TeamSizeMenu
+gs_teamSizeState	0x8011B7C9	invented: CHOICE_ state of GS_TeamSizeMenu
+gs_teamSizeCursor	0x8011B7CA	invented: highlighted choice of GS_TeamSizeMenu
+gs_teamSizeBlinkFrame	0x8011B7CB	invented: blink frame of GS_TeamSizeMenu
+gs_playersMenu	0x8011B7D0	invented: GS_PlayersMenu's menu items
+gs_playersBlink	0x8011B82C	invented: per choice of GS_PlayersMenu: images of its blink
+gs_playersSlide	0x8011B844	invented: slide step of GS_PlayersMenu
+gs_playersState	0x8011B845	invented: CHOICE_ state of GS_PlayersMenu
+gs_playersCursor	0x8011B846	invented: highlighted choice of GS_PlayersMenu
+gs_playersBlinkFrame	0x8011B847	invented: blink frame of GS_PlayersMenu
+gs_twoChoiceMenu	0x8011B850	invented: GS_TwoChoiceMenu's menu items
+gs_twoChoiceBlink	0x8011B8AC	invented: per choice of GS_TwoChoiceMenu: images of its blink
+gs_twoChoiceSlide	0x8011B8C4	invented: slide step of GS_TwoChoiceMenu
+gs_twoChoiceState	0x8011B8C5	invented: CHOICE_ state of GS_TwoChoiceMenu
+gs_twoChoiceCursor	0x8011B8C6	invented: highlighted choice of GS_TwoChoiceMenu
+gs_twoChoiceBlinkFrame	0x8011B8C7	invented: blink frame of GS_TwoChoiceMenu
+gs_nameEntryMenu	0x8011BA08	invented: the name entry's menu items
+gs_nameEntryStep	0x8011BA6C	invented: step of the name entry
+gs_nameEntryChars	0x8011BA70	invented: the characters of the name entry, per set, case, row and column
+gs_gridExitColumn	0x8011BD40	invented: column the name entry's cursor left the grid from
+gs_namePlayer	0x80120793	invented: player whose name is entered
+gs_nameCursorX	0x80120794	invented: column of the name entry's cursor
+gs_nameCursorY	0x80120795	invented: row of the name entry's cursor
+gs_nameCharSet	0x80120796	invented: character set of the name entry
+gs_nameCharCase	0x80120797	invented: case of the name entry's character set
+gs_nameLength	0x80120798	invented: characters entered of the name
+gs_setupMenu	0x8011B8D0	invented: the player setup's menu items
+gs_rumbleBlink	0x8011BA50	invented: images of the Rumble Pak marker's blink
+gs_handicapDigits	0x8011BA58	invented: image of each digit of a handicap
+gs_clearRecordAnswer	0x8011BD44	invented: answer of the prompt to clear a team's record
+gs_setupFrames	0x8011BD48	invented: frame counter of the player setup
+gs_setupSlide	0x8011BD4C	invented: slide step of the player setup
+gs_setupState	0x8011BD4D	invented: CHOICE_ state of the player setup
+gs_cHeldFrames	0x8011BD4E	invented: frames a C button is held in the player setup
+gs_teamPromptChoice	0x80120790	invented: choice of the team prompt: keep the name or clear the record
+gs_rumbleStatus	0x80120791	invented: per port: controller status the Rumble Pak check compares with
+gs_optionsMenu	0x8011FC90	invented: the options screen's menu items
+gs_creditsScript	0x8011FD58	invented: the credits script (creditCmd_t)
+gs_soundTestFrames	0x80120400	invented: frames since the last sound test
+gs_optionsSlide	0x80120424	invented: slide step of the options screen
+gs_optionsState	0x80120425	invented: state of the options screen: sliding in, in place, sliding out
+gs_optionsCursor	0x80120426	invented: highlighted option, an OPTION_ value
+gs_soundTestSound	0x80120427	invented: sound of the sound test
+gs_optionsPage	0x80120428	invented: 0 the options, 1 the records page, 2 the credits
+gs_creditSprites	0x80120860	invented: the credits' sprites (creditSprite_t)
+gs_creditsWait	0x80120A18	invented: frames before the next credits command
+gs_creditsPos	0x80120A1A	invented: next command of the credits script
+gs_pakCheckStep	0x80120A60	invented: step of the pak check
+gs_secondController	0x80120A64	invented: set when a second controller is in play
+gs_lastContStatus	0x80120A68	invented: per port: controller status of the last frame
+gs_pakCheckFrames	0x80120668	invented: frame counter of the pak check
+gs_classes	0x8011B540	invented: the classes of the overlay's model scenes (objClass_t array)

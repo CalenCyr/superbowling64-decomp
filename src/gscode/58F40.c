@@ -6,13 +6,13 @@
 
 /*
 ================
-func_80112350_gscode
+GS_Init
 
 Entry of the overlay: starts BGM 1; coming back from a game (D_8005CB60 set) opens screen 6, else clears
 the players and opens screen 0.
 ================
 */
-void func_80112350_gscode( void ) {
+void GS_Init( void ) {
     s32 i;
 
     func_800379C8( 1 );
@@ -22,9 +22,9 @@ void func_80112350_gscode( void ) {
             D_800DF5D0[i] = 0;
         }
         D_8005C163 = 0;
-        D_80120780_gscode = 0;
+        gs_screen = 0;
     } else {
-        D_80120780_gscode = 6;
+        gs_screen = 6;
     }
 }
 
@@ -36,7 +36,7 @@ Pushes a screen to go back to.
 ================
 */
 void func_801123C4_gscode( u8 screen ) {
-    D_80120781_gscode[D_8011B5A0_gscode++] = screen;
+    gs_screenStack[gs_screenDepth++] = screen;
 }
 
 /*
@@ -47,7 +47,7 @@ Goes back to the last pushed screen.
 ================
 */
 void func_801123E8_gscode( void ) {
-    D_80120780_gscode = D_80120781_gscode[--D_8011B5A0_gscode];
+    gs_screen = gs_screenStack[--gs_screenDepth];
 }
 
 /*
@@ -61,51 +61,51 @@ exit, which keeps the delay slot of the game-mode switch's range check empty.
 ================
 */
 s32 func_80112414_gscode( void ) {
-    switch ( D_80120780_gscode ) {
+    switch ( gs_screen ) {
     case 0:
-        if ( func_801128A0_gscode() == 1 ) {
+        if ( GS_ModeMenu() == 1 ) {
             func_801123C4_gscode( 0 );
             switch ( D_8005C160 & 0xF ) {
             case 0:
-                D_80120780_gscode = 1;
+                gs_screen = 1;
                 break;
             case 1:
                 D_8005C162 = 1;
                 D_8005C161 = 2;
                 D_8005C0E4[1] = 0x81;
                 D_8005C0E4[0] = 0;
-                D_80120780_gscode = 4;
+                gs_screen = 4;
                 break;
             case 2:
                 D_8005C161 = 1;
                 D_8005C162 = 0;
                 D_8005C0E4[0] = 0;
-                D_80120780_gscode = 6;
+                gs_screen = 6;
                 break;
             case 3:
                 D_8005C162 = 1;
                 D_8005C161 = 2;
-                D_80120780_gscode = 5;
+                gs_screen = 5;
                 break;
             case 4:
-                D_80120780_gscode = 8;
+                gs_screen = 8;
                 break;
             }
         }
         break;
     case 1:
-        switch ( func_80112F10_gscode() ) {
+        switch ( GS_SubModeMenu() ) {
         case 1:
             func_801123C4_gscode( 1 );
             switch ( ( D_8005C160 >> 4 ) & 3 ) {
             case 0:
-                D_80120780_gscode = 2;
+                gs_screen = 2;
                 break;
             case 1:
-                D_80120780_gscode = 3;
+                gs_screen = 3;
                 break;
             case 2:
-                D_80120780_gscode = 5;
+                gs_screen = 5;
                 break;
             }
             break;
@@ -115,10 +115,10 @@ s32 func_80112414_gscode( void ) {
         }
         break;
     case 2:
-        switch ( func_80113430_gscode() ) {
+        switch ( GS_TeamSizeMenu() ) {
         case 1:
             func_801123C4_gscode( 2 );
-            D_80120780_gscode = 5;
+            gs_screen = 5;
             break;
         case 2:
             func_801123E8_gscode();
@@ -126,10 +126,10 @@ s32 func_80112414_gscode( void ) {
         }
         break;
     case 3:
-        switch ( func_80113990_gscode() ) {
+        switch ( GS_PlayersMenu() ) {
         case 1:
             func_801123C4_gscode( 3 );
-            D_80120780_gscode = 5;
+            gs_screen = 5;
             break;
         case 2:
             func_801123E8_gscode();
@@ -137,26 +137,26 @@ s32 func_80112414_gscode( void ) {
         }
         break;
     case 4:
-        switch ( func_80113DA0_gscode() ) {
+        switch ( GS_TwoChoiceMenu() ) {
         case 1:
             func_801123C4_gscode( 4 );
-            D_80120780_gscode = 6;
+            gs_screen = 6;
             break;
         case 2:
             func_801123E8_gscode();
             break;
         case 3:
             func_801123C4_gscode( 4 );
-            D_80120780_gscode = 9;
+            gs_screen = 9;
             func_800379C8( 13 );
             break;
         }
         break;
     case 5:
-        switch ( func_80114D1C_gscode() ) {
+        switch ( GS_PlayerSetup() ) {
         case 1:
             func_801123C4_gscode( 5 );
-            D_80120780_gscode = 6;
+            gs_screen = 6;
             break;
         case 2:
             func_801123E8_gscode();
@@ -171,7 +171,7 @@ s32 func_80112414_gscode( void ) {
             case 0:
             case 2:
             case 3:
-                D_80120780_gscode = 7;
+                gs_screen = 7;
                 break;
             case 1:
                 D_8005C0BF = 2;
@@ -186,7 +186,7 @@ s32 func_80112414_gscode( void ) {
         }
         break;
     case 7:
-        switch ( func_801176C0_gscode() ) {
+        switch ( GS_CharacterSelect() ) {
         case 1:
             D_8005C0BF = 2;
             D_8005C0B6 = 0;
@@ -197,7 +197,7 @@ s32 func_80112414_gscode( void ) {
         }
         break;
     case 8:
-        switch ( func_801199E0_gscode() ) {
+        switch ( GS_Options() ) {
         case 1:
         case 2:
             func_801123E8_gscode();
@@ -205,7 +205,7 @@ s32 func_80112414_gscode( void ) {
         }
         break;
     case 9:
-        switch ( func_8011AA50_gscode() ) {
+        switch ( GS_CharacterMenu() ) {
         case 1:
         case 2:
             func_801123E8_gscode();
@@ -217,16 +217,16 @@ s32 func_80112414_gscode( void ) {
 
 /*
 ================
-func_8011288C_gscode
+GS_NullCreate
 ================
 */
-void func_8011288C_gscode( void ) {
+void GS_NullCreate( void ) {
 }
 
 /*
 ================
-func_80112894_gscode
+GS_NullHandler
 ================
 */
-void func_80112894_gscode( void ) {
+void GS_NullHandler( void ) {
 }

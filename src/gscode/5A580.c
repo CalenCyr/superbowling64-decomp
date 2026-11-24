@@ -6,19 +6,19 @@
 
 /*
 ================
-func_80113990_gscode
+GS_PlayersMenu
 
-Frame of the menu of one or two players, a two-choice menu like func_80113DA0_gscode: taking the left
+Frame of the menu of one or two players, a two-choice menu like GS_TwoChoiceMenu: taking the left
 choice sets up one player on one team, the right one two players on two teams (game-mode argument 1).
 Returns 0 while the menu runs; once it has slid out, 1 for a choice taken and 2 for backing out.
 ================
 */
-s32 func_80113990_gscode( void ) {
+s32 GS_PlayersMenu( void ) {
     u8 choice;
 
-    if ( D_8011B845_gscode == CHOICE_RUN && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
+    if ( gs_playersState == CHOICE_RUN && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
         func_80037870( SE_DECIDE, 0 );
-        switch ( D_8011B846_gscode ) {
+        switch ( gs_playersCursor ) {
         case 0:
             D_8005C161 = 1;
             D_8005C162 = 0;
@@ -30,66 +30,68 @@ s32 func_80113990_gscode( void ) {
             D_8005C160 = ( D_8005C160 & 0x3F ) | 0x40;
             break;
         }
-        D_8011B845_gscode = CHOICE_TAKEN;
+        gs_playersState = CHOICE_TAKEN;
     }
-    if ( D_8011B845_gscode == CHOICE_RUN && ( D_800E4D62 & B_BUTTON ) ) {
+    if ( gs_playersState == CHOICE_RUN && ( D_800E4D62 & B_BUTTON ) ) {
         func_80037870( 2, 0 );
-        D_8011B845_gscode = CHOICE_BACK;
+        gs_playersState = CHOICE_BACK;
     }
 
     func_8003068C( 0xE0, 0xE0, 0xE0 );
     func_8002DF3C( 0xA58, 0, 0 );
-    func_8003893C( D_8011B7D0_gscode, 0, D_8011B82C_gscode[0][0], MENU_NONE, MENU_NONE, MENU_NONE );
-    func_8003893C( D_8011B7D0_gscode, 1, D_8011B82C_gscode[1][0], MENU_NONE, MENU_NONE, MENU_NONE );
+    func_8003893C( gs_playersMenu, 0, gs_playersBlink[0][0], MENU_NONE, MENU_NONE, MENU_NONE );
+    func_8003893C( gs_playersMenu, 1, gs_playersBlink[1][0], MENU_NONE, MENU_NONE, MENU_NONE );
 
-    if ( D_8011B845_gscode == CHOICE_RUN ) {
-        if ( ++D_8011B847_gscode == 30 ) {
-            D_8011B847_gscode = 0;
+    if ( gs_playersState == CHOICE_RUN ) {
+        if ( ++gs_playersBlinkFrame == 30 ) {
+            gs_playersBlinkFrame = 0;
         }
-        choice = D_8011B846_gscode;
+        choice = gs_playersCursor;
         switch ( choice ) {
         case 0:
-            func_8003893C( D_8011B7D0_gscode, 0, D_8011B82C_gscode[0][D_8011B847_gscode / 5], MENU_NONE, MENU_NONE, MENU_NONE );
+            func_8003893C( gs_playersMenu, 0, gs_playersBlink[0][gs_playersBlinkFrame / 5],
+                           MENU_NONE, MENU_NONE, MENU_NONE );
             func_8002C950( 0x28, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & R_JPAD ) {
-                D_8011B846_gscode = 1;
+                gs_playersCursor = 1;
             }
             break;
         case 1:
-            func_8003893C( D_8011B7D0_gscode, 1, D_8011B82C_gscode[1][D_8011B847_gscode / 5], MENU_NONE, MENU_NONE, MENU_NONE );
+            func_8003893C( gs_playersMenu, 1, gs_playersBlink[1][gs_playersBlinkFrame / 5],
+                           MENU_NONE, MENU_NONE, MENU_NONE );
             func_8002C950( 0xB8, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
-                D_8011B846_gscode = 0;
+                gs_playersCursor = 0;
             }
             break;
         }
-        if ( D_8011B846_gscode != choice ) {
-            D_8011B847_gscode = 0;
+        if ( gs_playersCursor != choice ) {
+            gs_playersBlinkFrame = 0;
             func_80026B28();
             func_80037870( SE_CURSOR, SE_NO_REUSE );
         }
     }
 
-    func_800386E0( D_8011B7D0_gscode, D_8011B844_gscode );
-    switch ( D_8011B845_gscode ) {
+    func_800386E0( gs_playersMenu, gs_playersSlide );
+    switch ( gs_playersState ) {
     case CHOICE_IN:
-        D_8011B7D0_gscode[5].slide = SLIDE_LEFT;
-        D_8011B844_gscode -= 2;
-        if ( D_8011B844_gscode == 0 ) {
-            D_8011B845_gscode = CHOICE_RUN;
+        gs_playersMenu[5].slide = SLIDE_LEFT;
+        gs_playersSlide -= 2;
+        if ( gs_playersSlide == 0 ) {
+            gs_playersState = CHOICE_RUN;
             func_80026B28();
         }
         break;
     case CHOICE_TAKEN:
     case CHOICE_BACK:
-        D_8011B7D0_gscode[5].slide = SLIDE_RIGHT;
-        D_8011B844_gscode += 2;
-        if ( D_8011B844_gscode == 30 ) {
-            if ( D_8011B845_gscode == CHOICE_TAKEN ) {
-                D_8011B845_gscode = CHOICE_IN;
+        gs_playersMenu[5].slide = SLIDE_RIGHT;
+        gs_playersSlide += 2;
+        if ( gs_playersSlide == 30 ) {
+            if ( gs_playersState == CHOICE_TAKEN ) {
+                gs_playersState = CHOICE_IN;
                 return 1;
             }
-            D_8011B845_gscode = CHOICE_IN;
+            gs_playersState = CHOICE_IN;
             return 2;
         }
         break;

@@ -345,7 +345,7 @@ s32 func_80118040_gscode( void ) {
             if ( --D_801207B2_gscode == 0 ) {
                 if ( ( D_8005C160 & 0xF ) == 1 ) {
                     if ( D_8009D098.unk_7B ) {
-                        func_8011B0B0_gscode();
+                        GS_StartPakCheck();
                         D_8011FC81_gscode = 4;
                     } else {
                         D_8005C0BF = 1;
@@ -467,7 +467,7 @@ s32 func_80118040_gscode( void ) {
         if ( D_8011FC80_gscode == 0 ) {
             D_8011FC81_gscode = CHOICE_RUN;
             func_80026B28();
-            func_8002A1EC( D_8011B540_gscode, D_8011F900_gscode );
+            func_8002A1EC( gs_classes, D_8011F900_gscode );
             D_8009CFA0[0]->path->unk_38 |= 4;
             for ( i = 0; i < 4; i++ ) {
                 D_801207B4_gscode[i] = 0xFFFF;
@@ -511,7 +511,7 @@ s32 func_80118040_gscode( void ) {
         }
         break;
     case 4:
-        if ( func_8011B214_gscode() ) {
+        if ( GS_PakCheck() ) {
             D_8005C0BF = 1;
             D_8011FC81_gscode = CHOICE_TAKEN;
         }
