@@ -37,16 +37,16 @@ typedef struct {
 
 extern s32 D_8005C9D0;              /* the D_800EA440 buffer of the last BGM loaded */
 extern u16 D_8005C9E8;              /* index of the current BGM, | BGM_STOPPED */
-extern u16 D_8005C9EC[];            /* BGM volume of each D_8009D098.musicVolume setting */
-extern u8 D_8005C9F8[];             /* nonzero: the BGM is skipped while D_8009D098.music is 0 */
+extern u16 D_8005C9EC[];            /* BGM volume of each save_data.musicVolume setting */
+extern u8 D_8005C9F8[];             /* nonzero: the BGM is skipped while save_data.music is 0 */
 extern s16 D_8005CA0C[];            /* str file of each BGM */
 extern u8 D_800EA440[2][BGM_BUFFER_SIZE];
 extern bmpHeader_t D_8005CA40;
 extern s16 D_8005CA76;              /* number of the next screenshot */
-extern OSMesgQueue D_800E6520;
-extern OSMesgQueue D_80099428;      /* takes the audio task requests */
-extern OSMesgQueue D_8009D040;      /* where the audio task reports completion */
-extern s32 D_800DF6A4;              /* the audio task request message: its code, SCHED_MSG_AUDIO */
+extern OSMesgQueue sound_frameQueue;  /* Main_Thread sends to it every other retrace */
+extern OSMesgQueue sched_queue;     /* Main_Thread's: the SP, DP, PRENMI and retrace events and the audio task requests */
+extern OSMesgQueue sound_doneQueue;  /* where the audio task reports completion */
+extern s32 sched_msgAudio;          /* the audio task request message: its code, SCHED_MSG_AUDIO */
 extern u8 D_800ABD70[];             /* audio heap */
 extern OSTime D_80099450;           /* when the last audio task started */
 extern s32 D_8005B0F0;              /* microseconds the last audio task took */

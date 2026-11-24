@@ -3232,7 +3232,7 @@ s32 GA_CpuInput( gaPlayer_t *pl, s32 player ) {
 GA_CpuSetup
 
 Set-up of a player the game plays: picks speed at random between the character's limits, takes the
-GA_PickAimPin target with a random sideways error (bounded by the mode and D_8009D098.difficulty), then
+GA_PickAimPin target with a random sideways error (bounded by the mode and save_data.difficulty), then
 chooses cpuAim and cpuStance (where GA_CpuInput moves aim and stance) and the spin that
 func_801205A0_gacode gives for them. A character whose maxSpin exceeds 12 tries a crossing set-up first; when
 spin falls outside the character's range, a set-up from 30.48 to the side follows, and last one with spin 0.
@@ -3252,7 +3252,7 @@ void GA_CpuSetup( gaPlayer_t *pl, s32 player ) {
     pl->character.speed = RAND( range ) / 100.0f + pl->character.minSpeed;
     GA_PickAimPin( target, pl->lane->bodies, pl->lane->spots, pl->character.reverseSpin );
     if ( ( game_mode & 0xF ) == 3 || ( ( game_mode >> 4 ) & 3 ) == 1 ) {
-        switch ( D_8009D098.difficulty ) {
+        switch ( save_data.difficulty ) {
             case 0:
                 spread = 32;
                 bias = 16;
@@ -3267,7 +3267,7 @@ void GA_CpuSetup( gaPlayer_t *pl, s32 player ) {
                 break;
         }
     } else {
-        switch ( D_8009D098.difficulty ) {
+        switch ( save_data.difficulty ) {
             case 0:
                 spread = 96;
                 bias = 48;
@@ -3354,8 +3354,8 @@ modes that have one), and a value of the lane's current inputFunc step.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: register allocation only; retail gives row s2, lane s3, player s4 and &D_800F8094 s5 (here
-// player s2, &D_800F8094 s3, row s4, lane s5); instructions, constants, relocations and schedule are the same
+// NON_MATCHING: register allocation only; retail gives row s2, lane s3, player s4 and &game_gfx s5 (here
+// player s2, &game_gfx s3, row s4, lane s5); instructions, constants, relocations and schedule are the same
 // (the line counter stepped per line puts the TABLE row's increment after its sprintf, as retail). Tried: row
 // as u8/s16, lane as s32, the two locals' declaration order
 void GA_DebugText( s32 player ) {
@@ -3368,17 +3368,17 @@ void GA_DebugText( s32 player ) {
     lane = pl->laneIndex;
     row = 14;
     sprintf( text, "SL[%8.4f]", ga_stage->unk_10 );
-    Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+    Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
     row++;
     sprintf( text, "FRM[%3d]", pl->obj->frame );
-    Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+    Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
     row++;
     sprintf( text, "T[%6.2f]R[%6.2f]", pl->character.speed, pl->character.spin );
-    Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+    Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
     row++;
     if ( ga_gameMode == GA_ScoreSetupGame || ga_gameMode == GA_ScorePar ) {
         sprintf( text, "TABLE[%d]", D_800DF59C.unk_04[game_frame[player]] );
-        Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+        Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
         row++;
     }
     if ( pl->lane->inputFunc == GA_InputAim ) {
@@ -3404,7 +3404,7 @@ void GA_DebugText( s32 player ) {
     } else {
         return;
     }
-    Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+    Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", GA_DebugText);

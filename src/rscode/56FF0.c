@@ -41,7 +41,7 @@ void RS_Frame( void ) {
     }
     rs_dpadPressed = game_leaveState ? 0 : D_800E6758;
     rs_buttonsPressed = game_leaveState ? 0 : D_800E4D62;
-    Txt_LoadGlyphSheet( &D_800F8094 );
+    Txt_LoadGlyphSheet( &game_gfx );
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     Draw_Image( 0xA58, 0, 0 );
     rs_state();
@@ -58,9 +58,9 @@ void RS_Frame( void ) {
             rs_boxAlphaFalling = 1;
         }
     }
-    Txt_LoadFont( &D_800F8094 );
-    Txt_SetupFont( &D_800F8094, 0 );
-    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+    Txt_LoadFont( &game_gfx );
+    Txt_SetupFont( &game_gfx, 0 );
+    gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
 }
 
 /*
@@ -94,7 +94,7 @@ void RS_StartMode( void ) {
 ================
 RS_StartMode0
 
-Picks the state of mode 0's results by its sub-mode; a perfect game (bit 0x200 of D_8009D098.unlocks) or a
+Picks the state of mode 0's results by its sub-mode; a perfect game (bit 0x200 of save_data.unlocks) or a
 finished game (bit 0x100) first shows its message, once. Sub-mode 0 checks for a perfect game only with
 argument 0 (bits 6-7 of game_mode); its switch lists the other three arguments, which do nothing.
 ================
@@ -117,10 +117,10 @@ void RS_StartMode0( void ) {
                     break;
                 }
             }
-            if ( found && !( D_8009D098.unlocks & 0x200 ) ) {
+            if ( found && !( save_data.unlocks & 0x200 ) ) {
                 Sound_PlaySe( 0x35, 0 );
                 rs_state = RS_PerfectMessage;
-                D_8009D098.unlocks |= 0x200;
+                save_data.unlocks |= 0x200;
             }
             break;
         case 1:
@@ -145,10 +145,10 @@ void RS_StartMode0( void ) {
                 break;
             }
         }
-        if ( found && !( D_8009D098.unlocks & 0x100 ) ) {
+        if ( found && !( save_data.unlocks & 0x100 ) ) {
             Sound_PlaySe( 0x35, 0 );
             rs_state = RS_FinishedMessage;
-            D_8009D098.unlocks |= 0x100;
+            save_data.unlocks |= 0x100;
         }
         break;
     }
@@ -208,13 +208,13 @@ void RS_RankAndRecord( void ) {
         for ( i = 0; i < game_numPlayers; i++ ) {
             character = ( ( game_players[i] >> 4 ) & 7 ) - 1;
             if ( character >= 0 ) {
-                RS_AddToRecord( &D_800E44E8[character], i );
-                RS_AddToRecord( &D_8009D098.records[character], i );
+                RS_AddToRecord( &game_sessionRecords[character], i );
+                RS_AddToRecord( &save_data.records[character], i );
             }
         }
         for ( character = 0; character < 4; character++ ) {
-            Score_SetRecordFigures( &D_800E44E8[character], character, 0 );
-            Score_SetRecordFigures( &D_8009D098.records[character], character, 1 );
+            Score_SetRecordFigures( &game_sessionRecords[character], character, 0 );
+            Score_SetRecordFigures( &save_data.records[character], character, 1 );
         }
     }
     rs_state = RS_ScoreSheet;
@@ -235,7 +235,7 @@ void RS_ScoreSheet( void ) {
     s16 i;
 
     for ( i = 0; i < 4; i++ ) {
-        empty += D_800E44E8[i].games ? 0 : 1;
+        empty += game_sessionRecords[i].games ? 0 : 1;
     }
     if ( ( rs_dpadPressed & L_JPAD ) && rs_sheetPage == 1 ) {
         Sound_PlaySe( SE_CURSOR, 0 );
@@ -298,10 +298,10 @@ void RS_Records( void ) {
     y += 0x18;
     switch ( rs_sheetPage ) {
     case 2:
-        Score_DrawRecordTable( 4, D_800E44E8, 0, 0x18, y );
+        Score_DrawRecordTable( 4, game_sessionRecords, 0, 0x18, y );
         break;
     case 3:
-        Score_DrawRecordTable( 4, D_8009D098.records, 1, 0x18, y );
+        Score_DrawRecordTable( 4, save_data.records, 1, 0x18, y );
         break;
     }
     y += 0x8C;
@@ -360,7 +360,7 @@ void RS_ResultsPage2( void ) {
 RS_DuelResults
 
 Results of a duel: the score of each game, the higher one marked, the games won, and the winner; A or Z
-leaves when player 1 won (setting the bit of game_stage in D_8009D098.unlocks), else opens the menu.
+leaves when player 1 won (setting the bit of game_stage in save_data.unlocks), else opens the menu.
 ================
 */
 #ifdef NON_MATCHING
@@ -406,7 +406,7 @@ void RS_DuelResults( void ) {
     }
     if ( game_gamesWon[0] > game_gamesWon[1] ) {
         Draw_ImageScaled( 0x869, 0x2C, y + 8, rs_boxAlpha + 0x7F, 1.0f, 1.0f );
-        if ( !( D_8009D098.unlocks & ( 1 << game_stage ) ) ) {
+        if ( !( save_data.unlocks & ( 1 << game_stage ) ) ) {
             Draw_Image( 0x870, 0x38, 0xAC );
         }
     } else {
@@ -416,7 +416,7 @@ void RS_DuelResults( void ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         if ( game_gamesWon[0] > game_gamesWon[1] ) {
             rs_state = RS_Leave;
-            D_8009D098.unlocks |= 1 << game_stage;
+            save_data.unlocks |= 1 << game_stage;
         } else {
             rs_state = RS_Menu;
             rs_returnState = RS_DuelResults;

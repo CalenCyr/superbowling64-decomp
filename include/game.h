@@ -44,7 +44,7 @@ extern u8 game_frameFlags[4][10];   /* per player and frame: flags; in the par g
 extern u16 game_splits[4];          /* per player: splits this game (GA_IsSplit, by GA_ScoreStandard), summed into
                                        playerRecord_t.splits; the par game keeps the sum of its pars in [0] */
 extern u16 game_strikes[4];         /* per player: strikes this game, counted up with game_strikeRun (GA_ScoreStandard) */
-extern u16 game_spares[4];          /* per player: spares this game, counted when the frame ends after a non-run turn (GA_ScoreStandard) */
+extern u16 game_spares[4];          /* per player: spares this game, counted when a frame ends after a non-run turn */
 extern u8 game_strikeRun[4];        /* per player: strikes in a row (to 255), which the game modes read and reset (GA_ScoreBattle) */
 extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
 extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */

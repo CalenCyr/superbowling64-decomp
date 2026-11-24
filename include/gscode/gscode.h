@@ -165,11 +165,11 @@ extern s16 D_80120828_gscode[4][3];       /* per player: x of its bars */
 extern s16 D_80120840_gscode[4][3];       /* per player: y of the bottom of its bars */
 
 /* gs_optionsCursor: line of the options screen */
-#define OPTION_DIFFICULTY   0           /* D_8009D098.difficulty, 0 to 2 */
-#define OPTION_MUSIC        1           /* D_8009D098.music, 0 or 1 */
+#define OPTION_DIFFICULTY   0           /* save_data.difficulty, 0 to 2 */
+#define OPTION_MUSIC        1           /* save_data.music, 0 or 1 */
 #define OPTION_SOUND_TEST   2           /* gs_soundTestSound */
-#define OPTION_BGM_VOLUME   3           /* D_8009D098.musicVolume, 0 to 4 */
-#define OPTION_RUMBLE       4           /* D_8009D098.rumble, 0 or 1 */
+#define OPTION_BGM_VOLUME   3           /* save_data.musicVolume, 0 to 4 */
+#define OPTION_RUMBLE       4           /* save_data.rumble, 0 or 1 */
 #define OPTION_RECORDS      5           /* toggles the records page */
 #define OPTION_CREDITS      6           /* plays the credits */
 #define OPTION_EXIT         7
@@ -212,8 +212,8 @@ typedef struct {
 extern menuItem_t gs_optionsMenu[20];     /* the options screen; [5] its title, id 0 the cursor */
 extern creditCmd_t gs_creditsScript[142]; /* the credits script */
 extern u32 gs_soundTestFrames;            /* frames since the last sound test */
-extern s16 D_80120404_gscode[4];          /* per D_8009D098.difficulty: its image */
-extern s16 D_8012040C_gscode[2];          /* per D_8009D098.music and unk_7B: their image */
+extern s16 D_80120404_gscode[4];          /* per save_data.difficulty: its image */
+extern s16 D_8012040C_gscode[2];          /* per save_data.music and unk_7B: their image */
 extern s16 D_80120410_gscode[10];         /* image of each digit */
 extern u8 gs_optionsSlide;                /* slide step of the options screen */
 extern u8 gs_optionsState;                /* 0 sliding in, 1 in place, 2 and 3 sliding out (3: backed out) */

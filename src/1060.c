@@ -23,7 +23,7 @@
 ================
 main
 
-Initialises libultra, clears memory from D_8010A250 to the end of RDRAM, sets up the heap and the
+Initialises libultra, clears memory from boot_staticFile to the end of RDRAM, sets up the heap and the
 records, and starts the boot thread.
 ================
 */
@@ -33,28 +33,28 @@ void main( void ) {
     __osInitialize_common();
     __osInitialize_autodetect();
     D_800A2FE4 = 0;
-    memset( D_8010A250, 0, RAM_END - (u32)D_8010A250 );
-    D_80066C38[0] = (u16 *)0x8038F800;
-    D_80066C38[1] = (u16 *)0x803B5000;
-    D_80066C38[2] = (u16 *)0x803DA800;
+    memset( boot_staticFile, 0, RAM_END - (u32)boot_staticFile );
+    sched_framebuffers[0] = (u16 *)0x8038F800;
+    sched_framebuffers[1] = (u16 *)0x803B5000;
+    sched_framebuffers[2] = (u16 *)0x803DA800;
     Mem_Reset( (HeapBlock *)HEAP_START, (u8 *)HEAP_END );
-    D_801000B8 = &D_8009D098;
-    D_8009D098.checksum = 0;
-    D_8009D098.unlocks = 3;
-    D_8009D098.difficulty = 1;
-    D_8009D098.music = 1;
-    D_8009D098.musicVolume = 2;
-    D_8009D098.rumble = 1;
+    save_dataPtr = &save_data;
+    save_data.checksum = 0;
+    save_data.unlocks = 3;
+    save_data.difficulty = 1;
+    save_data.music = 1;
+    save_data.musicVolume = 2;
+    save_data.rumble = 1;
     for ( i = 0; i < 4; i++ ) {
-        memset( &D_8009D098.records[i], 0, sizeof( playerRecord_t ) );
-        D_8009D098.records[i].low = 300;
-        memset( D_8009D098.records[i].name, 0xFF, sizeof( D_8009D098.records[i].name ) );
-        memset( &D_800E44E8[i], 0, sizeof( playerRecord_t ) );
-        D_800E44E8[i].low = 300;
-        memset( D_800E44E8[i].name, 0xFF, sizeof( D_800E44E8[i].name ) );
+        memset( &save_data.records[i], 0, sizeof( playerRecord_t ) );
+        save_data.records[i].low = 300;
+        memset( save_data.records[i].name, 0xFF, sizeof( save_data.records[i].name ) );
+        memset( &game_sessionRecords[i], 0, sizeof( playerRecord_t ) );
+        game_sessionRecords[i].low = 300;
+        memset( game_sessionRecords[i].name, 0xFF, sizeof( game_sessionRecords[i].name ) );
     }
-    osCreateThread( &D_80060EE0, 1, Boot_Thread, NULL, &D_80061090[BOOT_STACK_SIZE / sizeof( u64 )], 10 );
-    osStartThread( &D_80060EE0 );
+    osCreateThread( &boot_bootThread, 1, Boot_Thread, NULL, &boot_bootStack[BOOT_STACK_SIZE / sizeof( u64 )], 10 );
+    osStartThread( &boot_bootThread );
 }
 
 /*
@@ -66,10 +66,10 @@ Boot thread: starts the VI and PI managers and the main thread, then idles.
 */
 void Boot_Thread( void *arg ) {
     osCreateViManager( OS_PRIORITY_VIMGR );
-    osCreatePiManager( OS_PRIORITY_PIMGR, &D_801000E0, D_800693B8, 8 );
-    D_800ABD60 = osCartRomInit();
-    osCreateThread( &D_80061290, 3, Main_Thread, arg, &D_80061440[BOOT_STACK_SIZE / sizeof( u64 )], 20 );
-    osStartThread( &D_80061290 );
+    osCreatePiManager( OS_PRIORITY_PIMGR, &boot_piQueue, boot_piMsgs, 8 );
+    boot_romHandle = osCartRomInit();
+    osCreateThread( &boot_mainThread, 3, Main_Thread, arg, &boot_mainStack[BOOT_STACK_SIZE / sizeof( u64 )], 20 );
+    osStartThread( &boot_mainThread );
     osSetThreadPri( NULL, OS_PRIORITY_IDLE );
     for ( ;; ) {
     }
@@ -79,30 +79,30 @@ void Boot_Thread( void *arg ) {
 ================
 func_80025EBC
 
-Runs the D_80066B50 program on the RSP as an audio task; then counts down D_8005C9E0 and starts sequence
-D_8005C9E4 when it reaches zero.
+Runs the sched_audioProgram program on the RSP as an audio task; then counts down sound_bgmDelay and starts sequence
+sound_bgmStartVolume when it reaches zero.
 ================
 */
 void func_80025EBC( void ) {
-    D_8005B110 = 2;
-    D_80060EA0.t.type = M_AUDTASK;
-    D_80060EA0.t.flags = 0;
-    D_80060EA0.t.ucode_boot = rspbootTextStart;
-    D_80060EA0.t.ucode_boot_size = (u8 *)rspbootTextEnd - (u8 *)rspbootTextStart;
-    D_80060EA0.t.ucode = D_80066B50->ucode;
-    D_80060EA0.t.ucode_data = D_80066B50->ucodeData;
-    D_80060EA0.t.ucode_size = 0x1000;
-    D_80060EA0.t.ucode_data_size = 0x800;
-    D_80060EA0.t.data_ptr = D_80066B50->dataPtr;
-    D_8005B100 = 1;
-    D_80060EA0.t.data_size = D_80066B50->dataSize;
-    osSpTaskLoad( &D_80060EA0 );
-    osSpTaskStartGo( &D_80060EA0 );
-    if ( D_8005C9E4 != 0 ) {
-        if ( --D_8005C9E0 == 0 ) {
-            D_8005C9D8 = (u32)Snd_PlayBgm( D_800A3048 );
-            Snd_SetVolume( D_8005C9D8, D_8005C9E4 );
-            D_8005C9E4 = 0;
+    sched_audioState = 2;
+    sched_audioTask.t.type = M_AUDTASK;
+    sched_audioTask.t.flags = 0;
+    sched_audioTask.t.ucode_boot = rspbootTextStart;
+    sched_audioTask.t.ucode_boot_size = (u8 *)rspbootTextEnd - (u8 *)rspbootTextStart;
+    sched_audioTask.t.ucode = sched_audioProgram->ucode;
+    sched_audioTask.t.ucode_data = sched_audioProgram->ucodeData;
+    sched_audioTask.t.ucode_size = 0x1000;
+    sched_audioTask.t.ucode_data_size = 0x800;
+    sched_audioTask.t.data_ptr = sched_audioProgram->dataPtr;
+    sched_rspBusy = 1;
+    sched_audioTask.t.data_size = sched_audioProgram->dataSize;
+    osSpTaskLoad( &sched_audioTask );
+    osSpTaskStartGo( &sched_audioTask );
+    if ( sound_bgmStartVolume != 0 ) {
+        if ( --sound_bgmDelay == 0 ) {
+            sound_bgmId = (u32)Snd_PlayBgm( sound_nextBgm );
+            Snd_SetVolume( sound_bgmId, sound_bgmStartVolume );
+            sound_bgmStartVolume = 0;
         }
     }
 }
@@ -120,170 +120,170 @@ void Main_Thread( void *arg ) {
     OSMesg msg;
     s32 index;
 
-    osCreateMesgQueue( &D_800DF578, D_800E675C, 1 );
-    osCreateMesgQueue( &D_80099428, D_801000C0, 8 );
-    osCreateMesgQueue( &D_800E57E8, D_8009D060, 1 );
-    osCreateMesgQueue( &D_800E6520, D_8009CF8C, 1 );
+    osCreateMesgQueue( &boot_dmaQueue, boot_dmaMsgs, 1 );
+    osCreateMesgQueue( &sched_queue, sched_msgs, 8 );
+    osCreateMesgQueue( &sched_retraceQueue, sched_retraceMsgs, 1 );
+    osCreateMesgQueue( &sound_frameQueue, sound_frameMsgs, 1 );
     osCreateMesgQueue( &D_800E8078, D_8009CF98, 1 );
-    osCreateMesgQueue( &D_8009D040, D_800DF6A0, 1 );
-    osCreateMesgQueue( &D_800E6690, D_80066C2C, 1 );
-    osCreateMesgQueue( &D_800F8098, D_8009D02C, 1 );
-    osCreateMesgQueue( &D_800DF688, D_8009D068, 1 );
-    D_800E4558 = SCHED_MSG_SP_DONE;
-    D_80066B90 = SCHED_MSG_DP_DONE;
-    D_8009D058 = SCHED_MSG_PRENMI;
-    D_800DF6A4 = SCHED_MSG_AUDIO;
-    D_80069408 = SCHED_MSG_RETRACE;
-    D_800A2FD4 = SCHED_MSG_GFX;
-    osSetEventMesg( OS_EVENT_SP, &D_80099428, &D_800E4558 );
-    osSetEventMesg( OS_EVENT_DP, &D_80099428, &D_80066B90 );
-    osSetEventMesg( OS_EVENT_PRENMI, &D_80099428, &D_8009D058 );
-    osViSetEvent( &D_80099428, &D_80069408, 1 );
+    osCreateMesgQueue( &sound_doneQueue, sound_doneMsgs, 1 );
+    osCreateMesgQueue( &cont_requestQueue, cont_requestMsgs, 1 );
+    osCreateMesgQueue( &cont_replyQueue, cont_replyMsgs, 1 );
+    osCreateMesgQueue( &game_drawQueue, game_drawMsgs, 1 );
+    sched_msgSpDone = SCHED_MSG_SP_DONE;
+    sched_msgDpDone = SCHED_MSG_DP_DONE;
+    sched_msgPreNmi = SCHED_MSG_PRENMI;
+    sched_msgAudio = SCHED_MSG_AUDIO;
+    sched_msgRetrace = SCHED_MSG_RETRACE;
+    sched_msgGfx = SCHED_MSG_GFX;
+    osSetEventMesg( OS_EVENT_SP, &sched_queue, &sched_msgSpDone );
+    osSetEventMesg( OS_EVENT_DP, &sched_queue, &sched_msgDpDone );
+    osSetEventMesg( OS_EVENT_PRENMI, &sched_queue, &sched_msgPreNmi );
+    osViSetEvent( &sched_queue, &sched_msgRetrace, 1 );
 
     osInvalDCache( &D_8010A080, fat_ROM_END - fat_ROM_START );
-    D_80066B70.hdr.pri = OS_MESG_PRI_NORMAL;
-    D_80066B70.hdr.retQueue = &D_800DF578;
-    D_80066B70.dramAddr = &D_8010A080;
-    D_80066B70.devAddr = (u32)fat_ROM_START;
-    D_80066B70.size = fat_ROM_END - fat_ROM_START;
-    osEPiStartDma( D_800ABD60, &D_80066B70, OS_READ );
-    osRecvMesg( &D_800DF578, NULL, OS_MESG_BLOCK );
+    boot_dmaRequest.hdr.pri = OS_MESG_PRI_NORMAL;
+    boot_dmaRequest.hdr.retQueue = &boot_dmaQueue;
+    boot_dmaRequest.dramAddr = &D_8010A080;
+    boot_dmaRequest.devAddr = (u32)fat_ROM_START;
+    boot_dmaRequest.size = fat_ROM_END - fat_ROM_START;
+    osEPiStartDma( boot_romHandle, &boot_dmaRequest, OS_READ );
+    osRecvMesg( &boot_dmaQueue, NULL, OS_MESG_BLOCK );
     FAT_ReadFile( "IDX     SYS", D_800A30C0, FAT_GetFileSize( "IDX     SYS" ), 0 );
-    osInvalDCache( D_8010A250, knstatic_ROM_END - knstatic_ROM_START );
-    FAT_ReadFile( "KNSTATICSYS", D_8010A250, FAT_GetFileSize( "KNSTATICSYS" ), 0 );
+    osInvalDCache( boot_staticFile, knstatic_ROM_END - knstatic_ROM_START );
+    FAT_ReadFile( "KNSTATICSYS", boot_staticFile, FAT_GetFileSize( "KNSTATICSYS" ), 0 );
     Cont_Init();
     osContStartReadData( &D_80066B38 );
-    osCreateThread( &D_800617F0, 2, func_80028064, arg, &D_80068250[CONT_STACK_SIZE / sizeof( u64 )], 0x11 );
-    osStartThread( &D_800617F0 );
-    osCreateThread( &D_80061640, 5, Game_Thread, arg, &D_800E8090[GAME_STACK_SIZE / sizeof( u64 )], 8 );
-    osStartThread( &D_80061640 );
+    osCreateThread( &boot_contThread, 2, func_80028064, arg, &boot_contStack[CONT_STACK_SIZE / sizeof( u64 )], 0x11 );
+    osStartThread( &boot_contThread );
+    osCreateThread( &boot_gameThread, 5, Game_Thread, arg, &boot_gameStack[GAME_STACK_SIZE / sizeof( u64 )], 8 );
+    osStartThread( &boot_gameThread );
     func_80037CD0();
 
     for ( ;; ) {
-        osRecvMesg( &D_80099428, &msg, OS_MESG_BLOCK );
+        osRecvMesg( &sched_queue, &msg, OS_MESG_BLOCK );
         switch ( *(s32 *)msg ) {
         case SCHED_MSG_PRENMI:
-            D_8005C0B4[0] = TRUE;
+            sched_reset[0] = TRUE;
             if ( osAfterPreNMI() == 0 ) {
-                D_8005C0B4[1] = TRUE;
+                sched_reset[1] = TRUE;
             }
             break;
         case SCHED_MSG_RETRACE:
             if ( D_8005B0F4 & 1 ) {
-                osSendMesg( &D_800E6520, &msg, OS_MESG_NOBLOCK );
+                osSendMesg( &sound_frameQueue, &msg, OS_MESG_NOBLOCK );
             }
-            osSendMesg( &D_800E57E8, &D_80069408, OS_MESG_NOBLOCK );
+            osSendMesg( &sched_retraceQueue, &sched_msgRetrace, OS_MESG_NOBLOCK );
             ++D_8005B0F4;
             if ( D_8005B0F4 % 60 == 0 ) {
-                D_8005B0FC = D_8005B130;
-                D_8005B130 = 0;
+                sched_frameRate = sched_swaps;
+                sched_swaps = 0;
             }
-            if ( D_8005B12C++ != 0 ) {
-                D_8005B114[D_8005C0B3] = 4;
-                if ( D_8005B114[D_8005C0B2] == 1 ) {
-                    osViSwapBuffer( D_80066C38[D_8005C0B2] );
-                    D_8005C0B3 = D_8005C0B2;
-                    if ( ++D_8005C0B2 == 3 ) {
-                        D_8005C0B2 = 0;
+            if ( sched_retraces++ != 0 ) {
+                sched_fbState[sched_shownFb] = 4;
+                if ( sched_fbState[sched_nextFb] == 1 ) {
+                    osViSwapBuffer( sched_framebuffers[sched_nextFb] );
+                    sched_shownFb = sched_nextFb;
+                    if ( ++sched_nextFb == 3 ) {
+                        sched_nextFb = 0;
                     }
-                    D_8005B12C = 0;
-                    D_8005B130++;
+                    sched_retraces = 0;
+                    sched_swaps++;
                 }
             }
             break;
         case SCHED_MSG_SP_DONE:
-            D_8005B100 = 0;
-            if ( D_8005C0B4[0] == TRUE && D_8005C0B4[1] == FALSE ) {
+            sched_rspBusy = 0;
+            if ( sched_reset[0] == TRUE && sched_reset[1] == FALSE ) {
                 if ( osAfterPreNMI() == 0 ) {
-                    D_8005C0B4[1] = TRUE;
+                    sched_reset[1] = TRUE;
                 }
-            } else if ( D_8005B110 == 2 ) {
-                D_8005B110 = 0;
-                if ( D_8005B10C == 2 ) {
-                    D_8005B100 = 1;
-                    D_8005B10C = 1;
-                    osSpTaskLoad( &D_8005B140 );
-                    osSpTaskStartGo( &D_8005B140 );
+            } else if ( sched_audioState == 2 ) {
+                sched_audioState = 0;
+                if ( sched_gfxState == 2 ) {
+                    sched_rspBusy = 1;
+                    sched_gfxState = 1;
+                    osSpTaskLoad( &sched_gfxTask );
+                    osSpTaskStartGo( &sched_gfxTask );
                 }
-                osSendMesg( &D_8009D040, &msg, OS_MESG_NOBLOCK );
-            } else if ( D_8005B110 == 1 ) {
-                if ( D_8005B104 != 0 ) {
-                    D_8005B104 = 0;
-                    if ( osSpTaskYielded( &D_8005B140 ) ) {
-                        D_8005B10C = 2;
+                osSendMesg( &sound_doneQueue, &msg, OS_MESG_NOBLOCK );
+            } else if ( sched_audioState == 1 ) {
+                if ( sched_yieldAsked != 0 ) {
+                    sched_yieldAsked = 0;
+                    if ( osSpTaskYielded( &sched_gfxTask ) ) {
+                        sched_gfxState = 2;
                     }
                 }
                 func_80025EBC();
-            } else if ( D_8005B10C == 1 ) {
-                D_8005B0E4 = OS_CYCLES_TO_USEC( osGetTime() - D_80066C48 );
+            } else if ( sched_gfxState == 1 ) {
+                sched_rspTime = OS_CYCLES_TO_USEC( osGetTime() - sched_gfxStartTime );
             }
             break;
         case SCHED_MSG_DP_DONE:
-            D_8005B124[D_8005B120] = 3;
-            D_8005B114[D_80069410[D_8005B120].fbIndex] = 1;
-            D_8005B10C = 0;
-            if ( D_8005B114[D_8005C0B2] != 1 ) {
-                D_8005C0B2 = D_80069410[D_8005B120].fbIndex;
+            sched_listState[sched_runList] = 3;
+            sched_fbState[sched_gfxFrames[sched_runList].fbIndex] = 1;
+            sched_gfxState = 0;
+            if ( sched_fbState[sched_nextFb] != 1 ) {
+                sched_nextFb = sched_gfxFrames[sched_runList].fbIndex;
             }
-            D_8005B0E8 = OS_CYCLES_TO_USEC( osGetTime() - D_80066C48 );
+            sched_rdpTime = OS_CYCLES_TO_USEC( osGetTime() - sched_gfxStartTime );
             if ( D_8005C0BC != 0 && game_scene != 1 && ( D_800994BC & Z_TRIG ) && ( D_800E4D62 & L_TRIG ) ) {
                 Dbg_ScreenShot();
             }
             break;
         case SCHED_MSG_AUDIO:
-            if ( D_8005C0B4[0] == FALSE ) {
-                if ( D_8005B100 != 0 ) {
+            if ( sched_reset[0] == FALSE ) {
+                if ( sched_rspBusy != 0 ) {
                     osSpTaskYield();
-                    D_8005B104 = 1;
-                    D_8005B110 = 1;
+                    sched_yieldAsked = 1;
+                    sched_audioState = 1;
                     continue;
                 }
                 func_80025EBC();
             }
             break;
         case SCHED_MSG_GFX:
-            D_8005B108 = 0;
-            D_8005B124[D_8005C0B1] = 1;
+            sched_building = 0;
+            sched_listState[sched_bufferIndex] = 1;
             break;
         }
 
-        index = D_8005B0F8 + 1;
+        index = sched_drawFb + 1;
         if ( index == 3 ) {
             index = 0;
         }
-        if ( D_8005B108 == 0 && D_8005B124[( D_8005C0B1 + 1 ) & 1] == 3 ) {
-            if ( ++D_8005B0F8 == 3 ) {
-                D_8005B0F8 = 0;
+        if ( sched_building == 0 && sched_listState[( sched_bufferIndex + 1 ) & 1] == 3 ) {
+            if ( ++sched_drawFb == 3 ) {
+                sched_drawFb = 0;
             }
-            if ( ++D_8005C0B1 == 2 ) {
-                D_8005C0B1 = 0;
+            if ( ++sched_bufferIndex == 2 ) {
+                sched_bufferIndex = 0;
             }
-            D_8005B108 = 1;
-            D_8005B124[D_8005C0B1] = 0;
-            D_80069410[D_8005C0B1].fbIndex = D_8005B0F8;
-            osSendMesg( &D_800DF688, &index, OS_MESG_NOBLOCK );
-            D_80099440 = osGetTime();
+            sched_building = 1;
+            sched_listState[sched_bufferIndex] = 0;
+            sched_gfxFrames[sched_bufferIndex].fbIndex = sched_drawFb;
+            osSendMesg( &game_drawQueue, &index, OS_MESG_NOBLOCK );
+            sched_drawStartTime = osGetTime();
         }
-        if ( D_8005B100 == 0 && D_8005B10C == 0 && D_8005C0B4[0] == FALSE ) {
-            index = ( D_8005B120 + 1 ) & 1;
-            if ( D_8005B124[index] != 0 &&
-                 D_80066C38[D_80069410[index].fbIndex] != osViGetCurrentFramebuffer() &&
-                 D_80066C38[D_80069410[index].fbIndex] != osViGetNextFramebuffer() ) {
-                D_8005B120 = ( D_8005B120 + 1 ) & 1;
-                D_8005B124[D_8005B120] = 2;
-                D_8005B140.t.flags = OS_TASK_LOADABLE;
-                D_8005B140.t.ucode_boot_size = (u8 *)rspbootTextEnd - (u8 *)rspbootTextStart;
-                D_8005B140.t.ucode_boot = (u64 *)rspbootTextStart;
-                D_8005B140.t.ucode = (u64 *)gspF3DEX2_Rej_fifoTextStart;
-                D_8005B140.t.ucode_data = (u64 *)gspF3DEX2_Rej_fifoDataStart;
-                D_8005B140.t.data_ptr = (u64 *)D_80069410[D_8005B120].list;
-                D_8005B140.t.data_size = D_80069410[D_8005B120].size;
-                D_8005B100 = 1;
-                D_8005B10C = 1;
+        if ( sched_rspBusy == 0 && sched_gfxState == 0 && sched_reset[0] == FALSE ) {
+            index = ( sched_runList + 1 ) & 1;
+            if ( sched_listState[index] != 0 &&
+                 sched_framebuffers[sched_gfxFrames[index].fbIndex] != osViGetCurrentFramebuffer() &&
+                 sched_framebuffers[sched_gfxFrames[index].fbIndex] != osViGetNextFramebuffer() ) {
+                sched_runList = ( sched_runList + 1 ) & 1;
+                sched_listState[sched_runList] = 2;
+                sched_gfxTask.t.flags = OS_TASK_LOADABLE;
+                sched_gfxTask.t.ucode_boot_size = (u8 *)rspbootTextEnd - (u8 *)rspbootTextStart;
+                sched_gfxTask.t.ucode_boot = (u64 *)rspbootTextStart;
+                sched_gfxTask.t.ucode = (u64 *)gspF3DEX2_Rej_fifoTextStart;
+                sched_gfxTask.t.ucode_data = (u64 *)gspF3DEX2_Rej_fifoDataStart;
+                sched_gfxTask.t.data_ptr = (u64 *)sched_gfxFrames[sched_runList].list;
+                sched_gfxTask.t.data_size = sched_gfxFrames[sched_runList].size;
+                sched_rspBusy = 1;
+                sched_gfxState = 1;
                 osWritebackDCacheAll();
-                osSpTaskLoad( &D_8005B140 );
-                osSpTaskStartGo( &D_8005B140 );
-                D_80066C48 = osGetTime();
+                osSpTaskLoad( &sched_gfxTask );
+                osSpTaskStartGo( &sched_gfxTask );
+                sched_gfxStartTime = osGetTime();
             }
         }
     }
@@ -306,8 +306,8 @@ func_80026B28
 ================
 */
 inline void func_80026B28( void ) {
-    D_8009CFB0 = 75;
-    D_800619A0 = 12;
+    game_pulseAlpha = 75;
+    game_pulseStep = 12;
 }
 
 /*
@@ -324,7 +324,7 @@ CPU time of the frame.
 #ifdef NON_MATCHING
 // NON_MATCHING: the frame is 0x48 bytes, retail's 0x58 (16 bytes of locals no instruction uses); retail's lbu
 // and separate andi of game_scene before each switch need it volatile (game.h); otherwise only relocation
-// names differ (D_8005C0BA is retail's D_8005C0B8 + 2). One local holds the counter, the file size and the
+// names differ (game_cursorY is retail's game_cursorX + 2). One local holds the counter, the file size and the
 // second switch's index, as retail's s2 does. An unused 16-byte local gives retail's frame (not adopted, R17);
 // the inlined func_80026B10 and func_80026B28 have no locals, so their frames add nothing.
 void Game_Thread( void *arg ) {
@@ -332,12 +332,12 @@ void Game_Thread( void *arg ) {
 
     func_80026B28();
     for ( i = 0; i < 3; i++ ) {
-        osRecvMesg( &D_800DF688, NULL, OS_MESG_BLOCK );
-        D_80102070 = &D_80069410[D_8005C0B1];
-        D_800F8094 = D_80102070->list;
-        gDPFullSync( D_800F8094++ );
-        gSPEndDisplayList( D_800F8094++ );
-        osSendMesg( &D_80099428, &D_800A2FD4, OS_MESG_NOBLOCK );
+        osRecvMesg( &game_drawQueue, NULL, OS_MESG_BLOCK );
+        sched_buildFrame = &sched_gfxFrames[sched_bufferIndex];
+        game_gfx = sched_buildFrame->list;
+        gDPFullSync( game_gfx++ );
+        gSPEndDisplayList( game_gfx++ );
+        osSendMesg( &sched_queue, &sched_msgGfx, OS_MESG_NOBLOCK );
     }
     if ( osTvType == OS_TV_NTSC ) {
         osViSetMode( &osViModeTable[OS_VI_NTSC_LPN1] );
@@ -353,100 +353,100 @@ void Game_Thread( void *arg ) {
     memcpy( &game_floorGrids[1], &game_floorGrids[0], i );
 
     for ( ;; ) {
-        osRecvMesg( &D_800DF688, NULL, OS_MESG_BLOCK );
+        osRecvMesg( &game_drawQueue, NULL, OS_MESG_BLOCK );
         guRandom();
         Cont_ReadPads();
-        D_8009CFB0 += D_800619A0;
-        if ( D_8009CFB0 == 255 || D_8009CFB0 == 75 ) {
-            D_800619A0 *= -1;
+        game_pulseAlpha += game_pulseStep;
+        if ( game_pulseAlpha == 255 || game_pulseAlpha == 75 ) {
+            game_pulseStep *= -1;
         }
 
-        if ( D_8005B198 == 0 ) {
+        if ( game_cursorLocked == 0 ) {
             if ( D_8009D05C > 60 ) {
-                D_8005C0B8 += D_8005B134[D_8005C0BE][3];
+                game_cursorX += game_cursorSpeeds[game_cursorSpeed][3];
             } else if ( D_8009D05C > 45 ) {
-                D_8005C0B8 += D_8005B134[D_8005C0BE][2];
+                game_cursorX += game_cursorSpeeds[game_cursorSpeed][2];
             } else if ( D_8009D05C > 35 ) {
-                D_8005C0B8 += D_8005B134[D_8005C0BE][1];
+                game_cursorX += game_cursorSpeeds[game_cursorSpeed][1];
             } else if ( D_8009D05C > 25 ) {
-                D_8005C0B8 += D_8005B134[D_8005C0BE][0];
+                game_cursorX += game_cursorSpeeds[game_cursorSpeed][0];
             } else if ( D_8009D05C > 10 ) {
-                D_8005C0B8 += 1;
+                game_cursorX += 1;
             } else if ( D_8009D05C < -9 ) {
                 if ( D_8009D05C > -25 ) {
-                    D_8005C0B8 -= 1;
+                    game_cursorX -= 1;
                 } else if ( D_8009D05C > -35 ) {
-                    D_8005C0B8 -= D_8005B134[D_8005C0BE][0];
+                    game_cursorX -= game_cursorSpeeds[game_cursorSpeed][0];
                 } else if ( D_8009D05C > -45 ) {
-                    D_8005C0B8 -= D_8005B134[D_8005C0BE][1];
+                    game_cursorX -= game_cursorSpeeds[game_cursorSpeed][1];
                 } else if ( D_8009D05C > -60 ) {
-                    D_8005C0B8 -= D_8005B134[D_8005C0BE][2];
+                    game_cursorX -= game_cursorSpeeds[game_cursorSpeed][2];
                 } else {
-                    D_8005C0B8 -= D_8005B134[D_8005C0BE][3];
+                    game_cursorX -= game_cursorSpeeds[game_cursorSpeed][3];
                 }
             }
             if ( D_800DF628 > 60 ) {
-                D_8005C0BA -= D_8005B134[D_8005C0BE][3];
+                game_cursorY -= game_cursorSpeeds[game_cursorSpeed][3];
             } else if ( D_800DF628 > 45 ) {
-                D_8005C0BA -= D_8005B134[D_8005C0BE][2];
+                game_cursorY -= game_cursorSpeeds[game_cursorSpeed][2];
             } else if ( D_800DF628 > 35 ) {
-                D_8005C0BA -= D_8005B134[D_8005C0BE][1];
+                game_cursorY -= game_cursorSpeeds[game_cursorSpeed][1];
             } else if ( D_800DF628 > 25 ) {
-                D_8005C0BA -= D_8005B134[D_8005C0BE][0];
+                game_cursorY -= game_cursorSpeeds[game_cursorSpeed][0];
             } else if ( D_800DF628 > 10 ) {
-                D_8005C0BA -= 1;
+                game_cursorY -= 1;
             } else if ( D_800DF628 < -9 ) {
                 if ( D_800DF628 > -25 ) {
-                    D_8005C0BA += 1;
+                    game_cursorY += 1;
                 } else if ( D_800DF628 > -35 ) {
-                    D_8005C0BA += D_8005B134[D_8005C0BE][0];
+                    game_cursorY += game_cursorSpeeds[game_cursorSpeed][0];
                 } else if ( D_800DF628 > -45 ) {
-                    D_8005C0BA += D_8005B134[D_8005C0BE][1];
+                    game_cursorY += game_cursorSpeeds[game_cursorSpeed][1];
                 } else if ( D_800DF628 > -60 ) {
-                    D_8005C0BA += D_8005B134[D_8005C0BE][2];
+                    game_cursorY += game_cursorSpeeds[game_cursorSpeed][2];
                 } else {
-                    D_8005C0BA += D_8005B134[D_8005C0BE][3];
+                    game_cursorY += game_cursorSpeeds[game_cursorSpeed][3];
                 }
             }
-            if ( D_8005C0B8 < CURSOR_MIN_X ) {
-                D_8005C0B8 = CURSOR_MIN_X;
+            if ( game_cursorX < CURSOR_MIN_X ) {
+                game_cursorX = CURSOR_MIN_X;
             }
-            if ( D_8005C0B8 > CURSOR_MAX_X ) {
-                D_8005C0B8 = CURSOR_MAX_X;
+            if ( game_cursorX > CURSOR_MAX_X ) {
+                game_cursorX = CURSOR_MAX_X;
             }
-            if ( D_8005C0BA < CURSOR_MIN_Y ) {
-                D_8005C0BA = CURSOR_MIN_Y;
+            if ( game_cursorY < CURSOR_MIN_Y ) {
+                game_cursorY = CURSOR_MIN_Y;
             }
-            if ( D_8005C0BA > CURSOR_MAX_Y ) {
-                D_8005C0BA = CURSOR_MAX_Y;
+            if ( game_cursorY > CURSOR_MAX_Y ) {
+                game_cursorY = CURSOR_MAX_Y;
             }
         }
 
-        D_80102070 = &D_80069410[D_8005C0B1];
-        D_800F8094 = D_80102070->list;
-        gSPSegment( D_800F8094++, 0, 0 );
-        gSPDisplayList( D_800F8094++, D_8010A2C8 );
-        gSPDisplayList( D_800F8094++, D_8010A2A0 );
-        gDPSetDepthImage( D_800F8094++, osVirtualToPhysical( D_80000400 ) );
-        gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-                          osVirtualToPhysical( D_80066C38[D_8005B0F8] ) );
-        gDPPipeSync( D_800F8094++ );
+        sched_buildFrame = &sched_gfxFrames[sched_bufferIndex];
+        game_gfx = sched_buildFrame->list;
+        gSPSegment( game_gfx++, 0, 0 );
+        gSPDisplayList( game_gfx++, D_8010A2C8 );
+        gSPDisplayList( game_gfx++, D_8010A2A0 );
+        gDPSetDepthImage( game_gfx++, osVirtualToPhysical( D_80000400 ) );
+        gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                          osVirtualToPhysical( sched_framebuffers[sched_drawFb] ) );
+        gDPPipeSync( game_gfx++ );
 
-        if ( D_8005B0E0 != game_scene ) {
-            if ( D_8005B188 < 2 ) {
-                gDPSetCycleType( D_800F8094++, G_CYC_FILL );
-                gDPSetFillColor( D_800F8094++, ( GPACK_RGBA5551( 192, 192, 192, 1 ) << 16 ) |
+        if ( game_loadedScene != game_scene ) {
+            if ( game_blankFrames < 2 ) {
+                gDPSetCycleType( game_gfx++, G_CYC_FILL );
+                gDPSetFillColor( game_gfx++, ( GPACK_RGBA5551( 192, 192, 192, 1 ) << 16 ) |
                                                GPACK_RGBA5551( 192, 192, 192, 1 ) );
-                gDPFillRectangle( D_800F8094++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
-                gDPPipeSync( D_800F8094++ );
-                gDPFullSync( D_800F8094++ );
-                gSPEndDisplayList( D_800F8094++ );
-                D_80102070->size = ( D_800F8094 - D_80102070->list ) * sizeof( Gfx );
-                osSendMesg( &D_80099428, &D_800A2FD4, OS_MESG_NOBLOCK );
-                D_8005B188++;
+                gDPFillRectangle( game_gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
+                gDPPipeSync( game_gfx++ );
+                gDPFullSync( game_gfx++ );
+                gSPEndDisplayList( game_gfx++ );
+                sched_buildFrame->size = ( game_gfx - sched_buildFrame->list ) * sizeof( Gfx );
+                osSendMesg( &sched_queue, &sched_msgGfx, OS_MESG_NOBLOCK );
+                game_blankFrames++;
                 continue;
             }
-            D_8005B188 = 0;
+            game_blankFrames = 0;
             Mem_Reset( NULL, NULL );
             Cache_Clear();
             Obj_ClearList();
@@ -515,7 +515,7 @@ void Game_Thread( void *arg ) {
                 OP_Init();
                 break;
             }
-            D_8005B0E0 = game_scene;
+            game_loadedScene = game_scene;
         }
 
         i = game_scene;
@@ -545,9 +545,9 @@ void Game_Thread( void *arg ) {
 
         if ( D_8005C0EC != 0 ) {
             D_8005C190 = DRAW2D_FILL;
-            Draw_ImageScaled( 0xA71, 80, 120, D_8009CFB0, 1.0f, 1.0f );
+            Draw_ImageScaled( 0xA71, 80, 120, game_pulseAlpha, 1.0f, 1.0f );
             Draw_Image( 0x87F, 200, 152 );
-            Draw_Image( D_8005B180[game_demo], 200, 200 );
+            Draw_Image( game_demoTitles[game_demo], 200, 200 );
             if ( --D_800693B0 < 40 ) {
                 game_leaveState = 1;
                 if ( game_fade >= 248 ) {
@@ -556,7 +556,7 @@ void Game_Thread( void *arg ) {
                     game_fade = 263;
                     game_scene = SCENE_OPCODE;
                     D_8005C0EC = 0;
-                    D_8009D098.music = 1;
+                    save_data.music = 1;
                 }
             }
         }
@@ -578,11 +578,11 @@ void Game_Thread( void *arg ) {
             Snd_SetMasterVolume( SND_BGM, ( 255 - game_fade ) * 96 + 0x2000 );
         }
 
-        gDPFullSync( D_800F8094++ );
-        gSPEndDisplayList( D_800F8094++ );
-        D_80102070->size = ( D_800F8094 - D_80102070->list ) * sizeof( Gfx );
-        D_8005B0EC = OS_CYCLES_TO_USEC( osGetTime() - D_80099440 );
-        osSendMesg( &D_80099428, &D_800A2FD4, OS_MESG_NOBLOCK );
+        gDPFullSync( game_gfx++ );
+        gSPEndDisplayList( game_gfx++ );
+        sched_buildFrame->size = ( game_gfx - sched_buildFrame->list ) * sizeof( Gfx );
+        sched_cpuTime = OS_CYCLES_TO_USEC( osGetTime() - sched_drawStartTime );
+        osSendMesg( &sched_queue, &sched_msgGfx, OS_MESG_NOBLOCK );
     }
 }
 #else

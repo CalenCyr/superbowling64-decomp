@@ -51,7 +51,7 @@ s32 GS_PlayersMenu( void ) {
         case 0:
             Menu_SetItem( gs_playersMenu, 0, gs_playersBlink[0][gs_playersBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
-            Draw_RoundedBox( 0x28, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0x28, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
             if ( D_800E6758 & R_JPAD ) {
                 gs_playersCursor = 1;
             }
@@ -59,7 +59,7 @@ s32 GS_PlayersMenu( void ) {
         case 1:
             Menu_SetItem( gs_playersMenu, 1, gs_playersBlink[1][gs_playersBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
-            Draw_RoundedBox( 0xB8, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0xB8, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
             if ( D_800E6758 & L_JPAD ) {
                 gs_playersCursor = 0;
             }

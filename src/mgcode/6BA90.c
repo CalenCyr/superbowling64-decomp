@@ -33,19 +33,19 @@ void MG_Frame( void ) {
     }
     func_8002A2F0();
     if ( D_800A2FDC ) {
-        Txt_LoadFont( &D_800F8094 );
-        Txt_SetupFont( &D_800F8094, 0 );
-        gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
-        sprintf( text, "CPU=%6.6d", D_8005B0EC );
-        Txt_DrawString( &D_800F8094, 220, 180, text );
+        Txt_LoadFont( &game_gfx );
+        Txt_SetupFont( &game_gfx, 0 );
+        gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
+        sprintf( text, "CPU=%6.6d", sched_cpuTime );
+        Txt_DrawString( &game_gfx, 220, 180, text );
         sprintf( text, "SND=%6.6d", D_8005B0F0 );
-        Txt_DrawString( &D_800F8094, 220, 188, text );
-        sprintf( text, "RSP=%6.6d", D_8005B0E4 );
-        Txt_DrawString( &D_800F8094, 220, 196, text );
-        sprintf( text, "RDP=%6.6d", D_8005B0E8 );
-        Txt_DrawString( &D_800F8094, 220, 204, text );
-        sprintf( text, "FRATE=%3d", D_8005B0FC );
-        Txt_DrawString( &D_800F8094, 220, 212, text );
+        Txt_DrawString( &game_gfx, 220, 188, text );
+        sprintf( text, "RSP=%6.6d", sched_rspTime );
+        Txt_DrawString( &game_gfx, 220, 196, text );
+        sprintf( text, "RDP=%6.6d", sched_rdpTime );
+        Txt_DrawString( &game_gfx, 220, 204, text );
+        sprintf( text, "FRATE=%3d", sched_frameRate );
+        Txt_DrawString( &game_gfx, 220, 212, text );
     }
 }
 

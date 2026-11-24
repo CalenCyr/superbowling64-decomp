@@ -50,7 +50,7 @@ s32 GS_TeamSelect( void ) {
     s32 character;
     u8 player;
 
-    unlocked = D_8009D098.unlocks;
+    unlocked = save_data.unlocks;
     memset( slots, 0xFF, sizeof( slots ) );
 
     if ( game_lastTeam == 0 ) {
@@ -105,7 +105,7 @@ s32 GS_TeamSelect( void ) {
                 slots[0][0] = 0;
                 slots[0][1] = 1;
                 if ( D_8011FC84_gscode[0] ) {
-                    unlocked = GS_UnlockMask( D_8009D098.unlocks );
+                    unlocked = GS_UnlockMask( save_data.unlocks );
                 }
             }
             Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
@@ -255,7 +255,7 @@ s32 GS_TeamSelect( void ) {
                     // RULE-EXCEPTION: R30, the character cursor shares j's register: retail allocates repeat and
                     // pad ahead of it, which a separate local reverses
                     j = game_players[player] & 0xF;
-                    Menu_SetItem( D_8011FA80_gscode, player + 16, MENU_NONE, MENU_NONE, MENU_NONE, D_8009CFB0 );
+                    Menu_SetItem( D_8011FA80_gscode, player + 16, MENU_NONE, MENU_NONE, MENU_NONE, game_pulseAlpha );
 
                     if ( D_8011FC84_gscode[1] == 0x80 ) {
                         repeat = D_800E6758;
@@ -295,11 +295,11 @@ s32 GS_TeamSelect( void ) {
                         D_8011FC84_gscode[i]++;
                         if ( ( game_mode & 0xF ) == 1 && D_8011FC84_gscode[i] == 1 ) {
                             game_players[1] = ( game_players[1] & 0xF0 ) | 1;
-                            unlocked = GS_UnlockMask( D_8009D098.unlocks );
+                            unlocked = GS_UnlockMask( save_data.unlocks );
                             /* BUG: this reuses the team loop's counter, so the team loop goes on from the character
                                found (or ends) */
                             for ( i = 0; i < 8; i++ ) {
-                                if ( ( unlocked ^ D_8009D098.unlocks ) & ( 1 << i ) ) {
+                                if ( ( unlocked ^ save_data.unlocks ) & ( 1 << i ) ) {
                                     game_players[1] = ( game_players[1] & 0xF0 ) | i;
                                     break;
                                 }
@@ -344,7 +344,7 @@ s32 GS_TeamSelect( void ) {
         case 1:
             if ( --D_801207B2_gscode == 0 ) {
                 if ( ( game_mode & 0xF ) == 1 ) {
-                    if ( D_8009D098.rumble ) {
+                    if ( save_data.rumble ) {
                         GS_StartPakCheck();
                         D_8011FC81_gscode = 4;
                     } else {
@@ -451,9 +451,9 @@ s32 GS_TeamSelect( void ) {
                                    D_8011FC44_gscode[j][2], 0xC0 );
                 }
                 Menu_SetItem( D_8011FB98_gscode, i + 24, D_8011FC04_gscode[character], D_80120828_gscode[i][0] - 16,
-                               D_80120840_gscode[i][0] + 18, D_8009CFB0 );
+                               D_80120840_gscode[i][0] + 18, game_pulseAlpha );
                 Menu_SetItem( D_8011FB98_gscode, i + 28, D_8011FBF4_gscode[character], D_80120828_gscode[i][0] - 16,
-                               D_80120840_gscode[i][0] + 26, D_8009CFB0 );
+                               D_80120840_gscode[i][0] + 26, game_pulseAlpha );
             }
         }
     }

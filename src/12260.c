@@ -153,7 +153,7 @@ s32 Save_ShowPrompt( s32 id, s32 mode ) {
 ================
 Save_Checksum
 
-Returns the checksum of the settings D_801000B8: the sum of their bytes after the checksum word itself.
+Returns the checksum of the settings save_dataPtr: the sum of their bytes after the checksum word itself.
 ================
 */
 s32 Save_Checksum( void ) {
@@ -161,7 +161,7 @@ s32 Save_Checksum( void ) {
     s32 sum;
     s32 i;
 
-    bytes = (u8 *)D_801000B8;
+    bytes = (u8 *)save_dataPtr;
     sum = 0;
     for ( i = 4; i < 0x100; i++ ) {
         sum += bytes[i];
@@ -190,11 +190,11 @@ s32 Save_SaveSettings( void ) {
     switch ( D_8005C990 ) {
     case 0:
         D_80064314 = 9;
-        osSendMesg( &D_800E6690, &D_80064314, OS_MESG_NOBLOCK );
+        osSendMesg( &cont_requestQueue, &D_80064314, OS_MESG_NOBLOCK );
         D_8005C990 = 1;
         break;
     case 1:
-        if ( osRecvMesg( &D_800F8098, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
+        if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
             if ( D_80066B8C == 0 ) {
                 D_8005C990 = 2;
             } else {
@@ -211,11 +211,11 @@ s32 Save_SaveSettings( void ) {
     case 3:
         D_80064314 = 6;
         D_800E4FC8 = 0;
-        osSendMesg( &D_800E6690, &D_80064314, OS_MESG_NOBLOCK );
+        osSendMesg( &cont_requestQueue, &D_80064314, OS_MESG_NOBLOCK );
         D_8005C990 = 4;
         break;
     case 4:
-        if ( osRecvMesg( &D_800F8098, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
+        if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
             if ( D_80066B8C == 0 ) {
                 if ( memcmp( D_800693E8, D_80066BA4, sizeof( D_800693E8 ) ) == 0 ) {
                     D_8005C990 = 5;
@@ -230,7 +230,7 @@ s32 Save_SaveSettings( void ) {
         }
         break;
     case 5:
-        bytes = (u8 *)D_801000B8;
+        bytes = (u8 *)save_dataPtr;
         sum = 0;
         for ( i = 4; i < 0x100; i++ ) {
             sum += bytes[i];
@@ -243,11 +243,11 @@ s32 Save_SaveSettings( void ) {
         *(s32 *)bytes = sum;
         D_80064314 = 5;
         D_800E6578 = 1;
-        osSendMesg( &D_800E6690, &D_80064314, OS_MESG_NOBLOCK );
+        osSendMesg( &cont_requestQueue, &D_80064314, OS_MESG_NOBLOCK );
         D_8005C990 = 6;
         break;
     case 6:
-        if ( osRecvMesg( &D_800F8098, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
+        if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
             if ( D_80066B8C == 0 ) {
                 D_8005C990 = 7;
             } else if ( D_80066B8C == 2 ) {

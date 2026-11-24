@@ -56,7 +56,7 @@ extern u16 D_8005CB58[4];          /* Score_DrawCardFrame: sign of a score: nega
 extern u16 D_8005CB2C[9];          /* Score_DrawParCard: image of each frame's number */
 extern u16 D_8005CB40[6];          /* Score_DrawParCard: per row, the image of a frame's box */
 extern u16 D_8005CB4C[6];          /* Score_DrawParCard: per row, the image of the total's box */
-/* Score_SetRecordFigures: per kind of record (0: D_800E44E8, 1: D_8009D098), per character, the record's figures */
+/* Score_SetRecordFigures: per kind of record (0: game_sessionRecords, 1: save_data), per character, the record's figures */
 extern f32 D_800E66B0[3][4];        /* average score */
 extern f32 D_800DF5D8[3][4];        /* unk_14, percent of 12 a game */
 extern f32 D_800A2FE8[3][4];        /* unk_16, percent of 10 a game */

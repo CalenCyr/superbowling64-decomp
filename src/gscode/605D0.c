@@ -35,16 +35,16 @@ s32 GS_Options( void ) {
     if ( gs_optionsState == 1 && game_leaveState == 0 ) {
         Menu_SetItem( gs_optionsMenu, 10, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
         Menu_SetItem( gs_optionsMenu, 11, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
-        Menu_SetItem( gs_optionsMenu, 1, D_80120404_gscode[D_8009D098.difficulty], MENU_NONE, MENU_NONE, 0xFF );
-        Menu_SetItem( gs_optionsMenu, 2, D_8012040C_gscode[D_8009D098.music], MENU_NONE, MENU_NONE, 0xFF );
-        Menu_SetItem( gs_optionsMenu, 12, D_8012040C_gscode[D_8009D098.rumble], MENU_NONE, MENU_NONE, 0xFF );
+        Menu_SetItem( gs_optionsMenu, 1, D_80120404_gscode[save_data.difficulty], MENU_NONE, MENU_NONE, 0xFF );
+        Menu_SetItem( gs_optionsMenu, 2, D_8012040C_gscode[save_data.music], MENU_NONE, MENU_NONE, 0xFF );
+        Menu_SetItem( gs_optionsMenu, 12, D_8012040C_gscode[save_data.rumble], MENU_NONE, MENU_NONE, 0xFF );
         if ( (u8)( gs_soundTestSound / 10 ) ) {
             Menu_SetItem( gs_optionsMenu, 3, D_80120410_gscode[(u8)( gs_soundTestSound / 10 )], MENU_NONE,
                            MENU_NONE, 0xFF );
         }
         Menu_SetItem( gs_optionsMenu, 4, D_80120410_gscode[(u8)( gs_soundTestSound % 10 )], MENU_NONE,
                        MENU_NONE, 0xFF );
-        for ( i = 0; i < 4 - D_8009D098.musicVolume; i++ ) {
+        for ( i = 0; i < 4 - save_data.musicVolume; i++ ) {
             Menu_SetItem( gs_optionsMenu, i + 5, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
         }
 
@@ -68,22 +68,22 @@ s32 GS_Options( void ) {
         switch ( gs_optionsCursor ) {
         case OPTION_DIFFICULTY:
             if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || ( D_800E6758 & R_JPAD ) ) {
-                if ( ++D_8009D098.difficulty == 3 ) {
-                    D_8009D098.difficulty = 0;
+                if ( ++save_data.difficulty == 3 ) {
+                    save_data.difficulty = 0;
                 }
                 Sound_PlaySe( 0, 0x80 );
             }
             if ( D_800E6758 & L_JPAD ) {
-                if ( --D_8009D098.difficulty == 0xFF ) {
-                    D_8009D098.difficulty = 2;
+                if ( --save_data.difficulty == 0xFF ) {
+                    save_data.difficulty = 2;
                 }
                 Sound_PlaySe( 0, 0x80 );
             }
             break;
         case OPTION_MUSIC:
             if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || ( D_800E6758 & ( L_JPAD | R_JPAD ) ) ) {
-                if ( ++D_8009D098.music == 2 ) {
-                    D_8009D098.music = 0;
+                if ( ++save_data.music == 2 ) {
+                    save_data.music = 0;
                 }
                 Sound_PlaySe( 0, 0x80 );
             }
@@ -107,23 +107,23 @@ s32 GS_Options( void ) {
                 Sound_PlaySe( 1, 0x80 );
                 // RULE-EXCEPTION: R30, i holds the saved setting: retail gives the counter this longer life, which
                 // ranks it below each loop's hoisted values and orders this block's loads
-                i = D_8009D098.music;
-                D_8009D098.music = 1;
+                i = save_data.music;
+                save_data.music = 1;
                 Sound_PlayBgm( gs_soundTestSound );
-                D_8009D098.music = i;
+                save_data.music = i;
             }
             break;
         case OPTION_BGM_VOLUME:
             if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || ( D_800E6758 & R_JPAD ) ) {
-                if ( ++D_8009D098.musicVolume == 5 ) {
-                    D_8009D098.musicVolume = 0;
+                if ( ++save_data.musicVolume == 5 ) {
+                    save_data.musicVolume = 0;
                 }
                 Sound_UpdateBgmVolume();
                 Sound_PlaySe( 0, 0x80 );
             }
             if ( D_800E6758 & L_JPAD ) {
-                if ( --D_8009D098.musicVolume == 0xFF ) {
-                    D_8009D098.musicVolume = 4;
+                if ( --save_data.musicVolume == 0xFF ) {
+                    save_data.musicVolume = 4;
                 }
                 Sound_UpdateBgmVolume();
                 Sound_PlaySe( 0, 0x80 );
@@ -131,8 +131,8 @@ s32 GS_Options( void ) {
             break;
         case OPTION_RUMBLE:
             if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || ( D_800E6758 & ( L_JPAD | R_JPAD ) ) ) {
-                if ( ++D_8009D098.rumble == 2 ) {
-                    D_8009D098.rumble = 0;
+                if ( ++save_data.rumble == 2 ) {
+                    save_data.rumble = 0;
                 }
                 Sound_PlaySe( 0, 0x80 );
             }
@@ -154,9 +154,9 @@ s32 GS_Options( void ) {
         }
 
         if ( gs_optionsCursor < OPTION_EXIT ) {
-            Menu_SetItem( gs_optionsMenu, 0, 0x8F0, 0x49, gs_optionsCursor * 20 + 0x46, D_8009CFB0 );
+            Menu_SetItem( gs_optionsMenu, 0, 0x8F0, 0x49, gs_optionsCursor * 20 + 0x46, game_pulseAlpha );
         } else {
-            Menu_SetItem( gs_optionsMenu, 0, 0x8EF, 0xD0, 0xB0, D_8009CFB0 );
+            Menu_SetItem( gs_optionsMenu, 0, 0x8EF, 0xD0, 0xB0, game_pulseAlpha );
         }
     }
 
@@ -191,11 +191,11 @@ s32 GS_Options( void ) {
             }
             if ( gs_optionsPage == 1 ) {
                 for ( i = 0; i < 4; i++ ) {
-                    Score_SetRecordFigures( &D_8009D098.records[i], i, 0 );
+                    Score_SetRecordFigures( &save_data.records[i], i, 0 );
                 }
                 Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
-                Txt_LoadGlyphSheet( &D_800F8094 );
-                Score_DrawRecordTable( 4, D_8009D098.records, 0, 0x18, 0x38 );
+                Txt_LoadGlyphSheet( &game_gfx );
+                Score_DrawRecordTable( 4, save_data.records, 0, 0x18, 0x38 );
             }
         }
     } else {

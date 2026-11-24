@@ -393,7 +393,7 @@ FatTable	include/fat.h	evidence: the BW64FAT file at ROM 0x3C2A0, header "BW64FA
 ArchiveEntry	include/archive.h	invented: {ROM offset into the str segment, stored size, decompressed size} record read by the LZSS loader
 HeapBlock	include/heap.h	invented: free-list block header (next, size) of the block allocator in unit 51F0
 HostPacket	include/hostio.h	invented: request header (command, size, file name) exchanged with the development host link in unit 4890
-GfxFrame	include/boot.h	invented: a display list the game thread builds (list, size, framebuffer index), two at D_80069410
+GfxFrame	include/boot.h	invented: a display list the game thread builds (list, size, framebuffer index), two at sched_gfxFrames
 SCHED_MSG_RETRACE	include/boot.h	invented: code 0 of the main thread's messages, set by osViSetEvent
 SCHED_MSG_SP_DONE	include/boot.h	invented: code 1, set by osSetEventMesg(OS_EVENT_SP)
 SCHED_MSG_DP_DONE	include/boot.h	invented: code 2, set by osSetEventMesg(OS_EVENT_DP)
@@ -403,9 +403,9 @@ SCHED_MSG_AUDIO	include/boot.h	invented: code 5, sent by the audio thread (12C70
 CONT_STACK_SIZE	include/boot.h	invented: bytes of the controller thread's stack (0x80068250-0x80068A50)
 GAME_STACK_SIZE	include/boot.h	invented: bytes of the game thread's stack (0x800E8090-0x800EA090)
 GFX_LIST_LEN	include/boot.h	invented: Gfx commands of a GfxFrame list (0x18000 bytes)
-CURSOR_MIN_X	include/boot.h	invented: the game thread clamps the cursor x D_8005C0B8 to 16 or more
+CURSOR_MIN_X	include/boot.h	invented: the game thread clamps the cursor x game_cursorX to 16 or more
 CURSOR_MAX_X	include/boot.h	invented: the game thread clamps the cursor x to 303 or less
-CURSOR_MIN_Y	include/boot.h	invented: the game thread clamps the cursor y D_8005C0BA to 16 or more
+CURSOR_MIN_Y	include/boot.h	invented: the game thread clamps the cursor y game_cursorY to 16 or more
 CURSOR_MAX_Y	include/boot.h	invented: the game thread clamps the cursor y to 227 or less
 SCENE_GACODE	include/overlay.h	invented: game_scene value 0, for which the game thread loads "GACODE  SYS" (ROM string)
 SCENE_CACODE	include/overlay.h	invented: value 1, loads "CACODE  SYS"
@@ -465,7 +465,7 @@ SCORE_IMAGE_*, ROLL_STRIKE, ROLL_SPARE	menu.h	invented: indices of D_8005CAC0 th
 Menu_SlidePos	13490.c	invented: the inline position calculation of Menu_DrawItems's slides
 # main scene engine types (object.h, filecache.h, ground.h)
 sceneObject_t	object.h	invented: scene object (body after the objNode_t header; D_800EA120 holds pointers); matrix 0x04, frame 0x48, viewMask 0x4A, model 0x4C, anim 0x50, joints from 0x58; gacode.h's sceneObj_t is a partial copy
-sceneObjJoint_t	object.h	invented: 0x140-byte joint: float matrix, then Mtx[2] and mirrored Mtx[2] by D_8005C0B1 (func_8002AF20, func_8002B9CC)
+sceneObjJoint_t	object.h	invented: 0x140-byte joint: float matrix, then Mtx[2] and mirrored Mtx[2] by sched_bufferIndex (func_8002AF20, func_8002B9CC)
 sceneCamera_t	object.h	invented: 0x248-byte camera (D_8009CFA0); eye/at/up are the guLookAtReflectF arguments of func_8002C324, path a FILE_TYPE3 file
 sceneObjectNode_t	object.h	invented: what func_8002B610 creates: the objNode_t header, then a sceneObject_t (cacode reads model at 0x5C and anim at 0x60 through it)
 sceneCameraNode_t	object.h	invented: what func_8002BFD8 creates: the objNode_t header, then a sceneCamera_t (it lists node + 0x10 in D_8009CFA0)
@@ -1072,10 +1072,10 @@ playerRecord_t.strikes	boot.h	invented: summed game_strikes (counted with the st
 playerRecord_t.spares	boot.h	invented: summed game_spares (frames ended by the second throw), to 9999; of 10 a game
 playerRecord_t.splits	boot.h	invented: summed game_splits (counted by GA_IsSplit's result), to 9999; of 10 a game
 playerRecord_t	boot.h	invented: a player's record: name, games, total, high and low scores, strikes, spares, splits (RS_AddToRecord)
-saveData_t	boot.h	invented: the block D_8009D098 saved with Save_Checksum: checksum, unlocks, the four records and the options
-OPTION_DIFFICULTY	gscode.h	invented: the options line of D_8009D098.difficulty (was OPTION_SOUND, which the use in GA_CpuSetup contradicts)
-OPTION_MUSIC	gscode.h	invented: the options line of D_8009D098.music
-OPTION_RUMBLE	gscode.h	invented: the options line of D_8009D098.rumble
+saveData_t	boot.h	invented: the block save_data saved with Save_Checksum: checksum, unlocks, the four records and the options
+OPTION_DIFFICULTY	gscode.h	invented: the options line of save_data.difficulty (was OPTION_SOUND, which the use in GA_CpuSetup contradicts)
+OPTION_MUSIC	gscode.h	invented: the options line of save_data.music
+OPTION_RUMBLE	gscode.h	invented: the options line of save_data.rumble
 GA_ScoreStandard	0x801151A0	invented: game mode of the duel, team and pair games: scores strikes (runs), spares and splits and sets the callout
 GA_ScorePar	0x801155BC	invented: game mode of the par game (GA_ParGameLoop): scores each frame against par
 gaCharacter_t.timingAngle	gacode.h	invented: the throw's timing as an angle (-pi/2 to pi/2, func_8011B1A0_gacode); its sine and cosine bend the release velocity (debug text 'FR SIN')
@@ -1135,3 +1135,85 @@ game_strikes	0x800DF6B4	evidence: per player: strikes this game; RS_AddToRecord 
 game_spares	0x8009D088	evidence: per player: spares this game; RS_AddToRecord adds it into playerRecord_t.spares
 game_strikeRun	0x800A304C	invented: per player: strikes in a row (to 255), counted with game_strikes; picks ga_runSounds and the callout, reset on a non-strike
 game_floorGrids	0x80100100	invented: the lane's floor height grids: [0] the stage's, [1] a copy main loads at boot
+
+# include/boot.h: boot, threads, the scheduler and the game thread
+boot_romHandle	0x800ABD60	invented: the cartridge ROM PI handle (osCartRomInit at boot) every ROM DMA uses
+boot_dmaRequest	0x80066B70	invented: the OSIoMesg of each ROM DMA
+boot_dmaQueue	0x800DF578	invented: where ROM DMAs report completion
+boot_dmaMsgs	0x800E675C	invented: buffer of boot_dmaQueue
+boot_staticFile	0x8010A250	invented: where main loads the KNSTATICSYS file, the start of the memory it clears at boot
+boot_bootThread	0x80060EE0	invented: the boot thread (Boot_Thread)
+boot_bootStack	0x80061090	invented: stack of boot_bootThread
+boot_mainThread	0x80061290	invented: the main thread (Main_Thread)
+boot_mainStack	0x80061440	invented: stack of boot_mainThread
+boot_piQueue	0x801000E0	invented: command queue of the PI manager Boot_Thread starts
+boot_piMsgs	0x800693B8	invented: buffer of boot_piQueue
+boot_contThread	0x800617F0	invented: the controller thread (func_80028064)
+boot_contStack	0x80068250	invented: stack of boot_contThread
+boot_gameThread	0x80061640	invented: the game thread (Game_Thread)
+boot_gameStack	0x800E8090	invented: stack of boot_gameThread
+sched_framebuffers	0x80066C38	invented: the three RGBA5551 320x240 framebuffers Main_Thread swaps
+sched_drawFb	0x8005B0F8	invented: index in sched_framebuffers of the framebuffer being drawn (C650's frame setup draws into it)
+sched_rspTime	0x8005B0E4	evidence: RSP time of the last frame; mgcode's meter labels it RSP
+sched_rdpTime	0x8005B0E8	evidence: RDP time of the last frame; mgcode's meter labels it RDP
+sched_cpuTime	0x8005B0EC	evidence: CPU time of the last frame; mgcode's meter labels it CPU
+sched_frameRate	0x8005B0FC	evidence: swaps in the last second; mgcode's meter labels it FRATE
+sched_bufferIndex	0x8005C0B1	invented: 0 or 1, which of the double-buffered display lists and matrices is built; Main_Thread flips it
+game_gfx	0x800F8094	invented: next command of the display list being built; every drawing function appends through it
+save_data	0x8009D098	invented: the records and settings the game saves (saveData_t; Save_Checksum)
+save_dataPtr	0x801000B8	invented: points at save_data (set at boot); Save_Checksum and opcode's save check read through it
+game_sessionRecords	0x800E44E8	invented: per character: records since power-on (cleared at boot, not saved); RS_AddToRecord adds to them and to save_data.records
+sched_audioTask	0x80060EA0	invented: the audio OSTask func_80025EBC starts
+sched_audioProgram	0x80066B50	invented: the program func_80025EBC runs as the audio task, set by the sound unit (12C70)
+sched_rspBusy	0x8005B100	invented: 1 while a task runs on the RSP (set on start, cleared on SP done); an audio request then makes the graphics task yield
+sched_audioState	0x8005B110	invented: 2 while the audio task runs, 1 while it waits for the graphics task to yield, 0 none (Main_Thread)
+sound_bgmId	0x8005C9D8	invented: sound id of the playing BGM (Snd_PlayBgm), 0: none (Sound_PlayBgm, Sound_StopBgm)
+sound_bgmDelay	0x8005C9E0	invented: frames until the loaded BGM starts (BGM_START_DELAY, counted down by func_80025EBC)
+sound_bgmStartVolume	0x8005C9E4	invented: volume the loaded BGM starts at; nonzero while a BGM waits to start (Sound_PlayBgm, func_80025EBC)
+sound_nextBgm	0x800A3048	invented: the sequence Sound_PlayBgm loaded, which func_80025EBC starts
+sched_msgRetrace	0x80069408	invented: the scheduler's message for a VI retrace, SCHED_MSG_RETRACE
+sched_msgSpDone	0x800E4558	invented: the scheduler's message for an RSP task done, SCHED_MSG_SP_DONE
+sched_msgDpDone	0x80066B90	invented: the scheduler's message for the RDP done, SCHED_MSG_DP_DONE
+sched_msgPreNmi	0x8009D058	invented: the scheduler's message for the reset button, SCHED_MSG_PRENMI
+sched_msgGfx	0x800A2FD4	invented: the scheduler's message for a finished display list, SCHED_MSG_GFX
+sched_msgAudio	0x800DF6A4	invented: the scheduler's message for an audio task request, SCHED_MSG_AUDIO
+sched_queue	0x80099428	invented: Main_Thread's queue: the SP, DP, PRENMI and retrace events and the audio requests
+sched_msgs	0x801000C0	invented: buffer of sched_queue
+sched_retraceQueue	0x800E57E8	invented: gets the retrace message each VI
+sched_retraceMsgs	0x8009D060	invented: buffer of sched_retraceQueue
+sound_frameQueue	0x800E6520	invented: Main_Thread sends to it every other retrace; func_80037BE0 waits on it
+sound_frameMsgs	0x8009CF8C	invented: buffer of sound_frameQueue
+sound_doneQueue	0x8009D040	invented: where Main_Thread reports the audio task done
+sound_doneMsgs	0x800DF6A0	invented: buffer of sound_doneQueue
+cont_requestQueue	0x800E6690	invented: requests to the controller thread (func_80028064)
+cont_requestMsgs	0x80066C2C	invented: buffer of cont_requestQueue
+cont_replyQueue	0x800F8098	invented: the controller thread's replies
+cont_replyMsgs	0x8009D02C	invented: buffer of cont_replyQueue
+game_drawQueue	0x800DF688	invented: tells the game thread which framebuffer to draw next
+game_drawMsgs	0x8009D068	invented: buffer of game_drawQueue
+sched_gfxFrames	0x80069410	invented: the two display lists the game thread builds in turn (GfxFrame)
+sched_buildFrame	0x80102070	invented: the one of sched_gfxFrames the game thread builds
+sched_gfxTask	0x8005B140	invented: the graphics OSTask
+sched_runList	0x8005B120	invented: index in sched_gfxFrames of the list the RSP runs
+sched_listState	0x8005B124	invented: state of each list of sched_gfxFrames: 0 building, 1 built, 2 running, 3 done
+sched_fbState	0x8005B114	invented: state of each framebuffer of sched_framebuffers: 1 drawn, 4 shown
+sched_nextFb	0x8005C0B2	invented: framebuffer to show next
+sched_shownFb	0x8005C0B3	invented: framebuffer shown
+sched_reset	0x8005C0B4	invented: [0] the reset button was pressed, [1] the tasks stopped after it (osAfterPreNMI)
+sched_yieldAsked	0x8005B104	invented: the graphics task was asked to yield
+sched_building	0x8005B108	invented: the game thread is building a list
+sched_gfxState	0x8005B10C	invented: graphics task state: 0 idle, 1 running, 2 yielded
+sched_retraces	0x8005B12C	invented: retraces since the last swap
+sched_swaps	0x8005B130	invented: swaps this second, copied into sched_frameRate
+sched_gfxStartTime	0x80066C48	invented: when the graphics task started
+sched_drawStartTime	0x80099440	invented: when the game thread was told to draw
+game_pulseAlpha	0x8009CFB0	invented: alpha that pulses between 75 and 255, game_pulseStep a frame
+game_pulseStep	0x800619A0	invented: +12 or -12, the step of game_pulseAlpha
+game_cursorX	0x8005C0B8	invented: a cursor's x, moved by the stick; 160 at boot
+game_cursorY	0x8005C0BA	invented: the cursor's y; 120 at boot
+game_cursorSpeed	0x8005C0BE	invented: row of game_cursorSpeeds the cursor moves by
+game_cursorSpeeds	0x8005B134	invented: pixels a frame the cursor moves by, from the least to the most stick tilt
+game_cursorLocked	0x8005B198	invented: when set, the cursor stays
+game_blankFrames	0x8005B188	invented: blank frames drawn before the next scene loads
+game_loadedScene	0x8005B0E0	invented: the scene loaded (game_scene); 0xFF at boot
+game_demoTitles	0x8005B180	invented: per demo (game_demo): the image the demo shows its title by

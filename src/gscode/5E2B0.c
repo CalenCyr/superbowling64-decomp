@@ -17,7 +17,7 @@ s32 GS_CharacterSelect( void ) {
     s32 i;
 
     for ( i = 0; i < 8; i++ ) {
-        if ( D_8009D098.unlocks & ( 1 << i ) ) {
+        if ( save_data.unlocks & ( 1 << i ) ) {
             Menu_SetItem( D_8011BD50_gscode, i, D_8011F8A8_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
         }
     }
@@ -25,7 +25,7 @@ s32 GS_CharacterSelect( void ) {
     if ( D_8011F8B9_gscode == CHOICE_RUN ) {
         if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
             Sound_PlaySe( SE_DECIDE, 0 );
-            if ( D_8009D098.rumble ) {
+            if ( save_data.rumble ) {
                 GS_StartPakCheck();
                 D_8011F8B9_gscode = 4;
             } else {
@@ -75,7 +75,7 @@ s32 GS_CharacterSelect( void ) {
                 if ( game_stage == 0xFF ) {
                     game_stage = 7;
                 }
-            } while ( !( D_8009D098.unlocks & ( 1 << game_stage ) ) );
+            } while ( !( save_data.unlocks & ( 1 << game_stage ) ) );
             Sound_PlaySe( SE_CURSOR, 0 );
         }
         if ( D_800E6758 & R_JPAD ) {
@@ -89,7 +89,7 @@ s32 GS_CharacterSelect( void ) {
                 if ( game_stage == 8 ) {
                     game_stage = 0;
                 }
-            } while ( !( D_8009D098.unlocks & ( 1 << game_stage ) ) );
+            } while ( !( save_data.unlocks & ( 1 << game_stage ) ) );
             Sound_PlaySe( SE_CURSOR, 0 );
         }
     }
@@ -98,7 +98,7 @@ s32 GS_CharacterSelect( void ) {
                    MENU_NONE );
     Menu_SetItem( D_8011BD50_gscode, 9, MENU_NONE, ( game_stage + 1 ) * 32, MENU_NONE, MENU_NONE );
     Menu_SetItem( D_8011BDF0_gscode, 10, D_8011BE30_gscode[D_8011BE38_gscode[game_stage]], MENU_NONE, MENU_NONE,
-                   D_8009CFB0 );
+                   game_pulseAlpha );
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     Draw_Image( 0xA58, 0, 0 );
     Menu_DrawItems( D_8011BD50_gscode, D_8011F8B8_gscode );

@@ -73,18 +73,18 @@ settings skip it.
 // An unused 16-byte local gives the exact bytes (not adopted, R17); a dead call with 6 to 8 argument words would
 // too (gcc 2.7.2 keeps outgoing-argument space for calls it deletes), but this unit has none to point to.
 void Sound_PlayBgm( s32 index ) {
-    if ( D_8005C9D8 != 0 ) {
-        Snd_Stop( D_8005C9D8, 5 );
+    if ( sound_bgmId != 0 ) {
+        Snd_Stop( sound_bgmId, 5 );
     }
     D_8005C9D0 ^= 1;
     Str_ReadFile( D_8005CA0C[index], D_800EA440[D_8005C9D0] );
-    if ( D_8009D098.music != 0 || D_8005C9F8[index] == 0 ) {
+    if ( save_data.music != 0 || D_8005C9F8[index] == 0 ) {
         D_8005C9E8 = index;
-        D_8005C9E0 = BGM_START_DELAY;
-        D_800A3048 = (seqHeader_t *)D_800EA440[D_8005C9D0];
-        D_8005C9E4 = D_8005C9EC[D_8009D098.musicVolume];
+        sound_bgmDelay = BGM_START_DELAY;
+        sound_nextBgm = (seqHeader_t *)D_800EA440[D_8005C9D0];
+        sound_bgmStartVolume = D_8005C9EC[save_data.musicVolume];
     } else {
-        D_8005C9D8 = 0;
+        sound_bgmId = 0;
         D_8005C9E8 = index | BGM_STOPPED;
     }
 }
@@ -100,10 +100,10 @@ Stops the BGM.
 ================
 */
 void Sound_StopBgm( void ) {
-    if ( D_8005C9D8 != 0 ) {
-        Snd_Stop( D_8005C9D8, 5 );
+    if ( sound_bgmId != 0 ) {
+        Snd_Stop( sound_bgmId, 5 );
     }
-    D_8005C9D8 = 0;
+    sound_bgmId = 0;
     D_8005C9E8 |= BGM_STOPPED;
 }
 
@@ -115,8 +115,8 @@ Sets the BGM to the volume of the current setting.
 ================
 */
 void Sound_UpdateBgmVolume( void ) {
-    if ( D_8005C9D8 != 0 ) {
-        Snd_SetVolume( D_8005C9D8, D_8005C9EC[D_8009D098.musicVolume] );
+    if ( sound_bgmId != 0 ) {
+        Snd_SetVolume( sound_bgmId, D_8005C9EC[save_data.musicVolume] );
     }
 }
 
@@ -132,13 +132,13 @@ void func_80037BD8( void ) {
 ================
 func_80037BE0
 
-Waits for the next message on D_800E6520.
+Waits for the next message on sound_frameQueue.
 ================
 */
 void func_80037BE0( void ) {
     OSMesg msg;
 
-    osRecvMesg( &D_800E6520, &msg, OS_MESG_BLOCK );
+    osRecvMesg( &sound_frameQueue, &msg, OS_MESG_BLOCK );
 }
 
 /*
@@ -150,10 +150,10 @@ Runs program as the audio task and waits for it; D_8005B0F0 gets the time it too
 */
 void Sound_RunAudioTask( UnkRspProgram *program ) {
     D_80099450 = osGetTime();
-    D_80066B50 = program;
+    sched_audioProgram = program;
     osWritebackDCache( D_800ABD70, 0x33800 );
-    osSendMesg( &D_80099428, &D_800DF6A4, OS_MESG_NOBLOCK );
-    osRecvMesg( &D_8009D040, NULL, OS_MESG_BLOCK );
+    osSendMesg( &sched_queue, &sched_msgAudio, OS_MESG_NOBLOCK );
+    osRecvMesg( &sound_doneQueue, NULL, OS_MESG_BLOCK );
     D_8005B0F0 = OS_CYCLES_TO_USEC( osGetTime() - D_80099450 );
 }
 
@@ -176,23 +176,24 @@ void Dbg_ScreenShot( void ) {
     u8 name[0x10];
 
     if ( D_800E4D62 & L_TRIG ) {
-        file = (bmpFile_t *)D_80066C38[0];
+        file = (bmpFile_t *)sched_framebuffers[0];
         dst = (u8 *)file;
         file->header = D_8005CA40;
         dst += sizeof( bmpHeader_t );
         fb = 1;
         for ( y = 0; y < SCREENSHOT_HEIGHT / 2; y++ ) {
             for ( x = 0; x < SCREENSHOT_WIDTH; x++ ) {
-                pixel = D_80066C38[fb][y * SCREENSHOT_WIDTH + x];
-                D_80066C38[fb][y * SCREENSHOT_WIDTH + x] = D_80066C38[fb][( SCREENSHOT_HEIGHT - 1 - y ) * SCREENSHOT_WIDTH + x];
-                D_80066C38[fb][( SCREENSHOT_HEIGHT - 1 - y ) * SCREENSHOT_WIDTH + x] = pixel;
+                pixel = sched_framebuffers[fb][y * SCREENSHOT_WIDTH + x];
+                sched_framebuffers[fb][y * SCREENSHOT_WIDTH + x] =
+                    sched_framebuffers[fb][( SCREENSHOT_HEIGHT - 1 - y ) * SCREENSHOT_WIDTH + x];
+                sched_framebuffers[fb][( SCREENSHOT_HEIGHT - 1 - y ) * SCREENSHOT_WIDTH + x] = pixel;
             }
         }
         for ( y = 0; y < SCREENSHOT_HEIGHT; y++ ) {
             for ( x = 0; x < SCREENSHOT_WIDTH; x++ ) {
-                *dst++ = ( D_80066C38[fb][y * SCREENSHOT_WIDTH + x] & 0x3E ) << 2;
-                *dst++ = ( D_80066C38[fb][y * SCREENSHOT_WIDTH + x] & 0x7C0 ) >> 3;
-                *dst++ = ( D_80066C38[fb][y * SCREENSHOT_WIDTH + x] & 0xF800 ) >> 8;
+                *dst++ = ( sched_framebuffers[fb][y * SCREENSHOT_WIDTH + x] & 0x3E ) << 2;
+                *dst++ = ( sched_framebuffers[fb][y * SCREENSHOT_WIDTH + x] & 0x7C0 ) >> 3;
+                *dst++ = ( sched_framebuffers[fb][y * SCREENSHOT_WIDTH + x] & 0xF800 ) >> 8;
             }
         }
         sprintf( name, "BW%3.3d.BMP", D_8005CA76++ );

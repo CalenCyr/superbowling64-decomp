@@ -12,7 +12,7 @@ GA_Init
 The overlay's init: stops the BGM, resets the teams' current players and the pause menu, enters the pause
 menu's state as the state to come back to, loads the stage's floor grid, places each player's character in
 the stage's scene and creates it, starts the stage's sound, sets up the lanes, clears the games won and the
-scores, sets up the game mode, takes two options from D_8009D098.unlocks and starts the game's BGM.
+scores, sets up the game mode, takes two options from save_data.unlocks and starts the game's BGM.
 ================
 */
 void GA_Init( void ) {
@@ -49,8 +49,8 @@ void GA_Init( void ) {
         game_duelScores[i][0] = game_duelScores[i][1] = game_duelScores[i][2] = 0;
     }
     GA_SetupMode();
-    ga_earlyCommit = ( D_8009D098.unlocks >> 9 ) & 1;
-    ga_steerBall = ( D_8009D098.unlocks >> 8 ) & 1;
+    ga_earlyCommit = ( save_data.unlocks >> 9 ) & 1;
+    ga_steerBall = ( save_data.unlocks >> 8 ) & 1;
     Sound_PlayBgm( ga_bgm );
 }
 
@@ -105,7 +105,7 @@ void GA_Frame( void ) {
     for ( team = 0; team <= game_lastTeam; team++ ) {
         GA_HoldBall( ga_teamPlayers[team][ga_teamCurrent[team]] );
     }
-    Txt_LoadGlyphSheet( &D_800F8094 );
+    Txt_LoadGlyphSheet( &game_gfx );
     Draw_FillRect( 0x9F, 0, 2, 0xF0, 0, 0, 0, 0xFF );
     if ( !D_8012D650_gacode && !cUpHeld ) {
         func_80114FC4_gacode( ga_teamPlayers[0][ga_teamCurrent[0]] );
@@ -145,9 +145,9 @@ void GA_Frame( void ) {
             ga_blinkFalling = 1;
         }
     }
-    Txt_LoadFont( &D_800F8094 );
-    Txt_SetupFont( &D_800F8094, 0 );
-    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+    Txt_LoadFont( &game_gfx );
+    Txt_SetupFont( &game_gfx, 0 );
+    gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
 }
 
 /*
@@ -168,7 +168,7 @@ void func_80112A74_gacode( void ) {
 ================
 GA_PauseMenu
 
-Pause menu: draws it with the cursor on one of its four items and the on/off mark of D_8009D098.music,
+Pause menu: draws it with the cursor on one of its four items and the on/off mark of save_data.music,
 moves the cursor with the D-pad, and on A or Z runs the item; B closes the menu.
 ================
 */
@@ -180,7 +180,7 @@ s32 GA_PauseMenu( void ) {
     isMode2 = ( game_mode & 0xF ) == 2;
     Draw_Image( isMode2 ? 0x882 : 0x89E, 0x50, 0x40 );
     Draw_ImageScaled( 0x8A0, 0x66, cursorY[ga_pauseCursor], (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
-    Draw_ImageScaled( 0x89F, markX[D_8009D098.music], 0x6C, (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
+    Draw_ImageScaled( 0x89F, markX[save_data.music], 0x6C, (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
     if ( D_800E6758 & U_JPAD ) {
         Sound_PlaySe( 0, 0 );
         if ( ga_pauseCursor == 0 ) {
@@ -208,8 +208,8 @@ s32 GA_PauseMenu( void ) {
             Sound_PlaySe( 1, 0 );
             break;
         case 2:
-            D_8009D098.music = !D_8009D098.music;
-            if ( D_8009D098.music ) {
+            save_data.music = !save_data.music;
+            if ( save_data.music ) {
                 Sound_PlayBgm( ga_bgm );
             } else {
                 Sound_StopBgm();

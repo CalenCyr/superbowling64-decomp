@@ -9,7 +9,7 @@
 ================
 GA_CountFrame
 
-Counts a frame; in mode 3, gives resources 1673 and 1674 the D_8009CFB0 value in their byte 7.
+Counts a frame; in mode 3, gives resources 1673 and 1674 the game_pulseAlpha value in their byte 7.
 Declared inline: retail repeats its body in each caller below, and still has this out-of-line copy, which
 nothing calls (gcc 2.7 emits an extern inline function).
 ================
@@ -17,8 +17,8 @@ nothing calls (gcc 2.7 emits an extern inline function).
 inline void GA_CountFrame( void ) {
     ga_frameCount++;
     if ( ( game_mode & 0xF ) == 3 ) {
-        ( (unkImage_t *)D_800F80B0[1673].data )->unk_07 = D_8009CFB0;
-        ( (unkImage_t *)D_800F80B0[1674].data )->unk_07 = D_8009CFB0;
+        ( (unkImage_t *)D_800F80B0[1673].data )->unk_07 = game_pulseAlpha;
+        ( (unkImage_t *)D_800F80B0[1674].data )->unk_07 = game_pulseAlpha;
     }
 }
 

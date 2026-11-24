@@ -265,7 +265,7 @@ inline void Menu_DrawNamePlate( s32 player, u8 cpu, u16 *name, s16 x, s16 y ) {
         Score_DrawNumber( D_800DF5D0[player], x - 6, y + 12 );
     }
     Menu_DrawImage( icons[cpu ? 4 : player], x + 2, y + 2 );
-    Txt_DrawGlyphs( &D_800F8094, x + 14, y + 2, 8, name );
+    Txt_DrawGlyphs( &game_gfx, x + 14, y + 2, 8, name );
 }
 
 /*
@@ -282,9 +282,9 @@ void Menu_DrawSmallNamePlate( s32 player, u8 cpu, u16 *name, u8 noIcon, s16 x, s
     Draw_Image( 0x9FE, x, y );
     if ( !noIcon ) {
         Menu_DrawImage( icons[cpu ? 4 : player], x + 2, y + 1 );
-        Txt_DrawGlyphs( &D_800F8094, x + 3, y + 10, 8, name );
+        Txt_DrawGlyphs( &game_gfx, x + 3, y + 10, 8, name );
     } else {
-        Txt_DrawGlyphs( &D_800F8094, x + 3, y + 6, 8, name );
+        Txt_DrawGlyphs( &game_gfx, x + 3, y + 6, 8, name );
     }
 }
 
@@ -835,7 +835,7 @@ void Score_DrawRecordTable( u16 count, playerRecord_t *records, u8 kind, s16 x, 
         played = records[i].games != 0;
         rowX = x;
         Draw_Image( 0x9FE, rowX, rowY );
-        Txt_DrawGlyphs( &D_800F8094, rowX + 3, rowY + 6, 8, records[i].name );
+        Txt_DrawGlyphs( &game_gfx, rowX + 3, rowY + 6, 8, records[i].name );
         rowX += 0x2C;
         topY = rowY + 2;
         Draw_Image( 0x9E7, rowX, rowY );

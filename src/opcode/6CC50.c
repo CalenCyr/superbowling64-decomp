@@ -39,8 +39,8 @@ s32 OP_PakScreen( void ) {
     case 0:
         op_pakMsg = 6;
         D_800E4FC8 = 0;
-        osSendMesg( &D_800E6690, &op_pakMsg, OS_MESG_NOBLOCK );
-        osRecvMesg( &D_800F8098, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
+        osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
+        osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
         if ( D_80066B8C != 0 ) {
             return FALSE;
         }
@@ -48,8 +48,8 @@ s32 OP_PakScreen( void ) {
         for ( i = 0; i < PAK_MAX_NOTES; i++ ) {
             op_pakMsg = 10;
             D_800E6584 = i;
-            osSendMesg( &D_800E6690, &op_pakMsg, OS_MESG_NOBLOCK );
-            osRecvMesg( &D_800F8098, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
+            osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
+            osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
             if ( D_80066B8C == 0 ) {
                 n = op_numNotes;
                 op_noteIndex[n] = i;
@@ -65,15 +65,15 @@ s32 OP_PakScreen( void ) {
             }
         }
         op_pakMsg = 3;
-        osSendMesg( &D_800E6690, &op_pakMsg, OS_MESG_NOBLOCK );
-        osRecvMesg( &D_800F8098, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
+        osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
+        osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
         if ( D_80066B8C != 0 ) {
             return FALSE;
         }
         op_pakMsg = 4;
         op_freeNotes = D_80066C28 - D_800692D4;
-        osSendMesg( &D_800E6690, &op_pakMsg, OS_MESG_NOBLOCK );
-        osRecvMesg( &D_800F8098, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
+        osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
+        osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
         if ( D_80066B8C != 0 ) {
             return FALSE;
         }
@@ -84,7 +84,7 @@ s32 OP_PakScreen( void ) {
     case 2:
         Draw_Image( 0xA58, 0, 0 );
         if ( op_pakState == 0 ) {
-            Draw_RoundedBox( op_promptChoice == 0 ? 0x40 : 0xB0, 0xC0, 0x50, 0x10, 0xFF, 0xFF, 0xFF, D_8009CFB0 );
+            Draw_RoundedBox( op_promptChoice == 0 ? 0x40 : 0xB0, 0xC0, 0x50, 0x10, 0xFF, 0xFF, 0xFF, game_pulseAlpha );
         }
         for ( i = 0; op_pakImages[i].id != -1; i++ ) {
             if ( op_pakImages[i].alpha ) {
@@ -93,24 +93,24 @@ s32 OP_PakScreen( void ) {
             }
         }
         if ( op_firstNote != 0 ) {
-            Draw_ImageScaled( 0x888, 0x98, 0x38, D_8009CFB0, 1.0f, 1.0f );
+            Draw_ImageScaled( 0x888, 0x98, 0x38, game_pulseAlpha, 1.0f, 1.0f );
         }
         if ( op_numNotes - op_firstNote >= 6 ) {
-            Draw_ImageScaled( 0x889, 0x98, 0xA4, D_8009CFB0, 1.0f, 1.0f );
+            Draw_ImageScaled( 0x889, 0x98, 0xA4, game_pulseAlpha, 1.0f, 1.0f );
         }
-        Txt_LoadGlyphSheet( &D_800F8094 );
+        Txt_LoadGlyphSheet( &game_gfx );
         for ( i = 0; i < PAK_NOTES_SHOWN; i++ ) {
             if ( i + op_firstNote < op_numNotes ) {
                 Txt_NumberToGlyphs( glyphs, i + op_firstNote + 1, 2 );
-                Txt_DrawGlyphs( &D_800F8094, 0x28, 0x49 + i * 18, 8, glyphs );
-                Txt_DrawGlyphs( &D_800F8094, 0x3C, 0x49 + i * 18, 8, op_noteNames[i + op_firstNote].name );
+                Txt_DrawGlyphs( &game_gfx, 0x28, 0x49 + i * 18, 8, glyphs );
+                Txt_DrawGlyphs( &game_gfx, 0x3C, 0x49 + i * 18, 8, op_noteNames[i + op_firstNote].name );
                 Txt_NumberToGlyphs( glyphs, op_notePages[i + op_firstNote], 4 );
-                Txt_DrawGlyphs( &D_800F8094, 0xF9, 0x49 + i * 18, 8, glyphs );
+                Txt_DrawGlyphs( &game_gfx, 0xF9, 0x49 + i * 18, 8, glyphs );
             }
         }
         i = op_freeNotes < 10;
         Txt_NumberToGlyphs( glyphs, op_freeNotes, 2 );
-        Txt_DrawGlyphs( &D_800F8094, 0x74 + i * 8, 0xA9, 8, glyphs );
+        Txt_DrawGlyphs( &game_gfx, 0x74 + i * 8, 0xA9, 8, glyphs );
         if ( op_freePages >= 100 ) {
             i = 0;
         } else if ( op_freePages >= 10 ) {
@@ -119,7 +119,7 @@ s32 OP_PakScreen( void ) {
             i = 2;
         }
         Txt_NumberToGlyphs( glyphs, op_freePages, 3 );
-        Txt_DrawGlyphs( &D_800F8094, 0xFE + i * 8, 0xA9, 8, glyphs );
+        Txt_DrawGlyphs( &game_gfx, 0xFE + i * 8, 0xA9, 8, glyphs );
         if ( game_leaveState == 0 ) {
             switch ( op_pakState ) {
             case 0:
@@ -174,11 +174,11 @@ s32 OP_PakScreen( void ) {
                     }
                 }
                 Draw_Image( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
-                Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
+                Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, game_pulseAlpha );
                 break;
             case 2:
                 Draw_Image( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
-                Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
+                Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, game_pulseAlpha );
                 D_800DF590[0] = D_800DF590[1] = 0x24;
                 D_800E6538[0] = D_800E6538[1] = 0x10;
                 D_800E57E0[0] = 0x24;
@@ -191,8 +191,8 @@ s32 OP_PakScreen( void ) {
                         Sound_PlaySe( 8, 0 );
                         op_pakMsg = 10;
                         D_800E6584 = op_noteIndex[op_firstNote + op_cursorLine];
-                        osSendMesg( &D_800E6690, &op_pakMsg, OS_MESG_NOBLOCK );
-                        osRecvMesg( &D_800F8098, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
+                        osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
+                        osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
                         if ( D_80066B8C != 0 ) {
                             op_pakState = 3;
                         } else {
@@ -201,8 +201,8 @@ s32 OP_PakScreen( void ) {
                             op_pakMsg = 1;
                             D_8009D090 = D_80066C00.note.company_code;
                             D_8009CF6C = D_80066C00.note.game_code;
-                            osSendMesg( &D_800E6690, &op_pakMsg, OS_MESG_NOBLOCK );
-                            osRecvMesg( &D_800F8098, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
+                            osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
+                            osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
                             if ( D_80066B8C == 0 ) {
                                 op_freeNotes++;
                                 op_freePages += ( D_80066C00.note.file_size + 0xFF ) >> 8;
@@ -228,7 +228,7 @@ s32 OP_PakScreen( void ) {
                 break;
             case 3:
                 Draw_Image( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
-                Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
+                Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, game_pulseAlpha );
                 Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
                 if ( Save_ShowPrompt( 0x94A, PROMPT_TIMED ) ) {
                     op_pakState = 1;

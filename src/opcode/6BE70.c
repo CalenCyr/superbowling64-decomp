@@ -69,7 +69,7 @@ s32 OP_Frame( void ) {
         }
         Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
         Draw_Image( 0xADD, 0, 0 );
-        Draw_ImageScaled( 0x890, 0x44, 0xA0, D_8009CFB0, 1.0f, 1.0f );
+        Draw_ImageScaled( 0x890, 0x44, 0xA0, game_pulseAlpha, 1.0f, 1.0f );
         if ( ++op_modeFrames >= 450 ) {
             game_leaveState = 1;
             if ( game_fade == 0xFF ) {
@@ -78,7 +78,7 @@ s32 OP_Frame( void ) {
                 game_leaveState = 2;
                 D_800693B0 = 1200;
                 D_8005C0EC = 1;
-                D_8009D098.music = 0;
+                save_data.music = 0;
                 if ( ++game_demo == 4 ) {
                     game_demo = 0;
                 }

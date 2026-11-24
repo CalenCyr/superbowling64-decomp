@@ -331,11 +331,11 @@ Makes the drawn matrix of obj from its placement.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: MATCH-PENDING (R2): exact only with D_8005C0B1 declared a plain s8 (lb); boot.h declares it volatile,
-// as units 1060, 7250 and C650 read it, which loads it with lbu and a sign extension
+// NON_MATCHING: MATCH-PENDING (R2): exact only with sched_bufferIndex declared a plain s8 (lb); boot.h declares it
+// volatile, as units 1060, 7250 and C650 read it, which loads it with lbu and a sign extension
 void Obj_MakeMatrix( sceneObject_t *obj ) {
     Mtx_Scale( obj->mtx, 1.0f, 1.0f, 1.0f );
-    guMtxF2L( obj->mtx, &obj->joints[0].mtxL[D_8005C0B1] );
+    guMtxF2L( obj->mtx, &obj->joints[0].mtxL[sched_bufferIndex] );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/53B0", Obj_MakeMatrix);

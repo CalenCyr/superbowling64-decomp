@@ -50,8 +50,8 @@ extern u8 D_800F30E0[0x4B00];       /* func_8002A7EC reads a host file here (D_8
 /* Joint of a scene object: its matrix, the translation in row 3, and the fixed-point copies drawn from it. */
 typedef struct {
     /* 0x000 */ f32 mtx[4][4];
-    /* 0x040 */ Mtx mtxL[2];            /* by D_8005C0B1 */
-    /* 0x0C0 */ Mtx mirrorL[2];         /* by D_8005C0B1: mtx with its translation mirrored */
+    /* 0x040 */ Mtx mtxL[2];            /* by sched_bufferIndex */
+    /* 0x0C0 */ Mtx mirrorL[2];         /* by sched_bufferIndex: mtx with its translation mirrored */
 } sceneObjJoint_t;                         /* size 0x140 */
 
 /* Object of the scene engine (D_800EA120 holds pointers to them). */
@@ -88,7 +88,7 @@ typedef struct {
     /* 0x040 */ f32 dir[3];             /* at - eye */
     /* 0x04C */ f32 mtx[4][4];          /* view */
     /* 0x08C */ u8 unk_8C[0x04];
-    /* 0x090 */ Mtx viewL[2];           /* by D_8005C0B1 */
+    /* 0x090 */ Mtx viewL[2];           /* by sched_bufferIndex */
     /* 0x110 */ Mtx projL[2];
     /* 0x190 */ LookAt lookAt[2];
     /* 0x1D0 */ Vp vp[2];

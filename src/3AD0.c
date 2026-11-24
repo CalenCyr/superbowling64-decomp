@@ -45,15 +45,15 @@ s32 FAT_ReadFile( u8 *name, void *dst, s32 size, u32 offset ) {
     }
     osInvalDCache( dst, size );
     for ( i = 0; size - i * FAT_DMA_CHUNK > 0; i++ ) {
-        D_80066B70.dramAddr = (u8 *)dst + i * FAT_DMA_CHUNK;
-        D_80066B70.devAddr = D_8010A080.entries[index].romStart + offset + i * FAT_DMA_CHUNK;
+        boot_dmaRequest.dramAddr = (u8 *)dst + i * FAT_DMA_CHUNK;
+        boot_dmaRequest.devAddr = D_8010A080.entries[index].romStart + offset + i * FAT_DMA_CHUNK;
         len = size - i * FAT_DMA_CHUNK;
         if ( len > FAT_DMA_CHUNK ) {
             len = FAT_DMA_CHUNK;
         }
-        D_80066B70.size = len;
-        osEPiStartDma( D_800ABD60, &D_80066B70, OS_READ );
-        osRecvMesg( &D_800DF578, NULL, OS_MESG_BLOCK );
+        boot_dmaRequest.size = len;
+        osEPiStartDma( boot_romHandle, &boot_dmaRequest, OS_READ );
+        osRecvMesg( &boot_dmaQueue, NULL, OS_MESG_BLOCK );
     }
     return 0;
 }

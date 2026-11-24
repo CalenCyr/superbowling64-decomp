@@ -40,8 +40,8 @@ extern s32 D_8005C0EC;
 extern u32 D_800693B0;
 extern volatile s32 D_8005B0F4;    /* frame counter (Main_Thread); volatile: it reloads it right after its own store */
 /* requests to the controller thread (func_80028064), and its replies */
-extern OSMesgQueue D_800E6690;
-extern OSMesgQueue D_800F8098;
+extern OSMesgQueue cont_requestQueue;
+extern OSMesgQueue cont_replyQueue;
 extern s32 D_80066B8C;              /* result of the last request */
 extern s32 D_800E4FC8;
 extern s32 D_800E6584;              /* request 10: the note to read */

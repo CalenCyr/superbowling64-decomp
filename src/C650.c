@@ -154,11 +154,11 @@ off when it changes), its matrices, look-at, viewport, scissor and lights.
 ================
 */
 void Scene_BeginView( sceneCamera_t *cam ) {
-    gDPPipeSync( D_800F8094++ );
-    gDPSetDepthImage( D_800F8094++,
+    gDPPipeSync( game_gfx++ );
+    gDPSetDepthImage( game_gfx++,
                       osVirtualToPhysical( D_80000400 + ( cam->left & 0xFFC ) + cam->top * SCREEN_WIDTH ) );
-    gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-                      osVirtualToPhysical( D_80066C38[D_8005B0F8] + ( cam->left & 0xFFC ) +
+    gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                      osVirtualToPhysical( sched_framebuffers[sched_drawFb] + ( cam->left & 0xFFC ) +
                                            cam->top * SCREEN_WIDTH ) );
     if ( cam->path->flags & FILE3_FOG ) {
         if ( D_800E6588 == 0 ) {
@@ -167,8 +167,8 @@ void Scene_BeginView( sceneCamera_t *cam ) {
             D_80066B30 = 1;
             Scene_PickRenderModes();
         }
-        gSPFogPosition( D_800F8094++, cam->path->fogNear, cam->path->fogFar );
-        gDPSetFogColor( D_800F8094++, cam->path->fogColor >> 24, cam->path->fogColor >> 16, cam->path->fogColor >> 8,
+        gSPFogPosition( game_gfx++, cam->path->fogNear, cam->path->fogFar );
+        gDPSetFogColor( game_gfx++, cam->path->fogColor >> 24, cam->path->fogColor >> 16, cam->path->fogColor >> 8,
                         cam->path->fogColor );
     } else {
         if ( D_800E6588 == 1 ) {
@@ -177,31 +177,31 @@ void Scene_BeginView( sceneCamera_t *cam ) {
             D_80066B30 = 1;
             Scene_PickRenderModes();
         }
-        gDPSetFogColor( D_800F8094++, 0, 0, 0, 0 );
-        gSPFogPosition( D_800F8094++, 1000, 1200 );
+        gDPSetFogColor( game_gfx++, 0, 0, 0, 0 );
+        gSPFogPosition( game_gfx++, 1000, 1200 );
     }
-    gSPMatrix( D_800F8094++, &cam->projL[D_8005C0B1], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH );
-    gSPMatrix( D_800F8094++, &cam->viewL[D_8005C0B1], G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH );
-    gSPLookAt( D_800F8094++, &cam->lookAt[D_8005C0B1] );
-    gSPViewport( D_800F8094++, &cam->vp[D_8005C0B1] );
-    gDPSetScissor( D_800F8094++, G_SC_NON_INTERLACE, 0, 0, cam->width, cam->height );
-    gSPSetLights2( D_800F8094++, cam->lights[D_8005C0B1] );
+    gSPMatrix( game_gfx++, &cam->projL[sched_bufferIndex], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH );
+    gSPMatrix( game_gfx++, &cam->viewL[sched_bufferIndex], G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH );
+    gSPLookAt( game_gfx++, &cam->lookAt[sched_bufferIndex] );
+    gSPViewport( game_gfx++, &cam->vp[sched_bufferIndex] );
+    gDPSetScissor( game_gfx++, G_SC_NON_INTERLACE, 0, 0, cam->width, cam->height );
+    gSPSetLights2( game_gfx++, cam->lights[sched_bufferIndex] );
 }
 
 /*
 ================
 Scene_BeginFrame
 
-Starts the frame's drawing: viewport and scissor of the screen, the framebuffer D_8005B0F8 and the depth buffer.
+Starts the frame's drawing: viewport and scissor of the screen, the framebuffer sched_drawFb and the depth buffer.
 ================
 */
 void Scene_BeginFrame( void ) {
-    gDPPipeSync( D_800F8094++ );
-    gSPViewport( D_800F8094++, &D_8010A290 );
-    gDPSetScissor( D_800F8094++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
-    gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-                      osVirtualToPhysical( D_80066C38[D_8005B0F8] ) );
-    gDPSetDepthImage( D_800F8094++, osVirtualToPhysical( D_80000400 ) );
+    gDPPipeSync( game_gfx++ );
+    gSPViewport( game_gfx++, &D_8010A290 );
+    gDPSetScissor( game_gfx++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
+    gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                      osVirtualToPhysical( sched_framebuffers[sched_drawFb] ) );
+    gDPSetDepthImage( game_gfx++, osVirtualToPhysical( D_80000400 ) );
 }
 
 /*
@@ -311,37 +311,37 @@ void Scene_Draw( void ) {
     Scene_ChainDrawList();
 
     /* clear the depth buffer */
-    gDPSetCycleType( D_800F8094++, G_CYC_FILL );
-    gDPSetRenderMode( D_800F8094++, G_RM_NOOP, G_RM_NOOP2 );
-    gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical( D_80000400 ) );
-    gDPSetFillColor( D_800F8094++, ( GPACK_ZDZ( G_MAXFBZ, 0 ) << 16 ) | GPACK_ZDZ( G_MAXFBZ, 0 ) );
-    gDPFillRectangle( D_800F8094++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
-    gDPPipeSync( D_800F8094++ );
-    gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-                      osVirtualToPhysical( D_80066C38[D_8005B0F8] ) );
+    gDPSetCycleType( game_gfx++, G_CYC_FILL );
+    gDPSetRenderMode( game_gfx++, G_RM_NOOP, G_RM_NOOP2 );
+    gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical( D_80000400 ) );
+    gDPSetFillColor( game_gfx++, ( GPACK_ZDZ( G_MAXFBZ, 0 ) << 16 ) | GPACK_ZDZ( G_MAXFBZ, 0 ) );
+    gDPFillRectangle( game_gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
+    gDPPipeSync( game_gfx++ );
+    gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                      osVirtualToPhysical( sched_framebuffers[sched_drawFb] ) );
 
     /* the background of camera 0: its path's image, or its clear colour */
     if ( !( D_8009CFA0[0]->path->flags & 4 ) ) {
         if ( D_8009CFA0[0]->path->flags & 2 ) {
-            gDPSetCycleType( D_800F8094++, G_CYC_COPY );
-            gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
-            gDPSetTexturePersp( D_800F8094++, G_TP_NONE );
+            gDPSetCycleType( game_gfx++, G_CYC_COPY );
+            gDPSetAlphaCompare( game_gfx++, G_AC_NONE );
+            gDPSetTexturePersp( game_gfx++, G_TP_NONE );
             /* (0 - 0) * K5 + TEXEL0: the texel, whatever the multiplier */
-            gDPSetCombineLERP( D_800F8094++, 0, 0, K5, TEXEL0, 0, 0, 0, TEXEL0, 0, 0, K5, TEXEL0, 0, 0, 0, TEXEL0 );
-            gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
+            gDPSetCombineLERP( game_gfx++, 0, 0, K5, TEXEL0, 0, 0, 0, TEXEL0, 0, 0, K5, TEXEL0, 0, 0, 0, TEXEL0 );
+            gDPSetTextureLUT( game_gfx++, G_TT_RGBA16 );
             Draw_CiImage( IMAGE_CI8, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                            ( (fileImage_t *)D_8009CFA0[0]->path->unk_50 )->data,
                            ( (fileImage_t *)D_8009CFA0[0]->path->unk_50 )->data + CI8_PALETTE_SIZE );
         } else {
             path = D_8009CFA0[0]->path;
-            gDPSetCycleType( D_800F8094++, G_CYC_FILL );
-            gDPSetFillColor( D_800F8094++,
+            gDPSetCycleType( game_gfx++, G_CYC_FILL );
+            gDPSetFillColor( game_gfx++,
                              ( GPACK_RGBA5551( path->clearColor[0], path->clearColor[1], path->clearColor[2], 1 )
                                << 16 ) |
                                  GPACK_RGBA5551( path->clearColor[0], path->clearColor[1], path->clearColor[2], 1 ) );
-            gDPFillRectangle( D_800F8094++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
+            gDPFillRectangle( game_gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
         }
-        gDPPipeSync( D_800F8094++ );
+        gDPPipeSync( game_gfx++ );
     }
 
     /* the state the entries change from */
@@ -358,23 +358,23 @@ void Scene_Draw( void ) {
     D_800E6588 = 0;
     D_80066C34 = 0;
     D_800DF5D4 = 0xFFFF;
-    gDPSetCycleType( D_800F8094++, G_CYC_2CYCLE );
-    gDPSetTextureFilter( D_800F8094++, G_TF_BILERP );
-    gDPSetTexturePersp( D_800F8094++, G_TP_PERSP );
-    gSPPerspNormalize( D_800F8094++, D_8009CF9E );
-    gSPTexture( D_800F8094++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF );
-    gDPSetAlphaCompare( D_800F8094++, G_AC_THRESHOLD );
+    gDPSetCycleType( game_gfx++, G_CYC_2CYCLE );
+    gDPSetTextureFilter( game_gfx++, G_TF_BILERP );
+    gDPSetTexturePersp( game_gfx++, G_TP_PERSP );
+    gSPPerspNormalize( game_gfx++, D_8009CF9E );
+    gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF );
+    gDPSetAlphaCompare( game_gfx++, G_AC_THRESHOLD );
     D_8009CF70.a0 = 0xFF;
     D_80068ACC.r = 0x80;
     D_80068ACC.g = 0x80;
     D_80068ACC.b = 0x80;
     D_80068ACC.a = 0xFF;
-    gDPSetPrimColor( D_800F8094++, 0, 0, D_80068ACC.r, D_80068ACC.g, D_80068ACC.b, D_80068ACC.a );
+    gDPSetPrimColor( game_gfx++, 0, 0, D_80068ACC.r, D_80068ACC.g, D_80068ACC.b, D_80068ACC.a );
     D_800EA0C8.r = 0x80;
     D_800EA0C8.g = 0x80;
     D_800EA0C8.b = 0x80;
     D_800EA0C8.a = 0xFF;
-    gDPSetEnvColor( D_800F8094++, D_800EA0C8.r, D_800EA0C8.g, D_800EA0C8.b, D_800EA0C8.a );
+    gDPSetEnvColor( game_gfx++, D_800EA0C8.r, D_800EA0C8.g, D_800EA0C8.b, D_800EA0C8.a );
     D_800A3018 = 0;
     Scene_BeginView( D_8009CFA0[0] );
     D_800DF682 = 1;
@@ -391,20 +391,20 @@ void Scene_Draw( void ) {
             D_800A3018 = 0xFF;
             switch ( D_80066C34 ) {
             case 0:
-                gSPLoadUcodeL( D_800F8094++, gspF3DEX2_Rej_fifo );
-                gSPClipRatio( D_800F8094++, FRUSTRATIO_3 );
+                gSPLoadUcodeL( game_gfx++, gspF3DEX2_Rej_fifo );
+                gSPClipRatio( game_gfx++, FRUSTRATIO_3 );
                 break;
             case 1:
-                gSPLoadUcodeL( D_800F8094++, gspF3DEX2_fifo );
-                gSPClipRatio( D_800F8094++, FRUSTRATIO_1 );
+                gSPLoadUcodeL( game_gfx++, gspF3DEX2_fifo );
+                gSPClipRatio( game_gfx++, FRUSTRATIO_1 );
                 break;
             case 2:
-                gSPLoadUcodeL( D_800F8094++, gspL3DEX2_fifo );
-                gSPClipRatio( D_800F8094++, FRUSTRATIO_1 );
+                gSPLoadUcodeL( game_gfx++, gspL3DEX2_fifo );
+                gSPClipRatio( game_gfx++, FRUSTRATIO_1 );
                 break;
             }
             if ( D_8006940C ) {
-                gSPTexture( D_800F8094++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
+                gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
             }
         }
 
@@ -417,9 +417,9 @@ void Scene_Draw( void ) {
         if ( D_800E4D6C != ( ( D_8009D1A0[*link].unk_06 >> 13 ) & 1 ) ) {
             D_800E4D6C = ( D_8009D1A0[*link].unk_06 >> 13 ) & 1;
             if ( D_800E4D6C == 0 ) {
-                gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+                gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
             } else {
-                gDPSetCycleType( D_800F8094++, G_CYC_2CYCLE );
+                gDPSetCycleType( game_gfx++, G_CYC_2CYCLE );
             }
             D_80066B30 = 1;
             Scene_PickRenderModes();
@@ -446,11 +446,11 @@ void Scene_Draw( void ) {
             D_800DF5D4 = D_8009D1A0[*link].unk_04 & 0x7FF;
             if ( memcmp( &D_80068ACC, &mat->prim, sizeof( rgba8_t ) ) ) {
                 D_80068ACC = mat->prim;
-                gDPSetPrimColor( D_800F8094++, 0, 0, D_80068ACC.r, D_80068ACC.g, D_80068ACC.b, D_80068ACC.a );
+                gDPSetPrimColor( game_gfx++, 0, 0, D_80068ACC.r, D_80068ACC.g, D_80068ACC.b, D_80068ACC.a );
             }
             if ( memcmp( &D_800EA0C8, &mat->env, sizeof( rgba8_t ) ) ) {
                 D_800EA0C8 = mat->env;
-                gDPSetEnvColor( D_800F8094++, D_800EA0C8.r, D_800EA0C8.g, D_800EA0C8.b, D_800EA0C8.a );
+                gDPSetEnvColor( game_gfx++, D_800EA0C8.r, D_800EA0C8.g, D_800EA0C8.b, D_800EA0C8.a );
             }
             if ( memcmp( &D_8009CF70, &mat->combine, sizeof( combine_t ) ) ) {
                 D_8009CF70 = mat->combine;
@@ -468,11 +468,11 @@ void Scene_Draw( void ) {
                 D_800F7BE0 = ( mat->flags & MAT_TEXGEN ) >> 4;
                 if ( D_800F7BE0 ) {
                     D_8006940C = 1;
-                    gSPTexture( D_800F8094++, 0x07C0, 0x07C0, 0, G_TX_RENDERTILE, G_ON );
+                    gSPTexture( game_gfx++, 0x07C0, 0x07C0, 0, G_TX_RENDERTILE, G_ON );
                 } else if ( !D_8006940C ) {
-                    gSPTexture( D_800F8094++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF );
+                    gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF );
                 } else {
-                    gSPTexture( D_800F8094++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
+                    gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
                 }
                 D_800DF682 = 1;
             }
@@ -505,38 +505,38 @@ void Scene_Draw( void ) {
                 }
                 if ( D_8006940C != 1 ) {
                     D_8006940C = 1;
-                    gSPTexture( D_800F8094++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
+                    gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
                 }
                 switch ( mat->fmt ) {
                 case MAT_I4:
-                    gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
-                    gDPLoadTextureBlock_4b( D_800F8094++, mat->texels, G_IM_FMT_I, mat->width, mat->height, 0, cms,
+                    gDPSetTextureLUT( game_gfx++, G_TT_NONE );
+                    gDPLoadTextureBlock_4b( game_gfx++, mat->texels, G_IM_FMT_I, mat->width, mat->height, 0, cms,
                                             cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                             G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI4:
-                    gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
-                    gDPLoadTLUT_pal16( D_800F8094++, 15, mat->palette );
-                    gDPLoadTextureBlock_4b( D_800F8094++, mat->texels, G_IM_FMT_CI, mat->width, mat->height, 15, cms,
+                    gDPSetTextureLUT( game_gfx++, G_TT_RGBA16 );
+                    gDPLoadTLUT_pal16( game_gfx++, 15, mat->palette );
+                    gDPLoadTextureBlock_4b( game_gfx++, mat->texels, G_IM_FMT_CI, mat->width, mat->height, 15, cms,
                                             cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                             G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI8:
-                    gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
-                    gDPLoadTLUT_pal256( D_800F8094++, mat->palette );
-                    gDPLoadTextureBlock( D_800F8094++, mat->texels, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width, mat->height,
+                    gDPSetTextureLUT( game_gfx++, G_TT_RGBA16 );
+                    gDPLoadTLUT_pal256( game_gfx++, mat->palette );
+                    gDPLoadTextureBlock( game_gfx++, mat->texels, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width, mat->height,
                                          0, cms, cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                          G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_RGBA16:
-                    gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
-                    gDPLoadTextureBlock( D_800F8094++, mat->texels, G_IM_FMT_RGBA, G_IM_SIZ_16b, mat->width,
+                    gDPSetTextureLUT( game_gfx++, G_TT_NONE );
+                    gDPLoadTextureBlock( game_gfx++, mat->texels, G_IM_FMT_RGBA, G_IM_SIZ_16b, mat->width,
                                          mat->height, 0, cms, cmt, Scene_TextureSizeLog2( mat->width ),
                                          Scene_TextureSizeLog2( mat->height ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_I8:
-                    gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
-                    gDPLoadTextureBlock( D_800F8094++, mat->texels, G_IM_FMT_I, G_IM_SIZ_8b, mat->width, mat->height,
+                    gDPSetTextureLUT( game_gfx++, G_TT_NONE );
+                    gDPLoadTextureBlock( game_gfx++, mat->texels, G_IM_FMT_I, G_IM_SIZ_8b, mat->width, mat->height,
                                          0, cms, cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                          G_TX_NOLOD, G_TX_NOLOD );
                     break;
@@ -585,41 +585,41 @@ void Scene_Draw( void ) {
                 case MAT_I4:
                     /* loaded over the first texture, into tile 0 with palette 1: the tmem and tile of the others
                        went to the palette */
-                    gDPLoadTextureBlock_4b( D_800F8094++, mat->texels2, G_IM_FMT_I, mat->width2, mat->height2, 1, cms,
+                    gDPLoadTextureBlock_4b( game_gfx++, mat->texels2, G_IM_FMT_I, mat->width2, mat->height2, 1, cms,
                                             cmt, Scene_TextureSizeLog2( mat->width2 ), Scene_TextureSizeLog2( mat->height2 ),
                                             G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI4:
-                    gDPLoadTLUT_pal16( D_800F8094++, 14, mat->palette2 );
-                    gDPLoadMultiBlock_4b( D_800F8094++, mat->texels2, D_8009CF68, 1, G_IM_FMT_CI, mat->width2,
+                    gDPLoadTLUT_pal16( game_gfx++, 14, mat->palette2 );
+                    gDPLoadMultiBlock_4b( game_gfx++, mat->texels2, D_8009CF68, 1, G_IM_FMT_CI, mat->width2,
                                           mat->height2, 14, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
                                           Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI8:
-                    gDPLoadMultiBlock( D_800F8094++, mat->texels2, D_8009CF68, 1, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width2,
+                    gDPLoadMultiBlock( game_gfx++, mat->texels2, D_8009CF68, 1, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width2,
                                        mat->height2, 0, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
                                        Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_RGBA16:
-                    gDPLoadMultiBlock( D_800F8094++, mat->texels2, D_8009CF68, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                    gDPLoadMultiBlock( game_gfx++, mat->texels2, D_8009CF68, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
                                        mat->width2, mat->height2, 0, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
                                        Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_I8:
                     /* the first texture again, not the second */
-                    gDPLoadMultiBlock( D_800F8094++, mat->texels, D_8009CF68, 1, G_IM_FMT_I, G_IM_SIZ_8b, mat->width,
+                    gDPLoadMultiBlock( game_gfx++, mat->texels, D_8009CF68, 1, G_IM_FMT_I, G_IM_SIZ_8b, mat->width,
                                        mat->height, 0, cms, cmt, Scene_TextureSizeLog2( mat->width ),
                                        Scene_TextureSizeLog2( mat->height ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 }
             } else if ( D_8006940C ) {
                 D_8006940C = 0;
-                gSPTexture( D_800F8094++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF );
+                gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF );
             }
         }
 
         if ( ( mat->flags & MAT_TEXTURE ) && ( mat->scroll[0] != 0 || mat->scroll[1] != 0 ) ) {
-            gDPSetTileSize( D_800F8094++, G_TX_RENDERTILE, mat->scroll[0], mat->scroll[1], mat->scroll[0] + 64,
+            gDPSetTileSize( game_gfx++, G_TX_RENDERTILE, mat->scroll[0], mat->scroll[1], mat->scroll[0] + 64,
                             mat->scroll[1] + 32 );
         }
 
@@ -646,14 +646,14 @@ void Scene_Draw( void ) {
             if ( D_800E6588 ) {
                 D_800DF570 |= G_FOG;
             }
-            gSPClearGeometryMode( D_800F8094++, G_ZBUFFER | G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING |
+            gSPClearGeometryMode( game_gfx++, G_ZBUFFER | G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING |
                                                 G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH );
-            gSPSetGeometryMode( D_800F8094++, D_800DF570 );
+            gSPSetGeometryMode( game_gfx++, D_800DF570 );
         }
 
         if ( D_800EA0CC ) {
             D_800EA0CC = 0;
-            gfx = D_800F8094++;
+            gfx = game_gfx++;
             if ( D_800E4D60 ) {
                 gfx->words.w0 = _SHIFTL( G_SETCOMBINE, 24, 8 ) |
                                 _SHIFTL( GCCc0w0( mat->combine.a0, mat->combine.c0, mat->combine.Aa0, mat->combine.Ac0 ) |
@@ -675,17 +675,17 @@ void Scene_Draw( void ) {
 
         if ( D_80066B30 ) {
             D_80066B30 = 0;
-            gDPSetRenderMode( D_800F8094++, D_801000B4, D_800E4D64 );
+            gDPSetRenderMode( game_gfx++, D_801000B4, D_800E4D64 );
         }
 
         if ( D_800A30B0 != D_8009D1A0[*link].unk_08 ) {
             D_800A30B0 = D_8009D1A0[*link].unk_08;
-            gSPMatrix( D_800F8094++, D_8009D1A0[*link].unk_08, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
+            gSPMatrix( game_gfx++, D_8009D1A0[*link].unk_08, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
         }
 
-        gSPVertex( D_800F8094++, mesh->verts, mesh->numVerts, 0 );
-        gSPDisplayList( D_800F8094++, mesh->cmds );
-        gDPPipeSync( D_800F8094++ );
+        gSPVertex( game_gfx++, mesh->verts, mesh->numVerts, 0 );
+        gSPDisplayList( game_gfx++, mesh->cmds );
+        gDPPipeSync( game_gfx++ );
     }
 }
 #else
@@ -844,46 +844,46 @@ void Scene_DrawPuffs( void ) {
 
     if ( D_80066C34 != 1 ) {
         D_800A3018 = 2;
-        gSPLoadUcodeL( D_800F8094++, gspF3DEX2_fifo );
-        gSPClipRatio( D_800F8094++, FRUSTRATIO_1 );
+        gSPLoadUcodeL( game_gfx++, gspF3DEX2_fifo );
+        gSPClipRatio( game_gfx++, FRUSTRATIO_1 );
     }
-    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
-    gDPSetRenderMode( D_800F8094++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2 );
+    gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
+    gDPSetRenderMode( game_gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2 );
     /* (0 - 0) * K5 + PRIMITIVE: the colour is the primitive's, whatever the multiplier */
-    gDPSetCombineLERP( D_800F8094++, 0, 0, K5, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, K5, PRIMITIVE, TEXEL0, 0,
+    gDPSetCombineLERP( game_gfx++, 0, 0, K5, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, K5, PRIMITIVE, TEXEL0, 0,
                        PRIMITIVE, 0 );
-    gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
+    gDPSetAlphaCompare( game_gfx++, G_AC_NONE );
     for ( kind = 0; kind < 2; kind++ ) {
         if ( count[kind] == 0 ) {
             continue;
         }
-        gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
-        gDPLoadTextureBlock_4b( D_800F8094++,
+        gDPSetTextureLUT( game_gfx++, G_TT_NONE );
+        gDPLoadTextureBlock_4b( game_gfx++,
                                 ( (fileImage_t *)D_800F80B0[D_8005C1E4[kind]].data )->data + CI4_PALETTE_SIZE, G_IM_FMT_I,
                                 64, 64, 0, G_TX_WRAP | G_TX_NOMIRROR, G_TX_WRAP | G_TX_NOMIRROR, 6, 6, G_TX_NOLOD,
                                 G_TX_NOLOD );
         if ( kind == 1 ) {
-            gDPSetAlphaDither( D_800F8094++, G_AD_NOISE );
-            gDPSetAlphaCompare( D_800F8094++, G_AC_DITHER );
+            gDPSetAlphaDither( game_gfx++, G_AD_NOISE );
+            gDPSetAlphaCompare( game_gfx++, G_AC_DITHER );
         }
         for ( view = 0; view < 2; view++ ) {
             if ( D_800A3018 != view ) {
                 D_800A3018 = view;
                 Scene_BeginView( D_8009CFA0[D_800A3018] );
             }
-            gSPTexture( D_800F8094++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
-            gSPClearGeometryMode( D_800F8094++, G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN |
+            gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
+            gSPClearGeometryMode( game_gfx++, G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN |
                                                 G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH );
-            gSPSetGeometryMode( D_800F8094++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH );
+            gSPSetGeometryMode( game_gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH );
             for ( i = 0; i < NUM_PUFFS; i++ ) {
                 if ( ( D_800E4D70[i].flags & PUFF_KIND ) == kind && D_800E4D70[i].life != 0 &&
                      ( D_800E4D70[i].flags & PUFF_CAMERA( view ) ) ) {
-                    gSPMatrix( D_800F8094++, &D_800E6770[view][i], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
-                    gSPVertex( D_800F8094++, &D_8005C1F0[D_800E4D70[i].size * 4], 4, 0 );
-                    gDPSetPrimColor( D_800F8094++, 0, 0, D_8005C970[kind][0], D_8005C970[kind][1], D_8005C970[kind][2],
+                    gSPMatrix( game_gfx++, &D_800E6770[view][i], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
+                    gSPVertex( game_gfx++, &D_8005C1F0[D_800E4D70[i].size * 4], 4, 0 );
+                    gDPSetPrimColor( game_gfx++, 0, 0, D_8005C970[kind][0], D_8005C970[kind][1], D_8005C970[kind][2],
                                      D_800E4D70[i].alpha );
-                    gSP2Triangles( D_800F8094++, 0, 2, 1, 0, 2, 3, 1, 0 );
-                    gDPPipeSync( D_800F8094++ );
+                    gSP2Triangles( game_gfx++, 0, 2, 1, 0, 2, 3, 1, 0 );
+                    gDPPipeSync( game_gfx++ );
                 }
             }
         }

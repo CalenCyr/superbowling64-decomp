@@ -54,7 +54,7 @@ s32 GS_SubModeMenu( void ) {
         case 0:
             Menu_SetItem( gs_subModeMenu, 0, gs_subModeBlink[0][gs_subModeBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
-            Draw_RoundedBox( 0x28, 0x38, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0x28, 0x38, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
             if ( D_800E6758 & R_JPAD ) {
                 gs_subModeCursor = 1;
             }
@@ -65,7 +65,7 @@ s32 GS_SubModeMenu( void ) {
         case 1:
             Menu_SetItem( gs_subModeMenu, 1, gs_subModeBlink[1][gs_subModeBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
-            Draw_RoundedBox( 0xB8, 0x38, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0xB8, 0x38, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
             if ( D_800E6758 & L_JPAD ) {
                 gs_subModeCursor = 0;
             }
@@ -76,7 +76,7 @@ s32 GS_SubModeMenu( void ) {
         case 2:
             Menu_SetItem( gs_subModeMenu, 2, gs_subModeBlink[2][gs_subModeBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
-            Draw_RoundedBox( 0x70, 0x90, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0x70, 0x90, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
             if ( D_800E6758 & L_JPAD ) {
                 gs_subModeCursor = 0;
             }

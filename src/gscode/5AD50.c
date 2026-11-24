@@ -21,35 +21,35 @@ void GS_DrawTintedImage( s16 x, s16 y, u8 r, u8 g, u8 b, u8 a ) {
     if ( D_800F80B0[0x960].refCount == 0 ) {
         Cache_GetFile( 0x960, FILE_RAW );
     }
-    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
-    gDPSetRenderMode( D_800F8094++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
-    gDPSetCombineLERP( D_800F8094++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, TEXEL0, 0,
+    gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
+    gDPSetRenderMode( game_gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
+    gDPSetCombineLERP( game_gfx++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, TEXEL0, 0,
                        PRIMITIVE, 0 );
-    gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
-    gDPSetPrimColor( D_800F8094++, 0, 0, r, g, b, a );
+    gDPSetTextureLUT( game_gfx++, G_TT_NONE );
+    gDPSetPrimColor( game_gfx++, 0, 0, r, g, b, a );
 
-    gDPLoadTextureBlock_4b( D_800F8094++, ( (fileImage_t *)D_800F80B0[0x960].data )->data + CI4_PALETTE_SIZE,
+    gDPLoadTextureBlock_4b( game_gfx++, ( (fileImage_t *)D_800F80B0[0x960].data )->data + CI4_PALETTE_SIZE,
                             G_IM_FMT_I, 128, 32, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                             G_TX_NOLOD );
-    gSPTextureRectangle( D_800F8094++, ( x - 8 ) << 2, ( y - 8 ) << 2, ( x + 120 ) << 2, ( y + 24 ) << 2,
+    gSPTextureRectangle( game_gfx++, ( x - 8 ) << 2, ( y - 8 ) << 2, ( x + 120 ) << 2, ( y + 24 ) << 2,
                          G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
 
-    gDPLoadTextureBlock_4b( D_800F8094++,
+    gDPLoadTextureBlock_4b( game_gfx++,
                             ( (fileImage_t *)D_800F80B0[0x960].data )->data + CI4_PALETTE_SIZE + 128 * 32 / 2,
                             G_IM_FMT_I, 128, 32, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                             G_TX_NOLOD );
-    gSPTextureRectangle( D_800F8094++, ( x - 8 ) << 2, ( y + 24 ) << 2, ( x + 120 ) << 2, ( y + 56 ) << 2,
+    gSPTextureRectangle( game_gfx++, ( x - 8 ) << 2, ( y + 24 ) << 2, ( x + 120 ) << 2, ( y + 56 ) << 2,
                          G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
 
-    gDPLoadTextureBlock_4b( D_800F8094++,
+    gDPLoadTextureBlock_4b( game_gfx++,
                             ( (fileImage_t *)D_800F80B0[0x960].data )->data + CI4_PALETTE_SIZE + 128 * 32,
                             G_IM_FMT_I, 32, 64, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                             G_TX_NOLOD );
-    gSPTextureRectangle( D_800F8094++, ( x + 120 ) << 2, ( y - 8 ) << 2, ( x + 152 ) << 2, ( y + 56 ) << 2,
+    gSPTextureRectangle( game_gfx++, ( x + 120 ) << 2, ( y - 8 ) << 2, ( x + 152 ) << 2, ( y + 56 ) << 2,
                          G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
 
-    gDPPipeSync( D_800F8094++ );
-    gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
+    gDPPipeSync( game_gfx++ );
+    gDPSetTextureLUT( game_gfx++, G_TT_RGBA16 );
 }
 
 /*
@@ -97,21 +97,21 @@ s32 GS_NameEntry( void ) {
     }
 
     if ( gs_nameCursorY == -1 ) {
-        D_8009D098.records[player].name[gs_nameLength] = 0xFFFF;
+        save_data.records[player].name[gs_nameLength] = 0xFFFF;
         if ( gs_nameCursorX == 7 ) {
-            Menu_SetItem( gs_nameEntryMenu, 0x19, 0xA8C, 0xC0, 0x40, D_8009CFB0 );
+            Menu_SetItem( gs_nameEntryMenu, 0x19, 0xA8C, 0xC0, 0x40, game_pulseAlpha );
         } else {
-            Menu_SetItem( gs_nameEntryMenu, 0x19, 0xA8B, gs_nameCursorX * 16 + 0x3E, 0x3E, D_8009CFB0 );
+            Menu_SetItem( gs_nameEntryMenu, 0x19, 0xA8B, gs_nameCursorX * 16 + 0x3E, 0x3E, game_pulseAlpha );
         }
     } else {
         if ( gs_nameLength < 5 ) {
-            D_8009D098.records[player].name[gs_nameLength] =
+            save_data.records[player].name[gs_nameLength] =
                 gs_nameEntryChars[gs_nameCursorY * 12 +
                                   ( ( gs_nameCharSet * 2 + gs_nameCharCase ) * 60 + gs_nameCursorX )];
-            D_8009D098.records[player].name[gs_nameLength + 1] = 0xFFFF;
+            save_data.records[player].name[gs_nameLength + 1] = 0xFFFF;
         }
         Menu_SetItem( gs_nameEntryMenu, 0x19, 0xA8B, gs_nameCursorX * 16 + 0x3E, gs_nameCursorY * 16 + 0x56,
-                       D_8009CFB0 );
+                       game_pulseAlpha );
     }
 
     if ( D_800E6758 & U_JPAD ) {
@@ -172,15 +172,15 @@ s32 GS_NameEntry( void ) {
             gs_nameLength--;
         } else {
             gs_nameEntryStep = 2;
-            D_8009D098.records[player].name[0] = 0xFFFF;
+            save_data.records[player].name[0] = 0xFFFF;
         }
     }
     if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
         if ( gs_nameCursorY == -1 ) {
             if ( gs_nameCursorX == 7 ) {
                 if ( gs_nameLength == 0 ) {
-                    D_8009D098.records[player].name[0] = 0x57;
-                    D_8009D098.records[player].name[1] = 0xFFFF;
+                    save_data.records[player].name[0] = 0x57;
+                    save_data.records[player].name[1] = 0xFFFF;
                 }
                 Sound_PlaySe( 6, 0 );
                 if ( gs_namePlayer < game_numPlayers - 1 ) {
@@ -395,7 +395,7 @@ s32 GS_PlayerSetup( void ) {
             switch ( kind ) {
             case 0:
             case 2:
-                GS_DrawTintedImage( 0x16, 0x31, 0xFF, 0xFF, 0xFF, D_8009CFB0 );
+                GS_DrawTintedImage( 0x16, 0x31, 0xFF, 0xFF, 0xFF, game_pulseAlpha );
                 if ( ( D_800E6758 & L_JPAD ) && game_numPlayers >= 2 ) {
                     Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                     game_numPlayers--;
@@ -418,7 +418,7 @@ s32 GS_PlayerSetup( void ) {
                 }
                 break;
             case 1:
-                GS_DrawTintedImage( 0x16, 0x31, 0xFF, 0xFF, 0xFF, D_8009CFB0 );
+                GS_DrawTintedImage( 0x16, 0x31, 0xFF, 0xFF, 0xFF, game_pulseAlpha );
                 if ( ( D_800E6758 & L_JPAD ) && game_numPlayers == 4 ) {
                     Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                     game_numPlayers = 2;
@@ -448,10 +448,10 @@ s32 GS_PlayerSetup( void ) {
                 gs_setupState = CHOICE_BACK;
             }
             if ( minPlayers < game_numPlayers ) {
-                Menu_SetItem( gs_nameEntryMenu, 0x17, 0x84C, 0xE, 0x4A, D_8009CFB0 );
+                Menu_SetItem( gs_nameEntryMenu, 0x17, 0x84C, 0xE, 0x4A, game_pulseAlpha );
             }
             if ( game_numPlayers < maxPlayers ) {
-                Menu_SetItem( gs_nameEntryMenu, 0x18, 0x84B, 0x36, 0x4A, D_8009CFB0 );
+                Menu_SetItem( gs_nameEntryMenu, 0x18, 0x84B, 0x36, 0x4A, game_pulseAlpha );
             }
             break;
 
@@ -460,11 +460,11 @@ s32 GS_PlayerSetup( void ) {
                 gs_nameEntryStep = 2;
                 break;
             }
-            Draw_RoundedBox( gs_namePlayer * 62 + 0x2F, 0x78, 0x28, 2, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( gs_namePlayer * 62 + 0x2F, 0x78, 0x28, 2, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
             if ( game_players[gs_namePlayer] & 0x80 ) {
-                Draw_ImageScaled( 0x84C, gs_namePlayer * 62 + 0x1F, 0x71, D_8009CFB0, 1.0f, 1.0f );
+                Draw_ImageScaled( 0x84C, gs_namePlayer * 62 + 0x1F, 0x71, game_pulseAlpha, 1.0f, 1.0f );
             } else {
-                Draw_ImageScaled( 0x84B, gs_namePlayer * 62 + 0x57, 0x71, D_8009CFB0, 1.0f, 1.0f );
+                Draw_ImageScaled( 0x84B, gs_namePlayer * 62 + 0x57, 0x71, game_pulseAlpha, 1.0f, 1.0f );
             }
             if ( ( D_800E6758 & L_JPAD ) && ( game_players[gs_namePlayer] & 0x80 ) ) {
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
@@ -549,7 +549,7 @@ s32 GS_PlayerSetup( void ) {
                     } else {
                         gs_nameEntryStep = 5;
                     }
-                } else if ( D_8009D098.records[i - 1].name[0] == 0xFFFF ) {
+                } else if ( save_data.records[i - 1].name[0] == 0xFFFF ) {
                     gs_nameCharSet = 2;
                     gs_nameCursorX = 0;
                     gs_nameCursorY = 0;
@@ -576,9 +576,9 @@ s32 GS_PlayerSetup( void ) {
                     }
                 }
             } else {
-                Draw_RoundedBox( gs_namePlayer * 62 + 0x2B, 0x81, 0x30, 0x28, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
-                Draw_ImageScaled( 0x84C, gs_namePlayer * 62 + 0x1B, 0x95, D_8009CFB0, 1.0f, 1.0f );
-                Draw_ImageScaled( 0x84B, gs_namePlayer * 62 + 0x5B, 0x95, D_8009CFB0, 1.0f, 1.0f );
+                Draw_RoundedBox( gs_namePlayer * 62 + 0x2B, 0x81, 0x30, 0x28, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
+                Draw_ImageScaled( 0x84C, gs_namePlayer * 62 + 0x1B, 0x95, game_pulseAlpha, 1.0f, 1.0f );
+                Draw_ImageScaled( 0x84B, gs_namePlayer * 62 + 0x5B, 0x95, game_pulseAlpha, 1.0f, 1.0f );
                 switch ( ( game_players[gs_namePlayer] >> 4 ) & 7 ) {
                 case 1:
                     Menu_SetItem( gs_nameEntryMenu, 0x17, 0x906, gs_namePlayer * 62 + 0x3F, 0x97, 0xFF );
@@ -607,7 +607,7 @@ s32 GS_PlayerSetup( void ) {
             }
             Menu_SetItem( gs_nameEntryMenu, 0x17, 0x8FD, gs_namePlayer * 62 + 0x2B, 0x81, 0xFF );
             Menu_SetItem( gs_nameEntryMenu, 0x18, 0x8FE, gs_namePlayer * 62 + 0x2B, gs_teamPromptChoice * 16 + 0x81,
-                           D_8009CFB0 );
+                           game_pulseAlpha );
             if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
                 if ( gs_teamPromptChoice == 0 ) {
@@ -638,12 +638,12 @@ s32 GS_PlayerSetup( void ) {
                 gs_clearRecordAnswer = 0;
                 if ( D_80066C44 == 0 ) {
                     i = ( ( game_players[gs_namePlayer] >> 4 ) & 7 ) - 1;
-                    memset( &D_8009D098.records[i], 0, sizeof( D_8009D098.records[i] ) );
-                    D_8009D098.records[i].low = 300;
-                    memset( D_8009D098.records[i].name, 0xFF, sizeof( D_8009D098.records[i].name ) );
-                    memset( &D_800E44E8[i], 0, sizeof( D_800E44E8[i] ) );
-                    D_800E44E8[i].low = 300;
-                    memset( D_800E44E8[i].name, 0xFF, sizeof( D_800E44E8[i].name ) );
+                    memset( &save_data.records[i], 0, sizeof( save_data.records[i] ) );
+                    save_data.records[i].low = 300;
+                    memset( save_data.records[i].name, 0xFF, sizeof( save_data.records[i].name ) );
+                    memset( &game_sessionRecords[i], 0, sizeof( game_sessionRecords[i] ) );
+                    game_sessionRecords[i].low = 300;
+                    memset( game_sessionRecords[i].name, 0xFF, sizeof( game_sessionRecords[i].name ) );
                     gs_nameEntryStep = 2;
                 } else {
                     gs_nameEntryStep = 3;
@@ -657,14 +657,14 @@ s32 GS_PlayerSetup( void ) {
 
         case 5:
             if ( game_lastTeam == 0 ) {
-                Draw_RoundedBox( 0x3A, 0xBC, 0x64, 0x10, 0xFF, 0xFF, 0xFF, D_8009CFB0 );
+                Draw_RoundedBox( 0x3A, 0xBC, 0x64, 0x10, 0xFF, 0xFF, 0xFF, game_pulseAlpha );
                 if ( minPlayers < game_numPlayers ) {
-                    Menu_SetItem( gs_nameEntryMenu, 0x17, 0x84B, 0x9C, 0xBC, D_8009CFB0 );
+                    Menu_SetItem( gs_nameEntryMenu, 0x17, 0x84B, 0x9C, 0xBC, game_pulseAlpha );
                 }
             } else {
-                Draw_RoundedBox( 0xA4, 0xBC, 0x64, 0x10, 0xFF, 0xFF, 0xFF, D_8009CFB0 );
+                Draw_RoundedBox( 0xA4, 0xBC, 0x64, 0x10, 0xFF, 0xFF, 0xFF, game_pulseAlpha );
                 if ( minPlayers < game_numPlayers ) {
-                    Menu_SetItem( gs_nameEntryMenu, 0x17, 0x84C, 0x94, 0xBC, D_8009CFB0 );
+                    Menu_SetItem( gs_nameEntryMenu, 0x17, 0x84C, 0x94, 0xBC, game_pulseAlpha );
                 }
                 switch ( game_numPlayers ) {
                 case 2:
@@ -732,12 +732,13 @@ s32 GS_PlayerSetup( void ) {
                 }
                 Sound_PlaySe( SE_DECIDE, 0 );
                 for ( i = 0; i < 4; i++ ) {
-                    memcpy( D_800E44E8[i].name, D_8009D098.records[i].name, sizeof( D_800E44E8[i].name ) );
+                    memcpy( game_sessionRecords[i].name, save_data.records[i].name,
+                            sizeof( game_sessionRecords[i].name ) );
                 }
                 for ( i = 0; i < game_numPlayers; i++ ) {
                     team = ( game_players[i] >> 4 ) & 7;
                     if ( team != 0 ) {
-                        memcpy( &game_playerNames[i], D_8009D098.records[team - 1].name, sizeof( game_playerNames[i] ) );
+                        memcpy( &game_playerNames[i], save_data.records[team - 1].name, sizeof( game_playerNames[i] ) );
                     } else {
                         memset( &game_playerNames[i], 0xFF, sizeof( game_playerNames[i] ) );
                     }
@@ -762,7 +763,7 @@ s32 GS_PlayerSetup( void ) {
     if ( game_players[0] & 0x80 ) {
         Menu_SetItem( gs_setupMenu, 9, 0xAB6, MENU_NONE, MENU_NONE, MENU_NONE );
     } else if ( game_players[0] & 0x70 ) {
-        if ( D_8009D098.records[( ( game_players[0] >> 4 ) & 7 ) - 1].name[0] == 0xFFFF ) {
+        if ( save_data.records[( ( game_players[0] >> 4 ) & 7 ) - 1].name[0] == 0xFFFF ) {
             Menu_SetItem( gs_setupMenu, 0xD, 0x902, MENU_NONE, MENU_NONE, MENU_NONE );
         } else {
             Menu_SetItem( gs_setupMenu, 0xD, 0xA83, MENU_NONE, MENU_NONE, MENU_NONE );
@@ -776,7 +777,7 @@ s32 GS_PlayerSetup( void ) {
         if ( game_players[1] & 0x80 ) {
             Menu_SetItem( gs_setupMenu, 0xA, 0xAB6, MENU_NONE, MENU_NONE, MENU_NONE );
         } else if ( game_players[1] & 0x70 ) {
-            if ( D_8009D098.records[( ( game_players[1] >> 4 ) & 7 ) - 1].name[0] == 0xFFFF ) {
+            if ( save_data.records[( ( game_players[1] >> 4 ) & 7 ) - 1].name[0] == 0xFFFF ) {
                 Menu_SetItem( gs_setupMenu, 0xE, 0x902, MENU_NONE, MENU_NONE, 0xFF );
             } else {
                 Menu_SetItem( gs_setupMenu, 0xE, 0xA83, MENU_NONE, MENU_NONE, 0xFF );
@@ -791,7 +792,7 @@ s32 GS_PlayerSetup( void ) {
         if ( game_players[2] & 0x80 ) {
             Menu_SetItem( gs_setupMenu, 0xB, 0xAB6, MENU_NONE, MENU_NONE, MENU_NONE );
         } else if ( game_players[2] & 0x70 ) {
-            if ( D_8009D098.records[( ( game_players[2] >> 4 ) & 7 ) - 1].name[0] == 0xFFFF ) {
+            if ( save_data.records[( ( game_players[2] >> 4 ) & 7 ) - 1].name[0] == 0xFFFF ) {
                 Menu_SetItem( gs_setupMenu, 0xF, 0x902, MENU_NONE, MENU_NONE, 0xFF );
             } else {
                 Menu_SetItem( gs_setupMenu, 0xF, 0xA83, MENU_NONE, MENU_NONE, 0xFF );
@@ -806,7 +807,7 @@ s32 GS_PlayerSetup( void ) {
         if ( game_players[3] & 0x80 ) {
             Menu_SetItem( gs_setupMenu, 0xC, 0xAB6, MENU_NONE, MENU_NONE, MENU_NONE );
         } else if ( game_players[3] & 0x70 ) {
-            if ( D_8009D098.records[( ( game_players[3] >> 4 ) & 7 ) - 1].name[0] == 0xFFFF ) {
+            if ( save_data.records[( ( game_players[3] >> 4 ) & 7 ) - 1].name[0] == 0xFFFF ) {
                 Menu_SetItem( gs_setupMenu, 0x10, 0x902, MENU_NONE, MENU_NONE, 0xFF );
             } else {
                 Menu_SetItem( gs_setupMenu, 0x10, 0xA83, MENU_NONE, MENU_NONE, 0xFF );
@@ -821,13 +822,13 @@ s32 GS_PlayerSetup( void ) {
         Menu_SetItem( gs_setupMenu, 0x12, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
     }
     Menu_DrawItems( gs_setupMenu, gs_setupSlide );
-    Txt_LoadGlyphSheet( &D_800F8094 );
+    Txt_LoadGlyphSheet( &game_gfx );
 
     if ( gs_setupState == CHOICE_RUN ) {
         for ( i = 0; i < game_numPlayers; i++ ) {
             team = ( game_players[i] >> 4 ) & 7;
-            if ( team != 0 && !( game_players[i] & 0x80 ) && D_8009D098.records[team - 1].name[0] != 0xFFFF ) {
-                Txt_DrawGlyphs( &D_800F8094, i * 62 + 0x2F, 0x85, 8, D_8009D098.records[team - 1].name );
+            if ( team != 0 && !( game_players[i] & 0x80 ) && save_data.records[team - 1].name[0] != 0xFFFF ) {
+                Txt_DrawGlyphs( &game_gfx, i * 62 + 0x2F, 0x85, 8, save_data.records[team - 1].name );
             }
         }
         if ( game_mode == 0 ) {
@@ -892,7 +893,7 @@ s32 GS_PlayerSetup( void ) {
             }
         }
     }
-    if ( D_8009D098.rumble && gs_setupState == CHOICE_RUN && ( D_800E4FD0[0] || D_800E4FD0[1] ) ) {
+    if ( save_data.rumble && gs_setupState == CHOICE_RUN && ( D_800E4FD0[0] || D_800E4FD0[1] ) ) {
         if ( D_800E4FD0[0] ) {
             Menu_SetItem( gs_setupMenu, 0x15, MENU_NONE, MENU_NONE, MENU_NONE, 0xA0 );
         }
@@ -905,13 +906,13 @@ s32 GS_PlayerSetup( void ) {
     Menu_DrawItems( gs_nameEntryMenu, gs_setupSlide );
 
     if ( gs_nameEntryStep == 4 ) {
-        Txt_LoadGlyphSheet( &D_800F8094 );
-        Txt_DrawGlyphs( &D_800F8094, 0x40, 0x40, 0xA,
-                       D_8009D098.records[( ( game_players[gs_namePlayer] >> 4 ) & 7 ) - 1].name );
+        Txt_LoadGlyphSheet( &game_gfx );
+        Txt_DrawGlyphs( &game_gfx, 0x40, 0x40, 0xA,
+                       save_data.records[( ( game_players[gs_namePlayer] >> 4 ) & 7 ) - 1].name );
         if ( gs_nameLength < 5 ) {
-            Draw_ImageScaled( 0xA5A, gs_nameLength * 10 + 0x40, 0x40, D_8009CFB0, 1.0f, 1.0f );
+            Draw_ImageScaled( 0xA5A, gs_nameLength * 10 + 0x40, 0x40, game_pulseAlpha, 1.0f, 1.0f );
             if ( gs_nameLength + 1 < 5 ) {
-                Draw_ImageScaled( 0xA5A, ( gs_nameLength + 1 ) * 10 + 0x40, 0x40, D_8009CFB0, 1.0f, 1.0f );
+                Draw_ImageScaled( 0xA5A, ( gs_nameLength + 1 ) * 10 + 0x40, 0x40, game_pulseAlpha, 1.0f, 1.0f );
             }
         }
     }

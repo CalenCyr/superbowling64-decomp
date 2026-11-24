@@ -25,23 +25,23 @@ void CA_DrawFrame( s32 frame, s32 clip, u8 alpha ) {
         return;
     }
 
-    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
-    gDPSetRenderMode( D_800F8094++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
-    gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
-    gDPSetTexturePersp( D_800F8094++, G_TP_NONE );
-    gDPSetCombineLERP( D_800F8094++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE,
+    gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
+    gDPSetRenderMode( game_gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
+    gDPSetAlphaCompare( game_gfx++, G_AC_NONE );
+    gDPSetTexturePersp( game_gfx++, G_TP_NONE );
+    gDPSetCombineLERP( game_gfx++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE,
                        0 );
-    gDPSetPrimColor( D_800F8094++, 0, 0, 255, 255, 255, alpha );
+    gDPSetPrimColor( game_gfx++, 0, 0, 255, 255, 255, alpha );
     for ( row = 0; row < 8; row++ ) {
         for ( col = 0; col < 5; col++ ) {
-            gDPLoadTextureBlock( D_800F8094++, ca_frameCache[slot].tiles[col + row * 5], G_IM_FMT_RGBA,
+            gDPLoadTextureBlock( game_gfx++, ca_frameCache[slot].tiles[col + row * 5], G_IM_FMT_RGBA,
                                  G_IM_SIZ_16b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 5,
                                  G_TX_NOLOD, G_TX_NOLOD );
-            gSPTextureRectangle( D_800F8094++, ( col * 64 ) << 2, ( row * 32 ) << 2, ( col * 64 + 64 ) << 2,
+            gSPTextureRectangle( game_gfx++, ( col * 64 ) << 2, ( row * 32 ) << 2, ( col * 64 + 64 ) << 2,
                                  ( row * 32 + 32 ) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
         }
     }
-    gDPPipeSync( D_800F8094++ );
+    gDPPipeSync( game_gfx++ );
 }
 
 /*
@@ -692,46 +692,46 @@ void CA_Frame( void ) {
         CA_DrawFrame( ca_frame, ca_selected, ca_clipAlpha );
     }
 
-    gSPLoadUcodeL( D_800F8094++, gspL3DEX2_fifo );
+    gSPLoadUcodeL( game_gfx++, gspL3DEX2_fifo );
     Scene_BeginView( &ca_cameras[ca_selected]->cam );
 
     /* the selected part's axes */
-    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
-    gDPSetRenderMode( D_800F8094++, G_RM_AA_XLU_LINE, G_RM_AA_XLU_LINE2 );
-    gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
-    gDPSetCombineLERP( D_800F8094++, 1, 0, SHADE, ENVIRONMENT, 0, 0, 0, ENVIRONMENT, 1, 0, SHADE, ENVIRONMENT, 0, 0, 0,
+    gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
+    gDPSetRenderMode( game_gfx++, G_RM_AA_XLU_LINE, G_RM_AA_XLU_LINE2 );
+    gDPSetAlphaCompare( game_gfx++, G_AC_NONE );
+    gDPSetCombineLERP( game_gfx++, 1, 0, SHADE, ENVIRONMENT, 0, 0, 0, ENVIRONMENT, 1, 0, SHADE, ENVIRONMENT, 0, 0, 0,
                        ENVIRONMENT );
-    gDPSetPrimColor( D_800F8094++, 0, 0, 128, 128, 128, 128 );
-    gDPSetEnvColor( D_800F8094++, 0, 0, 0, 128 );
-    gSPMatrix( D_800F8094++, &obj->joints[ca_part].mtxL[D_8005C0B1],
+    gDPSetPrimColor( game_gfx++, 0, 0, 128, 128, 128, 128 );
+    gDPSetEnvColor( game_gfx++, 0, 0, 0, 128 );
+    gSPMatrix( game_gfx++, &obj->joints[ca_part].mtxL[sched_bufferIndex],
                G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
-    gSPVertex( D_800F8094++, ca_axes, 4, 0 );
-    gSPLine3D( D_800F8094++, 0, 1, 0 );
-    gSPLine3D( D_800F8094++, 0, 2, 0 );
-    gSPLine3D( D_800F8094++, 0, 3, 0 );
-    gDPPipeSync( D_800F8094++ );
+    gSPVertex( game_gfx++, ca_axes, 4, 0 );
+    gSPLine3D( game_gfx++, 0, 1, 0 );
+    gSPLine3D( game_gfx++, 0, 2, 0 );
+    gSPLine3D( game_gfx++, 0, 3, 0 );
+    gDPPipeSync( game_gfx++ );
     Scene_BeginFrame();
 
-    Txt_LoadFont( &D_800F8094 );
-    Txt_SetupFont( &D_800F8094, 0 );
-    gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
+    Txt_LoadFont( &game_gfx );
+    Txt_SetupFont( &game_gfx, 0 );
+    gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
     switch ( ca_mode ) {
     case CAMODE_ROTATE:
-        Txt_DrawString( &D_800F8094, 20, 20, "ROTATE" );
+        Txt_DrawString( &game_gfx, 20, 20, "ROTATE" );
         sprintf( str, "H=%3.1f P=%3.1f B=%3.1f", model->parts[ca_part]->rot[0] * RAD_TO_DEG,
                  model->parts[ca_part]->rot[1] * RAD_TO_DEG,
                  model->parts[ca_part]->rot[2] * RAD_TO_DEG );
-        Txt_DrawString( &D_800F8094, 64, 215, str );
+        Txt_DrawString( &game_gfx, 64, 215, str );
         break;
     case CAMODE_FILE:
-        Txt_DrawString( &D_800F8094, 20, 20, "FILE" );
+        Txt_DrawString( &game_gfx, 20, 20, "FILE" );
         break;
     case CAMODE_IMAGE:
-        Txt_DrawString( &D_800F8094, 20, 20, "IMAGE" );
+        Txt_DrawString( &game_gfx, 20, 20, "IMAGE" );
         sprintf( str, "IMG1=%d IMG2=%d", D_80115374_cacode[1], D_80115374_cacode[2] );
-        Txt_DrawString( &D_800F8094, 84, 30, str );
+        Txt_DrawString( &game_gfx, 84, 30, str );
         break;
     }
     sprintf( str, "CAM=%d OBJ=%d FRAME=%d", ca_selected, ca_part, ca_frame );
-    Txt_DrawString( &D_800F8094, 84, 20, str );
+    Txt_DrawString( &game_gfx, 84, 20, str );
 }

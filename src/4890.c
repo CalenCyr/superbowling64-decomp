@@ -145,10 +145,10 @@ u8 Host_ExchangeByte( u8 c ) {
     u32 data;
 
     do {
-        __osEPiRawReadIo( D_800ABD60, HOSTIO_STATUS, &data );
+        __osEPiRawReadIo( boot_romHandle, HOSTIO_STATUS, &data );
     } while ( !( data & HOSTIO_STATUS_READY ) );
-    __osEPiRawReadIo( D_800ABD60, HOSTIO_DATA, &data );
-    __osEPiRawWriteIo( D_800ABD60, HOSTIO_SEND, c << 16 );
+    __osEPiRawReadIo( boot_romHandle, HOSTIO_DATA, &data );
+    __osEPiRawWriteIo( boot_romHandle, HOSTIO_SEND, c << 16 );
     return data;
 }
 
@@ -163,9 +163,9 @@ u8 Host_RecvByte( void ) {
     u32 data;
 
     do {
-        __osEPiRawReadIo( D_800ABD60, HOSTIO_STATUS, &data );
+        __osEPiRawReadIo( boot_romHandle, HOSTIO_STATUS, &data );
     } while ( !( data & HOSTIO_STATUS_READY ) );
-    __osEPiRawReadIo( D_800ABD60, HOSTIO_DATA, &data );
-    __osEPiRawWriteIo( D_800ABD60, HOSTIO_SEND, data << 16 );
+    __osEPiRawReadIo( boot_romHandle, HOSTIO_DATA, &data );
+    __osEPiRawWriteIo( boot_romHandle, HOSTIO_SEND, data << 16 );
     return data;
 }

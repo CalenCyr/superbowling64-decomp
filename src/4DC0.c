@@ -80,18 +80,18 @@ u32 Str_ReadFile( s32 index, u8 *dst ) {
     osWritebackDCacheAll();
     osInvalDCache( dst, D_800A30C0[index].size );
     for ( remaining = D_800A30C0[index].size; remaining > ARCHIVE_DMA_CHUNK; remaining -= ARCHIVE_DMA_CHUNK ) {
-        D_80066B70.dramAddr = dst + done;
-        D_80066B70.devAddr = D_800A30C0[index].romOffset + ( done + (u32)str_ROM_START );
-        D_80066B70.size = ARCHIVE_DMA_CHUNK;
+        boot_dmaRequest.dramAddr = dst + done;
+        boot_dmaRequest.devAddr = D_800A30C0[index].romOffset + ( done + (u32)str_ROM_START );
+        boot_dmaRequest.size = ARCHIVE_DMA_CHUNK;
         done += ARCHIVE_DMA_CHUNK;
-        osEPiStartDma( D_800ABD60, &D_80066B70, OS_READ );
-        osRecvMesg( &D_800DF578, NULL, OS_MESG_BLOCK );
+        osEPiStartDma( boot_romHandle, &boot_dmaRequest, OS_READ );
+        osRecvMesg( &boot_dmaQueue, NULL, OS_MESG_BLOCK );
     }
-    D_80066B70.dramAddr = dst + done;
-    D_80066B70.size = ( remaining + 1 ) & ~1;
-    D_80066B70.devAddr = D_800A30C0[index].romOffset + ( done + (u32)str_ROM_START );
-    osEPiStartDma( D_800ABD60, &D_80066B70, OS_READ );
-    osRecvMesg( &D_800DF578, NULL, OS_MESG_BLOCK );
+    boot_dmaRequest.dramAddr = dst + done;
+    boot_dmaRequest.size = ( remaining + 1 ) & ~1;
+    boot_dmaRequest.devAddr = D_800A30C0[index].romOffset + ( done + (u32)str_ROM_START );
+    osEPiStartDma( boot_romHandle, &boot_dmaRequest, OS_READ );
+    osRecvMesg( &boot_dmaQueue, NULL, OS_MESG_BLOCK );
     if ( compressed ) {
         LZ_Decompress( out, dst, D_800A30C0[index].size );
     }
