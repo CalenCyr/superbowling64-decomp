@@ -14,7 +14,7 @@
 #define HOSTIO_STATUS_READY 0x01
 
 /*
-Request header sent before each transfer (D_800692D8). The names of the type and its members are invented
+Request header sent before each transfer (host_packet). The names of the type and its members are invented
 from their use in unit 4890.
 */
 typedef struct {
@@ -24,8 +24,8 @@ typedef struct {
     /* 0x0C */ u8 name[0x50];       /* NUL-terminated file name */
 } HostPacket;                       /* size 0x5C */
 
-extern HostPacket D_800692D8;
-extern s32 D_800619F0;
+extern HostPacket host_packet;      /* the request header of the next transfer */
+extern s32 host_fileSize;           /* bytes of the file Host_GetFileSize announced */
 
 void Host_Send( u8 *buf, s32 len );
 void Host_Recv( u8 *buf, s32 len );

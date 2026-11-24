@@ -381,8 +381,8 @@ void Scene_Draw( void ) {
     scene_renderModeChanged = 1;
 
     for ( link = &scene_drawHead; *link != DRAW_NONE; link = &scene_drawList[*link].next ) {
-        mesh = D_800F80B0[scene_drawList[*link].unk_06 & 0x7FF].data;
-        mat = D_800F80B0[scene_drawList[*link].unk_04 & 0x7FF].data;
+        mesh = cache_files[scene_drawList[*link].unk_06 & 0x7FF].data;
+        mat = cache_files[scene_drawList[*link].unk_04 & 0x7FF].data;
 
         ucode = scene_drawList[*link].unk_06 >> 14;
         if ( scene_ucode != ucode ) {
@@ -859,7 +859,7 @@ void Scene_DrawPuffs( void ) {
         }
         gDPSetTextureLUT( game_gfx++, G_TT_NONE );
         gDPLoadTextureBlock_4b( game_gfx++,
-                                ( (fileImage_t *)D_800F80B0[scene_puffImages[kind]].data )->data + CI4_PALETTE_SIZE, G_IM_FMT_I,
+                                ( (fileImage_t *)cache_files[scene_puffImages[kind]].data )->data + CI4_PALETTE_SIZE, G_IM_FMT_I,
                                 64, 64, 0, G_TX_WRAP | G_TX_NOMIRROR, G_TX_WRAP | G_TX_NOMIRROR, 6, 6, G_TX_NOLOD,
                                 G_TX_NOLOD );
         if ( kind == 1 ) {

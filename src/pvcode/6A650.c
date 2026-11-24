@@ -14,12 +14,12 @@ objects come from its "sce.dat", else from the overlay's own records.
 */
 void PV_Init( void ) {
     if ( cont_allHeld & START_BUTTON ) {
-        D_8005C0BC = 1;
+        cache_hostMode = 1;
         Host_Sync();
     }
-    if ( D_8005C0BC ) {
+    if ( cache_hostMode ) {
         func_8002A7EC( "sce.dat" );
-        D_8005C0BD = 1;
+        cache_hostFiles = 1;
         Obj_CreateAll( pv_classes, (objParams_t *)obj_hostFile );
     } else {
         Obj_CreateAll( pv_classes, pv_sceneObjects );

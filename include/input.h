@@ -10,7 +10,7 @@
 
 extern OSMesgQueue cont_siQueue;    /* serial interface events */
 extern OSMesg cont_siMsgs;
-extern u8 D_800619B8[];             /* its address is the serial event's message */
+extern u8 cont_siEvent[];           /* its address is the serial event's message */
 extern u8 cont_standardMask;        /* bit per port with a standard controller */
 extern OSContStatus cont_status[MAXCONTROLLERS];
 extern OSPfs cont_rumblePfs[NUM_PLAYERS];

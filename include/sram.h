@@ -6,7 +6,7 @@
 #include "common.h"
 #include "libultra.h"
 
-extern OSPiHandle D_80069338;
+extern OSPiHandle sram_handle;      /* the SRAM's PI handle, set up on first use */
 
 OSPiHandle *Sram_GetHandle( void );
 

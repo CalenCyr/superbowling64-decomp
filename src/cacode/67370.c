@@ -79,7 +79,7 @@ void CA_CacheFrame( s32 frame, s32 clip ) {
         }
     }
 
-    if ( D_8005C0BC ) {
+    if ( cache_hostMode ) {
         sprintf( name, "%1.1d - Frame %4.4d.bmp", clip, frame + D_80115374_cacode[clip] );
         Host_LoadFile( name, ca_bmpBuffer, 54 + 320 * 240 * 2 );    /* the headers and the picture */
     } else {
@@ -126,17 +126,17 @@ void CA_Init( void ) {
     u32 j;
 
     if ( cont_allHeld & START_BUTTON ) {
-        D_8005C0BC = 1;
+        cache_hostMode = 1;
         Host_Sync();
     }
-    if ( D_8005C0BC ) {
+    if ( cache_hostMode ) {
         Host_LoadFile( "sce.dat", (u8 *)ca_sceneParams, sizeof( ca_sceneParams ) );
-        D_8005C0BD = 1;
+        cache_hostFiles = 1;
         for ( i = 0; i < 3; i++ ) {
             ca_cameras[i] = (sceneCameraNode_t *)Cam_Create( &ca_sceneParams[i] );
             ca_objects[i] = (sceneObjectNode_t *)func_8002B610( &ca_sceneParams[i + 3] );
         }
-        D_8005C0BD = 0;
+        cache_hostFiles = 0;
     } else {
         for ( i = 0; i < 3; i++ ) {
             ca_cameras[i] = (sceneCameraNode_t *)Cam_Create( &ca_sceneParams[i] );

@@ -24,7 +24,7 @@ void Cont_Init( void ) {
     OSContPad pads[MAXCONTROLLERS];
 
     osCreateMesgQueue( &cont_siQueue, &cont_siMsgs, 1 );
-    osSetEventMesg( OS_EVENT_SI, &cont_siQueue, (OSMesg)D_800619B8 );
+    osSetEventMesg( OS_EVENT_SI, &cont_siQueue, (OSMesg)cont_siEvent );
     osContInit( &cont_siQueue, &cont_standardMask, cont_status );
     osContSetCh( NUM_PLAYERS );
     cont_hasRumble[1] = FALSE;

@@ -133,10 +133,10 @@ typedef struct {
     /* 0x50 */ void *unk_50;
 } fileType3_t;
 
-extern fileCacheEntry_t D_800F80B0[FILECACHE_SIZE];
+extern fileCacheEntry_t cache_files[FILECACHE_SIZE];  /* by file index */
 /* both set: files are read from the development host (as "data.NNNN") instead of the str segment */
-extern u8 D_8005C0BC;
-extern u8 D_8005C0BD;
+extern u8 cache_hostMode;           /* development switch; alone it also enables the debug menu */
+extern u8 cache_hostFiles;          /* set by the overlays that read host files */
 
 void Cache_Clear( void );
 void Cache_LoadFile( s16 index );

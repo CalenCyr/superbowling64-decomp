@@ -19,18 +19,18 @@ Sets up the SRAM handle and adds it to the PI handle table, once; returns it.
 ================
 */
 OSPiHandle *Sram_GetHandle( void ) {
-    if ( D_80069338.baseAddress == PHYS_TO_K1( SRAM_START_ADDR ) ) {
-        return &D_80069338;
+    if ( sram_handle.baseAddress == PHYS_TO_K1( SRAM_START_ADDR ) ) {
+        return &sram_handle;
     }
-    D_80069338.type = DEVICE_TYPE_SRAM;
-    D_80069338.baseAddress = PHYS_TO_K1( SRAM_START_ADDR );
-    D_80069338.latency = SRAM_LATENCY;
-    D_80069338.pulse = SRAM_PULSE;
-    D_80069338.pageSize = SRAM_PAGE_SIZE;
-    D_80069338.relDuration = SRAM_REL_DURATION;
-    D_80069338.domain = PI_DOMAIN2;
-    D_80069338.speed = 0;
-    bzero( &D_80069338.transferInfo, sizeof( D_80069338.transferInfo ) );
-    osEPiLinkHandle( &D_80069338 );
-    return &D_80069338;
+    sram_handle.type = DEVICE_TYPE_SRAM;
+    sram_handle.baseAddress = PHYS_TO_K1( SRAM_START_ADDR );
+    sram_handle.latency = SRAM_LATENCY;
+    sram_handle.pulse = SRAM_PULSE;
+    sram_handle.pageSize = SRAM_PAGE_SIZE;
+    sram_handle.relDuration = SRAM_REL_DURATION;
+    sram_handle.domain = PI_DOMAIN2;
+    sram_handle.speed = 0;
+    bzero( &sram_handle.transferInfo, sizeof( sram_handle.transferInfo ) );
+    osEPiLinkHandle( &sram_handle );
+    return &sram_handle;
 }

@@ -17,10 +17,10 @@ s16 FAT_FindFile( u8 *name ) {
     s32 i;
 
     for ( i = 0; ; i++ ) {
-        if ( D_8010A080.entries[i].name == NULL ) {
+        if ( fat_table.entries[i].name == NULL ) {
             return -1;
         }
-        if ( strncmp( name, D_8010A080.entries[i].name, FAT_NAME_LEN ) == 0 ) {
+        if ( strncmp( name, fat_table.entries[i].name, FAT_NAME_LEN ) == 0 ) {
             return i;
         }
     }
@@ -46,7 +46,7 @@ s32 FAT_ReadFile( u8 *name, void *dst, s32 size, u32 offset ) {
     osInvalDCache( dst, size );
     for ( i = 0; size - i * FAT_DMA_CHUNK > 0; i++ ) {
         boot_dmaRequest.dramAddr = (u8 *)dst + i * FAT_DMA_CHUNK;
-        boot_dmaRequest.devAddr = D_8010A080.entries[index].romStart + offset + i * FAT_DMA_CHUNK;
+        boot_dmaRequest.devAddr = fat_table.entries[index].romStart + offset + i * FAT_DMA_CHUNK;
         len = size - i * FAT_DMA_CHUNK;
         if ( len > FAT_DMA_CHUNK ) {
             len = FAT_DMA_CHUNK;
@@ -72,5 +72,5 @@ s32 FAT_GetFileSize( u8 *name ) {
     if ( index == -1 ) {
         return 0;
     }
-    return D_8010A080.entries[index].romEnd - D_8010A080.entries[index].romStart;
+    return fat_table.entries[index].romEnd - fat_table.entries[index].romStart;
 }

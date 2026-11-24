@@ -19,9 +19,9 @@ typedef struct {
 
 extern u8 str_ROM_START[];          /* linker: ROM address of the str segment */
 
-extern ArchiveEntry D_800A30C0[];
-extern u8 D_80061A00[LZSS_N];       /* LZSS window */
-extern u8 D_80102080[];             /* where compressed files are read before decompression */
+extern ArchiveEntry str_files[];    /* the str segment's files, by file index */
+extern u8 lz_window[LZSS_N];        /* LZSS window */
+extern u8 lz_readBuffer[];          /* where compressed files are read before decompression */
 
 void LZ_Decompress( u8 *dst, u8 *src, u16 len );
 u32 Str_ReadFile( s32 index, u8 *dst );

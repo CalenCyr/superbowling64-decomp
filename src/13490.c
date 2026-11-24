@@ -25,7 +25,7 @@ void Maze_Draw( u16 image, u32 width, u32 height, u8 *maze ) {
     s32 col;
 
     Cache_GetFile( image, FILE_RAW );
-    pixels = ( (fileImage_t *)D_800F80B0[image].data )->data + CI4_PALETTE_SIZE;
+    pixels = ( (fileImage_t *)cache_files[image].data )->data + CI4_PALETTE_SIZE;
     memset( pixels, 0, 0x800 );
     for ( row = 0; row < width * 2 + 1; row++ ) {
         for ( col = 0; col < height * 2 + 1; col++ ) {
@@ -196,10 +196,10 @@ void Menu_DrawItems( menuItem_t *items, u8 step ) {
         }
         x = items[i].x;
         y = items[i].y;
-        if ( D_800F80B0[items[i].image].refCount == 0 ) {
+        if ( cache_files[items[i].image].refCount == 0 ) {
             Cache_GetFile( items[i].image, FILE_RAW );
         }
-        image = D_800F80B0[items[i].image].data;
+        image = cache_files[items[i].image].data;
         width = image->width;
         height = image->height;
         switch ( items[i].slide ) {

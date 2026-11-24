@@ -128,10 +128,10 @@ s32 Save_ShowPrompt( s32 id, s32 mode ) {
     } else {
         scale = 1.0f;
     }
-    if ( D_800F80B0[id].refCount == 0 ) {
+    if ( cache_files[id].refCount == 0 ) {
         Cache_GetFile( id, FILE_RAW );
     }
-    image = D_800F80B0[id].data;
+    image = cache_files[id].data;
     x = ( SCREEN_WIDTH - image->width * scale ) / 2.0f;
     y = ( 200 - image->height ) / 2;
     Draw_ImageScaled( id, x, y, 0xFF, scale, 1.0f );

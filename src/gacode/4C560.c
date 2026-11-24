@@ -17,8 +17,8 @@ nothing calls (gcc 2.7 emits an extern inline function).
 inline void GA_CountFrame( void ) {
     ga_frameCount++;
     if ( ( game_mode & 0xF ) == 3 ) {
-        ( (unkImage_t *)D_800F80B0[1673].data )->unk_07 = game_pulseAlpha;
-        ( (unkImage_t *)D_800F80B0[1674].data )->unk_07 = game_pulseAlpha;
+        ( (unkImage_t *)cache_files[1673].data )->unk_07 = game_pulseAlpha;
+        ( (unkImage_t *)cache_files[1674].data )->unk_07 = game_pulseAlpha;
     }
 }
 
@@ -116,8 +116,8 @@ void GA_AnimateTextures( void ) {
         GA_SetPlayerObjectFlags( 0 );
         Cache_GetFile( 2682, FILE_RAW );
         Cache_GetFile( 2698, FILE_RAW );
-        ga_savedTexels[0] = ( (fileRefB_t *)D_800F80B0[1523].data )->texels;
-        ga_savedTexels[1] = ( (fileRefB_t *)D_800F80B0[1524].data )->texels;
+        ga_savedTexels[0] = ( (fileRefB_t *)cache_files[1523].data )->texels;
+        ga_savedTexels[1] = ( (fileRefB_t *)cache_files[1524].data )->texels;
         for ( i = 0; i < 11; i++ ) {
             Cache_GetFile( D_8012C928_gacode[i], FILE_RAW );
             Cache_GetFile( D_8012C940_gacode[i], FILE_RAW );
@@ -131,24 +131,24 @@ void GA_AnimateTextures( void ) {
             Cache_GetFile( D_8012C964_gacode[i], FILE_RAW );
         }
     }
-    ( (fileRefB_t *)D_800F80B0[1648].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C964_gacode[sched_frameCount / 20 % 9]].data )->palette;
-    ( (fileRefB_t *)D_800F80B0[1528].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C95C_gacode[sched_frameCount / 64 & 1]].data )->palette;
-    ( (fileRefB_t *)D_800F80B0[1529].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C960_gacode[sched_frameCount / 64 & 1]].data )->palette;
-    ( (fileRefB_t *)D_800F80B0[1496].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C958_gacode[sched_frameCount / 2 & 1]].data )->palette;
-    ( (fileRefB_t *)D_800F80B0[1663].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C928_gacode[sched_frameCount / 20 % 11]].data )->palette;
-    ( (fileRefB_t *)D_800F80B0[1664].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C940_gacode[sched_frameCount / 20 % 11]].data )->palette;
+    ( (fileRefB_t *)cache_files[1648].data )->texels =
+        ( (unkImage_t *)cache_files[D_8012C964_gacode[sched_frameCount / 20 % 9]].data )->palette;
+    ( (fileRefB_t *)cache_files[1528].data )->texels =
+        ( (unkImage_t *)cache_files[D_8012C95C_gacode[sched_frameCount / 64 & 1]].data )->palette;
+    ( (fileRefB_t *)cache_files[1529].data )->texels =
+        ( (unkImage_t *)cache_files[D_8012C960_gacode[sched_frameCount / 64 & 1]].data )->palette;
+    ( (fileRefB_t *)cache_files[1496].data )->texels =
+        ( (unkImage_t *)cache_files[D_8012C958_gacode[sched_frameCount / 2 & 1]].data )->palette;
+    ( (fileRefB_t *)cache_files[1663].data )->texels =
+        ( (unkImage_t *)cache_files[D_8012C928_gacode[sched_frameCount / 20 % 11]].data )->palette;
+    ( (fileRefB_t *)cache_files[1664].data )->texels =
+        ( (unkImage_t *)cache_files[D_8012C940_gacode[sched_frameCount / 20 % 11]].data )->palette;
     if ( sched_frameCount & 0x40 ) {
-        ( (fileRefB_t *)D_800F80B0[1523].data )->texels = ( (unkImage_t *)D_800F80B0[2682].data )->palette;
-        ( (fileRefB_t *)D_800F80B0[1524].data )->texels = ( (unkImage_t *)D_800F80B0[2698].data )->palette;
+        ( (fileRefB_t *)cache_files[1523].data )->texels = ( (unkImage_t *)cache_files[2682].data )->palette;
+        ( (fileRefB_t *)cache_files[1524].data )->texels = ( (unkImage_t *)cache_files[2698].data )->palette;
     } else {
-        ( (fileRefB_t *)D_800F80B0[1523].data )->texels = ga_savedTexels[0];
-        ( (fileRefB_t *)D_800F80B0[1524].data )->texels = ga_savedTexels[1];
+        ( (fileRefB_t *)cache_files[1523].data )->texels = ga_savedTexels[0];
+        ( (fileRefB_t *)cache_files[1524].data )->texels = ga_savedTexels[1];
     }
     GA_CountFrame();
 }
@@ -222,14 +222,14 @@ void GA_FlickerLight( void ) {
     Cam_SetAmbient( 0, color );
     Cam_SetAmbient( 1, color );
     step = ( level - 100 ) / 39;
-    ( (fileRefB_t *)D_800F80B0[1903].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C988_gacode[step]].data )->palette;
-    ( (fileRefB_t *)D_800F80B0[1904].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C978_gacode[step]].data )->palette;
-    ( (fileRefB_t *)D_800F80B0[1905].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C980_gacode[step]].data )->palette;
-    ( (fileRefB_t *)D_800F80B0[1906].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C990_gacode[step]].data )->palette;
+    ( (fileRefB_t *)cache_files[1903].data )->texels =
+        ( (unkImage_t *)cache_files[D_8012C988_gacode[step]].data )->palette;
+    ( (fileRefB_t *)cache_files[1904].data )->texels =
+        ( (unkImage_t *)cache_files[D_8012C978_gacode[step]].data )->palette;
+    ( (fileRefB_t *)cache_files[1905].data )->texels =
+        ( (unkImage_t *)cache_files[D_8012C980_gacode[step]].data )->palette;
+    ( (fileRefB_t *)cache_files[1906].data )->texels =
+        ( (unkImage_t *)cache_files[D_8012C990_gacode[step]].data )->palette;
     GA_CountFrame();
 }
 
@@ -247,7 +247,7 @@ void func_80123004_gacode( void ) {
         D_8012C920_gacode = 1;
         GA_SetPlayerObjectFlags( 1 );
     }
-    ( (fileRefB_t *)D_800F80B0[883].data )->scroll[0]--;
+    ( (fileRefB_t *)cache_files[883].data )->scroll[0]--;
     GA_CountFrame();
     if ( game_lastTeam == 1 ) {
         if ( D_800DF595[0] == 3 && ( ga_frameCount & 3 ) == 0 ) {
@@ -297,19 +297,19 @@ void GA_LoadLanePalettes( s32 lane, s32 alt, s32 index ) {
     }
     Cache_GetFile( ga_lanePaletteImages[index][2], FILE_RAW );
     Cache_GetFile( ga_lanePaletteImages[index][3], FILE_RAW );
-    ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[1].material].data )->texels =
-        ( (unkImage_t *)D_800F80B0[ga_lanePaletteImages[index][3]].data )->palette;
-    ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[2].material].data )->texels =
-        ( (unkImage_t *)D_800F80B0[ga_lanePaletteImages[index][2]].data )->palette;
-    ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[3].material].data )->texels =
-        ( (unkImage_t *)D_800F80B0[ga_lanePaletteImages[index][2]].data )->palette;
+    ( (fileRefB_t *)cache_files[obj->model->parts[0]->refs[1].material].data )->texels =
+        ( (unkImage_t *)cache_files[ga_lanePaletteImages[index][3]].data )->palette;
+    ( (fileRefB_t *)cache_files[obj->model->parts[0]->refs[2].material].data )->texels =
+        ( (unkImage_t *)cache_files[ga_lanePaletteImages[index][2]].data )->palette;
+    ( (fileRefB_t *)cache_files[obj->model->parts[0]->refs[3].material].data )->texels =
+        ( (unkImage_t *)cache_files[ga_lanePaletteImages[index][2]].data )->palette;
     if ( alt == 0 ) {
         Cache_GetFile( ga_lanePaletteImages[index][1], FILE_RAW );
-        ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[0].material].data )->texels =
-            ( (unkImage_t *)D_800F80B0[ga_lanePaletteImages[index][1]].data )->palette;
+        ( (fileRefB_t *)cache_files[obj->model->parts[0]->refs[0].material].data )->texels =
+            ( (unkImage_t *)cache_files[ga_lanePaletteImages[index][1]].data )->palette;
     } else {
         Cache_GetFile( ga_lanePaletteImages[index][0], FILE_RAW );
-        ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[0].material].data )->texels =
-            ( (unkImage_t *)D_800F80B0[ga_lanePaletteImages[index][0]].data )->palette;
+        ( (fileRefB_t *)cache_files[obj->model->parts[0]->refs[0].material].data )->texels =
+            ( (unkImage_t *)cache_files[ga_lanePaletteImages[index][0]].data )->palette;
     }
 }

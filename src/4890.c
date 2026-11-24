@@ -70,9 +70,9 @@ Sends request 1 for name.
 ================
 */
 void func_800295A0( u8 *name ) {
-    D_800692D8.command = 1;
-    strcpy( D_800692D8.name, name );
-    Host_Send( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
+    host_packet.command = 1;
+    strcpy( host_packet.name, name );
+    Host_Send( (u8 *)&host_packet, sizeof( host_packet ) );
 }
 
 /*
@@ -83,23 +83,23 @@ Sends request 2 for name and receives the file's size.
 ================
 */
 s32 Host_GetFileSize( u8 *name ) {
-    D_800692D8.command = 2;
-    strcpy( D_800692D8.name, name );
-    D_800692D8.size = 0x100000;
-    Host_Send( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
-    Host_Recv( (u8 *)&D_800619F0, sizeof( D_800619F0 ) );
-    return D_800619F0;
+    host_packet.command = 2;
+    strcpy( host_packet.name, name );
+    host_packet.size = 0x100000;
+    Host_Send( (u8 *)&host_packet, sizeof( host_packet ) );
+    Host_Recv( (u8 *)&host_fileSize, sizeof( host_fileSize ) );
+    return host_fileSize;
 }
 
 /*
 ================
 Host_ReadFile
 
-Receives the D_800619F0 bytes announced by Host_GetFileSize into buf.
+Receives the host_fileSize bytes announced by Host_GetFileSize into buf.
 ================
 */
 void Host_ReadFile( u8 *buf ) {
-    Host_Recv( buf, D_800619F0 );
+    Host_Recv( buf, host_fileSize );
 }
 
 /*
@@ -110,10 +110,10 @@ Sends request 2 for name with size, then receives the size the host returns and 
 ================
 */
 s32 Host_LoadFile( u8 *name, u8 *buf, s32 size ) {
-    D_800692D8.command = 2;
-    strcpy( D_800692D8.name, name );
-    D_800692D8.size = size;
-    Host_Send( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
+    host_packet.command = 2;
+    strcpy( host_packet.name, name );
+    host_packet.size = size;
+    Host_Send( (u8 *)&host_packet, sizeof( host_packet ) );
     Host_Recv( (u8 *)&size, sizeof( size ) );
     Host_Recv( buf, size );
     return size;
@@ -127,10 +127,10 @@ Sends request 3 for name, then the size bytes of buf.
 ================
 */
 void Host_WriteFile( u8 *name, u8 *buf, s32 size ) {
-    D_800692D8.command = 3;
-    strcpy( D_800692D8.name, name );
-    D_800692D8.size = size;
-    Host_Send( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
+    host_packet.command = 3;
+    strcpy( host_packet.name, name );
+    host_packet.size = size;
+    Host_Send( (u8 *)&host_packet, sizeof( host_packet ) );
     Host_Send( buf, size );
 }
 

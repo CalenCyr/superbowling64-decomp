@@ -18,12 +18,12 @@ Starts the heap over: at base, ending at end, when base is given; otherwise over
 */
 void Mem_Reset( HeapBlock *base, u8 *end ) {
     if ( base != NULL ) {
-        D_80062A20 = base;
-        D_80062A24 = end;
+        mem_first = base;
+        mem_end = end;
     }
     D_80062A28 = 0;
-    D_80062A20->next = NULL;
-    D_80062A20->size = sizeof( HeapBlock );
+    mem_first->next = NULL;
+    mem_first->size = sizeof( HeapBlock );
 }
 
 /*
@@ -38,7 +38,7 @@ void *Mem_Alloc( u32 size ) {
     HeapBlock *block;
     HeapBlock *newBlock;
 
-    block = D_80062A20;
+    block = mem_first;
     size = HEAP_ALIGN( size );
     while ( block->next != NULL ) {
         newBlock = BLOCK_END( block );
@@ -52,7 +52,7 @@ void *Mem_Alloc( u32 size ) {
     if ( block->next == NULL ) {
         block->next = BLOCK_END( block );
         BLOCK_END( block )->next = NULL;
-        D_80066B88 = D_80062A24 - ( (u8 *)BLOCK_END( block ) + ( size + sizeof( HeapBlock ) ) );
+        mem_lastFree = mem_end - ( (u8 *)BLOCK_END( block ) + ( size + sizeof( HeapBlock ) ) );
     }
     BLOCK_END( block )->size = size + sizeof( HeapBlock );
     memset( BLOCK_END( block ) + 1, 0, size );
@@ -70,7 +70,7 @@ void Mem_Free( void *ptr ) {
     HeapBlock *prev;
     HeapBlock *block;
 
-    for ( prev = block = D_80062A20; block != NULL; prev = block, block = block->next ) {
+    for ( prev = block = mem_first; block != NULL; prev = block, block = block->next ) {
         if ( (void *)block < ptr && ptr < (void *)BLOCK_END( block ) ) {
             prev->next = block->next;
             return;
@@ -88,7 +88,7 @@ Sets the size of the allocation at ptr to size bytes, rounded up to 8.
 void Mem_Resize( void *ptr, u32 size ) {
     HeapBlock *block;
 
-    block = D_80062A20;
+    block = mem_first;
     size = HEAP_ALIGN( size ) + sizeof( HeapBlock );
     do {
         if ( (void *)( block + 1 ) == ptr ) {

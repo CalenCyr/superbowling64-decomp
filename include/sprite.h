@@ -6,7 +6,7 @@
 #include "common.h"
 #include "libultra.h"
 
-/* D_8005C190 (dbgtext.h): the RDP mode the last 2D drawing set up */
+/* draw_rdpMode (dbgtext.h): the RDP mode the last 2D drawing set up */
 #define DRAW2D_COPY         0           /* copy mode, Draw_Image */
 #define DRAW2D_1CYCLE       1           /* one-cycle mode, Draw_ImageScaled */
 #define DRAW2D_FILL         0xFF        /* rectangles, Draw_FillRect */

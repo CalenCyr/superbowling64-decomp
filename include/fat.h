@@ -16,13 +16,13 @@ typedef struct {
     /* 0x0C */ u32 unk_0C;
 } FatEntry;
 
-/* The BW64FAT file (ROM 0x3C2A0), which boot loads to D_8010A080. */
+/* The BW64FAT file (ROM 0x3C2A0), which boot loads to fat_table. */
 typedef struct {
     /* 0x00 */ u8 magic[8];         /* "BW64FAT" */
     /* 0x08 */ FatEntry entries[1]; /* as many as the file holds */
 } FatTable;
 
-extern FatTable D_8010A080;
+extern FatTable fat_table;          /* the BW64FAT file */
 extern u8 fat_ROM_START[];          /* linker: ROM address of the fat segment */
 extern u8 fat_ROM_END[];
 extern u8 knstatic_ROM_START[];     /* linker: ROM address of the knstatic segment (the KNSTATICSYS file) */

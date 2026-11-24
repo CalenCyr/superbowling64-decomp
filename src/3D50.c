@@ -9,7 +9,7 @@
 ================
 Txt_SetupFont
 
-Render state for the 8x8 font, drawn with the given palette of D_8005B1B0.
+Render state for the 8x8 font, drawn with the given palette of txt_fontPalette.
 ================
 */
 void Txt_SetupFont( Gfx **gdl, s32 palette ) {
@@ -29,9 +29,9 @@ Loads the 8x8 font and its palettes.
 ================
 */
 void Txt_LoadFont( Gfx **gdl ) {
-    gDPLoadTextureBlock_4b( ( *gdl )++, D_8005B8B0, G_IM_FMT_CI, 128, 32, 1,
+    gDPLoadTextureBlock_4b( ( *gdl )++, txt_font, G_IM_FMT_CI, 128, 32, 1,
                             G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 7, 6, G_TX_NOLOD, G_TX_NOLOD );
-    gDPLoadTLUT_pal256( ( *gdl )++, D_8005B1B0 );
+    gDPLoadTLUT_pal256( ( *gdl )++, txt_fontPalette );
     gDPSetTextureFilter( ( *gdl )++, G_TF_POINT );
     gDPSetBlendColor( ( *gdl )++, 0xFF, 0xFF, 0xFF, 0xA0 );
     gDPSetTexturePersp( ( *gdl )++, G_TP_NONE );
@@ -96,9 +96,9 @@ Loads the glyph sheet (file 0x9CE) and its palette, and sets the render state fo
 ================
 */
 void Txt_LoadGlyphSheet( Gfx **gdl ) {
-    D_800619E0 = Cache_GetFile( 0x9CE, 0 );
-    gDPLoadTLUT_pal16( ( *gdl )++, 0, D_800619E0 + 0x10 );
-    D_800619E0 += 0x30;
+    txt_glyphs = Cache_GetFile( 0x9CE, 0 );
+    gDPLoadTLUT_pal16( ( *gdl )++, 0, txt_glyphs + 0x10 );
+    txt_glyphs += 0x30;
     gDPSetTextureFilter( ( *gdl )++, G_TF_POINT );
     gDPSetTexturePersp( ( *gdl )++, G_TP_NONE );
     gDPSetTextureLUT( ( *gdl )++, G_TT_RGBA16 );
@@ -106,7 +106,7 @@ void Txt_LoadGlyphSheet( Gfx **gdl ) {
     gDPSetAlphaCompare( ( *gdl )++, G_AC_THRESHOLD );
     gDPSetCombineMode( ( *gdl )++, G_CC_DECALRGBA, G_CC_DECALRGBA );
     gDPSetCycleType( ( *gdl )++, G_CYC_COPY );
-    D_8005C190 = 0xFF;
+    draw_rdpMode = 0xFF;
 }
 
 /*
@@ -120,7 +120,7 @@ void Txt_DrawGlyphs( Gfx **gdl, s16 x, s16 y, u16 advance, u16 *glyphs ) {
     s32 i;
 
     for ( i = 0; *glyphs != GLYPH_END; i += advance, glyphs++ ) {
-        gDPLoadTextureTile_4b( ( *gdl )++, D_800619E0, G_IM_FMT_CI, 64, 0, *glyphs % 8 * 8, *glyphs / 8 * 16,
+        gDPLoadTextureTile_4b( ( *gdl )++, txt_glyphs, G_IM_FMT_CI, 64, 0, *glyphs % 8 * 8, *glyphs / 8 * 16,
                                *glyphs % 8 * 8 + 8, *glyphs / 8 * 16 + 16, 0, G_TX_NOMIRROR | G_TX_CLAMP,
                                G_TX_NOMIRROR | G_TX_CLAMP, 3, 4, G_TX_NOLOD, G_TX_NOLOD );
         gSPTextureRectangle( ( *gdl )++, ( x + i ) << 2, y << 2, ( x + i + 7 ) << 2, ( y + 15 ) << 2,

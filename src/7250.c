@@ -214,8 +214,8 @@ outside it: one 16 by 16 intensity image (file 0xB33) drawn in four quadrants, e
 ================
 */
 void Draw_RoundedBox( s16 x, s16 y, u16 w, u16 h, u8 r, u8 g, u8 b, u8 a ) {
-    D_8005C190 = DRAW2D_FILL;
-    if ( D_800F80B0[0xB33].refCount == 0 ) {
+    draw_rdpMode = DRAW2D_FILL;
+    if ( cache_files[0xB33].refCount == 0 ) {
         Cache_GetFile( 0xB33, FILE_RAW );
     }
     gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
@@ -224,7 +224,7 @@ void Draw_RoundedBox( s16 x, s16 y, u16 w, u16 h, u8 r, u8 g, u8 b, u8 a ) {
                        PRIMITIVE, 0 );
     gDPSetTextureLUT( game_gfx++, G_TT_NONE );
     gDPSetPrimColor( game_gfx++, 0, 0, r, g, b, a );
-    gDPLoadTextureBlock_4b( game_gfx++, ( (fileImage_t *)D_800F80B0[0xB33].data )->data + CI4_PALETTE_SIZE,
+    gDPLoadTextureBlock_4b( game_gfx++, ( (fileImage_t *)cache_files[0xB33].data )->data + CI4_PALETTE_SIZE,
                             G_IM_FMT_I, 16, 16, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                             G_TX_NOLOD );
     gSPTextureRectangle( game_gfx++, ( x - 8 ) << 2, ( y - 8 ) << 2, ( x + w ) << 2, ( y + h ) << 2,
@@ -385,16 +385,16 @@ void Draw_Image( u16 id, s16 x, s16 y ) {
     u32 height;
     u8 *data;
 
-    if ( D_8005C190 != DRAW2D_COPY ) {
-        D_8005C190 = DRAW2D_COPY;
+    if ( draw_rdpMode != DRAW2D_COPY ) {
+        draw_rdpMode = DRAW2D_COPY;
         gDPSetCycleType( game_gfx++, G_CYC_COPY );
         gDPSetRenderMode( game_gfx++, G_RM_NOOP, G_RM_NOOP2 );
         gDPSetAlphaCompare( game_gfx++, G_AC_THRESHOLD );
     }
-    if ( D_800F80B0[id].refCount == 0 ) {
+    if ( cache_files[id].refCount == 0 ) {
         Cache_GetFile( id, FILE_RAW );
     }
-    image = D_800F80B0[id].data;
+    image = cache_files[id].data;
     type = image->type;
     width = image->width;
     height = image->height;
@@ -424,16 +424,16 @@ void Draw_ImageCopyPalette( u16 id, s16 x, s16 y ) {
     u32 height;
     u8 *data;
 
-    if ( D_8005C190 != DRAW2D_COPY ) {
-        D_8005C190 = DRAW2D_COPY;
+    if ( draw_rdpMode != DRAW2D_COPY ) {
+        draw_rdpMode = DRAW2D_COPY;
         gDPSetCycleType( game_gfx++, G_CYC_COPY );
         gDPSetRenderMode( game_gfx++, G_RM_NOOP, G_RM_NOOP2 );
         gDPSetAlphaCompare( game_gfx++, G_AC_THRESHOLD );
     }
-    if ( D_800F80B0[id].refCount == 0 ) {
+    if ( cache_files[id].refCount == 0 ) {
         Cache_GetFile( id, FILE_RAW );
     }
-    image = D_800F80B0[id].data;
+    image = cache_files[id].data;
     type = image->type;
     width = image->width;
     height = image->height;
@@ -480,8 +480,8 @@ void Draw_ImageScaled( u16 id, s16 x, s16 y, u8 alpha, f32 scaleX, f32 scaleY ) 
     s32 rows;
     s32 offset;
 
-    if ( D_8005C190 != DRAW2D_1CYCLE ) {
-        D_8005C190 = DRAW2D_1CYCLE;
+    if ( draw_rdpMode != DRAW2D_1CYCLE ) {
+        draw_rdpMode = DRAW2D_1CYCLE;
         gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
         gDPSetRenderMode( game_gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
         gDPSetCombineLERP( game_gfx++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, TEXEL0, TEXEL0, 0,
@@ -490,10 +490,10 @@ void Draw_ImageScaled( u16 id, s16 x, s16 y, u8 alpha, f32 scaleX, f32 scaleY ) 
     }
     gDPSetTextureFilter( game_gfx++, G_TF_POINT );
     gDPSetPrimColor( game_gfx++, 0, 0, 0xFF, 0xFF, 0xFF, alpha );
-    if ( D_800F80B0[id].refCount == 0 ) {
+    if ( cache_files[id].refCount == 0 ) {
         Cache_GetFile( id, FILE_RAW );
     }
-    image = D_800F80B0[id].data;
+    image = cache_files[id].data;
     type = image->type;
     width = image->width;
     height = image->height;
@@ -617,7 +617,7 @@ left edges; translucent unless a is 0xFF.
 ================
 */
 void Draw_FillRect( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a ) {
-    D_8005C190 = DRAW2D_FILL;
+    draw_rdpMode = DRAW2D_FILL;
     gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
     if ( a == 0xFF ) {
         gDPSetRenderMode( game_gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2 );
@@ -641,7 +641,7 @@ does its fill.
 ================
 */
 void Draw_RectOutline( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a ) {
-    D_8005C190 = DRAW2D_FILL;
+    draw_rdpMode = DRAW2D_FILL;
     gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
     if ( a == 0xFF ) {
         gDPSetRenderMode( game_gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2 );
@@ -678,7 +678,7 @@ void Draw_ClearScreen( u32 r, u32 g, u32 b ) {
     gDPPipeSync( game_gfx++ );
     gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
                       osVirtualToPhysical( sched_framebuffers[sched_drawFb] ) );
-    D_8005C190 = DRAW2D_FILL;
+    draw_rdpMode = DRAW2D_FILL;
     gDPSetCycleType( game_gfx++, G_CYC_FILL );
     gDPSetFillColor( game_gfx++, GPACK_RGBA5551( r, g, b, 1 ) << 16 | GPACK_RGBA5551( r, g, b, 1 ) );
     gDPFillRectangle( game_gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );

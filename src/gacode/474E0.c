@@ -1136,8 +1136,8 @@ Sets up a sprite of resource id with palette range first to last, keeping a copy
 */
 void GA_SetupSprite( gaSprite_t *sprite, u16 id, u16 first, u16 last ) {
     Draw_Image( id, 320, 240 );
-    if ( D_800F80B0[id].data != NULL ) {
-        memmove( sprite->palette, ( (unkImage_t *)D_800F80B0[id].data )->palette, sizeof( sprite->palette ) );
+    if ( cache_files[id].data != NULL ) {
+        memmove( sprite->palette, ( (unkImage_t *)cache_files[id].data )->palette, sizeof( sprite->palette ) );
         sprite->id = id;
         sprite->first = first;
         sprite->last = last;
@@ -1153,8 +1153,8 @@ Puts the sprite's saved palette back into its resource.
 ================
 */
 void GA_RestorePalette( gaSprite_t *sprite ) {
-    if ( D_800F80B0[sprite->id].data != NULL ) {
-        memmove( ( (unkImage_t *)D_800F80B0[sprite->id].data )->palette, sprite->palette, sizeof( sprite->palette ) );
+    if ( cache_files[sprite->id].data != NULL ) {
+        memmove( ( (unkImage_t *)cache_files[sprite->id].data )->palette, sprite->palette, sizeof( sprite->palette ) );
     }
 }
 
@@ -1172,11 +1172,11 @@ inline void GA_FillPalette( gaSprite_t *sprite, u16 color, u16 index ) {
     u16 *dst;
     s32 i;
 
-    dst = D_800F80B0[sprite->id].data;
+    dst = cache_files[sprite->id].data;
     if ( dst == NULL ) {
         return;
     }
-    dst = ( (unkImage_t *)D_800F80B0[sprite->id].data )->palette;
+    dst = ( (unkImage_t *)cache_files[sprite->id].data )->palette;
     dst += sprite->first;
     if ( index < sprite->first ) {
         index = sprite->first;

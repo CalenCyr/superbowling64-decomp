@@ -24,7 +24,7 @@ void LZ_Decompress( u8 *dst, u8 *src, u16 len ) {
     u16 flags;
     s32 c;
 
-    memset( D_80061A00, 0, LZSS_N - LZSS_F );
+    memset( lz_window, 0, LZSS_N - LZSS_F );
     r = LZSS_N - LZSS_F;
     flags = 0;
     for ( pos = 0; pos < len; ) {
@@ -34,7 +34,7 @@ void LZ_Decompress( u8 *dst, u8 *src, u16 len ) {
         if ( flags & 1 ) {
             c = src[pos++];
             *dst++ = c;
-            D_80061A00[r++] = c;
+            lz_window[r++] = c;
             r &= LZSS_N - 1;
         } else {
             i = src[pos++];
@@ -42,9 +42,9 @@ void LZ_Decompress( u8 *dst, u8 *src, u16 len ) {
             i |= ( j & 0xF0 ) << 4;
             j = ( j & 0x0F ) + LZSS_THRESHOLD;
             for ( k = 0; k <= j; k++ ) {
-                c = D_80061A00[( i + k ) & ( LZSS_N - 1 )];
+                c = lz_window[( i + k ) & ( LZSS_N - 1 )];
                 *dst++ = c;
-                D_80061A00[r++] = c;
+                lz_window[r++] = c;
                 r &= LZSS_N - 1;
             }
         }
@@ -59,29 +59,29 @@ Reads file index of the str segment into dst, decompressing it if it is stored c
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: register/schedule; retail keeps the addresses of D_800A30C0's fields in registers (hoisting
-// &D_800A30C0[index].romOffset out of the loop) where this draft addresses them with %hi/%lo each time; an
+// NON_MATCHING: register/schedule; retail keeps the addresses of str_files's fields in registers (hoisting
+// &str_files[index].romOffset out of the loop) where this draft addresses them with %hi/%lo each time; an
 // ArchiveEntry *entry local is worse. Permuter (target-only scoring, 5 min): best 2560 from 3030 only through noise
-// (a pointer temporary for D_800A30C0 after the last DMA), no source clue.
+// (a pointer temporary for str_files after the last DMA), no source clue.
 u32 Str_ReadFile( s32 index, u8 *dst ) {
     u8 *out;
     s32 compressed;
     u32 done;
     u32 remaining;
 
-    if ( D_800A30C0[index].rawSize == D_800A30C0[index].size ) {
+    if ( str_files[index].rawSize == str_files[index].size ) {
         compressed = FALSE;
     } else {
         compressed = TRUE;
         out = dst;
-        dst = D_80102080;
+        dst = lz_readBuffer;
     }
     done = 0;
     osWritebackDCacheAll();
-    osInvalDCache( dst, D_800A30C0[index].size );
-    for ( remaining = D_800A30C0[index].size; remaining > ARCHIVE_DMA_CHUNK; remaining -= ARCHIVE_DMA_CHUNK ) {
+    osInvalDCache( dst, str_files[index].size );
+    for ( remaining = str_files[index].size; remaining > ARCHIVE_DMA_CHUNK; remaining -= ARCHIVE_DMA_CHUNK ) {
         boot_dmaRequest.dramAddr = dst + done;
-        boot_dmaRequest.devAddr = D_800A30C0[index].romOffset + ( done + (u32)str_ROM_START );
+        boot_dmaRequest.devAddr = str_files[index].romOffset + ( done + (u32)str_ROM_START );
         boot_dmaRequest.size = ARCHIVE_DMA_CHUNK;
         done += ARCHIVE_DMA_CHUNK;
         osEPiStartDma( boot_romHandle, &boot_dmaRequest, OS_READ );
@@ -89,13 +89,13 @@ u32 Str_ReadFile( s32 index, u8 *dst ) {
     }
     boot_dmaRequest.dramAddr = dst + done;
     boot_dmaRequest.size = ( remaining + 1 ) & ~1;
-    boot_dmaRequest.devAddr = D_800A30C0[index].romOffset + ( done + (u32)str_ROM_START );
+    boot_dmaRequest.devAddr = str_files[index].romOffset + ( done + (u32)str_ROM_START );
     osEPiStartDma( boot_romHandle, &boot_dmaRequest, OS_READ );
     osRecvMesg( &boot_dmaQueue, NULL, OS_MESG_BLOCK );
     if ( compressed ) {
-        LZ_Decompress( out, dst, D_800A30C0[index].size );
+        LZ_Decompress( out, dst, str_files[index].size );
     }
-    return D_800A30C0[index].rawSize;
+    return str_files[index].rawSize;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/4DC0", Str_ReadFile);

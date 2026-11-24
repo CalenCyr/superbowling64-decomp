@@ -17,8 +17,8 @@ their right, from (x - 8, y - 8).
 ================
 */
 void GS_DrawTintedImage( s16 x, s16 y, u8 r, u8 g, u8 b, u8 a ) {
-    D_8005C190 = DRAW2D_FILL; /* neither cached mode: the next image or text sets its mode up again */
-    if ( D_800F80B0[0x960].refCount == 0 ) {
+    draw_rdpMode = DRAW2D_FILL; /* neither cached mode: the next image or text sets its mode up again */
+    if ( cache_files[0x960].refCount == 0 ) {
         Cache_GetFile( 0x960, FILE_RAW );
     }
     gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
@@ -28,21 +28,21 @@ void GS_DrawTintedImage( s16 x, s16 y, u8 r, u8 g, u8 b, u8 a ) {
     gDPSetTextureLUT( game_gfx++, G_TT_NONE );
     gDPSetPrimColor( game_gfx++, 0, 0, r, g, b, a );
 
-    gDPLoadTextureBlock_4b( game_gfx++, ( (fileImage_t *)D_800F80B0[0x960].data )->data + CI4_PALETTE_SIZE,
+    gDPLoadTextureBlock_4b( game_gfx++, ( (fileImage_t *)cache_files[0x960].data )->data + CI4_PALETTE_SIZE,
                             G_IM_FMT_I, 128, 32, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                             G_TX_NOLOD );
     gSPTextureRectangle( game_gfx++, ( x - 8 ) << 2, ( y - 8 ) << 2, ( x + 120 ) << 2, ( y + 24 ) << 2,
                          G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
 
     gDPLoadTextureBlock_4b( game_gfx++,
-                            ( (fileImage_t *)D_800F80B0[0x960].data )->data + CI4_PALETTE_SIZE + 128 * 32 / 2,
+                            ( (fileImage_t *)cache_files[0x960].data )->data + CI4_PALETTE_SIZE + 128 * 32 / 2,
                             G_IM_FMT_I, 128, 32, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                             G_TX_NOLOD );
     gSPTextureRectangle( game_gfx++, ( x - 8 ) << 2, ( y + 24 ) << 2, ( x + 120 ) << 2, ( y + 56 ) << 2,
                          G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10 );
 
     gDPLoadTextureBlock_4b( game_gfx++,
-                            ( (fileImage_t *)D_800F80B0[0x960].data )->data + CI4_PALETTE_SIZE + 128 * 32,
+                            ( (fileImage_t *)cache_files[0x960].data )->data + CI4_PALETTE_SIZE + 128 * 32,
                             G_IM_FMT_I, 32, 64, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                             G_TX_NOLOD );
     gSPTextureRectangle( game_gfx++, ( x + 120 ) << 2, ( y - 8 ) << 2, ( x + 152 ) << 2, ( y + 56 ) << 2,

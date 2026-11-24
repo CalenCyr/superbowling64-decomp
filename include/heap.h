@@ -6,7 +6,7 @@
 #include "common.h"
 
 /*
-Header in front of each allocation; the blocks form a list in address order from D_80062A20. Names of the
+Header in front of each allocation; the blocks form a list in address order from mem_first. Names of the
 type and its members are invented.
 */
 typedef struct HeapBlock_s {
@@ -14,10 +14,10 @@ typedef struct HeapBlock_s {
     /* 0x04 */ u32 size;                /* bytes from this header to the end of the block, header included */
 } HeapBlock;
 
-extern HeapBlock *D_80062A20;           /* first block; the heap starts here */
-extern u8 *D_80062A24;                  /* end of the heap */
+extern HeapBlock *mem_first;            /* first block; the heap starts here */
+extern u8 *mem_end;                     /* end of the heap */
 extern s32 D_80062A28;
-extern s32 D_80066B88;                  /* bytes left after the last block */
+extern s32 mem_lastFree;                /* bytes left after the last block */
 
 void Mem_Reset( HeapBlock *base, u8 *end );
 void *Mem_Alloc( u32 size );

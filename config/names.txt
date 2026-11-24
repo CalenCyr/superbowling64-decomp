@@ -431,7 +431,7 @@ gaSprite_t	gacode.h	invented: sprite of a main resource with a 256-colour palett
 GA_ScoreResult	3E350.c	invented: the inline helper of GA_ScorePar that maps 2 + a frame's score against par to the game mode's result (1 par, 2 one under, 3 else)
 unkImage_t	gacode.h	invented: image a resource points to: 0x10-byte header, then a 256-colour palette
 # units 53B0-13490 (lane match-main-53B0: types; functions keep placeholder names)
-fileCacheEntry_t	include/filecache.h	invented: {reference count, data} slot per str file index in D_800F80B0 (unit BEF0)
+fileCacheEntry_t	include/filecache.h	invented: {reference count, data} slot per str file index in cache_files (unit BEF0)
 fileType1_t	include/filecache.h	invented: file relocated by Cache_GetFile type 1 (count, offset, part offsets); purpose unknown
 fileType1Part_t	include/filecache.h	invented: part of a fileType1_t, naming pairs of further files
 fileType1Ref_t	include/filecache.h	invented: pair of file indices in a fileType1Part_t
@@ -457,7 +457,7 @@ objNode_t, objClass_t, objParams_t, OBJ_PARAMS_SKIP, OBJ_PARAMS_END	object.h	inv
 drawEntry_t, DRAW_BUCKETS, DRAW_NONE	ground.h	invented: the 12-byte entries of scene_drawList that Scene_AddToDrawList sorts into 0x400 buckets chained by Scene_ChainDrawList
 SCREEN_WIDTH, SCREEN_HEIGHT	boot.h	invented: the 320x240 framebuffers (Scene_BeginFrame's scissor and color image)
 fileImage_t, IMAGE_CI4, IMAGE_CI8, CI4_PALETTE_SIZE, CI8_PALETTE_SIZE	sprite.h	invented: the image files Draw_Image draws (palette offsets 0x20 and 0x200 by type)
-DRAW2D_COPY, DRAW2D_1CYCLE, DRAW2D_FILL	sprite.h	invented: the D_8005C190 values the 2D functions set with the cycle type they emit
+DRAW2D_COPY, DRAW2D_1CYCLE, DRAW2D_FILL	sprite.h	invented: the draw_rdpMode values the 2D functions set with the cycle type they emit
 PROMPT_* (modes and states), PROMPT_ZOOM_FRAMES	save.h	invented: Save_ShowPrompt's modes, from its input handling, and save_promptState's states
 SE_CURSOR, SE_DECIDE	gamesnd.h	invented: SE 0 on a cursor move and SE 1 on a choice in Save_ShowPrompt
 menuItem_t, MENU_END, MENU_NONE, MENU_SLIDE_STEPS, SLIDE_*	menu.h	invented: the 10-byte menu records Menu_DrawItems draws and Menu_SetItem edits
@@ -1403,3 +1403,23 @@ audio_stack	0x80064590	invented: the audio thread's stack
 audio_buffers	0x80064594	invented: NUM_AUDIO_BUFFERS output buffers
 audio_cmdList	0x80064598	invented: the frame's command list
 audio_lastBuffer	0x8005CE50	invented: the buffer the last task filled, for the AI next; NULL: none yet
+
+# include/sram.h, filecache.h, hostio.h, archive.h, heap.h, fat.h, dbgtext.h, input.h: device handles, file tables, the heap, fonts
+sram_handle	0x80069338	invented: the SRAM's PI handle, set up on first use (unit 47E0)
+cache_files	0x800F80B0	invented: the file cache, by file index (Cache_LoadFile, Cache_GetFile)
+cache_hostMode	0x8005C0BC	invented: development switch: with cache_hostFiles, files come from the host; alone it enables the debug menu (Z with L) and cacode's host pictures
+cache_hostFiles	0x8005C0BD	invented: set by pvcode and cacode: with cache_hostMode, files are read from the host as "data.NNNN"
+host_packet	0x800692D8	invented: the request header sent before each host transfer (HostPacket)
+host_fileSize	0x800619F0	invented: bytes of the file announced by Host_GetFileSize, then received by Host_ReadFile
+str_files	0x800A30C0	invented: the str segment's file table, by file index (ArchiveEntry; Str_ReadFile)
+lz_window	0x80061A00	invented: the LZSS window
+lz_readBuffer	0x80102080	invented: where compressed files are read before decompression
+mem_first	0x80062A20	invented: the heap's first block, where the heap starts (Mem_Reset)
+mem_end	0x80062A24	invented: end of the heap (Mem_Reset)
+mem_lastFree	0x80066B88	invented: bytes left after the last block (Mem_Alloc)
+fat_table	0x8010A080	invented: the BW64FAT file, loaded here at boot (FatTable)
+txt_fontPalette	0x8005B1B0	invented: palette of the txt_font font
+txt_font	0x8005B8B0	invented: 128x32 CI4 font, characters 0x20-0x5F in rows of 16 (Txt_LoadFont)
+txt_glyphs	0x800619E0	invented: CI4 glyph sheet, 64 pixels wide, 8x16 glyphs (GLYPH_DIGIT0)
+draw_rdpMode	0x8005C190	invented: the RDP mode the last 2D drawing set up (DRAW2D_FILL, DRAW2D_COPY; 0xFF: none, set by unit 3D50)
+cont_siEvent	0x800619B8	invented: its address is the message of the serial interface event (Cont_Init)

@@ -140,15 +140,15 @@ void Main_Thread( void *arg ) {
     osSetEventMesg( OS_EVENT_PRENMI, &sched_queue, &sched_msgPreNmi );
     osViSetEvent( &sched_queue, &sched_msgRetrace, 1 );
 
-    osInvalDCache( &D_8010A080, fat_ROM_END - fat_ROM_START );
+    osInvalDCache( &fat_table, fat_ROM_END - fat_ROM_START );
     boot_dmaRequest.hdr.pri = OS_MESG_PRI_NORMAL;
     boot_dmaRequest.hdr.retQueue = &boot_dmaQueue;
-    boot_dmaRequest.dramAddr = &D_8010A080;
+    boot_dmaRequest.dramAddr = &fat_table;
     boot_dmaRequest.devAddr = (u32)fat_ROM_START;
     boot_dmaRequest.size = fat_ROM_END - fat_ROM_START;
     osEPiStartDma( boot_romHandle, &boot_dmaRequest, OS_READ );
     osRecvMesg( &boot_dmaQueue, NULL, OS_MESG_BLOCK );
-    FAT_ReadFile( "IDX     SYS", D_800A30C0, FAT_GetFileSize( "IDX     SYS" ), 0 );
+    FAT_ReadFile( "IDX     SYS", str_files, FAT_GetFileSize( "IDX     SYS" ), 0 );
     osInvalDCache( boot_staticFile, knstatic_ROM_END - knstatic_ROM_START );
     FAT_ReadFile( "KNSTATICSYS", boot_staticFile, FAT_GetFileSize( "KNSTATICSYS" ), 0 );
     Cont_Init();
@@ -226,7 +226,7 @@ void Main_Thread( void *arg ) {
                 sched_nextFb = sched_gfxFrames[sched_runList].fbIndex;
             }
             sched_rdpTime = OS_CYCLES_TO_USEC( osGetTime() - sched_gfxStartTime );
-            if ( D_8005C0BC != 0 && game_scene != 1 && ( cont_allHeld & Z_TRIG ) && ( cont_allPressed & L_TRIG ) ) {
+            if ( cache_hostMode != 0 && game_scene != 1 && ( cont_allHeld & Z_TRIG ) && ( cont_allPressed & L_TRIG ) ) {
                 Dbg_ScreenShot();
             }
             break;
@@ -544,7 +544,7 @@ void Game_Thread( void *arg ) {
         }
 
         if ( cont_demoMode != 0 ) {
-            D_8005C190 = DRAW2D_FILL;
+            draw_rdpMode = DRAW2D_FILL;
             Draw_ImageScaled( 0xA71, 80, 120, game_pulseAlpha, 1.0f, 1.0f );
             Draw_Image( 0x87F, 200, 152 );
             Draw_Image( game_demoTitles[game_demo], 200, 200 );
