@@ -654,6 +654,7 @@ s32 Scene_Draw( void ) {
             if ( scene_fog ) {
                 scene_geometryMode |= G_FOG;
             }
+            /* G_ZBUFFER is left out of the clear, so once set it stays set */
             gSPClearGeometryMode( game_gfx++, G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING |
                                                 G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH );
             gSPSetGeometryMode( game_gfx++, scene_geometryMode );
