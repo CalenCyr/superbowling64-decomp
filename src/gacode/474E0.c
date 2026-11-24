@@ -214,7 +214,7 @@ GA_SegmentHitsSpot
 
 Nonzero when the segment from from to to passes within radius plus the spot's radius of the spot's centre,
 at a point between its ends.
-Declared inline: GA_CollideLane (parked draft) expands it.
+Declared inline: GA_CollideLane expands it.
 ================
 */
 inline s32 GA_SegmentHitsSpot( gaSpot_t *spot, vec3_t from, vec3_t to, f32 radius ) {
@@ -306,7 +306,7 @@ GA_CollideBodies
 Collision of bodies a and b (spots sa and sb): the one with more momentum is the mover of
 GA_CollideMomentum, and when it had strictly more, the other takes its spin about y, reversed and cut by
 the restitution.
-Declared inline: GA_CollideLane (parked draft) expands it.
+Declared inline: GA_CollideLane expands it.
 ================
 */
 inline void GA_CollideBodies( gaMotion_t *a, gaMotion_t *b, gaSpot_t *sa, gaSpot_t *sb ) {
@@ -412,9 +412,10 @@ GA_TipBody
 For a body with rot[0] 0 that moves at speed 1 or more: by kind 0 or 1 sets its spin about x, heads it along
 its velocity (GA_SetBallHeading), moves standState from 1 (still standing) to 2, and plays sound 0x32 (0x4B with
 flags bit 1) on the lane of flags bit 0; returns 1. Otherwise returns 0.
+Declared inline: GA_CollideLane expands it.
 ================
 */
-s32 GA_TipBody( u8 kind, gaMotion_t *motion, gaBody_t *body, u8 flags ) {
+inline s32 GA_TipBody( u8 kind, gaMotion_t *motion, gaBody_t *body, u8 flags ) {
     if ( body->rot[0] == 0.0f && GA_VecLength( motion->vel ) >= 1.0 ) {
         switch ( kind ) {
         case 0:
@@ -471,20 +472,14 @@ bit 0 (it was hit this frame) and one bit per spot it touches. Returns 1 when th
 the first spots knocked a body over.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: same calls, CFG and inline expansions (GA_SegmentHitsSpot, GA_CollideBodies,
-// GA_VecLength); register allocation differs: retail keeps lane in s7, a in s8 and hit on the stack
-// (0x7C), recomputes &bodies[a] at each use, and spills which as a word (andi 0xFF in the inner loop's
-// preheader, so it may be (u8)( i / NUM_BODIES ) inside the inner loop); this draft hoists the constant 1 into
-// s7 and &bodies[a] into s8, and its frame is 8 bytes larger
 s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots, u8 lane ) {
     gaSpot_t mid;
-    s32 hit = 0;
     s32 i;
     s32 a;
     s32 b;
     s32 b2;
-    u8 which;
+    s32 which;
+    s32 hit = 0;
 
     for ( b = 0; b < NUM_BODIES; b++ ) {
         spots[b].contacts &= ~1;
@@ -509,45 +504,18 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                 mid.pos[2] = ( spots[b].pos[2] + spots[b2].pos[2] ) / 2.0f;
                 mid.radius = spots[b2].radius;
             }
-            if ( !( ( spots[i].contacts >> ( b2 ) ) & 1 ) &&
+            if ( !( ( spots[i].contacts >> b2 ) & 1 ) &&
                  ( GA_SpotsOverlap( &spots[i], &spots[b] ) ||
                    ( spots[b2].radius != 0.0f &&
                      GA_SegmentHitsSpot( &spots[i], spots[b].pos, mid.pos, spots[b].radius ) ) ) ) {
                 if ( !( ( spots[i].contacts >> b ) & 1 ) ) {
                     GA_CollideBodies( &motion[a], &motion[b], &spots[i], &spots[b] );
-                    lane = spots[i].pos[1] < -190.0f ? lane | 2 : lane;
+                    lane |= spots[i].pos[1] < -190.0f ? 2 : 0;
                     if ( bodies[b].kind == 1 ) {
-                        if ( bodies[b].rot[0] == 0.0f && GA_VecLength( motion[b].vel ) >= 1.0 ) {
-                            motion[b].spin[0] = 1.5f;
-                            GA_SetBallHeading( motion[b].vel, &bodies[b] );
-                            if ( bodies[b].standState == 1 ) {
-                                bodies[b].standState = 2;
-                            }
-                            GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
-                            hit = 1;
-                        } else {
-                            hit = 0;
-                        }
+                        hit = GA_TipBody( 0, &motion[b], &bodies[b], lane );
                     }
                     if ( bodies[a].kind == 1 ) {
-                        if ( bodies[a].rot[0] == 0.0f && GA_VecLength( motion[a].vel ) >= 1.0 ) {
-                            switch ( which ) {
-                            case 0:
-                                motion[a].spin[0] = 1.5f;
-                                break;
-                            case 1:
-                                motion[a].spin[0] = -2.0f;
-                                break;
-                            }
-                            GA_SetBallHeading( motion[a].vel, &bodies[a] );
-                            if ( bodies[a].standState == 1 ) {
-                                bodies[a].standState = 2;
-                            }
-                            GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
-                            hit = 1;
-                        } else {
-                            hit = 0;
-                        }
+                        hit = GA_TipBody( which, &motion[a], &bodies[a], lane );
                     }
                     spots[i].contacts |= 1 << b;
                     spots[b].contacts |= 1;
@@ -557,48 +525,26 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                         ( GA_SpotsOverlap( &spots[i], &spots[b2] ) ||
                           GA_SegmentHitsSpot( &spots[i], mid.pos, spots[b2].pos,
                                                 spots[b2].radius ) ) ) {
-                if ( !( ( spots[i].contacts >> ( b2 ) ) & 1 ) ) {
+                if ( !( ( spots[i].contacts >> b2 ) & 1 ) ) {
                     GA_CollideBodies( &motion[a], &motion[b], &spots[i], &spots[b2] );
-                    lane = spots[i].pos[1] < -190.0f ? lane | 2 : lane;
-                    if ( bodies[b].kind == 1 && bodies[b].rot[0] == 0.0f &&
-                         GA_VecLength( motion[b].vel ) >= 1.0 ) {
-                        motion[b].spin[0] = -2.0f;
-                        GA_SetBallHeading( motion[b].vel, &bodies[b] );
-                        if ( bodies[b].standState == 1 ) {
-                            bodies[b].standState = 2;
-                        }
-                        GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
+                    lane |= spots[i].pos[1] < -190.0f ? 2 : 0;
+                    if ( bodies[b].kind == 1 ) {
+                        GA_TipBody( 1, &motion[b], &bodies[b], lane );
                     }
-                    if ( bodies[a].kind == 1 && bodies[a].rot[0] == 0.0f &&
-                         GA_VecLength( motion[a].vel ) >= 1.0 ) {
-                        switch ( which ) {
-                        case 0:
-                            motion[a].spin[0] = 1.5f;
-                            break;
-                        case 1:
-                            motion[a].spin[0] = -2.0f;
-                            break;
-                        }
-                        GA_SetBallHeading( motion[a].vel, &bodies[a] );
-                        if ( bodies[a].standState == 1 ) {
-                            bodies[a].standState = 2;
-                        }
-                        GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
+                    if ( bodies[a].kind == 1 ) {
+                        GA_TipBody( which, &motion[a], &bodies[a], lane );
                     }
-                    spots[i].contacts |= 1 << ( b2 );
+                    spots[i].contacts |= 1 << b2;
                     spots[b].contacts |= 1;
                 }
             } else {
-                spots[i].contacts &= ~( 1 << b );
-                spots[i].contacts &= ~( 1 << ( b2 ) );
+                spots[i].contacts = ~( 1 << b ) & spots[i].contacts;
+                spots[i].contacts = ~( 1 << b2 ) & spots[i].contacts;
             }
         }
     }
     return hit;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_CollideLane);
-#endif
 
 /*
 ================
