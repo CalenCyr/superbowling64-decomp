@@ -1913,6 +1913,10 @@ s32 Snd_StartSe( seTable_t *table, s32 index, s32 volume, s32 pan, s32 priority 
 // NON_MATCHING: registers: retail inlines Snd_RelocateTable (declaring it inline gives retail's 0x50 frame and loops), then keeps a separate base copy per relocation loop and swaps s1/s2.
 // Also checked: base parameter s32/u32/u8 */void */const, a base local (s32, u32 or a pointer) set from hdr, at the
 // top or in the if; the local shares one register across the loops instead of retail's per-loop copies.
+// Retail's per-loop copy (a1 = a2 = hdr) has the shape of gcc's inline parameter copy, which this draft gets for
+// table (a loaded temporary) but not for base (hdr, a user variable). Not it: base arguments (u32)hdr, (int)hdr,
+// (s32)(u8 *)hdr, (s32)(void *)hdr, (s32)&hdr->unk_00, (s32)&hdr[0], (s32)(hdr + 0); a pointer walk or an entry
+// local in Snd_RelocateTable.
 /*
 ================
 Snd_StartBgm
