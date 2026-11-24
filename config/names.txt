@@ -441,7 +441,7 @@ fileType2_t	include/filecache.h	invented: file relocated by Cache_GetFile type 2
 fileType3_t	include/filecache.h	invented: file relocated by Cache_GetFile type 3
 FILE3_FOG	include/filecache.h	invented: fileType3_t.unk_38 bit Scene_BeginView tests before drawing fog
 fileType3_t.fogColor, fogNear, fogFar	include/filecache.h	invented: the gDPSetFogColor and gSPFogPosition arguments of Scene_BeginView
-bmpHeader_t	include/gamesnd.h	evidence: D_8005CA40 is a BMP file and info header ("BM", 54-byte offset, 320x240, 24 bpp) written by func_80037E30
+bmpHeader_t	include/gamesnd.h	evidence: dbg_shotHeader is a BMP file and info header ("BM", 54-byte offset, 320x240, 24 bpp) written by func_80037E30
 bmpFile_t	include/gamesnd.h	evidence: func_80037E30 writes the header and 320x240 BGR pixels to the host as "BW%3.3d.BMP"
 
 # 1B060.c / 1B1A0.c audio heap and frame sizing
@@ -1351,3 +1351,27 @@ cam_count	0x80099480	invented: cameras in cam_cameras (cleared by Obj_ClearList)
 cam_cameras	0x8009CFA0	invented: the scene's cameras (Cam_Create); an object's viewMask has a bit for each
 cam_perspNorm	0x8009CF9E	invented: perspNorm of the cameras' projections (guPerspective in Cam_Update, gSPPerspNormalize)
 cam_manual	0x800EA0C0	invented: set: Cam_Update applies the controller's zoom, pan and rotation instead of the path's view
+
+# include/gamesnd.h: the BGM files, the audio task and screenshots (unit 12C70)
+sound_bgmBuffer	0x8005C9D0	invented: the sound_bgmBuffers buffer of the last BGM loaded (Sound_PlayBgm)
+sound_bgm	0x8005C9E8	invented: index of the current BGM, | BGM_STOPPED
+sound_bgmVolumes	0x8005C9EC	invented: BGM volume of each save_data.musicVolume setting (Sound_UpdateBgmVolume)
+sound_bgmIsMusic	0x8005C9F8	invented: per BGM, nonzero: skipped while save_data.music is 0 (Sound_PlayBgm)
+sound_bgmFiles	0x8005CA0C	invented: str file of each BGM
+sound_bgmBuffers	0x800EA440	invented: the two BGM sequence buffers, BGM_BUFFER_SIZE each
+dbg_shotHeader	0x8005CA40	invented: the BMP header Dbg_ScreenShot puts in front of a screenshot's pixels
+dbg_shotNumber	0x8005CA76	invented: number of the next screenshot, BW%3.3d.BMP (Dbg_ScreenShot)
+sound_heap	0x800ABD70	invented: the audio heap (written back before the audio task, 0x33800 bytes)
+sound_taskStart	0x80099450	invented: when the last audio task started (Sound_RunAudioTask)
+sound_taskTime	0x8005B0F0	invented: microseconds the last audio task took
+
+# include/gridedit.h: the floor grid editor (unit 111A0)
+gridEd_active	0x8005C980	invented: set: GridEd_Frame runs each frame; it clears it when done
+gridEd_vtx	0x8005C984	invented: a vertex per grid point, allocated on the editor's first frame
+gridEd_cursorX	0x8005C988	invented: the cursor's point along x
+gridEd_cursorZ	0x8005C98A	invented: the cursor's point along z
+gridEd_paint	0x8005C98C	invented: the mark Z with the D-pad paints (GRIDEDIT_SELECT)
+gridEd_heldFrames	0x8005C98E	invented: frames the D-pad has been held, to 100; from 7 the cursor repeats
+gridEd_page	0x80063AF0	invented: the editor's page, GRIDEDIT_*, picked with R held and up or down
+gridEd_mtx	0x80063AF8	invented: identity, the model matrix of the grid
+gridEd_marked	0x80063B40	invented: per grid point: marked (GRIDEDIT_SELECT, GRIDEDIT_HEIGHT)

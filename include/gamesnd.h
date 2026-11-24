@@ -10,7 +10,7 @@
 
 #define BGM_BUFFER_SIZE     0x4650      /* bytes of each BGM sequence buffer */
 #define BGM_START_DELAY     10          /* frames from loading a BGM to starting it */
-#define BGM_STOPPED         0x100       /* D_8005C9E8: the BGM is not playing */
+#define BGM_STOPPED         0x100       /* sound_bgm: the BGM is not playing */
 
 /* Sound_PlaySe flags */
 #define SE_PAN_MASK         0x03        /* 0: centre, 1: left, 2: right, 3: random pan and volume */
@@ -35,21 +35,21 @@ typedef struct {
     /* 0x00036 */ u8 pixels[SCREENSHOT_HEIGHT][SCREENSHOT_WIDTH][3];  /* blue, green, red */
 } bmpFile_t;
 
-extern s32 D_8005C9D0;              /* the D_800EA440 buffer of the last BGM loaded */
-extern u16 D_8005C9E8;              /* index of the current BGM, | BGM_STOPPED */
-extern u16 D_8005C9EC[];            /* BGM volume of each save_data.musicVolume setting */
-extern u8 D_8005C9F8[];             /* nonzero: the BGM is skipped while save_data.music is 0 */
-extern s16 D_8005CA0C[];            /* str file of each BGM */
-extern u8 D_800EA440[2][BGM_BUFFER_SIZE];
-extern bmpHeader_t D_8005CA40;
-extern s16 D_8005CA76;              /* number of the next screenshot */
+extern s32 sound_bgmBuffer;         /* the sound_bgmBuffers buffer of the last BGM loaded */
+extern u16 sound_bgm;               /* index of the current BGM, | BGM_STOPPED */
+extern u16 sound_bgmVolumes[];      /* BGM volume of each save_data.musicVolume setting */
+extern u8 sound_bgmIsMusic[];       /* nonzero: the BGM is skipped while save_data.music is 0 */
+extern s16 sound_bgmFiles[];        /* str file of each BGM */
+extern u8 sound_bgmBuffers[2][BGM_BUFFER_SIZE];  /* BGM sequence buffers, used in turn */
+extern bmpHeader_t dbg_shotHeader;  /* the header in front of each screenshot's pixels */
+extern s16 dbg_shotNumber;          /* number of the next screenshot */
 extern OSMesgQueue sound_frameQueue;  /* Main_Thread sends to it every other retrace */
 extern OSMesgQueue sched_queue;     /* Main_Thread's: the SP, DP, PRENMI and retrace events and the audio task requests */
 extern OSMesgQueue sound_doneQueue;  /* where the audio task reports completion */
 extern s32 sched_msgAudio;          /* the audio task request message: its code, SCHED_MSG_AUDIO */
-extern u8 D_800ABD70[];             /* audio heap */
-extern OSTime D_80099450;           /* when the last audio task started */
-extern s32 D_8005B0F0;              /* microseconds the last audio task took */
+extern u8 sound_heap[];             /* audio heap */
+extern OSTime sound_taskStart;      /* when the last audio task started */
+extern s32 sound_taskTime;          /* microseconds the last audio task took */
 
 /* sound driver functions (unit 166B0) this unit calls that functions.h does not declare */
 void Snd_Init( sndConfig_t *config );

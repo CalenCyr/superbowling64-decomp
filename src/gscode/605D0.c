@@ -297,7 +297,7 @@ s32 GS_Options( void ) {
         gs_optionsMenu[5].slide = SLIDE_RIGHT;
         gs_optionsSlide += 2;
         if ( gs_optionsSlide == 30 ) {
-            if ( D_8005C9E8 != 1 ) {
+            if ( sound_bgm != 1 ) {
                 Sound_PlayBgm( 1 );
             }
             if ( gs_optionsState == 2 ) {

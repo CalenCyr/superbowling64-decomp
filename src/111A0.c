@@ -18,7 +18,7 @@
 GridEd_Frame
 
 Frame of the floor grid editor: draws the grid game_floorGrids[0] in lines through camera 0, marked points red and the
-cursor flashing, then runs the page D_80063AF0 (R with up or down picks it) and prints the page, its values and the
+cursor flashing, then runs the page gridEd_page (R with up or down picks it) and prints the page, its values and the
 height under the cursor.
 ================
 */
@@ -31,11 +31,11 @@ void GridEd_Frame( void ) {
     s32 i;
     s32 resized;
 
-    if ( D_8005C984 == NULL ) {
-        D_80063AF0 = GRIDEDIT_EXIT;
-        D_8005C984 = Mem_Alloc( GRIDEDIT_POINTS * sizeof( Vtx ) );
-        memset( D_80063B40, 0, sizeof( D_80063B40 ) );
-        guMtxIdent( &D_80063AF8 );
+    if ( gridEd_vtx == NULL ) {
+        gridEd_page = GRIDEDIT_EXIT;
+        gridEd_vtx = Mem_Alloc( GRIDEDIT_POINTS * sizeof( Vtx ) );
+        memset( gridEd_marked, 0, sizeof( gridEd_marked ) );
+        guMtxIdent( &gridEd_mtx );
     }
 
     gSPLoadUcodeL( game_gfx++, gspL3DEX2_fifo );
@@ -45,39 +45,39 @@ void GridEd_Frame( void ) {
     gDPSetAlphaCompare( game_gfx++, G_AC_NONE );
     gDPSetCombineLERP( game_gfx++, 1, 0, SHADE, 0, 1, 0, PRIMITIVE, 0, 1, 0, SHADE, 0, 1, 0, PRIMITIVE, 0 );
     gDPSetPrimColor( game_gfx++, 0, 0, 0x80, 0x80, 0x80, 0x80 );
-    gSPMatrix( game_gfx++, &D_80063AF8, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
+    gSPMatrix( game_gfx++, &gridEd_mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
     gSPClearGeometryMode( game_gfx++, G_SHADE | G_SHADING_SMOOTH | G_LIGHTING | G_TEXTURE_GEN | G_FOG );
     gSPSetGeometryMode( game_gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH );
 
     for ( z = 0; z < game_floorGrids[0].numZ; z++ ) {
         for ( x = 0; x < game_floorGrids[0].numX; x++ ) {
-            D_8005C984[x + z * game_floorGrids[0].numX].v.ob[0] = game_floorGrids[0].originX + x * game_floorGrids[0].stepX;
-            D_8005C984[x + z * game_floorGrids[0].numX].v.ob[1] = game_floorGrids[0].heights[x + z * game_floorGrids[0].numX];
-            D_8005C984[x + z * game_floorGrids[0].numX].v.ob[2] = game_floorGrids[0].originZ + z * game_floorGrids[0].stepZ;
-            if ( D_80063B40[x + z * game_floorGrids[0].numX] ) {
-                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[0] = 0xFF;
-                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[1] = 0;
-                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[2] = 0;
+            gridEd_vtx[x + z * game_floorGrids[0].numX].v.ob[0] = game_floorGrids[0].originX + x * game_floorGrids[0].stepX;
+            gridEd_vtx[x + z * game_floorGrids[0].numX].v.ob[1] = game_floorGrids[0].heights[x + z * game_floorGrids[0].numX];
+            gridEd_vtx[x + z * game_floorGrids[0].numX].v.ob[2] = game_floorGrids[0].originZ + z * game_floorGrids[0].stepZ;
+            if ( gridEd_marked[x + z * game_floorGrids[0].numX] ) {
+                gridEd_vtx[x + z * game_floorGrids[0].numX].v.cn[0] = 0xFF;
+                gridEd_vtx[x + z * game_floorGrids[0].numX].v.cn[1] = 0;
+                gridEd_vtx[x + z * game_floorGrids[0].numX].v.cn[2] = 0;
             } else {
-                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[0] = 0xFF;
-                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[1] = 0xFF;
-                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[2] = 0xFF;
+                gridEd_vtx[x + z * game_floorGrids[0].numX].v.cn[0] = 0xFF;
+                gridEd_vtx[x + z * game_floorGrids[0].numX].v.cn[1] = 0xFF;
+                gridEd_vtx[x + z * game_floorGrids[0].numX].v.cn[2] = 0xFF;
             }
-            if ( D_8005C988 == x && D_8005C98A == z ) {
-                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[1] = sched_frameCount << 3;
+            if ( gridEd_cursorX == x && gridEd_cursorZ == z ) {
+                gridEd_vtx[x + z * game_floorGrids[0].numX].v.cn[1] = sched_frameCount << 3;
             }
         }
     }
 
     for ( z = 0; z < game_floorGrids[0].numZ; z++ ) {
         for ( x = 0; x < game_floorGrids[0].numX; x++ ) {
-            gSPVertex( game_gfx++, D_8005C984 + x + z * game_floorGrids[0].numX, 1, 0 );
+            gSPVertex( game_gfx++, gridEd_vtx + x + z * game_floorGrids[0].numX, 1, 0 );
             if ( x + 1 < game_floorGrids[0].numX ) {
-                gSPVertex( game_gfx++, D_8005C984 + x + z * game_floorGrids[0].numX + 1, 1, 1 );
+                gSPVertex( game_gfx++, gridEd_vtx + x + z * game_floorGrids[0].numX + 1, 1, 1 );
                 gSPLine3D( game_gfx++, 0, 1, 0 );
             }
             if ( z + 1 < game_floorGrids[0].numZ ) {
-                gSPVertex( game_gfx++, D_8005C984 + x + ( z + 1 ) * game_floorGrids[0].numX, 1, 1 );
+                gSPVertex( game_gfx++, gridEd_vtx + x + ( z + 1 ) * game_floorGrids[0].numX, 1, 1 );
                 gSPLine3D( game_gfx++, 0, 1, 0 );
             }
         }
@@ -89,18 +89,18 @@ void GridEd_Frame( void ) {
     Txt_SetupFont( &game_gfx, 0 );
     gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
 
-    if ( ( cont_allPressed & U_JPAD ) && ( cont_allHeld & R_TRIG ) && D_80063AF0 != GRIDEDIT_EXIT ) {
-        D_80063AF0--;
+    if ( ( cont_allPressed & U_JPAD ) && ( cont_allHeld & R_TRIG ) && gridEd_page != GRIDEDIT_EXIT ) {
+        gridEd_page--;
     }
-    if ( ( cont_allPressed & D_JPAD ) && ( cont_allHeld & R_TRIG ) && D_80063AF0 < GRIDEDIT_PAGES - 1 ) {
-        D_80063AF0++;
+    if ( ( cont_allPressed & D_JPAD ) && ( cont_allHeld & R_TRIG ) && gridEd_page < GRIDEDIT_PAGES - 1 ) {
+        gridEd_page++;
     }
 
-    switch ( D_80063AF0 ) {
+    switch ( gridEd_page ) {
         case GRIDEDIT_EXIT:
             Txt_DrawString( &game_gfx, 32, 20, "EXIT" );
             if ( cont_allPressed & Z_TRIG ) {
-                D_8005C980 = 0;
+                gridEd_active = 0;
             }
             break;
 
@@ -194,60 +194,60 @@ void GridEd_Frame( void ) {
 
         case GRIDEDIT_SELECT:
             Txt_DrawString( &game_gfx, 32, 20, "VTX SEL" );
-            if ( ( cont_allPressed & U_JPAD ) || ( D_8005C98E >= 7 && ( cont_allHeld & U_JPAD ) ) ) {
-                if ( D_8005C98A > 0 ) {
-                    D_8005C98A--;
+            if ( ( cont_allPressed & U_JPAD ) || ( gridEd_heldFrames >= 7 && ( cont_allHeld & U_JPAD ) ) ) {
+                if ( gridEd_cursorZ > 0 ) {
+                    gridEd_cursorZ--;
                 }
                 if ( cont_allHeld & Z_TRIG ) {
-                    D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
+                    gridEd_marked[gridEd_cursorX + gridEd_cursorZ * game_floorGrids[0].numX] = gridEd_paint;
                 }
             }
-            if ( ( cont_allPressed & D_JPAD ) || ( D_8005C98E >= 7 && ( cont_allHeld & D_JPAD ) ) ) {
-                if ( D_8005C98A < game_floorGrids[0].numZ - 1 ) {
-                    D_8005C98A++;
+            if ( ( cont_allPressed & D_JPAD ) || ( gridEd_heldFrames >= 7 && ( cont_allHeld & D_JPAD ) ) ) {
+                if ( gridEd_cursorZ < game_floorGrids[0].numZ - 1 ) {
+                    gridEd_cursorZ++;
                 }
                 if ( cont_allHeld & Z_TRIG ) {
-                    D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
+                    gridEd_marked[gridEd_cursorX + gridEd_cursorZ * game_floorGrids[0].numX] = gridEd_paint;
                 }
             }
-            if ( ( cont_allPressed & L_JPAD ) || ( D_8005C98E >= 7 && ( cont_allHeld & L_JPAD ) ) ) {
-                if ( D_8005C988 > 0 ) {
-                    D_8005C988--;
+            if ( ( cont_allPressed & L_JPAD ) || ( gridEd_heldFrames >= 7 && ( cont_allHeld & L_JPAD ) ) ) {
+                if ( gridEd_cursorX > 0 ) {
+                    gridEd_cursorX--;
                 }
                 if ( cont_allHeld & Z_TRIG ) {
-                    D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
+                    gridEd_marked[gridEd_cursorX + gridEd_cursorZ * game_floorGrids[0].numX] = gridEd_paint;
                 }
             }
-            if ( ( cont_allPressed & R_JPAD ) || ( D_8005C98E >= 7 && ( cont_allHeld & R_JPAD ) ) ) {
-                if ( D_8005C988 < game_floorGrids[0].numX - 1 ) {
-                    D_8005C988++;
+            if ( ( cont_allPressed & R_JPAD ) || ( gridEd_heldFrames >= 7 && ( cont_allHeld & R_JPAD ) ) ) {
+                if ( gridEd_cursorX < game_floorGrids[0].numX - 1 ) {
+                    gridEd_cursorX++;
                 }
                 if ( cont_allHeld & Z_TRIG ) {
-                    D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
+                    gridEd_marked[gridEd_cursorX + gridEd_cursorZ * game_floorGrids[0].numX] = gridEd_paint;
                 }
             }
             if ( cont_allHeld & ( U_JPAD | D_JPAD | L_JPAD | R_JPAD ) ) {
-                if ( D_8005C98E < 100 ) {
-                    D_8005C98E++;
+                if ( gridEd_heldFrames < 100 ) {
+                    gridEd_heldFrames++;
                 }
             } else {
-                D_8005C98E = 0;
+                gridEd_heldFrames = 0;
             }
             if ( cont_allPressed & Z_TRIG ) {
-                D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C =
-                    D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] ^ 1;
+                gridEd_marked[gridEd_cursorX + gridEd_cursorZ * game_floorGrids[0].numX] = gridEd_paint =
+                    gridEd_marked[gridEd_cursorX + gridEd_cursorZ * game_floorGrids[0].numX] ^ 1;
             }
             if ( ( cont_allPressed & START_BUTTON ) && !( cont_allHeld & R_TRIG ) ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
-                    D_80063B40[i] = 0;
+                    gridEd_marked[i] = 0;
                 }
             }
             if ( ( cont_allPressed & START_BUTTON ) && ( cont_allHeld & R_TRIG ) ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
-                    D_80063B40[i] ^= 1;
+                    gridEd_marked[i] ^= 1;
                 }
             }
-            sprintf( text, "SEL=%d", D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] );
+            sprintf( text, "SEL=%d", gridEd_marked[gridEd_cursorX + gridEd_cursorZ * game_floorGrids[0].numX] );
             Txt_DrawString( &game_gfx, 64, 30, text );
             break;
 
@@ -255,20 +255,20 @@ void GridEd_Frame( void ) {
             Txt_DrawString( &game_gfx, 32, 20, "VTX Y" );
             if ( ( cont_allHeld & ( U_JPAD | R_TRIG ) ) == U_JPAD ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
-                    if ( D_80063B40[i] ) {
+                    if ( gridEd_marked[i] ) {
                         game_floorGrids[0].heights[i]++;
                     }
                 }
             }
             if ( ( cont_allHeld & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
-                    if ( D_80063B40[i] ) {
+                    if ( gridEd_marked[i] ) {
                         game_floorGrids[0].heights[i]--;
                     }
                 }
             }
             for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
-                if ( D_80063B40[i] ) {
+                if ( gridEd_marked[i] ) {
                     sprintf( text, "Y=%d", game_floorGrids[0].heights[i] );
                     Txt_DrawString( &game_gfx, 64, 30, text );
                     break;
@@ -277,8 +277,8 @@ void GridEd_Frame( void ) {
             break;
     }
 
-    sprintf( text, "(%d,%d)=%d", D_8005C988, D_8005C98A,
-             game_floorGrids[0].heights[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] );
+    sprintf( text, "(%d,%d)=%d", gridEd_cursorX, gridEd_cursorZ,
+             game_floorGrids[0].heights[gridEd_cursorX + gridEd_cursorZ * game_floorGrids[0].numX] );
     Txt_DrawString( &game_gfx, 120, 20, text );
 }
 #else

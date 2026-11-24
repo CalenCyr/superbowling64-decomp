@@ -38,11 +38,11 @@ void PV_Frame( void ) {
     u8 text[0x50];
 
     func_8002A2F0();
-    if ( D_8005C980 ) {
+    if ( gridEd_active ) {
         GridEd_Frame();
     }
     if ( cont_allPressed & R_TRIG ) {
-        D_8005C980 = 1;
+        gridEd_active = 1;
     }
     if ( cont_allPressed & START_BUTTON ) {
         pv_stepDone = 0;
@@ -68,7 +68,7 @@ void PV_Frame( void ) {
         gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
         sprintf( text, "CPU=%6.6d", sched_cpuTime );
         Txt_DrawString( &game_gfx, 220, 180, text );
-        sprintf( text, "SND=%6.6d", D_8005B0F0 );
+        sprintf( text, "SND=%6.6d", sound_taskTime );
         Txt_DrawString( &game_gfx, 220, 188, text );
         sprintf( text, "RSP=%6.6d", sched_rspTime );
         Txt_DrawString( &game_gfx, 220, 196, text );

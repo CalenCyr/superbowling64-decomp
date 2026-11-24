@@ -76,16 +76,16 @@ void Sound_PlayBgm( s32 index ) {
     if ( sound_bgmId != 0 ) {
         Snd_Stop( sound_bgmId, 5 );
     }
-    D_8005C9D0 ^= 1;
-    Str_ReadFile( D_8005CA0C[index], D_800EA440[D_8005C9D0] );
-    if ( save_data.music != 0 || D_8005C9F8[index] == 0 ) {
-        D_8005C9E8 = index;
+    sound_bgmBuffer ^= 1;
+    Str_ReadFile( sound_bgmFiles[index], sound_bgmBuffers[sound_bgmBuffer] );
+    if ( save_data.music != 0 || sound_bgmIsMusic[index] == 0 ) {
+        sound_bgm = index;
         sound_bgmDelay = BGM_START_DELAY;
-        sound_nextBgm = (seqHeader_t *)D_800EA440[D_8005C9D0];
-        sound_bgmStartVolume = D_8005C9EC[save_data.musicVolume];
+        sound_nextBgm = (seqHeader_t *)sound_bgmBuffers[sound_bgmBuffer];
+        sound_bgmStartVolume = sound_bgmVolumes[save_data.musicVolume];
     } else {
         sound_bgmId = 0;
-        D_8005C9E8 = index | BGM_STOPPED;
+        sound_bgm = index | BGM_STOPPED;
     }
 }
 #else
@@ -104,7 +104,7 @@ void Sound_StopBgm( void ) {
         Snd_Stop( sound_bgmId, 5 );
     }
     sound_bgmId = 0;
-    D_8005C9E8 |= BGM_STOPPED;
+    sound_bgm |= BGM_STOPPED;
 }
 
 /*
@@ -116,7 +116,7 @@ Sets the BGM to the volume of the current setting.
 */
 void Sound_UpdateBgmVolume( void ) {
     if ( sound_bgmId != 0 ) {
-        Snd_SetVolume( sound_bgmId, D_8005C9EC[save_data.musicVolume] );
+        Snd_SetVolume( sound_bgmId, sound_bgmVolumes[save_data.musicVolume] );
     }
 }
 
@@ -145,16 +145,16 @@ void func_80037BE0( void ) {
 ================
 Sound_RunAudioTask
 
-Runs program as the audio task and waits for it; D_8005B0F0 gets the time it took.
+Runs program as the audio task and waits for it; sound_taskTime gets the time it took.
 ================
 */
 void Sound_RunAudioTask( UnkRspProgram *program ) {
-    D_80099450 = osGetTime();
+    sound_taskStart = osGetTime();
     sched_audioProgram = program;
-    osWritebackDCache( D_800ABD70, 0x33800 );
+    osWritebackDCache( sound_heap, 0x33800 );
     osSendMesg( &sched_queue, &sched_msgAudio, OS_MESG_NOBLOCK );
     osRecvMesg( &sound_doneQueue, NULL, OS_MESG_BLOCK );
-    D_8005B0F0 = OS_CYCLES_TO_USEC( osGetTime() - D_80099450 );
+    sound_taskTime = OS_CYCLES_TO_USEC( osGetTime() - sound_taskStart );
 }
 
 INCLUDE_ASM("asm/nonmatchings/12C70", func_80037CD0);
@@ -178,7 +178,7 @@ void Dbg_ScreenShot( void ) {
     if ( cont_allPressed & L_TRIG ) {
         file = (bmpFile_t *)sched_framebuffers[0];
         dst = (u8 *)file;
-        file->header = D_8005CA40;
+        file->header = dbg_shotHeader;
         dst += sizeof( bmpHeader_t );
         fb = 1;
         for ( y = 0; y < SCREENSHOT_HEIGHT / 2; y++ ) {
@@ -196,7 +196,7 @@ void Dbg_ScreenShot( void ) {
                 *dst++ = ( sched_framebuffers[fb][y * SCREENSHOT_WIDTH + x] & 0xF800 ) >> 8;
             }
         }
-        sprintf( name, "BW%3.3d.BMP", D_8005CA76++ );
+        sprintf( name, "BW%3.3d.BMP", dbg_shotNumber++ );
         Host_WriteFile( name, (u8 *)file, SCREENSHOT_FILE_SIZE );
         cont_allPressed = 0;
     }

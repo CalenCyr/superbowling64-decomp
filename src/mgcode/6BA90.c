@@ -38,7 +38,7 @@ void MG_Frame( void ) {
         gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
         sprintf( text, "CPU=%6.6d", sched_cpuTime );
         Txt_DrawString( &game_gfx, 220, 180, text );
-        sprintf( text, "SND=%6.6d", D_8005B0F0 );
+        sprintf( text, "SND=%6.6d", sound_taskTime );
         Txt_DrawString( &game_gfx, 220, 188, text );
         sprintf( text, "RSP=%6.6d", sched_rspTime );
         Txt_DrawString( &game_gfx, 220, 196, text );

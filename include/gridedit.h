@@ -6,7 +6,7 @@
 #include "common.h"
 #include "libultra.h"
 
-/* D_80063AF0: the editor's page, picked with R held and up or down */
+/* gridEd_page: the editor's page, picked with R held and up or down */
 #define GRIDEDIT_EXIT       0           /* Z leaves the editor */
 #define GRIDEDIT_LOAD       1           /* Z reads "ground.bin" from the host */
 #define GRIDEDIT_SAVE       2           /* Z writes "ground.bin" to the host */
@@ -19,16 +19,16 @@
 
 #define GRIDEDIT_POINTS     2000        /* points of floorGrid_t.heights */
 
-extern u8 D_8005C980;               /* set: GridEd_Frame runs each frame; it clears it when done */
-extern Vtx *D_8005C984;             /* a vertex per grid point, allocated on the first frame */
-extern s16 D_8005C988;              /* the cursor's point along x */
-extern s16 D_8005C98A;              /* the cursor's point along z */
-extern u16 D_8005C98C;              /* the mark Z with the D-pad paints */
-extern u8 D_8005C98E;               /* frames the D-pad has been held, to 100; from 7 the cursor repeats */
+extern u8 gridEd_active;            /* set: GridEd_Frame runs each frame; it clears it when done */
+extern Vtx *gridEd_vtx;             /* a vertex per grid point, allocated on the first frame */
+extern s16 gridEd_cursorX;          /* the cursor's point along x */
+extern s16 gridEd_cursorZ;          /* the cursor's point along z */
+extern u16 gridEd_paint;            /* the mark Z with the D-pad paints */
+extern u8 gridEd_heldFrames;        /* frames the D-pad has been held, to 100; from 7 the cursor repeats */
 // volatile: retail loads it again, unused, right after each ++ and -- store, and re-reads and re-masks it before the switch
-extern volatile u8 D_80063AF0;      /* the page, GRIDEDIT_* */
-extern Mtx D_80063AF8;              /* identity, the model matrix of the grid */
-extern u8 D_80063B40[GRIDEDIT_POINTS]; /* per point: marked */
+extern volatile u8 gridEd_page;     /* the page, GRIDEDIT_* */
+extern Mtx gridEd_mtx;              /* identity, the model matrix of the grid */
+extern u8 gridEd_marked[GRIDEDIT_POINTS];  /* per point: marked */
 
 void GridEd_Frame( void );
 
