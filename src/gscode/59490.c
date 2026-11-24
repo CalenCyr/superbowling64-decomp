@@ -18,7 +18,8 @@ has slid out after a choice.
 #ifdef NON_MATCHING
 // NON_MATCHING: retail's frame is 0x60, this draft's 0x30 (0x30 bytes of unused stack, likely an inlined helper's locals); cases 1 to 3 of the first switch share one tail in retail. Banking it needs symbol_addrs entries gs_modeMenu size:0x78 and gs_modeBlink size:0x3C.
 // An unused 48-byte local gives retail's frame (not adopted, R17); no callee here is a same-unit inline whose frame
-// could carry it in.
+// could carry it in. The players' reset is an ascending loop (as in GS_Init): gcc reverses it into retail's pointer
+// walk down from game_players[3]; written counting down, it indexes game_players without the pointer.
 s32 GS_ModeMenu( void ) {
     s32 i;
     u8 choice;
@@ -133,7 +134,7 @@ s32 GS_ModeMenu( void ) {
             func_80026B28();
             game_mode = 0;
             game_numPlayers = 1;
-            for ( i = 3; i >= 0; i-- ) {
+            for ( i = 0; i < 4; i++ ) {
                 game_players[i] = 0;
             }
         }
