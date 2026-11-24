@@ -7,14 +7,14 @@
 
 /*
 ================
-func_80122340_gacode
+GA_CountFrame
 
 Counts a frame; in mode 3, gives resources 1673 and 1674 the D_8009CFB0 value in their byte 7.
 Declared inline: retail repeats its body in each caller below, and still has this out-of-line copy, which
 nothing calls (gcc 2.7 emits an extern inline function).
 ================
 */
-inline void func_80122340_gacode( void ) {
+inline void GA_CountFrame( void ) {
     D_8012C924_gacode++;
     if ( ( D_8005C160 & 0xF ) == 3 ) {
         ( (unkImage_t *)D_800F80B0[1673].data )->unk_07 = D_8009CFB0;
@@ -24,13 +24,13 @@ inline void func_80122340_gacode( void ) {
 
 /*
 ================
-func_8012239C_gacode
+GA_SetPlayerObjectFlags
 
 With set nonzero, gives each player's scene object (140 on) the flag bits of the low nibble of its
 D_8005C0E4 entry.
 ================
 */
-void func_8012239C_gacode( s32 set ) {
+void GA_SetPlayerObjectFlags( s32 set ) {
     s32 i;
 
     if ( !set ) {
@@ -70,9 +70,9 @@ func_80122470_gacode
 void func_80122470_gacode( void ) {
     if ( D_8012C920_gacode == 0 ) {
         D_8012C920_gacode = 1;
-        func_8012239C_gacode( 0 );
+        GA_SetPlayerObjectFlags( 0 );
     }
-    func_80122340_gacode();
+    GA_CountFrame();
 }
 
 /*
@@ -86,9 +86,9 @@ ball's state is 1 (the second lane only when D_8005C162 is 1).
 void func_801224F8_gacode( void ) {
     if ( D_8012C920_gacode == 0 ) {
         D_8012C920_gacode = 1;
-        func_8012239C_gacode( 1 );
+        GA_SetPlayerObjectFlags( 1 );
     }
-    func_80122340_gacode();
+    GA_CountFrame();
     if ( D_800DF595[0] == 1 && ( D_8012C924_gacode & 1 ) ) {
         func_80035380( 0x300, D_800E6560[0][0] + guRandom() % 20 - 10.0f,
                        D_800E6560[0][1] - 10.0f + guRandom() % 20 - 10.0f, D_800E6560[0][2] + 10.0f );
@@ -101,19 +101,19 @@ void func_801224F8_gacode( void ) {
 
 /*
 ================
-func_80122788_gacode
+GA_AnimateTextures
 
 Animated textures: loads the frame images on the first frame and saves the texels of resources 1523 and 1524,
 then points the palettes of seven resources at the images of the current frame of D_8005B0F4. Every other
 64 frames, resources 1523 and 1524 show images 2682 and 2698 instead of their own texels.
 ================
 */
-void func_80122788_gacode( void ) {
+void GA_AnimateTextures( void ) {
     s32 i;
 
     if ( D_8012C920_gacode == 0 ) {
         D_8012C920_gacode = 1;
-        func_8012239C_gacode( 0 );
+        GA_SetPlayerObjectFlags( 0 );
         Cache_GetFile( 2682, FILE_RAW );
         Cache_GetFile( 2698, FILE_RAW );
         D_8012CDD0_gacode[0] = ( (fileRefB_t *)D_800F80B0[1523].data )->unk_30;
@@ -150,7 +150,7 @@ void func_80122788_gacode( void ) {
         ( (fileRefB_t *)D_800F80B0[1523].data )->unk_30 = D_8012CDD0_gacode[0];
         ( (fileRefB_t *)D_800F80B0[1524].data )->unk_30 = D_8012CDD0_gacode[1];
     }
-    func_80122340_gacode();
+    GA_CountFrame();
 }
 
 /*
@@ -161,9 +161,9 @@ func_80122BD8_gacode
 void func_80122BD8_gacode( void ) {
     if ( D_8012C920_gacode == 0 ) {
         D_8012C920_gacode = 1;
-        func_8012239C_gacode( 1 );
+        GA_SetPlayerObjectFlags( 1 );
     }
-    func_80122340_gacode();
+    GA_CountFrame();
 }
 
 /*
@@ -174,21 +174,21 @@ func_80122C60_gacode
 void func_80122C60_gacode( void ) {
     if ( D_8012C920_gacode == 0 ) {
         D_8012C920_gacode = 1;
-        func_8012239C_gacode( 0 );
+        GA_SetPlayerObjectFlags( 0 );
     }
-    func_80122340_gacode();
+    GA_CountFrame();
 }
 
 /*
 ================
-func_80122CE8_gacode
+GA_FlickerLight
 
 Flickering light: loads the four palette images of every brightness step on the first frame, then counts down
 to a random flicker; in its last five frames the brightness is random (100 to 254), else 100. The brightness
 sets lights 0 and 1 and picks the palettes of resources 1903 to 1906.
 ================
 */
-void func_80122CE8_gacode( void ) {
+void GA_FlickerLight( void ) {
     s32 i;
     u8 color[3];
     u8 level;
@@ -196,7 +196,7 @@ void func_80122CE8_gacode( void ) {
 
     if ( D_8012C920_gacode == 0 ) {
         D_8012C920_gacode = 1;
-        func_8012239C_gacode( 1 );
+        GA_SetPlayerObjectFlags( 1 );
         for ( i = 0; i < 4; i++ ) {
             Cache_GetFile( D_8012C978_gacode[i], FILE_RAW );
             Cache_GetFile( D_8012C980_gacode[i], FILE_RAW );
@@ -230,7 +230,7 @@ void func_80122CE8_gacode( void ) {
         ( (unkImage_t *)D_800F80B0[D_8012C980_gacode[step]].data )->palette;
     ( (fileRefB_t *)D_800F80B0[1906].data )->unk_30 =
         ( (unkImage_t *)D_800F80B0[D_8012C990_gacode[step]].data )->palette;
-    func_80122340_gacode();
+    GA_CountFrame();
 }
 
 /*
@@ -245,10 +245,10 @@ on every other frame.
 void func_80123004_gacode( void ) {
     if ( D_8012C920_gacode == 0 ) {
         D_8012C920_gacode = 1;
-        func_8012239C_gacode( 1 );
+        GA_SetPlayerObjectFlags( 1 );
     }
     ( (fileRefB_t *)D_800F80B0[883].data )->scroll[0]--;
-    func_80122340_gacode();
+    GA_CountFrame();
     if ( D_8005C162 == 1 ) {
         if ( D_800DF595[0] == 3 && ( D_8012C924_gacode & 3 ) == 0 ) {
             func_80035380( 0x301, D_800E6560[0][0] + guRandom() % 10 - 5.0f,
@@ -274,20 +274,20 @@ func_801233A8_gacode
 void func_801233A8_gacode( void ) {
     if ( D_8012C920_gacode == 0 ) {
         D_8012C920_gacode = 1;
-        func_8012239C_gacode( 1 );
+        GA_SetPlayerObjectFlags( 1 );
     }
-    func_80122340_gacode();
+    GA_CountFrame();
 }
 
 /*
 ================
-func_80123430_gacode
+GA_LoadLanePalettes
 
 Loads the image files of D_8012C9A0_gacode[index] and points the palettes of the first four parts' second
 files of the lane's scene object (100 or 120) at them; the first part takes file 1, or file 0 when alt is set.
 ================
 */
-void func_80123430_gacode( s32 lane, s32 alt, s32 index ) {
+void GA_LoadLanePalettes( s32 lane, s32 alt, s32 index ) {
     sceneObject_t *obj;
 
     if ( lane == 0 ) {

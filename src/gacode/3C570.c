@@ -7,7 +7,7 @@
 
 /*
 ================
-func_80112350_gacode
+GA_Init
 
 The overlay's init: stops the BGM, resets the teams' current players and the pause menu, enters the pause
 menu's state as the state to come back to, loads the stage's floor grid, places each player's character in
@@ -15,7 +15,7 @@ the stage's scene and creates it, starts the stage's sound, sets up the lanes, c
 scores, sets up the game mode, takes two options from D_8009D098.unk_04 and starts the game's BGM.
 ================
 */
-void func_80112350_gacode( void ) {
+void GA_Init( void ) {
     s32 character;
     s32 i;
     objParams_t *params;
@@ -27,7 +27,7 @@ void func_80112350_gacode( void ) {
     D_8012D650_gacode = 0;
     D_8012D238_gacode = 0;
     D_8012D239_gacode = 0;
-    D_8012CDF0_gacode = func_80112AF0_gacode;
+    D_8012CDF0_gacode = GA_PauseMenu;
     Str_ReadFile( D_8012D220_gacode->unk_18, (u8 *)&D_80100100[0] );
     params = D_8012D220_gacode->unk_00;
     for ( i = 0; i < D_8005C161; i++, params++ ) {
@@ -42,13 +42,13 @@ void func_80112350_gacode( void ) {
     } else {
         D_8012CDE8_gacode = 0;
     }
-    func_80114140_gacode( D_8005C162, D_8012D220_gacode->unk_04, ( D_8005C160 & 0xF ) == 3 );
-    func_80121E34_gacode();
+    GA_SetupLanes( D_8005C162, D_8012D220_gacode->unk_04, ( D_8005C160 & 0xF ) == 3 );
+    GA_ClearScores();
     for ( i = 0; i < 2; i++ ) {
         D_800693DC[i] = 0;
         D_8009D030[i][0] = D_8009D030[i][1] = D_8009D030[i][2] = 0;
     }
-    func_801132B0_gacode();
+    GA_SetupMode();
     D_8012D225_gacode = ( D_8009D098.unk_04 >> 9 ) & 1;
     D_8012D224_gacode = ( D_8009D098.unk_04 >> 8 ) & 1;
     Sound_PlayBgm( D_8012CE00_gacode );
@@ -56,7 +56,7 @@ void func_80112350_gacode( void ) {
 
 /*
 ================
-func_801125A0_gacode
+GA_Frame
 
 The overlay's frame: leaves once main has faded out after a request, requests leaving when the game mode
 is done or the pause menu quits, opens the pause menu on Start and, while C-up is held (not in mode 2),
@@ -64,12 +64,12 @@ func_80112E04_gacode's view, runs the stage and the players, draws them, runs th
 blink of D_80123600_gacode between 0 and 0x80.
 ================
 */
-void func_801125A0_gacode( void ) {
+void GA_Frame( void ) {
     s32 team;
     s32 cUpHeld = FALSE;
 
     if ( D_8005C0BF == 1 && D_8005C0C0 == 0xFF ) {
-        func_80120D7C_gacode( &D_8012CDE8_gacode );
+        GA_StopLaneSound( &D_8012CDE8_gacode );
         D_8005C0BF = 2;
         D_8005C0C0 = 0x107;
         D_8005C0B6 = D_80123603_gacode == 1 ? 6 : 4;
@@ -103,7 +103,7 @@ void func_801125A0_gacode( void ) {
     D_8012D220_gacode->update();
     func_8002A2F0();
     for ( team = 0; team <= D_8005C162; team++ ) {
-        func_80114EC4_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
+        GA_HoldBall( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
     }
     Txt_LoadGlyphSheet( &D_800F8094 );
     Draw_FillRect( 0x9F, 0, 2, 0xF0, 0, 0, 0, 0xFF );
@@ -118,7 +118,7 @@ void func_801125A0_gacode( void ) {
     if ( !D_8012D650_gacode && !cUpHeld ) {
         D_80123603_gacode = D_8012CDFC_gacode();
         if ( !D_8005C162 ) {
-            func_801150B4_gacode( D_8012CE02_gacode[0][D_8012CDF8_gacode[0]] );
+            GA_UpdateLaneCamera( D_8012CE02_gacode[0][D_8012CDF8_gacode[0]] );
         }
     } else {
         for ( team = 0; team <= D_8005C162; team++ ) {
@@ -158,7 +158,7 @@ func_80112A74_gacode
 void func_80112A74_gacode( void ) {
     s32 team;
 
-    func_80120D7C_gacode( &D_8012CDE8_gacode );
+    GA_StopLaneSound( &D_8012CDE8_gacode );
     for ( team = 0; team <= D_8005C162; team++ ) {
         func_80114FFC_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
     }
@@ -166,13 +166,13 @@ void func_80112A74_gacode( void ) {
 
 /*
 ================
-func_80112AF0_gacode
+GA_PauseMenu
 
 Pause menu: draws it with the cursor on one of its four items and the on/off mark of D_8009D098.unk_79,
 moves the cursor with the D-pad, and on A or Z runs the item; B closes the menu.
 ================
 */
-s32 func_80112AF0_gacode( void ) {
+s32 GA_PauseMenu( void ) {
     s16 cursorY[4] = { 0x8A, 0x5A, 0x6A, 0x7A };
     s16 markX[2] = { 0xB6, 0x9C };
     u8 isMode2;
@@ -204,7 +204,7 @@ s32 func_80112AF0_gacode( void ) {
             Sound_PlaySe( 1, 0 );
             break;
         case 1:
-            D_8012CDF0_gacode = isMode2 ? func_80112EBC_gacode : func_80112D94_gacode;
+            D_8012CDF0_gacode = isMode2 ? GA_PageBrowser : func_80112D94_gacode;
             Sound_PlaySe( 1, 0 );
             break;
         case 2:
@@ -237,7 +237,7 @@ s32 func_80112D94_gacode( void ) {
     func_80112E04_gacode();
     if ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
         Sound_PlaySe( 11, 0 );
-        D_8012CDF0_gacode = func_80112AF0_gacode;
+        D_8012CDF0_gacode = GA_PauseMenu;
     }
     return 0;
 }
@@ -249,7 +249,7 @@ func_80112E04_gacode
 */
 void func_80112E04_gacode( void ) {
     if ( ( D_8005C160 & 0xF ) == 3 ) {
-        func_8011A26C_gacode();
+        GA_DrawDistancePanels();
         return;
     }
     switch ( ( D_8005C160 >> 4 ) & 3 ) {
@@ -267,14 +267,14 @@ void func_80112E04_gacode( void ) {
 
 /*
 ================
-func_80112EBC_gacode
+GA_PageBrowser
 
 Main loop state of the pause menu's page browser (mode 2): draws the current page of D_80123608_gacode with
 the cursor on an item or on the back item, moves the cursor with the D-pad, and on A or Z opens the item's
 page or goes back to the parent page (from the first page, to the pause menu); B goes back to the pause menu.
 ================
 */
-s32 func_80112EBC_gacode( void ) {
+s32 GA_PageBrowser( void ) {
     s16 x = 0x28;
     s16 y = 0x28;
 
@@ -310,7 +310,7 @@ s32 func_80112EBC_gacode( void ) {
                 if ( D_80123608_gacode[D_80123680_gacode].parent < 0 ) {
                     Sound_PlaySe( 11, 0 );
                     D_80123680_gacode = 0;
-                    D_8012CDF0_gacode = func_80112AF0_gacode;
+                    D_8012CDF0_gacode = GA_PauseMenu;
                 } else {
                     Sound_PlaySe( 0x33, 0 );
                     D_80123680_gacode = D_80123608_gacode[D_80123680_gacode].parent;
@@ -328,7 +328,7 @@ s32 func_80112EBC_gacode( void ) {
     if ( D_800E4D62 & B_BUTTON ) {
         Sound_PlaySe( 2, 0 );
         D_80123680_gacode = 0;
-        D_8012CDF0_gacode = func_80112AF0_gacode;
+        D_8012CDF0_gacode = GA_PauseMenu;
     }
     return 0;
 }
@@ -344,7 +344,7 @@ s32 func_80113210_gacode( void ) {
         D_8012CDF0_gacode = func_80113270_gacode;
         break;
     case 2:
-        D_8012CDF0_gacode = func_80112AF0_gacode;
+        D_8012CDF0_gacode = GA_PauseMenu;
         break;
     }
     return 0;
@@ -374,30 +374,30 @@ s32 func_801132A8_gacode( void ) {
 
 /*
 ================
-func_801132B0_gacode
+GA_SetupMode
 
 Sets up the game for the mode in the low nibble of D_8005C160, with its BGM.
 ================
 */
-void func_801132B0_gacode( void ) {
+void GA_SetupMode( void ) {
     switch ( D_8005C160 & 0xF ) {
     case 0:
         func_80113384_gacode();
         break;
     case 1:
-        func_80113594_gacode( func_80113EE4_gacode, func_801151A0_gacode );
+        GA_StartMode( GA_DuelLoop, func_801151A0_gacode );
         D_8012CE00_gacode = D_8012D220_gacode->unk_1A;
         break;
     case 3:
-        func_80113594_gacode( func_80114024_gacode, func_8011582C_gacode );
+        GA_StartMode( func_80114024_gacode, func_8011582C_gacode );
         D_8012CE00_gacode = 17;
         break;
     case 2:
-        func_80113594_gacode( func_80114108_gacode, func_801157F8_gacode );
+        GA_StartMode( func_80114108_gacode, func_801157F8_gacode );
         D_8012CE00_gacode = 16;
         break;
     }
-    func_801136FC_gacode();
+    GA_FillTeams();
 }
 
 /*
@@ -416,19 +416,19 @@ void func_80113384_gacode( void ) {
         /* the arguments that share a state still have a case each (retail keeps one block per case) */
         switch ( D_8005C160 >> 6 ) {
         case 0:
-            func_80113594_gacode( func_80113968_gacode, func_801151A0_gacode );
+            GA_StartMode( GA_TeamGameLoop, func_801151A0_gacode );
             break;
         case 2:
-            func_80113594_gacode( func_80113968_gacode, func_801151A0_gacode );
+            GA_StartMode( GA_TeamGameLoop, func_801151A0_gacode );
             break;
         case 1:
-            func_80113594_gacode( func_80113AD4_gacode, func_801151A0_gacode );
+            GA_StartMode( GA_PairGameLoop, func_801151A0_gacode );
             break;
         }
         D_8012CE00_gacode = D_8012D220_gacode->unk_1A;
         break;
     case 1:
-        func_801209C0_gacode( D_800DF59C.unk_04, 25, 0 );
+        GA_ShuffleOrder( D_800DF59C.unk_04, 25, 0 );
         for ( i = 0; i < 9; i++ ) {
             D_80099458[0][i] = D_80123950_gacode[D_800DF59C.unk_04[i]].unk_00;
             D_8009CF80[0] += D_80099458[0][i];
@@ -436,23 +436,23 @@ void func_80113384_gacode( void ) {
         /* the arguments that share a state still have a case each (retail keeps one block per case) */
         switch ( D_8005C160 >> 6 ) {
         case 0:
-            func_80113594_gacode( func_80113D48_gacode, func_801155BC_gacode );
+            GA_StartMode( GA_ParGameLoop, func_801155BC_gacode );
             break;
         case 1:
-            func_80113594_gacode( func_80113D48_gacode, func_801155BC_gacode );
+            GA_StartMode( GA_ParGameLoop, func_801155BC_gacode );
             break;
         }
         D_8012CE00_gacode = D_8012D220_gacode->unk_1A;
         break;
     case 2:
-        func_801209C0_gacode( &D_800DF59C.unk_04[0], 5, 0 );
-        func_801209C0_gacode( &D_800DF59C.unk_04[3], 5, 5 );
-        func_801209C0_gacode( &D_800DF59C.unk_04[6], 5, 10 );
+        GA_ShuffleOrder( &D_800DF59C.unk_04[0], 5, 0 );
+        GA_ShuffleOrder( &D_800DF59C.unk_04[3], 5, 5 );
+        GA_ShuffleOrder( &D_800DF59C.unk_04[6], 5, 10 );
         D_800DF59C.unk_04[9] = 15;
         for ( i = 0; i < D_8005C161; i++ ) {
             D_80068A50[i] = 5;
         }
-        func_80113594_gacode( func_80113968_gacode, func_801156D8_gacode );
+        GA_StartMode( GA_TeamGameLoop, func_801156D8_gacode );
         D_8012CE00_gacode = 11;
         break;
     }
@@ -460,14 +460,14 @@ void func_80113384_gacode( void ) {
 
 /*
 ================
-func_80113594_gacode
+GA_StartMode
 
 Starts a game mode: sets the main loop state and the mode's handler, picks the handler that starts a turn,
 and sets up each player on the lane of their team (with two players the second, with three or four players
 2 and up, on the second lane, when there are two teams); players without a controller get port -1.
 ================
 */
-void func_80113594_gacode( gaState_t state, gaPlayerFunc_t mode ) {
+void GA_StartMode( gaState_t state, gaPlayerFunc_t mode ) {
     s32 player;
     u8 team;
     u8 lane;
@@ -483,7 +483,7 @@ void func_80113594_gacode( gaState_t state, gaPlayerFunc_t mode ) {
     } else if ( mode == func_8011582C_gacode ) {
         D_8012D23C_gacode = func_80115CDC_gacode;
     } else {
-        D_8012D23C_gacode = func_80115B9C_gacode;
+        D_8012D23C_gacode = GA_EndTurn;
     }
     for ( player = 0; player < D_8005C161; player++ ) {
         /* team stays unset with one player (or more than four); D_8005C162 is then 0 */
@@ -497,7 +497,7 @@ void func_80113594_gacode( gaState_t state, gaPlayerFunc_t mode ) {
             break;
         }
         lane = D_8005C162 ? team : 0;
-        func_80114550_gacode( player, ( D_8005C0E4[player] >> 7 ) ? -1 : lane, D_8005C0E4[player] & 0xF, lane );
+        GA_SetupPlayer( player, ( D_8005C0E4[player] >> 7 ) ? -1 : lane, D_8005C0E4[player] & 0xF, lane );
     }
     if ( !D_8005C162 ) {
         func_80115054_gacode();
@@ -506,13 +506,13 @@ void func_80113594_gacode( gaState_t state, gaPlayerFunc_t mode ) {
 
 /*
 ================
-func_801136FC_gacode
+GA_FillTeams
 
 Fills the teams' player lists: with one team every player in order; with two, players 0 and 1 apart with
 two players, players 0 and 1 against the rest with three or four.
 ================
 */
-void func_801136FC_gacode( void ) {
+void GA_FillTeams( void ) {
     s32 i;
 
     if ( !D_8005C162 ) {
@@ -563,24 +563,24 @@ void func_801136FC_gacode( void ) {
 
 /*
 ================
-func_801138EC_gacode
+GA_NextTeamPlayer
 
 Advances *cur to the next player of the team, wrapping at the end of the list, and on past each player
 whose D_800994BE flag is set, but stops at start.
 ================
 */
-inline void func_801138EC_gacode( u8 *cur, s32 start, s32 team ) {
+inline void GA_NextTeamPlayer( u8 *cur, s32 start, s32 team ) {
     if ( D_8012CE02_gacode[team][++( *cur )] == -1 ) {
         *cur = 0;
     }
     if ( *cur != start && D_800994BE[D_8012CE02_gacode[team][*cur]] ) {
-        func_801138EC_gacode( cur, start, team );
+        GA_NextTeamPlayer( cur, start, team );
     }
 }
 
 /*
 ================
-func_80113968_gacode
+GA_TeamGameLoop
 
 Main loop state of a team game: runs the current player of each team; when one is done, ends the game for
 the team if every player has the D_800994BE flag set, else passes the turn to the team's next player.
@@ -591,14 +591,14 @@ the team if every player has the D_800994BE flag set, else passes the turn to th
 // after it (tried: if/++ count, i++ in the index, local order, a row pointer local, pointer-walk counts, a
 // player local, unsigned counts, while and ++i loops; 28k
 // permuter iterations from base 20 found nothing lower). The
-// turn pass is func_801138EC_gacode inlined (its inline is what puts the body here at -O2).
-s32 func_80113968_gacode( void ) {
+// turn pass is GA_NextTeamPlayer inlined (its inline is what puts the body here at -O2).
+s32 GA_TeamGameLoop( void ) {
     s32 team;
     s32 flagged;
     s32 i;
 
     for ( team = 0; team <= D_8005C162; team++ ) {
-        if ( func_80114640_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] ) ) {
+        if ( GA_RunPlayer( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] ) ) {
             flagged = 0;
             for ( i = 0; D_8012CE02_gacode[team][i] != -1; i++ ) {
                 flagged += D_800994BE[D_8012CE02_gacode[team][i]] != 0;
@@ -606,19 +606,19 @@ s32 func_80113968_gacode( void ) {
             if ( flagged == i ) {
                 func_80115D70_gacode( D_8012CE02_gacode[team][0], 0 );
             } else {
-                func_801138EC_gacode( &D_8012CDF8_gacode[team], D_8012CDF8_gacode[team], team );
+                GA_NextTeamPlayer( &D_8012CDF8_gacode[team], D_8012CDF8_gacode[team], team );
             }
         }
     }
     return func_80115E24_gacode( D_8005C162 );
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113968_gacode);
+INCLUDE_ASM("asm/nonmatchings/gacode/3C570", GA_TeamGameLoop);
 #endif
 
 /*
 ================
-func_80113AD4_gacode
+GA_PairGameLoop
 
 Main loop state of the pair game: runs the current player of each team; with three or more players the
 turn alternates between the pair of players 0 and 1 and the pair 2 and 3 (D_80123684_gacode keeps each
@@ -626,7 +626,7 @@ pair's next index), else it passes to the team's next player. Ends the game for 
 D_800994BE of the current player's pair is set (with four players on one team, once both pairs' flags are).
 ================
 */
-s32 func_80113AD4_gacode( void ) {
+s32 GA_PairGameLoop( void ) {
     s32 team;
     s32 result;
     s32 done;
@@ -634,7 +634,7 @@ s32 func_80113AD4_gacode( void ) {
 
     done = 0;
     for ( team = 0; team <= D_8005C162; team++ ) {
-        result = func_80114640_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
+        result = GA_RunPlayer( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
         if ( result < 0 ) {
             if ( D_8012CE02_gacode[0][2] != -1 ) {
                 if ( D_8012CDF8_gacode[team] >= 2 ) {
@@ -681,7 +681,7 @@ s32 func_80113AD4_gacode( void ) {
 
 /*
 ================
-func_80113D48_gacode
+GA_ParGameLoop
 
 Main loop state of the par game: runs the current player of each team, passes the turn on when one is
 done, and ends the game for the team when every player has the D_800994BE flag set (or, without that,
@@ -689,17 +689,17 @@ when the turn comes back to the first player). Then advances the frame when the 
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: schedule only, the same residue as func_80113968_gacode: retail increments i before the
+// NON_MATCHING: schedule only, the same residue as GA_TeamGameLoop: retail increments i before the
 // row pointer in the flag-count loop (tried an inline helper over the row, pointer-walk counts; 23k permuter
 // iterations from base 20 found nothing lower).
-s32 func_80113D48_gacode( void ) {
+s32 GA_ParGameLoop( void ) {
     s32 team;
     s32 i;
     s32 flagged;
     s32 showFrame;
 
     for ( team = 0; team <= D_8005C162; team++ ) {
-        if ( func_80114640_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] ) ) {
+        if ( GA_RunPlayer( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] ) ) {
             if ( D_8012CE02_gacode[team][++D_8012CDF8_gacode[team]] == -1 ) {
                 D_8012CDF8_gacode[team] = 0;
             }
@@ -717,32 +717,32 @@ s32 func_80113D48_gacode( void ) {
     showFrame = ( D_8005C160 >> 6 ) == 1;
     if ( D_8012D238_gacode < 9 && func_80115ED4_gacode( D_8005C162 ) ) {
         if ( showFrame ) {
-            func_8012224C_gacode( D_8012D238_gacode );
+            GA_DecideFrame( D_8012D238_gacode );
         }
         D_8012D238_gacode++;
     }
     return func_80115E24_gacode( D_8005C162 ) != 0;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", func_80113D48_gacode);
+INCLUDE_ASM("asm/nonmatchings/gacode/3C570", GA_ParGameLoop);
 #endif
 
 /*
 ================
-func_80113EE4_gacode
+GA_DuelLoop
 
 Main loop state of a two-lane game: updates both lanes; when both are done, counts a game won for the lane
-func_80115FCC_gacode returns. On A or Z with both lanes at -1, starts the next game (skipping when a lane has
+GA_EndDuelGame returns. On A or Z with both lanes at -1, starts the next game (skipping when a lane has
 won two).
 ================
 */
-s32 func_80113EE4_gacode( void ) {
+s32 GA_DuelLoop( void ) {
     s32 results[2];
     s32 winner;
     s32 i;
 
     for ( i = 0; i < 2; i++ ) {
-        results[i] = func_80114640_gacode( i );
+        results[i] = GA_RunPlayer( i );
         if ( results[i] > 0 && D_800994BE[i] ) {
             func_80115D70_gacode( i, 1 );
         }
@@ -751,7 +751,7 @@ s32 func_80113EE4_gacode( void ) {
         return 1;
     }
     if ( func_80115DF4_gacode( 0 ) && func_80115DF4_gacode( 1 ) ) {
-        winner = func_80115FCC_gacode();
+        winner = GA_EndDuelGame();
         if ( winner >= 0 ) {
             D_800693DC[winner]++;
         }
@@ -781,7 +781,7 @@ s32 func_80114024_gacode( void ) {
     s32 i;
 
     for ( i = 0; i < 2; i++ ) {
-        results[i] = func_80114640_gacode( i );
+        results[i] = GA_RunPlayer( i );
         if ( results[i] > 0 && D_800994BE[i] ) {
             func_80115D70_gacode( i, 1 );
         }
@@ -790,7 +790,7 @@ s32 func_80114024_gacode( void ) {
         return 1;
     }
     if ( func_80115DF4_gacode( 0 ) && func_80115DF4_gacode( 1 ) ) {
-        func_80115FCC_gacode();
+        GA_EndDuelGame();
         return 0;
     }
     if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || results[0] + results[1] == -2 ) {
@@ -805,7 +805,7 @@ func_80114108_gacode
 ================
 */
 s32 func_80114108_gacode( void ) {
-    func_80114640_gacode( 0 );
+    GA_RunPlayer( 0 );
     return 0;
 }
 

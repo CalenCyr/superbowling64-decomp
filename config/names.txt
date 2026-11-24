@@ -418,17 +418,17 @@ SCENE_RSCODE	include/overlay.h	invented: value 6, loads "RSCODE  SYS"
 # gacode overlay (include/gacode/gacode.h): types and members, all invented from use
 vec3_t	gacode.h	invented: three floats (x, y, z); the Quake-style vector type
 gaBody_t	gacode.h	invented: 0x60-byte body of a lane, eleven per lane (index 0 the ball, 1-10 the pins: loops over 1..10 touch only pins); pos/rot/scale are the guPositionF arguments
-gaSpot_t	gacode.h	invented: 0x20-byte rest position of a body; func_80114CB4_gacode copies its pos into the body
+gaSpot_t	gacode.h	invented: 0x20-byte rest position of a body; GA_PlaceBody copies its pos into the body
 gaCamera_t	gacode.h	invented: three vectors the unk_B0C handlers write (eye, at, a third)
 gaLane_t	gacode.h	invented: 0xB30-byte lane (two, D_8012DCF0_gacode): bodies, their scene objects, four handler slots, a sound handle
 gaCharacter_t	gacode.h	invented: 0x48-byte record of D_80123BE0_gacode, copied to the start of gaPlayer_t
-gaMenuPage_t	gacode.h	invented: 8-byte page of func_80112EBC_gacode's browser: image, cursor, back item, the pages its items open, the parent page
+gaMenuPage_t	gacode.h	invented: 8-byte page of GA_PageBrowser's browser: image, cursor, back item, the pages its items open, the parent page
 gaPlayer_t	gacode.h	invented: 0xA0-byte player (four, D_8012D658_gacode): character, scene object, lane, controller port (-1: played by the game)
 gaState_t	gacode.h	invented: main-loop state function of the overlay (D_8012CDF0_gacode)
 gaPlayerFunc_t	gacode.h	invented: per-player handler (game mode D_8012CDF4_gacode, D_8012D23C_gacode)
 gaCharacterData_t	gacode.h	invented: what gaCharacter_t.unk_00 points to (a byte table indexed by gaLane_t.unk_B26)
 gaStage_t	gacode.h	invented: 0x34-byte stage configuration (D_80123EB0_gacode); its last member is a per-frame function (func_80122470_gacode ...)
-gaSprite_t	gacode.h	invented: sprite of a main resource with a 256-colour palette copy (func_80120A7C_gacode)
+gaSprite_t	gacode.h	invented: sprite of a main resource with a 256-colour palette copy (GA_SetupSprite)
 GA_ScoreResult	3E350.c	invented: the inline helper of func_801155BC_gacode that maps 2 + a frame's score against par to the game mode's result (1 par, 2 one under, 3 else)
 unkImage_t	gacode.h	invented: image a resource points to: 0x10-byte header, then a 256-colour palette
 # units 53B0-13490 (lane match-main-53B0: types; functions keep placeholder names)
@@ -498,10 +498,10 @@ MAT_SMOOTH	include/filecache.h	invented: fileRefB_t.flags bit 3, sets G_SHADING_
 MAT_TEXGEN	include/filecache.h	invented: fileRefB_t.flags bit 4, sets G_TEXTURE_GEN and the 0x7C0 texture scale in func_80031E40
 MAT_I4	include/filecache.h	invented: fileRefB_t.fmt values 0-4 (MAT_I4, MAT_CI4, MAT_CI8, MAT_RGBA16, MAT_I8), from the texture loads of func_80031E40
 gaLaneAim_t	gacode.h	invented: 8-byte per-lane aiming state (two, D_8012D228_gacode): a position, a counter within 999, the step reached
-gaMotion_t	gacode.h	invented: 0x38-byte motion of a lane body (gaLane_t.motion, 11 from 0x420; initial copy D_8012C230_gacode): velocity, spin, flags; stepped by func_80114898_gacode
+gaMotion_t	gacode.h	invented: 0x38-byte motion of a lane body (gaLane_t.motion, 11 from 0x420; initial copy D_8012C230_gacode): velocity, spin, flags; stepped by GA_PhysicsStep
 FABS	include/gacode/gacode.h	invented: float absolute value macro (0 - x), func_80119638_gacode
-floorGrid_t	include/game.h	invented: 0xFAC-byte file at D_80100100 (point counts, spacing and origin along x and z, then s16 heights); func_8012016C_gacode clamps to its edges, func_8011F87C_gacode interpolates its heights
-GA_TogglePin	3E350.c	invented: the inline helper of func_8011A404_gacode that toggles a lane body's standing flag (unk_5D) and returns the new state
+floorGrid_t	include/game.h	invented: 0xFAC-byte file at D_80100100 (point counts, spacing and origin along x and z, then s16 heights); GA_KeepInGrid clamps to its edges, GA_FloorHeight interpolates its heights
+GA_TogglePin	3E350.c	invented: the inline helper of GA_PinEditor that toggles a lane body's standing flag (unk_5D) and returns the new state
 GRIDEDIT_EXIT, GRIDEDIT_LOAD, GRIDEDIT_SAVE, GRIDEDIT_SIZE, GRIDEDIT_STEP, GRIDEDIT_ORIGIN, GRIDEDIT_SELECT, GRIDEDIT_HEIGHT, GRIDEDIT_PAGES, GRIDEDIT_POINTS	include/gridedit.h	invented: the pages of the floor grid editor func_80035DA0 (from its page titles "EXIT", "FILE LOAD", "FILE SAVE", "MTX FORM", "MTX WH", "MTX OFS", "VTX SEL", "VTX Y"), and floorGrid_t.heights' 2000 points
 
 # rscode/56FF0.c results overlay
@@ -774,3 +774,93 @@ GS_UnlockMask	0x80118010	invented: expands the saved unlock flags into the mask 
 GS_TeamSelect	0x80118040	invented: one frame of the team select, where each team's players pick characters
 OP_ConvertPakChar	0x80113130	invented: converts a Controller Pak note-name character code through the overlay's table
 OP_PakScreen	0x80113168	invented: one frame of the Controller Pak screen that lists and deletes notes
+
+# gacode game overlay functions
+GA_Init	0x80112350	invented: the overlay's init (overlay.h): sets up the players, the stage, its sound and the lanes
+GA_Frame	0x801125A0	invented: the overlay's per-frame function (overlay.h): pause menu, stage, players, drawing
+GA_PauseMenu	0x80112AF0	invented: runs the pause menu: four items with the cursor, B closes it
+GA_PageBrowser	0x80112EBC	invented: main loop state of the pause menu's page browser (mode 2)
+GA_SetupMode	0x801132B0	invented: sets up the game for the mode in the low nibble of D_8005C160, with its BGM
+GA_StartMode	0x80113594	invented: starts a game mode: main loop state, handlers and each player's lane
+GA_FillTeams	0x801136FC	invented: fills the teams' player lists
+GA_NextTeamPlayer	0x801138EC	invented: advances to the team's next player still playing
+GA_TeamGameLoop	0x80113968	invented: main loop state of a team game
+GA_PairGameLoop	0x80113AD4	invented: main loop state of the pair game
+GA_ParGameLoop	0x80113D48	invented: main loop state of the par game
+GA_DuelLoop	0x80113EE4	invented: main loop state of a two-lane game that counts games won (a duel, GA_EndDuelGame)
+GA_CountFrame	0x80122340	invented: counts a frame (and in mode 3 updates two resources)
+GA_SetPlayerObjectFlags	0x8012239C	invented: gives each player's scene object the flag bits of its D_8005C0E4 entry
+GA_AnimateTextures	0x80122788	invented: animated textures: points seven resources' palettes at the current frame's images
+GA_FlickerLight	0x80122CE8	invented: flickering light: random brightness steps for lights 0 and 1 and four resources' palettes
+GA_LoadLanePalettes	0x80123430	invented: loads a set of images and points the palettes of a lane's scene object parts at them
+GA_SetupLanes	0x80114140	invented: sets up both lanes: sprites, scene objects, camera and state
+GA_StopLanes	0x801144C4	invented: stops the lanes' sounds and parks their handlers
+GA_SetupPlayer	0x80114550	invented: sets up a player's port, character and lane
+GA_RunPlayer	0x80114640	invented: runs a player's frame: lane handler, then input from the pad or the game
+GA_PhysicsStep	0x80114898	invented: the per-frame physics step of a lane's bodies
+GA_PlaceBody	0x80114CB4	invented: places a body's object at its spot
+GA_PublishBall	0x80114DD4	invented: publishes the lane's ball position and state to main
+GA_HoldBall	0x80114EC4	invented: places a held ball in the player's hand
+GA_UpdateLaneCamera	0x801150B4	invented: moves main's camera on from the view the lane shows
+GA_EndTurn	0x80115B9C	invented: ends a player's turn and picks the lane's next handler
+GA_EndDuelGame	0x80115FCC	invented: ends a game of a duel: records scores, plays win and loss animations, returns the winning lane
+GA_StartTurn	0x80116248	invented: sets up the lane's pins for the mode and frame, then starts the turn
+GA_ResetLane	0x8011641C	invented: resets a player's lane for a new turn
+GA_SetTurnHandlers	0x8011669C	invented: sets the handlers of a player's turn for the game mode
+GA_HidePins	0x80116798	invented: hides the pins
+GA_SoundThrowResult	0x801167C0	invented: sounds the result of a throw
+GA_StepClamped	0x801169F8	invented: moves a value by delta / 50 within -50 to 50
+GA_RollBall	0x80116BA4	invented: rolls the ball of a player's throw
+GA_RollBallSpin	0x80116DC8	invented: rolls the ball as GA_RollBall, turning its velocity into spin
+GA_DrawScorePanel	0x8011917C	invented: draws a player's score panel on the lane's side
+GA_DrawPinDiagram	0x80119328	invented: draws the pin diagram of the player's lane
+GA_DrawParPanel	0x801198E4	invented: draws the par game's panel for a player
+GA_DrawParFramePanel	0x80119ACC	invented: draws the par game's frame panel
+GA_DrawDistancePanels	0x8011A26C	invented: draws both players' distance panels
+GA_PinEditor	0x8011A404	invented: the pin editor: draws the pin chart with a cursor and edits it from the first controller
+GA_DrawAimLine	0x8011A8AC	invented: draws the lane's aim line in a cycling colour
+GA_SetBallView	0x8011B634	invented: sets the lane's camera to one of five views of the ball
+GA_FreeCamera	0x8011BD34	invented: an unk_B0C camera handler: a free camera moved by the stick
+GA_CpuInput	0x8011C658	invented: input of a player the game plays
+GA_CpuSetup	0x8011C93C	invented: set-up of a player the game plays: picks its throw at random
+GA_DebugText	0x8011CF30	invented: draws debug text for a player
+GA_BodyMatrix	0x8011D2C0	invented: builds the placement matrix of a body
+GA_TransformPoint	0x8011D304	invented: places a point by a rotation (degrees) and a translation
+GA_VecSub	0x8011D3A0	invented: out = to - from
+GA_VecLength	0x8011D3D4	invented: length of a vector
+GA_VecNormalize	0x8011D424	invented: scales a vector to length 1 and returns its length
+GA_VecDirection	0x8011D4E4	invented: unit vector between two points; returns their distance
+GA_VecCosAngle	0x8011D5B8	invented: cosine of the angle between two vectors
+GA_VecCrossNormal	0x8011D6C4	invented: unit vector of a cross product
+GA_SetBallHeading	0x8011D7CC	invented: sets the ball's heading from a vector in the x-z plane
+GA_SpotsOverlap	0x8011D9CC	invented: tests whether two spots' spheres overlap
+GA_SegmentHitsSpot	0x8011DB54	invented: tests whether a segment passes within a spot's radius
+GA_SpotContact	0x8011DCB8	invented: contact normal and restitution of a moving spot against another
+GA_CollideBodies	0x8011E014	invented: collision of two bodies
+GA_CollideMomentum	0x8011E12C	invented: momentum exchange of a moving body with another
+GA_TipBody	0x8011E504	invented: starts a standing body falling once it moves fast enough, with its sound
+GA_ApproachLimit	0x8011E63C	invented: moves a value one step toward a limit and clamps it there
+GA_CollideLane	0x8011E6F8	invented: collisions between the bodies of a lane
+GA_SettleBodies	0x8011F334	invented: slows and turns the fallen bodies until they lie on their side
+GA_KeepOnFloor	0x8011F4CC	invented: keeps a body's spots inside the floor grid and on the floor
+GA_FloorHeight	0x8011F87C	invented: height (and normal) of the floor grid at a point
+GA_SlopeContact	0x8011FD08	invented: contact of a body's spot with a sloped floor
+GA_KeepInGrid	0x8012016C	invented: keeps a spot inside the floor grid and below the ceiling
+GA_PickAimPin	0x801203AC	invented: picks the pin the game aims at
+GA_BinarySearch	0x80120680	invented: binary search of a sorted table
+GA_IsSplit	0x801206E0	invented: 1 when the head pin is down and the standing pins are a listed leave (bowling's split)
+GA_UnpackPinMask	0x80120980	invented: unpacks a pin mask into one flag per pin
+GA_ShuffleOrder	0x801209C0	invented: fills an array with consecutive values and shuffles it
+GA_SetupSprite	0x80120A7C	invented: sets up a sprite of a resource, keeping a copy of its palette
+GA_RestorePalette	0x80120B10	invented: puts a sprite's saved palette back into its resource
+GA_FillPalette	0x80120B50	invented: rewrites a sprite's palette range from its saved copy up to an index
+GA_FillPaletteFraction	0x80120C0C	invented: GA_FillPalette at a fraction of the palette range
+GA_PlayLaneSound	0x80120D30	invented: starts a sound for a lane and returns its handle
+GA_StopLaneSound	0x80120D7C	invented: stops a lane sound by handle and clears it
+GA_ScoreFirstBall	0x80120DD8	invented: scores the first ball of a frame (bowling scoring: strike and spare bonuses)
+GA_ScoreSecondBall	0x801213B4	invented: scores the second ball of a frame
+GA_ScoreThirdBall	0x801219CC	invented: scores the third ball of the tenth frame
+GA_ClearScores	0x80121E34	invented: clears every player's scores, results and counters
+GA_EndFrame	0x80122060	invented: ends the player's frame
+GA_CountParThrow	0x80122140	invented: counts a throw of the par game's frame and scores it against par
+GA_DecideFrame	0x8012224C	invented: decides a frame between players 0 and 1

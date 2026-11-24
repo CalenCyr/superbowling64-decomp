@@ -19,7 +19,7 @@ extern u8 D_8005C160;               /* low nibble the game mode; bits 4-5 a sub-
 extern u8 D_8005C161;               /* number of players */
 extern u8 D_8005C162;               /* index of the last team */
 extern u8 D_8005C163;
-extern u8 D_8005C164;               /* set to 1 by the game reset (func_80121E34_gacode) */
+extern u8 D_8005C164;               /* set to 1 by the game reset (GA_ClearScores) */
 extern u8 D_8005CB60;
 extern u8 D_800693DC[2];            /* per lane: games won */
 extern u8 D_8009D19C[4];            /* per player: current frame (10: the game is over) */
@@ -40,7 +40,7 @@ extern playerName_t D_8005C0F8[8];   /* per character: its default name */
 extern playerName_t D_80068218[];    /* per player: name */
 extern u8 D_80068A50[];             /* per player (func_8003A658) */
 extern u8 D_800994BE[];             /* per player (func_8003A658) */
-extern u8 D_80099458[4][10];        /* per player and frame: flags; in the par game, [0] holds each frame's par (func_80122140_gacode) */
+extern u8 D_80099458[4][10];        /* per player and frame: flags; in the par game, [0] holds each frame's par (GA_CountParThrow) */
 extern u16 D_8009CF80[4];           /* per player of a duel: games won */
 extern u16 D_800DF6B4[4];           /* per player: counted up with D_800A304C (func_801151A0_gacode) */
 extern u16 D_8009D088[4];           /* per player: counted when the frame ends after a non-run turn (func_801151A0_gacode) */

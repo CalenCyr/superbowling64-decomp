@@ -34,8 +34,8 @@ extern u8 opcode_VRAM[];
 extern u8 opcode_BSS_END[];
 
 /* each overlay's init, run once after it is loaded, and its per-frame function; gacode's func_80112A74 ends the demo */
-void func_80112350_gacode( void );
-void func_801125A0_gacode( void );
+void GA_Init( void );
+void GA_Frame( void );
 void func_80112A74_gacode( void );
 void RS_Init( void );
 void RS_Frame( void );

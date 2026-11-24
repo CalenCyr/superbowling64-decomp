@@ -458,7 +458,7 @@ void Game_Thread( void *arg ) {
                 osInvalDCache( gacode_VRAM, i );
                 FAT_ReadFile( "GACODE  SYS", gacode_VRAM, i, 0 );
                 func_80026B10();
-                func_80112350_gacode();
+                GA_Init();
                 break;
             case SCENE_RSCODE:
                 i = FAT_GetFileSize( "RSCODE  SYS" );
@@ -521,7 +521,7 @@ void Game_Thread( void *arg ) {
         i = D_8005C0B6;
         switch ( i ) {
         case SCENE_GACODE:
-            func_801125A0_gacode();
+            GA_Frame();
             break;
         case SCENE_RSCODE:
             RS_Frame();

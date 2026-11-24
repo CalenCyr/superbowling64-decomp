@@ -7,7 +7,7 @@
 
 /*
 ================
-func_8011D2C0_gacode
+GA_BodyMatrix
 
 Builds the placement matrix of a body: rotation rot (degrees), then scale, then translation pos.
 ================
@@ -15,46 +15,46 @@ Builds the placement matrix of a body: rotation rot (degrees), then scale, then 
 #ifdef NON_MATCHING
 // NON_MATCHING: stack frame; retail's is 0xA8 bytes, 0x80 more than this body needs, as if two 4x4 float
 // matrices were declared and never used; every instruction else is the same. Two unused f32[4][4] locals,
-// or the same declared in an if ( 0 ) block, give the exact bytes here and in func_8011D304_gacode (which
+// or the same declared in an if ( 0 ) block, give the exact bytes here and in GA_TransformPoint (which
 // expands this function, frame included); neither is adopted (R17) without evidence of what they were.
-// Declared inline: func_8011D304_gacode expands it.
-inline void func_8011D2C0_gacode( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale ) {
+// Declared inline: GA_TransformPoint expands it.
+inline void GA_BodyMatrix( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale ) {
     guPositionF( mf, rot[0], rot[1], rot[2], scale, pos[0], pos[1], pos[2] );
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D2C0_gacode);
+INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_BodyMatrix);
 #endif
 
 #ifdef NON_MATCHING
-// NON_MATCHING: stack frame only; retail's is 0xF0 bytes. This expands func_8011D2C0_gacode (an inline's
+// NON_MATCHING: stack frame only; retail's is 0xF0 bytes. This expands GA_BodyMatrix (an inline's
 // frame stays in its caller's: retail's &mf is held in s2, which the expansion gives and guPositionF called
-// directly does not), so the missing 0x80 are func_8011D2C0_gacode's; exact (whole frame) once that function's frame is found
+// directly does not), so the missing 0x80 are GA_BodyMatrix's; exact (whole frame) once that function's frame is found
 /*
 ================
-func_8011D304_gacode
+GA_TransformPoint
 
 out = in placed by rotation rot (degrees) and translation pos.
 ================
 */
-void func_8011D304_gacode( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos ) {
+void GA_TransformPoint( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos ) {
     f32 mf[4][4];
 
-    func_8011D2C0_gacode( mf, pos, rot, 1.0f );
+    GA_BodyMatrix( mf, pos, rot, 1.0f );
     guMtxXFMF( mf, in[0], in[1], in[2], &out[0], &out[1], &out[2] );
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011D304_gacode);
+INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_TransformPoint);
 #endif
 
 /*
 ================
-func_8011D3A0_gacode
+GA_VecSub
 
 out = to - from
-Declared inline: func_8011D4E4_gacode expands it.
+Declared inline: GA_VecDirection expands it.
 ================
 */
-inline void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to ) {
+inline void GA_VecSub( vec3_t out, vec3_t from, vec3_t to ) {
     out[0] = to[0] - from[0];
     out[1] = to[1] - from[1];
     out[2] = to[2] - from[2];
@@ -62,25 +62,25 @@ inline void func_8011D3A0_gacode( vec3_t out, vec3_t from, vec3_t to ) {
 
 /*
 ================
-func_8011D3D4_gacode
+GA_VecLength
 
 Length of v.
-Declared inline: func_8011D5B8_gacode expands it.
+Declared inline: GA_VecCosAngle expands it.
 ================
 */
-inline f32 func_8011D3D4_gacode( vec3_t v ) {
+inline f32 GA_VecLength( vec3_t v ) {
     return sqrtf( v[0] * v[0] + v[1] * v[1] + v[2] * v[2] );
 }
 
 /*
 ================
-func_8011D424_gacode
+GA_VecNormalize
 
 out = in scaled to length 1, or (0, -1, 0) when in is zero; returns the length of in.
-Declared inline: func_8011D4E4_gacode and func_8011D6C4_gacode expand it.
+Declared inline: GA_VecDirection and GA_VecCrossNormal expand it.
 ================
 */
-inline f32 func_8011D424_gacode( vec3_t out, vec3_t in ) {
+inline f32 GA_VecNormalize( vec3_t out, vec3_t in ) {
     f32 length = sqrtf( in[0] * in[0] + in[1] * in[1] + in[2] * in[2] );
 
     if ( length == 0.0f ) {
@@ -97,28 +97,28 @@ inline f32 func_8011D424_gacode( vec3_t out, vec3_t in ) {
 
 /*
 ================
-func_8011D4E4_gacode
+GA_VecDirection
 
 out = the unit vector from from to to; returns their distance.
 ================
 */
-f32 func_8011D4E4_gacode( vec3_t out, vec3_t from, vec3_t to ) {
+f32 GA_VecDirection( vec3_t out, vec3_t from, vec3_t to ) {
     vec3_t delta;
 
-    func_8011D3A0_gacode( delta, from, to );
-    return func_8011D424_gacode( out, delta );
+    GA_VecSub( delta, from, to );
+    return GA_VecNormalize( out, delta );
 }
 
 /*
 ================
-func_8011D5B8_gacode
+GA_VecCosAngle
 
 Cosine of the angle between a and b; 1 when either is zero.
-Declared inline: func_8011FD08_gacode expands it.
+Declared inline: GA_SlopeContact expands it.
 ================
 */
-inline f32 func_8011D5B8_gacode( vec3_t a, vec3_t b ) {
-    f32 lengths = func_8011D3D4_gacode( a ) * func_8011D3D4_gacode( b );
+inline f32 GA_VecCosAngle( vec3_t a, vec3_t b ) {
+    f32 lengths = GA_VecLength( a ) * GA_VecLength( b );
 
     if ( lengths == 0.0f ) {
         return 1.0f;
@@ -128,31 +128,31 @@ inline f32 func_8011D5B8_gacode( vec3_t a, vec3_t b ) {
 
 /*
 ================
-func_8011D6C4_gacode
+GA_VecCrossNormal
 
 out = the unit vector of a x b, or (0, -1, 0) when a and b are parallel.
-Declared inline: func_8011F87C_gacode expands it.
+Declared inline: GA_FloorHeight expands it.
 ================
 */
-inline void func_8011D6C4_gacode( vec3_t out, vec3_t a, vec3_t b ) {
+inline void GA_VecCrossNormal( vec3_t out, vec3_t a, vec3_t b ) {
     vec3_t cross;
 
     cross[0] = a[1] * b[2] - a[2] * b[1];
     cross[1] = a[2] * b[0] - a[0] * b[2];
     cross[2] = a[0] * b[1] - a[1] * b[0];
-    func_8011D424_gacode( out, cross );
+    GA_VecNormalize( out, cross );
 }
 
 /*
 ================
-func_8011D7CC_gacode
+GA_SetBallHeading
 
 Sets the ball's rot[1] (degrees) from the heading of v in the x-z plane, approximated from |v[0] / v[2]|
 (45 * its square root below 1) rather than an arctangent; with v[2] zero it turns rot[1] by 90 instead.
 Clamped to -180..179.9999.
 ================
 */
-void func_8011D7CC_gacode( vec3_t v, gaBody_t *ball ) {
+void GA_SetBallHeading( vec3_t v, gaBody_t *ball ) {
     f32 ratio;
     f32 angle;
 
@@ -184,13 +184,13 @@ void func_8011D7CC_gacode( vec3_t v, gaBody_t *ball ) {
 
 /*
 ================
-func_8011D9CC_gacode
+GA_SpotsOverlap
 
 Nonzero when the spheres of spots a and b (centre pos, radius unk_18) overlap: their boxes first, axis by
 axis, then the distance.
 ================
 */
-s32 func_8011D9CC_gacode( gaSpot_t *a, gaSpot_t *b ) {
+s32 GA_SpotsOverlap( gaSpot_t *a, gaSpot_t *b ) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -210,14 +210,14 @@ s32 func_8011D9CC_gacode( gaSpot_t *a, gaSpot_t *b ) {
 
 /*
 ================
-func_8011DB54_gacode
+GA_SegmentHitsSpot
 
 Nonzero when the segment from from to to passes within radius plus the spot's radius of the spot's centre,
 at a point between its ends.
-Declared inline: func_8011E6F8_gacode (parked draft) expands it.
+Declared inline: GA_CollideLane (parked draft) expands it.
 ================
 */
-inline s32 func_8011DB54_gacode( gaSpot_t *spot, vec3_t from, vec3_t to, f32 radius ) {
+inline s32 GA_SegmentHitsSpot( gaSpot_t *spot, vec3_t from, vec3_t to, f32 radius ) {
     f32 dx;
     f32 dy;
     f32 dz;
@@ -250,7 +250,7 @@ inline s32 func_8011DB54_gacode( gaSpot_t *spot, vec3_t from, vec3_t to, f32 rad
 
 /*
 ================
-func_8011DCB8_gacode
+GA_SpotContact
 
 Contact of spot a, moving along vel, with spot b: normal = the unit vector from a's centre, pushed back
 along vel by what the spheres overlap, to b's centre; returns 1 minus the closest distance of b's centre
@@ -258,13 +258,13 @@ from a's path over the sum of the radii.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: register allocation in the two expansions of func_8011D424_gacode only: retail copies the
+// NON_MATCHING: register allocation in the two expansions of GA_VecNormalize only: retail copies the
 // first one's length into $f4 before the zero test and divides by $f4, and in the second takes sqrt.s into $f0
 // and copies it to $f2 after the sqrtf fallback joins; this draft uses the sqrt register directly. Everything
 // else matches, including $f20/$f22, which need along reused as the push and t as the clamped distance (with
 // separate push and dist locals they land in caller-saved registers instead). Also tried: the inline's length
-// through func_8011D3D4_gacode (no change).
-f32 func_8011DCB8_gacode( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
+// through GA_VecLength (no change).
+f32 GA_SpotContact( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     f32 along;
     f32 speedSq;
     f32 t;
@@ -281,35 +281,35 @@ f32 func_8011DCB8_gacode( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) 
     dir[0] = vel[0] * t + a->pos[0];
     dir[1] = vel[1] * t + a->pos[1];
     dir[2] = vel[2] * t + a->pos[2];
-    func_8011D3A0_gacode( gap, dir, b->pos );
-    t = func_8011D3D4_gacode( gap );
+    GA_VecSub( gap, dir, b->pos );
+    t = GA_VecLength( gap );
     t = t < 0.0 ? 0.0f : a->unk_18 + b->unk_18 < t ? a->unk_18 + b->unk_18 : t;
     along = a->unk_18 + b->unk_18 - t * 0.85;
-    func_8011D424_gacode( dir, vel );
+    GA_VecNormalize( dir, vel );
     dir[0] *= along;
     dir[1] *= along;
     dir[2] *= along;
     gap[0] += dir[0];
     gap[1] += dir[1];
     gap[2] += dir[2];
-    func_8011D424_gacode( normal, gap );
+    GA_VecNormalize( normal, gap );
     return 1.0 - t / ( a->unk_18 + b->unk_18 );
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011DCB8_gacode);
+INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_SpotContact);
 #endif
 
 /*
 ================
-func_8011E014_gacode
+GA_CollideBodies
 
 Collision of bodies a and b (spots sa and sb): the one with more momentum is the mover of
-func_8011E12C_gacode, and when it had strictly more, the other takes its spin about y, reversed and cut by
+GA_CollideMomentum, and when it had strictly more, the other takes its spin about y, reversed and cut by
 the restitution.
-Declared inline: func_8011E6F8_gacode (parked draft) expands it.
+Declared inline: GA_CollideLane (parked draft) expands it.
 ================
 */
-inline void func_8011E014_gacode( gaMotion_t *a, gaMotion_t *b, gaSpot_t *sa, gaSpot_t *sb ) {
+inline void GA_CollideBodies( gaMotion_t *a, gaMotion_t *b, gaSpot_t *sa, gaSpot_t *sb ) {
     gaMotion_t *in[2];
     gaMotion_t *out[2];
     gaSpot_t *spots[2];
@@ -334,7 +334,7 @@ inline void func_8011E014_gacode( gaMotion_t *a, gaMotion_t *b, gaSpot_t *sa, ga
         momentum[0] = momentum[1];
         momentum[1] = swap;
     }
-    restitution = func_8011E12C_gacode( out, in, spots );
+    restitution = GA_CollideMomentum( out, in, spots );
     if ( momentum[0] > momentum[1] ) {
         keep = 1.0 - restitution;
         out[1]->spin[1] = -( in[0]->spin[1] * keep );
@@ -343,14 +343,14 @@ inline void func_8011E014_gacode( gaMotion_t *a, gaMotion_t *b, gaSpot_t *sa, ga
 
 /*
 ================
-func_8011E12C_gacode
+GA_CollideMomentum
 
 Collision of in[0] (moving) with in[1], weighted by their unk_30, with the restitution of
-func_8011DCB8_gacode: out[1] leaves along the contact normal, out[0] keeps the rest of the momentum at its own
+GA_SpotContact: out[1] leaves along the contact normal, out[0] keeps the rest of the momentum at its own
 speed. Returns the restitution.
 ================
 */
-f32 func_8011E12C_gacode( gaMotion_t **out, gaMotion_t **in, gaSpot_t **spots ) {
+f32 GA_CollideMomentum( gaMotion_t **out, gaMotion_t **in, gaSpot_t **spots ) {
     gaMotion_t after[2];
     vec3_t normal;
     vec3_t vel0;
@@ -359,7 +359,7 @@ f32 func_8011E12C_gacode( gaMotion_t **out, gaMotion_t **in, gaSpot_t **spots ) 
     f32 speed;
     f32 speed0;
 
-    restitution = func_8011DCB8_gacode( in[0]->vel, spots[0], spots[1], normal );
+    restitution = GA_SpotContact( in[0]->vel, spots[0], spots[1], normal );
     after[0].vel[0] = ( ( in[0]->unk_30 - restitution * in[1]->unk_30 ) * in[0]->vel[0] +
                         ( in[1]->unk_30 + restitution * in[1]->unk_30 ) * in[1]->vel[0] ) /
                       ( in[0]->unk_30 + in[1]->unk_30 );
@@ -378,7 +378,7 @@ f32 func_8011E12C_gacode( gaMotion_t **out, gaMotion_t **in, gaSpot_t **spots ) 
     after[1].vel[2] = ( ( in[0]->unk_30 + restitution * in[0]->unk_30 ) * in[0]->vel[2] +
                         ( in[1]->unk_30 - restitution * in[0]->unk_30 ) * in[1]->vel[2] ) /
                       ( in[0]->unk_30 + in[1]->unk_30 );
-    speed = func_8011D3D4_gacode( after[1].vel );
+    speed = GA_VecLength( after[1].vel );
     vel1[0] = normal[0] * speed;
     vel1[1] = normal[1] * speed;
     vel1[2] = normal[2] * speed;
@@ -388,8 +388,8 @@ f32 func_8011E12C_gacode( gaMotion_t **out, gaMotion_t **in, gaSpot_t **spots ) 
               in[0]->unk_30;
     vel0[2] = ( after[0].vel[2] * in[0]->unk_30 + after[1].vel[2] * in[1]->unk_30 - vel1[2] * in[1]->unk_30 ) /
               in[0]->unk_30;
-    speed = func_8011D3D4_gacode( after[0].vel );
-    speed0 = func_8011D3D4_gacode( vel0 );
+    speed = GA_VecLength( after[0].vel );
+    speed0 = GA_VecLength( vel0 );
     if ( speed0 == 0.0f ) {
         speed = speed0 = 1.0f;
     }
@@ -407,15 +407,15 @@ f32 func_8011E12C_gacode( gaMotion_t **out, gaMotion_t **in, gaSpot_t **spots ) 
 
 /*
 ================
-func_8011E504_gacode
+GA_TipBody
 
 For a body with rot[0] 0 that moves at speed 1 or more: by kind 0 or 1 sets its spin about x, heads it along
-its velocity (func_8011D7CC_gacode), moves unk_5D from 1 (still standing) to 2, and plays sound 0x32 (0x4B with
+its velocity (GA_SetBallHeading), moves unk_5D from 1 (still standing) to 2, and plays sound 0x32 (0x4B with
 flags bit 1) on the lane of flags bit 0; returns 1. Otherwise returns 0.
 ================
 */
-s32 func_8011E504_gacode( u8 kind, gaMotion_t *motion, gaBody_t *body, u8 flags ) {
-    if ( body->rot[0] == 0.0f && func_8011D3D4_gacode( motion->vel ) >= 1.0 ) {
+s32 GA_TipBody( u8 kind, gaMotion_t *motion, gaBody_t *body, u8 flags ) {
+    if ( body->rot[0] == 0.0f && GA_VecLength( motion->vel ) >= 1.0 ) {
         switch ( kind ) {
         case 0:
             motion->spin[0] = 1.5f;
@@ -424,11 +424,11 @@ s32 func_8011E504_gacode( u8 kind, gaMotion_t *motion, gaBody_t *body, u8 flags 
             motion->spin[0] = -2.0f;
             break;
         }
-        func_8011D7CC_gacode( motion->vel, body );
+        GA_SetBallHeading( motion->vel, body );
         if ( body->unk_5D == 1 ) {
             body->unk_5D = 2;
         }
-        func_80120D30_gacode( flags & 1, flags & 2 ? 0x4B : 0x32 );
+        GA_PlayLaneSound( flags & 1, flags & 2 ? 0x4B : 0x32 );
         return 1;
     }
     return 0;
@@ -436,14 +436,14 @@ s32 func_8011E504_gacode( u8 kind, gaMotion_t *motion, gaBody_t *body, u8 flags 
 
 /*
 ================
-func_8011E63C_gacode
+GA_ApproachLimit
 
 Moves *speed one step toward limit's side; once *value reaches limit (from below for a positive limit,
 from above for a negative one) clamps it there, stops *speed and returns 1.
-Declared inline: func_8011F334_gacode expands it.
+Declared inline: GA_SettleBodies expands it.
 ================
 */
-inline s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit ) {
+inline s32 GA_ApproachLimit( f32 *value, f32 *speed, f32 limit ) {
     if ( ( limit > 0.0f && *value >= limit ) || ( limit < 0.0f && *value <= limit ) ) {
         *value = limit;
         *speed = 0.0f;
@@ -459,12 +459,12 @@ inline s32 func_8011E63C_gacode( f32 *value, f32 *speed, f32 limit ) {
 
 /*
 ================
-func_8011E6F8_gacode
+GA_CollideLane
 
 Collisions between the bodies of a lane. Each spot in use (spots[0..10], then spot2 of each body in
 spots[11..21]) of a body still in play is tested against each later body in play, first against its
 spot (or the segment from that spot to the midpoint with its spot2), then against its spot2 (or the
-segment from that midpoint to spot2). A new contact runs func_8011E014_gacode on the two bodies, and each
+segment from that midpoint to spot2). A new contact runs GA_CollideBodies on the two bodies, and each
 of them that stands flat (unk_5C 1, rot[0] 0) and was hit at 1 or more starts to tip toward its new
 heading, falls (unk_5D 2) and plays its sound (0x4B under the lane, else 0x32). unk_1C of a spot holds
 bit 0 (it was hit this frame) and one bit per spot it touches. Returns 1 when the last contact with
@@ -472,12 +472,12 @@ the first spots knocked a body over.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: same calls, CFG and inline expansions (func_8011DB54_gacode, func_8011E014_gacode,
-// func_8011D3D4_gacode); register allocation differs: retail keeps lane in s7, a in s8 and hit on the stack
+// NON_MATCHING: same calls, CFG and inline expansions (GA_SegmentHitsSpot, GA_CollideBodies,
+// GA_VecLength); register allocation differs: retail keeps lane in s7, a in s8 and hit on the stack
 // (0x7C), recomputes &bodies[a] at each use, and spills which as a word (andi 0xFF in the inner loop's
 // preheader, so it may be (u8)( i / NUM_BODIES ) inside the inner loop); this draft hoists the constant 1 into
 // s7 and &bodies[a] into s8, and its frame is 8 bytes larger
-s32 func_8011E6F8_gacode( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots, u8 lane ) {
+s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots, u8 lane ) {
     gaSpot_t mid;
     s32 hit = 0;
     s32 i;
@@ -510,27 +510,27 @@ s32 func_8011E6F8_gacode( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSp
                 mid.unk_18 = spots[b2].unk_18;
             }
             if ( !( ( spots[i].unk_1C >> ( b2 ) ) & 1 ) &&
-                 ( func_8011D9CC_gacode( &spots[i], &spots[b] ) ||
+                 ( GA_SpotsOverlap( &spots[i], &spots[b] ) ||
                    ( spots[b2].unk_18 != 0.0f &&
-                     func_8011DB54_gacode( &spots[i], spots[b].pos, mid.pos, spots[b].unk_18 ) ) ) ) {
+                     GA_SegmentHitsSpot( &spots[i], spots[b].pos, mid.pos, spots[b].unk_18 ) ) ) ) {
                 if ( !( ( spots[i].unk_1C >> b ) & 1 ) ) {
-                    func_8011E014_gacode( &motion[a], &motion[b], &spots[i], &spots[b] );
+                    GA_CollideBodies( &motion[a], &motion[b], &spots[i], &spots[b] );
                     lane = spots[i].pos[1] < -190.0f ? lane | 2 : lane;
                     if ( bodies[b].unk_5C == 1 ) {
-                        if ( bodies[b].rot[0] == 0.0f && func_8011D3D4_gacode( motion[b].vel ) >= 1.0 ) {
+                        if ( bodies[b].rot[0] == 0.0f && GA_VecLength( motion[b].vel ) >= 1.0 ) {
                             motion[b].spin[0] = 1.5f;
-                            func_8011D7CC_gacode( motion[b].vel, &bodies[b] );
+                            GA_SetBallHeading( motion[b].vel, &bodies[b] );
                             if ( bodies[b].unk_5D == 1 ) {
                                 bodies[b].unk_5D = 2;
                             }
-                            func_80120D30_gacode( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
+                            GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
                             hit = 1;
                         } else {
                             hit = 0;
                         }
                     }
                     if ( bodies[a].unk_5C == 1 ) {
-                        if ( bodies[a].rot[0] == 0.0f && func_8011D3D4_gacode( motion[a].vel ) >= 1.0 ) {
+                        if ( bodies[a].rot[0] == 0.0f && GA_VecLength( motion[a].vel ) >= 1.0 ) {
                             switch ( which ) {
                             case 0:
                                 motion[a].spin[0] = 1.5f;
@@ -539,11 +539,11 @@ s32 func_8011E6F8_gacode( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSp
                                 motion[a].spin[0] = -2.0f;
                                 break;
                             }
-                            func_8011D7CC_gacode( motion[a].vel, &bodies[a] );
+                            GA_SetBallHeading( motion[a].vel, &bodies[a] );
                             if ( bodies[a].unk_5D == 1 ) {
                                 bodies[a].unk_5D = 2;
                             }
-                            func_80120D30_gacode( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
+                            GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
                             hit = 1;
                         } else {
                             hit = 0;
@@ -554,23 +554,23 @@ s32 func_8011E6F8_gacode( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSp
                 }
             } else if ( spots[b2].unk_18 != 0.0f && !( spots[b].unk_1C & 1 ) &&
                         !( ( spots[i].unk_1C >> b ) & 1 ) &&
-                        ( func_8011D9CC_gacode( &spots[i], &spots[b2] ) ||
-                          func_8011DB54_gacode( &spots[i], mid.pos, spots[b2].pos,
+                        ( GA_SpotsOverlap( &spots[i], &spots[b2] ) ||
+                          GA_SegmentHitsSpot( &spots[i], mid.pos, spots[b2].pos,
                                                 spots[b2].unk_18 ) ) ) {
                 if ( !( ( spots[i].unk_1C >> ( b2 ) ) & 1 ) ) {
-                    func_8011E014_gacode( &motion[a], &motion[b], &spots[i], &spots[b2] );
+                    GA_CollideBodies( &motion[a], &motion[b], &spots[i], &spots[b2] );
                     lane = spots[i].pos[1] < -190.0f ? lane | 2 : lane;
                     if ( bodies[b].unk_5C == 1 && bodies[b].rot[0] == 0.0f &&
-                         func_8011D3D4_gacode( motion[b].vel ) >= 1.0 ) {
+                         GA_VecLength( motion[b].vel ) >= 1.0 ) {
                         motion[b].spin[0] = -2.0f;
-                        func_8011D7CC_gacode( motion[b].vel, &bodies[b] );
+                        GA_SetBallHeading( motion[b].vel, &bodies[b] );
                         if ( bodies[b].unk_5D == 1 ) {
                             bodies[b].unk_5D = 2;
                         }
-                        func_80120D30_gacode( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
+                        GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
                     }
                     if ( bodies[a].unk_5C == 1 && bodies[a].rot[0] == 0.0f &&
-                         func_8011D3D4_gacode( motion[a].vel ) >= 1.0 ) {
+                         GA_VecLength( motion[a].vel ) >= 1.0 ) {
                         switch ( which ) {
                         case 0:
                             motion[a].spin[0] = 1.5f;
@@ -579,11 +579,11 @@ s32 func_8011E6F8_gacode( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSp
                             motion[a].spin[0] = -2.0f;
                             break;
                         }
-                        func_8011D7CC_gacode( motion[a].vel, &bodies[a] );
+                        GA_SetBallHeading( motion[a].vel, &bodies[a] );
                         if ( bodies[a].unk_5D == 1 ) {
                             bodies[a].unk_5D = 2;
                         }
-                        func_80120D30_gacode( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
+                        GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
                     }
                     spots[i].unk_1C |= 1 << ( b2 );
                     spots[b].unk_1C |= 1;
@@ -597,19 +597,19 @@ s32 func_8011E6F8_gacode( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSp
     return hit;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011E6F8_gacode);
+INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_CollideLane);
 #endif
 
 /*
 ================
-func_8011F334_gacode
+GA_SettleBodies
 
 Each frame, for every standing body that is down (unk_5C 1) and has motion flag 2: one lying flat slows to
 0.75 of its speed along the lane; one still tipping turns toward 90 degrees on its side and, once there,
 slows to 0.85. The spin about y decays to 0.925 either way.
 ================
 */
-void func_8011F334_gacode( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots ) {
+void GA_SettleBodies( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots ) {
     s32 i;
     s32 down;
 
@@ -620,9 +620,9 @@ void func_8011F334_gacode( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots
                 motion[i].vel[2] *= 0.75;
             } else {
                 if ( bodies[i].rot[0] >= 0.0f ) {
-                    down = func_8011E63C_gacode( &bodies[i].rot[0], &motion[i].spin[0], 90.0f );
+                    down = GA_ApproachLimit( &bodies[i].rot[0], &motion[i].spin[0], 90.0f );
                 } else {
-                    down = func_8011E63C_gacode( &bodies[i].rot[0], &motion[i].spin[0], -90.0f );
+                    down = GA_ApproachLimit( &bodies[i].rot[0], &motion[i].spin[0], -90.0f );
                 }
                 if ( down ) {
                     motion[i].vel[0] *= 0.85;
@@ -636,10 +636,10 @@ void func_8011F334_gacode( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots
 
 /*
 ================
-func_8011F4CC_gacode
+GA_KeepOnFloor
 
 Keeps a body's spot (and spot2, unless its unk_18 is 0) inside the floor grid and on the floor: a spot
-that sank under the floor is lifted back onto it (unless func_8011FD08_gacode handles the contact) and its
+that sank under the floor is lifted back onto it (unless GA_SlopeContact handles the contact) and its
 fall turned into a damped bounce (motion flag 2). Returns 1 when the body lands with spot, 2 when it
 bounces with spot, else 0. Gravity (1.0889) is then applied.
 ================
@@ -648,7 +648,7 @@ bounces with spot, else 0. Gravity (1.0889) is then applied.
 // NON_MATCHING: byte-exact, but only with the empty `else if` branch (R17): retail skips the in-air case with
 // `and` of the two booleans (spot2 in use, spot2 on the floor); `!( a && b ) && c`, a nested if and a named
 // flag all give `or` or a different body. The empty branch may stand for a compiled-out macro (debug print)
-s32 func_8011F4CC_gacode( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 ceiling, f32 arg4 ) {
+s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 ceiling, f32 arg4 ) {
     vec3_t normal;
     f32 floor;
     f32 bottom2;
@@ -656,12 +656,12 @@ s32 func_8011F4CC_gacode( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f
     s32 handled;
     s32 landed;
 
-    func_8012016C_gacode( spot, spot2, motion, ceiling );
-    floor = func_8011F87C_gacode( spot->pos[0], spot->pos[2], normal );
+    GA_KeepInGrid( spot, spot2, motion, ceiling );
+    floor = GA_FloorHeight( spot->pos[0], spot->pos[2], normal );
     motion->flags &= ~0x40;
     landed = 0;
     if ( spot2->unk_18 != 0.0f && ( bottom2 = spot2->pos[1] - spot2->unk_18 ) < floor ) {
-        if ( !func_8011FD08_gacode( motion, spot2, normal ) ) {
+        if ( !GA_SlopeContact( motion, spot2, normal ) ) {
             spot->pos[1] += floor - bottom2;
             spot2->pos[1] += floor - bottom2;
         }
@@ -674,7 +674,7 @@ s32 func_8011F4CC_gacode( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f
         }
         motion->flags |= 2;
     } else if ( ( bottom = spot->pos[1] - spot->unk_18 ) < floor ) {
-        handled = func_8011FD08_gacode( motion, spot, normal );
+        handled = GA_SlopeContact( motion, spot, normal );
         if ( !handled ) {
             spot->pos[1] += floor - bottom;
             if ( spot2->unk_18 != 0.0f ) {
@@ -716,18 +716,18 @@ s32 func_8011F4CC_gacode( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f
     return landed;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_8011F4CC_gacode);
+INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_KeepOnFloor);
 #endif
 
 /*
 ================
-func_8011F87C_gacode
+GA_FloorHeight
 
 Height of the floor grid at (x, z), interpolated over the triangle of its cell that holds the point; when
 normal is not 0 it receives the unit normal of that triangle.
 ================
 */
-f32 func_8011F87C_gacode( f32 x, f32 z, vec3_t normal ) {
+f32 GA_FloorHeight( f32 x, f32 z, vec3_t normal ) {
     s32 cell[2];
     f32 pos[2];
     f32 h[4];
@@ -773,7 +773,7 @@ f32 func_8011F87C_gacode( f32 x, f32 z, vec3_t normal ) {
             alongX[0] = D_80100100[0].stepX;
             alongX[1] = h[1] - h[0];
             alongZ[1] = h[3] - h[1];
-            func_8011D6C4_gacode( normal, alongZ, alongX );
+            GA_VecCrossNormal( normal, alongZ, alongX );
         }
     } else {
         a = ( h[3] - h[0] ) * dx / D_80100100[0].stepX + h[0];
@@ -786,7 +786,7 @@ f32 func_8011F87C_gacode( f32 x, f32 z, vec3_t normal ) {
             alongX[0] = D_80100100[0].stepX;
             alongX[1] = h[3] - h[2];
             alongZ[1] = h[2] - h[0];
-            func_8011D6C4_gacode( normal, alongZ, alongX );
+            GA_VecCrossNormal( normal, alongZ, alongX );
         }
     }
     return height;
@@ -794,7 +794,7 @@ f32 func_8011F87C_gacode( f32 x, f32 z, vec3_t normal ) {
 
 /*
 ================
-func_8011FD08_gacode
+GA_SlopeContact
 
 Contact of a body's spot with a sloped floor (normal not straight up), unless motion flag 1: the slope is
 taken along x or z, whichever the normal leans more; against a slope steeper than 30 degrees from the
@@ -803,7 +803,7 @@ slides down the slope (motion flag 0x10 along x, 0x20 along z). Returns 1 on a b
 unk_0C takes the normal.
 ================
 */
-s32 func_8011FD08_gacode( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal ) {
+s32 GA_SlopeContact( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal ) {
     vec3_t from;
     vec3_t slope;
     s32 hit = 0;
@@ -816,7 +816,7 @@ s32 func_8011FD08_gacode( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal ) {
             from[0] = spot->unk_0C[0];
             slope[2] = 0.0f;
             slope[0] = normal[0];
-            if ( func_8011D5B8_gacode( from, slope ) < 0.866 ) {
+            if ( GA_VecCosAngle( from, slope ) < 0.866 ) {
                 hit = 1;
                 if ( motion->vel[0] * normal[0] <= 0.0f ) {
                     motion->vel[0] = -motion->vel[0];
@@ -834,7 +834,7 @@ s32 func_8011FD08_gacode( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal ) {
             from[0] = 0.0f;
             slope[2] = normal[2];
             slope[0] = 0.0f;
-            if ( func_8011D5B8_gacode( from, slope ) < 0.866 ) {
+            if ( GA_VecCosAngle( from, slope ) < 0.866 ) {
                 hit = 1;
                 if ( motion->vel[2] * normal[2] <= 0.0f ) {
                     motion->vel[2] = -motion->vel[2];
@@ -859,14 +859,14 @@ s32 func_8011FD08_gacode( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal ) {
 
 /*
 ================
-func_8012016C_gacode
+GA_KeepInGrid
 
 Keeps spot inside the floor grid (along z and x) and below ceiling: a spot past an edge is put back on
 it, spot2 moved with it unless its unk_18 is 0, and the velocity across that edge bounced (z: -0.1, motion
 flag 4; x: 0.5, flag 1; y: -0.0001).
 ================
 */
-void func_8012016C_gacode( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, f32 ceiling ) {
+void GA_KeepInGrid( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, f32 ceiling ) {
     f32 edge;
 
     motion->flags &= ~4;
@@ -904,7 +904,7 @@ void func_8012016C_gacode( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, 
 
 /*
 ================
-func_801203AC_gacode
+GA_PickAimPin
 
 Picks the pin to aim at from side's view: with one pin standing, that pin; with the last standing pin
 checked 1 or 5, that pin, offset 4.9 toward side; else the group (of two, split by D_8012C900_gacode's
@@ -912,7 +912,7 @@ order) with more standing pins, offset 15 (unless pin 7 or 10) or 5. Writes its 
 returns the pin.
 ================
 */
-s32 func_801203AC_gacode( vec3_t out, gaBody_t *bodies, gaSpot_t *spots, s32 side ) {
+s32 GA_PickAimPin( vec3_t out, gaBody_t *bodies, gaSpot_t *spots, s32 side ) {
     s32 right = 0;
     s32 left = 0;
     s32 numRight = 0;
@@ -1000,13 +1000,13 @@ f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale ) {
 
 /*
 ================
-func_80120680_gacode
+GA_BinarySearch
 
 Binary search of the count sorted entries of table for key; its index, or -1.
-Declared inline: func_801206E0_gacode expands it.
+Declared inline: GA_IsSplit expands it.
 ================
 */
-inline s32 func_80120680_gacode( u16 key, s32 count, u16 *table ) {
+inline s32 GA_BinarySearch( u16 key, s32 count, u16 *table ) {
     s32 lo = 0;
     s32 hi = count - 1;
     s32 mid;
@@ -1027,13 +1027,13 @@ inline s32 func_80120680_gacode( u16 key, s32 count, u16 *table ) {
 
 /*
 ================
-func_801206E0_gacode
+GA_IsSplit
 
 1 when the head pin is down and the mask of the standing pins is one of the leaves listed for their
 number (2 to 6, tables D_801236C0_gacode to D_801237EC_gacode); else 0.
 ================
 */
-u8 func_801206E0_gacode( gaLane_t *lane ) {
+u8 GA_IsSplit( gaLane_t *lane ) {
     u8 listed = 0;
     s32 mask = 0;
     s32 numStanding = 0;
@@ -1050,27 +1050,27 @@ u8 func_801206E0_gacode( gaLane_t *lane ) {
     }
     switch ( numStanding ) {
     case 2:
-        if ( func_80120680_gacode( mask, D_801236C0_gacode[0], &D_801236C0_gacode[1] ) >= 0 ) {
+        if ( GA_BinarySearch( mask, D_801236C0_gacode[0], &D_801236C0_gacode[1] ) >= 0 ) {
             listed = 1;
         }
         break;
     case 3:
-        if ( func_80120680_gacode( mask, D_801236F0_gacode[0], &D_801236F0_gacode[1] ) >= 0 ) {
+        if ( GA_BinarySearch( mask, D_801236F0_gacode[0], &D_801236F0_gacode[1] ) >= 0 ) {
             listed = 1;
         }
         break;
     case 4:
-        if ( func_80120680_gacode( mask, D_80123748_gacode[0], &D_80123748_gacode[1] ) >= 0 ) {
+        if ( GA_BinarySearch( mask, D_80123748_gacode[0], &D_80123748_gacode[1] ) >= 0 ) {
             listed = 1;
         }
         break;
     case 5:
-        if ( func_80120680_gacode( mask, D_801237BC_gacode[0], &D_801237BC_gacode[1] ) >= 0 ) {
+        if ( GA_BinarySearch( mask, D_801237BC_gacode[0], &D_801237BC_gacode[1] ) >= 0 ) {
             listed = 1;
         }
         break;
     case 6:
-        if ( func_80120680_gacode( mask, D_801237EC_gacode[0], &D_801237EC_gacode[1] ) >= 0 ) {
+        if ( GA_BinarySearch( mask, D_801237EC_gacode[0], &D_801237EC_gacode[1] ) >= 0 ) {
             listed = 1;
         }
         break;
@@ -1080,12 +1080,12 @@ u8 func_801206E0_gacode( gaLane_t *lane ) {
 
 /*
 ================
-func_80120980_gacode
+GA_UnpackPinMask
 
 Unpacks a pin mask, pin 1 in bit 9, into one flag per pin.
 ================
 */
-void func_80120980_gacode( u8 *pins, u16 mask ) {
+void GA_UnpackPinMask( u8 *pins, u16 mask ) {
     s32 i;
 
     for ( i = 0; i < NUM_PINS; i++ ) {
@@ -1099,7 +1099,7 @@ void func_80120980_gacode( u8 *pins, u16 mask ) {
 
 /*
 ================
-func_801209C0_gacode
+GA_ShuffleOrder
 
 Fills order with first, first + 1, ... (count values) and shuffles it.
 ================
@@ -1107,7 +1107,7 @@ Fills order with first, first + 1, ... (count values) and shuffles it.
 #ifdef NON_MATCHING
 // NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
 // change the register allocation, and a reused local is not counted as a match
-void func_801209C0_gacode( u8 *order, u8 count, u8 first ) {
+void GA_ShuffleOrder( u8 *order, u8 count, u8 first ) {
     s32 i;
     s32 j;          // RULE-EXCEPTION: R30, one local serves as the next value, then as the slot to swap with
     u8 swap;
@@ -1124,17 +1124,17 @@ void func_801209C0_gacode( u8 *order, u8 count, u8 first ) {
     }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_801209C0_gacode);
+INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_ShuffleOrder);
 #endif
 
 /*
 ================
-func_80120A7C_gacode
+GA_SetupSprite
 
 Sets up a sprite of resource id with palette range first to last, keeping a copy of its palette.
 ================
 */
-void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, u16 first, u16 last ) {
+void GA_SetupSprite( gaSprite_t *sprite, u16 id, u16 first, u16 last ) {
     Draw_Image( id, 320, 240 );
     if ( D_800F80B0[id].data != NULL ) {
         memmove( sprite->palette, ( (unkImage_t *)D_800F80B0[id].data )->palette, sizeof( sprite->palette ) );
@@ -1147,12 +1147,12 @@ void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, u16 first, u16 last ) {
 
 /*
 ================
-func_80120B10_gacode
+GA_RestorePalette
 
 Puts the sprite's saved palette back into its resource.
 ================
 */
-void func_80120B10_gacode( gaSprite_t *sprite ) {
+void GA_RestorePalette( gaSprite_t *sprite ) {
     if ( D_800F80B0[sprite->id].data != NULL ) {
         memmove( ( (unkImage_t *)D_800F80B0[sprite->id].data )->palette, sprite->palette, sizeof( sprite->palette ) );
     }
@@ -1160,15 +1160,15 @@ void func_80120B10_gacode( gaSprite_t *sprite ) {
 
 /*
 ================
-func_80120B50_gacode
+GA_FillPalette
 
 Rewrites the sprite's palette range in its resource from the saved copy: with color 0, the entries before
 index keep their colour and the others go black; else only entry index takes color.
 
-Declared inline: nothing calls this copy, and func_80120C0C_gacode repeats its body.
+Declared inline: nothing calls this copy, and GA_FillPaletteFraction repeats its body.
 ================
 */
-inline void func_80120B50_gacode( gaSprite_t *sprite, u16 color, u16 index ) {
+inline void GA_FillPalette( gaSprite_t *sprite, u16 color, u16 index ) {
     u16 *dst;
     s32 i;
 
@@ -1201,9 +1201,9 @@ inline void func_80120B50_gacode( gaSprite_t *sprite, u16 color, u16 index ) {
 
 /*
 ================
-func_80120C0C_gacode
+GA_FillPaletteFraction
 
-func_80120B50_gacode at fraction t of the sprite's palette range.
+GA_FillPalette at fraction t of the sprite's palette range.
 ================
 */
 #ifdef NON_MATCHING
@@ -1211,23 +1211,23 @@ func_80120B50_gacode at fraction t of the sprite's palette range.
 // swaps them (tried: an index local, operand order, u16/u32/s32 offsets, the inline's local order and clamp
 // spelling, the inline's body written out with an index local; 22k permuter iterations from base 50 found
 // nothing lower)
-void func_80120C0C_gacode( gaSprite_t *sprite, u16 color, f32 t ) {
+void GA_FillPaletteFraction( gaSprite_t *sprite, u16 color, f32 t ) {
     u16 count = sprite->last - sprite->first + 1;
 
-    func_80120B50_gacode( sprite, color, sprite->first + (u32)( count * t ) );
+    GA_FillPalette( sprite, color, sprite->first + (u32)( count * t ) );
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", func_80120C0C_gacode);
+INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_FillPaletteFraction);
 #endif
 
 /*
 ================
-func_80120D30_gacode
+GA_PlayLaneSound
 
 Starts sound id for a lane; returns its handle.
 ================
 */
-u64 func_80120D30_gacode( u8 lane, s32 id ) {
+u64 GA_PlayLaneSound( u8 lane, s32 id ) {
     u8 flags;
 
     if ( D_8005C162 ) {
@@ -1243,12 +1243,12 @@ u64 func_80120D30_gacode( u8 lane, s32 id ) {
 
 /*
 ================
-func_80120D7C_gacode
+GA_StopLaneSound
 
 Stops the sound of *handle, if any, and clears it.
 ================
 */
-void func_80120D7C_gacode( s64 *handle ) {
+void GA_StopLaneSound( s64 *handle ) {
     if ( *handle != 0 ) {
         Sound_Stop( *handle );
         *handle = 0;
@@ -1265,15 +1265,15 @@ void func_80120DD0_gacode( void ) {
 
 /*
 ================
-func_80120DD8_gacode
+GA_ScoreFirstBall
 
 Scores the first ball of player's frame from the D_8012D8DA_gacode pins it knocked down, by
 D_8012CDE0_gacode (0 nothing owed, 1 a spare's bonus, 2 a strike's, 3 two strikes'): the scores owed
 are settled as far as this ball allows and D_8012CDE0_gacode takes its next state (4 to 6 past this
-ball, as func_801213B4_gacode reads them). A strike before the tenth frame ends the frame.
+ball, as GA_ScoreSecondBall reads them). A strike before the tenth frame ends the frame.
 ================
 */
-void func_80120DD8_gacode( u8 player ) {
+void GA_ScoreFirstBall( u8 player ) {
     if ( D_8012D8DA_gacode == 10 ) {
         if ( D_8009D19C[player] == 9 ) {
             D_80066E18[player][D_8009D19C[player]] = -1;
@@ -1382,7 +1382,7 @@ void func_80120DD8_gacode( u8 player ) {
 
 /*
 ================
-func_801213B4_gacode
+GA_ScoreSecondBall
 
 Scores the second ball of player's frame from the D_8012D8DA_gacode pins it knocked down, by
 D_8012CDE0_gacode: after an open first ball (0, or 4 with a strike's bonus owed) a spare leaves a
@@ -1390,7 +1390,7 @@ spare's bonus owed (1) and an open frame is scored; in the tenth frame after a s
 strike's bonus owed) a strike leaves 3, anything else 2, and the third ball follows.
 ================
 */
-void func_801213B4_gacode( u8 player ) {
+void GA_ScoreSecondBall( u8 player ) {
     if ( D_8012CDE0_gacode[player] == 0 || D_8012CDE0_gacode[player] == 4 ) {
         if ( D_80066E18[player][D_8009D19C[player]] + D_8012D8DA_gacode == 10 ) {
             D_800A3020[player][D_8009D19C[player]] = -1;
@@ -1481,7 +1481,7 @@ void func_801213B4_gacode( u8 player ) {
 
 /*
 ================
-func_801219CC_gacode
+GA_ScoreThirdBall
 
 Scores the third ball of player's frame (D_80068A50_gacode 2) from the D_8012D8DA_gacode pins it knocked
 down, by D_8012CDE0_gacode: 1 and 3 add 10 or 20 to the previous score plus the third ball (a strike
@@ -1489,7 +1489,7 @@ counts 10 more), 2 adds 10 plus the second and third balls (20 when they make a 
 is stored in D_800994B8 (-1 for a strike or spare) and the player's game ends (D_800994BE).
 ================
 */
-void func_801219CC_gacode( u8 player ) {
+void GA_ScoreThirdBall( u8 player ) {
     if ( D_8012CDE0_gacode[player] == 1 || D_8012CDE0_gacode[player] == 3 ) {
         if ( D_8012D8DA_gacode == 10 ) {
             D_800994B8[player] = -1;
@@ -1544,12 +1544,12 @@ void func_801219CC_gacode( u8 player ) {
 
 /*
 ================
-func_80121E34_gacode
+GA_ClearScores
 
 Clears every player's scores, results and counters for a new game.
 ================
 */
-void func_80121E34_gacode( void ) {
+void GA_ClearScores( void ) {
     u8 player;
     u8 frame;
 
@@ -1591,27 +1591,27 @@ void func_80121FD0_gacode( u8 arg0, u8 arg1 ) {
     D_8012D8DA_gacode = arg1;
     switch ( D_80068A50[arg0] ) {
     case 0:
-        func_80120DD8_gacode( arg0 );
+        GA_ScoreFirstBall( arg0 );
         break;
     case 1:
-        func_801213B4_gacode( arg0 );
+        GA_ScoreSecondBall( arg0 );
         break;
     case 2:
-        func_801219CC_gacode( arg0 );
+        GA_ScoreThirdBall( arg0 );
         break;
     }
 }
 
 /*
 ================
-func_80122060_gacode
+GA_EndFrame
 
 Ends the player's frame: with done set, marks the frame's two results -1 and moves to the next frame (and
 returns 1); else takes one from D_80068A50. The player is finished after frame 10 or when D_80068A50
 reaches 0.
 ================
 */
-s32 func_80122060_gacode( u8 player, s32 done ) {
+s32 GA_EndFrame( u8 player, s32 done ) {
     u8 frame = D_8009D19C[player];
     s32 advanced = 0;
 
@@ -1630,13 +1630,13 @@ s32 func_80122060_gacode( u8 player, s32 done ) {
 
 /*
 ================
-func_80122140_gacode
+GA_CountParThrow
 
 Counts a throw of the player's frame; once forced, or at D_80099458 + 5 throws, scores the frame against
 D_80099458 and moves on (returns 1 then). The player is finished after frame 9.
 ================
 */
-s32 func_80122140_gacode( u8 player, s32 force ) {
+s32 GA_CountParThrow( u8 player, s32 force ) {
     u8 frame;
     s8 throws;
     s32 advanced = 0;
@@ -1657,13 +1657,13 @@ s32 func_80122140_gacode( u8 player, s32 force ) {
 
 /*
 ================
-func_8012224C_gacode
+GA_DecideFrame
 
 Decides a frame between players 0 and 1: the lower D_80066E18 result takes 2 and the other 0, a tie gives
 both 1; a 2 counts in the player's D_800994B8.
 ================
 */
-void func_8012224C_gacode( u8 frame ) {
+void GA_DecideFrame( u8 frame ) {
     if ( D_80066E18[0][frame] < D_80066E18[1][frame] ) {
         D_800A3020[0][frame] = 2;
         D_800A3020[1][frame] = 0;
