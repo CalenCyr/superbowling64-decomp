@@ -76,14 +76,14 @@ void Score_DrawFrameHeaders( u8 count, u8 first, s16 x, s16 y );
 void Score_DrawHeaders( u8 tenth, s16 x, s16 y );
 void Menu_SetItem( menuItem_t *items, s16 id, s16 image, s16 x, s16 y, s16 alpha );
 void Score_DrawNumber( s16 value, s16 x, s16 y );
-void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s16 y );
+void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s16 y );
 u16 Score_RollImage( s16 pins, u8 foul );
 void Score_GetDigits( s16 *digits, s16 value, u8 small, u8 tens );
 void Score_DrawCardFrame( s32 player, u8 frame, u8 kind, u8 all, s16 x, s16 y );
 void Score_DrawTotal( s32 player, u8 duel, s16 x, s16 y );
 void Score_SetRecordFigures( playerRecord_t *record, s32 index, u8 kind );
 void Score_DrawNumberBox( s32 a, s32 b, u8 show, s16 x, s16 y );
-void Menu_DrawBox( s32 arg0, u8 count, u8 small, s16 x, s16 y );
+void Menu_DrawBox( s32 player, u8 count, u8 small, s16 x, s16 y );
 void Menu_DrawImage( s16 image, s16 x, s16 y );
 s32 Menu_TwoChoicePrompt( void );
 

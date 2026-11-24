@@ -1532,18 +1532,18 @@ void GA_ClearScores( void ) {
 func_80121FD0_gacode
 ================
 */
-void func_80121FD0_gacode( u8 arg0, u8 arg1 ) {
-    D_8012D651_gacode = arg0;
-    D_8012D8DA_gacode = arg1;
-    switch ( D_80068A50[arg0] ) {
+void func_80121FD0_gacode( u8 player, u8 pinsHit ) {
+    D_8012D651_gacode = player;
+    D_8012D8DA_gacode = pinsHit;
+    switch ( D_80068A50[player] ) {
     case 0:
-        GA_ScoreFirstBall( arg0 );
+        GA_ScoreFirstBall( player );
         break;
     case 1:
-        GA_ScoreSecondBall( arg0 );
+        GA_ScoreSecondBall( player );
         break;
     case 2:
-        GA_ScoreThirdBall( arg0 );
+        GA_ScoreThirdBall( player );
         break;
     }
 }

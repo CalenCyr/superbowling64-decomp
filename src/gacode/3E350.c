@@ -26,10 +26,11 @@ void func_80114138_gacode( void ) {
 GA_SetupLanes
 
 Sets up both lanes: their sprites, scene objects, camera and state; lane 1 is shifted by offset. With
-arg2 set, also clears a flag of the lanes' body objects and shows their markerObjs[2] objects.
+twoTeams set (game_lastTeam), clears each lane's flag in its body objects; in distance mode (mode 3), shows
+the lanes' markerObjs[2] objects.
 ================
 */
-void GA_SetupLanes( u8 arg0, f32 offset, u8 arg2 ) {
+void GA_SetupLanes( u8 twoTeams, f32 offset, u8 distanceMode ) {
     s32 i;
     s32 j;
     s32 base;
@@ -48,14 +49,14 @@ void GA_SetupLanes( u8 arg0, f32 offset, u8 arg2 ) {
         ga_lanes[i].camera->frame = -1;
         for ( j = 0; j < NUM_BODIES; j++ ) {
             ga_lanes[i].bodyObjs[j] = obj_scene[base + j];
-            if ( arg0 ) {
+            if ( twoTeams ) {
                 ga_lanes[i].bodyObjs[j]->flags &= i == 0 ? ~0x8000 : ~0x4000;
             }
         }
         ga_lanes[i].markerObjs[0] = obj_scene[base + j++];
         ga_lanes[i].markerObjs[1] = obj_scene[base + j++];
         ga_lanes[i].markerObjs[2] = obj_scene[base + j];
-        if ( arg2 ) {
+        if ( distanceMode ) {
             ga_lanes[i].markerObjs[2]->viewMask = i + 1;
             D_8012C110_gacode[2].pos[1] = ga_stage->unk_14;
         }
@@ -769,7 +770,7 @@ s32 func_80115D38_gacode( s32 player ) {
 func_80115D70_gacode
 ================
 */
-void func_80115D70_gacode( s32 player, u8 arg1 ) {
+void func_80115D70_gacode( s32 player, u8 restart ) {
     gaLane_t *lane = ga_players[player].lane;
     s32 i;
 
@@ -779,7 +780,7 @@ void func_80115D70_gacode( s32 player, u8 arg1 ) {
     lane->turnFunc = func_80116414_gacode;
     lane->panelFunc = func_8011B564_gacode;
     lane->cameraFunc = GA_FreeCamera;
-    if ( arg1 ) {
+    if ( restart ) {
         lane->inputFunc = GA_InputParkedRestart;
     } else {
         lane->inputFunc = GA_InputParked;

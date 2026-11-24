@@ -343,17 +343,18 @@ void Score_DrawHeaders( u8 tenth, s16 x, s16 y ) {
 Score_DrawFrame
 
 Draws the player's frame of the scoreboard at (x, y), last being the frame in play and throw its throw: the
-frame's box, the image of each roll played, and the frame's score.
+frame's box, the image of each roll played, and the frame's score; done is game_playerDone, set once the
+player has finished the game.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: calls, CFG, constants and stack match; registers differ: retail gives rowY s4 (frame s5, arg4 s6)
+// NON_MATCHING: calls, CFG, constants and stack match; registers differ: retail gives rowY s4 (frame s5, done s6)
 // and roll v0 (so its bne delay slots are not likely-branches). Tried: rowY as s32 (worse), y itself as the cursor
 // (same), roll by ternary/if (block 1 needs the if), foul as an s32 local (needed for retail's andi),
 // rowY = y + 2 once before the frame test (worse).
 // Permuter (target-only scoring, 7 min): best 615 from 865 only through noise (a u16 temporary for the third
 // roll, a duplicated if/else), no source clue.
-void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s16 y ) {
+void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;
     s16 roll;
@@ -374,7 +375,7 @@ void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s
             }
             Menu_DrawImage( Score_RollImage( roll, FALSE ), x + 1, rowY );
         }
-        if ( last == 9 && ( throw >= 2 || arg4 ) ) {
+        if ( last == 9 && ( throw >= 2 || done ) ) {
             if ( ( game_frameFlags[player][frame] & 1 ) && ( game_frameFlags[player][frame] & 0x20 ) ) {
                 Draw_Image( 0x85F, x + 9, rowY - 2 );
             }
@@ -386,7 +387,7 @@ void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s
             }
             Menu_DrawImage( Score_RollImage( roll, foul ), x + 11, rowY );
         }
-        if ( arg4 ) {
+        if ( done ) {
             if ( game_firstRolls[player][frame] == -1 || game_secondRolls[player][frame] == -1 ) {
                 pins = D_800994B8[player];
                 roll = pins == -1 && game_secondRolls[player][frame] == pins ? -2 : pins;
@@ -784,10 +785,11 @@ void Score_DrawPlayerBoard( s32 player, s16 x, s16 y ) {
 ================
 Menu_DrawBox
 
-Draws count pieces of a box at (x, y): its left end, then its body; small ones when small is set.
+Draws count pieces of a box at (x, y): its left end, then its body; small ones when small is set. The
+callers pass the player, which is unused.
 ================
 */
-void Menu_DrawBox( s32 arg0, u8 count, u8 small, s16 x, s16 y ) {
+void Menu_DrawBox( s32 player, u8 count, u8 small, s16 x, s16 y ) {
     s32 i;
     s32 offset;
 
