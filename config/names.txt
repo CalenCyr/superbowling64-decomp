@@ -461,7 +461,7 @@ DRAW2D_COPY, DRAW2D_1CYCLE, DRAW2D_FILL	sprite.h	invented: the D_8005C190 values
 PROMPT_* (modes and states), PROMPT_ZOOM_FRAMES	save.h	invented: Save_ShowPrompt's modes, from its input handling, and save_promptState's states
 SE_CURSOR, SE_DECIDE	gamesnd.h	invented: SE 0 on a cursor move and SE 1 on a choice in Save_ShowPrompt
 menuItem_t, MENU_END, MENU_NONE, MENU_SLIDE_STEPS, SLIDE_*	menu.h	invented: the 10-byte menu records Menu_DrawItems draws and Menu_SetItem edits
-SCORE_IMAGE_*, ROLL_STRIKE, ROLL_SPARE	menu.h	invented: indices of D_8005CAC0 that Score_RollImage returns for the rolls of a frame
+SCORE_IMAGE_*, ROLL_STRIKE, ROLL_SPARE	menu.h	invented: indices of score_images that Score_RollImage returns for the rolls of a frame
 Menu_SlidePos	13490.c	invented: the inline position calculation of Menu_DrawItems's slides
 # main scene engine types (object.h, filecache.h, ground.h)
 sceneObject_t	object.h	invented: scene object (body after the objNode_t header; D_800EA120 holds pointers); matrix 0x04, frame 0x48, viewMask 0x4A, model 0x4C, anim 0x50, joints from 0x58; gacode.h's sceneObj_t is a partial copy
@@ -1269,3 +1269,23 @@ save_choiceX	0x800E57E0	invented: x of each choice's cursor rectangle, from the 
 save_choiceY	0x800E4D68	invented: y of each choice's cursor rectangle
 save_choiceWidth	0x800DF590	invented: width of each choice's cursor rectangle
 save_choiceHeight	0x800E6538	invented: height of each choice's cursor rectangle
+
+# include/menu.h and sprite.h: menus, the scoreboard's images and record figures, 2D drawing
+menu_slidePositions	0x8005CA80	invented: position of a sliding menu item at each of MENU_SLIDE_STEPS steps, 0x1000: in place
+score_images	0x8005CAC0	invented: image of each digit, then of the scoreboard's symbols (SCORE_IMAGE_STRIKE etc.)
+score_digitImages	0x8005CB18	invented: image of each digit (Score_GetDigits)
+score_smallDigitImages	0x8005CB04	invented: image of each small digit (Score_GetDigits with small set)
+score_playerIcons	0x8005CAE4	invented: icon of each player, then of the computer
+score_plateNumbers	0x800DF5D0	invented: per player: number shown on the player's name plate, 0: none (cleared by GS_Init)
+score_signImages	0x8005CB58	invented: image of the sign of a score: negative, zero, positive (Score_DrawTotal)
+score_parFrameImages	0x8005CB2C	invented: Score_DrawParCard: image of each frame's number
+score_parFrameBoxes	0x8005CB40	invented: Score_DrawParCard: per row, the image of a frame's box
+score_parTotalBoxes	0x8005CB4C	invented: Score_DrawParCard: per row, the image of the total's box
+score_averages	0x800E66B0	invented: Score_SetRecordFigures: per kind of record and character, the average score
+score_strikeRates	0x800DF5D8	invented: Score_SetRecordFigures: per kind of record and character, playerRecord_t.strikes as a percent of 12 a game
+score_spareRates	0x800A2FE8	invented: Score_SetRecordFigures: per kind of record and character, playerRecord_t.spares as a percent of 10 a game
+score_splitRates	0x80099488	invented: Score_SetRecordFigures: per kind of record and character, playerRecord_t.splits as a percent of 10 a game
+draw_lineVtx	0x80063A70	invented: the two ends of the line Draw_Line3D draws, by camera
+draw_lineMtx	0x80063AB0	invented: identity, the model matrix of Draw_Line3D's line
+draw_palettes	0x80062A70	invented: palette copies of Draw_ImageCopyPalette, four per frame buffer
+draw_nextPalette	0x8005C194	invented: the next of draw_palettes' four

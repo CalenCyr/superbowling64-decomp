@@ -473,7 +473,7 @@ s32 GS_PlayerSetup( void ) {
             if ( ( cont_allDpadRepeat & R_JPAD ) && !( game_players[gs_namePlayer] & 0x80 ) ) {
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 game_players[gs_namePlayer] = 0x80;
-                D_800DF5D0[gs_namePlayer] = 0;
+                score_plateNumbers[gs_namePlayer] = 0;
             }
             if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
@@ -833,22 +833,22 @@ s32 GS_PlayerSetup( void ) {
         }
         if ( game_mode == 0 ) {
             for ( i = 0; i < game_numPlayers; i++ ) {
-                if ( D_800DF5D0[i] != 0 ) {
+                if ( score_plateNumbers[i] != 0 ) {
                     Draw_Image( 0x9CF, i * 62 + 0x2B, 0x99 );
-                    if ( D_800DF5D0[i] / 10 != 0 ) {
-                        Draw_Image( gs_handicapDigits[D_800DF5D0[i] / 10], i * 62 + 0x3F, 0xA1 );
+                    if ( score_plateNumbers[i] / 10 != 0 ) {
+                        Draw_Image( gs_handicapDigits[score_plateNumbers[i] / 10], i * 62 + 0x3F, 0xA1 );
                     }
-                    Draw_Image( gs_handicapDigits[D_800DF5D0[i] % 10], i * 62 + 0x47, 0xA1 );
+                    Draw_Image( gs_handicapDigits[score_plateNumbers[i] % 10], i * 62 + 0x47, 0xA1 );
                 }
             }
         }
         if ( gs_nameEntryStep == 2 && game_mode == 0 && !( game_players[gs_namePlayer] & 0x80 ) ) {
             Draw_Image( 0x9CF, gs_namePlayer * 62 + 0x2B, 0x99 );
-            if ( D_800DF5D0[gs_namePlayer] / 10 != 0 ) {
-                Draw_Image( gs_handicapDigits[D_800DF5D0[gs_namePlayer] / 10], gs_namePlayer * 62 + 0x3F,
+            if ( score_plateNumbers[gs_namePlayer] / 10 != 0 ) {
+                Draw_Image( gs_handicapDigits[score_plateNumbers[gs_namePlayer] / 10], gs_namePlayer * 62 + 0x3F,
                                0xA1 );
             }
-            Draw_Image( gs_handicapDigits[D_800DF5D0[gs_namePlayer] % 10], gs_namePlayer * 62 + 0x47,
+            Draw_Image( gs_handicapDigits[score_plateNumbers[gs_namePlayer] % 10], gs_namePlayer * 62 + 0x47,
                            0xA1 );
             Draw_Image( 0x9D0, gs_namePlayer * 62 + 0x51, 0xA1 );
             Draw_Image( 0x9D1, gs_namePlayer * 62 + 0x2F, 0xA1 );
@@ -856,18 +856,18 @@ s32 GS_PlayerSetup( void ) {
                 gs_cHeldFrames = 0;
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 Draw_Image( 0x9D2, gs_namePlayer * 62 + 0x51, 0xA1 );
-                D_800DF5D0[gs_namePlayer] += 5;
-                if ( D_800DF5D0[gs_namePlayer] >= 0x60 ) {
-                    D_800DF5D0[gs_namePlayer] = 0;
+                score_plateNumbers[gs_namePlayer] += 5;
+                if ( score_plateNumbers[gs_namePlayer] >= 0x60 ) {
+                    score_plateNumbers[gs_namePlayer] = 0;
                 }
             }
             if ( ( cont_allPressed & L_CBUTTONS ) || ( ( cont_allHeld & L_CBUTTONS ) && gs_cHeldFrames >= 9 ) ) {
                 gs_cHeldFrames = 0;
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 Draw_Image( 0x9D3, gs_namePlayer * 62 + 0x2F, 0xA1 );
-                D_800DF5D0[gs_namePlayer] -= 5;
-                if ( D_800DF5D0[gs_namePlayer] < 0 ) {
-                    D_800DF5D0[gs_namePlayer] = 0x5F;
+                score_plateNumbers[gs_namePlayer] -= 5;
+                if ( score_plateNumbers[gs_namePlayer] < 0 ) {
+                    score_plateNumbers[gs_namePlayer] = 0x5F;
                 }
             }
             if ( cont_allHeld & ( R_CBUTTONS | L_CBUTTONS ) ) {
@@ -952,7 +952,7 @@ s32 GS_PlayerSetup( void ) {
             }
             for ( i = 0; i < 4; i++ ) {
                 game_players[i] = 0;
-                D_800DF5D0[i] = 0;
+                score_plateNumbers[i] = 0;
             }
             game_stage = 0;
             gs_setupState = CHOICE_IN;

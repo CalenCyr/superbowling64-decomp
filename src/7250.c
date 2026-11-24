@@ -439,18 +439,18 @@ void Draw_ImageCopyPalette( u16 id, s16 x, s16 y ) {
     height = image->height;
     data = image->data;
     if ( type == IMAGE_CI4 ) {
-        memcpy( D_80062A70[sched_bufferIndex][D_8005C194], data, CI4_PALETTE_SIZE );
-        Draw_CiImage( type, x, y, width, height, D_80062A70[sched_bufferIndex][D_8005C194],
+        memcpy( draw_palettes[sched_bufferIndex][draw_nextPalette], data, CI4_PALETTE_SIZE );
+        Draw_CiImage( type, x, y, width, height, draw_palettes[sched_bufferIndex][draw_nextPalette],
                        data + CI4_PALETTE_SIZE );
     } else if ( type == IMAGE_CI8 ) {
-        memcpy( D_80062A70[sched_bufferIndex][D_8005C194], data, CI8_PALETTE_SIZE );
-        Draw_CiImage( type, x, y, width, height, D_80062A70[sched_bufferIndex][D_8005C194],
+        memcpy( draw_palettes[sched_bufferIndex][draw_nextPalette], data, CI8_PALETTE_SIZE );
+        Draw_CiImage( type, x, y, width, height, draw_palettes[sched_bufferIndex][draw_nextPalette],
                        data + CI8_PALETTE_SIZE );
     } else {
-        Draw_CiImage( type, x, y, width, height, D_80062A70[sched_bufferIndex][D_8005C194], data );
+        Draw_CiImage( type, x, y, width, height, draw_palettes[sched_bufferIndex][draw_nextPalette], data );
     }
-    if ( ++D_8005C194 == 4 ) {
-        D_8005C194 = 0;
+    if ( ++draw_nextPalette == 4 ) {
+        draw_nextPalette = 0;
     }
 }
 
@@ -692,25 +692,25 @@ void Draw_ClearScreen( u32 r, u32 g, u32 b ) {
 Draw_Line3D
 
 Draws a line from start to end in the view of camera index, in colour (red, green, blue, alpha), color[4] pixels
-wide, through the camera's two vertices D_80063A70[index].
+wide, through the camera's two vertices draw_lineVtx[index].
 ================
 */
 void Draw_Line3D( s32 index, f32 *start, f32 *end, u8 *color ) {
     u32 i;
 
     for ( i = 0; i < 3; i++ ) {
-        D_80063A70[index][0].v.ob[i] = *start++;
-        D_80063A70[index][1].v.ob[i] = *end++;
+        draw_lineVtx[index][0].v.ob[i] = *start++;
+        draw_lineVtx[index][1].v.ob[i] = *end++;
     }
-    guMtxIdent( &D_80063AB0 );
+    guMtxIdent( &draw_lineMtx );
     gSPLoadUcodeL( game_gfx++, gspL3DEX2_fifo );
     Scene_BeginView( D_8009CFA0[index] );
     gDPSetRenderMode( game_gfx++, G_RM_AA_XLU_LINE, G_RM_AA_XLU_LINE2 );
     gDPSetAlphaCompare( game_gfx++, G_AC_NONE );
     gDPSetCombineMode( game_gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE );
     gDPSetPrimColor( game_gfx++, 0, 0, color[0], color[1], color[2], color[3] );
-    gSPMatrix( game_gfx++, &D_80063AB0, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
-    gSPVertex( game_gfx++, D_80063A70[index], 2, 0 );
+    gSPMatrix( game_gfx++, &draw_lineMtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
+    gSPVertex( game_gfx++, draw_lineVtx[index], 2, 0 );
     gSPLineW3D( game_gfx++, 0, 1, color[4], 0 );
     Scene_BeginFrame();
 }

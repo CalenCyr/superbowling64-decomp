@@ -19,7 +19,7 @@ void GS_Init( void ) {
     if ( !game_replay ) {
         for ( i = 0; i < 4; i++ ) {
             game_players[i] = 0;
-            D_800DF5D0[i] = 0;
+            score_plateNumbers[i] = 0;
         }
         game_stage = 0;
         gs_screen = 0;

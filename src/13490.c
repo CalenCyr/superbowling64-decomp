@@ -204,16 +204,16 @@ void Menu_DrawItems( menuItem_t *items, u8 step ) {
         height = image->height;
         switch ( items[i].slide ) {
         case SLIDE_TOP:
-            y = Menu_SlidePos( y, height, -80, D_8005CA80[step] );
+            y = Menu_SlidePos( y, height, -80, menu_slidePositions[step] );
             break;
         case SLIDE_BOTTOM:
-            y = Menu_SlidePos( y, height, SCREEN_WIDTH, D_8005CA80[step] );
+            y = Menu_SlidePos( y, height, SCREEN_WIDTH, menu_slidePositions[step] );
             break;
         case SLIDE_LEFT:
-            x = Menu_SlidePos( x, width, -140, D_8005CA80[step] );
+            x = Menu_SlidePos( x, width, -140, menu_slidePositions[step] );
             break;
         case SLIDE_RIGHT:
-            x = Menu_SlidePos( x, width, 460, D_8005CA80[step] );
+            x = Menu_SlidePos( x, width, 460, menu_slidePositions[step] );
             break;
         }
         Draw_ImageScaled( items[i].image, x, y, items[i].alpha, 1.0f, 1.0f );
@@ -259,10 +259,10 @@ and name.
 inline void Menu_DrawNamePlate( s32 player, u8 cpu, u16 *name, s16 x, s16 y ) {
     s16 *icons;
 
-    icons = D_8005CAE4;
+    icons = score_playerIcons;
     Draw_Image( 0x90B, x, y );
-    if ( D_800DF5D0[player] != 0 ) {
-        Score_DrawNumber( D_800DF5D0[player], x - 6, y + 12 );
+    if ( score_plateNumbers[player] != 0 ) {
+        Score_DrawNumber( score_plateNumbers[player], x - 6, y + 12 );
     }
     Menu_DrawImage( icons[cpu ? 4 : player], x + 2, y + 2 );
     Txt_DrawGlyphs( &game_gfx, x + 14, y + 2, 8, name );
@@ -278,7 +278,7 @@ Draws the small name plate of player at (x, y): its frame and name, and the icon
 void Menu_DrawSmallNamePlate( s32 player, u8 cpu, u16 *name, u8 noIcon, s16 x, s16 y ) {
     s16 *icons;
 
-    icons = D_8005CAE4;
+    icons = score_playerIcons;
     Draw_Image( 0x9FE, x, y );
     if ( !noIcon ) {
         Menu_DrawImage( icons[cpu ? 4 : player], x + 2, y + 1 );
@@ -301,7 +301,7 @@ inline void Score_DrawFrameHeaders( u8 count, u8 first, s16 x, s16 y ) {
     s32 i;
     s32 frame;
 
-    images = D_8005CAC0;
+    images = score_images;
     for ( i = 0; i < count; i++ ) {
         frame = first + i;
         if ( frame == 9 ) {
@@ -326,7 +326,7 @@ void Score_DrawHeaders( u8 tenth, s16 x, s16 y ) {
     u16 *images;
     s32 i;
 
-    images = D_8005CAC0;
+    images = score_images;
     if ( tenth ) {
         Draw_Image( 0x87B, x + 16, y );
         return;
@@ -399,7 +399,7 @@ void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s
             rowY += 9;
             pins = game_frameScores[player][frame];
             if ( pins >= 0 ) {
-                pins += D_800DF5D0[player];
+                pins += score_plateNumbers[player];
             }
             Score_DrawNumber( pins, x + 5, rowY );
         }
@@ -417,7 +417,7 @@ void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s
             rowY += 9;
             pins = game_frameScores[player][frame];
             if ( pins >= 0 ) {
-                pins += D_800DF5D0[player];
+                pins += score_plateNumbers[player];
             }
             Score_DrawNumber( pins, x, rowY );
         }
@@ -438,7 +438,7 @@ set); 0xFFFF when there is none.
 u16 Score_RollImage( s16 pins, u8 foul ) {
     u16 *images;
 
-    images = D_8005CAC0;
+    images = score_images;
     if ( pins >= 1 && pins <= 9 ) {
         return images[pins];
     }
@@ -471,7 +471,7 @@ void Score_DrawNumber( s16 value, s16 x, s16 y ) {
     s16 tens;
     s16 ones;
 
-    images = D_8005CAC0;
+    images = score_images;
     if ( value == -1 ) {
         digits[0] = digits[1] = digits[2] = -1;
     } else {
@@ -500,7 +500,7 @@ void Score_DrawNumber( s16 value, s16 x, s16 y ) {
 ================
 Score_GetDigits
 
-Sets digits to the images of the four digits of value, up to 9999, from D_8005CB04 when small is set: -1, no
+Sets digits to the images of the four digits of value, up to 9999, from score_smallDigitImages when small is set: -1, no
 image, for leading zeros, but the tens are shown when tens is set.
 ================
 */
@@ -517,9 +517,9 @@ void Score_GetDigits( s16 *digits, s16 value, u8 small, u8 tens ) {
     ones -= hundreds * 100;
     ten = ones / 10;
     ones -= ten * 10;
-    images = D_8005CB18;
+    images = score_digitImages;
     if ( small ) {
-        images = D_8005CB04;
+        images = score_smallDigitImages;
     }
     if ( thousands != 0 ) {
         digits[0] = images[thousands];
@@ -557,7 +557,7 @@ of them when all is set.
 // score 100.
 // Also checked: the single-plate case first (mode != 1, worse), player = ( i == 1 ) * 2, player in the block's
 // scope, player++ for the second plate (worse), frameX = x after the frame-3 header (worse), the helper indexing
-// D_8005CAE4 without its icons local (worse here and in the other callers).
+// score_playerIcons without its icons local (worse here and in the other callers).
 void Score_DrawTeamBoard( u8 mode, u8 all, s16 x, s16 y ) {
     s32 i;
     s32 frame;
@@ -638,10 +638,10 @@ void Score_DrawParCard( u8 kind, u8 all, s16 x, s16 y ) {
         }
         rowX += 0x38;
         for ( i = 0; i < 9; i++ ) {
-            Draw_Image( D_8005CB40[row], rowX, rowY );
+            Draw_Image( score_parFrameBoxes[row], rowX, rowY );
             switch ( row ) {
             case 0:
-                Draw_Image( D_8005CB2C[i], rowX + 6, rowY + 3 );
+                Draw_Image( score_parFrameImages[i], rowX + 6, rowY + 3 );
                 break;
             case 1:
                 Score_DrawNumber( game_frameFlags[0][i], rowX - 6, rowY + 4 );
@@ -652,7 +652,7 @@ void Score_DrawParCard( u8 kind, u8 all, s16 x, s16 y ) {
             }
             rowX += 18;
         }
-        Draw_Image( D_8005CB4C[row], rowX, rowY );
+        Draw_Image( score_parTotalBoxes[row], rowX, rowY );
         switch ( row ) {
         case 0:
             Draw_Image( 0x9E8, rowX, rowY );
@@ -685,7 +685,7 @@ void Score_DrawCardFrame( s32 player, u8 frame, u8 kind, u8 all, s16 x, s16 y ) 
         score = game_frameScores[player][frame];
         if ( all || frame < game_frame[player] ) {
             sign = score < 0 ? 0 : score > 0 ? 2 : 1;
-            Draw_Image( D_8005CB58[sign], x + 3, y + 4 );
+            Draw_Image( score_signImages[sign], x + 3, y + 4 );
             Score_DrawNumber( score < 0 ? -score : score, x - 2, y + 7 );
         }
     } else if ( all || frame < game_frame[player] ) {
@@ -712,7 +712,7 @@ void Score_DrawTotal( s32 player, u8 duel, s16 x, s16 y ) {
     if ( !duel ) {
         score = game_totals[player];
         sign = score < 0 ? 0 : score > 0 ? 2 : 1;
-        Draw_Image( D_8005CB58[sign], x + 4, y + 4 );
+        Draw_Image( score_signImages[sign], x + 4, y + 4 );
         Score_DrawNumber( score < 0 ? -score : score, x + 8, y + 7 );
     } else {
         other = player != 1;
@@ -848,7 +848,7 @@ void Score_DrawRecordTable( u16 count, playerRecord_t *records, u8 kind, s16 x, 
         }
         Draw_Image( played ? 0x9E6 : 0x9E7, rowX + 0x26, rowY );
         if ( played ) {
-            Score_GetDigits( digits, D_800E66B0[kind][i] * 10.0f, TRUE, TRUE );
+            Score_GetDigits( digits, score_averages[kind][i] * 10.0f, TRUE, TRUE );
             Menu_DrawImage( digits[0], rowX + 0x2A, rowY + 7 );
             Menu_DrawImage( digits[1], rowX + 0x31, rowY + 7 );
             Menu_DrawImage( digits[2], rowX + 0x39, rowY + 7 );
@@ -867,9 +867,9 @@ void Score_DrawRecordTable( u16 count, playerRecord_t *records, u8 kind, s16 x, 
             Menu_DrawImage( digits[2], rowX + 0x5E, rowY + 14 );
             Menu_DrawImage( digits[3], rowX + 0x66, rowY + 14 );
         }
-        Score_DrawNumberBox( records[i].strikes, D_800DF5D8[kind][i] * 10.0f, played, rowX + 0x72, rowY );
-        Score_DrawNumberBox( records[i].spares, D_800A2FE8[kind][i] * 10.0f, played, rowX + 0x98, rowY );
-        Score_DrawNumberBox( records[i].splits, D_80099488[kind][i] * 10.0f, played, rowX + 0xBE, rowY );
+        Score_DrawNumberBox( records[i].strikes, score_strikeRates[kind][i] * 10.0f, played, rowX + 0x72, rowY );
+        Score_DrawNumberBox( records[i].spares, score_spareRates[kind][i] * 10.0f, played, rowX + 0x98, rowY );
+        Score_DrawNumberBox( records[i].splits, score_splitRates[kind][i] * 10.0f, played, rowX + 0xBE, rowY );
         rowY += 0x1C;
     }
 }
@@ -910,18 +910,19 @@ void Score_DrawNumberBox( s32 a, s32 b, u8 show, s16 x, s16 y ) {
 ================
 Score_SetRecordFigures
 
-Sets the figures of record, of character index, in the kind's row of D_800E66B0, D_800DF5D8, D_800A2FE8 and
-D_80099488; all 0 when it holds no game.
+Sets the figures of record, of character index, in the kind's row of score_averages,
+score_strikeRates, score_spareRates and score_splitRates; all 0 when it holds no game.
 ================
 */
 void Score_SetRecordFigures( playerRecord_t *record, s32 index, u8 kind ) {
     if ( record->games == 0 ) {
-        D_800E66B0[kind][index] = D_800DF5D8[kind][index] = D_800A2FE8[kind][index] = D_80099488[kind][index] = 0.0f;
+        score_averages[kind][index] = score_strikeRates[kind][index] = score_spareRates[kind][index] =
+            score_splitRates[kind][index] = 0.0f;
     } else {
-        D_800E66B0[kind][index] = (f32)record->total / record->games;
-        D_800DF5D8[kind][index] = record->strikes * 100.0f / ( record->games * 12 );
-        D_800A2FE8[kind][index] = record->spares * 100.0f / ( record->games * 10 );
-        D_80099488[kind][index] = record->splits * 100.0f / ( record->games * 10 );
+        score_averages[kind][index] = (f32)record->total / record->games;
+        score_strikeRates[kind][index] = record->strikes * 100.0f / ( record->games * 12 );
+        score_spareRates[kind][index] = record->spares * 100.0f / ( record->games * 10 );
+        score_splitRates[kind][index] = record->splits * 100.0f / ( record->games * 10 );
     }
 }
 
