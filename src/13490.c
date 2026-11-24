@@ -946,18 +946,18 @@ Runs the two-choice prompt 0x957 for a frame; returns 1 or 2 for the choice take
 ================
 */
 s32 Menu_TwoChoicePrompt( void ) {
-    D_800DF590[0] = D_800DF590[1] = 0x24;
-    D_800E6538[0] = D_800E6538[1] = 0x10;
-    D_800E57E0[0] = 0x36;
-    D_800E4D68[0] = 0x1E;
-    D_800E57E0[1] = 0x5E;
-    D_800E4D68[1] = 0x1E;
+    save_choiceWidth[0] = save_choiceWidth[1] = 0x24;
+    save_choiceHeight[0] = save_choiceHeight[1] = 0x10;
+    save_choiceX[0] = 0x36;
+    save_choiceY[0] = 0x1E;
+    save_choiceX[1] = 0x5E;
+    save_choiceY[1] = 0x1E;
     if ( Save_ShowPrompt( 0x957, PROMPT_CHOICE2_H ) ) {
-        if ( D_80066C44 == 0 ) {
+        if ( save_promptChoice == 0 ) {
             return 1;
         }
-        if ( D_80066C44 == 1 ) {
-            D_80066C44 = 0;
+        if ( save_promptChoice == 1 ) {
+            save_promptChoice = 0;
             return 2;
         }
     }

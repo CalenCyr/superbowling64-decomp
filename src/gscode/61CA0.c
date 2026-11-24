@@ -106,7 +106,7 @@ s32 GS_PakCheck( void ) {
             gs_pakCheckStep = 2;
             return 0;
         }
-        if ( D_8005C9BC ) {
+        if ( save_promptState ) {
             return 0;
         }
         if ( cont_hasRumble[0] ) {

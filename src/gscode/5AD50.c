@@ -628,15 +628,15 @@ s32 GS_PlayerSetup( void ) {
             break;
 
         case 9:
-            D_800DF590[0] = D_800DF590[1] = 0x24;
-            D_800E6538[0] = D_800E6538[1] = 0x10;
-            D_800E57E0[0] = 0x24;
-            D_800E4D68[0] = 0x1E;
-            D_800E57E0[1] = 0x4E;
-            D_800E4D68[1] = 0x1E;
+            save_choiceWidth[0] = save_choiceWidth[1] = 0x24;
+            save_choiceHeight[0] = save_choiceHeight[1] = 0x10;
+            save_choiceX[0] = 0x24;
+            save_choiceY[0] = 0x1E;
+            save_choiceX[1] = 0x4E;
+            save_choiceY[1] = 0x1E;
             if ( gs_clearRecordAnswer != 0 ) {
                 gs_clearRecordAnswer = 0;
-                if ( D_80066C44 == 0 ) {
+                if ( save_promptChoice == 0 ) {
                     i = ( ( game_players[gs_namePlayer] >> 4 ) & 7 ) - 1;
                     memset( &save_data.records[i], 0, sizeof( save_data.records[i] ) );
                     save_data.records[i].low = 300;

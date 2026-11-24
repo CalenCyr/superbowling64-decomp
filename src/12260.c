@@ -15,7 +15,7 @@
 Save_ShowPrompt
 
 Shows the prompt image id, in the way of mode, for one frame: it zooms in, runs, then zooms out. Modes
-PROMPT_CHOICE2_H to PROMPT_CHOICE3 move a blinking cursor over the choices, D_80066C44, until A or Z.
+PROMPT_CHOICE2_H to PROMPT_CHOICE3 move a blinking cursor over the choices, save_promptChoice, until A or Z.
 Returns TRUE in the frame it has closed, or once open in mode PROMPT_OPEN.
 ================
 */
@@ -27,104 +27,104 @@ s32 Save_ShowPrompt( s32 id, s32 mode ) {
     fileImage_t *image;
 
     done = FALSE;
-    switch ( D_8005C9BC ) {
+    switch ( save_promptState ) {
     case PROMPT_CLOSED:
-        D_80064310 = 1;
-        D_8005C9BC = PROMPT_OPENING;
+        save_promptFrame = 1;
+        save_promptState = PROMPT_OPENING;
         break;
     case PROMPT_RUNNING:
         switch ( mode ) {
         case PROMPT_TIMED:
-            if ( ++D_80064310 == 90 || cont_allPressed != 0 ) {
-                D_80064310 = PROMPT_ZOOM_FRAMES;
-                D_8005C9BC = PROMPT_CLOSING;
+            if ( ++save_promptFrame == 90 || cont_allPressed != 0 ) {
+                save_promptFrame = PROMPT_ZOOM_FRAMES;
+                save_promptState = PROMPT_CLOSING;
             }
             break;
         case PROMPT_ANY_BUTTON:
             if ( cont_allPressed != 0 ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
-                D_8005C9BC = PROMPT_CLOSING;
+                save_promptState = PROMPT_CLOSING;
             }
             break;
         case PROMPT_OPEN:
             break;
         case PROMPT_CLOSE:
-            D_8005C9BC = PROMPT_CLOSING;
+            save_promptState = PROMPT_CLOSING;
             break;
         case PROMPT_CHOICE2_H:
-            if ( D_80066C44 == 0 && ( cont_allDpadRepeat & R_JPAD ) ) {
+            if ( save_promptChoice == 0 && ( cont_allDpadRepeat & R_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
-                D_80066C44 = 1;
+                save_promptChoice = 1;
             }
-            if ( D_80066C44 == 1 && ( cont_allDpadRepeat & L_JPAD ) ) {
+            if ( save_promptChoice == 1 && ( cont_allDpadRepeat & L_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
-                D_80066C44 = 0;
+                save_promptChoice = 0;
             }
             if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
-                D_8005C9BC = PROMPT_CLOSING;
+                save_promptState = PROMPT_CLOSING;
             }
             break;
         case PROMPT_CHOICE2_V:
-            if ( D_80066C44 == 0 && ( cont_allDpadRepeat & D_JPAD ) ) {
+            if ( save_promptChoice == 0 && ( cont_allDpadRepeat & D_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
-                D_80066C44 = 1;
+                save_promptChoice = 1;
             }
-            if ( D_80066C44 == 1 && ( cont_allDpadRepeat & U_JPAD ) ) {
+            if ( save_promptChoice == 1 && ( cont_allDpadRepeat & U_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
-                D_80066C44 = 0;
+                save_promptChoice = 0;
             }
             if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
-                D_8005C9BC = PROMPT_CLOSING;
+                save_promptState = PROMPT_CLOSING;
             }
             break;
         case PROMPT_CHOICE3:
-            if ( D_80066C44 == 0 && ( cont_allDpadRepeat & R_JPAD ) ) {
+            if ( save_promptChoice == 0 && ( cont_allDpadRepeat & R_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
-                D_80066C44 = 1;
-            } else if ( D_80066C44 == 1 && ( cont_allDpadRepeat & L_JPAD ) ) {
+                save_promptChoice = 1;
+            } else if ( save_promptChoice == 1 && ( cont_allDpadRepeat & L_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
-                D_80066C44 = 0;
-            } else if ( D_80066C44 == 1 && ( cont_allDpadRepeat & R_JPAD ) ) {
+                save_promptChoice = 0;
+            } else if ( save_promptChoice == 1 && ( cont_allDpadRepeat & R_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
-                D_80066C44 = 2;
-            } else if ( D_80066C44 == 2 && ( cont_allDpadRepeat & L_JPAD ) ) {
+                save_promptChoice = 2;
+            } else if ( save_promptChoice == 2 && ( cont_allDpadRepeat & L_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
-                D_80066C44 = 1;
+                save_promptChoice = 1;
             }
             if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
-                D_8005C9BC = PROMPT_CLOSING;
+                save_promptState = PROMPT_CLOSING;
             }
             break;
         case PROMPT_TIMED_LONG:
-            if ( ++D_80064310 == 270 || cont_allPressed != 0 ) {
-                D_80064310 = PROMPT_ZOOM_FRAMES;
-                D_8005C9BC = PROMPT_CLOSING;
+            if ( ++save_promptFrame == 270 || cont_allPressed != 0 ) {
+                save_promptFrame = PROMPT_ZOOM_FRAMES;
+                save_promptState = PROMPT_CLOSING;
             }
             break;
         }
         break;
     case PROMPT_OPENING:
-        if ( ++D_80064310 == PROMPT_ZOOM_FRAMES ) {
-            D_8005C9BC = PROMPT_RUNNING;
-            D_80066C44 = 0;
+        if ( ++save_promptFrame == PROMPT_ZOOM_FRAMES ) {
+            save_promptState = PROMPT_RUNNING;
+            save_promptChoice = 0;
             if ( mode == PROMPT_OPEN ) {
                 done = TRUE;
             }
         }
         break;
     case PROMPT_CLOSING:
-        if ( --D_80064310 == 1 ) {
-            D_8005C9BC = PROMPT_CLOSED;
+        if ( --save_promptFrame == 1 ) {
+            save_promptState = PROMPT_CLOSED;
             done = TRUE;
         }
         break;
     }
 
-    if ( D_80064310 < PROMPT_ZOOM_FRAMES ) {
-        scale = D_8005C994[D_80064310];
+    if ( save_promptFrame < PROMPT_ZOOM_FRAMES ) {
+        scale = save_promptZoom[save_promptFrame];
     } else {
         scale = 1.0f;
     }
@@ -136,13 +136,14 @@ s32 Save_ShowPrompt( s32 id, s32 mode ) {
     y = ( 200 - image->height ) / 2;
     Draw_ImageScaled( id, x, y, 0xFF, scale, 1.0f );
 
-    if ( D_8005C9BC == PROMPT_RUNNING && mode >= PROMPT_CHOICE2_H ) {
+    if ( save_promptState == PROMPT_RUNNING && mode >= PROMPT_CHOICE2_H ) {
         if ( mode < PROMPT_TIMED_LONG ) {
-            Draw_FillRect( D_800E57E0[D_80066C44] + x, D_800E4D68[D_80066C44] + y, D_800DF590[D_80066C44],
-                           D_800E6538[D_80066C44], 0, 0xFF, 0, D_8005C9C4 );
-            D_8005C9C4 += D_8005C9C5;
-            if ( D_8005C9C4 == 0x80 || D_8005C9C4 == 0x40 ) {
-                D_8005C9C5 *= -1;
+            Draw_FillRect( save_choiceX[save_promptChoice] + x, save_choiceY[save_promptChoice] + y,
+                           save_choiceWidth[save_promptChoice], save_choiceHeight[save_promptChoice], 0, 0xFF, 0,
+                           save_cursorAlpha );
+            save_cursorAlpha += save_cursorStep;
+            if ( save_cursorAlpha == 0x80 || save_cursorAlpha == 0x40 ) {
+                save_cursorStep *= -1;
             }
         }
     }
@@ -183,49 +184,49 @@ s32 Save_SaveSettings( void ) {
     s32 sum;
     s32 i;
 
-    if ( D_8005C0E0 == 0 ) {
+    if ( save_enabled == 0 ) {
         return FALSE;
     }
     Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
-    switch ( D_8005C990 ) {
+    switch ( save_step ) {
     case 0:
-        D_80064314 = 9;
-        osSendMesg( &cont_requestQueue, &D_80064314, OS_MESG_NOBLOCK );
-        D_8005C990 = 1;
+        save_contMsg = 9;
+        osSendMesg( &cont_requestQueue, &save_contMsg, OS_MESG_NOBLOCK );
+        save_step = 1;
         break;
     case 1:
-        if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
+        if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&save_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
             if ( cont_result == 0 ) {
-                D_8005C990 = 2;
+                save_step = 2;
             } else {
-                D_8005C990 = 3;
+                save_step = 3;
             }
         }
         break;
     case 2:
         if ( Save_ShowPrompt( 0x94C, PROMPT_TIMED ) ) {
-            D_8005C990 = 10;
-            D_80066C44 = 0;
+            save_step = 10;
+            save_promptChoice = 0;
         }
         break;
     case 3:
-        D_80064314 = 6;
+        save_contMsg = 6;
         D_800E4FC8 = 0;
-        osSendMesg( &cont_requestQueue, &D_80064314, OS_MESG_NOBLOCK );
-        D_8005C990 = 4;
+        osSendMesg( &cont_requestQueue, &save_contMsg, OS_MESG_NOBLOCK );
+        save_step = 4;
         break;
     case 4:
-        if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
+        if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&save_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
             if ( cont_result == 0 ) {
                 if ( memcmp( D_800693E8, D_80066BA4, sizeof( D_800693E8 ) ) == 0 ) {
-                    D_8005C990 = 5;
+                    save_step = 5;
                 } else {
-                    D_8005C990 = 8;
+                    save_step = 8;
                 }
             } else if ( cont_result == 1 ) {
-                D_8005C990 = 10;
+                save_step = 10;
             } else {
-                D_8005C990 = 11;
+                save_step = 11;
             }
         }
         break;
@@ -241,74 +242,74 @@ s32 Save_SaveSettings( void ) {
         global stores below (MEM_IN_STRUCT_P), and retail keeps it first.
         */
         *(s32 *)bytes = sum;
-        D_80064314 = 5;
+        save_contMsg = 5;
         D_800E6578 = 1;
-        osSendMesg( &cont_requestQueue, &D_80064314, OS_MESG_NOBLOCK );
-        D_8005C990 = 6;
+        osSendMesg( &cont_requestQueue, &save_contMsg, OS_MESG_NOBLOCK );
+        save_step = 6;
         break;
     case 6:
-        if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
+        if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&save_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
             if ( cont_result == 0 ) {
-                D_8005C990 = 7;
+                save_step = 7;
             } else if ( cont_result == 2 ) {
-                D_8005C990 = 8;
+                save_step = 8;
             } else if ( cont_result == 1 ) {
-                D_8005C990 = 10;
+                save_step = 10;
             } else {
-                D_8005C990 = 11;
+                save_step = 11;
             }
         }
         Save_ShowPrompt( 0x95C, PROMPT_OPEN );
         break;
     case 7:
         if ( Save_ShowPrompt( 0x95C, PROMPT_CLOSE ) ) {
-            D_8005C990 = 0;
+            save_step = 0;
             return FALSE;
         }
         break;
     case 8:
         if ( Save_ShowPrompt( 0x959, PROMPT_TIMED ) ) {
-            D_8005C990 = 9;
+            save_step = 9;
         }
         break;
     case 9:
         if ( Save_ShowPrompt( 0x95A, PROMPT_ANY_BUTTON ) ) {
-            D_8005C990 = 0;
+            save_step = 0;
         }
         break;
     case 10:
-        D_800DF590[0] = 0x2E;
-        D_800DF590[1] = 0x36;
-        D_800E6538[0] = D_800E6538[1] = 0x10;
-        D_800E57E0[0] = 0x20;
-        D_800E4D68[0] = 0x2A;
-        D_800E57E0[1] = 0x6E;
-        D_800E4D68[1] = 0x2A;
+        save_choiceWidth[0] = 0x2E;
+        save_choiceWidth[1] = 0x36;
+        save_choiceHeight[0] = save_choiceHeight[1] = 0x10;
+        save_choiceX[0] = 0x20;
+        save_choiceY[0] = 0x2A;
+        save_choiceX[1] = 0x6E;
+        save_choiceY[1] = 0x2A;
         if ( Save_ShowPrompt( 0x95B, PROMPT_CHOICE2_H ) ) {
-            if ( D_80066C44 == 0 ) {
-                D_8005C990 = 9;
+            if ( save_promptChoice == 0 ) {
+                save_step = 9;
             }
-            if ( D_80066C44 == 1 ) {
-                D_80066C44 = 0;
-                D_8005C990 = 0;
+            if ( save_promptChoice == 1 ) {
+                save_promptChoice = 0;
+                save_step = 0;
                 return FALSE;
             }
         }
         break;
     case 11:
-        D_800DF590[0] = D_800DF590[1] = 0x24;
-        D_800E6538[0] = D_800E6538[1] = 0x10;
-        D_800E57E0[0] = 0x40;
-        D_800E4D68[0] = 0x2A;
-        D_800E57E0[1] = 0x66;
-        D_800E4D68[1] = 0x2A;
+        save_choiceWidth[0] = save_choiceWidth[1] = 0x24;
+        save_choiceHeight[0] = save_choiceHeight[1] = 0x10;
+        save_choiceX[0] = 0x40;
+        save_choiceY[0] = 0x2A;
+        save_choiceX[1] = 0x66;
+        save_choiceY[1] = 0x2A;
         if ( Save_ShowPrompt( 0x958, PROMPT_CHOICE2_H ) ) {
-            if ( D_80066C44 == 0 ) {
-                D_8005C990 = 9;
+            if ( save_promptChoice == 0 ) {
+                save_step = 9;
             }
-            if ( D_80066C44 == 1 ) {
-                D_80066C44 = 0;
-                D_8005C990 = 0;
+            if ( save_promptChoice == 1 ) {
+                save_promptChoice = 0;
+                save_step = 0;
                 return FALSE;
             }
         }

@@ -607,8 +607,8 @@ D_800EA0A8 = 0x800EA0A8; // size:0x18 allow_addend:True
 aspMainTextStart = 0x8005A480;
 aspMainDataStart = 0x80060010;
 D_80066E00 = 0x80066E00; // size:0x10 allow_addend:True
-D_8005C9C4 = 0x8005C9C4; // size:0x1
-D_8005C9C5 = 0x8005C9C5; // size:0x1
+save_cursorAlpha = 0x8005C9C4; // size:0x1
+save_cursorStep = 0x8005C9C5; // size:0x1
 
 // gacode overlay data that the overlay reads through aggregates (splat names only the referenced members)
 ga_blinkLevel = 0x80123600; // segment:gacode size:0x2 allow_addend:True
@@ -687,10 +687,10 @@ gs_rumbleStatus = 0x80120791; // segment:gscode size:0x2
 
 // main: the prompt's cursor rectangles (save.h), two entries each; the asm's second-entry references
 // (D_800E57E2, D_800E4D6A, D_800DF592, D_800E653A) are their [1]
-D_800E57E0 = 0x800E57E0; // size:0x4
-D_800E4D68 = 0x800E4D68; // size:0x4
-D_800DF590 = 0x800DF590; // size:0x4
-D_800E6538 = 0x800E6538; // size:0x4
+save_choiceX = 0x800E57E0; // size:0x4
+save_choiceY = 0x800E4D68; // size:0x4
+save_choiceWidth = 0x800DF590; // size:0x4
+save_choiceHeight = 0x800E6538; // size:0x4
 RS_Init = 0x80112350; // type:func segment:rscode
 RS_Frame = 0x801123A8; // type:func segment:rscode
 RS_StartMode = 0x80112574; // type:func segment:rscode
@@ -1283,3 +1283,10 @@ cont_deleteGameName = 0x800F7C78;
 cont_deleteExtName = 0x80066E10;
 cont_deleteCompany = 0x8009D090;
 cont_deleteGameCode = 0x8009CF6C;
+save_enabled = 0x8005C0E0;
+save_step = 0x8005C990;
+save_contMsg = 0x80064314;
+save_promptState = 0x8005C9BC;
+save_promptFrame = 0x80064310;
+save_promptZoom = 0x8005C994;
+save_promptChoice = 0x80066C44;

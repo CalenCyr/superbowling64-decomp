@@ -458,7 +458,7 @@ drawEntry_t, DRAW_BUCKETS, DRAW_NONE	ground.h	invented: the 12-byte entries of D
 SCREEN_WIDTH, SCREEN_HEIGHT	boot.h	invented: the 320x240 framebuffers (Scene_BeginFrame's scissor and color image)
 fileImage_t, IMAGE_CI4, IMAGE_CI8, CI4_PALETTE_SIZE, CI8_PALETTE_SIZE	sprite.h	invented: the image files Draw_Image draws (palette offsets 0x20 and 0x200 by type)
 DRAW2D_COPY, DRAW2D_1CYCLE, DRAW2D_FILL	sprite.h	invented: the D_8005C190 values the 2D functions set with the cycle type they emit
-PROMPT_* (modes and states), PROMPT_ZOOM_FRAMES	save.h	invented: Save_ShowPrompt's modes, from its input handling, and D_8005C9BC's states
+PROMPT_* (modes and states), PROMPT_ZOOM_FRAMES	save.h	invented: Save_ShowPrompt's modes, from its input handling, and save_promptState's states
 SE_CURSOR, SE_DECIDE	gamesnd.h	invented: SE 0 on a cursor move and SE 1 on a choice in Save_ShowPrompt
 menuItem_t, MENU_END, MENU_NONE, MENU_SLIDE_STEPS, SLIDE_*	menu.h	invented: the 10-byte menu records Menu_DrawItems draws and Menu_SetItem edits
 SCORE_IMAGE_*, ROLL_STRIKE, ROLL_SPARE	menu.h	invented: indices of D_8005CAC0 that Score_RollImage returns for the rolls of a frame
@@ -1254,3 +1254,18 @@ cont_deleteGameName	0x800F7C78	invented: request 1: game name of the note to del
 cont_deleteExtName	0x80066E10	invented: request 1: extension of the note to delete
 cont_deleteCompany	0x8009D090	invented: request 1: company code of the note to delete
 cont_deleteGameCode	0x8009CF6C	invented: request 1: game code of the note to delete
+
+# include/save.h: saving the settings and the prompts
+save_enabled	0x8005C0E0	invented: saving is on (set by opcode's Controller Pak check); Save_SaveSettings does nothing while it is 0
+save_step	0x8005C990	invented: step of Save_SaveSettings
+save_contMsg	0x80064314	invented: the message Save_SaveSettings sends to the controller thread and receives back
+save_promptState	0x8005C9BC	invented: state of the prompt, PROMPT_CLOSED etc. (Save_ShowPrompt)
+save_promptFrame	0x80064310	invented: frame of the prompt's zoom, or of a PROMPT_TIMED prompt
+save_promptZoom	0x8005C994	invented: scale of the prompt in each frame of its zoom
+save_promptChoice	0x80066C44	invented: the prompt's choice under the cursor
+save_cursorAlpha	0x8005C9C4	invented: alpha of the prompt's blinking cursor, 0x40 to 0x80
+save_cursorStep	0x8005C9C5	invented: added to save_cursorAlpha each frame; turned at either end
+save_choiceX	0x800E57E0	invented: x of each choice's cursor rectangle, from the prompt's corner
+save_choiceY	0x800E4D68	invented: y of each choice's cursor rectangle
+save_choiceWidth	0x800DF590	invented: width of each choice's cursor rectangle
+save_choiceHeight	0x800E6538	invented: height of each choice's cursor rectangle

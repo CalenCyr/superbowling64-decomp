@@ -22,7 +22,7 @@ OP_CheckSettings
 
 Runs one frame of the settings check at boot, over a dimmed screen: asks the controller thread for the
 Controller Pak and the saved settings, and prompts to load, create or repair them. Returns FALSE when it is
-over: saving is then on (D_8005C0E0) with the settings loaded, or off.
+over: saving is then on (save_enabled) with the settings loaded, or off.
 ================
 */
 s32 OP_CheckSettings( void ) {
@@ -47,7 +47,7 @@ s32 OP_CheckSettings( void ) {
     case 2:
         if ( Save_ShowPrompt( 0x94C, PROMPT_TIMED ) ) {
             op_checkStep = 10;
-            D_80066C44 = 0;
+            save_promptChoice = 0;
         }
         break;
     case 3:
@@ -81,19 +81,19 @@ s32 OP_CheckSettings( void ) {
     case 9:
         break;
     case 10:
-        D_800DF590[0] = D_800DF590[1] = 0x24;
-        D_800E6538[0] = D_800E6538[1] = 0x10;
-        D_800E57E0[0] = 0x2E;
-        D_800E4D68[0] = 0x1C;
-        D_800E57E0[1] = 0x58;
-        D_800E4D68[1] = 0x1C;
+        save_choiceWidth[0] = save_choiceWidth[1] = 0x24;
+        save_choiceHeight[0] = save_choiceHeight[1] = 0x10;
+        save_choiceX[0] = 0x2E;
+        save_choiceY[0] = 0x1C;
+        save_choiceX[1] = 0x58;
+        save_choiceY[1] = 0x1C;
         if ( Save_ShowPrompt( 0x950, PROMPT_CHOICE2_H ) ) {
-            if ( D_80066C44 == 0 ) {
-                D_8005C0E0 = 0;
+            if ( save_promptChoice == 0 ) {
+                save_enabled = 0;
                 return FALSE;
             }
-            if ( D_80066C44 == 1 ) {
-                D_80066C44 = 0;
+            if ( save_promptChoice == 1 ) {
+                save_promptChoice = 0;
                 op_checkStep = 15;
             }
         }
@@ -126,22 +126,22 @@ s32 OP_CheckSettings( void ) {
         }
         break;
     case 21:
-        D_800DF590[0] = 0x24;
-        D_800E6538[0] = 0x10;
-        D_800DF590[1] = 0x24;
-        D_800E6538[1] = 0x10;
-        D_800E57E0[0] = 0x36;
-        D_800E4D68[0] = 0x44;
-        D_800E57E0[1] = 0x5E;
-        D_800E4D68[1] = 0x44;
+        save_choiceWidth[0] = 0x24;
+        save_choiceHeight[0] = 0x10;
+        save_choiceWidth[1] = 0x24;
+        save_choiceHeight[1] = 0x10;
+        save_choiceX[0] = 0x36;
+        save_choiceY[0] = 0x44;
+        save_choiceX[1] = 0x5E;
+        save_choiceY[1] = 0x44;
         if ( Save_ShowPrompt( 0x94F, PROMPT_CHOICE2_H ) ) {
-            if ( D_80066C44 == 0 ) {
+            if ( save_promptChoice == 0 ) {
                 op_contMsg = 0;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
                 op_checkStep = 22;
             }
-            if ( D_80066C44 == 1 ) {
-                D_80066C44 = 0;
+            if ( save_promptChoice == 1 ) {
+                save_promptChoice = 0;
                 op_checkStep = 10;
             }
         }
@@ -174,7 +174,7 @@ s32 OP_CheckSettings( void ) {
         if ( Save_ShowPrompt( 0x95C, PROMPT_CLOSE ) ) {
             osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             if ( cont_result == 0 ) {
-                D_8005C0E0 = 1;
+                save_enabled = 1;
                 memcpy( D_800693E8, D_80066BA4, sizeof( D_800693E8 ) );
                 return FALSE;
             }
@@ -184,51 +184,51 @@ s32 OP_CheckSettings( void ) {
     case 25:
         /* BUG: the rectangle arrays hold two entries; the third choice's stores land on the next
            globals (__osContLastCmd and D_800DF595, cont_held[0], D_800E4D6C; the height lands in unused bss) */
-        D_800DF590[0] = 0x34;
-        D_800E6538[0] = 0xE;
-        D_800DF590[1] = 0x34;
-        D_800E6538[1] = 0x10;
-        D_800DF590[2] = 0x7A;
-        D_800E6538[2] = 0x1C;
-        D_800E57E0[0] = 0xA;
-        D_800E4D68[0] = 0x36;
-        D_800E57E0[1] = 0x44;
-        D_800E4D68[1] = 0x36;
-        D_800E57E0[2] = 0x78;
-        D_800E4D68[2] = 0x36;
+        save_choiceWidth[0] = 0x34;
+        save_choiceHeight[0] = 0xE;
+        save_choiceWidth[1] = 0x34;
+        save_choiceHeight[1] = 0x10;
+        save_choiceWidth[2] = 0x7A;
+        save_choiceHeight[2] = 0x1C;
+        save_choiceX[0] = 0xA;
+        save_choiceY[0] = 0x36;
+        save_choiceX[1] = 0x44;
+        save_choiceY[1] = 0x36;
+        save_choiceX[2] = 0x78;
+        save_choiceY[2] = 0x36;
         if ( Save_ShowPrompt( 0x954, PROMPT_CHOICE3 ) ) {
-            if ( D_80066C44 == 0 ) {
-                D_80066C44 = 0;
+            if ( save_promptChoice == 0 ) {
+                save_promptChoice = 0;
                 op_checkStep = 29;
             }
-            if ( D_80066C44 == 1 ) {
-                D_80066C44 = 0;
+            if ( save_promptChoice == 1 ) {
+                save_promptChoice = 0;
                 op_checkStep = 15;
             }
-            if ( D_80066C44 == 2 ) {
-                D_8005C0E0 = 0;
+            if ( save_promptChoice == 2 ) {
+                save_enabled = 0;
                 return FALSE;
             }
         }
         break;
     case 29:
-        D_800DF590[1] = 0x24;
-        D_800DF590[0] = 0x24;
-        D_800E6538[1] = 0x10;
-        D_800E6538[0] = 0x10;
-        D_800E57E0[0] = 0x24;
-        D_800E4D68[0] = 0x32;
-        D_800E57E0[1] = 0x4E;
-        D_800E4D68[1] = 0x32;
+        save_choiceWidth[1] = 0x24;
+        save_choiceWidth[0] = 0x24;
+        save_choiceHeight[1] = 0x10;
+        save_choiceHeight[0] = 0x10;
+        save_choiceX[0] = 0x24;
+        save_choiceY[0] = 0x32;
+        save_choiceX[1] = 0x4E;
+        save_choiceY[1] = 0x32;
         if ( Save_ShowPrompt( 0xA5B, PROMPT_CHOICE2_H ) ) {
-            if ( D_80066C44 == 0 ) {
+            if ( save_promptChoice == 0 ) {
                 op_checkStep = 26;
-                D_80066C44 = 0;
+                save_promptChoice = 0;
                 op_contMsg = 7;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
             }
-            if ( D_80066C44 == 1 ) {
-                D_80066C44 = 0;
+            if ( save_promptChoice == 1 ) {
+                save_promptChoice = 0;
                 op_checkStep = 15;
             }
         }
@@ -247,29 +247,29 @@ s32 OP_CheckSettings( void ) {
     case 28:
         /* BUG: the rectangle arrays hold two entries; the third choice's stores land on the next
            globals (__osContLastCmd and D_800DF595, cont_held[0], D_800E4D6C; the height lands in unused bss) */
-        D_800DF590[0] = 0x34;
-        D_800E6538[0] = 0xE;
-        D_800DF590[1] = 0x34;
-        D_800E6538[1] = 0x10;
-        D_800DF590[2] = 0x7A;
-        D_800E6538[2] = 0x1C;
-        D_800E57E0[0] = 0xA;
-        D_800E4D68[0] = 0x36;
-        D_800E57E0[1] = 0x44;
-        D_800E4D68[1] = 0x36;
-        D_800E57E0[2] = 0x78;
-        D_800E4D68[2] = 0x36;
+        save_choiceWidth[0] = 0x34;
+        save_choiceHeight[0] = 0xE;
+        save_choiceWidth[1] = 0x34;
+        save_choiceHeight[1] = 0x10;
+        save_choiceWidth[2] = 0x7A;
+        save_choiceHeight[2] = 0x1C;
+        save_choiceX[0] = 0xA;
+        save_choiceY[0] = 0x36;
+        save_choiceX[1] = 0x44;
+        save_choiceY[1] = 0x36;
+        save_choiceX[2] = 0x78;
+        save_choiceY[2] = 0x36;
         if ( Save_ShowPrompt( 0xB59, PROMPT_CHOICE3 ) ) {
-            if ( D_80066C44 == 0 ) {
-                D_80066C44 = 0;
+            if ( save_promptChoice == 0 ) {
+                save_promptChoice = 0;
                 op_checkStep = 29;
             }
-            if ( D_80066C44 == 1 ) {
-                D_80066C44 = 0;
+            if ( save_promptChoice == 1 ) {
+                save_promptChoice = 0;
                 op_checkStep = 15;
             }
-            if ( D_80066C44 == 2 ) {
-                D_8005C0E0 = 0;
+            if ( save_promptChoice == 2 ) {
+                save_enabled = 0;
                 return FALSE;
             }
         }
@@ -288,7 +288,7 @@ s32 OP_CheckSettings( void ) {
         if ( Save_ShowPrompt( 0x951, PROMPT_CLOSE ) ) {
             osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             if ( cont_result == 0 && save_dataPtr->checksum == Save_Checksum() ) {
-                D_8005C0E0 = 1;
+                save_enabled = 1;
                 memcpy( D_800693E8, D_80066BA4, sizeof( D_800693E8 ) );
                 return FALSE;
             }

@@ -148,7 +148,7 @@ s32 OP_PakScreen( void ) {
                 if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                     Sound_PlaySe( 1, 0 );
                     op_pakState = 2;
-                    D_80066C44 = 1;
+                    save_promptChoice = 1;
                 }
                 if ( cont_allPressed & B_BUTTON ) {
                     Sound_PlaySe( 2, 0 );
@@ -179,15 +179,15 @@ s32 OP_PakScreen( void ) {
             case 2:
                 Draw_Image( op_cursorImages[sched_frameCount / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
                 Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, game_pulseAlpha );
-                D_800DF590[0] = D_800DF590[1] = 0x24;
-                D_800E6538[0] = D_800E6538[1] = 0x10;
-                D_800E57E0[0] = 0x24;
-                D_800E4D68[0] = 0x1E;
-                D_800E57E0[1] = 0x4E;
-                D_800E4D68[1] = 0x1E;
+                save_choiceWidth[0] = save_choiceWidth[1] = 0x24;
+                save_choiceHeight[0] = save_choiceHeight[1] = 0x10;
+                save_choiceX[0] = 0x24;
+                save_choiceY[0] = 0x1E;
+                save_choiceX[1] = 0x4E;
+                save_choiceY[1] = 0x1E;
                 Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
                 if ( Save_ShowPrompt( 0x94B, PROMPT_CHOICE2_H ) ) {
-                    if ( D_80066C44 == 0 ) {
+                    if ( save_promptChoice == 0 ) {
                         Sound_PlaySe( 8, 0 );
                         op_pakMsg = 10;
                         cont_noteIndex = op_noteIndex[op_firstNote + op_cursorLine];
@@ -221,7 +221,7 @@ s32 OP_PakScreen( void ) {
                             }
                         }
                     }
-                    if ( D_80066C44 == 1 ) {
+                    if ( save_promptChoice == 1 ) {
                         op_pakState = 1;
                     }
                 }
