@@ -131,7 +131,7 @@ result.
 // loops' pointer order (spot set and stepped first) was found by A/B, and indexed &pl->lane->bodies[i] or a
 // lane local miss the loop-invariant base; the permuter (target-only scoring, 1.3k iterations from 15) found nothing better.
 // Also tried: the increments' order (i first, body first), the pointers set in the for's init, i as
-// s16/u8/u32, body declared before spot.
+// s16/u8/u32, body declared before spot; body assigned before spot folds the lane load into body's s1.
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
@@ -201,7 +201,8 @@ GA_SettleBodies.
 // pointer local walked by loop 2 (for ( i = 0, p = spots + NUM_BODIES; ...; i++, p++ )) leaves only its set-up
 // placed before the hoisted -190.0f; reusing loop 1's second for it swaps port and second (s3/s4); spots +
 // i + NUM_BODIES and &spots[i] + NUM_BODIES fold it into spots[i]; lane->secondSpots[i] or a secondSpots
-// local are further off. The continues, the local arrays and bounceSound as s16 (lh) came from A/B.
+// local are further off; &spots[NUM_BODIES + i] is the same; a spot cursor for loop 2 (spot, spot +
+// NUM_BODIES) is further off. The continues, the local arrays and bounceSound as s16 (lh) came from A/B.
 /* An angle in degrees brought back within -180..180. */
 #define GA_WRAP_DEGREES( a ) ( ( a ) < -180.0f ? ( a ) + 360.0f : ( a ) >= 180.0f ? ( a ) - 360.0f : ( a ) )
 
