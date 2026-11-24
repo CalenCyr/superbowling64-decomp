@@ -419,7 +419,6 @@ SCENE_RSCODE	include/overlay.h	invented: value 6, loads "RSCODE  SYS"
 vec3_t	gacode.h	invented: three floats (x, y, z); the Quake-style vector type
 gaBody_t	gacode.h	invented: 0x60-byte body of a lane, eleven per lane (index 0 the ball, 1-10 the pins: loops over 1..10 touch only pins); pos/rot/scale are the guPositionF arguments
 gaSpot_t	gacode.h	invented: 0x20-byte rest position of a body; GA_PlaceBody copies its pos into the body
-gaCamera_t	gacode.h	invented: three vectors the cameraFunc handlers write (eye, at, a third)
 gaLane_t	gacode.h	invented: 0xB30-byte lane (two, ga_lanes): bodies, their scene objects, four handler slots, a sound handle
 gaCharacter_t	gacode.h	invented: 0x48-byte record of ga_characters, copied to the start of gaPlayer_t
 gaMenuPage_t	gacode.h	invented: 8-byte page of GA_PageBrowser's browser: image, cursor, back item, the pages its items open, the parent page
@@ -1007,7 +1006,7 @@ Ovl_KeepRoutines	0x80028590	invented: never called: refers to the library routin
 # gacode struct members
 gaLane_t.turnFunc	gacode.h	invented: the lane's turn handler, run first in GA_RunPlayer's frame and picked by GA_EndTurn
 gaLane_t.panelFunc	gacode.h	invented: the lane's handler that runs the mode's part of the frame and draws the player's panels
-gaLane_t.cameraFunc	gacode.h	invented: the lane's camera handler (writes a gaCamera_t)
+gaLane_t.cameraFunc	gacode.h	invented: the lane's camera handler (writes the lane's sceneCamera_t)
 gaLane_t.inputFunc	gacode.h	invented: the lane's input handler, called with the buttons and the stick
 gaLane_t.soundHandle	gacode.h	invented: sound handle (Sound_PlaySe)
 gaLane_t.cameraRaise	gacode.h	invented: camera height offset that falls to 0 by 45 a frame
@@ -1049,8 +1048,6 @@ gaCharacter_t.direction	gacode.h	invented: GA_VecDirection of stance and aim, th
 sceneCamera_t.upPoint	object.h	invented: the point the up vector points to from eye (header comment)
 sceneCamera_t.left	object.h	invented: x of the viewport's corner in the framebuffer (Scene_BeginView)
 sceneCamera_t.top	object.h	invented: y of the viewport's corner in the framebuffer (Scene_BeginView)
-gaCamera_t.upPoint	gacode.h	invented: as sceneCamera_t.upPoint (the same leading members)
-gaCamera_t.frame	gacode.h	invented: as sceneCamera_t.frame; -1: the path is not followed
 fileType3_t.upPoint	filecache.h	invented: the path's sceneCamera_t.upPoint where the frames leave a component out
 fileType3_t.upPointMask	filecache.h	invented: the mask of upPoint's components in each frame (as eyeMask)
 fileType3_t.flags	filecache.h	invented: FILE3_FOG; 4 set by gscode's character menu

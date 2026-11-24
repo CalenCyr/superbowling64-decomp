@@ -398,7 +398,7 @@ void func_80115054_gacode( void ) {
     s32 player;
     s32 i;
 
-    ( (gaCamera_t *)D_800EA120[1] )->frame = -1;
+    ( (sceneCamera_t *)D_800EA120[1] )->frame = -1;
     for ( player = MAX_PLAYERS - 1; player >= 0; player-- ) {
         pl = &ga_players[player];
         pl->ballView = 0;
@@ -418,8 +418,8 @@ camera.
 ================
 */
 void GA_UpdateLaneCamera( s32 player ) {
-    void (*view)( s32 player, gaCamera_t *camera ) = ga_players[player].lane->cameraFunc;
-    gaCamera_t *camera = D_800EA120[1];
+    void (*view)( s32 player, sceneCamera_t *camera ) = ga_players[player].lane->cameraFunc;
+    sceneCamera_t *camera = D_800EA120[1];
 
     if ( view == func_8011BB44_gacode ) {
         func_8011C468_gacode( player, camera );
@@ -2767,7 +2767,7 @@ it, behind it looking up the lane's middle, in front of it, and high to the lane
 ================
 */
 void GA_SetBallView( gaPlayer_t *pl, s32 view ) {
-    gaCamera_t *camera = pl->lane->camera;
+    sceneCamera_t *camera = pl->lane->camera;
     gaLane_t *lane = pl->lane;
     s32 side;
 
@@ -2840,7 +2840,7 @@ func_8011B8AC_gacode
 A cameraFunc handler: the camera of func_8011C0DC_gacode, raised by cameraRaise, which falls by 45 a frame to 0.
 ================
 */
-void func_8011B8AC_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011B8AC_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
     camera->eye[2] = 960.0f;
@@ -2863,7 +2863,7 @@ void func_8011B8AC_gacode( s32 player, gaCamera_t *camera ) {
 func_8011B974_gacode
 ================
 */
-void func_8011B974_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011B974_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
     camera->eye[2] = 960.0f;
@@ -2882,7 +2882,7 @@ void func_8011B974_gacode( s32 player, gaCamera_t *camera ) {
 func_8011BA00_gacode
 ================
 */
-void func_8011BA00_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011BA00_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
     camera->eye[2] = 1130.0f;
@@ -2901,7 +2901,7 @@ void func_8011BA00_gacode( s32 player, gaCamera_t *camera ) {
 func_8011BA8C_gacode
 ================
 */
-void func_8011BA8C_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011BA8C_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 side = pl->laneIndex ? -1 : 1;
 
@@ -2923,7 +2923,7 @@ func_8011BB44_gacode
 A cameraFunc handler: R and L step ballView through 0 to 4, wrapping; the camera is GA_SetBallView's.
 ================
 */
-void func_8011BB44_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011BB44_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( D_800E44E0[pl->laneIndex] & R_TRIG ) {
@@ -2950,7 +2950,7 @@ void func_8011BB44_gacode( s32 player, gaCamera_t *camera ) {
 func_8011BC10_gacode
 ================
 */
-void func_8011BC10_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011BC10_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
     camera->eye[2] = -896.0f;
@@ -2969,7 +2969,7 @@ void func_8011BC10_gacode( s32 player, gaCamera_t *camera ) {
 func_8011BCA8_gacode
 ================
 */
-void func_8011BCA8_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011BCA8_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
     camera->eye[2] = pl->obj->joints[1].mtx[3][2] - 256.0f;
@@ -2992,7 +2992,7 @@ moves ga_freeCameraPos sideways; stick y moves it along the angle. ga_freeCamera
 across and -1000 to 0 along the lane, and the eye looks 1024 out along the angle.
 ================
 */
-void GA_FreeCamera( s32 player, gaCamera_t *camera ) {
+void GA_FreeCamera( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
     f32 angle = ga_spinCameraAngle[pl->laneIndex] + M_PI;
     f32 speed;
@@ -3027,7 +3027,7 @@ void GA_FreeCamera( s32 player, gaCamera_t *camera ) {
 func_8011C0DC_gacode
 ================
 */
-void func_8011C0DC_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011C0DC_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
     camera->eye[2] = 960.0f;
@@ -3049,7 +3049,7 @@ Camera handler: eye above the origin, looking out at the lane's ga_spinCameraAng
 0.3 degrees a frame.
 ================
 */
-void func_8011C158_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011C158_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
     camera->eye[2] = 0.0f;
@@ -3074,7 +3074,7 @@ ga_throwCamPaths; by D_8012D8D8_gacode) at the frame that follows the player's a
 player object's second joint.
 ================
 */
-void func_8011C254_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011C254_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 joint;
     u16 file;
@@ -3114,7 +3114,7 @@ Camera handler: puts the eye on the ga_followCamPaths path (one of ten, by D_801
 follows the ball down the lane, looking at the ball.
 ================
 */
-void func_8011C468_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011C468_gacode( s32 player, sceneCamera_t *camera ) {
     gaLane_t *lane = ga_players[player].lane;
     s16 frame;
 
@@ -3134,7 +3134,7 @@ Camera handler: puts the eye on frame D_8012D8D8_gacode % 5 of the ga_laneCamPat
 lane.
 ================
 */
-void func_8011C57C_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011C57C_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
     Cam_ReadPathFrame( ga_laneCamPaths[D_8012D8D8_gacode % 5], 0, camera->eye, camera->upPoint );
@@ -3153,7 +3153,7 @@ func_8011C650_gacode
 A cameraFunc handler that leaves the camera as it is.
 ================
 */
-void func_8011C650_gacode( s32 player, gaCamera_t *camera ) {
+void func_8011C650_gacode( s32 player, sceneCamera_t *camera ) {
 }
 
 /*

@@ -53,10 +53,7 @@ typedef struct {
     /* 0x0C0 */ Mtx mirrorL[2];         /* by D_8005C0B1: mtx with its translation mirrored */
 } sceneObjJoint_t;                         /* size 0x140 */
 
-/*
-Object of the scene engine (gacode's D_800EA120 holds pointers to them). gacode.h keeps a partial copy of it,
-sceneObj_t, until it includes this header.
-*/
+/* Object of the scene engine (D_800EA120 holds pointers to them). */
 typedef struct {
     /* 0x00 */ u16 flags;
     /* 0x02 */ u8 unk_02[2];
@@ -112,8 +109,8 @@ typedef struct {
     /* 0x00 */ objNode_t node;
     /* 0x10 */ sceneCamera_t cam;
 } sceneCameraNode_t;                    /* size 0x258 */
-extern void *D_800EA120[];          /* main's scene objects, of several kinds: [1] gacode's camera (gaCamera_t), the
-                                       others mostly sceneObject_t */
+extern void *D_800EA120[];          /* main's scene objects, of several kinds: cameras (sceneCamera_t, Cam_Create)
+                                       and scene objects (sceneObject_t) */
 
 void Obj_ClearList( void );
 void Obj_Create( objParams_t *params );

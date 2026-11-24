@@ -57,13 +57,6 @@ OVERLAY
 
 typedef f32 vec3_t[3];
 
-/* Joint of a scene object: its matrix, the translation in row 3. Name invented. */
-
-/*
-Object of main's scene engine (D_800EA120 holds pointers to them): only the members the overlay uses. Name
-invented.
-*/
-
 
 /* Ball or pin of a lane. Name invented. */
 typedef struct {
@@ -83,14 +76,6 @@ typedef struct {
     /* 0x18 */ f32 radius;              /* of the spot's sphere; 0: no such spot */
     /* 0x1C */ u32 contacts;            /* contact bits of GA_CollideLane: bit 0 hit this frame, bit n touching spots[n] */
 } gaSpot_t;                             /* size 0x20 */
-
-/* View of a lane, set each frame by the lane's cameraFunc handler. Name invented. */
-typedef struct gaCamera_s {
-    /* 0x00 */ vec3_t eye;
-    /* 0x0C */ vec3_t at;
-    /* 0x18 */ vec3_t upPoint;
-    /* 0x24 */ s32 frame;
-} gaCamera_t;
 
 #define NUM_BODIES      11              /* the ball, then the ten pins */
 #define NUM_PINS        10
@@ -118,10 +103,10 @@ typedef struct {
     /* 0xA68 */ gaSpot_t markerSpots[3];    /* [0] the aim, [1] the stance, [2] the aim marker */
     /* 0xAC8 */ sceneObject_t *bodyObjs[NUM_BODIES];
     /* 0xAF4 */ sceneObject_t *markerObjs[3];
-    /* 0xB00 */ gaCamera_t *camera;
+    /* 0xB00 */ sceneCamera_t *camera;  /* main's scene camera D_800EA120[lane] (Cam_Create) */
     /* 0xB04 */ void (*turnFunc)( s32 player );
     /* 0xB08 */ void (*panelFunc)( s32 player );
-    /* 0xB0C */ void (*cameraFunc)( s32 player, gaCamera_t *camera );
+    /* 0xB0C */ void (*cameraFunc)( s32 player, sceneCamera_t *camera );
     /* 0xB10 */ s32 (*inputFunc)( s32 player, s32 input, s16 stickX, s16 stickY );
     /* 0xB14 */ f32 offsetX;                /* x of the lane (lane 1: GA_SetupLanes' offset) */
     /* 0xB18 */ s64 soundHandle;            /* sound handle (Sound_PlaySe) */
@@ -463,22 +448,22 @@ void func_8011B408_gacode( s32 player );
 void func_8011B564_gacode( s32 player );
 void func_8011B5C8_gacode( s32 lane );
 void GA_SetBallView( gaPlayer_t *pl, s32 view );
-void func_8011B8AC_gacode( s32 player, gaCamera_t *camera );
-void func_8011B974_gacode( s32 player, gaCamera_t *camera );
-void func_8011BA00_gacode( s32 player, gaCamera_t *camera );
-void func_8011BB44_gacode( s32 player, gaCamera_t *camera );
-void func_8011BA8C_gacode( s32 player, gaCamera_t *camera );
-void func_8011BC10_gacode( s32 player, gaCamera_t *camera );
-void func_8011BCA8_gacode( s32 player, gaCamera_t *camera );
-void GA_FreeCamera( s32 player, gaCamera_t *camera );
-void func_8011C0DC_gacode( s32 player, gaCamera_t *camera );
-void func_8011C158_gacode( s32 player, gaCamera_t *camera );
-void func_8011C254_gacode( s32 player, gaCamera_t *camera );
-void func_8011C468_gacode( s32 player, gaCamera_t *camera );
-void func_8011C650_gacode( s32 player, gaCamera_t *camera );
+void func_8011B8AC_gacode( s32 player, sceneCamera_t *camera );
+void func_8011B974_gacode( s32 player, sceneCamera_t *camera );
+void func_8011BA00_gacode( s32 player, sceneCamera_t *camera );
+void func_8011BB44_gacode( s32 player, sceneCamera_t *camera );
+void func_8011BA8C_gacode( s32 player, sceneCamera_t *camera );
+void func_8011BC10_gacode( s32 player, sceneCamera_t *camera );
+void func_8011BCA8_gacode( s32 player, sceneCamera_t *camera );
+void GA_FreeCamera( s32 player, sceneCamera_t *camera );
+void func_8011C0DC_gacode( s32 player, sceneCamera_t *camera );
+void func_8011C158_gacode( s32 player, sceneCamera_t *camera );
+void func_8011C254_gacode( s32 player, sceneCamera_t *camera );
+void func_8011C468_gacode( s32 player, sceneCamera_t *camera );
+void func_8011C650_gacode( s32 player, sceneCamera_t *camera );
 s32 GA_CpuInput( gaPlayer_t *pl, s32 player );
 void func_8011B490_gacode( s32 lane );
-void func_8011C57C_gacode( s32 player, gaCamera_t *camera );
+void func_8011C57C_gacode( s32 player, sceneCamera_t *camera );
 void func_8011CEE4_gacode( gaPlayer_t *pl, s32 player );
 void GA_CpuSetup( gaPlayer_t *pl, s32 player );
 void GA_DebugText( s32 player );
