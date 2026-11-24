@@ -28,9 +28,6 @@ Runs one frame of the Controller Pak screen: lists the pak's notes, and deletes 
 confirms. Returns FALSE when the screen is over.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: needs the unit at -O3 (or inline on func_80113130_opcode); then only reorg's delay-slot choices differ: retail fills the delete's last cursor test as bnel where this draft gets bne, and keeps state 3's first lui 0x6666 (D_8005B0F4 / 5) in place where this draft moves it into the state dispatch's beq delay slot
-// (both are reorg treating v0/v1 as live on the not-taken path where this draft's flow info has them dead; moving the leave test after the outer switch breaks state 0's exit)
 s32 func_80113168_opcode( void ) {
     s32 i;
     s32 j;
@@ -206,9 +203,7 @@ s32 func_80113168_opcode( void ) {
                             D_8009CF6C = D_80066C00.note.game_code;
                             osSendMesg( &D_800E6690, &D_80114370_opcode, OS_MESG_NOBLOCK );
                             osRecvMesg( &D_800F8098, (OSMesg *)&D_80114370_opcode, OS_MESG_BLOCK );
-                            if ( D_80066B8C != 0 ) {
-                                D_801142A5_opcode = 3;
-                            } else {
+                            if ( D_80066B8C == 0 ) {
                                 D_801145F8_opcode++;
                                 D_801145FC_opcode += ( D_80066C00.note.file_size + 0xFF ) >> 8;
                                 for ( i = D_801142A4_opcode + D_80114376_opcode; i < D_80114374_opcode - 1; i++ ) {
@@ -221,6 +216,8 @@ s32 func_80113168_opcode( void ) {
                                     D_801142A4_opcode--;
                                 }
                                 D_801142A5_opcode = 1;
+                            } else {
+                                D_801142A5_opcode = 3;
                             }
                         }
                     }
@@ -248,6 +245,3 @@ s32 func_80113168_opcode( void ) {
     }
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/opcode/6CC50", func_80113168_opcode);
-#endif
