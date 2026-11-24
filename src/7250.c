@@ -111,6 +111,9 @@ projection, and the view (with the eye's light) or, while D_800EA0C0 is set, the
 rotation of the last view.
 ================
 */
+#ifdef NON_MATCHING
+// NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
+// change the register allocation, and a reused local is not counted as a match
 void func_8002C324( sceneCamera_t *cam ) {
     f32 *data;
     s32 i;
@@ -183,6 +186,9 @@ void func_8002C324( sceneCamera_t *cam ) {
         cam->dir[i] = cam->at[i] - cam->eye[i];
     }
 }
+#else
+INCLUDE_ASM("asm/nonmatchings/7250", func_8002C324);
+#endif
 
 /*
 ================

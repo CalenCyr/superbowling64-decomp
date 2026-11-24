@@ -1121,6 +1121,9 @@ and voice restart (unless held), wave, pitch and FX mix. NOTE_REST, or a program
 note instead. A channel whose stream ended stops its voice.
 ================
 */
+#ifdef NON_MATCHING
+// NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
+// change the register allocation, and a reused local is not counted as a match
 void Snd_PlayNextNote( sndChannel_t *chan, s32 index ) {
     u8 *src;
     s32 note;
@@ -1235,6 +1238,9 @@ void Snd_PlayNextNote( sndChannel_t *chan, s32 index ) {
         n_alSynStopVoice( &snd_voices[index] );
     }
 }
+#else
+INCLUDE_ASM("asm/nonmatchings/166B0", Snd_PlayNextNote);
+#endif
 
 /*
 ================
@@ -1260,6 +1266,9 @@ Sends the volume (track volume * envelope * velocity * volume scale, then the gr
 fade) and the pan (pan * pan scale) of voice index, each only when it changed.
 ================
 */
+#ifdef NON_MATCHING
+// NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
+// change the register allocation, and a reused local is not counted as a match
 void Snd_UpdateVolumePan( sndChannel_t *chan, s32 index ) {
     // RULE-EXCEPTION: R30, the volume and the pan share one local; separate locals change the register
     // allocation.
@@ -1284,6 +1293,9 @@ void Snd_UpdateVolumePan( sndChannel_t *chan, s32 index ) {
         n_alSynSetPan( &snd_voices[index], value );
     }
 }
+#else
+INCLUDE_ASM("asm/nonmatchings/166B0", Snd_UpdateVolumePan);
+#endif
 
 /*
 ================
