@@ -37,7 +37,7 @@ s32 OP_Frame( void ) {
 
     switch ( D_8005C0E8 ) {
     case 10:
-        func_8003068C( 0xE0, 0xE0, 0xE0 );
+        Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
         func_8002DF3C( 0xB58, 0, 0 );
         if ( ++op_modeFrames >= 150 ) {
             D_8005C0BF = 1;
@@ -51,7 +51,7 @@ s32 OP_Frame( void ) {
         }
         break;
     case 0:
-        func_8003068C( 0xE0, 0xE0, 0xE0 );
+        Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
         func_8002DF3C( 0x925, 0x3C, 0x58 );
         if ( ++op_modeFrames >= 70 ) {
             D_8005C0BF = 1;
@@ -65,9 +65,9 @@ s32 OP_Frame( void ) {
         break;
     case 1:
         if ( op_modeFrames == 6 ) {
-            func_800379C8( 0 );
+            Sound_PlayBgm( 0 );
         }
-        func_8003068C( 0xE0, 0xE0, 0xE0 );
+        Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
         func_8002DF3C( 0xADD, 0, 0 );
         func_8002E4B0( 0x890, 0x44, 0xA0, D_8009CFB0, 1.0f, 1.0f );
         if ( ++op_modeFrames >= 450 ) {
@@ -122,7 +122,7 @@ s32 OP_Frame( void ) {
         }
         break;
     case 2:
-        func_8003068C( 0xE0, 0xE0, 0xE0 );
+        Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
         func_8002DF3C( 0xADD, 0, 0 );
         if ( !OP_CheckSettings() ) {
             D_8005C0BF = 1;
@@ -130,7 +130,7 @@ s32 OP_Frame( void ) {
         }
         break;
     case 3:
-        func_8003068C( 0xE0, 0xE0, 0xE0 );
+        Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
         func_8002DF3C( 0xADD, 0, 0 );
         if ( D_8005C0C0 == 0xFF ) {
             D_8005C0C0 = 0x107;
@@ -139,7 +139,7 @@ s32 OP_Frame( void ) {
         }
         break;
     case 0xFD:
-        func_8003068C( 0xE0, 0xE0, 0xE0 );
+        Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
         func_8002DF3C( 0xB5A, 0x48, 0x60 );
         break;
     case 0xFE:

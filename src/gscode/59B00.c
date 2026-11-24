@@ -39,7 +39,7 @@ s32 GS_SubModeMenu( void ) {
         gs_subModeState = CHOICE_BACK;
     }
 
-    func_8003068C( 0xE0, 0xE0, 0xE0 );
+    Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     func_8002DF3C( 0xA58, 0, 0 );
     func_8003893C( gs_subModeMenu, 0, gs_subModeBlink[0][0], MENU_NONE, MENU_NONE, MENU_NONE );
     func_8003893C( gs_subModeMenu, 1, gs_subModeBlink[1][0], MENU_NONE, MENU_NONE, MENU_NONE );
@@ -54,7 +54,7 @@ s32 GS_SubModeMenu( void ) {
         case 0:
             func_8003893C( gs_subModeMenu, 0, gs_subModeBlink[0][gs_subModeBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
-            func_8002C950( 0x28, 0x38, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0x28, 0x38, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & R_JPAD ) {
                 gs_subModeCursor = 1;
             }
@@ -65,7 +65,7 @@ s32 GS_SubModeMenu( void ) {
         case 1:
             func_8003893C( gs_subModeMenu, 1, gs_subModeBlink[1][gs_subModeBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
-            func_8002C950( 0xB8, 0x38, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0xB8, 0x38, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
                 gs_subModeCursor = 0;
             }
@@ -76,7 +76,7 @@ s32 GS_SubModeMenu( void ) {
         case 2:
             func_8003893C( gs_subModeMenu, 2, gs_subModeBlink[2][gs_subModeBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
-            func_8002C950( 0x70, 0x90, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0x70, 0x90, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
                 gs_subModeCursor = 0;
             }

@@ -7,12 +7,12 @@
 
 /*
 ================
-func_80028950
+Txt_SetupFont
 
 Render state for the 8x8 font, drawn with the given palette of D_8005B1B0.
 ================
 */
-void func_80028950( Gfx **gdl, s32 palette ) {
+void Txt_SetupFont( Gfx **gdl, s32 palette ) {
     gDPSetTextureLUT( ( *gdl )++, G_TT_RGBA16 );
     gDPSetRenderMode( ( *gdl )++, G_RM_OPA_SURF, G_RM_OPA_SURF2 );
     gDPSetAlphaCompare( ( *gdl )++, G_AC_THRESHOLD );
@@ -23,12 +23,12 @@ void func_80028950( Gfx **gdl, s32 palette ) {
 
 /*
 ================
-func_80028A0C
+Txt_LoadFont
 
 Loads the 8x8 font and its palettes.
 ================
 */
-void func_80028A0C( Gfx **gdl ) {
+void Txt_LoadFont( Gfx **gdl ) {
     gDPLoadTextureBlock_4b( ( *gdl )++, D_8005B8B0, G_IM_FMT_CI, 128, 32, 1,
                             G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 7, 6, G_TX_NOLOD, G_TX_NOLOD );
     gDPLoadTLUT_pal256( ( *gdl )++, D_8005B1B0 );
@@ -40,13 +40,13 @@ void func_80028A0C( Gfx **gdl ) {
 
 /*
 ================
-func_80028BF4
+Txt_SetTint
 
 Sets the primitive and environment colours, and for mode 0 or 1 the render and combine modes that tint the
 font with them; mode 1 blends when primA is not 0xFF.
 ================
 */
-void func_80028BF4( Gfx **gdl, u8 mode, u8 primR, u8 primG, u8 primB, u8 envR, u8 envG, u8 envB, u8 primA ) {
+void Txt_SetTint( Gfx **gdl, u8 mode, u8 primR, u8 primG, u8 primB, u8 envR, u8 envG, u8 envB, u8 primA ) {
     gDPSetEnvColor( ( *gdl )++, envR, envG, envB, 0xFF );
     gDPSetPrimColor( ( *gdl )++, 0, 0, primR, primG, primB, primA );
     switch ( mode ) {
@@ -90,12 +90,12 @@ void func_80028DA4( Gfx **gdl, s16 x, s16 y, u8 *str ) {
 
 /*
 ================
-func_80028EA8
+Txt_LoadGlyphSheet
 
 Loads the glyph sheet (file 0x9CE) and its palette, and sets the render state for drawing it.
 ================
 */
-void func_80028EA8( Gfx **gdl ) {
+void Txt_LoadGlyphSheet( Gfx **gdl ) {
     D_800619E0 = func_80030C04( 0x9CE, 0 );
     gDPLoadTLUT_pal16( ( *gdl )++, 0, D_800619E0 + 0x10 );
     D_800619E0 += 0x30;
@@ -131,7 +131,7 @@ void func_80029088( Gfx **gdl, s16 x, s16 y, u16 advance, u16 *glyphs ) {
 
 /*
 ================
-func_800292D4
+Txt_NumberToGlyphs
 
 Writes the last digits decimal digits of value to glyphs as glyph indices, without leading zeros (a lone
 zero for 0), and ends the string.
@@ -140,7 +140,7 @@ zero for 0), and ends the string.
 #ifdef NON_MATCHING
 // NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
 // change the register allocation, and a reused local is not counted as a match
-void func_800292D4( u16 *glyphs, s32 value, s32 digits ) {
+void Txt_NumberToGlyphs( u16 *glyphs, s32 value, s32 digits ) {
     s32 i;
     s32 div;
 
@@ -165,5 +165,5 @@ void func_800292D4( u16 *glyphs, s32 value, s32 digits ) {
     glyphs[i] = GLYPH_END;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/3D50", func_800292D4);
+INCLUDE_ASM("asm/nonmatchings/3D50", Txt_NumberToGlyphs);
 #endif

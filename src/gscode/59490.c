@@ -49,7 +49,7 @@ s32 GS_ModeMenu( void ) {
         }
     }
 
-    func_8003068C( 0xE0, 0xE0, 0xE0 );
+    Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     func_8002DF3C( 0xA58, 0, 0 );
     func_800386E0( gs_modeMenu, gs_modeSlide );
     for ( i = 0; i < 5; i++ ) {
@@ -64,7 +64,7 @@ s32 GS_ModeMenu( void ) {
         switch ( choice ) {
         case 0:
             func_8003893C( gs_modeChoices, 1, gs_modeBlink[1][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
-            func_8002C950( 0x38, 0x30, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0x38, 0x30, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & R_JPAD ) {
                 gs_modeCursor = 1;
             }
@@ -74,7 +74,7 @@ s32 GS_ModeMenu( void ) {
             break;
         case 1:
             func_8003893C( gs_modeChoices, 2, gs_modeBlink[2][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
-            func_8002C950( 0xA8, 0x30, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0xA8, 0x30, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
                 gs_modeCursor = 0;
             }
@@ -84,7 +84,7 @@ s32 GS_ModeMenu( void ) {
             break;
         case 2:
             func_8003893C( gs_modeChoices, 3, gs_modeBlink[3][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
-            func_8002C950( 0x18, 0x98, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0x18, 0x98, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & R_JPAD ) {
                 gs_modeCursor = 4;
             }
@@ -94,7 +94,7 @@ s32 GS_ModeMenu( void ) {
             break;
         case 3:
             func_8003893C( gs_modeChoices, 5, gs_modeBlink[4][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
-            func_8002C950( 0xC8, 0x98, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0xC8, 0x98, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
                 gs_modeCursor = 4;
             }
@@ -104,7 +104,7 @@ s32 GS_ModeMenu( void ) {
             break;
         case 4:
             func_8003893C( gs_modeChoices, 4, gs_modeBlink[0][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
-            func_8002C950( 0x70, 0x70, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0x70, 0x70, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
                 gs_modeCursor = 2;
             } else if ( D_800E6758 & R_JPAD ) {

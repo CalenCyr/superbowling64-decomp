@@ -698,3 +698,48 @@ gs_secondController	0x80120A64	invented: set when a second controller is in play
 gs_lastContStatus	0x80120A68	invented: per port: controller status of the last frame
 gs_pakCheckFrames	0x80120668	invented: frame counter of the pak check
 gs_classes	0x8011B540	invented: the classes of the overlay's model scenes (objClass_t array)
+
+# main units: text, drawing, host link, file cache, sound wrappers, controllers
+Txt_SetupFont	0x80028950	invented: sets the render state of the 8x8 font with one of its palettes
+Txt_LoadFont	0x80028A0C	invented: loads the 8x8 font and its palettes
+Txt_SetTint	0x80028BF4	invented: sets the primitive and environment colours and the tinting modes
+Txt_LoadGlyphSheet	0x80028EA8	invented: loads the glyph sheet (file 0x9CE) and its palette and sets the render state
+Txt_NumberToGlyphs	0x800292D4	invented: writes the last decimal digits of a value as glyph indices
+Cam_SetAmbient	0x8002BE50	invented: sets the ambient colour of a camera
+Cam_Create	0x8002BFD8	invented: creates a camera (class create function) from its parameter record
+Cam_Update	0x8002C324	invented: updates a camera from its target joint and path frame
+Cam_UpdateAndAdvance	0x8002C908	invented: updates a camera and advances it along its path
+Draw_RoundedBox	0x8002C950	invented: draws a translucent box with rounded corners
+Draw_RectOutline	0x80030058	invented: draws the one-pixel outline of a rectangle
+Draw_ClearScreen	0x8003068C	invented: clears the depth buffer and fills the framebuffer with a colour
+Host_Send	0x80029490	invented: sends bytes to the development host
+Host_Recv	0x800294D8	invented: receives bytes from the development host
+Host_Sync	0x80029524	invented: exchanges a handshake with the host until it answers
+Host_GetFileSize	0x8002961C	invented: sends request 2 for a file name and receives the file's size
+Host_ReadFile	0x800296D4	invented: receives the bytes announced by Host_GetFileSize
+Host_LoadFile	0x80029728	invented: requests a file and receives its size and bytes
+Host_WriteFile	0x80029814	invented: sends request 3 for a file name, then the bytes
+Host_ExchangeByte	0x800298D4	invented: sends a byte once the link is ready and returns the byte read
+Host_RecvByte	0x8002994C	invented: receives a byte once the link is ready, echoing it back
+LZ_Decompress	0x800299C0	invented: decompresses LZSS data
+Str_ReadFile	0x80029AF4	invented: reads a file of the str segment, decompressing it if stored compressed
+Save_Checksum	0x800373DC	invented: returns the checksum of the saved settings
+Save_SaveSettings	0x80037410	invented: runs one frame of saving the settings
+Sound_PlayBgm	0x800379C8	invented: loads a BGM into the other buffer and starts it after BGM_START_DELAY frames
+Sound_StopBgm	0x80037B18	invented: stops the BGM
+Sound_UpdateBgmVolume	0x80037B84	invented: sets the BGM to the volume of the current setting
+Sound_RunAudioTask	0x80037C08	invented: runs a program as the audio task and waits for it
+Dbg_ScreenShot	0x80037E30	invented: on an L press writes the screen to the host as the next "BWnnn.BMP"
+Cache_Clear	0x80030AF0	invented: empties the file cache without freeing what it holds
+Cache_LoadFile	0x80030B14	invented: allocates and loads a file with one reference
+Cache_ReleaseData	0x80031104	invented: drops a reference to the cached file at a data pointer
+Cache_Release	0x80031184	invented: drops a reference to a file by index
+Cache_FreeBelow	0x800311D0	invented: frees the cached files below an index
+Boot_Thread	0x80025E10	invented: the boot thread: starts the VI and PI managers and the main thread, then idles
+Main_Thread	0x80025FEC	invented: the main thread: sets up queues, files and the other threads, then runs the scenes
+Cont_Init	0x800279F0	invented: sets up the controllers and Rumble Paks of both ports
+Rumble_Probe	0x80027A7C	invented: looks for a Rumble Pak on a port and stops it
+Rumble_Start	0x80027B18	invented: starts the Rumble Pak of a port
+Rumble_Stop	0x80027B6C	invented: stops the Rumble Pak of a port
+Cont_ReadPads	0x80027BC0	invented: reads the pads of both ports into the per-port state
+Cont_FindStandard	0x80027FF0	invented: sets a bit of D_8005B190 for each port holding a standard controller

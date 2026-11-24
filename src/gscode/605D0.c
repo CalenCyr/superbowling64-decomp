@@ -25,7 +25,7 @@ s32 GS_Options( void ) {
         gs_optionsState = 3;
     }
 
-    func_8003068C( 0, 0, 0 );
+    Draw_ClearScreen( 0, 0, 0 );
     func_8002DF3C( 0xA58, 0, 0 );
 
     for ( i = 0; i < 13; i++ ) {
@@ -109,7 +109,7 @@ s32 GS_Options( void ) {
                 // ranks it below each loop's hoisted values and orders this block's loads
                 i = D_8009D098.unk_79;
                 D_8009D098.unk_79 = 1;
-                func_800379C8( gs_soundTestSound );
+                Sound_PlayBgm( gs_soundTestSound );
                 D_8009D098.unk_79 = i;
             }
             break;
@@ -118,14 +118,14 @@ s32 GS_Options( void ) {
                 if ( ++D_8009D098.unk_7A == 5 ) {
                     D_8009D098.unk_7A = 0;
                 }
-                func_80037B84();
+                Sound_UpdateBgmVolume();
                 func_80037870( 0, 0x80 );
             }
             if ( D_800E6758 & L_JPAD ) {
                 if ( --D_8009D098.unk_7A == 0xFF ) {
                     D_8009D098.unk_7A = 4;
                 }
-                func_80037B84();
+                Sound_UpdateBgmVolume();
                 func_80037870( 0, 0x80 );
             }
             break;
@@ -164,7 +164,7 @@ s32 GS_Options( void ) {
         D_8005C0BF = 2;
         D_8005C0C0 = 0x107;
         if ( gs_optionsPage == 0 ) {
-            func_800379C8( 0x13 );
+            Sound_PlayBgm( 0x13 );
             gs_optionsPage = 2;
             gs_creditsWait = 1;
             gs_creditsPos = 0;
@@ -172,7 +172,7 @@ s32 GS_Options( void ) {
                 gs_creditSprites[i].image = -1;
             }
         } else {
-            func_800379C8( 1 );
+            Sound_PlayBgm( 1 );
             gs_optionsPage = 0;
         }
     }
@@ -194,7 +194,7 @@ s32 GS_Options( void ) {
                     func_8003B034( &D_8009D098.unk_08[i], i, 0 );
                 }
                 func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
-                func_80028EA8( &D_800F8094 );
+                Txt_LoadGlyphSheet( &D_800F8094 );
                 func_8003A970( 4, D_8009D098.unk_08, 0, 0x18, 0x38 );
             }
         }
@@ -297,7 +297,7 @@ s32 GS_Options( void ) {
         gs_optionsSlide += 2;
         if ( gs_optionsSlide == 30 ) {
             if ( D_8005C9E8 != 1 ) {
-                func_800379C8( 1 );
+                Sound_PlayBgm( 1 );
             }
             if ( gs_optionsState == 2 ) {
                 gs_optionsState = 0;

@@ -138,11 +138,11 @@ extern fileCacheEntry_t D_800F80B0[FILECACHE_SIZE];
 extern u8 D_8005C0BC;
 extern u8 D_8005C0BD;
 
-void func_80030AF0( void );
-void func_80030B14( s16 index );
+void Cache_Clear( void );
+void Cache_LoadFile( s16 index );
 void *func_80030C04( s16 index, s16 type );
-void func_80031104( void *data );
-void func_80031184( s16 index );
-void func_800311D0( s16 count );
+void Cache_ReleaseData( void *data );
+void Cache_Release( s16 index );
+void Cache_FreeBelow( s16 count );
 
 #endif

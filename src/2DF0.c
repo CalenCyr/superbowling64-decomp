@@ -12,7 +12,7 @@
 
 /*
 ================
-func_800279F0
+Cont_Init
 
 Sets up the controllers and the Rumble Paks of both ports.
 ================
@@ -20,7 +20,7 @@ Sets up the controllers and the Rumble Paks of both ports.
 #ifdef NON_MATCHING
 // NON_MATCHING: MATCH-PENDING (R17): byte-exact only with the unused local pads, which supplies retail's 0x18
 // bytes of unused frame; without it the frame is 0x18 instead of 0x30
-void func_800279F0( void ) {
+void Cont_Init( void ) {
     OSContPad pads[MAXCONTROLLERS];
 
     osCreateMesgQueue( &D_80066B38, &D_800E4FCC, 1 );
@@ -29,24 +29,24 @@ void func_800279F0( void ) {
     osContSetCh( NUM_PLAYERS );
     D_800E4FD0[1] = FALSE;
     D_800E4FD0[0] = FALSE;
-    func_80027A7C( 0 );
-    func_80027A7C( 1 );
+    Rumble_Probe( 0 );
+    Rumble_Probe( 1 );
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/2DF0", func_800279F0);
+INCLUDE_ASM("asm/nonmatchings/2DF0", Cont_Init);
 #endif
 
 /*
 ================
-func_80027A7C
+Rumble_Probe
 
 Looks for a Rumble Pak on port chan, and stops it if there is one.
 ================
 */
-void func_80027A7C( s32 chan ) {
+void Rumble_Probe( s32 chan ) {
     if ( osMotorInit( &D_80066B38, &D_800E6400[chan], chan ) == 0 ) {
         D_800E4FD0[chan] = TRUE;
-        func_80027B6C( chan );
+        Rumble_Stop( chan );
     } else {
         D_800E4FD0[chan] = FALSE;
     }
@@ -56,12 +56,12 @@ void func_80027A7C( s32 chan ) {
 
 /*
 ================
-func_80027B18
+Rumble_Start
 
 Starts the Rumble Pak of port chan, if it has one.
 ================
 */
-void func_80027B18( s32 chan ) {
+void Rumble_Start( s32 chan ) {
     if ( D_800E4FD0[chan] == TRUE ) {
         osMotorStart( &D_800E6400[chan] );
     }
@@ -69,12 +69,12 @@ void func_80027B18( s32 chan ) {
 
 /*
 ================
-func_80027B6C
+Rumble_Stop
 
 Stops the Rumble Pak of port chan, if it has one.
 ================
 */
-void func_80027B6C( s32 chan ) {
+void Rumble_Stop( s32 chan ) {
     if ( D_800E4FD0[chan] == TRUE ) {
         osMotorStop( &D_800E6400[chan] );
     }
@@ -82,14 +82,14 @@ void func_80027B6C( s32 chan ) {
 
 /*
 ================
-func_80027BC0
+Cont_ReadPads
 
 Reads the pads of both ports into the per-port state: buttons held and pressed, the stick outside its dead
 zone and as D-pad bits, and D-pad presses that repeat every 4 frames once held for REPEAT_DELAY; then merges
 the two ports.
 ================
 */
-void func_80027BC0( void ) {
+void Cont_ReadPads( void ) {
     s32 i;
     OSContPad *pad;
 
@@ -195,12 +195,12 @@ void func_80027BC0( void ) {
 
 /*
 ================
-func_80027FF0
+Cont_FindStandard
 
 Sets a bit of D_8005B190 for each port that holds a standard controller.
 ================
 */
-void func_80027FF0( void ) {
+void Cont_FindStandard( void ) {
     s32 i;
 
     D_8005B190 = 0;

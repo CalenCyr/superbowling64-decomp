@@ -27,15 +27,15 @@ typedef struct {
 extern HostPacket D_800692D8;
 extern s32 D_800619F0;
 
-void func_80029490( u8 *buf, s32 len );
-void func_800294D8( u8 *buf, s32 len );
-s32 func_80029524( void );
+void Host_Send( u8 *buf, s32 len );
+void Host_Recv( u8 *buf, s32 len );
+s32 Host_Sync( void );
 void func_800295A0( u8 *name );
-s32 func_8002961C( u8 *name );
-void func_800296D4( u8 *buf );
-s32 func_80029728( u8 *name, u8 *buf, s32 size );
-void func_80029814( u8 *name, u8 *buf, s32 size );
-u8 func_800298D4( u8 c );
-u8 func_8002994C( void );
+s32 Host_GetFileSize( u8 *name );
+void Host_ReadFile( u8 *buf );
+s32 Host_LoadFile( u8 *name, u8 *buf, s32 size );
+void Host_WriteFile( u8 *name, u8 *buf, s32 size );
+u8 Host_ExchangeByte( u8 c );
+u8 Host_RecvByte( void );
 
 #endif

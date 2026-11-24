@@ -34,7 +34,7 @@ s32 func_80113168_opcode( void ) {
     s32 n;
     u16 glyphs[8];
 
-    func_8003068C( 0xE0, 0xE0, 0xE0 );
+    Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     switch ( op_pakStep ) {
     case 0:
         op_pakMsg = 6;
@@ -84,7 +84,7 @@ s32 func_80113168_opcode( void ) {
     case 2:
         func_8002DF3C( 0xA58, 0, 0 );
         if ( op_pakState == 0 ) {
-            func_8002C950( op_promptChoice == 0 ? 0x40 : 0xB0, 0xC0, 0x50, 0x10, 0xFF, 0xFF, 0xFF, D_8009CFB0 );
+            Draw_RoundedBox( op_promptChoice == 0 ? 0x40 : 0xB0, 0xC0, 0x50, 0x10, 0xFF, 0xFF, 0xFF, D_8009CFB0 );
         }
         for ( i = 0; op_pakImages[i].id != -1; i++ ) {
             if ( op_pakImages[i].alpha ) {
@@ -98,18 +98,18 @@ s32 func_80113168_opcode( void ) {
         if ( op_numNotes - op_firstNote >= 6 ) {
             func_8002E4B0( 0x889, 0x98, 0xA4, D_8009CFB0, 1.0f, 1.0f );
         }
-        func_80028EA8( &D_800F8094 );
+        Txt_LoadGlyphSheet( &D_800F8094 );
         for ( i = 0; i < PAK_NOTES_SHOWN; i++ ) {
             if ( i + op_firstNote < op_numNotes ) {
-                func_800292D4( glyphs, i + op_firstNote + 1, 2 );
+                Txt_NumberToGlyphs( glyphs, i + op_firstNote + 1, 2 );
                 func_80029088( &D_800F8094, 0x28, 0x49 + i * 18, 8, glyphs );
                 func_80029088( &D_800F8094, 0x3C, 0x49 + i * 18, 8, op_noteNames[i + op_firstNote].name );
-                func_800292D4( glyphs, op_notePages[i + op_firstNote], 4 );
+                Txt_NumberToGlyphs( glyphs, op_notePages[i + op_firstNote], 4 );
                 func_80029088( &D_800F8094, 0xF9, 0x49 + i * 18, 8, glyphs );
             }
         }
         i = op_freeNotes < 10;
-        func_800292D4( glyphs, op_freeNotes, 2 );
+        Txt_NumberToGlyphs( glyphs, op_freeNotes, 2 );
         func_80029088( &D_800F8094, 0x74 + i * 8, 0xA9, 8, glyphs );
         if ( op_freePages >= 100 ) {
             i = 0;
@@ -118,7 +118,7 @@ s32 func_80113168_opcode( void ) {
         } else {
             i = 2;
         }
-        func_800292D4( glyphs, op_freePages, 3 );
+        Txt_NumberToGlyphs( glyphs, op_freePages, 3 );
         func_80029088( &D_800F8094, 0xFE + i * 8, 0xA9, 8, glyphs );
         if ( D_8005C0BF == 0 ) {
             switch ( op_pakState ) {
@@ -174,11 +174,11 @@ s32 func_80113168_opcode( void ) {
                     }
                 }
                 func_8002DF3C( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
-                func_80030058( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
+                Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
                 break;
             case 2:
                 func_8002DF3C( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
-                func_80030058( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
+                Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
                 D_800DF590[0] = D_800DF590[1] = 0x24;
                 D_800E6538[0] = D_800E6538[1] = 0x10;
                 D_800E57E0[0] = 0x24;
@@ -228,7 +228,7 @@ s32 func_80113168_opcode( void ) {
                 break;
             case 3:
                 func_8002DF3C( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
-                func_80030058( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
+                Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
                 func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
                 if ( func_80036E60( 0x94A, PROMPT_TIMED ) ) {
                     op_pakState = 1;

@@ -43,7 +43,7 @@ s32 GS_CharacterSelect( void ) {
         D_8011F8BA_gscode++;
         if ( D_8011F8BA_gscode == 10 ) {
             func_8002A67C();
-            func_800311D0( 0x825 );
+            Cache_FreeBelow( 0x825 );
             func_8002A1EC( gs_classes, D_8011F880_gscode[D_8005C163] );
             D_8011F8A0_gscode = 30;
             D_8011F8A4_gscode = 3.1415927f;
@@ -99,7 +99,7 @@ s32 GS_CharacterSelect( void ) {
     func_8003893C( D_8011BD50_gscode, 9, MENU_NONE, ( D_8005C163 + 1 ) * 32, MENU_NONE, MENU_NONE );
     func_8003893C( D_8011BDF0_gscode, 10, D_8011BE30_gscode[D_8011BE38_gscode[D_8005C163]], MENU_NONE, MENU_NONE,
                    D_8009CFB0 );
-    func_8003068C( 0xE0, 0xE0, 0xE0 );
+    Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     func_8002DF3C( 0xA58, 0, 0 );
     func_800386E0( D_8011BD50_gscode, D_8011F8B8_gscode );
 
@@ -153,7 +153,7 @@ s32 GS_CharacterSelect( void ) {
             }
             D_8011F8BA_gscode = 8;
             func_8002A67C();
-            func_800311D0( 0x825 );
+            Cache_FreeBelow( 0x825 );
             if ( D_8011F8B9_gscode == CHOICE_TAKEN ) {
                 D_8011F8B9_gscode = CHOICE_IN;
                 return 1;

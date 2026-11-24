@@ -7,43 +7,43 @@
 
 /*
 ================
-func_80029490
+Host_Send
 
 Sends len bytes from buf.
 ================
 */
-void func_80029490( u8 *buf, s32 len ) {
+void Host_Send( u8 *buf, s32 len ) {
     s32 i;
 
     for ( i = 0; i < len; i++ ) {
-        func_800298D4( buf[i] );
+        Host_ExchangeByte( buf[i] );
     }
 }
 
 /*
 ================
-func_800294D8
+Host_Recv
 
 Receives len bytes into buf.
 ================
 */
-void func_800294D8( u8 *buf, s32 len ) {
+void Host_Recv( u8 *buf, s32 len ) {
     s32 i;
 
     for ( i = 0; i < len; i++ ) {
-        buf[i] = func_8002994C();
+        buf[i] = Host_RecvByte();
     }
 }
 
 /*
 ================
-func_80029524
+Host_Sync
 
 Exchanges 0x20 / 0x10 with the host until it answers 0x10 / 0x20.
 ================
 */
-s32 func_80029524( void ) {
-    while ( func_800298D4( 0x20 ) != 0x10 || func_800298D4( 0x10 ) != 0x20 ) {
+s32 Host_Sync( void ) {
+    while ( Host_ExchangeByte( 0x20 ) != 0x10 || Host_ExchangeByte( 0x10 ) != 0x20 ) {
     }
     return 0;
 }
@@ -72,76 +72,76 @@ Sends request 1 for name.
 void func_800295A0( u8 *name ) {
     D_800692D8.command = 1;
     strcpy( D_800692D8.name, name );
-    func_80029490( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
+    Host_Send( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
 }
 
 /*
 ================
-func_8002961C
+Host_GetFileSize
 
 Sends request 2 for name and receives the file's size.
 ================
 */
-s32 func_8002961C( u8 *name ) {
+s32 Host_GetFileSize( u8 *name ) {
     D_800692D8.command = 2;
     strcpy( D_800692D8.name, name );
     D_800692D8.size = 0x100000;
-    func_80029490( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
-    func_800294D8( (u8 *)&D_800619F0, sizeof( D_800619F0 ) );
+    Host_Send( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
+    Host_Recv( (u8 *)&D_800619F0, sizeof( D_800619F0 ) );
     return D_800619F0;
 }
 
 /*
 ================
-func_800296D4
+Host_ReadFile
 
-Receives the D_800619F0 bytes announced by func_8002961C into buf.
+Receives the D_800619F0 bytes announced by Host_GetFileSize into buf.
 ================
 */
-void func_800296D4( u8 *buf ) {
-    func_800294D8( buf, D_800619F0 );
+void Host_ReadFile( u8 *buf ) {
+    Host_Recv( buf, D_800619F0 );
 }
 
 /*
 ================
-func_80029728
+Host_LoadFile
 
 Sends request 2 for name with size, then receives the size the host returns and that many bytes into buf.
 ================
 */
-s32 func_80029728( u8 *name, u8 *buf, s32 size ) {
+s32 Host_LoadFile( u8 *name, u8 *buf, s32 size ) {
     D_800692D8.command = 2;
     strcpy( D_800692D8.name, name );
     D_800692D8.size = size;
-    func_80029490( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
-    func_800294D8( (u8 *)&size, sizeof( size ) );
-    func_800294D8( buf, size );
+    Host_Send( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
+    Host_Recv( (u8 *)&size, sizeof( size ) );
+    Host_Recv( buf, size );
     return size;
 }
 
 /*
 ================
-func_80029814
+Host_WriteFile
 
 Sends request 3 for name, then the size bytes of buf.
 ================
 */
-void func_80029814( u8 *name, u8 *buf, s32 size ) {
+void Host_WriteFile( u8 *name, u8 *buf, s32 size ) {
     D_800692D8.command = 3;
     strcpy( D_800692D8.name, name );
     D_800692D8.size = size;
-    func_80029490( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
-    func_80029490( buf, size );
+    Host_Send( (u8 *)&D_800692D8, sizeof( D_800692D8 ) );
+    Host_Send( buf, size );
 }
 
 /*
 ================
-func_800298D4
+Host_ExchangeByte
 
 Sends c once the link is ready; returns the byte read from the link at the same time.
 ================
 */
-u8 func_800298D4( u8 c ) {
+u8 Host_ExchangeByte( u8 c ) {
     u32 data;
 
     do {
@@ -154,12 +154,12 @@ u8 func_800298D4( u8 c ) {
 
 /*
 ================
-func_8002994C
+Host_RecvByte
 
 Receives a byte once the link is ready, echoing it back.
 ================
 */
-u8 func_8002994C( void ) {
+u8 Host_RecvByte( void ) {
     u32 data;
 
     do {

@@ -150,9 +150,10 @@ s32 OP_CheckSettings( void ) {
         if ( func_80036E60( 0x955, PROMPT_CLOSE ) ) {
             osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             if ( D_80066B8C == 0 ) {
-                /* the checksum word through a raw view, as func_80037410 does: a member store sinks past the stores below */
+                /* the checksum word through a raw view, as Save_SaveSettings does: a member store sinks past the
+                   stores below */
                 checksum = (s32 *)D_801000B8;
-                *checksum = func_800373DC();
+                *checksum = Save_Checksum();
                 op_contMsg = 5;
                 D_800E6578 = 1;
                 osSendMesg( &D_800E6690, &op_contMsg, OS_MESG_NOBLOCK );
@@ -286,7 +287,7 @@ s32 OP_CheckSettings( void ) {
     case 35:
         if ( func_80036E60( 0x951, PROMPT_CLOSE ) ) {
             osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
-            if ( D_80066B8C == 0 && D_801000B8->unk_00 == func_800373DC() ) {
+            if ( D_80066B8C == 0 && D_801000B8->unk_00 == Save_Checksum() ) {
                 D_8005C0E0 = 1;
                 memcpy( D_800693E8, D_80066BA4, sizeof( D_800693E8 ) );
                 return FALSE;

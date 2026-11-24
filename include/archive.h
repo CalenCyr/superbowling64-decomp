@@ -23,7 +23,7 @@ extern ArchiveEntry D_800A30C0[];
 extern u8 D_80061A00[LZSS_N];       /* LZSS window */
 extern u8 D_80102080[];             /* where compressed files are read before decompression */
 
-void func_800299C0( u8 *dst, u8 *src, u16 len );
-u32 func_80029AF4( s32 index, u8 *dst );
+void LZ_Decompress( u8 *dst, u8 *src, u16 len );
+u32 Str_ReadFile( s32 index, u8 *dst );
 
 #endif

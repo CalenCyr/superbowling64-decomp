@@ -350,7 +350,7 @@ extern gaState_t D_8012CDF0_gacode;     /* current state */
 extern gaPlayerFunc_t D_8012CDF4_gacode;  /* game mode */
 extern gaPlayerFunc_t D_8012D23C_gacode;
 extern gaState_t D_8012CDFC_gacode;     /* main loop state of the game mode (func_80113594_gacode) */
-extern s16 D_8012CE00_gacode;          /* BGM of the game (func_800379C8) */
+extern s16 D_8012CE00_gacode;          /* BGM of the game (Sound_PlayBgm) */
 extern s64 D_8012CDE8_gacode;           /* sound handle (func_80037870) */
 extern u8 D_8012CDF8_gacode[2];         /* per team: index in D_8012CE02_gacode of the current player */
 extern s8 D_8012CE02_gacode[2][5];      /* per team: player numbers, -1 ends */

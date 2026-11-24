@@ -35,7 +35,7 @@ typedef struct {
     /* 0x7A */ u8 unk_7A;
     /* 0x7B */ u8 unk_7B;
     /* 0x7C */ u8 unk_7C[0x100 - 0x7C];
-} UnkRecordSet;                             /* size 0x100; func_800373DC sums bytes 0x04-0xFF */
+} UnkRecordSet;                             /* size 0x100; Save_Checksum sums bytes 0x04-0xFF */
 
 /* What func_80025EBC runs on the RSP; set through D_80066B50. Names invented. */
 typedef struct {
@@ -76,7 +76,7 @@ extern UnkRecord D_800E44E8[4];
 
 extern OSThread D_80060EE0;         /* boot thread: starts the managers, then idles */
 extern u64 D_80061090[BOOT_STACK_SIZE / sizeof( u64 )];
-extern OSThread D_80061290;         /* main thread, func_80025FEC */
+extern OSThread D_80061290;         /* main thread, Main_Thread */
 extern u64 D_80061440[BOOT_STACK_SIZE / sizeof( u64 )];
 extern OSMesgQueue D_801000E0;      /* PI manager commands */
 extern OSMesg D_800693B8[8];
@@ -90,7 +90,7 @@ extern s32 D_8005C9E0;              /* frames until the sequence D_8005C9E4 star
 extern s32 D_8005C9E4;
 extern seqHeader_t *D_800A3048;
 
-/* The main thread (func_80025FEC) schedules the RSP and RDP; these are its messages, queues and state. */
+/* The main thread (Main_Thread) schedules the RSP and RDP; these are its messages, queues and state. */
 #define SCHED_MSG_RETRACE   0           /* VI retrace (D_80069408) */
 #define SCHED_MSG_SP_DONE   1           /* RSP task done (D_800E4558) */
 #define SCHED_MSG_DP_DONE   2           /* RDP done (D_80066B90) */
@@ -174,9 +174,9 @@ extern u16 D_8005B180[4];           /* per demo (D_8005C0F0): the image the demo
 extern Gfx D_8010A2C8[];            /* display lists of the KNSTATICSYS file each frame starts with */
 extern Gfx D_8010A2A0[];
 
-void func_80025E10( void *arg );
+void Boot_Thread( void *arg );
 void func_80025EBC( void );
-void func_80025FEC( void *arg );
+void Main_Thread( void *arg );
 void func_80026B10( void );
 void func_80026B28( void );
 

@@ -401,7 +401,7 @@ s32 func_80118040_gscode( void ) {
             func_8003893C( D_8011FA80_gscode, i, 0x8BC, MENU_NONE, MENU_NONE, MENU_NONE );
         }
     }
-    func_8003068C( 0xE0, 0xE0, 0xE0 );
+    Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     func_8002DF3C( 0xA58, 0, 0 );
     func_800386E0( D_8011FA80_gscode, D_8011FC80_gscode );
     /* an empty loop: retail still counts it out */
@@ -500,7 +500,7 @@ s32 func_80118040_gscode( void ) {
             }
             func_8002A67C();
             D_8011FC82_gscode = 0;
-            func_800311D0( 0x825 );
+            Cache_FreeBelow( 0x825 );
             D_8011FC84_gscode[0] = D_8011FC84_gscode[1] = 0;
             if ( D_8011FC81_gscode == CHOICE_TAKEN ) {
                 D_8011FC81_gscode = CHOICE_IN;

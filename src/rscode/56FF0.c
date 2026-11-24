@@ -12,7 +12,7 @@ Entry of the overlay: starts the first state and the mode's results.
 ================
 */
 void RS_Init( void ) {
-    func_80037B18();
+    Sound_StopBgm();
     rs_leaving = 0;
     rs_boxAlpha = 0;
     rs_boxAlphaFalling = 0;
@@ -41,8 +41,8 @@ void RS_Frame( void ) {
     }
     rs_dpadPressed = D_8005C0BF ? 0 : D_800E6758;
     rs_buttonsPressed = D_8005C0BF ? 0 : D_800E4D62;
-    func_80028EA8( &D_800F8094 );
-    func_8003068C( 0xE0, 0xE0, 0xE0 );
+    Txt_LoadGlyphSheet( &D_800F8094 );
+    Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     func_8002DF3C( 0xA58, 0, 0 );
     rs_state();
     if ( rs_boxAlphaFalling == 1 ) {
@@ -58,8 +58,8 @@ void RS_Frame( void ) {
             rs_boxAlphaFalling = 1;
         }
     }
-    func_80028A0C( &D_800F8094 );
-    func_80028950( &D_800F8094, 0 );
+    Txt_LoadFont( &D_800F8094 );
+    Txt_SetupFont( &D_800F8094, 0 );
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
 }
 
@@ -74,18 +74,18 @@ void RS_StartMode( void ) {
     switch ( D_8005C160 & 0xF ) {
     case 0:
         RS_StartMode0();
-        func_800379C8( 10 );
+        Sound_PlayBgm( 10 );
         break;
     case 1:
         rs_state = RS_DuelResults;
-        func_800379C8( D_800EA090[0] <= D_800EA090[1] ? 15 : 14 );
+        Sound_PlayBgm( D_800EA090[0] <= D_800EA090[1] ? 15 : 14 );
         func_80037870( D_800EA090[0] <= D_800EA090[1] ? 0x6D : 0x6C, 0 );
         break;
     case 2:
         break;
     case 3:
         rs_state = rs_returnState = RS_Menu;
-        func_800379C8( 18 );
+        Sound_PlayBgm( 18 );
         break;
     }
 }
@@ -162,7 +162,7 @@ Shows message 0x88C in a box for 300 frames or until A or Z, then goes to RS_Res
 ================
 */
 void RS_FinishedMessage( void ) {
-    func_8002C950( 0x26, 0x50, 0xF0, 0x40, 0xE0, 0xE0, 0xE0, rs_boxAlpha + 0x40 );
+    Draw_RoundedBox( 0x26, 0x50, 0xF0, 0x40, 0xE0, 0xE0, 0xE0, rs_boxAlpha + 0x40 );
     func_8002DF3C( 0x88C, 0x26, 0x50 );
     if ( ++rs_messageFrames >= 300 || ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) ) {
         func_80037870( SE_DECIDE, 0 );
@@ -178,7 +178,7 @@ Shows message 0xAE3 in a box for 300 frames or until A or Z, then goes to RS_Sco
 ================
 */
 void RS_PerfectMessage( void ) {
-    func_8002C950( 0x26, 0x50, 0xF0, 0x40, 0xE0, 0xE0, 0xE0, rs_boxAlpha + 0x40 );
+    Draw_RoundedBox( 0x26, 0x50, 0xF0, 0x40, 0xE0, 0xE0, 0xE0, rs_boxAlpha + 0x40 );
     func_8002DF3C( 0xAE3, 0x26, 0x50 );
     if ( ++rs_messageFrames >= 300 || ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) ) {
         func_80037870( SE_DECIDE, 0 );
@@ -506,11 +506,11 @@ void RS_MenuConfirm( void ) {
 ================
 RS_Leave
 
-Waits for func_80037410, then leaves the overlay.
+Waits for Save_SaveSettings, then leaves the overlay.
 ================
 */
 void RS_Leave( void ) {
-    if ( func_80037410() ) {
+    if ( Save_SaveSettings() ) {
         return;
     }
     rs_leaving = 1;
@@ -624,7 +624,7 @@ Draws two choices side by side, the chosen one in a box, the other faded.
 void RS_DrawChoices( u8 choice, u16 *images, s16 y, u16 w, u16 h ) {
     s16 x[2] = { 0x48, 0xA8 };
 
-    func_8002C950( x[choice], y, w, h, 0xE0, 0xE0, 0xE0, rs_boxAlpha + 0x40 );
+    Draw_RoundedBox( x[choice], y, w, h, 0xE0, 0xE0, 0xE0, rs_boxAlpha + 0x40 );
     func_8002DF3C( images[choice], x[choice], y );
     func_8002E4B0( images[!choice], x[!choice], y, 0x60, 1.0f, 1.0f );
 }

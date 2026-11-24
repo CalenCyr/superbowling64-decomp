@@ -15,7 +15,7 @@ objects come from its "sce.dat", else from the overlay's own records.
 void PV_Init( void ) {
     if ( D_800994BC & START_BUTTON ) {
         D_8005C0BC = 1;
-        func_80029524();
+        Host_Sync();
     }
     if ( D_8005C0BC ) {
         func_8002A7EC( "sce.dat" );
@@ -30,7 +30,7 @@ void PV_Init( void ) {
 ================
 PV_Frame
 
-Frame of the overlay: runs the scene's objects; R starts func_80035DA0, Start restarts func_80037410;
+Frame of the overlay: runs the scene's objects; R starts func_80035DA0, Start restarts Save_SaveSettings;
 right plays the sound up and down pick and left stops it; then prints the frame's times and rate.
 ================
 */
@@ -47,7 +47,7 @@ void PV_Frame( void ) {
     if ( D_800E4D62 & START_BUTTON ) {
         pv_stepDone = 0;
     }
-    if ( !pv_stepDone && !func_80037410() ) {
+    if ( !pv_stepDone && !Save_SaveSettings() ) {
         pv_stepDone = 1;
     }
     if ( D_800E4D62 & R_JPAD ) {
@@ -63,8 +63,8 @@ void PV_Frame( void ) {
         pv_sound--;
     }
     if ( D_800A2FDC ) {
-        func_80028A0C( &D_800F8094 );
-        func_80028950( &D_800F8094, 0 );
+        Txt_LoadFont( &D_800F8094 );
+        Txt_SetupFont( &D_800F8094, 0 );
         gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
         sprintf( text, "CPU=%6.6d", D_8005B0EC );
         func_80028DA4( &D_800F8094, 220, 180, text );

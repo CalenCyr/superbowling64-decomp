@@ -53,22 +53,22 @@ void main( void ) {
         D_800E44E8[i].low = 300;
         memset( D_800E44E8[i].name, 0xFF, sizeof( D_800E44E8[i].name ) );
     }
-    osCreateThread( &D_80060EE0, 1, func_80025E10, NULL, &D_80061090[BOOT_STACK_SIZE / sizeof( u64 )], 10 );
+    osCreateThread( &D_80060EE0, 1, Boot_Thread, NULL, &D_80061090[BOOT_STACK_SIZE / sizeof( u64 )], 10 );
     osStartThread( &D_80060EE0 );
 }
 
 /*
 ================
-func_80025E10
+Boot_Thread
 
 Boot thread: starts the VI and PI managers and the main thread, then idles.
 ================
 */
-void func_80025E10( void *arg ) {
+void Boot_Thread( void *arg ) {
     osCreateViManager( OS_PRIORITY_VIMGR );
     osCreatePiManager( OS_PRIORITY_PIMGR, &D_801000E0, D_800693B8, 8 );
     D_800ABD60 = osCartRomInit();
-    osCreateThread( &D_80061290, 3, func_80025FEC, arg, &D_80061440[BOOT_STACK_SIZE / sizeof( u64 )], 20 );
+    osCreateThread( &D_80061290, 3, Main_Thread, arg, &D_80061440[BOOT_STACK_SIZE / sizeof( u64 )], 20 );
     osStartThread( &D_80061290 );
     osSetThreadPri( NULL, OS_PRIORITY_IDLE );
     for ( ;; ) {
@@ -109,14 +109,14 @@ void func_80025EBC( void ) {
 
 /*
 ================
-func_80025FEC
+Main_Thread
 
 Main thread: creates the message queues, loads the file table, IDX and KNSTATICSYS, starts the controller
 and game threads, then schedules the RSP and RDP for ever: it swaps the framebuffers on retrace, runs the
 audio task when asked (making the graphics task yield), and starts each display list the game thread builds.
 ================
 */
-void func_80025FEC( void *arg ) {
+void Main_Thread( void *arg ) {
     OSMesg msg;
     s32 index;
 
@@ -151,7 +151,7 @@ void func_80025FEC( void *arg ) {
     func_80028744( "IDX     SYS", D_800A30C0, func_8002889C( "IDX     SYS" ), 0 );
     osInvalDCache( D_8010A250, knstatic_ROM_END - knstatic_ROM_START );
     func_80028744( "KNSTATICSYS", D_8010A250, func_8002889C( "KNSTATICSYS" ), 0 );
-    func_800279F0();
+    Cont_Init();
     osContStartReadData( &D_80066B38 );
     osCreateThread( &D_800617F0, 2, func_80028064, arg, &D_80068250[CONT_STACK_SIZE / sizeof( u64 )], 0x11 );
     osStartThread( &D_800617F0 );
@@ -227,7 +227,7 @@ void func_80025FEC( void *arg ) {
             }
             D_8005B0E8 = OS_CYCLES_TO_USEC( osGetTime() - D_80066C48 );
             if ( D_8005C0BC != 0 && D_8005C0B6 != 1 && ( D_800994BC & Z_TRIG ) && ( D_800E4D62 & L_TRIG ) ) {
-                func_80037E30();
+                Dbg_ScreenShot();
             }
             break;
         case SCHED_MSG_AUDIO:
@@ -348,14 +348,14 @@ void func_80026B44( void *arg ) {
         }
     }
     osViSetSpecialFeatures( OS_VI_GAMMA_OFF | OS_VI_DITHER_FILTER_ON );
-    func_80027BC0();
-    i = func_80029AF4( 0xB5C, (u8 *)&D_80100100[0] );
+    Cont_ReadPads();
+    i = Str_ReadFile( 0xB5C, (u8 *)&D_80100100[0] );
     memcpy( &D_80100100[1], &D_80100100[0], i );
 
     for ( ;; ) {
         osRecvMesg( &D_800DF688, NULL, OS_MESG_BLOCK );
         guRandom();
-        func_80027BC0();
+        Cont_ReadPads();
         D_8009CFB0 += D_800619A0;
         if ( D_8009CFB0 == 255 || D_8009CFB0 == 75 ) {
             D_800619A0 *= -1;
@@ -448,7 +448,7 @@ void func_80026B44( void *arg ) {
             }
             D_8005B188 = 0;
             func_80029DF0( NULL, NULL );
-            func_80030AF0();
+            Cache_Clear();
             func_80029FB0();
             switch ( D_8005C0B6 ) {
             case SCENE_GACODE:

@@ -81,9 +81,9 @@ void CA_CacheFrame( s32 frame, s32 clip ) {
 
     if ( D_8005C0BC ) {
         sprintf( name, "%1.1d - Frame %4.4d.bmp", clip, frame + D_80115374_cacode[clip] );
-        func_80029728( name, ca_bmpBuffer, 54 + 320 * 240 * 2 );    /* the headers and the picture */
+        Host_LoadFile( name, ca_bmpBuffer, 54 + 320 * 240 * 2 );    /* the headers and the picture */
     } else {
-        func_80029AF4( 0xA58, ca_bmpBuffer );
+        Str_ReadFile( 0xA58, ca_bmpBuffer );
     }
 
     ca_frameCache[slot].frame = frame;
@@ -127,19 +127,19 @@ void CA_Init( void ) {
 
     if ( D_800994BC & START_BUTTON ) {
         D_8005C0BC = 1;
-        func_80029524();
+        Host_Sync();
     }
     if ( D_8005C0BC ) {
-        func_80029728( "sce.dat", (u8 *)ca_sceneParams, sizeof( ca_sceneParams ) );
+        Host_LoadFile( "sce.dat", (u8 *)ca_sceneParams, sizeof( ca_sceneParams ) );
         D_8005C0BD = 1;
         for ( i = 0; i < 3; i++ ) {
-            ca_cameras[i] = (sceneCameraNode_t *)func_8002BFD8( &ca_sceneParams[i] );
+            ca_cameras[i] = (sceneCameraNode_t *)Cam_Create( &ca_sceneParams[i] );
             ca_objects[i] = (sceneObjectNode_t *)func_8002B610( &ca_sceneParams[i + 3] );
         }
         D_8005C0BD = 0;
     } else {
         for ( i = 0; i < 3; i++ ) {
-            ca_cameras[i] = (sceneCameraNode_t *)func_8002BFD8( &ca_sceneParams[i] );
+            ca_cameras[i] = (sceneCameraNode_t *)Cam_Create( &ca_sceneParams[i] );
             ca_objects[i] = (sceneObjectNode_t *)func_8002B610( &ca_sceneParams[i + 3] );
         }
     }
@@ -349,7 +349,7 @@ void CA_Frame( void ) {
         size = MOTION_FILE_SIZE;
         if ( D_800E4D62 & A_BUTTON ) {
             buf = func_80029E28( MOTION_FILE_SIZE );
-            func_80029728( "motion.dat", buf, MOTION_FILE_SIZE );
+            Host_LoadFile( "motion.dat", buf, MOTION_FILE_SIZE );
             size = 0;
             memcpy( ca_partRotations, buf + size, sizeof( ca_partRotations ) );
             size += sizeof( ca_partRotations );
@@ -380,7 +380,7 @@ void CA_Frame( void ) {
             size += sizeof( ca_cameraUp );
             memcpy( buf + size, &D_80115374_cacode[1], 2 * sizeof( D_80115374_cacode[0] ) );
             size += 2 * sizeof( D_80115374_cacode[0] );
-            func_80029814( "motion.dat", buf, size );
+            Host_WriteFile( "motion.dat", buf, size );
             func_80029F18( buf );
         }
     }
@@ -533,7 +533,7 @@ void CA_Frame( void ) {
     func_80031250();
     func_80035074();
     for ( i = 0; i < 3; i++ ) {
-        func_8002C324( &ca_cameras[i]->cam );
+        Cam_Update( &ca_cameras[i]->cam );
         func_8002B9CC( &ca_objects[i]->obj );
     }
     func_80031E40();
@@ -712,8 +712,8 @@ void CA_Frame( void ) {
     gDPPipeSync( D_800F8094++ );
     func_80031BB0();
 
-    func_80028A0C( &D_800F8094 );
-    func_80028950( &D_800F8094, 0 );
+    Txt_LoadFont( &D_800F8094 );
+    Txt_SetupFont( &D_800F8094, 0 );
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
     switch ( ca_mode ) {
     case CAMODE_ROTATE:

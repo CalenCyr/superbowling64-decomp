@@ -10,12 +10,12 @@
 
 /*
 ================
-func_800299C0
+LZ_Decompress
 
 Decompresses the len LZSS bytes at src into dst.
 ================
 */
-void func_800299C0( u8 *dst, u8 *src, u16 len ) {
+void LZ_Decompress( u8 *dst, u8 *src, u16 len ) {
     s32 i;
     s32 j;
     s32 k;
@@ -53,7 +53,7 @@ void func_800299C0( u8 *dst, u8 *src, u16 len ) {
 
 /*
 ================
-func_80029AF4
+Str_ReadFile
 
 Reads file index of the str segment into dst, decompressing it if it is stored compressed; returns its size.
 ================
@@ -63,7 +63,7 @@ Reads file index of the str segment into dst, decompressing it if it is stored c
 // &D_800A30C0[index].romOffset out of the loop) where this draft addresses them with %hi/%lo each time; an
 // ArchiveEntry *entry local is worse. Permuter (target-only scoring, 5 min): best 2560 from 3030 only through noise
 // (a pointer temporary for D_800A30C0 after the last DMA), no source clue.
-u32 func_80029AF4( s32 index, u8 *dst ) {
+u32 Str_ReadFile( s32 index, u8 *dst ) {
     u8 *out;
     s32 compressed;
     u32 done;
@@ -93,10 +93,10 @@ u32 func_80029AF4( s32 index, u8 *dst ) {
     osEPiStartDma( D_800ABD60, &D_80066B70, OS_READ );
     osRecvMesg( &D_800DF578, NULL, OS_MESG_BLOCK );
     if ( compressed ) {
-        func_800299C0( out, dst, D_800A30C0[index].size );
+        LZ_Decompress( out, dst, D_800A30C0[index].size );
     }
     return D_800A30C0[index].rawSize;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/4DC0", func_80029AF4);
+INCLUDE_ASM("asm/nonmatchings/4DC0", Str_ReadFile);
 #endif

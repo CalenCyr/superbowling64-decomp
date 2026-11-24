@@ -219,8 +219,8 @@ void func_80122CE8_gacode( void ) {
         level = 100;
     }
     color[0] = color[1] = color[2] = level;
-    func_8002BE50( 0, color );
-    func_8002BE50( 1, color );
+    Cam_SetAmbient( 0, color );
+    Cam_SetAmbient( 1, color );
     step = ( level - 100 ) / 39;
     ( (fileRefB_t *)D_800F80B0[1903].data )->unk_30 =
         ( (unkImage_t *)D_800F80B0[D_8012C988_gacode[step]].data )->palette;

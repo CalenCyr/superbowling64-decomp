@@ -33,8 +33,8 @@ void MG_Frame( void ) {
     }
     func_8002A2F0();
     if ( D_800A2FDC ) {
-        func_80028A0C( &D_800F8094 );
-        func_80028950( &D_800F8094, 0 );
+        Txt_LoadFont( &D_800F8094 );
+        Txt_SetupFont( &D_800F8094, 0 );
         gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
         sprintf( text, "CPU=%6.6d", D_8005B0EC );
         func_80028DA4( &D_800F8094, 220, 180, text );

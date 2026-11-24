@@ -32,7 +32,7 @@ s32 GS_TwoChoiceMenu( void ) {
         gs_twoChoiceState = CHOICE_BACK;
     }
 
-    func_8003068C( 0xE0, 0xE0, 0xE0 );
+    Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     func_8002DF3C( 0xA58, 0, 0 );
     func_8003893C( gs_twoChoiceMenu, 0, gs_twoChoiceBlink[0][0], MENU_NONE, MENU_NONE, MENU_NONE );
     func_8003893C( gs_twoChoiceMenu, 1, gs_twoChoiceBlink[1][0], MENU_NONE, MENU_NONE, MENU_NONE );
@@ -46,7 +46,7 @@ s32 GS_TwoChoiceMenu( void ) {
         case 0:
             func_8003893C( gs_twoChoiceMenu, 0, gs_twoChoiceBlink[0][gs_twoChoiceBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
-            func_8002C950( 0x28, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0x28, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & R_JPAD ) {
                 gs_twoChoiceCursor = 1;
             }
@@ -54,7 +54,7 @@ s32 GS_TwoChoiceMenu( void ) {
         case 1:
             func_8003893C( gs_twoChoiceMenu, 1, gs_twoChoiceBlink[1][gs_twoChoiceBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
-            func_8002C950( 0xB8, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
+            Draw_RoundedBox( 0xB8, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
                 gs_twoChoiceCursor = 0;
             }

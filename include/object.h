@@ -102,7 +102,7 @@ typedef struct {
 extern sceneCamera_t *D_8009CFA0[];
 extern u16 D_8009CF9E;              /* perspNorm of the cameras' projections (guPerspective) */
 
-/* What the classes func_8002B610 and func_8002BFD8 create: the list header, then the scene object or camera. */
+/* What the classes func_8002B610 and Cam_Create create: the list header, then the scene object or camera. */
 typedef struct {
     /* 0x00 */ objNode_t node;
     /* 0x10 */ sceneObject_t obj;
@@ -136,10 +136,10 @@ void func_8002B9CC( sceneObject_t *obj );
 void func_8002BE00( sceneObject_t *obj );
 
 /* the cameras (unit 7250) */
-void func_8002BE50( s32 index, u8 *color );
+void Cam_SetAmbient( s32 index, u8 *color );
 void func_8002BED8( s16 file, s16 frame, f32 *eye, f32 *unk_2C );
-objNode_t *func_8002BFD8( objParams_t *params );
-void func_8002C324( sceneCamera_t *cam );
-void func_8002C908( sceneCamera_t *cam );
+objNode_t *Cam_Create( objParams_t *params );
+void Cam_Update( sceneCamera_t *cam );
+void Cam_UpdateAndAdvance( sceneCamera_t *cam );
 
 #endif

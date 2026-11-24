@@ -157,7 +157,7 @@ Reads host file name into D_800F30E0.
 */
 void func_8002A7EC( u8 *name ) {
     /* BUG: the read allows 0x8000 bytes, more than the buffer; a longer file overruns the bss after it */
-    func_80029728( name, D_800F30E0, 0x8000 );
+    Host_LoadFile( name, D_800F30E0, 0x8000 );
 }
 
 /*

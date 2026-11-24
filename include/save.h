@@ -26,7 +26,7 @@
 
 
 extern u8 D_8005C0E0;               /* saving is on */
-extern u8 D_8005C990;               /* step of func_80037410 */
+extern u8 D_8005C990;               /* step of Save_SaveSettings */
 extern s32 D_80064314;              /* message to and from the controller thread */
 extern u8 D_800693E8[0x20];
 extern u8 D_80066BA4[0x20];
@@ -45,7 +45,7 @@ extern s16 D_800DF590[2];           /* width */
 extern s16 D_800E6538[2];           /* height */
 
 s32 func_80036E60( s32 id, s32 mode );
-s32 func_800373DC( void );
-s32 func_80037410( void );
+s32 Save_Checksum( void );
+s32 Save_SaveSettings( void );
 
 #endif

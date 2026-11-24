@@ -85,8 +85,8 @@ void func_80035DA0( void ) {
 
     gDPPipeSync( D_800F8094++ );
     func_80031BB0();
-    func_80028A0C( &D_800F8094 );
-    func_80028950( &D_800F8094, 0 );
+    Txt_LoadFont( &D_800F8094 );
+    Txt_SetupFont( &D_800F8094, 0 );
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
 
     if ( ( D_800E4D62 & U_JPAD ) && ( D_800994BC & R_TRIG ) && D_80063AF0 != GRIDEDIT_EXIT ) {
@@ -107,16 +107,16 @@ void func_80035DA0( void ) {
         case GRIDEDIT_LOAD:
             func_80028DA4( &D_800F8094, 32, 20, "FILE LOAD" );
             if ( D_800E4D62 & Z_TRIG ) {
-                func_80029524();
-                func_8002961C( "ground.bin" );
-                func_800296D4( (u8 *)&D_80100100[0] );
+                Host_Sync();
+                Host_GetFileSize( "ground.bin" );
+                Host_ReadFile( (u8 *)&D_80100100[0] );
             }
             break;
 
         case GRIDEDIT_SAVE:
             func_80028DA4( &D_800F8094, 32, 20, "FILE SAVE" );
             if ( D_800E4D62 & Z_TRIG ) {
-                func_80029814( "ground.bin", (u8 *)&D_80100100[0],
+                Host_WriteFile( "ground.bin", (u8 *)&D_80100100[0],
                                sizeof( floorGrid_t ) - ( GRIDEDIT_POINTS - D_80100100[0].numX * D_80100100[0].numZ ) * sizeof( s16 ) );
             }
             break;

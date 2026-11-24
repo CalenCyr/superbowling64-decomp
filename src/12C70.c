@@ -62,7 +62,7 @@ void func_800379A8( u64 id ) {
 
 /*
 ================
-func_800379C8
+Sound_PlayBgm
 
 Stops the BGM and loads BGM index into the other buffer; it starts BGM_START_DELAY frames later, unless the
 settings skip it.
@@ -72,12 +72,12 @@ settings skip it.
 // NON_MATCHING: stack frame; retail's is 0x30 bytes, 0x10 more than this needs, as if from an unused 16-byte local; the code is exact.
 // An unused 16-byte local gives the exact bytes (not adopted, R17); a dead call with 6 to 8 argument words would
 // too (gcc 2.7.2 keeps outgoing-argument space for calls it deletes), but this unit has none to point to.
-void func_800379C8( s32 index ) {
+void Sound_PlayBgm( s32 index ) {
     if ( D_8005C9D8 != 0 ) {
         Snd_Stop( D_8005C9D8, 5 );
     }
     D_8005C9D0 ^= 1;
-    func_80029AF4( D_8005CA0C[index], D_800EA440[D_8005C9D0] );
+    Str_ReadFile( D_8005CA0C[index], D_800EA440[D_8005C9D0] );
     if ( D_8009D098.unk_79 != 0 || D_8005C9F8[index] == 0 ) {
         D_8005C9E8 = index;
         D_8005C9E0 = BGM_START_DELAY;
@@ -89,17 +89,17 @@ void func_800379C8( s32 index ) {
     }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/12C70", func_800379C8);
+INCLUDE_ASM("asm/nonmatchings/12C70", Sound_PlayBgm);
 #endif
 
 /*
 ================
-func_80037B18
+Sound_StopBgm
 
 Stops the BGM.
 ================
 */
-void func_80037B18( void ) {
+void Sound_StopBgm( void ) {
     if ( D_8005C9D8 != 0 ) {
         Snd_Stop( D_8005C9D8, 5 );
     }
@@ -109,12 +109,12 @@ void func_80037B18( void ) {
 
 /*
 ================
-func_80037B84
+Sound_UpdateBgmVolume
 
 Sets the BGM to the volume of the current setting.
 ================
 */
-void func_80037B84( void ) {
+void Sound_UpdateBgmVolume( void ) {
     if ( D_8005C9D8 != 0 ) {
         Snd_SetVolume( D_8005C9D8, D_8005C9EC[D_8009D098.unk_7A] );
     }
@@ -143,12 +143,12 @@ void func_80037BE0( void ) {
 
 /*
 ================
-func_80037C08
+Sound_RunAudioTask
 
 Runs program as the audio task and waits for it; D_8005B0F0 gets the time it took.
 ================
 */
-void func_80037C08( UnkRspProgram *program ) {
+void Sound_RunAudioTask( UnkRspProgram *program ) {
     D_80099450 = osGetTime();
     D_80066B50 = program;
     osWritebackDCache( D_800ABD70, 0x33800 );
@@ -161,12 +161,12 @@ INCLUDE_ASM("asm/nonmatchings/12C70", func_80037CD0);
 
 /*
 ================
-func_80037E30
+Dbg_ScreenShot
 
 On an L press: writes the screen to the host as the next "BWnnn.BMP".
 ================
 */
-void func_80037E30( void ) {
+void Dbg_ScreenShot( void ) {
     bmpFile_t *file;
     u8 *dst;
     s32 x;
@@ -196,7 +196,7 @@ void func_80037E30( void ) {
             }
         }
         sprintf( name, "BW%3.3d.BMP", D_8005CA76++ );
-        func_80029814( name, (u8 *)file, SCREENSHOT_FILE_SIZE );
+        Host_WriteFile( name, (u8 *)file, SCREENSHOT_FILE_SIZE );
         D_800E4D62 = 0;
     }
 }

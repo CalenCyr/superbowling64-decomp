@@ -16,7 +16,7 @@
 #include "save.h"
 #include "gridedit.h"
 
-extern s32 pv_stepDone;    /* 0: func_80037410 is still stepping */
+extern s32 pv_stepDone;    /* 0: Save_SaveSettings is still stepping */
 extern u8 pv_sound;        /* sound the D-pad picks */
 extern u64 pv_soundHandle; /* handle of the playing sound */
 

@@ -14,12 +14,12 @@
 
 /*
 ================
-func_8002BE50
+Cam_SetAmbient
 
 Sets the ambient colour of camera index to color (red, green, blue).
 ================
 */
-void func_8002BE50( s32 index, u8 *color ) {
+void Cam_SetAmbient( s32 index, u8 *color ) {
     u32 i;
 
     for ( i = 0; i < 3; i++ ) {
@@ -60,14 +60,14 @@ void func_8002BED8( s16 file, s16 frame, f32 *eye, f32 *unk_2C ) {
 
 /*
 ================
-func_8002BFD8
+Cam_Create
 
 Creates a camera from params: its path (unk_08[0]) with the starting eye, at and up point, its viewport size and
 target (unk_08[1] to unk_08[6]), the path's light and a grey one from the eye, and lists it in D_8009CFA0 and,
 by priority, in D_800EA120.
 ================
 */
-objNode_t *func_8002BFD8( objParams_t *params ) {
+objNode_t *Cam_Create( objParams_t *params ) {
     sceneCameraNode_t *node;
     sceneCamera_t *cam;
     s32 i;
@@ -104,7 +104,7 @@ objNode_t *func_8002BFD8( objParams_t *params ) {
 
 /*
 ================
-func_8002C324
+Cam_Update
 
 Updates cam: at from its target joint, eye and up point from the path's current frame, the viewport, the
 projection, and the view (with the eye's light) or, while D_800EA0C0 is set, the controller's zoom, pan and
@@ -114,7 +114,7 @@ rotation of the last view.
 #ifdef NON_MATCHING
 // NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
 // change the register allocation, and a reused local is not counted as a match
-void func_8002C324( sceneCamera_t *cam ) {
+void Cam_Update( sceneCamera_t *cam ) {
     f32 *data;
     s32 i;
     f32 dx;
@@ -187,18 +187,18 @@ void func_8002C324( sceneCamera_t *cam ) {
     }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/7250", func_8002C324);
+INCLUDE_ASM("asm/nonmatchings/7250", Cam_Update);
 #endif
 
 /*
 ================
-func_8002C908
+Cam_UpdateAndAdvance
 
 Updates cam, and advances it along its path, from the start after the last frame.
 ================
 */
-void func_8002C908( sceneCamera_t *cam ) {
-    func_8002C324( cam );
+void Cam_UpdateAndAdvance( sceneCamera_t *cam ) {
+    Cam_Update( cam );
     cam->frame += D_800F7BF8;
     if ( cam->frame == cam->path->numFrames ) {
         cam->frame = 0;
@@ -207,13 +207,13 @@ void func_8002C908( sceneCamera_t *cam ) {
 
 /*
 ================
-func_8002C950
+Draw_RoundedBox
 
 Draws a translucent box of w by h pixels at (x, y) in colour (r, g, b, a), with rounded corners 8 pixels
 outside it: one 16 by 16 intensity image (file 0xB33) drawn in four quadrants, each mirrored away from the box.
 ================
 */
-void func_8002C950( s16 x, s16 y, u16 w, u16 h, u8 r, u8 g, u8 b, u8 a ) {
+void Draw_RoundedBox( s16 x, s16 y, u16 w, u16 h, u8 r, u8 g, u8 b, u8 a ) {
     D_8005C190 = DRAW2D_FILL;
     if ( D_800F80B0[0xB33].refCount == 0 ) {
         func_80030C04( 0xB33, FILE_RAW );
@@ -634,13 +634,13 @@ void func_8002FDE4( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a 
 
 /*
 ================
-func_80030058
+Draw_RectOutline
 
 Draws the one-pixel outline of the rectangle of width by height at (x, y) in colour (r, g, b, a), as func_8002FDE4
 does its fill.
 ================
 */
-void func_80030058( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a ) {
+void Draw_RectOutline( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a ) {
     D_8005C190 = DRAW2D_FILL;
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
     if ( a == 0xFF ) {
@@ -664,12 +664,12 @@ void func_80030058( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a 
 
 /*
 ================
-func_8003068C
+Draw_ClearScreen
 
 Clears the depth buffer and fills the framebuffer being drawn with colour (r, g, b), leaving the RDP in fill mode.
 ================
 */
-void func_8003068C( u32 r, u32 g, u32 b ) {
+void Draw_ClearScreen( u32 r, u32 g, u32 b ) {
     gDPSetCycleType( D_800F8094++, G_CYC_FILL );
     gDPSetRenderMode( D_800F8094++, G_RM_NOOP, G_RM_NOOP2 );
     gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical( D_80000400 ) );

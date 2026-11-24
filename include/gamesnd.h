@@ -29,7 +29,7 @@ typedef struct {
     /* 0x00 */ u8 data[0x36];
 } bmpHeader_t;
 
-/* A screenshot as func_80037E30 writes it to the host. */
+/* A screenshot as Dbg_ScreenShot writes it to the host. */
 typedef struct {
     /* 0x00000 */ bmpHeader_t header;
     /* 0x00036 */ u8 pixels[SCREENSHOT_HEIGHT][SCREENSHOT_WIDTH][3];  /* blue, green, red */
@@ -59,13 +59,13 @@ void Snd_SetSeWaveBank( seTable_t *table, waveBank_t *bank );
 
 u64 func_80037870( s32 index, s32 flags );
 void func_800379A8( u64 id );
-void func_800379C8( s32 index );
-void func_80037B18( void );
-void func_80037B84( void );
+void Sound_PlayBgm( s32 index );
+void Sound_StopBgm( void );
+void Sound_UpdateBgmVolume( void );
 void func_80037BD8( void );
 void func_80037BE0( void );
-void func_80037C08( UnkRspProgram *program );
+void Sound_RunAudioTask( UnkRspProgram *program );
 void func_80037CD0( void );
-void func_80037E30( void );
+void Dbg_ScreenShot( void );
 
 #endif

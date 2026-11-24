@@ -15,7 +15,7 @@ it has slid out, 1 when a character was taken and 2 for backing out.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: retail loads the argument of both func_80031184 calls with lhu (passed unconverted, as with no
+// NON_MATCHING: retail loads the argument of both Cache_Release calls with lhu (passed unconverted, as with no
 // prototype in scope); the s16 prototype makes it lh. Every other instruction is the same.
 s32 GS_CharacterMenu( void ) {
     s32 i;
@@ -37,7 +37,7 @@ s32 GS_CharacterMenu( void ) {
                 D_80120658_gscode = 0;
             }
             ( (sceneObject_t *)D_800EA120[10] )->frame = 1;
-            func_80031184( D_80120A48_gscode[D_80120656_gscode] );
+            Cache_Release( D_80120A48_gscode[D_80120656_gscode] );
             D_80120A48_gscode[D_80120656_gscode] = D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1];
             ( (sceneObject_t *)D_800EA120[10] )->anim =
                 func_80030C04( D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1], FILE_TYPE2 );
@@ -65,7 +65,7 @@ s32 GS_CharacterMenu( void ) {
     }
 
     func_8003893C( D_80120430_gscode, 9, MENU_NONE, ( D_80120656_gscode + 1 ) * 32, MENU_NONE, MENU_NONE );
-    func_8003068C( 0, 0, 0 );
+    Draw_ClearScreen( 0, 0, 0 );
     if ( D_80120657_gscode & 1 ) {
         func_8002DF3C( 0xA58, 0, 0 );
     }
@@ -82,7 +82,7 @@ s32 GS_CharacterMenu( void ) {
         ( (sceneObject_t *)D_800EA120[10] )->frame = 0;
         ( (sceneObject_t *)D_800EA120[10] )->model = D_80120A28_gscode[D_80120656_gscode];
         D_80120A20_gscode = D_80120656_gscode;
-        func_80031184( D_80120A48_gscode[D_80120656_gscode] );
+        Cache_Release( D_80120A48_gscode[D_80120656_gscode] );
         D_80120A48_gscode[D_80120656_gscode] = D_801205E4_gscode[D_80120656_gscode][0];
         ( (sceneObject_t *)D_800EA120[10] )->anim = func_80030C04( D_801205E4_gscode[D_80120656_gscode][0], FILE_TYPE2 );
         func_8002AAD0( ( (sceneObject_t *)D_800EA120[10] )->mtx, 0.0f, 0.0f, 0.0f,
@@ -113,9 +113,9 @@ s32 GS_CharacterMenu( void ) {
         D_80120430_gscode[5].slide = SLIDE_RIGHT;
         D_80120654_gscode += 2;
         if ( D_80120654_gscode == 30 ) {
-            func_800379C8( 1 );
+            Sound_PlayBgm( 1 );
             func_8002A67C();
-            func_800311D0( 0x825 );
+            Cache_FreeBelow( 0x825 );
             D_80120430_gscode[5].slide = SLIDE_LEFT;
             if ( D_80120655_gscode == CHOICE_TAKEN ) {
                 D_80120655_gscode = CHOICE_IN;

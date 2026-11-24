@@ -20,7 +20,7 @@ void func_80112350_gacode( void ) {
     s32 i;
     objParams_t *params;
 
-    func_80037B18();
+    Sound_StopBgm();
     func_80037870( 0x36, 0 );
     D_8012CDF8_gacode[0] = D_8012CDF8_gacode[1] = 0;
     D_8012D220_gacode = &D_80123EB0_gacode[D_8005C163];
@@ -28,7 +28,7 @@ void func_80112350_gacode( void ) {
     D_8012D238_gacode = 0;
     D_8012D239_gacode = 0;
     D_8012CDF0_gacode = func_80112AF0_gacode;
-    func_80029AF4( D_8012D220_gacode->unk_18, (u8 *)&D_80100100[0] );
+    Str_ReadFile( D_8012D220_gacode->unk_18, (u8 *)&D_80100100[0] );
     params = D_8012D220_gacode->unk_00;
     for ( i = 0; i < D_8005C161; i++, params++ ) {
         character = D_8005C0E4[i] & 0xF;
@@ -51,7 +51,7 @@ void func_80112350_gacode( void ) {
     func_801132B0_gacode();
     D_8012D225_gacode = ( D_8009D098.unk_04 >> 9 ) & 1;
     D_8012D224_gacode = ( D_8009D098.unk_04 >> 8 ) & 1;
-    func_800379C8( D_8012CE00_gacode );
+    Sound_PlayBgm( D_8012CE00_gacode );
 }
 
 /*
@@ -105,7 +105,7 @@ void func_801125A0_gacode( void ) {
     for ( team = 0; team <= D_8005C162; team++ ) {
         func_80114EC4_gacode( D_8012CE02_gacode[team][D_8012CDF8_gacode[team]] );
     }
-    func_80028EA8( &D_800F8094 );
+    Txt_LoadGlyphSheet( &D_800F8094 );
     func_8002FDE4( 0x9F, 0, 2, 0xF0, 0, 0, 0, 0xFF );
     if ( !D_8012D650_gacode && !cUpHeld ) {
         func_80114FC4_gacode( D_8012CE02_gacode[0][D_8012CDF8_gacode[0]] );
@@ -145,8 +145,8 @@ void func_801125A0_gacode( void ) {
             D_80123602_gacode = 1;
         }
     }
-    func_80028A0C( &D_800F8094 );
-    func_80028950( &D_800F8094, 0 );
+    Txt_LoadFont( &D_800F8094 );
+    Txt_SetupFont( &D_800F8094, 0 );
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
 }
 
@@ -210,9 +210,9 @@ s32 func_80112AF0_gacode( void ) {
         case 2:
             D_8009D098.unk_79 = !D_8009D098.unk_79;
             if ( D_8009D098.unk_79 ) {
-                func_800379C8( D_8012CE00_gacode );
+                Sound_PlayBgm( D_8012CE00_gacode );
             } else {
-                func_80037B18();
+                Sound_StopBgm();
             }
             break;
         case 3:
@@ -356,7 +356,7 @@ func_80113270_gacode
 ================
 */
 s32 func_80113270_gacode( void ) {
-    if ( func_80037410() ) {
+    if ( Save_SaveSettings() ) {
         return 0;
     }
     D_8012CDF0_gacode = func_801132A8_gacode;

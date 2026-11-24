@@ -15,7 +15,7 @@ the players and opens screen 0.
 void GS_Init( void ) {
     s32 i;
 
-    func_800379C8( 1 );
+    Sound_PlayBgm( 1 );
     if ( !D_8005CB60 ) {
         for ( i = 0; i < 4; i++ ) {
             D_8005C0E4[i] = 0;
@@ -148,7 +148,7 @@ s32 func_80112414_gscode( void ) {
         case 3:
             func_801123C4_gscode( 4 );
             gs_screen = 9;
-            func_800379C8( 13 );
+            Sound_PlayBgm( 13 );
             break;
         }
         break;

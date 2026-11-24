@@ -18,7 +18,7 @@ extern u8 D_800E4FD0[NUM_PLAYERS];  /* TRUE when the port has a Rumble Pak */
 extern s16 D_80066C24[NUM_PLAYERS];
 extern u8 D_800DF680[NUM_PLAYERS];
 
-/* per-port pad state, rebuilt each frame by func_80027BC0 */
+/* per-port pad state, rebuilt each frame by Cont_ReadPads */
 extern OSContPad D_80066B58[MAXCONTROLLERS];
 extern s8 D_800692D0[NUM_PLAYERS];  /* stick x, 0 inside the dead zone */
 extern s8 D_800A2FD8[NUM_PLAYERS];  /* stick y, 0 inside the dead zone */
@@ -38,7 +38,7 @@ extern s8 D_8009D05C;
 extern s8 D_800DF628;
 extern s32 D_8005C0EC;
 extern u32 D_800693B0;
-extern volatile s32 D_8005B0F4;    /* frame counter (func_80025FEC); volatile: it reloads it right after its own store */
+extern volatile s32 D_8005B0F4;    /* frame counter (Main_Thread); volatile: it reloads it right after its own store */
 /* requests to the controller thread (func_80028064), and its replies */
 extern OSMesgQueue D_800E6690;
 extern OSMesgQueue D_800F8098;
@@ -62,12 +62,12 @@ extern u16 D_8009D090;              /* company code */
 extern u32 D_8009CF6C;              /* game code */
 extern u8 D_800E6578;
 
-void func_800279F0( void );
-void func_80027A7C( s32 chan );
-void func_80027B18( s32 chan );
-void func_80027B6C( s32 chan );
-void func_80027BC0( void );
-void func_80027FF0( void );
+void Cont_Init( void );
+void Rumble_Probe( s32 chan );
+void Rumble_Start( s32 chan );
+void Rumble_Stop( s32 chan );
+void Cont_ReadPads( void );
+void Cont_FindStandard( void );
 void func_80028064( void *arg );
 
 #endif

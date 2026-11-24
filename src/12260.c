@@ -151,12 +151,12 @@ s32 func_80036E60( s32 id, s32 mode ) {
 
 /*
 ================
-func_800373DC
+Save_Checksum
 
 Returns the checksum of the settings D_801000B8: the sum of their bytes after the checksum word itself.
 ================
 */
-s32 func_800373DC( void ) {
+s32 Save_Checksum( void ) {
     u8 *bytes;
     s32 sum;
     s32 i;
@@ -171,14 +171,14 @@ s32 func_800373DC( void ) {
 
 /*
 ================
-func_80037410
+Save_SaveSettings
 
 Runs one frame of saving the settings, over a dimmed screen: asks the controller thread to check the
 Controller Pak, prompts, writes the settings with their checksum, and reports the result. Returns FALSE when
 it is over, or when saving is off.
 ================
 */
-s32 func_80037410( void ) {
+s32 Save_SaveSettings( void ) {
     u8 *bytes;
     s32 sum;
     s32 i;
