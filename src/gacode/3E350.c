@@ -446,14 +446,14 @@ GA_ScoreStandard
 
 A game mode. The player scores for their team when the sub-mode's argument is 1 (players 2 and 3 for player
 1). After a func_80116398_gacode turn (unless D_80068A50 is 2), records GA_IsSplit's result in the
-frame's flags. When the throw ends the frame, counts the run D_800A304C on after a func_80116398_gacode turn
-(returns 2), else ends it (returns 1); otherwise plays the throw's sound and ends the run, returning 3 when
+frame's flags and counts a split in D_8009CF80. When the throw ends the frame, counts the run D_800A304C on
+after a func_80116398_gacode turn (returns 2), else ends it (returns 1); otherwise plays the throw's sound and ends the run, returning 3 when
 the lane's callout was 3 or the run had reached 3, else 0.
 ================
 */
 s32 GA_ScoreStandard( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
-    s32 strike = 0;
+    s32 split = 0;
     s32 scorer;
     s32 frame;
     s32 result;
@@ -465,12 +465,12 @@ s32 GA_ScoreStandard( s32 player ) {
     }
     frame = D_8009D19C[scorer];
     if ( pl->lane->turnFunc == func_80116398_gacode && D_80068A50[scorer] != 2 ) {
-        strike = GA_IsSplit( pl->lane );
-        if ( strike != 0 ) {
+        split = GA_IsSplit( pl->lane );
+        if ( split != 0 ) {
             D_8009CF80[scorer]++;
         }
-        D_80099458[scorer][frame] = strike | ( D_80099458[scorer][frame] & 0xF0 );
-        if ( frame == 9 && strike != 0 ) {
+        D_80099458[scorer][frame] = split | ( D_80099458[scorer][frame] & 0xF0 );
+        if ( frame == 9 && split != 0 ) {
             D_80099458[scorer][frame] |= 0x10 << D_80068A50[scorer];
         }
     }
@@ -511,7 +511,7 @@ s32 GA_ScoreStandard( s32 player ) {
             GA_PlayLaneSound( pl->laneIndex, 0x62 );
             result = 3;
         } else if ( D_800A304C[scorer] >= 3 ) {
-            if ( strike != 0 ) {
+            if ( split != 0 ) {
                 GA_PlayLaneSound( pl->laneIndex, 0x7C );
                 pl->lane->callout = 2;
             } else {
@@ -521,7 +521,7 @@ s32 GA_ScoreStandard( s32 player ) {
         } else if ( pl->lane->pinsHit == 0 ) {
             GA_PlayLaneSound( pl->laneIndex, 0x62 );
             pl->lane->callout = 4;
-        } else if ( strike != 0 ) {
+        } else if ( split != 0 ) {
             GA_PlayLaneSound( pl->laneIndex, 0x7C );
             pl->lane->callout = 2;
         }

@@ -41,7 +41,8 @@ extern playerName_t D_80068218[];    /* per player: name */
 extern u8 D_80068A50[];             /* per player (Score_DrawPlayerBoard) */
 extern u8 D_800994BE[];             /* per player (Score_DrawPlayerBoard) */
 extern u8 D_80099458[4][10];        /* per player and frame: flags; in the par game, [0] holds each frame's par (GA_CountParThrow) */
-extern u16 D_8009CF80[4];           /* per player of a duel: games won */
+extern u16 D_8009CF80[4];           /* per player: splits this game (GA_IsSplit, by GA_ScoreStandard), summed into
+                                       playerRecord_t.splits; the par game keeps the sum of its pars in [0] */
 extern u16 D_800DF6B4[4];           /* per player: counted up with D_800A304C (GA_ScoreStandard) */
 extern u16 D_8009D088[4];           /* per player: counted when the frame ends after a non-run turn (GA_ScoreStandard) */
 extern u8 D_800A304C[4];            /* per player: a run counter (to 255) the game modes read and reset (func_8011582C_gacode) */
