@@ -467,7 +467,7 @@ void func_80026B44( void *arg ) {
                 osInvalDCache( rscode_VRAM, i );
                 func_80028744( "RSCODE  SYS", rscode_VRAM, i, 0 );
                 func_80026B10();
-                func_80112350_rscode();
+                RS_Init();
                 break;
             case SCENE_GSCODE:
                 i = func_8002889C( "GSCODE  SYS" );
@@ -524,7 +524,7 @@ void func_80026B44( void *arg ) {
             func_801125A0_gacode();
             break;
         case SCENE_RSCODE:
-            func_801123A8_rscode();
+            RS_Frame();
             break;
         case SCENE_GSCODE:
             func_80112414_gscode();

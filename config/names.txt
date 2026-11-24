@@ -503,3 +503,42 @@ FABS	include/gacode/gacode.h	invented: float absolute value macro (0 - x), func_
 floorGrid_t	include/game.h	invented: 0xFAC-byte file at D_80100100 (point counts, spacing and origin along x and z, then s16 heights); func_8012016C_gacode clamps to its edges, func_8011F87C_gacode interpolates its heights
 GA_TogglePin	3E350.c	invented: the inline helper of func_8011A404_gacode that toggles a lane body's standing flag (unk_5D) and returns the new state
 GRIDEDIT_EXIT, GRIDEDIT_LOAD, GRIDEDIT_SAVE, GRIDEDIT_SIZE, GRIDEDIT_STEP, GRIDEDIT_ORIGIN, GRIDEDIT_SELECT, GRIDEDIT_HEIGHT, GRIDEDIT_PAGES, GRIDEDIT_POINTS	include/gridedit.h	invented: the pages of the floor grid editor func_80035DA0 (from its page titles "EXIT", "FILE LOAD", "FILE SAVE", "MTX FORM", "MTX WH", "MTX OFS", "VTX SEL", "VTX Y"), and floorGrid_t.heights' 2000 points
+
+# rscode/56FF0.c results overlay
+RS_Init	0x80112350	invented: the overlay's init, run once after main loads it (overlay.h); starts the first state
+RS_Frame	0x801123A8	invented: the overlay's per-frame function (overlay.h); input, background, current state
+RS_StartMode	0x80112574	invented: picks the first state and the BGM by the game mode (D_8005C160 & 0xF)
+RS_StartMode0	0x80112674	invented: picks mode 0's first state by its sub-mode
+RS_FinishedMessage	0x8011286C	invented: state showing the finished-game message (bit 0x100) for 300 frames or until A/Z
+RS_PerfectMessage	0x8011291C	invented: state showing the perfect-game message (a player's tenth frame at 300; bit 0x200)
+RS_RankAndRecord	0x801129CC	invented: ranks the players by score and adds the game to the characters' records
+RS_ScoreSheet	0x80112B60	invented: state of mode 0's results: score sheet or pin diagrams
+RS_Records	0x80112E04	invented: state showing the characters' records, of this session or saved
+RS_ResultsPage1	0x80113030	invented: results-page state of sub-mode 1 (A/Z opens RS_Menu)
+RS_ResultsPage2	0x801130AC	invented: results-page state of sub-mode 2 (A/Z opens RS_Menu)
+RS_DuelResults	0x8011311C	invented: state of a duel's results: each game's score, games won, the winner
+RS_ResultsPage	0x80113504	invented: results-page state (A/Z opens RS_Menu)
+RS_Menu	0x80113564	invented: state of the two-choice menu (leave the results, or the other choice)
+RS_MenuConfirm	0x8011372C	invented: state waiting on func_8003B204's answer: 1 leaves (RS_Leave), 2 back to RS_Menu
+RS_Leave	0x8011377C	invented: state that waits for func_80037410, then leaves the overlay
+RS_Idle	0x801137CC	invented: last state, does nothing while the overlay is left
+RS_DrawPinDiagram	0x801137D4	invented: draws the pin diagram of one player's frame
+RS_DrawPinDiagrams	0x80113904	invented: draws the pin diagrams of every player's frames
+RS_DrawChoices	0x80113DC8	invented: draws two choices side by side, the chosen one boxed
+RS_AddToRecord	0x80113EC0	invented: adds the player's game to a character's record
+RS_RankHighest	0x80113FCC	invented: ranks scores from the highest
+RS_RankLowest	0x801140EC	invented: ranks values from the lowest
+rs_leaving	0x80114250	invented: set to leave the overlay
+rs_boxAlpha	0x80114252	invented: alpha of the boxes, pulsed 0 to 0x80 and back by RS_Frame
+rs_boxAlphaFalling	0x80114253	invented: 1 while rs_boxAlpha falls
+rs_messageFrames	0x80114254	invented: frames the current message has been shown
+rs_menuChoice	0x80114256	invented: choice of RS_Menu
+rs_pinPos	0x80114258	invented: x and y of each pin in a frame's pin diagram
+rs_pinPage	0x80114280	invented: page of the pin diagrams
+rs_ranks	0x801142A2	invented: each player's rank by score, 1 the best
+rs_buttonsPressed	0x801142A0	invented: buttons pressed this frame (0 once leaving)
+rs_dpadPressed	0x801142A6	invented: D-pad presses this frame (0 once leaving)
+rs_nextScene	0x801142A8	invented: copied back to the scene (D_8005C0B6) on leaving
+rs_state	0x801142AC	invented: current state, run each frame by RS_Frame
+rs_returnState	0x801142B0	invented: state to return to
+rs_sheetPage	0x80114251	invented: RS_ScoreSheet's page, 0 the score sheet, 1 the pin diagrams (left and right choose)

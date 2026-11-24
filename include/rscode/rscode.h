@@ -23,45 +23,45 @@ OVERLAY
 ==============================================================================
 */
 
-/* A state of the overlay's main loop (D_801142AC_rscode). Name invented. */
+/* A state of the overlay's main loop (rs_state). Name invented. */
 typedef void (*rsState_t)( void );
 
-extern u8 D_80114250_rscode;        /* set: leave the overlay */
-extern u8 D_80114251_rscode;
-extern u8 D_80114252_rscode;        /* alpha of the boxes, 0 to 0x80 and back */
-extern u8 D_80114253_rscode;        /* 1: D_80114252_rscode falls */
-extern s16 D_80114254_rscode;       /* frames the current message has been shown */
-extern u8 D_80114256_rscode;        /* choice of func_80113564_rscode's menu */
-extern s16 D_80114258_rscode[10][2];
-extern u8 D_80114280_rscode;        /* page of the pin diagrams: 0 frames 1-9, 1 the tenth on */    /* x and y of each pin in a frame's pin diagram */
-extern u8 D_801142A2_rscode[4];     /* per player: rank by score, 1 the best */
-extern u16 D_801142A0_rscode;       /* buttons pressed this frame (0 once leaving) */
-extern u16 D_801142A6_rscode;       /* D-pad presses this frame (0 once leaving) */
-extern u8 D_801142B4_rscode;        /* D_8005C160 >> 6 */
-extern u8 D_801142A8_rscode;        /* copied back to D_8005C0B6 on leaving */
-extern rsState_t D_801142AC_rscode; /* current state */
-extern rsState_t D_801142B0_rscode; /* state to return to */
+extern u8 rs_leaving;            /* set: leave the overlay */
+extern u8 rs_sheetPage;
+extern u8 rs_boxAlpha;           /* alpha of the boxes, 0 to 0x80 and back */
+extern u8 rs_boxAlphaFalling;    /* 1: rs_boxAlpha falls */
+extern s16 rs_messageFrames;     /* frames the current message has been shown */
+extern u8 rs_menuChoice;         /* choice of RS_Menu's menu */
+extern s16 rs_pinPos[10][2];     /* x and y of each pin in a frame's pin diagram */
+extern u8 rs_pinPage;            /* page of the pin diagrams: 0 frames 1-9, 1 the tenth on */
+extern u8 rs_ranks[4];           /* per player: rank by score, 1 the best */
+extern u16 rs_buttonsPressed;    /* buttons pressed this frame (0 once leaving) */
+extern u16 rs_dpadPressed;       /* D-pad presses this frame (0 once leaving) */
+extern u8 D_801142B4_rscode;     /* D_8005C160 >> 6 */
+extern u8 rs_nextScene;          /* copied back to D_8005C0B6 on leaving */
+extern rsState_t rs_state;       /* current state */
+extern rsState_t rs_returnState; /* state to return to */
 
-void func_80112574_rscode( void );
-void func_80112674_rscode( void );
-void func_8011286C_rscode( void );
-void func_8011291C_rscode( void );
-void func_801129CC_rscode( void );
-void func_80112B60_rscode( void );
-void func_80112E04_rscode( void );
-void func_80113030_rscode( void );
-void func_801130AC_rscode( void );
-void func_8011311C_rscode( void );
-void func_80113504_rscode( void );
-void func_80113564_rscode( void );
-void func_8011372C_rscode( void );
-void func_8011377C_rscode( void );
-void func_801137CC_rscode( void );
-void func_801137D4_rscode( s32 player, u8 frame, s16 x, s16 y );
-void func_80113904_rscode( s16 x, s16 y );
-void func_80113DC8_rscode( u8 choice, u16 *images, s16 y, u16 w, u16 h );
-void func_80113EC0_rscode( UnkRecord *record, s32 player );
-void func_80113FCC_rscode( u8 *ranks, u8 count, s16 *scores, s16 low, s16 high );
-void func_801140EC_rscode( u8 *ranks, u8 count, s16 *values, s16 low, s16 high );
+void RS_StartMode( void );
+void RS_StartMode0( void );
+void RS_FinishedMessage( void );
+void RS_PerfectMessage( void );
+void RS_RankAndRecord( void );
+void RS_ScoreSheet( void );
+void RS_Records( void );
+void RS_ResultsPage1( void );
+void RS_ResultsPage2( void );
+void RS_DuelResults( void );
+void RS_ResultsPage( void );
+void RS_Menu( void );
+void RS_MenuConfirm( void );
+void RS_Leave( void );
+void RS_Idle( void );
+void RS_DrawPinDiagram( s32 player, u8 frame, s16 x, s16 y );
+void RS_DrawPinDiagrams( s16 x, s16 y );
+void RS_DrawChoices( u8 choice, u16 *images, s16 y, u16 w, u16 h );
+void RS_AddToRecord( UnkRecord *record, s32 player );
+void RS_RankHighest( u8 *ranks, u8 count, s16 *scores, s16 low, s16 high );
+void RS_RankLowest( u8 *ranks, u8 count, s16 *values, s16 low, s16 high );
 
 #endif
