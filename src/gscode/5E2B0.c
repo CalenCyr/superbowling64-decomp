@@ -106,8 +106,8 @@ s32 GS_CharacterSelect( void ) {
     if ( D_8011F8B9_gscode == CHOICE_RUN && D_8011F8BA_gscode != 7 && D_8011F8BA_gscode != 8 &&
          D_8011F8BA_gscode != 9 ) {
         Draw_FillRect( cam_cameras[0]->left, cam_cameras[0]->top, cam_cameras[0]->width - 1,
-                       cam_cameras[0]->height - 1, cam_cameras[0]->path->clearColor[0],
-                       cam_cameras[0]->path->clearColor[1], cam_cameras[0]->path->clearColor[2], 0xFF );
+                       cam_cameras[0]->height - 1, cam_cameras[0]->path->clearColor >> 16,
+                       cam_cameras[0]->path->clearColor >> 8, cam_cameras[0]->path->clearColor, 0xFF );
         cam_cameras[0]->frame = -1;
         cam_cameras[0]->path->fovy = 30.0f;
         cam_cameras[0]->eye[0] = 0.0f;

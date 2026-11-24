@@ -10,6 +10,25 @@
 #include "sprite.h"
 
 /*
+ * gDPLoadMultiBlock with the render tile at tmem 0: only the load tile takes tmem, so the render tile samples
+ * whatever lies at the start of tmem.
+ */
+#define Scene_LoadMultiBlock( pkt, timg, tmem, rtile, fmt, siz, width, height, pal, cms, cmt, masks, maskt, shifts, \
+                              shiftt )                                                                              \
+    {                                                                                                               \
+        gDPSetTextureImage( pkt, fmt, siz##_LOAD_BLOCK, 1, timg );                                                  \
+        gDPSetTile( pkt, fmt, siz##_LOAD_BLOCK, 0, tmem, G_TX_LOADTILE, 0, cmt, maskt, shiftt, cms, masks, shifts ); \
+        gDPLoadSync( pkt );                                                                                         \
+        gDPLoadBlock( pkt, G_TX_LOADTILE, 0, 0, ( ( ( width ) * ( height ) + siz##_INCR ) >> siz##_SHIFT ) - 1,       \
+                      CALC_DXT( width, siz##_BYTES ) );                                                             \
+        gDPPipeSync( pkt );                                                                                         \
+        gDPSetTile( pkt, fmt, siz, ( ( ( width ) * siz##_LINE_BYTES ) + 7 ) >> 3, 0, rtile, pal, cmt, maskt, shiftt, \
+                    cms, masks, shifts );                                                                           \
+        gDPSetTileSize( pkt, rtile, 0, 0, ( ( width ) - 1 ) << G_TEXTURE_IMAGE_FRAC,                                \
+                        ( ( height ) - 1 ) << G_TEXTURE_IMAGE_FRAC );                                               \
+    }
+
+/*
 ================
 Scene_ClearDrawList
 
@@ -284,10 +303,10 @@ void Scene_PickRenderModes( void ) {
 }
 
 #ifdef NON_MATCHING
-// NON_MATCHING: complete body, same calls and skeleton (Scene_ChainDrawList and Scene_TextureSizeLog2 expand inline). Differs in:
-// the second texture's loads, where retail's render tile is at tmem 0 (only the load tile takes scene_tmemNext), unlike
-// gDPLoadMultiBlock; the clear colour, which retail reads as one word at fileType3_t 0x44 (clearColor is bytes);
-// cms/cmt trade $s4/$s5; the order of the initial colour-byte stores; register choice around the load macros
+// NON_MATCHING: complete body, same instruction count, calls and skeleton (Scene_ChainDrawList and
+// Scene_TextureSizeLog2 expand inline). Differs only in registers and schedule: cms/cmt trade $s4/$s5; before the
+// loop, the G_RM_ZB_OPA_SURF2 constant and cam_perspNorm take other registers, and the first prim/env colour byte
+// stores and the 0xFF load sit elsewhere
 /*
 ================
 Scene_Draw
@@ -297,16 +316,16 @@ setting up for each entry its microcode, camera, cycle and render modes, materia
 mode and textures) and model matrix only where they change, and drawing its mesh.
 ================
 */
-void Scene_Draw( void ) {
+// RULE-EXCEPTION: s32 with no return value: retail keeps v0 live at the exit (the loop's last branch is likely)
+s32 Scene_Draw( void ) {
     s16 *link;
     fileRefA_t *mesh;
     fileRefB_t *mat;
-    fileType3_t *path;
     u32 ucode;
     u32 view;
     u32 size;
     u32 cmt, cms;
-    Gfx *gfx;
+    u32 clearColor;
 
     Scene_ChainDrawList();
 
@@ -333,12 +352,10 @@ void Scene_Draw( void ) {
                            ( (fileImage_t *)cam_cameras[0]->path->unk_50 )->data,
                            ( (fileImage_t *)cam_cameras[0]->path->unk_50 )->data + CI8_PALETTE_SIZE );
         } else {
-            path = cam_cameras[0]->path;
             gDPSetCycleType( game_gfx++, G_CYC_FILL );
-            gDPSetFillColor( game_gfx++,
-                             ( GPACK_RGBA5551( path->clearColor[0], path->clearColor[1], path->clearColor[2], 1 )
-                               << 16 ) |
-                                 GPACK_RGBA5551( path->clearColor[0], path->clearColor[1], path->clearColor[2], 1 ) );
+            clearColor = cam_cameras[0]->path->clearColor;
+            gDPSetFillColor( game_gfx++, ( GPACK_RGBA5551( clearColor >> 16, clearColor >> 8, clearColor, 1 ) << 16 ) |
+                                             GPACK_RGBA5551( clearColor >> 16, clearColor >> 8, clearColor, 1 ) );
             gDPFillRectangle( game_gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
         }
         gDPPipeSync( game_gfx++ );
@@ -596,18 +613,18 @@ void Scene_Draw( void ) {
                                           Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI8:
-                    gDPLoadMultiBlock( game_gfx++, mat->texels2, scene_tmemNext, 1, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width2,
+                    Scene_LoadMultiBlock( game_gfx++, mat->texels2, scene_tmemNext, 1, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width2,
                                        mat->height2, 0, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
                                        Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_RGBA16:
-                    gDPLoadMultiBlock( game_gfx++, mat->texels2, scene_tmemNext, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                    Scene_LoadMultiBlock( game_gfx++, mat->texels2, scene_tmemNext, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
                                        mat->width2, mat->height2, 0, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
                                        Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_I8:
                     /* the first texture again, not the second */
-                    gDPLoadMultiBlock( game_gfx++, mat->texels, scene_tmemNext, 1, G_IM_FMT_I, G_IM_SIZ_8b, mat->width,
+                    Scene_LoadMultiBlock( game_gfx++, mat->texels, scene_tmemNext, 1, G_IM_FMT_I, G_IM_SIZ_8b, mat->width,
                                        mat->height, 0, cms, cmt, Scene_TextureSizeLog2( mat->width ),
                                        Scene_TextureSizeLog2( mat->height ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
@@ -646,30 +663,28 @@ void Scene_Draw( void ) {
             if ( scene_fog ) {
                 scene_geometryMode |= G_FOG;
             }
-            gSPClearGeometryMode( game_gfx++, G_ZBUFFER | G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING |
+            gSPClearGeometryMode( game_gfx++, G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING |
                                                 G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH );
             gSPSetGeometryMode( game_gfx++, scene_geometryMode );
         }
 
         if ( scene_combineChanged ) {
             scene_combineChanged = 0;
-            gfx = game_gfx++;
             if ( scene_zBuffer ) {
-                gfx->words.w0 = _SHIFTL( G_SETCOMBINE, 24, 8 ) |
-                                _SHIFTL( GCCc0w0( mat->combine.a0, mat->combine.c0, mat->combine.Aa0, mat->combine.Ac0 ) |
-                                             GCCc1w0( mat->combine.a1, mat->combine.c1 ),
-                                         0, 24 );
-                gfx->words.w1 = GCCc0w1( mat->combine.b0, mat->combine.d0, mat->combine.Ab0, mat->combine.Ad0 ) |
-                                GCCc1w1( mat->combine.b1, mat->combine.Aa1, mat->combine.Ac1, mat->combine.d1,
-                                         mat->combine.Ab1, mat->combine.Ad1 );
+                gDPSetCombine( game_gfx++,
+                               GCCc0w0( mat->combine.a0, mat->combine.c0, mat->combine.Aa0, mat->combine.Ac0 ) |
+                                   GCCc1w0( mat->combine.a1, mat->combine.c1 ),
+                               GCCc0w1( mat->combine.b0, mat->combine.d0, mat->combine.Ab0, mat->combine.Ad0 ) |
+                                   GCCc1w1( mat->combine.b1, mat->combine.Aa1, mat->combine.Ac1, mat->combine.d1,
+                                            mat->combine.Ab1, mat->combine.Ad1 ) );
             } else {
-                gfx->words.w0 = _SHIFTL( G_SETCOMBINE, 24, 8 ) |
-                                _SHIFTL( GCCc0w0( mat->combine.a0, mat->combine.c0, mat->combine.Aa0, mat->combine.Ac0 ) |
-                                             GCCc1w0( mat->combine.a0, mat->combine.c0 ),
-                                         0, 24 );
-                gfx->words.w1 = GCCc0w1( mat->combine.b0, mat->combine.d0, mat->combine.Ab0, mat->combine.Ad0 ) |
-                                GCCc1w1( mat->combine.b0, mat->combine.Aa0, mat->combine.Ac0, mat->combine.d0,
-                                         mat->combine.Ab0, mat->combine.Ad0 );
+                /* without the z buffer, cycle 1 repeats cycle 0 */
+                gDPSetCombine( game_gfx++,
+                               GCCc0w0( mat->combine.a0, mat->combine.c0, mat->combine.Aa0, mat->combine.Ac0 ) |
+                                   GCCc1w0( mat->combine.a0, mat->combine.c0 ),
+                               GCCc0w1( mat->combine.b0, mat->combine.d0, mat->combine.Ab0, mat->combine.Ad0 ) |
+                                   GCCc1w1( mat->combine.b0, mat->combine.Aa0, mat->combine.Ac0, mat->combine.d0,
+                                            mat->combine.Ab0, mat->combine.Ad0 ) );
             }
         }
 

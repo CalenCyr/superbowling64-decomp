@@ -82,7 +82,7 @@ extern void *scene_modelMtx;        /* the model matrix last loaded */
 void Scene_ClearDrawList( void );
 void Scene_AddToDrawList( void );
 void Scene_BeginView( sceneCamera_t *cam );
-void Scene_Draw( void );
+s32 Scene_Draw( void );
 void Scene_ChainDrawList( void );
 void Scene_BeginFrame( void );
 void Scene_PickRenderModes( void );

@@ -126,8 +126,8 @@ typedef struct {
     /* 0x3C */ u32 fogColor;        /* rgba */
     /* 0x40 */ u16 fogFar;
     /* 0x42 */ u16 fogNear;
-    /* 0x44 */ u8 unk_44[0x01];
-    /* 0x45 */ u8 clearColor[3];  /* rgb gscode's character menu fills its viewport with */
+    /* 0x44 */ u32 clearColor;      /* 0x00RRGGBB: the background without an image; gscode's character menu fills its
+                                       viewport with it */
     /* 0x48 */ f32 *frames;
     /* 0x4C */ Lights1 *light;
     /* 0x50 */ void *unk_50;
