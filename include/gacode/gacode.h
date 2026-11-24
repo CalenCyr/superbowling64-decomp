@@ -118,7 +118,7 @@ typedef struct {
     /* 0xB26 */ u8 reaction;                /* the character's reaction animation (files[reaction + 2]) */
     /* 0xB27 */ u8 unk_B27;
     /* 0xB28 */ f32 cameraRaise;            /* camera height offset of func_8011B8AC_gacode */
-    /* 0xB2C */ u16 bounceSound;            /* of the ball's floor hits: gaStage_t.unk_1E[0], [1] for a curving throw */
+    /* 0xB2C */ s16 bounceSound;            /* of the ball's floor hits: gaStage_t.unk_1E[0], [1] for a curving throw */
     /* 0xB2E */ u8 unk_B2E[2];
 } gaLane_t;                             /* size 0xB30 */
 

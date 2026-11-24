@@ -196,68 +196,82 @@ GA_SettleBodies.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: calls and constants as retail (CFG not yet compared past the prologue); retail keeps pointers into the lane (bodies in s7,
-// spots in fp, &lane->motion spilled to the stack and walked by both loops, and loop 2 reaches secondSpots as
-// spots + 0x160), which suggests pointer locals walked per body instead of lane->x[i]; frame 0x68 here 0x70.
-// bounceSound is read with lh (s16 in retail?) against gaStage_t.unk_1E[1].
+// NON_MATCHING: one register only: loop 2's &spots[i + NUM_BODIES] is reduced to 352 + 32 * i and added to
+// spots at the call, where retail walks a full pointer from spots + 0x160 (in s4, stepped after i). A second
+// pointer local walked by loop 2 (for ( i = 0, p = spots + NUM_BODIES; ...; i++, p++ )) leaves only its set-up
+// placed before the hoisted -190.0f; reusing loop 1's second for it swaps port and second (s3/s4); spots +
+// i + NUM_BODIES and &spots[i] + NUM_BODIES fold it into spots[i]; lane->secondSpots[i] or a secondSpots
+// local are further off. The continues, the local arrays and bounceSound as s16 (lh) came from A/B.
 /* An angle in degrees brought back within -180..180. */
 #define GA_WRAP_DEGREES( a ) ( ( a ) < -180.0f ? ( a ) + 360.0f : ( a ) >= 180.0f ? ( a ) - 360.0f : ( a ) )
 
 void GA_PhysicsStep( s32 player, s32 port ) {
     gaPlayer_t *pl = &ga_players[player];
     gaLane_t *lane = pl->lane;
+    gaMotion_t *motion = lane->motion;
+    gaSpot_t *spots = lane->spots;
+    gaSpot_t *second;
+    s32 hit;
     s32 i;
 
+    second = lane->secondSpots;
+    for ( i = 0; i < NUM_BODIES; i++, second++ ) {
+        if ( lane->bodies[i].standState == 0 ) {
+            continue;
+        }
+        if ( lane->bodies[i].kind == 1 ) {
+            lane->bodies[i].rot[1] += motion[i].spin[1];
+        }
+        lane->bodies[i].rot[1] = GA_WRAP_DEGREES( lane->bodies[i].rot[1] );
+        lane->bodies[i].rot[2] += motion[i].spin[2];
+        lane->bodies[i].rot[2] = GA_WRAP_DEGREES( lane->bodies[i].rot[2] );
+        lane->bodies[i].rot[0] += motion[i].spin[0];
+        lane->bodies[i].rot[0] = GA_WRAP_DEGREES( lane->bodies[i].rot[0] );
+        spots[i].pos[0] += motion[i].vel[0];
+        spots[i].pos[1] += motion[i].vel[1];
+        spots[i].pos[2] += motion[i].vel[2];
+        if ( second->radius == 0.0f ) {
+            continue;
+        }
+        GA_TransformPoint( second->pos, D_8012C758_gacode, lane->bodies[i].rot, spots[i].pos );
+    }
     for ( i = 0; i < NUM_BODIES; i++ ) {
-        if ( lane->bodies[i].standState != 0 ) {
-            if ( lane->bodies[i].kind == 1 ) {
-                lane->bodies[i].rot[1] += lane->motion[i].spin[1];
+        if ( lane->bodies[i].standState == 0 ) {
+            continue;
+        }
+        /* spots[i + NUM_BODIES] is secondSpots[i], which follows spots in the lane (as in GA_CollideLane) */
+        hit = GA_KeepOnFloor( &motion[i], &spots[i], &spots[i + NUM_BODIES], 180.0f, ga_stage->unk_14 );
+        if ( lane->bodies[i].kind != 0 ) {
+            continue;
+        }
+        if ( hit && spots[i].pos[2] > -1050.0 ) {
+            if ( spots[i].pos[1] <= -190.0f ) {
+                GA_PlayLaneSound( pl->laneIndex, 0x48 );
+            } else {
+                GA_PlayLaneSound( pl->laneIndex, pl->lane->bounceSound );
             }
-            lane->bodies[i].rot[1] = GA_WRAP_DEGREES( lane->bodies[i].rot[1] );
-            lane->bodies[i].rot[2] += lane->motion[i].spin[2];
-            lane->bodies[i].rot[2] = GA_WRAP_DEGREES( lane->bodies[i].rot[2] );
-            lane->bodies[i].rot[0] += lane->motion[i].spin[0];
-            lane->bodies[i].rot[0] = GA_WRAP_DEGREES( lane->bodies[i].rot[0] );
-            lane->spots[i].pos[0] += lane->motion[i].vel[0];
-            lane->spots[i].pos[1] += lane->motion[i].vel[1];
-            lane->spots[i].pos[2] += lane->motion[i].vel[2];
-            if ( lane->secondSpots[i].radius != 0.0f ) {
-                GA_TransformPoint( lane->secondSpots[i].pos, D_8012C758_gacode, lane->bodies[i].rot, lane->spots[i].pos );
+            if ( port >= 0 ) {
+                if ( pl->lane->bounceSound == ga_stage->unk_1E[1] ) {
+                    cont_rumble[port] = 6;
+                } else {
+                    cont_rumble[port] = 4;
+                }
+                D_8006940D[port] = 10;
+            }
+        }
+        if ( ( ( motion[i].flags >> 2 ) & 1 ) || ( ( motion[i].flags >> 6 ) & 1 ) ) {
+            GA_PlayLaneSound( pl->laneIndex, spots[i].pos[1] <= -190.0f ? 0x4C : 0x2F );
+            if ( port >= 0 && ( ( motion[i].flags >> 6 ) & 1 ) ) {
+                cont_rumble[port] = 5;
+                D_8006940D[port] = 10;
             }
         }
     }
-    for ( i = 0; i < NUM_BODIES; i++ ) {
-        if ( lane->bodies[i].standState != 0 ) {
-            s32 hit = GA_KeepOnFloor( &lane->motion[i], &lane->spots[i], &lane->secondSpots[i], 180.0f,
-                                            ga_stage->unk_14 );
-
-            if ( lane->bodies[i].kind == 0 ) {
-                if ( hit && lane->spots[i].pos[2] > -1050.0 ) {
-                    if ( lane->spots[i].pos[1] <= -190.0f ) {
-                        GA_PlayLaneSound( pl->laneIndex, 0x48 );
-                    } else {
-                        GA_PlayLaneSound( pl->laneIndex, pl->lane->bounceSound );
-                    }
-                    if ( port >= 0 ) {
-                        cont_rumble[port] = pl->lane->bounceSound == ga_stage->unk_1E[1] ? 6 : 4;
-                        D_8006940D[port] = 10;
-                    }
-                }
-                if ( ( ( lane->motion[i].flags >> 2 ) & 1 ) || ( ( lane->motion[i].flags >> 6 ) & 1 ) ) {
-                    GA_PlayLaneSound( pl->laneIndex, lane->spots[i].pos[1] <= -190.0f ? 0x4C : 0x2F );
-                    if ( port >= 0 && ( ( lane->motion[i].flags >> 6 ) & 1 ) ) {
-                        cont_rumble[port] = 5;
-                        D_8006940D[port] = 10;
-                    }
-                }
-            }
-        }
-    }
-    if ( GA_CollideLane( player, lane->bodies, lane->motion, lane->spots, pl->laneIndex ) && port >= 0 ) {
+    if ( GA_CollideLane( player, lane->bodies, motion, spots, pl->laneIndex ) && port >= 0 ) {
         cont_rumble[port] = 5;
         D_8006940D[port] = 15;
     }
-    GA_SettleBodies( lane->bodies, lane->motion, lane->spots );
+    GA_SettleBodies( lane->bodies, motion, spots );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", GA_PhysicsStep);
