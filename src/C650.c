@@ -302,11 +302,6 @@ void Scene_PickRenderModes( void ) {
     }
 }
 
-#ifdef NON_MATCHING
-// NON_MATCHING: complete body, same instruction count, calls and skeleton (Scene_ChainDrawList and
-// Scene_TextureSizeLog2 expand inline). Differs only in registers and schedule: cms/cmt trade $s4/$s5; before the
-// loop, the G_RM_ZB_OPA_SURF2 constant and cam_perspNorm take other registers, and the first prim/env colour byte
-// stores and the 0xFF load sit elsewhere
 /*
 ================
 Scene_Draw
@@ -324,7 +319,7 @@ s32 Scene_Draw( void ) {
     u32 ucode;
     u32 view;
     u32 size;
-    u32 cmt, cms;
+    u32 cms, cmt;
     u32 clearColor;
 
     Scene_ChainDrawList();
@@ -362,9 +357,8 @@ s32 Scene_Draw( void ) {
     }
 
     /* the state the entries change from */
-    scene_renderMode1 = G_RM_FOG_PRIM_A;
-    scene_renderMode2 = G_RM_ZB_OPA_SURF2;
     scene_twoCycle = 1;
+    scene_renderMode1 = G_RM_FOG_PRIM_A;
     scene_texturing = 0;
     scene_surface = 0;
     scene_cullBack = 1;
@@ -381,15 +375,12 @@ s32 Scene_Draw( void ) {
     gSPPerspNormalize( game_gfx++, cam_perspNorm );
     gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF );
     gDPSetAlphaCompare( game_gfx++, G_AC_THRESHOLD );
+    scene_renderMode2 = G_RM_ZB_OPA_SURF2;
     scene_combine.a0 = 0xFF;
-    scene_primColor.r = 0x80;
-    scene_primColor.g = 0x80;
-    scene_primColor.b = 0x80;
+    scene_primColor.r = scene_primColor.g = scene_primColor.b = 0x80;
     scene_primColor.a = 0xFF;
     gDPSetPrimColor( game_gfx++, 0, 0, scene_primColor.r, scene_primColor.g, scene_primColor.b, scene_primColor.a );
-    scene_envColor.r = 0x80;
-    scene_envColor.g = 0x80;
-    scene_envColor.b = 0x80;
+    scene_envColor.r = scene_envColor.g = scene_envColor.b = 0x80;
     scene_envColor.a = 0xFF;
     gDPSetEnvColor( game_gfx++, scene_envColor.r, scene_envColor.g, scene_envColor.b, scene_envColor.a );
     scene_view = 0;
@@ -403,9 +394,9 @@ s32 Scene_Draw( void ) {
 
         ucode = scene_drawList[*link].unk_06 >> 14;
         if ( scene_ucode != ucode ) {
-            scene_geometryChanged = 1;
             scene_ucode = ucode & 3;
             scene_view = 0xFF;
+            scene_geometryChanged = 1;
             switch ( scene_ucode ) {
             case 0:
                 gSPLoadUcodeL( game_gfx++, gspF3DEX2_Rej_fifo );
@@ -518,7 +509,7 @@ s32 Scene_Draw( void ) {
                     break;
                 }
                 if ( scene_texGen ) {
-                    cmt = cms = G_TX_WRAP;
+                    cms = cmt = G_TX_WRAP;
                 }
                 if ( scene_texturing != 1 ) {
                     scene_texturing = 1;
@@ -596,7 +587,7 @@ s32 Scene_Draw( void ) {
                     break;
                 }
                 if ( scene_texGen ) {
-                    cmt = cms = G_TX_WRAP;
+                    cms = cmt = G_TX_WRAP;
                 }
                 switch ( mat->fmt2 ) {
                 case MAT_I4:
@@ -703,9 +694,6 @@ s32 Scene_Draw( void ) {
         gDPPipeSync( game_gfx++ );
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/C650", Scene_Draw);
-#endif
 
 /*
 ================
