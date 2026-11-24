@@ -454,7 +454,7 @@ snd_frameSize, snd_minFrameSize, snd_maxFrameSize, snd_extraSamples	0x800645B0-0
 snd_frameSettled	0x8005CE60	invented: set while the AI queue is in range (Snd_NextFrameSize)
 AUDIO_FRAME_SAMPLES	structs.h	invented: the 184 samples per audio frame that Snd_InitFrameSizes and Snd_NextFrameSize use
 objNode_t, objClass_t, objParams_t, OBJ_PARAMS_SKIP, OBJ_PARAMS_END	object.h	invented: the object list of 53B0 (Obj_Create inserts by priority; Obj_CreateAll reads the float records up to -1.0)
-drawEntry_t, DRAW_BUCKETS, DRAW_NONE	ground.h	invented: the 12-byte entries of D_8009D1A0 that Scene_AddToDrawList sorts into 0x400 buckets chained by Scene_ChainDrawList
+drawEntry_t, DRAW_BUCKETS, DRAW_NONE	ground.h	invented: the 12-byte entries of scene_drawList that Scene_AddToDrawList sorts into 0x400 buckets chained by Scene_ChainDrawList
 SCREEN_WIDTH, SCREEN_HEIGHT	boot.h	invented: the 320x240 framebuffers (Scene_BeginFrame's scissor and color image)
 fileImage_t, IMAGE_CI4, IMAGE_CI8, CI4_PALETTE_SIZE, CI8_PALETTE_SIZE	sprite.h	invented: the image files Draw_Image draws (palette offsets 0x20 and 0x200 by type)
 DRAW2D_COPY, DRAW2D_1CYCLE, DRAW2D_FILL	sprite.h	invented: the D_8005C190 values the 2D functions set with the cycle type they emit
@@ -469,7 +469,7 @@ sceneObjJoint_t	object.h	invented: 0x140-byte joint: float matrix, then Mtx[2] a
 sceneCamera_t	object.h	invented: 0x248-byte camera (D_8009CFA0); eye/at/up are the guLookAtReflectF arguments of func_8002C324, path a FILE_TYPE3 file
 sceneObjectNode_t	object.h	invented: what func_8002B610 creates: the objNode_t header, then a sceneObject_t (cacode reads model at 0x5C and anim at 0x60 through it)
 sceneCameraNode_t	object.h	invented: what func_8002BFD8 creates: the objNode_t header, then a sceneCamera_t (it lists node + 0x10 in D_8009CFA0)
-puff_t	ground.h	invented: 12-byte camera-facing square (D_800E4D70, 50): flags, life, alpha, size and their steps (Scene_StartPuff starts one, Scene_DrawPuffs ages and draws them)
+puff_t	ground.h	invented: 12-byte camera-facing square (scene_puffs, 50): flags, life, alpha, size and their steps (Scene_StartPuff starts one, Scene_DrawPuffs ages and draws them)
 
 # rscode overlay (include/rscode/rscode.h): invented from use
 rsState_t	rscode.h	invented: main-loop state function of the results overlay (D_801142AC_rscode), as gacode's gaState_t
@@ -1289,3 +1289,52 @@ draw_lineVtx	0x80063A70	invented: the two ends of the line Draw_Line3D draws, by
 draw_lineMtx	0x80063AB0	invented: identity, the model matrix of Draw_Line3D's line
 draw_palettes	0x80062A70	invented: palette copies of Draw_ImageCopyPalette, four per frame buffer
 draw_nextPalette	0x8005C194	invented: the next of draw_palettes' four
+
+# include/ground.h: the draw list, the render state and the puffs (unit C650)
+scene_drawHead	0x800DF6A8	invented: first entry of the draw list once Scene_ChainDrawList has chained the buckets
+scene_numDraws	0x800E8070	invented: entries in scene_drawList (Scene_ClearDrawList, Scene_InsertEntry)
+scene_bucketHeads	0x800E4FE0	invented: first draw entry of each bucket, or DRAW_NONE
+scene_bucketTails	0x800E4560	invented: last draw entry of each bucket
+scene_drawList	0x8009D1A0	invented: the draw list, drawEntry_t chained by index (Scene_AddToDrawList, Scene_Draw)
+scene_surface	0x800A30B4	invented: surface type set by Scene_Draw, read by Scene_PickRenderModes
+scene_twoCycle	0x800E4D6C	invented: cycle type set by Scene_Draw: 1 G_CYC_2CYCLE, 0 G_CYC_1CYCLE
+scene_zBuffer	0x800E4D60	invented: Scene_Draw's z-buffer setting (G_ZBUFFER, the render modes and the combiner)
+scene_fog	0x800E6588	invented: fog on (G_FOG, Scene_PickRenderModes)
+scene_renderMode1	0x801000B4	invented: render mode of the first cycle (Scene_PickRenderModes, gDPSetRenderMode)
+scene_renderMode2	0x800E4D64	invented: render mode of the second cycle
+scene_powersOfTwo	0x8005C1D0	invented: 2, 4, ... 512 (Scene_TextureSizeLog2)
+scene_viewMask	0x8009CF89	invented: cameras an entry of Scene_AddToDrawList is drawn by, a bit per camera
+scene_addSurface	0x8009CF9C	invented: surface type of the entries Scene_AddToDrawList adds
+scene_addMaterial	0x8009D064	invented: material (file index) of the entries Scene_AddToDrawList adds
+scene_addTwoCycle	0x800E6580	invented: cycle type of the entries Scene_AddToDrawList adds (scene_twoCycle)
+scene_addCullBack	0x800F8090	invented: face culling of the entries Scene_AddToDrawList adds (scene_cullBack)
+scene_addMesh	0x800DF6BC	invented: mesh (file index) of the entries Scene_AddToDrawList adds
+scene_addUcode	0x801000B0	invented: microcode of the entries Scene_AddToDrawList adds (scene_ucode)
+scene_addNoZBuffer	0x80099448	invented: zero: the entries Scene_AddToDrawList adds use the z-buffer (scene_zBuffer)
+scene_addMatrix	0x80099420	invented: model matrix of the entries Scene_AddToDrawList adds (Scene_Draw loads drawEntry_t.unk_08 with gSPMatrix)
+scene_addLayer	0x80066E14	invented: nonzero: the layer whose buckets Scene_AddToDrawList puts its entries in, ahead of the material key
+scene_addByMaterial	0x800693AC	invented: nonzero: Scene_AddToDrawList keys its entries by material, else by microcode alone
+scene_geometryChanged	0x800DF682	invented: set: Scene_Draw sets the geometry mode again
+scene_renderModeChanged	0x80066B30	invented: set: Scene_Draw sets the render mode again
+scene_viewport	0x8010A290	invented: the screen's viewport, in the KNSTATICSYS file
+scene_depthBuffer	0x80000400	invented: depth buffer in the low RAM (gDPSetDepthImage)
+scene_primColor	0x80068ACC	invented: the primitive colour set (Scene_Draw)
+scene_envColor	0x800EA0C8	invented: the environment colour set (Scene_Draw)
+scene_combine	0x8009CF70	invented: combiner of the last material Scene_Draw set up
+scene_combineChanged	0x800EA0CC	invented: set: Scene_Draw sets the combiner again
+scene_texturing	0x8006940C	invented: texturing on (gSPTexture)
+scene_texGen	0x800F7BE0	invented: texture generation on (MAT_TEXGEN, G_TEXTURE_GEN)
+scene_smooth	0x800E6579	invented: MAT_SMOOTH of the last material (G_SHADING_SMOOTH)
+scene_lighting	0x80066B32	invented: MAT_LIGHTING of the last material (G_LIGHTING)
+scene_cullBack	0x80066B31	invented: 1: cull back faces, 0: front faces
+scene_geometryMode	0x800DF570	invented: the geometry mode Scene_Draw sets when scene_geometryChanged is
+scene_tmemNext	0x8009CF68	invented: tmem words of the first texture: where the second is loaded
+scene_material	0x800DF5D4	invented: the material (file index) last set up; 0xFFFF: none
+scene_modelMtx	0x800A30B0	invented: the model matrix last loaded (Scene_Draw)
+scene_puffs	0x800E4D70	invented: the puffs (Scene_StartPuff, Scene_DrawPuffs)
+scene_puffImages	0x8005C1E4	invented: image files of the two kinds of puff
+scene_puffSquares	0x8005C1F0	invented: squares of four vertices, by puff size (Scene_InitPuffs)
+scene_puffMtx	0x800E6770	invented: each puff turned to face camera 0, then camera 1 (Scene_FaceMatrix)
+scene_puffColors	0x8005C970	invented: rgb of the two kinds of puff
+scene_view	0x800A3018	invented: camera Scene_BeginView last set up; 2: none
+scene_ucode	0x80066C34	invented: microcode loaded: 0 gspF3DEX2_Rej_fifo, 1 gspF3DEX2_fifo, 2 gspL3DEX2_fifo

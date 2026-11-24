@@ -672,7 +672,7 @@ Clears the depth buffer and fills the framebuffer being drawn with colour (r, g,
 void Draw_ClearScreen( u32 r, u32 g, u32 b ) {
     gDPSetCycleType( game_gfx++, G_CYC_FILL );
     gDPSetRenderMode( game_gfx++, G_RM_NOOP, G_RM_NOOP2 );
-    gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical( D_80000400 ) );
+    gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical( scene_depthBuffer ) );
     gDPSetFillColor( game_gfx++, GPACK_ZDZ( G_MAXFBZ, 0 ) << 16 | GPACK_ZDZ( G_MAXFBZ, 0 ) );
     gDPFillRectangle( game_gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
     gDPPipeSync( game_gfx++ );

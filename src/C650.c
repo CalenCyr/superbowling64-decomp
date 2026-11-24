@@ -17,16 +17,16 @@ Empties the draw list: no entries, and every bucket empty.
 ================
 */
 void Scene_ClearDrawList( void ) {
-    D_800E8070 = 0;
-    D_800DF6A8 = DRAW_NONE;
-    memset( D_800E4FE0, 0xFF, sizeof( D_800E4FE0 ) );
+    scene_numDraws = 0;
+    scene_drawHead = DRAW_NONE;
+    memset( scene_bucketHeads, 0xFF, sizeof( scene_bucketHeads ) );
 }
 
 #ifdef NON_MATCHING
 // NON_MATCHING: the inline helper and its s16 *link store reproduce retail's frame (0x18) and its per-iteration
 // reloads; still differs in the insertion's block order (retail places the append arm before the search loop and
-// takes &D_8009D1A0[entry] in a register for the insert) and in the key expressions' schedule; retail also re-masks
-// D_80066E14 (lhu, then andi 0xffff) for the test and the key but shifts the unmasked value for the bucket, so it is
+// takes &scene_drawList[entry] in a register for the insert) and in the key expressions' schedule; retail also re-masks
+// scene_addLayer (lhu, then andi 0xffff) for the test and the key but shifts the unmasked value for the bucket, so it is
 // probably read into a wider local (a u16 local alone does not do it)
 // Also checked: the empty-bucket arm last (bucket != DRAW_NONE first), key <= ...key for the head test, and the
 // search as a while loop on next != DRAW_NONE with the append after it (each further from retail)
@@ -34,7 +34,7 @@ void Scene_ClearDrawList( void ) {
 ================
 Scene_InsertEntry
 
-Adds entry D_800E8070 of the draw list to bucket, after the entries of a lower key.
+Adds entry scene_numDraws of the draw list to bucket, after the entries of a lower key.
 ================
 */
 static inline void Scene_InsertEntry( u16 key, u16 bucket ) {
@@ -42,36 +42,36 @@ static inline void Scene_InsertEntry( u16 key, u16 bucket ) {
     u16 entry;
     u16 next;
 
-    D_8009D1A0[D_800E8070].key = key;
-    if ( D_800E4FE0[bucket] == DRAW_NONE ) {
-        D_800E4FE0[bucket] = D_800E8070;
-        D_800E4560[bucket] = D_800E8070;
-        D_8009D1A0[D_800E8070].next = DRAW_NONE;
+    scene_drawList[scene_numDraws].key = key;
+    if ( scene_bucketHeads[bucket] == DRAW_NONE ) {
+        scene_bucketHeads[bucket] = scene_numDraws;
+        scene_bucketTails[bucket] = scene_numDraws;
+        scene_drawList[scene_numDraws].next = DRAW_NONE;
     } else {
-        entry = D_800E4FE0[bucket];
-        if ( D_8009D1A0[entry].key >= key ) {
-            D_800E4FE0[bucket] = D_800E8070;
-            D_8009D1A0[D_800E8070].next = entry;
+        entry = scene_bucketHeads[bucket];
+        if ( scene_drawList[entry].key >= key ) {
+            scene_bucketHeads[bucket] = scene_numDraws;
+            scene_drawList[scene_numDraws].next = entry;
         } else {
             for ( ;; ) {
-                if ( D_8009D1A0[entry].next == DRAW_NONE ) {
-                    D_8009D1A0[entry].next = D_800E8070;
-                    D_8009D1A0[D_800E8070].next = DRAW_NONE;
-                    D_800E4560[bucket] = D_800E8070;
+                if ( scene_drawList[entry].next == DRAW_NONE ) {
+                    scene_drawList[entry].next = scene_numDraws;
+                    scene_drawList[scene_numDraws].next = DRAW_NONE;
+                    scene_bucketTails[bucket] = scene_numDraws;
                     break;
                 }
-                link = &D_8009D1A0[entry].next;
+                link = &scene_drawList[entry].next;
                 next = *link;
-                if ( D_8009D1A0[next].key >= key ) {
-                    *link = D_800E8070;
-                    D_8009D1A0[D_800E8070].next = next;
+                if ( scene_drawList[next].key >= key ) {
+                    *link = scene_numDraws;
+                    scene_drawList[scene_numDraws].next = next;
                     break;
                 }
                 entry = next;
             }
         }
     }
-    D_800E8070++;
+    scene_numDraws++;
 }
 
 /*
@@ -87,32 +87,32 @@ void Scene_AddToDrawList( void ) {
     u32 key;
     u32 bucket;
 
-    mask = D_8009CF89;
+    mask = scene_viewMask;
     for ( i = 0; i < D_80099480; i++ ) {
         if ( ( mask & 1 ) && D_8009CFA0[i]->height != 0 ) {
-            D_8009D1A0[D_800E8070].unk_04 = D_8009D064 | ( D_8009CF9C << 11 ) | ( i << 14 );
-            D_8009D1A0[D_800E8070].unk_06 = D_800DF6BC | ( D_800F8090 << 11 ) | ( D_800E6580 << 13 ) | ( D_801000B0 << 14 );
-            if ( D_80099448 == 0 ) {
-                D_8009D1A0[D_800E8070].unk_06 |= 0x1000;
+            scene_drawList[scene_numDraws].unk_04 = scene_addMaterial | ( scene_addSurface << 11 ) | ( i << 14 );
+            scene_drawList[scene_numDraws].unk_06 = scene_addMesh | ( scene_addCullBack << 11 ) | ( scene_addTwoCycle << 13 ) | ( scene_addUcode << 14 );
+            if ( scene_addNoZBuffer == 0 ) {
+                scene_drawList[scene_numDraws].unk_06 |= 0x1000;
             }
-            D_8009D1A0[D_800E8070].unk_08 = D_80099420;
-            if ( D_80066E14 != 0 ) {
-                key = ( D_80066E14 << 15 ) | ( D_8009D064 << 4 ) | ( D_801000B0 << 2 ) | i;
-                bucket = ( D_80066E14 << 3 ) | ( D_8009D064 & 3 );
-            } else if ( D_8009CF9C >= 3 ) {
-                if ( D_800693AC != 0 ) {
-                    key = ( D_8009D064 << 4 ) | ( ( D_801000B0 << 2 ) | 0x8000 ) | i;
-                    bucket = ( D_8009D064 & 0x7F ) | 0x80;
+            scene_drawList[scene_numDraws].unk_08 = scene_addMatrix;
+            if ( scene_addLayer != 0 ) {
+                key = ( scene_addLayer << 15 ) | ( scene_addMaterial << 4 ) | ( scene_addUcode << 2 ) | i;
+                bucket = ( scene_addLayer << 3 ) | ( scene_addMaterial & 3 );
+            } else if ( scene_addSurface >= 3 ) {
+                if ( scene_addByMaterial != 0 ) {
+                    key = ( scene_addMaterial << 4 ) | ( ( scene_addUcode << 2 ) | 0x8000 ) | i;
+                    bucket = ( scene_addMaterial & 0x7F ) | 0x80;
                 } else {
-                    key = ( D_801000B0 << 2 ) | ( i | 0x20 );
+                    key = ( scene_addUcode << 2 ) | ( i | 0x20 );
                     bucket = key << 3;
                 }
             } else {
-                if ( D_800693AC != 0 ) {
-                    key = ( D_8009D064 << 4 ) | ( ( D_801000B0 << 2 ) | 0x18000 ) | i;
-                    bucket = ( D_8009D064 & 0x7F ) | 0x180;
+                if ( scene_addByMaterial != 0 ) {
+                    key = ( scene_addMaterial << 4 ) | ( ( scene_addUcode << 2 ) | 0x18000 ) | i;
+                    bucket = ( scene_addMaterial & 0x7F ) | 0x180;
                 } else {
-                    key = ( D_801000B0 << 2 ) | ( i | 0x40 );
+                    key = ( scene_addUcode << 2 ) | ( i | 0x40 );
                     bucket = key << 3;
                 }
             }
@@ -129,18 +129,18 @@ INCLUDE_ASM("asm/nonmatchings/C650", Scene_AddToDrawList);
 ================
 Scene_ChainDrawList
 
-Chains the buckets of the draw list, in key order, into one list from D_800DF6A8.
+Chains the buckets of the draw list, in key order, into one list from scene_drawHead.
 ================
 */
 inline void Scene_ChainDrawList( void ) {
     s16 *link;
     s32 i;
 
-    link = &D_800DF6A8;
+    link = &scene_drawHead;
     for ( i = 0; i < DRAW_BUCKETS; i++ ) {
-        if ( D_800E4FE0[i] != DRAW_NONE ) {
-            *link = D_800E4FE0[i];
-            link = &D_8009D1A0[D_800E4560[i]].next;
+        if ( scene_bucketHeads[i] != DRAW_NONE ) {
+            *link = scene_bucketHeads[i];
+            link = &scene_drawList[scene_bucketTails[i]].next;
         }
     }
 }
@@ -156,25 +156,25 @@ off when it changes), its matrices, look-at, viewport, scissor and lights.
 void Scene_BeginView( sceneCamera_t *cam ) {
     gDPPipeSync( game_gfx++ );
     gDPSetDepthImage( game_gfx++,
-                      osVirtualToPhysical( D_80000400 + ( cam->left & 0xFFC ) + cam->top * SCREEN_WIDTH ) );
+                      osVirtualToPhysical( scene_depthBuffer + ( cam->left & 0xFFC ) + cam->top * SCREEN_WIDTH ) );
     gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
                       osVirtualToPhysical( sched_framebuffers[sched_drawFb] + ( cam->left & 0xFFC ) +
                                            cam->top * SCREEN_WIDTH ) );
     if ( cam->path->flags & FILE3_FOG ) {
-        if ( D_800E6588 == 0 ) {
-            D_800E6588 = 1;
-            D_800DF682 = 1;
-            D_80066B30 = 1;
+        if ( scene_fog == 0 ) {
+            scene_fog = 1;
+            scene_geometryChanged = 1;
+            scene_renderModeChanged = 1;
             Scene_PickRenderModes();
         }
         gSPFogPosition( game_gfx++, cam->path->fogNear, cam->path->fogFar );
         gDPSetFogColor( game_gfx++, cam->path->fogColor >> 24, cam->path->fogColor >> 16, cam->path->fogColor >> 8,
                         cam->path->fogColor );
     } else {
-        if ( D_800E6588 == 1 ) {
-            D_800E6588 = 0;
-            D_800DF682 = 1;
-            D_80066B30 = 1;
+        if ( scene_fog == 1 ) {
+            scene_fog = 0;
+            scene_geometryChanged = 1;
+            scene_renderModeChanged = 1;
             Scene_PickRenderModes();
         }
         gDPSetFogColor( game_gfx++, 0, 0, 0, 0 );
@@ -197,25 +197,25 @@ Starts the frame's drawing: viewport and scissor of the screen, the framebuffer 
 */
 void Scene_BeginFrame( void ) {
     gDPPipeSync( game_gfx++ );
-    gSPViewport( game_gfx++, &D_8010A290 );
+    gSPViewport( game_gfx++, &scene_viewport );
     gDPSetScissor( game_gfx++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
     gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
                       osVirtualToPhysical( sched_framebuffers[sched_drawFb] ) );
-    gDPSetDepthImage( game_gfx++, osVirtualToPhysical( D_80000400 ) );
+    gDPSetDepthImage( game_gfx++, osVirtualToPhysical( scene_depthBuffer ) );
 }
 
 /*
 ================
 Scene_TextureSizeLog2
 
-Returns the n for which 1 << n, from 2 to 512 in D_8005C1D0, is the smallest power at least value; 10 if none is.
+Returns the n for which 1 << n, from 2 to 512 in scene_powersOfTwo, is the smallest power at least value; 10 if none is.
 ================
 */
 inline s32 Scene_TextureSizeLog2( u32 value ) {
     s32 i;
 
     for ( i = 0; i < 9; i++ ) {
-        if ( D_8005C1D0[i] >= value ) {
+        if ( scene_powersOfTwo[i] >= value ) {
             break;
         }
     }
@@ -226,58 +226,58 @@ inline s32 Scene_TextureSizeLog2( u32 value ) {
 ================
 Scene_PickRenderModes
 
-Picks the render modes of the frame's two cycles, D_801000B4 and D_800E4D64, from the fog setting and the
-surface type D_800A30B4.
+Picks the render modes of the frame's two cycles, scene_renderMode1 and scene_renderMode2, from the fog setting and the
+surface type scene_surface.
 ================
 */
 void Scene_PickRenderModes( void ) {
-    if ( D_800E4D6C == 0 ) {
-        if ( D_800E4D60 != 0 ) {
+    if ( scene_twoCycle == 0 ) {
+        if ( scene_zBuffer != 0 ) {
             return;
         }
-        switch ( D_800A30B4 ) {
+        switch ( scene_surface ) {
         case 2:
-            D_801000B4 = G_RM_XLU_SURF;
-            D_800E4D64 = G_RM_XLU_SURF2;
+            scene_renderMode1 = G_RM_XLU_SURF;
+            scene_renderMode2 = G_RM_XLU_SURF2;
             break;
         case 3:
-            D_801000B4 = G_RM_AA_TEX_EDGE;
-            D_800E4D64 = G_RM_AA_TEX_EDGE2;
+            scene_renderMode1 = G_RM_AA_TEX_EDGE;
+            scene_renderMode2 = G_RM_AA_TEX_EDGE2;
             break;
         case 6:
-            if ( D_800E6588 != 0 ) {
-                D_801000B4 = 0xC8000200;
-                D_800E4D64 = 0x32004200;
+            if ( scene_fog != 0 ) {
+                scene_renderMode1 = 0xC8000200;
+                scene_renderMode2 = 0x32004200;
             } else {
-                D_801000B4 = G_RM_OPA_SURF;
-                D_800E4D64 = G_RM_OPA_SURF2;
+                scene_renderMode1 = G_RM_OPA_SURF;
+                scene_renderMode2 = G_RM_OPA_SURF2;
             }
             break;
         }
     } else {
-        if ( D_800E6588 != 0 ) {
-            D_801000B4 = G_RM_FOG_SHADE_A;
+        if ( scene_fog != 0 ) {
+            scene_renderMode1 = G_RM_FOG_SHADE_A;
         } else {
-            D_801000B4 = G_RM_PASS;
+            scene_renderMode1 = G_RM_PASS;
         }
-        if ( D_800E4D60 == 0 ) {
+        if ( scene_zBuffer == 0 ) {
             return;
         }
-        switch ( D_800A30B4 ) {
+        switch ( scene_surface ) {
         case 0:
-            D_800E4D64 = G_RM_ZB_XLU_DECAL2;
+            scene_renderMode2 = G_RM_ZB_XLU_DECAL2;
             break;
         case 2:
-            D_800E4D64 = G_RM_ZB_XLU_SURF2;
+            scene_renderMode2 = G_RM_ZB_XLU_SURF2;
             break;
         case 3:
-            D_800E4D64 = G_RM_AA_ZB_TEX_EDGE2;
+            scene_renderMode2 = G_RM_AA_ZB_TEX_EDGE2;
             break;
         case 4:
-            D_800E4D64 = G_RM_ZB_XLU_DECAL2;
+            scene_renderMode2 = G_RM_ZB_XLU_DECAL2;
             break;
         case 6:
-            D_800E4D64 = G_RM_ZB_OPA_SURF2;
+            scene_renderMode2 = G_RM_ZB_OPA_SURF2;
             break;
         }
     }
@@ -285,7 +285,7 @@ void Scene_PickRenderModes( void ) {
 
 #ifdef NON_MATCHING
 // NON_MATCHING: complete body, same calls and skeleton (Scene_ChainDrawList and Scene_TextureSizeLog2 expand inline). Differs in:
-// the second texture's loads, where retail's render tile is at tmem 0 (only the load tile takes D_8009CF68), unlike
+// the second texture's loads, where retail's render tile is at tmem 0 (only the load tile takes scene_tmemNext), unlike
 // gDPLoadMultiBlock; the clear colour, which retail reads as one word at fileType3_t 0x44 (clearColor is bytes);
 // cms/cmt trade $s4/$s5; the order of the initial colour-byte stores; register choice around the load macros
 /*
@@ -313,7 +313,7 @@ void Scene_Draw( void ) {
     /* clear the depth buffer */
     gDPSetCycleType( game_gfx++, G_CYC_FILL );
     gDPSetRenderMode( game_gfx++, G_RM_NOOP, G_RM_NOOP2 );
-    gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical( D_80000400 ) );
+    gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical( scene_depthBuffer ) );
     gDPSetFillColor( game_gfx++, ( GPACK_ZDZ( G_MAXFBZ, 0 ) << 16 ) | GPACK_ZDZ( G_MAXFBZ, 0 ) );
     gDPFillRectangle( game_gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 );
     gDPPipeSync( game_gfx++ );
@@ -345,51 +345,51 @@ void Scene_Draw( void ) {
     }
 
     /* the state the entries change from */
-    D_801000B4 = G_RM_FOG_PRIM_A;
-    D_800E4D64 = G_RM_ZB_OPA_SURF2;
-    D_800E4D6C = 1;
-    D_8006940C = 0;
-    D_800A30B4 = 0;
-    D_80066B31 = 1;
-    D_800E4D60 = 1;
-    D_800E6579 = 1;
-    D_80066B32 = 1;
-    D_800F7BE0 = 0;
-    D_800E6588 = 0;
-    D_80066C34 = 0;
-    D_800DF5D4 = 0xFFFF;
+    scene_renderMode1 = G_RM_FOG_PRIM_A;
+    scene_renderMode2 = G_RM_ZB_OPA_SURF2;
+    scene_twoCycle = 1;
+    scene_texturing = 0;
+    scene_surface = 0;
+    scene_cullBack = 1;
+    scene_zBuffer = 1;
+    scene_smooth = 1;
+    scene_lighting = 1;
+    scene_texGen = 0;
+    scene_fog = 0;
+    scene_ucode = 0;
+    scene_material = 0xFFFF;
     gDPSetCycleType( game_gfx++, G_CYC_2CYCLE );
     gDPSetTextureFilter( game_gfx++, G_TF_BILERP );
     gDPSetTexturePersp( game_gfx++, G_TP_PERSP );
     gSPPerspNormalize( game_gfx++, D_8009CF9E );
     gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF );
     gDPSetAlphaCompare( game_gfx++, G_AC_THRESHOLD );
-    D_8009CF70.a0 = 0xFF;
-    D_80068ACC.r = 0x80;
-    D_80068ACC.g = 0x80;
-    D_80068ACC.b = 0x80;
-    D_80068ACC.a = 0xFF;
-    gDPSetPrimColor( game_gfx++, 0, 0, D_80068ACC.r, D_80068ACC.g, D_80068ACC.b, D_80068ACC.a );
-    D_800EA0C8.r = 0x80;
-    D_800EA0C8.g = 0x80;
-    D_800EA0C8.b = 0x80;
-    D_800EA0C8.a = 0xFF;
-    gDPSetEnvColor( game_gfx++, D_800EA0C8.r, D_800EA0C8.g, D_800EA0C8.b, D_800EA0C8.a );
-    D_800A3018 = 0;
+    scene_combine.a0 = 0xFF;
+    scene_primColor.r = 0x80;
+    scene_primColor.g = 0x80;
+    scene_primColor.b = 0x80;
+    scene_primColor.a = 0xFF;
+    gDPSetPrimColor( game_gfx++, 0, 0, scene_primColor.r, scene_primColor.g, scene_primColor.b, scene_primColor.a );
+    scene_envColor.r = 0x80;
+    scene_envColor.g = 0x80;
+    scene_envColor.b = 0x80;
+    scene_envColor.a = 0xFF;
+    gDPSetEnvColor( game_gfx++, scene_envColor.r, scene_envColor.g, scene_envColor.b, scene_envColor.a );
+    scene_view = 0;
     Scene_BeginView( D_8009CFA0[0] );
-    D_800DF682 = 1;
-    D_80066B30 = 1;
+    scene_geometryChanged = 1;
+    scene_renderModeChanged = 1;
 
-    for ( link = &D_800DF6A8; *link != DRAW_NONE; link = &D_8009D1A0[*link].next ) {
-        mesh = D_800F80B0[D_8009D1A0[*link].unk_06 & 0x7FF].data;
-        mat = D_800F80B0[D_8009D1A0[*link].unk_04 & 0x7FF].data;
+    for ( link = &scene_drawHead; *link != DRAW_NONE; link = &scene_drawList[*link].next ) {
+        mesh = D_800F80B0[scene_drawList[*link].unk_06 & 0x7FF].data;
+        mat = D_800F80B0[scene_drawList[*link].unk_04 & 0x7FF].data;
 
-        ucode = D_8009D1A0[*link].unk_06 >> 14;
-        if ( D_80066C34 != ucode ) {
-            D_800DF682 = 1;
-            D_80066C34 = ucode & 3;
-            D_800A3018 = 0xFF;
-            switch ( D_80066C34 ) {
+        ucode = scene_drawList[*link].unk_06 >> 14;
+        if ( scene_ucode != ucode ) {
+            scene_geometryChanged = 1;
+            scene_ucode = ucode & 3;
+            scene_view = 0xFF;
+            switch ( scene_ucode ) {
             case 0:
                 gSPLoadUcodeL( game_gfx++, gspF3DEX2_Rej_fifo );
                 gSPClipRatio( game_gfx++, FRUSTRATIO_3 );
@@ -403,78 +403,78 @@ void Scene_Draw( void ) {
                 gSPClipRatio( game_gfx++, FRUSTRATIO_1 );
                 break;
             }
-            if ( D_8006940C ) {
+            if ( scene_texturing ) {
                 gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
             }
         }
 
-        view = D_8009D1A0[*link].unk_04 >> 14;
-        if ( D_800A3018 != view ) {
-            D_800A3018 = view;
+        view = scene_drawList[*link].unk_04 >> 14;
+        if ( scene_view != view ) {
+            scene_view = view;
             Scene_BeginView( D_8009CFA0[view] );
         }
 
-        if ( D_800E4D6C != ( ( D_8009D1A0[*link].unk_06 >> 13 ) & 1 ) ) {
-            D_800E4D6C = ( D_8009D1A0[*link].unk_06 >> 13 ) & 1;
-            if ( D_800E4D6C == 0 ) {
+        if ( scene_twoCycle != ( ( scene_drawList[*link].unk_06 >> 13 ) & 1 ) ) {
+            scene_twoCycle = ( scene_drawList[*link].unk_06 >> 13 ) & 1;
+            if ( scene_twoCycle == 0 ) {
                 gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
             } else {
                 gDPSetCycleType( game_gfx++, G_CYC_2CYCLE );
             }
-            D_80066B30 = 1;
+            scene_renderModeChanged = 1;
             Scene_PickRenderModes();
-            D_800EA0CC = 1;
+            scene_combineChanged = 1;
         }
-        if ( D_800E4D60 != ( ( D_8009D1A0[*link].unk_06 >> 12 ) & 1 ) ) {
-            D_800E4D60 = ( D_8009D1A0[*link].unk_06 >> 12 ) & 1;
-            D_800DF682 = 1;
-            D_80066B30 = 1;
-            D_800EA0CC = 1;
+        if ( scene_zBuffer != ( ( scene_drawList[*link].unk_06 >> 12 ) & 1 ) ) {
+            scene_zBuffer = ( scene_drawList[*link].unk_06 >> 12 ) & 1;
+            scene_geometryChanged = 1;
+            scene_renderModeChanged = 1;
+            scene_combineChanged = 1;
             Scene_PickRenderModes();
         }
-        if ( D_80066B31 != ( ( D_8009D1A0[*link].unk_06 >> 11 ) & 1 ) ) {
-            D_80066B31 = ( D_8009D1A0[*link].unk_06 >> 11 ) & 1;
-            D_800DF682 = 1;
+        if ( scene_cullBack != ( ( scene_drawList[*link].unk_06 >> 11 ) & 1 ) ) {
+            scene_cullBack = ( scene_drawList[*link].unk_06 >> 11 ) & 1;
+            scene_geometryChanged = 1;
         }
-        if ( D_800A30B4 != ( ( D_8009D1A0[*link].unk_04 >> 11 ) & 7 ) ) {
-            D_800A30B4 = ( D_8009D1A0[*link].unk_04 >> 11 ) & 7;
-            D_80066B30 = 1;
+        if ( scene_surface != ( ( scene_drawList[*link].unk_04 >> 11 ) & 7 ) ) {
+            scene_surface = ( scene_drawList[*link].unk_04 >> 11 ) & 7;
+            scene_renderModeChanged = 1;
             Scene_PickRenderModes();
         }
 
-        if ( D_800DF5D4 != ( D_8009D1A0[*link].unk_04 & 0x7FF ) ) {
-            D_800DF5D4 = D_8009D1A0[*link].unk_04 & 0x7FF;
-            if ( memcmp( &D_80068ACC, &mat->prim, sizeof( rgba8_t ) ) ) {
-                D_80068ACC = mat->prim;
-                gDPSetPrimColor( game_gfx++, 0, 0, D_80068ACC.r, D_80068ACC.g, D_80068ACC.b, D_80068ACC.a );
+        if ( scene_material != ( scene_drawList[*link].unk_04 & 0x7FF ) ) {
+            scene_material = scene_drawList[*link].unk_04 & 0x7FF;
+            if ( memcmp( &scene_primColor, &mat->prim, sizeof( rgba8_t ) ) ) {
+                scene_primColor = mat->prim;
+                gDPSetPrimColor( game_gfx++, 0, 0, scene_primColor.r, scene_primColor.g, scene_primColor.b, scene_primColor.a );
             }
-            if ( memcmp( &D_800EA0C8, &mat->env, sizeof( rgba8_t ) ) ) {
-                D_800EA0C8 = mat->env;
-                gDPSetEnvColor( game_gfx++, D_800EA0C8.r, D_800EA0C8.g, D_800EA0C8.b, D_800EA0C8.a );
+            if ( memcmp( &scene_envColor, &mat->env, sizeof( rgba8_t ) ) ) {
+                scene_envColor = mat->env;
+                gDPSetEnvColor( game_gfx++, scene_envColor.r, scene_envColor.g, scene_envColor.b, scene_envColor.a );
             }
-            if ( memcmp( &D_8009CF70, &mat->combine, sizeof( combine_t ) ) ) {
-                D_8009CF70 = mat->combine;
-                D_800EA0CC = 1;
+            if ( memcmp( &scene_combine, &mat->combine, sizeof( combine_t ) ) ) {
+                scene_combine = mat->combine;
+                scene_combineChanged = 1;
             }
-            if ( ( ( mat->flags & MAT_SMOOTH ) >> 3 ) != D_800E6579 ) {
-                D_800E6579 = ( mat->flags & MAT_SMOOTH ) >> 3;
-                D_800DF682 = 1;
+            if ( ( ( mat->flags & MAT_SMOOTH ) >> 3 ) != scene_smooth ) {
+                scene_smooth = ( mat->flags & MAT_SMOOTH ) >> 3;
+                scene_geometryChanged = 1;
             }
-            if ( ( ( mat->flags & MAT_LIGHTING ) >> 2 ) != D_80066B32 ) {
-                D_80066B32 = ( mat->flags & MAT_LIGHTING ) >> 2;
-                D_800DF682 = 1;
+            if ( ( ( mat->flags & MAT_LIGHTING ) >> 2 ) != scene_lighting ) {
+                scene_lighting = ( mat->flags & MAT_LIGHTING ) >> 2;
+                scene_geometryChanged = 1;
             }
-            if ( ( ( mat->flags & MAT_TEXGEN ) >> 4 ) != D_800F7BE0 ) {
-                D_800F7BE0 = ( mat->flags & MAT_TEXGEN ) >> 4;
-                if ( D_800F7BE0 ) {
-                    D_8006940C = 1;
+            if ( ( ( mat->flags & MAT_TEXGEN ) >> 4 ) != scene_texGen ) {
+                scene_texGen = ( mat->flags & MAT_TEXGEN ) >> 4;
+                if ( scene_texGen ) {
+                    scene_texturing = 1;
                     gSPTexture( game_gfx++, 0x07C0, 0x07C0, 0, G_TX_RENDERTILE, G_ON );
-                } else if ( !D_8006940C ) {
+                } else if ( !scene_texturing ) {
                     gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF );
                 } else {
                     gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
                 }
-                D_800DF682 = 1;
+                scene_geometryChanged = 1;
             }
 
             if ( mat->flags & MAT_TEXTURE ) {
@@ -500,11 +500,11 @@ void Scene_Draw( void ) {
                     cmt = G_TX_MIRROR;
                     break;
                 }
-                if ( D_800F7BE0 ) {
+                if ( scene_texGen ) {
                     cmt = cms = G_TX_WRAP;
                 }
-                if ( D_8006940C != 1 ) {
-                    D_8006940C = 1;
+                if ( scene_texturing != 1 ) {
+                    scene_texturing = 1;
                     gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
                 }
                 switch ( mat->fmt ) {
@@ -543,17 +543,17 @@ void Scene_Draw( void ) {
                 }
             } else if ( mat->flags & MAT_TEXTURE2 ) {
                 size = mat->width * mat->height;
-                D_8009CF68 = size;
+                scene_tmemNext = size;
                 switch ( mat->fmt ) {
                 case MAT_I4:
                 case MAT_CI4:
-                    D_8009CF68 = size >> 4;
+                    scene_tmemNext = size >> 4;
                     break;
                 case MAT_CI8:
-                    D_8009CF68 = size >> 3;
+                    scene_tmemNext = size >> 3;
                     break;
                 case MAT_RGBA16:
-                    D_8009CF68 = size >> 2;
+                    scene_tmemNext = size >> 2;
                     break;
                 }
                 switch ( mat->wrap2 & 3 ) {
@@ -578,7 +578,7 @@ void Scene_Draw( void ) {
                     cmt = G_TX_MIRROR;
                     break;
                 }
-                if ( D_800F7BE0 ) {
+                if ( scene_texGen ) {
                     cmt = cms = G_TX_WRAP;
                 }
                 switch ( mat->fmt2 ) {
@@ -591,29 +591,29 @@ void Scene_Draw( void ) {
                     break;
                 case MAT_CI4:
                     gDPLoadTLUT_pal16( game_gfx++, 14, mat->palette2 );
-                    gDPLoadMultiBlock_4b( game_gfx++, mat->texels2, D_8009CF68, 1, G_IM_FMT_CI, mat->width2,
+                    gDPLoadMultiBlock_4b( game_gfx++, mat->texels2, scene_tmemNext, 1, G_IM_FMT_CI, mat->width2,
                                           mat->height2, 14, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
                                           Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI8:
-                    gDPLoadMultiBlock( game_gfx++, mat->texels2, D_8009CF68, 1, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width2,
+                    gDPLoadMultiBlock( game_gfx++, mat->texels2, scene_tmemNext, 1, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width2,
                                        mat->height2, 0, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
                                        Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_RGBA16:
-                    gDPLoadMultiBlock( game_gfx++, mat->texels2, D_8009CF68, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                    gDPLoadMultiBlock( game_gfx++, mat->texels2, scene_tmemNext, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
                                        mat->width2, mat->height2, 0, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
                                        Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_I8:
                     /* the first texture again, not the second */
-                    gDPLoadMultiBlock( game_gfx++, mat->texels, D_8009CF68, 1, G_IM_FMT_I, G_IM_SIZ_8b, mat->width,
+                    gDPLoadMultiBlock( game_gfx++, mat->texels, scene_tmemNext, 1, G_IM_FMT_I, G_IM_SIZ_8b, mat->width,
                                        mat->height, 0, cms, cmt, Scene_TextureSizeLog2( mat->width ),
                                        Scene_TextureSizeLog2( mat->height ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 }
-            } else if ( D_8006940C ) {
-                D_8006940C = 0;
+            } else if ( scene_texturing ) {
+                scene_texturing = 0;
                 gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF );
             }
         }
@@ -623,38 +623,38 @@ void Scene_Draw( void ) {
                             mat->scroll[1] + 32 );
         }
 
-        if ( D_800DF682 ) {
-            D_800DF682 = 0;
-            D_800DF570 = G_SHADE;
-            if ( D_80066B31 ) {
-                D_800DF570 = G_SHADE | G_CULL_BACK;
+        if ( scene_geometryChanged ) {
+            scene_geometryChanged = 0;
+            scene_geometryMode = G_SHADE;
+            if ( scene_cullBack ) {
+                scene_geometryMode = G_SHADE | G_CULL_BACK;
             } else {
-                D_800DF570 = G_SHADE | G_CULL_FRONT;
+                scene_geometryMode = G_SHADE | G_CULL_FRONT;
             }
-            if ( D_800E4D60 ) {
-                D_800DF570 |= G_ZBUFFER;
+            if ( scene_zBuffer ) {
+                scene_geometryMode |= G_ZBUFFER;
             }
-            if ( D_800E6579 ) {
-                D_800DF570 |= G_SHADING_SMOOTH;
+            if ( scene_smooth ) {
+                scene_geometryMode |= G_SHADING_SMOOTH;
             }
-            if ( D_80066B32 ) {
-                D_800DF570 |= G_LIGHTING;
+            if ( scene_lighting ) {
+                scene_geometryMode |= G_LIGHTING;
             }
-            if ( D_800F7BE0 ) {
-                D_800DF570 |= G_TEXTURE_GEN;
+            if ( scene_texGen ) {
+                scene_geometryMode |= G_TEXTURE_GEN;
             }
-            if ( D_800E6588 ) {
-                D_800DF570 |= G_FOG;
+            if ( scene_fog ) {
+                scene_geometryMode |= G_FOG;
             }
             gSPClearGeometryMode( game_gfx++, G_ZBUFFER | G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING |
                                                 G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH );
-            gSPSetGeometryMode( game_gfx++, D_800DF570 );
+            gSPSetGeometryMode( game_gfx++, scene_geometryMode );
         }
 
-        if ( D_800EA0CC ) {
-            D_800EA0CC = 0;
+        if ( scene_combineChanged ) {
+            scene_combineChanged = 0;
             gfx = game_gfx++;
-            if ( D_800E4D60 ) {
+            if ( scene_zBuffer ) {
                 gfx->words.w0 = _SHIFTL( G_SETCOMBINE, 24, 8 ) |
                                 _SHIFTL( GCCc0w0( mat->combine.a0, mat->combine.c0, mat->combine.Aa0, mat->combine.Ac0 ) |
                                              GCCc1w0( mat->combine.a1, mat->combine.c1 ),
@@ -673,14 +673,14 @@ void Scene_Draw( void ) {
             }
         }
 
-        if ( D_80066B30 ) {
-            D_80066B30 = 0;
-            gDPSetRenderMode( game_gfx++, D_801000B4, D_800E4D64 );
+        if ( scene_renderModeChanged ) {
+            scene_renderModeChanged = 0;
+            gDPSetRenderMode( game_gfx++, scene_renderMode1, scene_renderMode2 );
         }
 
-        if ( D_800A30B0 != D_8009D1A0[*link].unk_08 ) {
-            D_800A30B0 = D_8009D1A0[*link].unk_08;
-            gSPMatrix( game_gfx++, D_8009D1A0[*link].unk_08, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
+        if ( scene_modelMtx != scene_drawList[*link].unk_08 ) {
+            scene_modelMtx = scene_drawList[*link].unk_08;
+            gSPMatrix( game_gfx++, scene_drawList[*link].unk_08, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
         }
 
         gSPVertex( game_gfx++, mesh->verts, mesh->numVerts, 0 );
@@ -703,24 +703,24 @@ void Scene_InitPuffs( void ) {
     s32 i;
 
     for ( i = 0; i < NUM_PUFFS; i++ ) {
-        D_800E4D70[i].life = 0;
+        scene_puffs[i].life = 0;
     }
     for ( i = 0; i < 2; i++ ) {
-        Cache_GetFile( D_8005C1E4[i], FILE_RAW );
+        Cache_GetFile( scene_puffImages[i], FILE_RAW );
     }
     for ( i = 1; i < NUM_PUFF_SIZES; i++ ) {
-        D_8005C1F0[i * 4] = D_8005C1F0[0];
-        D_8005C1F0[i * 4].v.ob[0] = -( i + 1 );
-        D_8005C1F0[i * 4].v.ob[1] = i + 1;
-        D_8005C1F0[i * 4 + 1] = D_8005C1F0[1];
-        D_8005C1F0[i * 4 + 1].v.ob[0] = i + 1;
-        D_8005C1F0[i * 4 + 1].v.ob[1] = i + 1;
-        D_8005C1F0[i * 4 + 2] = D_8005C1F0[2];
-        D_8005C1F0[i * 4 + 2].v.ob[0] = -( i + 1 );
-        D_8005C1F0[i * 4 + 2].v.ob[1] = -( i + 1 );
-        D_8005C1F0[i * 4 + 3] = D_8005C1F0[3];
-        D_8005C1F0[i * 4 + 3].v.ob[0] = i + 1;
-        D_8005C1F0[i * 4 + 3].v.ob[1] = -( i + 1 );
+        scene_puffSquares[i * 4] = scene_puffSquares[0];
+        scene_puffSquares[i * 4].v.ob[0] = -( i + 1 );
+        scene_puffSquares[i * 4].v.ob[1] = i + 1;
+        scene_puffSquares[i * 4 + 1] = scene_puffSquares[1];
+        scene_puffSquares[i * 4 + 1].v.ob[0] = i + 1;
+        scene_puffSquares[i * 4 + 1].v.ob[1] = i + 1;
+        scene_puffSquares[i * 4 + 2] = scene_puffSquares[2];
+        scene_puffSquares[i * 4 + 2].v.ob[0] = -( i + 1 );
+        scene_puffSquares[i * 4 + 2].v.ob[1] = -( i + 1 );
+        scene_puffSquares[i * 4 + 3] = scene_puffSquares[3];
+        scene_puffSquares[i * 4 + 3].v.ob[0] = i + 1;
+        scene_puffSquares[i * 4 + 3].v.ob[1] = -( i + 1 );
     }
 }
 
@@ -775,31 +775,31 @@ void Scene_StartPuff( u16 flags, f32 x, f32 y, f32 z ) {
     u32 i;
 
     for ( i = 0; i < NUM_PUFFS; i++ ) {
-        if ( D_800E4D70[i].life == 0 ) {
+        if ( scene_puffs[i].life == 0 ) {
             break;
         }
     }
-    D_800E4D70[i].flags = flags;
+    scene_puffs[i].flags = flags;
     switch ( flags & PUFF_KIND ) {
     case 0:
-        D_800E4D70[i].alpha = 0xFF;
-        D_800E4D70[i].alphaStep = -8;
-        D_800E4D70[i].size = 15;
-        D_800E4D70[i].sizeStep = 2;
-        D_800E4D70[i].life = 15;
+        scene_puffs[i].alpha = 0xFF;
+        scene_puffs[i].alphaStep = -8;
+        scene_puffs[i].size = 15;
+        scene_puffs[i].sizeStep = 2;
+        scene_puffs[i].life = 15;
         break;
     case 1:
-        D_800E4D70[i].alpha = 0xFF;
-        D_800E4D70[i].alphaStep = -15;
-        D_800E4D70[i].size = 10;
-        D_800E4D70[i].sizeStep = 2;
-        D_800E4D70[i].life = 7;
+        scene_puffs[i].alpha = 0xFF;
+        scene_puffs[i].alphaStep = -15;
+        scene_puffs[i].size = 10;
+        scene_puffs[i].sizeStep = 2;
+        scene_puffs[i].life = 7;
         break;
     }
     Scene_FaceMatrix( m, x, y, z, D_8009CFA0[0]->eye[0], D_8009CFA0[0]->eye[1], D_8009CFA0[0]->eye[2] );
-    guMtxF2L( m, &D_800E6770[0][i] );
+    guMtxF2L( m, &scene_puffMtx[0][i] );
     Scene_FaceMatrix( m, x, y, z, D_8009CFA0[1]->eye[0], D_8009CFA0[1]->eye[1], D_8009CFA0[1]->eye[2] );
-    guMtxF2L( m, &D_800E6770[1][i] );
+    guMtxF2L( m, &scene_puffMtx[1][i] );
 }
 
 /*
@@ -824,17 +824,17 @@ void Scene_DrawPuffs( void ) {
     }
     kind = FALSE;
     for ( i = 0; i < NUM_PUFFS; i++ ) {
-        if ( D_800E4D70[i].life != 0 ) {
-            count[D_800E4D70[i].flags & PUFF_KIND]++;
-            D_800E4D70[i].life--;
-            D_800E4D70[i].size += D_800E4D70[i].sizeStep;
+        if ( scene_puffs[i].life != 0 ) {
+            count[scene_puffs[i].flags & PUFF_KIND]++;
+            scene_puffs[i].life--;
+            scene_puffs[i].size += scene_puffs[i].sizeStep;
             kind = TRUE;
-            if ( D_800E4D70[i].size >= NUM_PUFF_SIZES ) {
-                D_800E4D70[i].size = NUM_PUFF_SIZES - 1;
+            if ( scene_puffs[i].size >= NUM_PUFF_SIZES ) {
+                scene_puffs[i].size = NUM_PUFF_SIZES - 1;
             }
-            D_800E4D70[i].alpha += D_800E4D70[i].alphaStep;
-            if ( D_800E4D70[i].alpha < 0 ) {
-                D_800E4D70[i].alpha = 0;
+            scene_puffs[i].alpha += scene_puffs[i].alphaStep;
+            if ( scene_puffs[i].alpha < 0 ) {
+                scene_puffs[i].alpha = 0;
             }
         }
     }
@@ -842,8 +842,8 @@ void Scene_DrawPuffs( void ) {
         return;
     }
 
-    if ( D_80066C34 != 1 ) {
-        D_800A3018 = 2;
+    if ( scene_ucode != 1 ) {
+        scene_view = 2;
         gSPLoadUcodeL( game_gfx++, gspF3DEX2_fifo );
         gSPClipRatio( game_gfx++, FRUSTRATIO_1 );
     }
@@ -859,7 +859,7 @@ void Scene_DrawPuffs( void ) {
         }
         gDPSetTextureLUT( game_gfx++, G_TT_NONE );
         gDPLoadTextureBlock_4b( game_gfx++,
-                                ( (fileImage_t *)D_800F80B0[D_8005C1E4[kind]].data )->data + CI4_PALETTE_SIZE, G_IM_FMT_I,
+                                ( (fileImage_t *)D_800F80B0[scene_puffImages[kind]].data )->data + CI4_PALETTE_SIZE, G_IM_FMT_I,
                                 64, 64, 0, G_TX_WRAP | G_TX_NOMIRROR, G_TX_WRAP | G_TX_NOMIRROR, 6, 6, G_TX_NOLOD,
                                 G_TX_NOLOD );
         if ( kind == 1 ) {
@@ -867,21 +867,21 @@ void Scene_DrawPuffs( void ) {
             gDPSetAlphaCompare( game_gfx++, G_AC_DITHER );
         }
         for ( view = 0; view < 2; view++ ) {
-            if ( D_800A3018 != view ) {
-                D_800A3018 = view;
-                Scene_BeginView( D_8009CFA0[D_800A3018] );
+            if ( scene_view != view ) {
+                scene_view = view;
+                Scene_BeginView( D_8009CFA0[scene_view] );
             }
             gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
             gSPClearGeometryMode( game_gfx++, G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN |
                                                 G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH );
             gSPSetGeometryMode( game_gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH );
             for ( i = 0; i < NUM_PUFFS; i++ ) {
-                if ( ( D_800E4D70[i].flags & PUFF_KIND ) == kind && D_800E4D70[i].life != 0 &&
-                     ( D_800E4D70[i].flags & PUFF_CAMERA( view ) ) ) {
-                    gSPMatrix( game_gfx++, &D_800E6770[view][i], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
-                    gSPVertex( game_gfx++, &D_8005C1F0[D_800E4D70[i].size * 4], 4, 0 );
-                    gDPSetPrimColor( game_gfx++, 0, 0, D_8005C970[kind][0], D_8005C970[kind][1], D_8005C970[kind][2],
-                                     D_800E4D70[i].alpha );
+                if ( ( scene_puffs[i].flags & PUFF_KIND ) == kind && scene_puffs[i].life != 0 &&
+                     ( scene_puffs[i].flags & PUFF_CAMERA( view ) ) ) {
+                    gSPMatrix( game_gfx++, &scene_puffMtx[view][i], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
+                    gSPVertex( game_gfx++, &scene_puffSquares[scene_puffs[i].size * 4], 4, 0 );
+                    gDPSetPrimColor( game_gfx++, 0, 0, scene_puffColors[kind][0], scene_puffColors[kind][1], scene_puffColors[kind][2],
+                                     scene_puffs[i].alpha );
                     gSP2Triangles( game_gfx++, 0, 2, 1, 0, 2, 3, 1, 0 );
                     gDPPipeSync( game_gfx++ );
                 }

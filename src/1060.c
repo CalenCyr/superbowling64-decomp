@@ -427,7 +427,7 @@ void Game_Thread( void *arg ) {
         gSPSegment( game_gfx++, 0, 0 );
         gSPDisplayList( game_gfx++, D_8010A2C8 );
         gSPDisplayList( game_gfx++, D_8010A2A0 );
-        gDPSetDepthImage( game_gfx++, osVirtualToPhysical( D_80000400 ) );
+        gDPSetDepthImage( game_gfx++, osVirtualToPhysical( scene_depthBuffer ) );
         gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
                           osVirtualToPhysical( sched_framebuffers[sched_drawFb] ) );
         gDPPipeSync( game_gfx++ );

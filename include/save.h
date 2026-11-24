@@ -37,7 +37,7 @@ extern u16 save_promptChoice;       /* choice under the cursor */
 extern u8 save_cursorAlpha;         /* alpha of the blinking cursor, 0x40 to 0x80 */
 extern s8 save_cursorStep;          /* added to save_cursorAlpha each frame; turned at either end */
 /* cursor rectangle of each choice, from the prompt's corner. Two entries each: the next bss objects
-   (cont_held, D_800E4D6C, __osContLastCmd; unused bss after the heights) follow each; a three-choice
+   (cont_held, scene_twoCycle, __osContLastCmd; unused bss after the heights) follow each; a three-choice
    prompt's third rectangle overruns them (OP_CheckSettings) */
 extern u16 save_choiceX[2];         /* x */
 extern u16 save_choiceY[2];         /* y */
