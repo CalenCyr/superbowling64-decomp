@@ -95,12 +95,10 @@ void func_80112574_rscode( void ) {
 func_80112674_rscode
 
 Picks the state of mode 0's results by its sub-mode; a perfect game (bit 0x200 of D_8009D098.unk_04) or a
-finished game (bit 0x100) first shows its message, once.
+finished game (bit 0x100) first shows its message, once. Sub-mode 0 checks for a perfect game only with
+argument 0 (bits 6-7 of D_8005C160); its switch lists the other three arguments, which do nothing.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: control flow; retail's switch on D_8005C160 >> 6 keeps a case 1 that goes to the end (its
-// decision tree tests 1, then < 2, then 0), which an empty case here does not keep
 void func_80112674_rscode( void ) {
     s32 found = 0;
     s32 i;
@@ -127,6 +125,10 @@ void func_80112674_rscode( void ) {
             break;
         case 1:
             break;
+        case 2:
+            break;
+        case 3:
+            break;
         }
         break;
     case 1:
@@ -151,9 +153,6 @@ void func_80112674_rscode( void ) {
         break;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", func_80112674_rscode);
-#endif
 
 /*
 ================
