@@ -63,6 +63,8 @@ Reads file index of the str segment into dst, decompressing it if it is stored c
 // &str_files[index].romOffset out of the loop) where this draft addresses them with %hi/%lo each time; an
 // ArchiveEntry *entry local is worse. Permuter (target-only scoring, 5 min): best 2560 from 3030 only through noise
 // (a pointer temporary for str_files after the last DMA), no source clue.
+// Retail forms each field's address from its own la of str_files + offset (CSE derives &size as &rawSize - 4); a
+// u32 [][3] table spells the same as the struct, and ( str_files + index )-> gives one shared base (both no closer).
 u32 Str_ReadFile( s32 index, u8 *dst ) {
     u8 *out;
     s32 compressed;
