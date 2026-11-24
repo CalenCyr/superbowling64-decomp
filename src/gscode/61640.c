@@ -99,7 +99,7 @@ s32 GS_CharacterMenu( void ) {
             func_80026B28();
             Obj_CreateAll( gs_classes, D_801204EC_gscode );
             D_80120A20_gscode = 0xFFFF;
-            D_8009CFA0[0]->path->unk_38 |= 4;
+            D_8009CFA0[0]->path->flags |= 4;
         } else if ( D_80120654_gscode == 28 ) {
             for ( i = 0; i < 8; i++ ) {
                 D_80120A28_gscode[i] = Cache_GetFile( D_801205CC_gscode[i], FILE_TYPE1 );

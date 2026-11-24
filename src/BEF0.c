@@ -87,20 +87,20 @@ void *Cache_GetFile( s16 index, s16 type ) {
         for ( i = 0; i < file1->numParts; i++ ) {
             file1->parts[i] = FILE_RELOC( file1, file1->parts[i] );
             for ( j = 0; j < file1->parts[i]->numRefs; j++ ) {
-                if ( D_800F80B0[file1->parts[i]->refs[j].unk_00].refCount == 0 ) {
-                    Cache_LoadFile( file1->parts[i]->refs[j].unk_00 );
-                    refA = D_800F80B0[file1->parts[i]->refs[j].unk_00].data;
-                    refA->unk_04 = FILE_RELOC( refA, refA->unk_04 );
-                    refA->unk_08 = FILE_RELOC( refA, refA->unk_08 );
-                    Obj_ConvertModel( refA->unk_08 );
+                if ( D_800F80B0[file1->parts[i]->refs[j].mesh].refCount == 0 ) {
+                    Cache_LoadFile( file1->parts[i]->refs[j].mesh );
+                    refA = D_800F80B0[file1->parts[i]->refs[j].mesh].data;
+                    refA->verts = FILE_RELOC( refA, refA->verts );
+                    refA->cmds = FILE_RELOC( refA, refA->cmds );
+                    Obj_ConvertModel( refA->cmds );
                 }
-                if ( D_800F80B0[file1->parts[i]->refs[j].unk_02].refCount == 0 ) {
-                    Cache_LoadFile( file1->parts[i]->refs[j].unk_02 );
-                    refB = D_800F80B0[file1->parts[i]->refs[j].unk_02].data;
-                    refB->unk_2C = FILE_RELOC( refB, refB->unk_2C );
-                    refB->unk_30 = FILE_RELOC( refB, refB->unk_30 );
-                    refB->unk_34 = FILE_RELOC( refB, refB->unk_2C );
-                    refB->unk_38 = FILE_RELOC( refB, refB->unk_30 );
+                if ( D_800F80B0[file1->parts[i]->refs[j].material].refCount == 0 ) {
+                    Cache_LoadFile( file1->parts[i]->refs[j].material );
+                    refB = D_800F80B0[file1->parts[i]->refs[j].material].data;
+                    refB->palette = FILE_RELOC( refB, refB->palette );
+                    refB->texels = FILE_RELOC( refB, refB->texels );
+                    refB->palette2 = FILE_RELOC( refB, refB->palette );
+                    refB->texels2 = FILE_RELOC( refB, refB->texels );
                 }
             }
         }

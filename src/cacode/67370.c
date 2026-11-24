@@ -150,12 +150,12 @@ void CA_Init( void ) {
         guMtxIdentF( ca_objectMatrices[1][i] );
         memcpy( ca_cameraAt[0][i], ca_cameras[1]->cam.at, sizeof( ca_cameraAt[0][i] ) );
         memcpy( ca_cameraEye[0][i], ca_cameras[1]->cam.eye, sizeof( ca_cameraEye[0][i] ) );
-        memcpy( ca_cameraUp[0][i], ca_cameras[1]->cam.unk_18, sizeof( ca_cameraUp[0][i] ) );
+        memcpy( ca_cameraUp[0][i], ca_cameras[1]->cam.upPoint, sizeof( ca_cameraUp[0][i] ) );
         memcpy( ca_cameraAt[1][i], ca_cameras[2]->cam.at, sizeof( ca_cameraAt[1][i] ) );
         memcpy( ca_cameraEye[1][i], ca_cameras[2]->cam.eye, sizeof( ca_cameraEye[1][i] ) );
-        memcpy( ca_cameraUp[1][i], ca_cameras[2]->cam.unk_18, sizeof( ca_cameraUp[1][i] ) );
+        memcpy( ca_cameraUp[1][i], ca_cameras[2]->cam.upPoint, sizeof( ca_cameraUp[1][i] ) );
         for ( j = 0; j < model->numParts; j++ ) {
-            memcpy( ca_partRotations[j][i], model->parts[j]->unk_08, sizeof( ca_partRotations[j][i] ) );
+            memcpy( ca_partRotations[j][i], model->parts[j]->rot, sizeof( ca_partRotations[j][i] ) );
         }
     }
     guMtxIdentF( ca_camera0Matrix );
@@ -399,52 +399,52 @@ void CA_Frame( void ) {
             cam = &ca_cameras[0]->cam;
             cam->width = 320;
             cam->height = 240;
-            cam->unk_2C = 0;
-            cam->unk_2E = 0;
+            cam->left = 0;
+            cam->top = 0;
             cam = &ca_cameras[1]->cam;
             cam->width = 120;
             cam->height = 120;
-            cam->unk_2C = 200;
-            cam->unk_2E = 0;
+            cam->left = 200;
+            cam->top = 0;
             cam = &ca_cameras[2]->cam;
             cam->width = 120;
             cam->height = 120;
-            cam->unk_2C = 200;
-            cam->unk_2E = 120;
+            cam->left = 200;
+            cam->top = 120;
             break;
         case 1:
             cam = &ca_cameras[0]->cam;
             cam->width = 120;
             cam->height = 120;
-            cam->unk_2C = 0;
-            cam->unk_2E = 0;
+            cam->left = 0;
+            cam->top = 0;
             cam = &ca_cameras[1]->cam;
             cam->width = 320;
             cam->height = 240;
-            cam->unk_2C = 0;
-            cam->unk_2E = 0;
+            cam->left = 0;
+            cam->top = 0;
             cam = &ca_cameras[2]->cam;
             cam->width = 120;
             cam->height = 120;
-            cam->unk_2C = 200;
-            cam->unk_2E = 120;
+            cam->left = 200;
+            cam->top = 120;
             break;
         case 2:
             cam = &ca_cameras[0]->cam;
             cam->width = 120;
             cam->height = 120;
-            cam->unk_2C = 0;
-            cam->unk_2E = 0;
+            cam->left = 0;
+            cam->top = 0;
             cam = &ca_cameras[1]->cam;
             cam->width = 120;
             cam->height = 120;
-            cam->unk_2C = 200;
-            cam->unk_2E = 0;
+            cam->left = 200;
+            cam->top = 0;
             cam = &ca_cameras[2]->cam;
             cam->width = 320;
             cam->height = 240;
-            cam->unk_2C = 0;
-            cam->unk_2E = 0;
+            cam->left = 0;
+            cam->top = 0;
             break;
         }
     }
@@ -515,7 +515,7 @@ void CA_Frame( void ) {
 
     /* pose the object for the frame */
     for ( i = 0; i < model->numParts; i++ ) {
-        memcpy( model->parts[i]->unk_08, ca_partRotations[i][ca_frame], sizeof( model->parts[i]->unk_08 ) );
+        memcpy( model->parts[i]->rot, ca_partRotations[i][ca_frame], sizeof( model->parts[i]->rot ) );
     }
     if ( ca_selected == 0 ) {
         memcpy( obj->mtx, ca_camera0Matrix, sizeof( obj->mtx ) );
@@ -526,8 +526,8 @@ void CA_Frame( void ) {
         memcpy( ca_objects[i]->obj.mtx, ca_objectMatrices[i - 1][ca_frame], sizeof( ca_objects[i]->obj.mtx ) );
         memcpy( ca_cameras[i]->cam.at, ca_cameraAt[i - 1][ca_frame], sizeof( ca_cameras[i]->cam.at ) );
         memcpy( ca_cameras[i]->cam.eye, ca_cameraEye[i - 1][ca_frame], sizeof( ca_cameras[i]->cam.eye ) );
-        memcpy( ca_cameras[i]->cam.unk_18, ca_cameraUp[i - 1][ca_frame],
-                sizeof( ca_cameras[i]->cam.unk_18 ) );
+        memcpy( ca_cameras[i]->cam.upPoint, ca_cameraUp[i - 1][ca_frame],
+                sizeof( ca_cameras[i]->cam.upPoint ) );
     }
 
     Scene_ClearDrawList();
@@ -564,9 +564,9 @@ void CA_Frame( void ) {
                 cam->eye[0] += move[0];
                 cam->eye[1] += move[1];
                 cam->eye[2] += move[2];
-                cam->unk_18[0] += move[0];
-                cam->unk_18[1] += move[1];
-                cam->unk_18[2] += move[2];
+                cam->upPoint[0] += move[0];
+                cam->upPoint[1] += move[1];
+                cam->upPoint[2] += move[2];
             }
         }
         if ( D_800994BC & Z_TRIG ) {
@@ -631,7 +631,7 @@ void CA_Frame( void ) {
             guMtxCatF( obj->joints[ca_part].mtx, rotM, m );
             if ( ca_part > 0 ) {
                 /* back to the parent's frame, and store the part's new rotation */
-                CA_InvertMatrix( obj->joints[model->parts[ca_part]->unk_04].mtx, inv );
+                CA_InvertMatrix( obj->joints[model->parts[ca_part]->parent].mtx, inv );
                 guMtxCatF( m, inv, m );
                 CA_DecomposeMatrix( m, move, ca_partRotations[ca_part][ca_frame], scale );
             }
@@ -670,7 +670,7 @@ void CA_Frame( void ) {
                 sizeof( ca_cameraAt[0][0] ) );
         memcpy( ca_cameraEye[ca_selected - 1][ca_frame], ca_cameras[ca_selected]->cam.eye,
                 sizeof( ca_cameraEye[0][0] ) );
-        memcpy( ca_cameraUp[ca_selected - 1][ca_frame], ca_cameras[ca_selected]->cam.unk_18,
+        memcpy( ca_cameraUp[ca_selected - 1][ca_frame], ca_cameras[ca_selected]->cam.upPoint,
                 sizeof( ca_cameraUp[0][0] ) );
     }
 
@@ -718,9 +718,9 @@ void CA_Frame( void ) {
     switch ( ca_mode ) {
     case CAMODE_ROTATE:
         Txt_DrawString( &D_800F8094, 20, 20, "ROTATE" );
-        sprintf( str, "H=%3.1f P=%3.1f B=%3.1f", model->parts[ca_part]->unk_08[0] * RAD_TO_DEG,
-                 model->parts[ca_part]->unk_08[1] * RAD_TO_DEG,
-                 model->parts[ca_part]->unk_08[2] * RAD_TO_DEG );
+        sprintf( str, "H=%3.1f P=%3.1f B=%3.1f", model->parts[ca_part]->rot[0] * RAD_TO_DEG,
+                 model->parts[ca_part]->rot[1] * RAD_TO_DEG,
+                 model->parts[ca_part]->rot[2] * RAD_TO_DEG );
         Txt_DrawString( &D_800F8094, 64, 215, str );
         break;
     case CAMODE_FILE:

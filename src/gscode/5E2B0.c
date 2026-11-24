@@ -47,7 +47,7 @@ s32 GS_CharacterSelect( void ) {
             Obj_CreateAll( gs_classes, D_8011F880_gscode[D_8005C163] );
             D_8011F8A0_gscode = 30;
             D_8011F8A4_gscode = 3.1415927f;
-            D_8009CFA0[0]->path->unk_38 |= 4;
+            D_8009CFA0[0]->path->flags |= 4;
         }
         if ( D_8011F8BA_gscode < 7 ) {
             D_8009CFA0[0]->width = 224.0f - D_8011F8BA_gscode * 32;
@@ -59,8 +59,8 @@ s32 GS_CharacterSelect( void ) {
             D_8009CFA0[0]->width = 32;
             D_8009CFA0[0]->height = 17;
         }
-        D_8009CFA0[0]->unk_2C = 160 - D_8009CFA0[0]->width / 2;
-        D_8009CFA0[0]->unk_2E = 114 - D_8009CFA0[0]->height / 2;
+        D_8009CFA0[0]->left = 160 - D_8009CFA0[0]->width / 2;
+        D_8009CFA0[0]->top = 114 - D_8009CFA0[0]->height / 2;
     }
 
     if ( D_8011F8B9_gscode == CHOICE_RUN ) {
@@ -105,7 +105,7 @@ s32 GS_CharacterSelect( void ) {
 
     if ( D_8011F8B9_gscode == CHOICE_RUN && D_8011F8BA_gscode != 7 && D_8011F8BA_gscode != 8 &&
          D_8011F8BA_gscode != 9 ) {
-        Draw_FillRect( D_8009CFA0[0]->unk_2C, D_8009CFA0[0]->unk_2E, D_8009CFA0[0]->width - 1,
+        Draw_FillRect( D_8009CFA0[0]->left, D_8009CFA0[0]->top, D_8009CFA0[0]->width - 1,
                        D_8009CFA0[0]->height - 1, D_8009CFA0[0]->path->clearColor[0],
                        D_8009CFA0[0]->path->clearColor[1], D_8009CFA0[0]->path->clearColor[2], 0xFF );
         D_8009CFA0[0]->frame = -1;
@@ -121,9 +121,9 @@ s32 GS_CharacterSelect( void ) {
         } else {
             D_8011F8A4_gscode += 0.010471975511965976;
         }
-        D_8009CFA0[0]->unk_18[2] = D_8009CFA0[0]->eye[2];
-        D_8009CFA0[0]->unk_18[0] = D_8009CFA0[0]->eye[0];
-        D_8009CFA0[0]->unk_18[1] = -100.0f;
+        D_8009CFA0[0]->upPoint[2] = D_8009CFA0[0]->eye[2];
+        D_8009CFA0[0]->upPoint[0] = D_8009CFA0[0]->eye[0];
+        D_8009CFA0[0]->upPoint[1] = -100.0f;
         func_8002A2F0();
     }
 

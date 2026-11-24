@@ -78,12 +78,12 @@ by that index).
 typedef struct {
     /* 0x000 */ f32 eye[3];
     /* 0x00C */ f32 at[3];
-    /* 0x018 */ f32 unk_18[3];          /* the up vector points from eye to it */
+    /* 0x018 */ f32 upPoint[3];         /* the up vector points from eye to it */
     /* 0x024 */ s32 frame;              /* of path; negative: the path is not followed */
     /* 0x028 */ u16 width;              /* of the viewport */
     /* 0x02A */ u16 height;
-    /* 0x02C */ u16 unk_2C;
-    /* 0x02E */ u16 unk_2E;
+    /* 0x02C */ u16 left;               /* of the viewport, in the framebuffer */
+    /* 0x02E */ u16 top;
     /* 0x030 */ u16 targetObj;          /* index in D_800EA120 of the object it looks at; 0: at stays */
     /* 0x032 */ u16 targetJoint;        /* the joint of that object */
     /* 0x034 */ f32 up[3];
@@ -137,7 +137,7 @@ void Obj_Draw( sceneObject_t *obj );
 
 /* the cameras (unit 7250) */
 void Cam_SetAmbient( s32 index, u8 *color );
-void Cam_ReadPathFrame( s16 file, s16 frame, f32 *eye, f32 *unk_2C );
+void Cam_ReadPathFrame( s16 file, s16 frame, f32 *eye, f32 *upPoint );
 objNode_t *Cam_Create( objParams_t *params );
 void Cam_Update( sceneCamera_t *cam );
 void Cam_UpdateAndAdvance( sceneCamera_t *cam );

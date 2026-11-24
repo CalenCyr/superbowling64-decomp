@@ -32,10 +32,10 @@ void Cam_SetAmbient( s32 index, u8 *color ) {
 ================
 Cam_ReadPathFrame
 
-Reads frame of camera path file into eye and unk_2C, each component from the frame or the path's default.
+Reads frame of camera path file into eye and upPoint, each component from the frame or the path's default.
 ================
 */
-void Cam_ReadPathFrame( s16 file, s16 frame, f32 *eye, f32 *unk_2C ) {
+void Cam_ReadPathFrame( s16 file, s16 frame, f32 *eye, f32 *upPoint ) {
     fileType3_t *path;
     f32 *data;
     s32 i;
@@ -50,10 +50,10 @@ void Cam_ReadPathFrame( s16 file, s16 frame, f32 *eye, f32 *unk_2C ) {
         }
     }
     for ( i = 0; i < 3; i++ ) {
-        if ( path->unk_12 & ( 4 >> i ) ) {
-            unk_2C[i] = *data++;
+        if ( path->upPointMask & ( 4 >> i ) ) {
+            upPoint[i] = *data++;
         } else {
-            unk_2C[i] = path->unk_2C[i];
+            upPoint[i] = path->upPoint[i];
         }
     }
 }
@@ -78,13 +78,13 @@ objNode_t *Cam_Create( objParams_t *params ) {
     for ( i = 0; i < 3; i++ ) {
         cam->at[i] = cam->path->at[i];
         cam->eye[i] = cam->path->eye[i];
-        cam->unk_18[i] = cam->path->unk_2C[i];
+        cam->upPoint[i] = cam->path->upPoint[i];
     }
     D_8009CFA0[D_80099480++] = cam;
     cam->width = params->unk_08[1];
     cam->height = params->unk_08[2];
-    cam->unk_2C = params->unk_08[3];
-    cam->unk_2E = params->unk_08[4];
+    cam->left = params->unk_08[3];
+    cam->top = params->unk_08[4];
     cam->targetObj = params->unk_08[5];
     cam->targetJoint = params->unk_08[6];
     for ( i = 0; i < 2; i++ ) {
@@ -136,8 +136,8 @@ void Cam_Update( sceneCamera_t *cam ) {
             }
         }
         for ( i = 0; i < 3; i++ ) {
-            if ( cam->path->unk_12 & ( 4 >> i ) ) {
-                cam->unk_18[i] = *data++;
+            if ( cam->path->upPointMask & ( 4 >> i ) ) {
+                cam->upPoint[i] = *data++;
             }
         }
     }
@@ -146,10 +146,10 @@ void Cam_Update( sceneCamera_t *cam ) {
     guPerspective( &cam->projL[D_8005C0B1], &D_8009CF9E, cam->path->fovy, (f32)cam->width / (f32)cam->height,
                    20.0f, 16000.0f, 1.0f );
     /* the up vector is divided by the sum of its components, not by its length */
-    norm = ( cam->unk_18[0] - cam->eye[0] ) + ( cam->unk_18[1] - cam->eye[1] ) + ( cam->unk_18[2] - cam->eye[2] );
-    cam->up[0] = ( cam->unk_18[0] - cam->eye[0] ) / norm;
-    cam->up[1] = ( cam->unk_18[1] - cam->eye[1] ) / norm;
-    cam->up[2] = ( cam->unk_18[2] - cam->eye[2] ) / norm;
+    norm = ( cam->upPoint[0] - cam->eye[0] ) + ( cam->upPoint[1] - cam->eye[1] ) + ( cam->upPoint[2] - cam->eye[2] );
+    cam->up[0] = ( cam->upPoint[0] - cam->eye[0] ) / norm;
+    cam->up[1] = ( cam->upPoint[1] - cam->eye[1] ) / norm;
+    cam->up[2] = ( cam->upPoint[2] - cam->eye[2] ) / norm;
     if ( D_800EA0C0 == 0 ) {
         guLookAtReflectF( cam->mtx, &cam->lookAt[D_8005C0B1], cam->eye[0], cam->eye[1], cam->eye[2], cam->at[0],
                           cam->at[1], cam->at[2], cam->up[0], cam->up[1], cam->up[2] );

@@ -24,14 +24,14 @@ typedef struct {
 
 /* Pairs of file indices in a fileType1_t part, each loaded and relocated with it. */
 typedef struct {
-    /* 0x00 */ u16 unk_00;          /* a fileRefA_t, which Obj_ConvertModel sets up */
-    /* 0x02 */ u16 unk_02;          /* a fileRefB_t */
+    /* 0x00 */ u16 mesh;            /* a fileRefA_t, which Obj_ConvertModel sets up */
+    /* 0x02 */ u16 material;        /* a fileRefB_t */
 } fileType1Ref_t;
 
 typedef struct {
     /* 0x00 */ u8 unk_00[0x04];
-    /* 0x04 */ s32 unk_04;          /* the parent part, whose joint cacode divides out */
-    /* 0x08 */ f32 unk_08[3];       /* rotation (radians); cacode's viewer copies it per frame */
+    /* 0x04 */ s32 parent;          /* the parent part, whose joint cacode divides out */
+    /* 0x08 */ f32 rot[3];          /* rotation (radians); cacode's viewer copies it per frame */
     /* 0x14 */ u8 unk_14[0x1A];
     /* 0x2E */ s16 numRefs;
     /* 0x30 */ fileType1Ref_t refs[1];   /* numRefs entries */
@@ -47,8 +47,8 @@ typedef struct {
 typedef struct {
     /* 0x00 */ u16 numVerts;
     /* 0x02 */ u8 unk_02[0x02];
-    /* 0x04 */ void *unk_04;        /* numVerts Vtx */
-    /* 0x08 */ Gfx *unk_08;         /* model commands, converted by Obj_ConvertModel */
+    /* 0x04 */ void *verts;         /* numVerts Vtx */
+    /* 0x08 */ Gfx *cmds;           /* model commands, converted by Obj_ConvertModel */
 } fileRefA_t;
 
 /* An 8-bit colour, compared and copied whole (memcmp, assignment). */
@@ -63,8 +63,8 @@ typedef struct {
 } combine_t;
 
 /* fileRefB_t.flags */
-#define MAT_TEXTURE         1           /* loads the texture at unk_30 into tile 0 */
-#define MAT_TEXTURE2        2           /* else, loads the texture at unk_38 into tile 1, after the first */
+#define MAT_TEXTURE         1           /* loads the texture at texels into tile 0 */
+#define MAT_TEXTURE2        2           /* else, loads the texture at texels2 into tile 1, after the first */
 #define MAT_LIGHTING        4
 #define MAT_SMOOTH          8
 #define MAT_TEXGEN          0x10
@@ -82,24 +82,24 @@ typedef struct {
     /* 0x04 */ rgba8_t prim;
     /* 0x08 */ rgba8_t env;
     /* 0x0C */ combine_t combine;
-    /* 0x1C */ u8 width;            /* of the texture at unk_30 */
+    /* 0x1C */ u8 width;            /* of the texture at texels */
     /* 0x1D */ u8 height;
     /* 0x1E */ u8 fmt;              /* MAT_I4 ... */
     /* 0x1F */ u8 wrap;             /* s in bits 0-1, t in bits 2-3: 0 wrap, 1 clamp, 2 mirror */
-    /* 0x20 */ u8 width2;           /* of the texture at unk_38 */
+    /* 0x20 */ u8 width2;           /* of the texture at texels2 */
     /* 0x21 */ u8 height2;
     /* 0x22 */ u8 fmt2;
     /* 0x23 */ u8 wrap2;
     /* 0x24 */ u16 scroll[2];       /* s, t of tile 0 in 10.2 fixed point */
     /* 0x28 */ u8 unk_28[0x04];
-    /* 0x2C */ void *unk_2C;         /* palette of unk_30 */
-    /* 0x30 */ void *unk_30;         /* texels */
-    /* 0x34 */ void *unk_34;         /* palette of unk_38 */
-    /* 0x38 */ void *unk_38;         /* texels */
+    /* 0x2C */ void *palette;       /* of texels */
+    /* 0x30 */ void *texels;        /* MAT_TEXTURE: loaded into tile 0 */
+    /* 0x34 */ void *palette2;      /* of texels2 */
+    /* 0x38 */ void *texels2;       /* MAT_TEXTURE2: loaded into tile 1 */
 } fileRefB_t;
 
 /* Animation of a model (FILE_TYPE2): per frame, the floats its joints' masks select. */
-#define FILE3_FOG           1           /* fileType3_t.unk_38: fog from fogNear to fogFar in fogColor */
+#define FILE3_FOG           1           /* fileType3_t.flags: fog from fogNear to fogFar in fogColor */
 
 typedef struct {
     /* 0x00 */ u32 numFrames;
@@ -118,11 +118,11 @@ typedef struct {
     /* 0x0C */ u16 frameSize;       /* floats per frame */
     /* 0x0E */ u8 unk_0E[0x02];
     /* 0x10 */ u16 eyeMask;
-    /* 0x12 */ u16 unk_12;          /* the mask of unk_2C */
+    /* 0x12 */ u16 upPointMask;     /* the mask of upPoint */
     /* 0x14 */ f32 at[3];
     /* 0x20 */ f32 eye[3];          /* where the frames leave a component out */
-    /* 0x2C */ f32 unk_2C[3];
-    /* 0x38 */ u32 unk_38;           /* flags; FILE3_FOG; 4 set by gscode's character menu */
+    /* 0x2C */ f32 upPoint[3];      /* sceneCamera_t.upPoint where the frames leave a component out */
+    /* 0x38 */ u32 flags;           /* FILE3_FOG; 4 set by gscode's character menu */
     /* 0x3C */ u32 fogColor;        /* rgba */
     /* 0x40 */ u16 fogFar;
     /* 0x42 */ u16 fogNear;

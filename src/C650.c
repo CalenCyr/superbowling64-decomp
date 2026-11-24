@@ -156,11 +156,11 @@ off when it changes), its matrices, look-at, viewport, scissor and lights.
 void Scene_BeginView( sceneCamera_t *cam ) {
     gDPPipeSync( D_800F8094++ );
     gDPSetDepthImage( D_800F8094++,
-                      osVirtualToPhysical( D_80000400 + ( cam->unk_2C & 0xFFC ) + cam->unk_2E * SCREEN_WIDTH ) );
+                      osVirtualToPhysical( D_80000400 + ( cam->left & 0xFFC ) + cam->top * SCREEN_WIDTH ) );
     gDPSetColorImage( D_800F8094++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-                      osVirtualToPhysical( D_80066C38[D_8005B0F8] + ( cam->unk_2C & 0xFFC ) +
-                                           cam->unk_2E * SCREEN_WIDTH ) );
-    if ( cam->path->unk_38 & FILE3_FOG ) {
+                      osVirtualToPhysical( D_80066C38[D_8005B0F8] + ( cam->left & 0xFFC ) +
+                                           cam->top * SCREEN_WIDTH ) );
+    if ( cam->path->flags & FILE3_FOG ) {
         if ( D_800E6588 == 0 ) {
             D_800E6588 = 1;
             D_800DF682 = 1;
@@ -321,8 +321,8 @@ void Scene_Draw( void ) {
                       osVirtualToPhysical( D_80066C38[D_8005B0F8] ) );
 
     /* the background of camera 0: its path's image, or its clear colour */
-    if ( !( D_8009CFA0[0]->path->unk_38 & 4 ) ) {
-        if ( D_8009CFA0[0]->path->unk_38 & 2 ) {
+    if ( !( D_8009CFA0[0]->path->flags & 4 ) ) {
+        if ( D_8009CFA0[0]->path->flags & 2 ) {
             gDPSetCycleType( D_800F8094++, G_CYC_COPY );
             gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
             gDPSetTexturePersp( D_800F8094++, G_TP_NONE );
@@ -510,33 +510,33 @@ void Scene_Draw( void ) {
                 switch ( mat->fmt ) {
                 case MAT_I4:
                     gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
-                    gDPLoadTextureBlock_4b( D_800F8094++, mat->unk_30, G_IM_FMT_I, mat->width, mat->height, 0, cms,
+                    gDPLoadTextureBlock_4b( D_800F8094++, mat->texels, G_IM_FMT_I, mat->width, mat->height, 0, cms,
                                             cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                             G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI4:
                     gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
-                    gDPLoadTLUT_pal16( D_800F8094++, 15, mat->unk_2C );
-                    gDPLoadTextureBlock_4b( D_800F8094++, mat->unk_30, G_IM_FMT_CI, mat->width, mat->height, 15, cms,
+                    gDPLoadTLUT_pal16( D_800F8094++, 15, mat->palette );
+                    gDPLoadTextureBlock_4b( D_800F8094++, mat->texels, G_IM_FMT_CI, mat->width, mat->height, 15, cms,
                                             cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                             G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI8:
                     gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
-                    gDPLoadTLUT_pal256( D_800F8094++, mat->unk_2C );
-                    gDPLoadTextureBlock( D_800F8094++, mat->unk_30, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width, mat->height,
+                    gDPLoadTLUT_pal256( D_800F8094++, mat->palette );
+                    gDPLoadTextureBlock( D_800F8094++, mat->texels, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width, mat->height,
                                          0, cms, cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                          G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_RGBA16:
                     gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
-                    gDPLoadTextureBlock( D_800F8094++, mat->unk_30, G_IM_FMT_RGBA, G_IM_SIZ_16b, mat->width,
+                    gDPLoadTextureBlock( D_800F8094++, mat->texels, G_IM_FMT_RGBA, G_IM_SIZ_16b, mat->width,
                                          mat->height, 0, cms, cmt, Scene_TextureSizeLog2( mat->width ),
                                          Scene_TextureSizeLog2( mat->height ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_I8:
                     gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
-                    gDPLoadTextureBlock( D_800F8094++, mat->unk_30, G_IM_FMT_I, G_IM_SIZ_8b, mat->width, mat->height,
+                    gDPLoadTextureBlock( D_800F8094++, mat->texels, G_IM_FMT_I, G_IM_SIZ_8b, mat->width, mat->height,
                                          0, cms, cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                          G_TX_NOLOD, G_TX_NOLOD );
                     break;
@@ -585,29 +585,29 @@ void Scene_Draw( void ) {
                 case MAT_I4:
                     /* loaded over the first texture, into tile 0 with palette 1: the tmem and tile of the others
                        went to the palette */
-                    gDPLoadTextureBlock_4b( D_800F8094++, mat->unk_38, G_IM_FMT_I, mat->width2, mat->height2, 1, cms,
+                    gDPLoadTextureBlock_4b( D_800F8094++, mat->texels2, G_IM_FMT_I, mat->width2, mat->height2, 1, cms,
                                             cmt, Scene_TextureSizeLog2( mat->width2 ), Scene_TextureSizeLog2( mat->height2 ),
                                             G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI4:
-                    gDPLoadTLUT_pal16( D_800F8094++, 14, mat->unk_34 );
-                    gDPLoadMultiBlock_4b( D_800F8094++, mat->unk_38, D_8009CF68, 1, G_IM_FMT_CI, mat->width2,
+                    gDPLoadTLUT_pal16( D_800F8094++, 14, mat->palette2 );
+                    gDPLoadMultiBlock_4b( D_800F8094++, mat->texels2, D_8009CF68, 1, G_IM_FMT_CI, mat->width2,
                                           mat->height2, 14, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
                                           Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI8:
-                    gDPLoadMultiBlock( D_800F8094++, mat->unk_38, D_8009CF68, 1, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width2,
+                    gDPLoadMultiBlock( D_800F8094++, mat->texels2, D_8009CF68, 1, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width2,
                                        mat->height2, 0, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
                                        Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_RGBA16:
-                    gDPLoadMultiBlock( D_800F8094++, mat->unk_38, D_8009CF68, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                    gDPLoadMultiBlock( D_800F8094++, mat->texels2, D_8009CF68, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
                                        mat->width2, mat->height2, 0, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
                                        Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_I8:
                     /* the first texture again, not the second */
-                    gDPLoadMultiBlock( D_800F8094++, mat->unk_30, D_8009CF68, 1, G_IM_FMT_I, G_IM_SIZ_8b, mat->width,
+                    gDPLoadMultiBlock( D_800F8094++, mat->texels, D_8009CF68, 1, G_IM_FMT_I, G_IM_SIZ_8b, mat->width,
                                        mat->height, 0, cms, cmt, Scene_TextureSizeLog2( mat->width ),
                                        Scene_TextureSizeLog2( mat->height ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
@@ -683,8 +683,8 @@ void Scene_Draw( void ) {
             gSPMatrix( D_800F8094++, D_8009D1A0[*link].unk_08, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
         }
 
-        gSPVertex( D_800F8094++, mesh->unk_04, mesh->numVerts, 0 );
-        gSPDisplayList( D_800F8094++, mesh->unk_08 );
+        gSPVertex( D_800F8094++, mesh->verts, mesh->numVerts, 0 );
+        gSPDisplayList( D_800F8094++, mesh->cmds );
         gDPPipeSync( D_800F8094++ );
     }
 }

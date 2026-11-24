@@ -45,7 +45,7 @@ void GA_SetupLanes( u8 arg0, f32 offset, u8 arg2 ) {
         base = i != 0 ? 120 : 100;
         ga_lanes[i].offsetX = i != 0 ? offset : 0.0f;
         ga_lanes[i].camera = D_800EA120[i];
-        ga_lanes[i].camera->unk_24 = -1;
+        ga_lanes[i].camera->frame = -1;
         for ( j = 0; j < NUM_BODIES; j++ ) {
             ga_lanes[i].bodyObjs[j] = D_800EA120[base + j];
             if ( arg0 ) {
@@ -398,7 +398,7 @@ void func_80115054_gacode( void ) {
     s32 player;
     s32 i;
 
-    ( (gaCamera_t *)D_800EA120[1] )->unk_24 = -1;
+    ( (gaCamera_t *)D_800EA120[1] )->frame = -1;
     for ( player = MAX_PLAYERS - 1; player >= 0; player-- ) {
         pl = &ga_players[player];
         pl->ballView = 0;
@@ -2782,9 +2782,9 @@ void GA_SetBallView( gaPlayer_t *pl, s32 view ) {
         camera->at[2] = lane->bodies[0].pos[2] - 1000.0f;
         camera->at[0] = lane->bodies[0].pos[0];
         camera->at[1] = lane->bodies[0].pos[1];
-        camera->unk_18[2] = camera->eye[2];
-        camera->unk_18[0] = camera->eye[0];
-        camera->unk_18[1] = 512.0f;
+        camera->upPoint[2] = camera->eye[2];
+        camera->upPoint[0] = camera->eye[0];
+        camera->upPoint[1] = 512.0f;
         break;
     case 1:
         camera->eye[2] = lane->bodies[0].pos[2] + 100.0f;
@@ -2793,9 +2793,9 @@ void GA_SetBallView( gaPlayer_t *pl, s32 view ) {
         camera->at[2] = lane->bodies[0].pos[2] - 50.0f;
         camera->at[0] = lane->bodies[0].pos[0];
         camera->at[1] = lane->bodies[0].pos[1];
-        camera->unk_18[2] = camera->eye[2];
-        camera->unk_18[0] = camera->eye[0];
-        camera->unk_18[1] = 512.0f;
+        camera->upPoint[2] = camera->eye[2];
+        camera->upPoint[0] = camera->eye[0];
+        camera->upPoint[1] = 512.0f;
         break;
     case 2:
         camera->eye[2] = lane->bodies[0].pos[2] + 100.0f;
@@ -2804,9 +2804,9 @@ void GA_SetBallView( gaPlayer_t *pl, s32 view ) {
         camera->at[2] = lane->bodies[0].pos[2] - 1000.0f;
         camera->at[0] = lane->bodies[0].pos[0];
         camera->at[1] = lane->bodies[0].pos[1];
-        camera->unk_18[2] = camera->eye[2];
-        camera->unk_18[0] = -pl->lane->spots[0].pos[0] + pl->lane->offsetX;
-        camera->unk_18[1] = 512.0f;
+        camera->upPoint[2] = camera->eye[2];
+        camera->upPoint[0] = -pl->lane->spots[0].pos[0] + pl->lane->offsetX;
+        camera->upPoint[1] = 512.0f;
         break;
     case 3:
         camera->eye[2] = lane->bodies[0].pos[2] - 125.0f;
@@ -2815,9 +2815,9 @@ void GA_SetBallView( gaPlayer_t *pl, s32 view ) {
         camera->at[2] = lane->bodies[0].pos[2] + 25.0f;
         camera->at[0] = lane->bodies[0].pos[0];
         camera->at[1] = lane->bodies[0].pos[1];
-        camera->unk_18[2] = camera->eye[2];
-        camera->unk_18[0] = camera->eye[0];
-        camera->unk_18[1] = 512.0f;
+        camera->upPoint[2] = camera->eye[2];
+        camera->upPoint[0] = camera->eye[0];
+        camera->upPoint[1] = 512.0f;
         break;
     case 4:
         camera->eye[2] = lane->bodies[0].pos[2] + 128.0f;
@@ -2826,9 +2826,9 @@ void GA_SetBallView( gaPlayer_t *pl, s32 view ) {
         camera->at[2] = lane->bodies[0].pos[2];
         camera->at[0] = lane->bodies[0].pos[0];
         camera->at[1] = lane->bodies[0].pos[1];
-        camera->unk_18[2] = camera->eye[2];
-        camera->unk_18[0] = camera->eye[0];
-        camera->unk_18[1] = 512.0f;
+        camera->upPoint[2] = camera->eye[2];
+        camera->upPoint[0] = camera->eye[0];
+        camera->upPoint[1] = 512.0f;
         break;
     }
 }
@@ -2849,9 +2849,9 @@ void func_8011B8AC_gacode( s32 player, gaCamera_t *camera ) {
     camera->at[2] = 335.0f;
     camera->at[0] = pl->lane->offsetX;
     camera->at[1] = 0.0f;
-    camera->unk_18[2] = camera->eye[2];
-    camera->unk_18[0] = camera->eye[0];
-    camera->unk_18[1] = 512.0f;
+    camera->upPoint[2] = camera->eye[2];
+    camera->upPoint[0] = camera->eye[0];
+    camera->upPoint[1] = 512.0f;
     pl->lane->cameraRaise -= 45.0f;
     if ( pl->lane->cameraRaise < 0.0f ) {
         pl->lane->cameraRaise = 0.0f;
@@ -2872,9 +2872,9 @@ void func_8011B974_gacode( s32 player, gaCamera_t *camera ) {
     camera->at[2] = 335.0f;
     camera->at[0] = pl->character.aim[0] + pl->lane->offsetX;
     camera->at[1] = 0.0f;
-    camera->unk_18[2] = camera->eye[2];
-    camera->unk_18[0] = camera->eye[0];
-    camera->unk_18[1] = 512.0f;
+    camera->upPoint[2] = camera->eye[2];
+    camera->upPoint[0] = camera->eye[0];
+    camera->upPoint[1] = 512.0f;
 }
 
 /*
@@ -2891,9 +2891,9 @@ void func_8011BA00_gacode( s32 player, gaCamera_t *camera ) {
     camera->at[2] = D_8012C158_gacode[0];
     camera->at[0] = pl->character.stance[0] + pl->lane->offsetX;
     camera->at[1] = 0.0f;
-    camera->unk_18[2] = camera->eye[2];
-    camera->unk_18[0] = camera->eye[0];
-    camera->unk_18[1] = 512.0f;
+    camera->upPoint[2] = camera->eye[2];
+    camera->upPoint[0] = camera->eye[0];
+    camera->upPoint[1] = 512.0f;
 }
 
 /*
@@ -2911,9 +2911,9 @@ void func_8011BA8C_gacode( s32 player, gaCamera_t *camera ) {
     camera->at[2] = pl->obj->joints[1].mtx[3][2];
     camera->at[0] = pl->obj->joints[1].mtx[3][0];
     camera->at[1] = 60.0f;
-    camera->unk_18[2] = camera->eye[2];
-    camera->unk_18[0] = camera->eye[0];
-    camera->unk_18[1] = 512.0f;
+    camera->upPoint[2] = camera->eye[2];
+    camera->upPoint[0] = camera->eye[0];
+    camera->upPoint[1] = 512.0f;
 }
 
 /*
@@ -2959,9 +2959,9 @@ void func_8011BC10_gacode( s32 player, gaCamera_t *camera ) {
     camera->at[2] = -1096.0f;
     camera->at[0] = pl->lane->offsetX;
     camera->at[1] = ga_stage->unk_14 + 24.0f;
-    camera->unk_18[2] = camera->eye[2];
-    camera->unk_18[0] = camera->eye[0];
-    camera->unk_18[1] = 512.0f;
+    camera->upPoint[2] = camera->eye[2];
+    camera->upPoint[0] = camera->eye[0];
+    camera->upPoint[1] = 512.0f;
 }
 
 /*
@@ -2978,9 +2978,9 @@ void func_8011BCA8_gacode( s32 player, gaCamera_t *camera ) {
     camera->at[2] = pl->obj->joints[1].mtx[3][2];
     camera->at[0] = pl->obj->joints[1].mtx[3][0];
     camera->at[1] = pl->obj->joints[1].mtx[3][1];
-    camera->unk_18[2] = camera->eye[2];
-    camera->unk_18[0] = camera->eye[0];
-    camera->unk_18[1] = 512.0f;
+    camera->upPoint[2] = camera->eye[2];
+    camera->upPoint[0] = camera->eye[0];
+    camera->upPoint[1] = 512.0f;
 }
 
 /*
@@ -3017,9 +3017,9 @@ void GA_FreeCamera( s32 player, gaCamera_t *camera ) {
     camera->at[2] = camera->eye[2] + cosf( angle ) * 1024.0f;
     camera->at[0] = camera->eye[0] + sinf( angle ) * 1024.0f;
     camera->at[1] = 20.0f;
-    camera->unk_18[2] = camera->eye[2];
-    camera->unk_18[0] = camera->eye[0];
-    camera->unk_18[1] = 512.0f;
+    camera->upPoint[2] = camera->eye[2];
+    camera->upPoint[0] = camera->eye[0];
+    camera->upPoint[1] = 512.0f;
 }
 
 /*
@@ -3036,9 +3036,9 @@ void func_8011C0DC_gacode( s32 player, gaCamera_t *camera ) {
     camera->at[2] = 335.0f;
     camera->at[0] = pl->lane->offsetX;
     camera->at[1] = 0.0f;
-    camera->unk_18[2] = camera->eye[2];
-    camera->unk_18[0] = camera->eye[0];
-    camera->unk_18[1] = 512.0f;
+    camera->upPoint[2] = camera->eye[2];
+    camera->upPoint[0] = camera->eye[0];
+    camera->upPoint[1] = 512.0f;
 }
 
 /*
@@ -3058,9 +3058,9 @@ void func_8011C158_gacode( s32 player, gaCamera_t *camera ) {
     camera->at[2] = cosf( ga_spinCameraAngle[pl->laneIndex] ) * 256.0f;
     camera->at[0] = sinf( ga_spinCameraAngle[pl->laneIndex] ) * 256.0f;
     camera->at[1] = camera->eye[1];
-    camera->unk_18[2] = camera->eye[2];
-    camera->unk_18[0] = camera->eye[0];
-    camera->unk_18[1] = 512.0f;
+    camera->upPoint[2] = camera->eye[2];
+    camera->upPoint[0] = camera->eye[0];
+    camera->upPoint[1] = 512.0f;
     ga_spinCameraAngle[pl->laneIndex] += M_PI / 600.0;
 }
 
@@ -3097,13 +3097,13 @@ void func_8011C254_gacode( s32 player, gaCamera_t *camera ) {
     }
     frame = pl->obj->frame * 200 / frames;
     frame = frame < 0 ? 0 : ( frame > 200 ? 200 : frame );
-    Cam_ReadPathFrame( file, frame, camera->eye, camera->unk_18 );
+    Cam_ReadPathFrame( file, frame, camera->eye, camera->upPoint );
     camera->at[2] = pl->obj->joints[joint].mtx[3][2];
     camera->at[0] = pl->obj->joints[joint].mtx[3][0];
     camera->at[1] = pl->obj->joints[joint].mtx[3][1];
-    camera->unk_18[2] = camera->eye[2];
-    camera->unk_18[0] = camera->eye[0];
-    camera->unk_18[1] = 512.0f;
+    camera->upPoint[2] = camera->eye[2];
+    camera->upPoint[0] = camera->eye[0];
+    camera->upPoint[1] = 512.0f;
 }
 
 /*
@@ -3120,7 +3120,7 @@ void func_8011C468_gacode( s32 player, gaCamera_t *camera ) {
 
     frame = ( 730.0f - lane->spots[0].pos[2] ) * 480.0f / 1780.0;
     frame = frame < 0 ? 0 : ( frame > 480 ? 480 : frame );
-    Cam_ReadPathFrame( ga_followCamPaths[D_8012D8D8_gacode % 10], frame, camera->eye, camera->unk_18 );
+    Cam_ReadPathFrame( ga_followCamPaths[D_8012D8D8_gacode % 10], frame, camera->eye, camera->upPoint );
     camera->at[2] = lane->bodies[0].pos[2];
     camera->at[0] = lane->bodies[0].pos[0];
     camera->at[1] = lane->bodies[0].pos[1];
@@ -3137,13 +3137,13 @@ lane.
 void func_8011C57C_gacode( s32 player, gaCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
-    Cam_ReadPathFrame( ga_laneCamPaths[D_8012D8D8_gacode % 5], 0, camera->eye, camera->unk_18 );
+    Cam_ReadPathFrame( ga_laneCamPaths[D_8012D8D8_gacode % 5], 0, camera->eye, camera->upPoint );
     camera->at[2] = -1096.0f;
     camera->at[0] = pl->lane->offsetX;
     camera->at[1] = ga_stage->unk_14;
-    camera->unk_18[2] = camera->eye[2];
-    camera->unk_18[0] = camera->eye[0];
-    camera->unk_18[1] = 512.0f;
+    camera->upPoint[2] = camera->eye[2];
+    camera->upPoint[0] = camera->eye[0];
+    camera->upPoint[1] = 512.0f;
 }
 
 /*

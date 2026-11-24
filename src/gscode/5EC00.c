@@ -468,7 +468,7 @@ s32 GS_TeamSelect( void ) {
             D_8011FC81_gscode = CHOICE_RUN;
             func_80026B28();
             Obj_CreateAll( gs_classes, D_8011F900_gscode );
-            D_8009CFA0[0]->path->unk_38 |= 4;
+            D_8009CFA0[0]->path->flags |= 4;
             for ( i = 0; i < 4; i++ ) {
                 D_801207B4_gscode[i] = 0xFFFF;
                 for ( j = 0; j < 3; j++ ) {

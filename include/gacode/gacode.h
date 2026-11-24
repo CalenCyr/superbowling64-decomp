@@ -88,8 +88,8 @@ typedef struct {
 typedef struct gaCamera_s {
     /* 0x00 */ vec3_t eye;
     /* 0x0C */ vec3_t at;
-    /* 0x18 */ vec3_t unk_18;
-    /* 0x24 */ s32 unk_24;
+    /* 0x18 */ vec3_t upPoint;
+    /* 0x24 */ s32 frame;
 } gaCamera_t;
 
 #define NUM_BODIES      11              /* the ball, then the ten pins */

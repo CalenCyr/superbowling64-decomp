@@ -1046,3 +1046,21 @@ gaCharacter_t.stance	gacode.h	invented: where the player stands, moved by the st
 gaCharacter_t.speed	gacode.h	invented: the ball's launch speed (motion[0].vel = speed * direction)
 gaCharacter_t.spin	gacode.h	invented: the ball's launch spin (motion[0].spin[1])
 gaCharacter_t.direction	gacode.h	invented: GA_VecDirection of stance and aim, the ball's launch direction
+sceneCamera_t.upPoint	object.h	invented: the point the up vector points to from eye (header comment)
+sceneCamera_t.left	object.h	invented: x of the viewport's corner in the framebuffer (Scene_BeginView)
+sceneCamera_t.top	object.h	invented: y of the viewport's corner in the framebuffer (Scene_BeginView)
+gaCamera_t.upPoint	gacode.h	invented: as sceneCamera_t.upPoint (the same leading members)
+gaCamera_t.frame	gacode.h	invented: as sceneCamera_t.frame; -1: the path is not followed
+fileType3_t.upPoint	filecache.h	invented: the path's sceneCamera_t.upPoint where the frames leave a component out
+fileType3_t.upPointMask	filecache.h	invented: the mask of upPoint's components in each frame (as eyeMask)
+fileType3_t.flags	filecache.h	invented: FILE3_FOG; 4 set by gscode's character menu
+fileRefA_t.verts	filecache.h	invented: the mesh's numVerts Vtx
+fileRefA_t.cmds	filecache.h	invented: the mesh's model commands, converted by Obj_ConvertModel
+fileRefB_t.palette	filecache.h	invented: palette of texels
+fileRefB_t.texels	filecache.h	invented: the first texture (MAT_TEXTURE, tile 0)
+fileRefB_t.palette2	filecache.h	invented: palette of texels2
+fileRefB_t.texels2	filecache.h	invented: the second texture (MAT_TEXTURE2, tile 1)
+fileType1Ref_t.mesh	filecache.h	invented: file index of a fileRefA_t mesh
+fileType1Ref_t.material	filecache.h	invented: file index of a fileRefB_t material
+fileType1Part_t.parent	filecache.h	invented: the parent part, whose joint cacode divides out
+fileType1Part_t.rot	filecache.h	invented: rotation (radians); cacode's viewer copies it per frame
