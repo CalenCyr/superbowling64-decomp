@@ -12,7 +12,7 @@ GA_Init
 The overlay's init: stops the BGM, resets the teams' current players and the pause menu, enters the pause
 menu's state as the state to come back to, loads the stage's floor grid, places each player's character in
 the stage's scene and creates it, starts the stage's sound, sets up the lanes, clears the games won and the
-scores, sets up the game mode, takes two options from D_8009D098.unk_04 and starts the game's BGM.
+scores, sets up the game mode, takes two options from D_8009D098.unlocks and starts the game's BGM.
 ================
 */
 void GA_Init( void ) {
@@ -49,8 +49,8 @@ void GA_Init( void ) {
         D_8009D030[i][0] = D_8009D030[i][1] = D_8009D030[i][2] = 0;
     }
     GA_SetupMode();
-    ga_earlyCommit = ( D_8009D098.unk_04 >> 9 ) & 1;
-    ga_steerBall = ( D_8009D098.unk_04 >> 8 ) & 1;
+    ga_earlyCommit = ( D_8009D098.unlocks >> 9 ) & 1;
+    ga_steerBall = ( D_8009D098.unlocks >> 8 ) & 1;
     Sound_PlayBgm( ga_bgm );
 }
 
@@ -168,7 +168,7 @@ void func_80112A74_gacode( void ) {
 ================
 GA_PauseMenu
 
-Pause menu: draws it with the cursor on one of its four items and the on/off mark of D_8009D098.unk_79,
+Pause menu: draws it with the cursor on one of its four items and the on/off mark of D_8009D098.music,
 moves the cursor with the D-pad, and on A or Z runs the item; B closes the menu.
 ================
 */
@@ -180,7 +180,7 @@ s32 GA_PauseMenu( void ) {
     isMode2 = ( D_8005C160 & 0xF ) == 2;
     Draw_Image( isMode2 ? 0x882 : 0x89E, 0x50, 0x40 );
     Draw_ImageScaled( 0x8A0, 0x66, cursorY[ga_pauseCursor], (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
-    Draw_ImageScaled( 0x89F, markX[D_8009D098.unk_79], 0x6C, (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
+    Draw_ImageScaled( 0x89F, markX[D_8009D098.music], 0x6C, (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
     if ( D_800E6758 & U_JPAD ) {
         Sound_PlaySe( 0, 0 );
         if ( ga_pauseCursor == 0 ) {
@@ -208,8 +208,8 @@ s32 GA_PauseMenu( void ) {
             Sound_PlaySe( 1, 0 );
             break;
         case 2:
-            D_8009D098.unk_79 = !D_8009D098.unk_79;
-            if ( D_8009D098.unk_79 ) {
+            D_8009D098.music = !D_8009D098.music;
+            if ( D_8009D098.music ) {
                 Sound_PlayBgm( ga_bgm );
             } else {
                 Sound_StopBgm();

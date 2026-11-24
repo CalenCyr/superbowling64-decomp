@@ -39,17 +39,17 @@ void main( void ) {
     D_80066C38[2] = (u16 *)0x803DA800;
     Mem_Reset( (HeapBlock *)HEAP_START, (u8 *)HEAP_END );
     D_801000B8 = &D_8009D098;
-    D_8009D098.unk_00 = 0;
-    D_8009D098.unk_04 = 3;
-    D_8009D098.unk_78 = 1;
-    D_8009D098.unk_79 = 1;
-    D_8009D098.unk_7A = 2;
-    D_8009D098.unk_7B = 1;
+    D_8009D098.checksum = 0;
+    D_8009D098.unlocks = 3;
+    D_8009D098.difficulty = 1;
+    D_8009D098.music = 1;
+    D_8009D098.musicVolume = 2;
+    D_8009D098.rumble = 1;
     for ( i = 0; i < 4; i++ ) {
-        memset( &D_8009D098.unk_08[i], 0, sizeof( UnkRecord ) );
-        D_8009D098.unk_08[i].low = 300;
-        memset( D_8009D098.unk_08[i].name, 0xFF, sizeof( D_8009D098.unk_08[i].name ) );
-        memset( &D_800E44E8[i], 0, sizeof( UnkRecord ) );
+        memset( &D_8009D098.records[i], 0, sizeof( playerRecord_t ) );
+        D_8009D098.records[i].low = 300;
+        memset( D_8009D098.records[i].name, 0xFF, sizeof( D_8009D098.records[i].name ) );
+        memset( &D_800E44E8[i], 0, sizeof( playerRecord_t ) );
         D_800E44E8[i].low = 300;
         memset( D_800E44E8[i].name, 0xFF, sizeof( D_800E44E8[i].name ) );
     }
@@ -556,7 +556,7 @@ void Game_Thread( void *arg ) {
                     D_8005C0C0 = 263;
                     D_8005C0B6 = SCENE_OPCODE;
                     D_8005C0EC = 0;
-                    D_8009D098.unk_79 = 1;
+                    D_8009D098.music = 1;
                 }
             }
         }

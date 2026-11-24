@@ -17,7 +17,7 @@ s32 GS_CharacterSelect( void ) {
     s32 i;
 
     for ( i = 0; i < 8; i++ ) {
-        if ( D_8009D098.unk_04 & ( 1 << i ) ) {
+        if ( D_8009D098.unlocks & ( 1 << i ) ) {
             Menu_SetItem( D_8011BD50_gscode, i, D_8011F8A8_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
         }
     }
@@ -25,7 +25,7 @@ s32 GS_CharacterSelect( void ) {
     if ( D_8011F8B9_gscode == CHOICE_RUN ) {
         if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
             Sound_PlaySe( SE_DECIDE, 0 );
-            if ( D_8009D098.unk_7B ) {
+            if ( D_8009D098.rumble ) {
                 GS_StartPakCheck();
                 D_8011F8B9_gscode = 4;
             } else {
@@ -75,7 +75,7 @@ s32 GS_CharacterSelect( void ) {
                 if ( D_8005C163 == 0xFF ) {
                     D_8005C163 = 7;
                 }
-            } while ( !( D_8009D098.unk_04 & ( 1 << D_8005C163 ) ) );
+            } while ( !( D_8009D098.unlocks & ( 1 << D_8005C163 ) ) );
             Sound_PlaySe( SE_CURSOR, 0 );
         }
         if ( D_800E6758 & R_JPAD ) {
@@ -89,7 +89,7 @@ s32 GS_CharacterSelect( void ) {
                 if ( D_8005C163 == 8 ) {
                     D_8005C163 = 0;
                 }
-            } while ( !( D_8009D098.unk_04 & ( 1 << D_8005C163 ) ) );
+            } while ( !( D_8009D098.unlocks & ( 1 << D_8005C163 ) ) );
             Sound_PlaySe( SE_CURSOR, 0 );
         }
     }

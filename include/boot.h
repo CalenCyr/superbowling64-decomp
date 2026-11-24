@@ -13,29 +13,30 @@
 #define SCREEN_WIDTH        320         /* pixels of the framebuffers of D_80066C38 */
 #define SCREEN_HEIGHT       240
 
-/* Record of 0x1C bytes kept four at a time in D_8009D098 and D_800E44E8; its purpose is unknown. */
+/* A player's record (RS_AddToRecord), kept four at a time in D_8009D098 and D_800E44E8. Name invented. */
 typedef struct {
     /* 0x00 */ u16 name[6];                 /* a player's name, characters ended by 0xFFFF; 0xFF bytes at boot */
     /* 0x0C */ u8 games;                    /* games played, to 255 */
     /* 0x0E */ u16 total;                   /* sum of their scores, to 0xFFFF */
     /* 0x10 */ u16 high;                    /* highest score */
     /* 0x12 */ u16 low;                     /* lowest score; 300 at boot */
-    /* 0x14 */ u16 unk_14;                  /* counts to 9999: of 12 a game */
-    /* 0x16 */ u16 unk_16;                  /* of 10 a game */
-    /* 0x18 */ u16 unk_18;                  /* of 10 a game */
+    /* 0x14 */ u16 strikes;                 /* to 9999: of 12 a game */
+    /* 0x16 */ u16 spares;                  /* of 10 a game */
+    /* 0x18 */ u16 splits;                  /* of 10 a game */
     /* 0x1A */ u8 unk_1A[0x02];
-} UnkRecord;                                /* size 0x1C */
+} playerRecord_t;                           /* size 0x1C */
 
+/* The records and settings the game saves (D_8009D098; Save_Checksum). Name invented. */
 typedef struct {
-    /* 0x00 */ s32 unk_00;
-    /* 0x04 */ u32 unk_04;                  /* bit per character of gscode's character menu: unlocked */
-    /* 0x08 */ UnkRecord unk_08[4];
-    /* 0x78 */ u8 unk_78;
-    /* 0x79 */ u8 unk_79;
-    /* 0x7A */ u8 unk_7A;
-    /* 0x7B */ u8 unk_7B;
+    /* 0x00 */ s32 checksum;                /* Save_Checksum, checked when the save is read (opcode) */
+    /* 0x04 */ u32 unlocks;                 /* bit per character of gscode's character menu: unlocked; 0x200: a perfect game */
+    /* 0x08 */ playerRecord_t records[4];
+    /* 0x78 */ u8 difficulty;               /* option, 0 to 2: narrows the aim spread of players the game plays */
+    /* 0x79 */ u8 music;                    /* option: BGM on */
+    /* 0x7A */ u8 musicVolume;              /* option, 0 to 4: index of the BGM volume */
+    /* 0x7B */ u8 rumble;                   /* option: use the Rumble Pak */
     /* 0x7C */ u8 unk_7C[0x100 - 0x7C];
-} UnkRecordSet;                             /* size 0x100; Save_Checksum sums bytes 0x04-0xFF */
+} saveData_t;                               /* size 0x100; Save_Checksum sums bytes 0x04-0xFF */
 
 /* What func_80025EBC runs on the RSP; set through D_80066B50. Names invented. */
 typedef struct {
@@ -70,9 +71,9 @@ extern s32 D_8005B0FC;              /* frame rate (shown as FRATE) */
 // volatile: units 1060, 7250 and C650 read it with lbu and a separate sign extension, once per use (53B0 alone uses lb)
 extern volatile s8 D_8005C0B1;
 extern Gfx *D_800F8094;             /* next command of the display list being built */
-extern UnkRecordSet D_8009D098;
-extern UnkRecordSet *D_801000B8;
-extern UnkRecord D_800E44E8[4];
+extern saveData_t D_8009D098;
+extern saveData_t *D_801000B8;
+extern playerRecord_t D_800E44E8[4];
 
 extern OSThread D_80060EE0;         /* boot thread: starts the managers, then idles */
 extern u64 D_80061090[BOOT_STACK_SIZE / sizeof( u64 )];

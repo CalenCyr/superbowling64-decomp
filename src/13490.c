@@ -816,7 +816,7 @@ name plate and, once it holds a game, its games, average, high and low scores an
 // in s5 and folds the offsets (x + 0x2E); rowY + 2 as topY reproduces retail's early s2. Tried: rowX/rowY/played
 // as s16/s32/u8, the inline small plate Menu_DrawSmallNamePlate (no change), x and rowX as u16 (no change;
 // retail reloads x with lhu), the name plate drawn at x with rowX = x + 0x2C (worse).
-void Score_DrawRecordTable( u16 count, UnkRecord *records, u8 kind, s16 x, s32 y ) {
+void Score_DrawRecordTable( u16 count, playerRecord_t *records, u8 kind, s16 x, s32 y ) {
     s16 digits[4];
     s32 i;
     s32 played;
@@ -867,9 +867,9 @@ void Score_DrawRecordTable( u16 count, UnkRecord *records, u8 kind, s16 x, s32 y
             Menu_DrawImage( digits[2], rowX + 0x5E, rowY + 14 );
             Menu_DrawImage( digits[3], rowX + 0x66, rowY + 14 );
         }
-        Score_DrawNumberBox( records[i].unk_14, D_800DF5D8[kind][i] * 10.0f, played, rowX + 0x72, rowY );
-        Score_DrawNumberBox( records[i].unk_16, D_800A2FE8[kind][i] * 10.0f, played, rowX + 0x98, rowY );
-        Score_DrawNumberBox( records[i].unk_18, D_80099488[kind][i] * 10.0f, played, rowX + 0xBE, rowY );
+        Score_DrawNumberBox( records[i].strikes, D_800DF5D8[kind][i] * 10.0f, played, rowX + 0x72, rowY );
+        Score_DrawNumberBox( records[i].spares, D_800A2FE8[kind][i] * 10.0f, played, rowX + 0x98, rowY );
+        Score_DrawNumberBox( records[i].splits, D_80099488[kind][i] * 10.0f, played, rowX + 0xBE, rowY );
         rowY += 0x1C;
     }
 }
@@ -914,14 +914,14 @@ Sets the figures of record, of character index, in the kind's row of D_800E66B0,
 D_80099488; all 0 when it holds no game.
 ================
 */
-void Score_SetRecordFigures( UnkRecord *record, s32 index, u8 kind ) {
+void Score_SetRecordFigures( playerRecord_t *record, s32 index, u8 kind ) {
     if ( record->games == 0 ) {
         D_800E66B0[kind][index] = D_800DF5D8[kind][index] = D_800A2FE8[kind][index] = D_80099488[kind][index] = 0.0f;
     } else {
         D_800E66B0[kind][index] = (f32)record->total / record->games;
-        D_800DF5D8[kind][index] = record->unk_14 * 100.0f / ( record->games * 12 );
-        D_800A2FE8[kind][index] = record->unk_16 * 100.0f / ( record->games * 10 );
-        D_80099488[kind][index] = record->unk_18 * 100.0f / ( record->games * 10 );
+        D_800DF5D8[kind][index] = record->strikes * 100.0f / ( record->games * 12 );
+        D_800A2FE8[kind][index] = record->spares * 100.0f / ( record->games * 10 );
+        D_80099488[kind][index] = record->splits * 100.0f / ( record->games * 10 );
     }
 }
 

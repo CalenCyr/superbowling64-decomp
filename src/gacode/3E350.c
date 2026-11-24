@@ -3218,7 +3218,7 @@ s32 GA_CpuInput( gaPlayer_t *pl, s32 player ) {
 GA_CpuSetup
 
 Set-up of a player the game plays: picks speed at random between the character's limits, takes the
-GA_PickAimPin target with a random sideways error (bounded by the mode and D_8009D098.unk_78), then
+GA_PickAimPin target with a random sideways error (bounded by the mode and D_8009D098.difficulty), then
 chooses cpuAim and cpuStance (where GA_CpuInput moves aim and stance) and the spin that
 func_801205A0_gacode gives for them. A character whose maxSpin exceeds 12 tries a crossing set-up first; when
 spin falls outside the character's range, a set-up from 30.48 to the side follows, and last one with spin 0.
@@ -3238,7 +3238,7 @@ void GA_CpuSetup( gaPlayer_t *pl, s32 player ) {
     pl->character.speed = RAND( range ) / 100.0f + pl->character.minSpeed;
     GA_PickAimPin( target, pl->lane->bodies, pl->lane->spots, pl->character.reverseSpin );
     if ( ( D_8005C160 & 0xF ) == 3 || ( ( D_8005C160 >> 4 ) & 3 ) == 1 ) {
-        switch ( D_8009D098.unk_78 ) {
+        switch ( D_8009D098.difficulty ) {
             case 0:
                 spread = 32;
                 bias = 16;
@@ -3253,7 +3253,7 @@ void GA_CpuSetup( gaPlayer_t *pl, s32 player ) {
                 break;
         }
     } else {
-        switch ( D_8009D098.unk_78 ) {
+        switch ( D_8009D098.difficulty ) {
             case 0:
                 spread = 96;
                 bias = 48;

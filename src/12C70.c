@@ -78,11 +78,11 @@ void Sound_PlayBgm( s32 index ) {
     }
     D_8005C9D0 ^= 1;
     Str_ReadFile( D_8005CA0C[index], D_800EA440[D_8005C9D0] );
-    if ( D_8009D098.unk_79 != 0 || D_8005C9F8[index] == 0 ) {
+    if ( D_8009D098.music != 0 || D_8005C9F8[index] == 0 ) {
         D_8005C9E8 = index;
         D_8005C9E0 = BGM_START_DELAY;
         D_800A3048 = (seqHeader_t *)D_800EA440[D_8005C9D0];
-        D_8005C9E4 = D_8005C9EC[D_8009D098.unk_7A];
+        D_8005C9E4 = D_8005C9EC[D_8009D098.musicVolume];
     } else {
         D_8005C9D8 = 0;
         D_8005C9E8 = index | BGM_STOPPED;
@@ -116,7 +116,7 @@ Sets the BGM to the volume of the current setting.
 */
 void Sound_UpdateBgmVolume( void ) {
     if ( D_8005C9D8 != 0 ) {
-        Snd_SetVolume( D_8005C9D8, D_8005C9EC[D_8009D098.unk_7A] );
+        Snd_SetVolume( D_8005C9D8, D_8005C9EC[D_8009D098.musicVolume] );
     }
 }
 

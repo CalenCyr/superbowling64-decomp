@@ -1064,3 +1064,18 @@ fileType1Ref_t.mesh	filecache.h	invented: file index of a fileRefA_t mesh
 fileType1Ref_t.material	filecache.h	invented: file index of a fileRefB_t material
 fileType1Part_t.parent	filecache.h	invented: the parent part, whose joint cacode divides out
 fileType1Part_t.rot	filecache.h	invented: rotation (radians); cacode's viewer copies it per frame
+saveData_t.checksum	boot.h	invented: Save_Checksum of bytes 0x04-0xFF, compared when the save is loaded (opcode)
+saveData_t.unlocks	boot.h	invented: unlock bits: one per character of gscode's character menu, 0x200 a perfect game (rscode), and the bits GA_Init reads
+saveData_t.records	boot.h	invented: the four players' records (RS_AddToRecord)
+saveData_t.difficulty	boot.h	invented: option 0 to 2 (gscode's options menu); narrows the aim spread of players the game plays (GA_CpuSetup)
+saveData_t.music	boot.h	invented: option: music on (Sound_PlayBgm), toggled in gacode's pause menu
+saveData_t.musicVolume	boot.h	invented: option 0 to 4, index of the BGM volume (Sound_UpdateBgmVolume)
+saveData_t.rumble	boot.h	invented: option: use the Rumble Pak (gscode's pak check)
+playerRecord_t.strikes	boot.h	invented: summed D_800DF6B4 (counted with the strike run), to 9999; of 12 a game
+playerRecord_t.spares	boot.h	invented: summed D_8009D088 (frames ended by the second throw), to 9999; of 10 a game
+playerRecord_t.splits	boot.h	invented: summed D_8009CF80 (counted by GA_IsSplit's result), to 9999; of 10 a game
+playerRecord_t	boot.h	invented: a player's record: name, games, total, high and low scores, strikes, spares, splits (RS_AddToRecord)
+saveData_t	boot.h	invented: the block D_8009D098 saved with Save_Checksum: checksum, unlocks, the four records and the options
+OPTION_DIFFICULTY	gscode.h	invented: the options line of D_8009D098.difficulty (was OPTION_SOUND, which the use in GA_CpuSetup contradicts)
+OPTION_MUSIC	gscode.h	invented: the options line of D_8009D098.music
+OPTION_RUMBLE	gscode.h	invented: the options line of D_8009D098.rumble

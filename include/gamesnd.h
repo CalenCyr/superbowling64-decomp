@@ -37,8 +37,8 @@ typedef struct {
 
 extern s32 D_8005C9D0;              /* the D_800EA440 buffer of the last BGM loaded */
 extern u16 D_8005C9E8;              /* index of the current BGM, | BGM_STOPPED */
-extern u16 D_8005C9EC[];            /* BGM volume of each D_8009D098.unk_7A setting */
-extern u8 D_8005C9F8[];             /* nonzero: the BGM is skipped while D_8009D098.unk_79 is 0 */
+extern u16 D_8005C9EC[];            /* BGM volume of each D_8009D098.musicVolume setting */
+extern u8 D_8005C9F8[];             /* nonzero: the BGM is skipped while D_8009D098.music is 0 */
 extern s16 D_8005CA0C[];            /* str file of each BGM */
 extern u8 D_800EA440[2][BGM_BUFFER_SIZE];
 extern bmpHeader_t D_8005CA40;

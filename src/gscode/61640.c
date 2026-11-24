@@ -23,7 +23,7 @@ s32 GS_CharacterMenu( void ) {
 
     Menu_SetItem( D_80120430_gscode, 10, D_80120644_gscode[D_80120656_gscode], MENU_NONE, MENU_NONE, MENU_NONE );
     for ( i = 0; i < 8; i++ ) {
-        if ( D_8009D098.unk_04 & ( 1 << i ) ) {
+        if ( D_8009D098.unlocks & ( 1 << i ) ) {
             Menu_SetItem( D_80120430_gscode, i, D_801204DC_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
         } else {
             Menu_SetItem( D_80120430_gscode, i, 0x8BC, MENU_NONE, MENU_NONE, MENU_NONE );
@@ -51,7 +51,7 @@ s32 GS_CharacterMenu( void ) {
                 if ( --D_80120656_gscode == 0xFF ) {
                     D_80120656_gscode = 7;
                 }
-            } while ( !( D_8009D098.unk_04 & ( 1 << D_80120656_gscode ) ) );
+            } while ( !( D_8009D098.unlocks & ( 1 << D_80120656_gscode ) ) );
             Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
         if ( D_800E6758 & R_JPAD ) {
@@ -59,7 +59,7 @@ s32 GS_CharacterMenu( void ) {
                 if ( ++D_80120656_gscode == 8 ) {
                     D_80120656_gscode = 0;
                 }
-            } while ( !( D_8009D098.unk_04 & ( 1 << D_80120656_gscode ) ) );
+            } while ( !( D_8009D098.unlocks & ( 1 << D_80120656_gscode ) ) );
             Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
     }

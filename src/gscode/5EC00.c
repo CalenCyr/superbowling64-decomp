@@ -50,7 +50,7 @@ s32 GS_TeamSelect( void ) {
     s32 character;
     u8 player;
 
-    unlocked = D_8009D098.unk_04;
+    unlocked = D_8009D098.unlocks;
     memset( slots, 0xFF, sizeof( slots ) );
 
     if ( D_8005C162 == 0 ) {
@@ -105,7 +105,7 @@ s32 GS_TeamSelect( void ) {
                 slots[0][0] = 0;
                 slots[0][1] = 1;
                 if ( D_8011FC84_gscode[0] ) {
-                    unlocked = GS_UnlockMask( D_8009D098.unk_04 );
+                    unlocked = GS_UnlockMask( D_8009D098.unlocks );
                 }
             }
             Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
@@ -295,11 +295,11 @@ s32 GS_TeamSelect( void ) {
                         D_8011FC84_gscode[i]++;
                         if ( ( D_8005C160 & 0xF ) == 1 && D_8011FC84_gscode[i] == 1 ) {
                             D_8005C0E4[1] = ( D_8005C0E4[1] & 0xF0 ) | 1;
-                            unlocked = GS_UnlockMask( D_8009D098.unk_04 );
+                            unlocked = GS_UnlockMask( D_8009D098.unlocks );
                             /* BUG: this reuses the team loop's counter, so the team loop goes on from the character
                                found (or ends) */
                             for ( i = 0; i < 8; i++ ) {
-                                if ( ( unlocked ^ D_8009D098.unk_04 ) & ( 1 << i ) ) {
+                                if ( ( unlocked ^ D_8009D098.unlocks ) & ( 1 << i ) ) {
                                     D_8005C0E4[1] = ( D_8005C0E4[1] & 0xF0 ) | i;
                                     break;
                                 }
@@ -344,7 +344,7 @@ s32 GS_TeamSelect( void ) {
         case 1:
             if ( --D_801207B2_gscode == 0 ) {
                 if ( ( D_8005C160 & 0xF ) == 1 ) {
-                    if ( D_8009D098.unk_7B ) {
+                    if ( D_8009D098.rumble ) {
                         GS_StartPakCheck();
                         D_8011FC81_gscode = 4;
                     } else {

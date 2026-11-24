@@ -60,7 +60,7 @@ void RS_Idle( void );
 void RS_DrawPinDiagram( s32 player, u8 frame, s16 x, s16 y );
 void RS_DrawPinDiagrams( s16 x, s16 y );
 void RS_DrawChoices( u8 choice, u16 *images, s16 y, u16 w, u16 h );
-void RS_AddToRecord( UnkRecord *record, s32 player );
+void RS_AddToRecord( playerRecord_t *record, s32 player );
 void RS_RankHighest( u8 *ranks, u8 count, s16 *scores, s16 low, s16 high );
 void RS_RankLowest( u8 *ranks, u8 count, s16 *values, s16 low, s16 high );
 

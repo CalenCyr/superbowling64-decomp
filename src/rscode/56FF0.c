@@ -94,7 +94,7 @@ void RS_StartMode( void ) {
 ================
 RS_StartMode0
 
-Picks the state of mode 0's results by its sub-mode; a perfect game (bit 0x200 of D_8009D098.unk_04) or a
+Picks the state of mode 0's results by its sub-mode; a perfect game (bit 0x200 of D_8009D098.unlocks) or a
 finished game (bit 0x100) first shows its message, once. Sub-mode 0 checks for a perfect game only with
 argument 0 (bits 6-7 of D_8005C160); its switch lists the other three arguments, which do nothing.
 ================
@@ -117,10 +117,10 @@ void RS_StartMode0( void ) {
                     break;
                 }
             }
-            if ( found && !( D_8009D098.unk_04 & 0x200 ) ) {
+            if ( found && !( D_8009D098.unlocks & 0x200 ) ) {
                 Sound_PlaySe( 0x35, 0 );
                 rs_state = RS_PerfectMessage;
-                D_8009D098.unk_04 |= 0x200;
+                D_8009D098.unlocks |= 0x200;
             }
             break;
         case 1:
@@ -145,10 +145,10 @@ void RS_StartMode0( void ) {
                 break;
             }
         }
-        if ( found && !( D_8009D098.unk_04 & 0x100 ) ) {
+        if ( found && !( D_8009D098.unlocks & 0x100 ) ) {
             Sound_PlaySe( 0x35, 0 );
             rs_state = RS_FinishedMessage;
-            D_8009D098.unk_04 |= 0x100;
+            D_8009D098.unlocks |= 0x100;
         }
         break;
     }
@@ -209,12 +209,12 @@ void RS_RankAndRecord( void ) {
             character = ( ( D_8005C0E4[i] >> 4 ) & 7 ) - 1;
             if ( character >= 0 ) {
                 RS_AddToRecord( &D_800E44E8[character], i );
-                RS_AddToRecord( &D_8009D098.unk_08[character], i );
+                RS_AddToRecord( &D_8009D098.records[character], i );
             }
         }
         for ( character = 0; character < 4; character++ ) {
             Score_SetRecordFigures( &D_800E44E8[character], character, 0 );
-            Score_SetRecordFigures( &D_8009D098.unk_08[character], character, 1 );
+            Score_SetRecordFigures( &D_8009D098.records[character], character, 1 );
         }
     }
     rs_state = RS_ScoreSheet;
@@ -301,7 +301,7 @@ void RS_Records( void ) {
         Score_DrawRecordTable( 4, D_800E44E8, 0, 0x18, y );
         break;
     case 3:
-        Score_DrawRecordTable( 4, D_8009D098.unk_08, 1, 0x18, y );
+        Score_DrawRecordTable( 4, D_8009D098.records, 1, 0x18, y );
         break;
     }
     y += 0x8C;
@@ -360,7 +360,7 @@ void RS_ResultsPage2( void ) {
 RS_DuelResults
 
 Results of a duel: the score of each game, the higher one marked, the games won, and the winner; A or Z
-leaves when player 1 won (setting the bit of D_8005C163 in D_8009D098.unk_04), else opens the menu.
+leaves when player 1 won (setting the bit of D_8005C163 in D_8009D098.unlocks), else opens the menu.
 ================
 */
 #ifdef NON_MATCHING
@@ -406,7 +406,7 @@ void RS_DuelResults( void ) {
     }
     if ( D_800693DC[0] > D_800693DC[1] ) {
         Draw_ImageScaled( 0x869, 0x2C, y + 8, rs_boxAlpha + 0x7F, 1.0f, 1.0f );
-        if ( !( D_8009D098.unk_04 & ( 1 << D_8005C163 ) ) ) {
+        if ( !( D_8009D098.unlocks & ( 1 << D_8005C163 ) ) ) {
             Draw_Image( 0x870, 0x38, 0xAC );
         }
     } else {
@@ -416,7 +416,7 @@ void RS_DuelResults( void ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         if ( D_800693DC[0] > D_800693DC[1] ) {
             rs_state = RS_Leave;
-            D_8009D098.unk_04 |= 1 << D_8005C163;
+            D_8009D098.unlocks |= 1 << D_8005C163;
         } else {
             rs_state = RS_Menu;
             rs_returnState = RS_DuelResults;
@@ -659,7 +659,7 @@ Adds the player's game to a character's record: one more game (to 255), the tota
 high and the low score, and three more counts (to 9999).
 ================
 */
-void RS_AddToRecord( UnkRecord *record, s32 player ) {
+void RS_AddToRecord( playerRecord_t *record, s32 player ) {
     if ( record->games + 1 < 256 ) {
         record->games++;
     }
@@ -668,14 +668,14 @@ void RS_AddToRecord( UnkRecord *record, s32 player ) {
     }
     record->high = Max( D_800DF630[player][9], record->high );
     record->low = Min( D_800DF630[player][9], record->low );
-    if ( record->unk_14 + D_800DF6B4[player] < 10000 ) {
-        record->unk_14 += D_800DF6B4[player];
+    if ( record->strikes + D_800DF6B4[player] < 10000 ) {
+        record->strikes += D_800DF6B4[player];
     }
-    if ( record->unk_16 + D_8009D088[player] < 10000 ) {
-        record->unk_16 += D_8009D088[player];
+    if ( record->spares + D_8009D088[player] < 10000 ) {
+        record->spares += D_8009D088[player];
     }
-    if ( record->unk_18 + D_8009CF80[player] < 10000 ) {
-        record->unk_18 += D_8009CF80[player];
+    if ( record->splits + D_8009CF80[player] < 10000 ) {
+        record->splits += D_8009CF80[player];
     }
 }
 

@@ -39,7 +39,7 @@ void GS_StartPakCheck( void ) {
     }
     gs_lastContStatus[1] = 0;
     gs_lastContStatus[0] = 0;
-    if ( D_8009D098.unk_7B ) {
+    if ( D_8009D098.rumble ) {
         if ( !D_800E4FD0[0] || ( gs_secondController == 1 && !D_800E4FD0[1] ) ) {
             gs_pakCheckStep = 0;
             return;
