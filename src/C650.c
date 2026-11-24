@@ -28,6 +28,8 @@ void func_80031250( void ) {
 // takes &D_8009D1A0[entry] in a register for the insert) and in the key expressions' schedule; retail also re-masks
 // D_80066E14 (lhu, then andi 0xffff) for the test and the key but shifts the unmasked value for the bucket, so it is
 // probably read into a wider local (a u16 local alone does not do it)
+// Also checked: the empty-bucket arm last (bucket != DRAW_NONE first), key <= ...key for the head test, and the
+// search as a while loop on next != DRAW_NONE with the append after it (each further from retail)
 /*
 ================
 func_8003128C_insert
