@@ -1123,7 +1123,10 @@ note instead. A channel whose stream ended stops its voice.
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
-// change the register allocation, and a reused local is not counted as a match
+// change the register allocation, and a reused local is not counted as a match. With cmd, length and transpose
+// locals, 6 lines differ: the command byte lands in v1 (retail a0) and the transpose copy in v0 (retail a0), i.e.
+// retail's byte shares one register with both. Also checked: wider/narrower types per local, *src read at each
+// use, Snd_SignExtend8-style inlines (s32/u8/u32 parameter) on the transpose expression; all worse or no change.
 void Snd_PlayNextNote( sndChannel_t *chan, s32 index ) {
     u8 *src;
     s32 note;
@@ -1268,7 +1271,11 @@ fade) and the pan (pan * pan scale) of voice index, each only when it changed.
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
-// change the register allocation, and a reused local is not counted as a match
+// change the register allocation, and a reused local is not counted as a match. With separate volume and pan
+// locals the volume lives in v1 (retail a0) and the pan goes straight to a1 (retail computes it in a0 and copies):
+// retail's one register spans both sends, so it conflicts with v1 and a1. Also checked: s32/u32/u8/u16/s16 locals,
+// inline helpers computing each value, inline send helpers taking it; no change. The permuter (score 0 states)
+// only rediscovered the reused local.
 void Snd_UpdateVolumePan( sndChannel_t *chan, s32 index ) {
     // RULE-EXCEPTION: R30, the volume and the pan share one local; separate locals change the register
     // allocation.
@@ -1614,7 +1621,9 @@ INCLUDE_ASM("asm/nonmatchings/166B0", Snd_Exp2);
 #ifdef NON_MATCHING
 // NON_MATCHING: registers: the sign extension as an inline helper gives retail's 0x30 frame and its reload of tune->value,
 // and the flag test gives its prologue; retail still copies the digit before the sign test, converts the first tune in
-// $f2 and reads the wave pointer into a0 (into v1 here)
+// $f2 and reads the wave pointer into a0 (into v1 here). Also checked: Snd_SignExtend8 parameter types u8/s8/u16/s16/u32
+// and f32/s16 returns; a Snd_SetTune( tune, digit ) inline (its argument is evaluated before the first conversion,
+// retail evaluates the digit after it). Retail's copy lands the digit in the register that held tune->raw.
 /*
 ================
 Snd_SignExtend8
@@ -1704,7 +1713,9 @@ CHANNEL ALLOCATION
 */
 
 #ifdef NON_MATCHING
-// NON_MATCHING: registers only: retail swaps a0 and a1 between the 0xFF constant and the tempo quotient
+// NON_MATCHING: registers only: retail swaps a0 and a1 between the 0xFF constant and the tempo quotient. Also checked:
+// statement order of the tempo division, one assignment chain vs two RESEND stores, u32/s16/u16 tempo, an inline
+// byte-clearing helper (u32 or s32 size), the order of p and started; no change or worse.
 /*
 ================
 Snd_ResetChannel
@@ -1904,7 +1915,9 @@ s32 Snd_StartSe( seTable_t *table, s32 index, s32 volume, s32 pan, s32 priority 
 }
 
 #ifdef NON_MATCHING
-// NON_MATCHING: registers: retail inlines Snd_RelocateTable (declaring it inline gives retail's 0x50 frame and loops), then keeps a separate base copy per relocation loop and swaps s1/s2
+// NON_MATCHING: registers: retail inlines Snd_RelocateTable (declaring it inline gives retail's 0x50 frame and loops), then keeps a separate base copy per relocation loop and swaps s1/s2.
+// Also checked: base parameter s32/u32/u8 */void */const, a base local (s32, u32 or a pointer) set from hdr, at the
+// top or in the if; the local shares one register across the loops instead of retail's per-loop copies.
 /*
 ================
 Snd_StartBgm
