@@ -413,24 +413,24 @@ s32 GS_TeamSelect( void ) {
             if ( i < game_numPlayers ) {
                 character = game_players[i] & 0xF;
                 if ( shown[i] ) {
-                    ( (sceneObject_t *)D_800EA120[10 + i] )->viewMask = 1;
+                    ( (sceneObject_t *)obj_scene[10 + i] )->viewMask = 1;
                     if ( D_801207B4_gscode[i] != character ) {
                         D_801207B4_gscode[i] = character;
-                        ( (sceneObject_t *)D_800EA120[10 + i] )->frame = 0;
-                        ( (sceneObject_t *)D_800EA120[10 + i] )->model = D_801207C0_gscode[character];
-                        ( (sceneObject_t *)D_800EA120[10 + i] )->anim = D_801207E0_gscode[character];
+                        ( (sceneObject_t *)obj_scene[10 + i] )->frame = 0;
+                        ( (sceneObject_t *)obj_scene[10 + i] )->model = D_801207C0_gscode[character];
+                        ( (sceneObject_t *)obj_scene[10 + i] )->anim = D_801207E0_gscode[character];
                         if ( character == 6 ) {
                             D_80120800_gscode[i][1] += 40;
                         }
-                        Mtx_SetRotScaleTrans( ( (sceneObject_t *)D_800EA120[10 + i] )->mtx, 0.0f, 0.0f, 0.0f,
+                        Mtx_SetRotScaleTrans( ( (sceneObject_t *)obj_scene[10 + i] )->mtx, 0.0f, 0.0f, 0.0f,
                                        D_8011F8C0_gscode[character], D_80120800_gscode[i][0], D_80120800_gscode[i][1],
                                        D_80120800_gscode[i][2] );
                     }
                 } else {
-                    ( (sceneObject_t *)D_800EA120[10 + i] )->viewMask = 0;
+                    ( (sceneObject_t *)obj_scene[10 + i] )->viewMask = 0;
                 }
             } else {
-                ( (sceneObject_t *)D_800EA120[10 + i] )->viewMask = 0;
+                ( (sceneObject_t *)obj_scene[10 + i] )->viewMask = 0;
             }
         }
         func_8002A2F0();
@@ -468,7 +468,7 @@ s32 GS_TeamSelect( void ) {
             D_8011FC81_gscode = CHOICE_RUN;
             func_80026B28();
             Obj_CreateAll( gs_classes, D_8011F900_gscode );
-            D_8009CFA0[0]->path->flags |= 4;
+            cam_cameras[0]->path->flags |= 4;
             for ( i = 0; i < 4; i++ ) {
                 D_801207B4_gscode[i] = 0xFFFF;
                 for ( j = 0; j < 3; j++ ) {

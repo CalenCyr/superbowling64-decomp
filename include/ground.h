@@ -48,7 +48,7 @@ extern u8 scene_fog;                /* fog on */
 extern u32 scene_renderMode1;       /* render mode of the first cycle */
 extern u32 scene_renderMode2;       /* render mode of the second cycle */
 extern u16 scene_powersOfTwo[];     /* 2, 4, ... 512 */
-extern u8 scene_viewMask;           /* cameras that draw, a bit per index in D_8009CFA0 */
+extern u8 scene_viewMask;           /* cameras that draw, a bit per index in cam_cameras */
 extern u8 scene_addSurface;         /* surface type of the entries Scene_AddToDrawList adds */
 extern u16 scene_addMaterial;       /* their material (file index) */
 extern u8 scene_addTwoCycle;        /* their cycle type (scene_twoCycle) */
@@ -92,7 +92,7 @@ extern u16 scene_puffImages[2];     /* image files of the two kinds of puff */
 extern Vtx scene_puffSquares[NUM_PUFF_SIZES * 4];  /* squares of four vertices, by size */
 extern Mtx scene_puffMtx[2][NUM_PUFFS];  /* each puff turned to face camera 0, then camera 1 */
 extern u8 scene_puffColors[2][3];   /* rgb of the two kinds of puff */
-extern u8 scene_view;               /* index in D_8009CFA0 of the camera Scene_BeginView last set up; 2: none */
+extern u8 scene_view;               /* index in cam_cameras of the camera Scene_BeginView last set up; 2: none */
 extern u8 scene_ucode;              /* microcode loaded: 0 gspF3DEX2_Rej_fifo, 1 gspF3DEX2_fifo, 2 gspL3DEX2_fifo */
 
 void Scene_InitPuffs( void );

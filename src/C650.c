@@ -88,8 +88,8 @@ void Scene_AddToDrawList( void ) {
     u32 bucket;
 
     mask = scene_viewMask;
-    for ( i = 0; i < D_80099480; i++ ) {
-        if ( ( mask & 1 ) && D_8009CFA0[i]->height != 0 ) {
+    for ( i = 0; i < cam_count; i++ ) {
+        if ( ( mask & 1 ) && cam_cameras[i]->height != 0 ) {
             scene_drawList[scene_numDraws].unk_04 = scene_addMaterial | ( scene_addSurface << 11 ) | ( i << 14 );
             scene_drawList[scene_numDraws].unk_06 = scene_addMesh | ( scene_addCullBack << 11 ) | ( scene_addTwoCycle << 13 ) | ( scene_addUcode << 14 );
             if ( scene_addNoZBuffer == 0 ) {
@@ -321,8 +321,8 @@ void Scene_Draw( void ) {
                       osVirtualToPhysical( sched_framebuffers[sched_drawFb] ) );
 
     /* the background of camera 0: its path's image, or its clear colour */
-    if ( !( D_8009CFA0[0]->path->flags & 4 ) ) {
-        if ( D_8009CFA0[0]->path->flags & 2 ) {
+    if ( !( cam_cameras[0]->path->flags & 4 ) ) {
+        if ( cam_cameras[0]->path->flags & 2 ) {
             gDPSetCycleType( game_gfx++, G_CYC_COPY );
             gDPSetAlphaCompare( game_gfx++, G_AC_NONE );
             gDPSetTexturePersp( game_gfx++, G_TP_NONE );
@@ -330,10 +330,10 @@ void Scene_Draw( void ) {
             gDPSetCombineLERP( game_gfx++, 0, 0, K5, TEXEL0, 0, 0, 0, TEXEL0, 0, 0, K5, TEXEL0, 0, 0, 0, TEXEL0 );
             gDPSetTextureLUT( game_gfx++, G_TT_RGBA16 );
             Draw_CiImage( IMAGE_CI8, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
-                           ( (fileImage_t *)D_8009CFA0[0]->path->unk_50 )->data,
-                           ( (fileImage_t *)D_8009CFA0[0]->path->unk_50 )->data + CI8_PALETTE_SIZE );
+                           ( (fileImage_t *)cam_cameras[0]->path->unk_50 )->data,
+                           ( (fileImage_t *)cam_cameras[0]->path->unk_50 )->data + CI8_PALETTE_SIZE );
         } else {
-            path = D_8009CFA0[0]->path;
+            path = cam_cameras[0]->path;
             gDPSetCycleType( game_gfx++, G_CYC_FILL );
             gDPSetFillColor( game_gfx++,
                              ( GPACK_RGBA5551( path->clearColor[0], path->clearColor[1], path->clearColor[2], 1 )
@@ -361,7 +361,7 @@ void Scene_Draw( void ) {
     gDPSetCycleType( game_gfx++, G_CYC_2CYCLE );
     gDPSetTextureFilter( game_gfx++, G_TF_BILERP );
     gDPSetTexturePersp( game_gfx++, G_TP_PERSP );
-    gSPPerspNormalize( game_gfx++, D_8009CF9E );
+    gSPPerspNormalize( game_gfx++, cam_perspNorm );
     gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF );
     gDPSetAlphaCompare( game_gfx++, G_AC_THRESHOLD );
     scene_combine.a0 = 0xFF;
@@ -376,7 +376,7 @@ void Scene_Draw( void ) {
     scene_envColor.a = 0xFF;
     gDPSetEnvColor( game_gfx++, scene_envColor.r, scene_envColor.g, scene_envColor.b, scene_envColor.a );
     scene_view = 0;
-    Scene_BeginView( D_8009CFA0[0] );
+    Scene_BeginView( cam_cameras[0] );
     scene_geometryChanged = 1;
     scene_renderModeChanged = 1;
 
@@ -411,7 +411,7 @@ void Scene_Draw( void ) {
         view = scene_drawList[*link].unk_04 >> 14;
         if ( scene_view != view ) {
             scene_view = view;
-            Scene_BeginView( D_8009CFA0[view] );
+            Scene_BeginView( cam_cameras[view] );
         }
 
         if ( scene_twoCycle != ( ( scene_drawList[*link].unk_06 >> 13 ) & 1 ) ) {
@@ -796,9 +796,9 @@ void Scene_StartPuff( u16 flags, f32 x, f32 y, f32 z ) {
         scene_puffs[i].life = 7;
         break;
     }
-    Scene_FaceMatrix( m, x, y, z, D_8009CFA0[0]->eye[0], D_8009CFA0[0]->eye[1], D_8009CFA0[0]->eye[2] );
+    Scene_FaceMatrix( m, x, y, z, cam_cameras[0]->eye[0], cam_cameras[0]->eye[1], cam_cameras[0]->eye[2] );
     guMtxF2L( m, &scene_puffMtx[0][i] );
-    Scene_FaceMatrix( m, x, y, z, D_8009CFA0[1]->eye[0], D_8009CFA0[1]->eye[1], D_8009CFA0[1]->eye[2] );
+    Scene_FaceMatrix( m, x, y, z, cam_cameras[1]->eye[0], cam_cameras[1]->eye[1], cam_cameras[1]->eye[2] );
     guMtxF2L( m, &scene_puffMtx[1][i] );
 }
 
@@ -869,7 +869,7 @@ void Scene_DrawPuffs( void ) {
         for ( view = 0; view < 2; view++ ) {
             if ( scene_view != view ) {
                 scene_view = view;
-                Scene_BeginView( D_8009CFA0[scene_view] );
+                Scene_BeginView( cam_cameras[scene_view] );
             }
             gSPTexture( game_gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
             gSPClearGeometryMode( game_gfx++, G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN |

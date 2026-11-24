@@ -464,11 +464,11 @@ menuItem_t, MENU_END, MENU_NONE, MENU_SLIDE_STEPS, SLIDE_*	menu.h	invented: the 
 SCORE_IMAGE_*, ROLL_STRIKE, ROLL_SPARE	menu.h	invented: indices of score_images that Score_RollImage returns for the rolls of a frame
 Menu_SlidePos	13490.c	invented: the inline position calculation of Menu_DrawItems's slides
 # main scene engine types (object.h, filecache.h, ground.h)
-sceneObject_t	object.h	invented: scene object (body after the objNode_t header; D_800EA120 holds pointers); matrix 0x04, frame 0x48, viewMask 0x4A, model 0x4C, anim 0x50, joints from 0x58; gacode.h's sceneObj_t is a partial copy
+sceneObject_t	object.h	invented: scene object (body after the objNode_t header; obj_scene holds pointers); matrix 0x04, frame 0x48, viewMask 0x4A, model 0x4C, anim 0x50, joints from 0x58; gacode.h's sceneObj_t is a partial copy
 sceneObjJoint_t	object.h	invented: 0x140-byte joint: float matrix, then Mtx[2] and mirrored Mtx[2] by sched_bufferIndex (func_8002AF20, func_8002B9CC)
-sceneCamera_t	object.h	invented: 0x248-byte camera (D_8009CFA0); eye/at/up are the guLookAtReflectF arguments of func_8002C324, path a FILE_TYPE3 file
+sceneCamera_t	object.h	invented: 0x248-byte camera (cam_cameras); eye/at/up are the guLookAtReflectF arguments of func_8002C324, path a FILE_TYPE3 file
 sceneObjectNode_t	object.h	invented: what func_8002B610 creates: the objNode_t header, then a sceneObject_t (cacode reads model at 0x5C and anim at 0x60 through it)
-sceneCameraNode_t	object.h	invented: what func_8002BFD8 creates: the objNode_t header, then a sceneCamera_t (it lists node + 0x10 in D_8009CFA0)
+sceneCameraNode_t	object.h	invented: what func_8002BFD8 creates: the objNode_t header, then a sceneCamera_t (it lists node + 0x10 in cam_cameras)
 puff_t	ground.h	invented: 12-byte camera-facing square (scene_puffs, 50): flags, life, alpha, size and their steps (Scene_StartPuff starts one, Scene_DrawPuffs ages and draws them)
 
 # rscode overlay (include/rscode/rscode.h): invented from use
@@ -1338,3 +1338,16 @@ scene_puffMtx	0x800E6770	invented: each puff turned to face camera 0, then camer
 scene_puffColors	0x8005C970	invented: rgb of the two kinds of puff
 scene_view	0x800A3018	invented: camera Scene_BeginView last set up; 2: none
 scene_ucode	0x80066C34	invented: microcode loaded: 0 gspF3DEX2_Rej_fifo, 1 gspF3DEX2_fifo, 2 gspL3DEX2_fifo
+
+# include/object.h: the object list and the scene's cameras (units 53B0, 7250)
+obj_list	0x80066E00	invented: head of the object list, kept in priority order (Obj_ClearList, Obj_Create)
+obj_classes	0x800E657C	invented: the object classes, by objParams_t.type (Obj_Create)
+obj_params	0x800A2FE0	invented: the records Obj_CreateAll creates objects from
+obj_paramsEnded	0x800A2FDC	invented: TRUE when the records ended with OBJ_PARAMS_END
+obj_frameStep	0x800F7BF8	invented: frames each update advances; 1 at start (Obj_ClearList)
+obj_hostFile	0x800F30E0	invented: buffer func_8002A7EC reads a host file into; pvcode creates objects from it
+obj_scene	0x800EA120	invented: main's scene objects by priority (Cam_Create lists cameras in it)
+cam_count	0x80099480	invented: cameras in cam_cameras (cleared by Obj_ClearList)
+cam_cameras	0x8009CFA0	invented: the scene's cameras (Cam_Create); an object's viewMask has a bit for each
+cam_perspNorm	0x8009CF9E	invented: perspNorm of the cameras' projections (guPerspective in Cam_Update, gSPPerspNormalize)
+cam_manual	0x800EA0C0	invented: set: Cam_Update applies the controller's zoom, pan and rotation instead of the path's view

@@ -32,7 +32,7 @@ void MG_Frame( void ) {
         Maze_Draw( 0x90F, MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
     }
     func_8002A2F0();
-    if ( D_800A2FDC ) {
+    if ( obj_paramsEnded ) {
         Txt_LoadFont( &game_gfx );
         Txt_SetupFont( &game_gfx, 0 );
         gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );

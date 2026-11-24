@@ -47,20 +47,20 @@ s32 GS_CharacterSelect( void ) {
             Obj_CreateAll( gs_classes, D_8011F880_gscode[game_stage] );
             D_8011F8A0_gscode = 30;
             D_8011F8A4_gscode = 3.1415927f;
-            D_8009CFA0[0]->path->flags |= 4;
+            cam_cameras[0]->path->flags |= 4;
         }
         if ( D_8011F8BA_gscode < 7 ) {
-            D_8009CFA0[0]->width = 224.0f - D_8011F8BA_gscode * 32;
-            D_8009CFA0[0]->height = 120.0f - D_8011F8BA_gscode * 17;
+            cam_cameras[0]->width = 224.0f - D_8011F8BA_gscode * 32;
+            cam_cameras[0]->height = 120.0f - D_8011F8BA_gscode * 17;
         } else if ( D_8011F8BA_gscode >= 9 ) {
-            D_8009CFA0[0]->width = ( D_8011F8BA_gscode - 8 ) * 32.0f;
-            D_8009CFA0[0]->height = ( D_8011F8BA_gscode - 8 ) * 17.0f;
+            cam_cameras[0]->width = ( D_8011F8BA_gscode - 8 ) * 32.0f;
+            cam_cameras[0]->height = ( D_8011F8BA_gscode - 8 ) * 17.0f;
         } else {
-            D_8009CFA0[0]->width = 32;
-            D_8009CFA0[0]->height = 17;
+            cam_cameras[0]->width = 32;
+            cam_cameras[0]->height = 17;
         }
-        D_8009CFA0[0]->left = 160 - D_8009CFA0[0]->width / 2;
-        D_8009CFA0[0]->top = 114 - D_8009CFA0[0]->height / 2;
+        cam_cameras[0]->left = 160 - cam_cameras[0]->width / 2;
+        cam_cameras[0]->top = 114 - cam_cameras[0]->height / 2;
     }
 
     if ( D_8011F8B9_gscode == CHOICE_RUN ) {
@@ -105,25 +105,25 @@ s32 GS_CharacterSelect( void ) {
 
     if ( D_8011F8B9_gscode == CHOICE_RUN && D_8011F8BA_gscode != 7 && D_8011F8BA_gscode != 8 &&
          D_8011F8BA_gscode != 9 ) {
-        Draw_FillRect( D_8009CFA0[0]->left, D_8009CFA0[0]->top, D_8009CFA0[0]->width - 1,
-                       D_8009CFA0[0]->height - 1, D_8009CFA0[0]->path->clearColor[0],
-                       D_8009CFA0[0]->path->clearColor[1], D_8009CFA0[0]->path->clearColor[2], 0xFF );
-        D_8009CFA0[0]->frame = -1;
-        D_8009CFA0[0]->path->fovy = 30.0f;
-        D_8009CFA0[0]->eye[0] = 0.0f;
-        D_8009CFA0[0]->eye[1] = 100.0f;
-        D_8009CFA0[0]->eye[2] = 0.0f;
-        D_8009CFA0[0]->at[2] = cosf( D_8011F8A4_gscode ) * 100.0f;
-        D_8009CFA0[0]->at[0] = sinf( D_8011F8A4_gscode ) * 100.0f;
-        D_8009CFA0[0]->at[1] = D_8009CFA0[0]->eye[1];
+        Draw_FillRect( cam_cameras[0]->left, cam_cameras[0]->top, cam_cameras[0]->width - 1,
+                       cam_cameras[0]->height - 1, cam_cameras[0]->path->clearColor[0],
+                       cam_cameras[0]->path->clearColor[1], cam_cameras[0]->path->clearColor[2], 0xFF );
+        cam_cameras[0]->frame = -1;
+        cam_cameras[0]->path->fovy = 30.0f;
+        cam_cameras[0]->eye[0] = 0.0f;
+        cam_cameras[0]->eye[1] = 100.0f;
+        cam_cameras[0]->eye[2] = 0.0f;
+        cam_cameras[0]->at[2] = cosf( D_8011F8A4_gscode ) * 100.0f;
+        cam_cameras[0]->at[0] = sinf( D_8011F8A4_gscode ) * 100.0f;
+        cam_cameras[0]->at[1] = cam_cameras[0]->eye[1];
         if ( D_8011F8A0_gscode ) {
             D_8011F8A0_gscode--;
         } else {
             D_8011F8A4_gscode += 0.010471975511965976;
         }
-        D_8009CFA0[0]->upPoint[2] = D_8009CFA0[0]->eye[2];
-        D_8009CFA0[0]->upPoint[0] = D_8009CFA0[0]->eye[0];
-        D_8009CFA0[0]->upPoint[1] = -100.0f;
+        cam_cameras[0]->upPoint[2] = cam_cameras[0]->eye[2];
+        cam_cameras[0]->upPoint[0] = cam_cameras[0]->eye[0];
+        cam_cameras[0]->upPoint[1] = -100.0f;
         func_8002A2F0();
     }
 

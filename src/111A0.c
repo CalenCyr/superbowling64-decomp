@@ -39,7 +39,7 @@ void GridEd_Frame( void ) {
     }
 
     gSPLoadUcodeL( game_gfx++, gspL3DEX2_fifo );
-    Scene_BeginView( D_8009CFA0[0] );
+    Scene_BeginView( cam_cameras[0] );
     gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
     gDPSetRenderMode( game_gfx++, G_RM_AA_ZB_XLU_LINE, G_RM_AA_ZB_XLU_LINE2 );
     gDPSetAlphaCompare( game_gfx++, G_AC_NONE );

@@ -23,8 +23,8 @@ void Cam_SetAmbient( s32 index, u8 *color ) {
     u32 i;
 
     for ( i = 0; i < 3; i++ ) {
-        D_8009CFA0[index]->lights[sched_bufferIndex].a.l.col[i] =
-            D_8009CFA0[index]->lights[sched_bufferIndex].a.l.colc[i] = color[i];
+        cam_cameras[index]->lights[sched_bufferIndex].a.l.col[i] =
+            cam_cameras[index]->lights[sched_bufferIndex].a.l.colc[i] = color[i];
     }
 }
 
@@ -63,8 +63,8 @@ void Cam_ReadPathFrame( s16 file, s16 frame, f32 *eye, f32 *upPoint ) {
 Cam_Create
 
 Creates a camera from params: its path (unk_08[0]) with the starting eye, at and up point, its viewport size and
-target (unk_08[1] to unk_08[6]), the path's light and a grey one from the eye, and lists it in D_8009CFA0 and,
-by priority, in D_800EA120.
+target (unk_08[1] to unk_08[6]), the path's light and a grey one from the eye, and lists it in cam_cameras and,
+by priority, in obj_scene.
 ================
 */
 objNode_t *Cam_Create( objParams_t *params ) {
@@ -80,7 +80,7 @@ objNode_t *Cam_Create( objParams_t *params ) {
         cam->eye[i] = cam->path->eye[i];
         cam->upPoint[i] = cam->path->upPoint[i];
     }
-    D_8009CFA0[D_80099480++] = cam;
+    cam_cameras[cam_count++] = cam;
     cam->width = params->unk_08[1];
     cam->height = params->unk_08[2];
     cam->left = params->unk_08[3];
@@ -98,7 +98,7 @@ objNode_t *Cam_Create( objParams_t *params ) {
         cam->vp[i].vp.vscale[2] = cam->vp[i].vp.vtrans[2] = G_MAXZ / 2;
         cam->vp[i].vp.vscale[3] = cam->vp[i].vp.vtrans[3] = 0;
     }
-    D_800EA120[(s32)params->priority] = cam;
+    obj_scene[(s32)params->priority] = cam;
     return &node->node;
 }
 
@@ -107,7 +107,7 @@ objNode_t *Cam_Create( objParams_t *params ) {
 Cam_Update
 
 Updates cam: at from its target joint, eye and up point from the path's current frame, the viewport, the
-projection, and the view (with the eye's light) or, while D_800EA0C0 is set, the controller's zoom, pan and
+projection, and the view (with the eye's light) or, while cam_manual is set, the controller's zoom, pan and
 rotation of the last view.
 ================
 */
@@ -127,7 +127,7 @@ void Cam_Update( sceneCamera_t *cam ) {
     if ( cam->frame >= 0 ) {
         data = cam->path->frames + cam->path->frameSize * cam->frame;
         if ( cam->targetObj != 0 ) {
-            guMtxXFMF( ( (sceneObject_t *)D_800EA120[cam->targetObj] )->joints[cam->targetJoint].mtx, 0.0f, 0.0f,
+            guMtxXFMF( ( (sceneObject_t *)obj_scene[cam->targetObj] )->joints[cam->targetJoint].mtx, 0.0f, 0.0f,
                        0.0f, &cam->at[0], &cam->at[1], &cam->at[2] );
         }
         for ( i = 0; i < 3; i++ ) {
@@ -143,14 +143,14 @@ void Cam_Update( sceneCamera_t *cam ) {
     }
     cam->vp[sched_bufferIndex].vp.vscale[0] = cam->vp[sched_bufferIndex].vp.vtrans[0] = cam->width * 2;
     cam->vp[sched_bufferIndex].vp.vscale[1] = cam->vp[sched_bufferIndex].vp.vtrans[1] = cam->height * 2;
-    guPerspective( &cam->projL[sched_bufferIndex], &D_8009CF9E, cam->path->fovy, (f32)cam->width / (f32)cam->height,
+    guPerspective( &cam->projL[sched_bufferIndex], &cam_perspNorm, cam->path->fovy, (f32)cam->width / (f32)cam->height,
                    20.0f, 16000.0f, 1.0f );
     /* the up vector is divided by the sum of its components, not by its length */
     norm = ( cam->upPoint[0] - cam->eye[0] ) + ( cam->upPoint[1] - cam->eye[1] ) + ( cam->upPoint[2] - cam->eye[2] );
     cam->up[0] = ( cam->upPoint[0] - cam->eye[0] ) / norm;
     cam->up[1] = ( cam->upPoint[1] - cam->eye[1] ) / norm;
     cam->up[2] = ( cam->upPoint[2] - cam->eye[2] ) / norm;
-    if ( D_800EA0C0 == 0 ) {
+    if ( cam_manual == 0 ) {
         guLookAtReflectF( cam->mtx, &cam->lookAt[sched_bufferIndex], cam->eye[0], cam->eye[1], cam->eye[2], cam->at[0],
                           cam->at[1], cam->at[2], cam->up[0], cam->up[1], cam->up[2] );
         dx = cam->eye[0] - cam->at[0];
@@ -199,7 +199,7 @@ Updates cam, and advances it along its path, from the start after the last frame
 */
 void Cam_UpdateAndAdvance( sceneCamera_t *cam ) {
     Cam_Update( cam );
-    cam->frame += D_800F7BF8;
+    cam->frame += obj_frameStep;
     if ( cam->frame == cam->path->numFrames ) {
         cam->frame = 0;
     }
@@ -704,7 +704,7 @@ void Draw_Line3D( s32 index, f32 *start, f32 *end, u8 *color ) {
     }
     guMtxIdent( &draw_lineMtx );
     gSPLoadUcodeL( game_gfx++, gspL3DEX2_fifo );
-    Scene_BeginView( D_8009CFA0[index] );
+    Scene_BeginView( cam_cameras[index] );
     gDPSetRenderMode( game_gfx++, G_RM_AA_XLU_LINE, G_RM_AA_XLU_LINE2 );
     gDPSetAlphaCompare( game_gfx++, G_AC_NONE );
     gDPSetCombineMode( game_gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE );

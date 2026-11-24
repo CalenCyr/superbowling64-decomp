@@ -103,7 +103,7 @@ typedef struct {
     /* 0xA68 */ gaSpot_t markerSpots[3];    /* [0] the aim, [1] the stance, [2] the aim marker */
     /* 0xAC8 */ sceneObject_t *bodyObjs[NUM_BODIES];
     /* 0xAF4 */ sceneObject_t *markerObjs[3];
-    /* 0xB00 */ sceneCamera_t *camera;  /* main's scene camera D_800EA120[lane] (Cam_Create) */
+    /* 0xB00 */ sceneCamera_t *camera;  /* main's scene camera obj_scene[lane] (Cam_Create) */
     /* 0xB04 */ void (*turnFunc)( s32 player );
     /* 0xB08 */ void (*panelFunc)( s32 player );
     /* 0xB0C */ void (*cameraFunc)( s32 player, sceneCamera_t *camera );

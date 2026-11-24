@@ -20,7 +20,7 @@ void PV_Init( void ) {
     if ( D_8005C0BC ) {
         func_8002A7EC( "sce.dat" );
         D_8005C0BD = 1;
-        Obj_CreateAll( pv_classes, (objParams_t *)D_800F30E0 );
+        Obj_CreateAll( pv_classes, (objParams_t *)obj_hostFile );
     } else {
         Obj_CreateAll( pv_classes, pv_sceneObjects );
     }
@@ -62,7 +62,7 @@ void PV_Frame( void ) {
     if ( cont_allPressed & D_JPAD ) {
         pv_sound--;
     }
-    if ( D_800A2FDC ) {
+    if ( obj_paramsEnded ) {
         Txt_LoadFont( &game_gfx );
         Txt_SetupFont( &game_gfx, 0 );
         gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );

@@ -39,24 +39,24 @@ void GA_SetPlayerObjectFlags( s32 set ) {
     for ( i = 0; i < game_numPlayers; i++ ) {
         switch ( game_players[i] & 0xF ) {
         case 1:
-            ( (sceneObject_t *)D_800EA120[140 + i] )->flags |= 0x1400;
+            ( (sceneObject_t *)obj_scene[140 + i] )->flags |= 0x1400;
             break;
         case 7:
-            ( (sceneObject_t *)D_800EA120[140 + i] )->flags |= 0x1C00;
+            ( (sceneObject_t *)obj_scene[140 + i] )->flags |= 0x1C00;
             break;
         case 0:
         case 2:
-            ( (sceneObject_t *)D_800EA120[140 + i] )->flags |= 0x1000;
+            ( (sceneObject_t *)obj_scene[140 + i] )->flags |= 0x1000;
             break;
         case 4:
-            ( (sceneObject_t *)D_800EA120[140 + i] )->flags |= 0x1E00;
+            ( (sceneObject_t *)obj_scene[140 + i] )->flags |= 0x1E00;
             break;
         case 3:
         case 6:
-            ( (sceneObject_t *)D_800EA120[140 + i] )->flags |= 0x3000;
+            ( (sceneObject_t *)obj_scene[140 + i] )->flags |= 0x3000;
             break;
         case 5:
-            ( (sceneObject_t *)D_800EA120[140 + i] )->flags |= 0x2800;
+            ( (sceneObject_t *)obj_scene[140 + i] )->flags |= 0x2800;
             break;
         }
     }
@@ -291,9 +291,9 @@ void GA_LoadLanePalettes( s32 lane, s32 alt, s32 index ) {
     sceneObject_t *obj;
 
     if ( lane == 0 ) {
-        obj = D_800EA120[100];
+        obj = obj_scene[100];
     } else {
-        obj = D_800EA120[120];
+        obj = obj_scene[120];
     }
     Cache_GetFile( ga_lanePaletteImages[index][2], FILE_RAW );
     Cache_GetFile( ga_lanePaletteImages[index][3], FILE_RAW );

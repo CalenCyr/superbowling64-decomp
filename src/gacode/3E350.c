@@ -44,17 +44,17 @@ void GA_SetupLanes( u8 arg0, f32 offset, u8 arg2 ) {
     for ( i = 0; i < 2; i++ ) {
         base = i != 0 ? 120 : 100;
         ga_lanes[i].offsetX = i != 0 ? offset : 0.0f;
-        ga_lanes[i].camera = D_800EA120[i];
+        ga_lanes[i].camera = obj_scene[i];
         ga_lanes[i].camera->frame = -1;
         for ( j = 0; j < NUM_BODIES; j++ ) {
-            ga_lanes[i].bodyObjs[j] = D_800EA120[base + j];
+            ga_lanes[i].bodyObjs[j] = obj_scene[base + j];
             if ( arg0 ) {
                 ga_lanes[i].bodyObjs[j]->flags &= i == 0 ? ~0x8000 : ~0x4000;
             }
         }
-        ga_lanes[i].markerObjs[0] = D_800EA120[base + j++];
-        ga_lanes[i].markerObjs[1] = D_800EA120[base + j++];
-        ga_lanes[i].markerObjs[2] = D_800EA120[base + j];
+        ga_lanes[i].markerObjs[0] = obj_scene[base + j++];
+        ga_lanes[i].markerObjs[1] = obj_scene[base + j++];
+        ga_lanes[i].markerObjs[2] = obj_scene[base + j];
         if ( arg2 ) {
             ga_lanes[i].markerObjs[2]->viewMask = i + 1;
             D_8012C110_gacode[2].pos[1] = ga_stage->unk_14;
@@ -76,7 +76,7 @@ void GA_SetupLanes( u8 arg0, f32 offset, u8 arg2 ) {
     }
     D_8012D8D8_gacode = 0;
     for ( player = 0; player < MAX_PLAYERS; player++ ) {
-        ga_players[player].obj = D_800EA120[140 + player];
+        ga_players[player].obj = obj_scene[140 + player];
     }
 }
 
@@ -398,15 +398,15 @@ void func_80115054_gacode( void ) {
     s32 player;
     s32 i;
 
-    ( (sceneCamera_t *)D_800EA120[1] )->frame = -1;
+    ( (sceneCamera_t *)obj_scene[1] )->frame = -1;
     for ( player = MAX_PLAYERS - 1; player >= 0; player-- ) {
         pl = &ga_players[player];
         pl->ballView = 0;
     }
     for ( i = 0; i < 14; i++ ) {
-        ( (sceneObject_t *)D_800EA120[120 + i] )->viewMask = 0;
+        ( (sceneObject_t *)obj_scene[120 + i] )->viewMask = 0;
     }
-    ( (sceneObject_t *)D_800EA120[141] )->viewMask = 0;
+    ( (sceneObject_t *)obj_scene[141] )->viewMask = 0;
 }
 
 /*
@@ -419,7 +419,7 @@ camera.
 */
 void GA_UpdateLaneCamera( s32 player ) {
     void (*view)( s32 player, sceneCamera_t *camera ) = ga_players[player].lane->cameraFunc;
-    sceneCamera_t *camera = D_800EA120[1];
+    sceneCamera_t *camera = obj_scene[1];
 
     if ( view == func_8011BB44_gacode ) {
         func_8011C468_gacode( player, camera );

@@ -17,11 +17,11 @@ Empties the object list, without freeing its objects.
 ================
 */
 void Obj_ClearList( void ) {
-    D_80066E00.next = NULL;
-    D_80066E00.priority = 0;
-    D_80099480 = 0;
-    D_800EA0C0 = 0;
-    D_800F7BF8 = 1;
+    obj_list.next = NULL;
+    obj_list.priority = 0;
+    cam_count = 0;
+    cam_manual = 0;
+    obj_frameStep = 1;
     Scene_InitPuffs();
 }
 
@@ -37,11 +37,11 @@ void Obj_Create( objParams_t *params ) {
     objNode_t *obj;
     objNode_t *prev;
 
-    obj = D_800E657C[(u32)params->type].create( params );
-    obj->update = D_800E657C[(u32)params->type].update;
+    obj = obj_classes[(u32)params->type].create( params );
+    obj->update = obj_classes[(u32)params->type].update;
     obj->priority = params->priority;
     obj->type = params->type;
-    for ( prev = &D_80066E00; prev->next != NULL; prev = prev->next ) {
+    for ( prev = &obj_list; prev->next != NULL; prev = prev->next ) {
         if ( prev->next->priority > (u32)params->priority ) {
             break;
         }
@@ -60,17 +60,17 @@ Creates the objects of the records params with classes, up to the first record o
 void Obj_CreateAll( objClass_t *classes, objParams_t *params ) {
     s32 i;
 
-    D_800E657C = classes;
-    D_800A2FE0 = params;
-    for ( i = 0; !( D_800A2FE0[i].type <= OBJ_PARAMS_END ); i++ ) {
-        if ( D_800A2FE0[i].type != OBJ_PARAMS_SKIP ) {
-            Obj_Create( &D_800A2FE0[i] );
+    obj_classes = classes;
+    obj_params = params;
+    for ( i = 0; !( obj_params[i].type <= OBJ_PARAMS_END ); i++ ) {
+        if ( obj_params[i].type != OBJ_PARAMS_SKIP ) {
+            Obj_Create( &obj_params[i] );
         }
     }
-    if ( D_800A2FE0[i].type == OBJ_PARAMS_END ) {
-        D_800A2FDC = TRUE;
+    if ( obj_params[i].type == OBJ_PARAMS_END ) {
+        obj_paramsEnded = TRUE;
     } else {
-        D_800A2FDC = FALSE;
+        obj_paramsEnded = FALSE;
     }
 }
 
@@ -86,9 +86,9 @@ Removes obj from the list and frees it.
 void Obj_Free( objNode_t *obj ) {
     objNode_t *prev;
 
-    prev = &D_80066E00;
-    if ( D_80066E00.next == obj ) {
-        D_80066E00.next = obj->next;
+    prev = &obj_list;
+    if ( obj_list.next == obj ) {
+        obj_list.next = obj->next;
     } else {
         do {
             prev = prev->next;
@@ -108,7 +108,7 @@ Frees every object, and empties the list.
 void Obj_FreeAll( void ) {
     objNode_t *head;
 
-    head = &D_80066E00;
+    head = &obj_list;
     while ( TRUE ) {
         if ( head->next == NULL ) {
             break;
@@ -152,12 +152,12 @@ f32 func_8002A724( u8 *str ) {
 ================
 func_8002A7EC
 
-Reads host file name into D_800F30E0.
+Reads host file name into obj_hostFile.
 ================
 */
 void func_8002A7EC( u8 *name ) {
     /* BUG: the read allows 0x8000 bytes, more than the buffer; a longer file overruns the bss after it */
-    Host_LoadFile( name, D_800F30E0, 0x8000 );
+    Host_LoadFile( name, obj_hostFile, 0x8000 );
 }
 
 /*
@@ -389,7 +389,7 @@ Draws obj, and advances its animation, from the start after its last frame.
 */
 void Obj_Draw( sceneObject_t *obj ) {
     func_8002B9CC( obj );
-    obj->frame += D_800F7BF8;
+    obj->frame += obj_frameStep;
     if ( obj->frame == obj->anim[0] ) {
         obj->frame = 0;
     }

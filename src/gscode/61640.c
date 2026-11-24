@@ -36,10 +36,10 @@ s32 GS_CharacterMenu( void ) {
             if ( ++D_80120658_gscode == D_801205DC_gscode[D_80120656_gscode] ) {
                 D_80120658_gscode = 0;
             }
-            ( (sceneObject_t *)D_800EA120[10] )->frame = 1;
+            ( (sceneObject_t *)obj_scene[10] )->frame = 1;
             Cache_Release( D_80120A48_gscode[D_80120656_gscode] );
             D_80120A48_gscode[D_80120656_gscode] = D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1];
-            ( (sceneObject_t *)D_800EA120[10] )->anim =
+            ( (sceneObject_t *)obj_scene[10] )->anim =
                 Cache_GetFile( D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1], FILE_TYPE2 );
         }
         if ( cont_allPressed & B_BUTTON ) {
@@ -73,19 +73,19 @@ s32 GS_CharacterMenu( void ) {
 
     if ( D_80120655_gscode == CHOICE_RUN ) {
         if ( D_80120A20_gscode == D_80120656_gscode ) {
-            if ( ( (sceneObject_t *)D_800EA120[10] )->frame ) {
+            if ( ( (sceneObject_t *)obj_scene[10] )->frame ) {
                 goto draw;
             }
         } else {
             D_80120658_gscode = 0;
         }
-        ( (sceneObject_t *)D_800EA120[10] )->frame = 0;
-        ( (sceneObject_t *)D_800EA120[10] )->model = D_80120A28_gscode[D_80120656_gscode];
+        ( (sceneObject_t *)obj_scene[10] )->frame = 0;
+        ( (sceneObject_t *)obj_scene[10] )->model = D_80120A28_gscode[D_80120656_gscode];
         D_80120A20_gscode = D_80120656_gscode;
         Cache_Release( D_80120A48_gscode[D_80120656_gscode] );
         D_80120A48_gscode[D_80120656_gscode] = D_801205E4_gscode[D_80120656_gscode][0];
-        ( (sceneObject_t *)D_800EA120[10] )->anim = Cache_GetFile( D_801205E4_gscode[D_80120656_gscode][0], FILE_TYPE2 );
-        Mtx_SetRotScaleTrans( ( (sceneObject_t *)D_800EA120[10] )->mtx, 0.0f, 0.0f, 0.0f,
+        ( (sceneObject_t *)obj_scene[10] )->anim = Cache_GetFile( D_801205E4_gscode[D_80120656_gscode][0], FILE_TYPE2 );
+        Mtx_SetRotScaleTrans( ( (sceneObject_t *)obj_scene[10] )->mtx, 0.0f, 0.0f, 0.0f,
                        D_801205AC_gscode[D_80120656_gscode] * 1.2, -100.0f, -100.0f, 300.0f );
     draw:
         func_8002A2F0();
@@ -99,7 +99,7 @@ s32 GS_CharacterMenu( void ) {
             func_80026B28();
             Obj_CreateAll( gs_classes, D_801204EC_gscode );
             D_80120A20_gscode = 0xFFFF;
-            D_8009CFA0[0]->path->flags |= 4;
+            cam_cameras[0]->path->flags |= 4;
         } else if ( D_80120654_gscode == 28 ) {
             for ( i = 0; i < 8; i++ ) {
                 D_80120A28_gscode[i] = Cache_GetFile( D_801205CC_gscode[i], FILE_TYPE1 );

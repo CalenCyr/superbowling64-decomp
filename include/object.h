@@ -13,12 +13,12 @@
 
 /* Parameter record of one object, all floats; Obj_CreateAll reads them in an array. */
 typedef struct {
-    /* 0x00 */ f32 type;            /* index into D_800E657C */
+    /* 0x00 */ f32 type;            /* index into obj_classes */
     /* 0x04 */ f32 priority;
     /* 0x08 */ f32 unk_08[14];
 } objParams_t;                      /* size 0x40 */
 
-/* Header of every object; the list from D_80066E00 is kept in priority order. */
+/* Header of every object; the list from obj_list is kept in priority order. */
 typedef struct objNode_s {
     /* 0x00 */ void (*update)( void *obj ); /* objClass_t.update of its class; called each frame with the object
                                            after this header (func_8002A2F0) */
@@ -32,14 +32,14 @@ typedef struct {
     /* 0x04 */ void (*update)( void *obj ); /* each frame (Obj_Draw, Cam_Update, ...) */
 } objClass_t;
 
-extern objNode_t D_80066E00;        /* list head */
-extern objClass_t *D_800E657C;      /* the classes, by objParams_t.type */
-extern objParams_t *D_800A2FE0;     /* the records Obj_CreateAll creates objects from */
-extern s32 D_800A2FDC;              /* TRUE when the records ended with OBJ_PARAMS_END */
-extern s32 D_80099480;              /* cameras in D_8009CFA0 */
-extern s32 D_800EA0C0;
-extern s32 D_800F7BF8;              /* frames each update advances; 1 at start */
-extern u8 D_800F30E0[0x4B00];       /* func_8002A7EC reads a host file here (scene_texGen follows) */
+extern objNode_t obj_list;          /* list head */
+extern objClass_t *obj_classes;     /* the classes, by objParams_t.type */
+extern objParams_t *obj_params;     /* the records Obj_CreateAll creates objects from */
+extern s32 obj_paramsEnded;         /* TRUE when the records ended with OBJ_PARAMS_END */
+extern s32 cam_count;               /* cameras in cam_cameras */
+extern s32 cam_manual;               /* set: Cam_Update applies the controller's zoom, pan and rotation */
+extern s32 obj_frameStep;           /* frames each update advances; 1 at start */
+extern u8 obj_hostFile[0x4B00];     /* func_8002A7EC reads a host file here (scene_texGen follows) */
 
 /* Model commands Obj_ConvertModel converts: the opcode byte, then its arguments. */
 #define MDLCMD_END          0           /* end of the list */
@@ -54,7 +54,7 @@ typedef struct {
     /* 0x0C0 */ Mtx mirrorL[2];         /* by sched_bufferIndex: mtx with its translation mirrored */
 } sceneObjJoint_t;                         /* size 0x140 */
 
-/* Object of the scene engine (D_800EA120 holds pointers to them). */
+/* Object of the scene engine (obj_scene holds pointers to them). */
 typedef struct {
     /* 0x00 */ u16 flags;
     /* 0x02 */ u8 unk_02[2];
@@ -70,7 +70,7 @@ typedef struct {
 } sceneObject_t;
 
 /*
-Camera of the scene, following a camera path (D_8009CFA0 lists them; an object's viewMask has a bit for each,
+Camera of the scene, following a camera path (cam_cameras lists them; an object's viewMask has a bit for each,
 by that index).
 */
 typedef struct {
@@ -82,7 +82,7 @@ typedef struct {
     /* 0x02A */ u16 height;
     /* 0x02C */ u16 left;               /* of the viewport, in the framebuffer */
     /* 0x02E */ u16 top;
-    /* 0x030 */ u16 targetObj;          /* index in D_800EA120 of the object it looks at; 0: at stays */
+    /* 0x030 */ u16 targetObj;          /* index in obj_scene of the object it looks at; 0: at stays */
     /* 0x032 */ u16 targetJoint;        /* the joint of that object */
     /* 0x034 */ f32 up[3];
     /* 0x040 */ f32 dir[3];             /* at - eye */
@@ -97,8 +97,8 @@ typedef struct {
     /* 0x244 */ u8 unk_244[0x04];
 } sceneCamera_t;                        /* size 0x248 */
 
-extern sceneCamera_t *D_8009CFA0[];
-extern u16 D_8009CF9E;              /* perspNorm of the cameras' projections (guPerspective) */
+extern sceneCamera_t *cam_cameras[];
+extern u16 cam_perspNorm;           /* perspNorm of the cameras' projections (guPerspective) */
 
 /* What the classes func_8002B610 and Cam_Create create: the list header, then the scene object or camera. */
 typedef struct {
@@ -110,8 +110,8 @@ typedef struct {
     /* 0x00 */ objNode_t node;
     /* 0x10 */ sceneCamera_t cam;
 } sceneCameraNode_t;                    /* size 0x258 */
-extern void *D_800EA120[];          /* main's scene objects, of several kinds: cameras (sceneCamera_t, Cam_Create)
-                                       and scene objects (sceneObject_t) */
+extern void *obj_scene[];           /* main's scene objects, of several kinds: cameras (sceneCamera_t, Cam_Create)
+                                        and scene objects (sceneObject_t) */
 
 void Obj_ClearList( void );
 void Obj_Create( objParams_t *params );
