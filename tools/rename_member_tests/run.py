@@ -32,7 +32,8 @@ def main():
                     errors.append(f"want {m.group(1)} keep {m.group(2)}, got {got}: {ln.strip()}")
         header = (root / "include" / "t.h").read_text()
         if "int count;" not in header or "Foo_t.count in a comment" not in header \
-                or "int unk_04;              /* keep" not in header:
+                or "int unk_04;              /* keep" not in header \
+                or "int count;               /* renamed" not in header:
             errors.append("definition or comment not updated as expected")
         if (root / "config" / "names.txt").read_text() != "Foo_t.count\tt.h\tinvented: test\n":
             errors.append("names.txt line missing")

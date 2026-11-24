@@ -149,7 +149,14 @@ def main(argv=None):
     text = lines[hline]
     for m in re.finditer(r"\b" + re.escape(a.old) + r"\b", text):
         if strip_comments(text[:m.end()]).rstrip().endswith(a.old):
-            lines[hline] = text[:m.start()] + a.new + text[m.end():]
+            line = text[:m.start()] + a.new + text[m.end():]
+            # Keep a trailing comment in its column.
+            pad = re.search(r";( +)/\*", line[m.start():])
+            if pad:
+                at = m.start() + pad.start(1)
+                width = max(1, len(pad.group(1)) - (len(a.new) - len(a.old)))
+                line = line[:at] + " " * width + line[at + len(pad.group(1)):]
+            lines[hline] = line
             break
     write(hpath, lines)
     sites, stuck = [], []
