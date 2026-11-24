@@ -318,8 +318,8 @@ inline void GA_CollideBodies( gaMotion_t *a, gaMotion_t *b, gaSpot_t *sa, gaSpot
     f32 restitution;
     f32 keep;
 
-    momentum[0] = ( a->vel[0] * a->vel[0] + a->vel[1] * a->vel[1] + a->vel[2] * a->vel[2] ) * ( a->unk_30 * a->unk_30 );
-    momentum[1] = ( b->vel[0] * b->vel[0] + b->vel[1] * b->vel[1] + b->vel[2] * b->vel[2] ) * ( b->unk_30 * b->unk_30 );
+    momentum[0] = ( a->vel[0] * a->vel[0] + a->vel[1] * a->vel[1] + a->vel[2] * a->vel[2] ) * ( a->mass * a->mass );
+    momentum[1] = ( b->vel[0] * b->vel[0] + b->vel[1] * b->vel[1] + b->vel[2] * b->vel[2] ) * ( b->mass * b->mass );
     if ( momentum[1] <= momentum[0] ) {
         in[0] = out[0] = a;
         in[1] = out[1] = b;
@@ -345,7 +345,7 @@ inline void GA_CollideBodies( gaMotion_t *a, gaMotion_t *b, gaSpot_t *sa, gaSpot
 ================
 GA_CollideMomentum
 
-Collision of in[0] (moving) with in[1], weighted by their unk_30, with the restitution of
+Collision of in[0] (moving) with in[1], weighted by their mass, with the restitution of
 GA_SpotContact: out[1] leaves along the contact normal, out[0] keeps the rest of the momentum at its own
 speed. Returns the restitution.
 ================
@@ -360,34 +360,34 @@ f32 GA_CollideMomentum( gaMotion_t **out, gaMotion_t **in, gaSpot_t **spots ) {
     f32 speed0;
 
     restitution = GA_SpotContact( in[0]->vel, spots[0], spots[1], normal );
-    after[0].vel[0] = ( ( in[0]->unk_30 - restitution * in[1]->unk_30 ) * in[0]->vel[0] +
-                        ( in[1]->unk_30 + restitution * in[1]->unk_30 ) * in[1]->vel[0] ) /
-                      ( in[0]->unk_30 + in[1]->unk_30 );
-    after[0].vel[1] = ( ( in[0]->unk_30 - restitution * in[1]->unk_30 ) * in[0]->vel[1] +
-                        ( in[1]->unk_30 + restitution * in[1]->unk_30 ) * in[1]->vel[1] ) /
-                      ( in[0]->unk_30 + in[1]->unk_30 );
-    after[0].vel[2] = ( ( in[0]->unk_30 - restitution * in[1]->unk_30 ) * in[0]->vel[2] +
-                        ( in[1]->unk_30 + restitution * in[1]->unk_30 ) * in[1]->vel[2] ) /
-                      ( in[0]->unk_30 + in[1]->unk_30 );
-    after[1].vel[0] = ( ( in[0]->unk_30 + restitution * in[0]->unk_30 ) * in[0]->vel[0] +
-                        ( in[1]->unk_30 - restitution * in[0]->unk_30 ) * in[1]->vel[0] ) /
-                      ( in[0]->unk_30 + in[1]->unk_30 );
-    after[1].vel[1] = ( ( in[0]->unk_30 + restitution * in[0]->unk_30 ) * in[0]->vel[1] +
-                        ( in[1]->unk_30 - restitution * in[0]->unk_30 ) * in[1]->vel[1] ) /
-                      ( in[0]->unk_30 + in[1]->unk_30 );
-    after[1].vel[2] = ( ( in[0]->unk_30 + restitution * in[0]->unk_30 ) * in[0]->vel[2] +
-                        ( in[1]->unk_30 - restitution * in[0]->unk_30 ) * in[1]->vel[2] ) /
-                      ( in[0]->unk_30 + in[1]->unk_30 );
+    after[0].vel[0] = ( ( in[0]->mass - restitution * in[1]->mass ) * in[0]->vel[0] +
+                        ( in[1]->mass + restitution * in[1]->mass ) * in[1]->vel[0] ) /
+                      ( in[0]->mass + in[1]->mass );
+    after[0].vel[1] = ( ( in[0]->mass - restitution * in[1]->mass ) * in[0]->vel[1] +
+                        ( in[1]->mass + restitution * in[1]->mass ) * in[1]->vel[1] ) /
+                      ( in[0]->mass + in[1]->mass );
+    after[0].vel[2] = ( ( in[0]->mass - restitution * in[1]->mass ) * in[0]->vel[2] +
+                        ( in[1]->mass + restitution * in[1]->mass ) * in[1]->vel[2] ) /
+                      ( in[0]->mass + in[1]->mass );
+    after[1].vel[0] = ( ( in[0]->mass + restitution * in[0]->mass ) * in[0]->vel[0] +
+                        ( in[1]->mass - restitution * in[0]->mass ) * in[1]->vel[0] ) /
+                      ( in[0]->mass + in[1]->mass );
+    after[1].vel[1] = ( ( in[0]->mass + restitution * in[0]->mass ) * in[0]->vel[1] +
+                        ( in[1]->mass - restitution * in[0]->mass ) * in[1]->vel[1] ) /
+                      ( in[0]->mass + in[1]->mass );
+    after[1].vel[2] = ( ( in[0]->mass + restitution * in[0]->mass ) * in[0]->vel[2] +
+                        ( in[1]->mass - restitution * in[0]->mass ) * in[1]->vel[2] ) /
+                      ( in[0]->mass + in[1]->mass );
     speed = GA_VecLength( after[1].vel );
     vel1[0] = normal[0] * speed;
     vel1[1] = normal[1] * speed;
     vel1[2] = normal[2] * speed;
-    vel0[0] = ( after[0].vel[0] * in[0]->unk_30 + after[1].vel[0] * in[1]->unk_30 - vel1[0] * in[1]->unk_30 ) /
-              in[0]->unk_30;
-    vel0[1] = ( after[0].vel[1] * in[0]->unk_30 + after[1].vel[1] * in[1]->unk_30 - vel1[1] * in[1]->unk_30 ) /
-              in[0]->unk_30;
-    vel0[2] = ( after[0].vel[2] * in[0]->unk_30 + after[1].vel[2] * in[1]->unk_30 - vel1[2] * in[1]->unk_30 ) /
-              in[0]->unk_30;
+    vel0[0] = ( after[0].vel[0] * in[0]->mass + after[1].vel[0] * in[1]->mass - vel1[0] * in[1]->mass ) /
+              in[0]->mass;
+    vel0[1] = ( after[0].vel[1] * in[0]->mass + after[1].vel[1] * in[1]->mass - vel1[1] * in[1]->mass ) /
+              in[0]->mass;
+    vel0[2] = ( after[0].vel[2] * in[0]->mass + after[1].vel[2] * in[1]->mass - vel1[2] * in[1]->mass ) /
+              in[0]->mass;
     speed = GA_VecLength( after[0].vel );
     speed0 = GA_VecLength( vel0 );
     if ( speed0 == 0.0f ) {
@@ -465,7 +465,7 @@ Collisions between the bodies of a lane. Each spot in use (spots[0..10], then sp
 spots[11..21]) of a body still in play is tested against each later body in play, first against its
 spot (or the segment from that spot to the midpoint with its spot2), then against its spot2 (or the
 segment from that midpoint to spot2). A new contact runs GA_CollideBodies on the two bodies, and each
-of them that stands flat (unk_5C 1, rot[0] 0) and was hit at 1 or more starts to tip toward its new
+of them that stands flat (kind 1, rot[0] 0) and was hit at 1 or more starts to tip toward its new
 heading, falls (standState 2) and plays its sound (0x4B under the lane, else 0x32). contacts of a spot holds
 bit 0 (it was hit this frame) and one bit per spot it touches. Returns 1 when the last contact with
 the first spots knocked a body over.
@@ -516,7 +516,7 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                 if ( !( ( spots[i].contacts >> b ) & 1 ) ) {
                     GA_CollideBodies( &motion[a], &motion[b], &spots[i], &spots[b] );
                     lane = spots[i].pos[1] < -190.0f ? lane | 2 : lane;
-                    if ( bodies[b].unk_5C == 1 ) {
+                    if ( bodies[b].kind == 1 ) {
                         if ( bodies[b].rot[0] == 0.0f && GA_VecLength( motion[b].vel ) >= 1.0 ) {
                             motion[b].spin[0] = 1.5f;
                             GA_SetBallHeading( motion[b].vel, &bodies[b] );
@@ -529,7 +529,7 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                             hit = 0;
                         }
                     }
-                    if ( bodies[a].unk_5C == 1 ) {
+                    if ( bodies[a].kind == 1 ) {
                         if ( bodies[a].rot[0] == 0.0f && GA_VecLength( motion[a].vel ) >= 1.0 ) {
                             switch ( which ) {
                             case 0:
@@ -560,7 +560,7 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                 if ( !( ( spots[i].contacts >> ( b2 ) ) & 1 ) ) {
                     GA_CollideBodies( &motion[a], &motion[b], &spots[i], &spots[b2] );
                     lane = spots[i].pos[1] < -190.0f ? lane | 2 : lane;
-                    if ( bodies[b].unk_5C == 1 && bodies[b].rot[0] == 0.0f &&
+                    if ( bodies[b].kind == 1 && bodies[b].rot[0] == 0.0f &&
                          GA_VecLength( motion[b].vel ) >= 1.0 ) {
                         motion[b].spin[0] = -2.0f;
                         GA_SetBallHeading( motion[b].vel, &bodies[b] );
@@ -569,7 +569,7 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                         }
                         GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
                     }
-                    if ( bodies[a].unk_5C == 1 && bodies[a].rot[0] == 0.0f &&
+                    if ( bodies[a].kind == 1 && bodies[a].rot[0] == 0.0f &&
                          GA_VecLength( motion[a].vel ) >= 1.0 ) {
                         switch ( which ) {
                         case 0:
@@ -604,7 +604,7 @@ INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_CollideLane);
 ================
 GA_SettleBodies
 
-Each frame, for every standing body that is down (unk_5C 1) and has motion flag 2: one lying flat slows to
+Each frame, for every standing body that is down (kind 1) and has motion flag 2: one lying flat slows to
 0.75 of its speed along the lane; one still tipping turns toward 90 degrees on its side and, once there,
 slows to 0.85. The spin about y decays to 0.925 either way.
 ================
@@ -614,7 +614,7 @@ void GA_SettleBodies( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots ) {
     s32 down;
 
     for ( i = 0; i < NUM_BODIES; i++ ) {
-        if ( bodies[i].standState != 0 && bodies[i].unk_5C == 1 && ( ( motion[i].flags >> 1 ) & 1 ) ) {
+        if ( bodies[i].standState != 0 && bodies[i].kind == 1 && ( ( motion[i].flags >> 1 ) & 1 ) ) {
             if ( bodies[i].rot[0] == 0.0f ) {
                 motion[i].vel[0] *= 0.75;
                 motion[i].vel[2] *= 0.75;
@@ -665,7 +665,7 @@ s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 cei
             spot->pos[1] += floor - bottom2;
             spot2->pos[1] += floor - bottom2;
         }
-        motion->vel[1] = -motion->vel[1] - motion->unk_30 * 0.7;
+        motion->vel[1] = -motion->vel[1] - motion->mass * 0.7;
         if ( motion->vel[1] <= 0.0f ) {
             motion->vel[1] = 0.0f;
         }
@@ -681,7 +681,7 @@ s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 cei
                 spot2->pos[1] += floor - bottom;
             }
         }
-        motion->vel[1] = -motion->vel[1] - motion->unk_30 * 0.7;
+        motion->vel[1] = -motion->vel[1] - motion->mass * 0.7;
         if ( motion->vel[1] <= 0.0f ) {
             motion->vel[1] = 0.0f;
             landed = 1;

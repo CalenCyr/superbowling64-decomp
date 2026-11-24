@@ -1028,3 +1028,21 @@ gaLane_t.callout	gacode.h	invented: index into D_8012C784_gacode of the image fu
 gaLane_t.reaction	gacode.h	invented: the character's reaction (animation files[reaction + 2], frame count unk_1B[reaction])
 gaLane_t.bounceSound	gacode.h	invented: sound of the ball's floor hits in GA_PhysicsStep, chosen from the stage by the throw's curve
 gaLane_t.markerSpots	gacode.h	invented: spots of the markers; [0] and [1] follow the stick, [2] the aim (func_80117BDC_gacode, func_80117D20_gacode)
+gaMotion_t.mass	gacode.h	invented: weight of the body in GA_Collide's momentum exchange; the ball's from D_801239E8_gacode by its weight
+gaBody_t.kind	gacode.h	invented: 0 the ball (sounds its hits, height 11.25), 1 a pin (tips and turns, height 6.25), 2 flat (height 0) (GA_PlaceBody)
+gaPlayer_t.ballWeight	gacode.h	invented: the ball's weight, 0 to 10 drawn as 6 to 16 (func_801194D0_gacode); picks the ball's mass and palette
+gaPlayer_t.homeMtx	gacode.h	invented: the player object's matrix at set-up, restored for each throw
+gaPlayer_t.releaseFrame	gacode.h	invented: the player object's animation frame when the throw was committed (func_80118014_gacode)
+gaPlayer_t.cpuAim	gacode.h	invented: where GA_CpuInput moves the character's aim for a player the game plays (GA_CpuSetup)
+gaPlayer_t.cpuStance	gacode.h	invented: where GA_CpuInput moves the character's stance for a player the game plays (GA_CpuSetup)
+gaCharacter_t.data	gacode.h	invented: the character's gaCharacterData_t (file indices, joint, frame counts)
+gaCharacter_t.ballWeight	gacode.h	invented: the character's ball weight, copied into gaPlayer_t.ballWeight
+gaCharacter_t.reverseSpin	gacode.h	invented: nonzero: spin runs from -maxSpin to 0 instead of 0 to maxSpin, and the hook bends the other way
+gaCharacter_t.maxSpeed	gacode.h	invented: upper limit of speed
+gaCharacter_t.minSpeed	gacode.h	invented: lower limit of speed
+gaCharacter_t.maxSpin	gacode.h	invented: range of spin
+gaCharacter_t.aim	gacode.h	invented: the aim point, moved by the stick in func_80117BDC_gacode with markerSpots[0]
+gaCharacter_t.stance	gacode.h	invented: where the player stands, moved by the stick in func_80117D20_gacode with markerSpots[1]; the player object is moved there
+gaCharacter_t.speed	gacode.h	invented: the ball's launch speed (motion[0].vel = speed * direction)
+gaCharacter_t.spin	gacode.h	invented: the ball's launch spin (motion[0].spin[1])
+gaCharacter_t.direction	gacode.h	invented: GA_VecDirection of stance and aim, the ball's launch direction

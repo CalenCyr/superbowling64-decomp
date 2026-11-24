@@ -71,7 +71,7 @@ typedef struct {
     /* 0x40 */ vec3_t pos;
     /* 0x4C */ vec3_t rot;
     /* 0x58 */ f32 scale;
-    /* 0x5C */ u8 unk_5C;
+    /* 0x5C */ u8 kind;                            /* 0: the ball, 1: a pin, 2: flat (GA_PlaceBody) */
     /* 0x5D */ u8 standState;               /* 1: still standing (pins) */
     /* 0x5E */ u8 unk_5E[2];
 } gaBody_t;                             /* size 0x60 */
@@ -101,7 +101,7 @@ typedef struct {
                                            by GA_SetBallHeading */
     /* 0x0C */ vec3_t spin;             /* added to the body's rot each frame (degrees, kept within -180..180) */
     /* 0x18 */ u8 unk_18[0x18];
-    /* 0x30 */ f32 unk_30;              /* the ball's from D_801239E8_gacode, by gaPlayer_t.unk_93 */
+    /* 0x30 */ f32 mass;                /* the ball's from D_801239E8_gacode, by gaPlayer_t.ballWeight */
     /* 0x34 */ u32 flags;
 } gaMotion_t;                           /* size 0x38 */
 
@@ -113,9 +113,9 @@ typedef struct {
     /* 0x000 */ gaBody_t bodies[NUM_BODIES];
     /* 0x420 */ gaMotion_t motion[NUM_BODIES];
     /* 0x688 */ gaSpot_t spots[NUM_BODIES];
-    /* 0x7E8 */ gaSpot_t secondSpots[NUM_BODIES];   /* each body's second sphere; radius 0: none */
+    /* 0x7E8 */ gaSpot_t secondSpots[NUM_BODIES]; /* each body's second sphere; radius 0: none */
     /* 0x948 */ gaBody_t markers[3];                /* the throw's markers; [2] the aim marker */
-    /* 0xA68 */ gaSpot_t markerSpots[3];
+    /* 0xA68 */ gaSpot_t markerSpots[3];            /* [0] the aim, [1] the stance, [2] the aim marker */
     /* 0xAC8 */ sceneObject_t *bodyObjs[NUM_BODIES];
     /* 0xAF4 */ sceneObject_t *markerObjs[3];
     /* 0xB00 */ gaCamera_t *camera;
@@ -123,21 +123,21 @@ typedef struct {
     /* 0xB08 */ void (*panelFunc)( s32 player );
     /* 0xB0C */ void (*cameraFunc)( s32 player, gaCamera_t *camera );
     /* 0xB10 */ s32 (*inputFunc)( s32 player, s32 input, s16 stickX, s16 stickY );
-    /* 0xB14 */ f32 offsetX;                 /* x of the lane (lane 1: GA_SetupLanes' offset) */
+    /* 0xB14 */ f32 offsetX;                /* x of the lane (lane 1: GA_SetupLanes' offset) */
     /* 0xB18 */ s64 soundHandle;            /* sound handle (Sound_PlaySe) */
-    /* 0xB20 */ s16 timer;                   /* frames waited by the input handlers */
-    /* 0xB22 */ u8 pinsHit;                   /* pins knocked down by this throw */
-    /* 0xB23 */ u8 pinsDown;                  /* pins down after it; 10 ends the frame */
-    /* 0xB24 */ u8 frameOver;                 /* the throw ended the frame (GA_EndTurn) */
-    /* 0xB25 */ u8 callout;                   /* image shown over the lane, index into D_8012C784_gacode; 0: none */
-    /* 0xB26 */ u8 reaction;                  /* the character's reaction animation (files[reaction + 2]) */
+    /* 0xB20 */ s16 timer;                  /* frames waited by the input handlers */
+    /* 0xB22 */ u8 pinsHit;                 /* pins knocked down by this throw */
+    /* 0xB23 */ u8 pinsDown;                /* pins down after it; 10 ends the frame */
+    /* 0xB24 */ u8 frameOver;               /* the throw ended the frame (GA_EndTurn) */
+    /* 0xB25 */ u8 callout;                 /* image shown over the lane, index into D_8012C784_gacode; 0: none */
+    /* 0xB26 */ u8 reaction;                /* the character's reaction animation (files[reaction + 2]) */
     /* 0xB27 */ u8 unk_B27;
     /* 0xB28 */ f32 cameraRaise;            /* camera height offset of func_8011B8AC_gacode */
-    /* 0xB2C */ u16 bounceSound;              /* of the ball's floor hits: gaStage_t.unk_1E[0], [1] for a curving throw */
+    /* 0xB2C */ u16 bounceSound;            /* of the ball's floor hits: gaStage_t.unk_1E[0], [1] for a curving throw */
     /* 0xB2E */ u8 unk_B2E[2];
 } gaLane_t;                             /* size 0xB30 */
 
-/* What gaCharacter_t.unk_00 points to. Name invented. */
+/* What gaCharacter_t.data points to. Name invented. */
 typedef struct {
     /* 0x00 */ s16 *unk_00;                 /* file indices */
     /* 0x04 */ f32 unk_04;                  /* objParams_t.unk_08[4] of the player's scene object */
@@ -156,19 +156,19 @@ extern gaCharacterData_t ga_characterData[10];   /* per character; unk_00 points
 
 /* Character record (ga_characters), copied into gaPlayer_t. Name invented. */
 typedef struct {
-    /* 0x00 */ gaCharacterData_t *unk_00;
-    /* 0x04 */ u8 unk_04;
-    /* 0x05 */ u8 unk_05;               /* nonzero: unk_30 runs from -unk_10 to 0, else from 0 to unk_10 */
+    /* 0x00 */ gaCharacterData_t *data;
+    /* 0x04 */ u8 ballWeight;                    /* copied into gaPlayer_t.ballWeight */
+    /* 0x05 */ u8 reverseSpin;          /* nonzero: spin runs from -maxSpin to 0, else from 0 to maxSpin */
     /* 0x06 */ u8 unk_06[0x02];
-    /* 0x08 */ f32 unk_08;              /* upper limit of unk_2C */
-    /* 0x0C */ f32 unk_0C;              /* lower limit of unk_2C */
-    /* 0x10 */ f32 unk_10;              /* range of unk_30 */
-    /* 0x14 */ vec3_t unk_14;
-    /* 0x20 */ vec3_t unk_20;
-    /* 0x2C */ f32 unk_2C;
-    /* 0x30 */ f32 unk_30;
+    /* 0x08 */ f32 maxSpeed;            /* upper limit of speed */
+    /* 0x0C */ f32 minSpeed;            /* lower limit of speed */
+    /* 0x10 */ f32 maxSpin;             /* range of spin */
+    /* 0x14 */ vec3_t aim;                         /* moved with the stick (func_80117BDC_gacode) */
+    /* 0x20 */ vec3_t stance;                      /* where the player stands (func_80117D20_gacode) */
+    /* 0x2C */ f32 speed;                          /* of the ball at release, between the limits */
+    /* 0x30 */ f32 spin;                           /* of the ball at release (motion[0].spin[1]) */
     /* 0x34 */ f32 unk_34;              /* an angle (radians; func_8011B1A0_gacode, func_8011840C_gacode) */
-    /* 0x38 */ vec3_t unk_38;            /* GA_VecDirection of unk_20 and unk_14 */
+    /* 0x38 */ vec3_t direction;        /* GA_VecDirection of stance and aim */
     /* 0x44 */ f32 unk_44;
 } gaCharacter_t;                        /* size 0x48 */
 
@@ -179,17 +179,17 @@ extern gaCharacter_t ga_characters[];
 /* A player (ga_players). Name invented. */
 typedef struct {
     /* 0x00 */ gaCharacter_t character;
-    /* 0x48 */ f32 unk_48[4][4];        /* copy of obj->mtx */
+    /* 0x48 */ f32 homeMtx[4][4];       /* copy of obj->mtx at set-up, restored for each throw */
     /* 0x88 */ sceneObject_t *obj;
     /* 0x8C */ gaLane_t *lane;
     /* 0x90 */ s8 port;                 /* controller port; -1: played by the game */
     /* 0x91 */ u8 laneIndex;
     /* 0x92 */ s8 ballView;               /* 0 to 4, stepped by func_8011BB44_gacode */
-    /* 0x93 */ u8 unk_93;               /* 0 to 10, chosen with C-left and C-right (func_801194D0_gacode) */
-    /* 0x94 */ u16 unk_94;
+    /* 0x93 */ u8 ballWeight;           /* 0 to 10, shown as 6 to 16; C-left and C-right (func_801194D0_gacode) */
+    /* 0x94 */ u16 releaseFrame;                   /* animation frame when the throw was committed */
     /* 0x96 */ u8 unk_96[0x02];
-    /* 0x98 */ f32 unk_98;
-    /* 0x9C */ f32 unk_9C;
+    /* 0x98 */ f32 cpuAim;                         /* aim[0] that a player the game plays heads for */
+    /* 0x9C */ f32 cpuStance;                      /* stance[0] that a player the game plays heads for */
 } gaPlayer_t;                           /* size 0xA0 */
 
 /* Configuration of a stage (ga_stages); ga_stage points to the current one. Name invented. */
@@ -211,7 +211,7 @@ typedef struct {
 invented. */
 typedef struct {
     /* 0x000 */ u16 id;
-    /* 0x002 */ u16 first;              /* palette range */
+    /* 0x002 */ u16 first;                  /* palette range */
     /* 0x004 */ u16 last;
     /* 0x006 */ u16 palette[256];
     /* 0x206 */ u8 unk_206;
@@ -283,8 +283,8 @@ extern s16 ga_runSounds[];      /* sound ids, by D_800A304C[] up to 10 (func_801
 /* by score against par; TODO identity: scores below par read before the label, so the table likely starts
    earlier */
 extern s16 D_8012C7E6_gacode[];
-extern f32 D_801239E8_gacode[11];      /* by gaPlayer_t.unk_93 */
-extern u16 D_8012C7F4_gacode[11];      /* image ids, by gaPlayer_t.unk_93 */
+extern f32 D_801239E8_gacode[11];      /* by gaPlayer_t.ballWeight */
+extern u16 D_8012C7F4_gacode[11];      /* image ids, by gaPlayer_t.ballWeight */
 extern u16 ga_numberImages[11];      /* image ids of the numbers 1 to 9, by number ([0] and [10] none) */
 extern u16 ga_parChartPins[NUM_PINS][2];  /* x and y of each pin in the pin chart (GA_DrawParFramePanel) */
 extern u16 D_8012C848_gacode[8];       /* image ids, by D_8005C163 */
