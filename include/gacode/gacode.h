@@ -152,9 +152,9 @@ typedef struct {
     /* 0x20 */ vec3_t stance;           /* where the player stands (func_80117D20_gacode) */
     /* 0x2C */ f32 speed;               /* of the ball at release, between the limits */
     /* 0x30 */ f32 spin;                /* of the ball at release (motion[0].spin[1]) */
-    /* 0x34 */ f32 unk_34;              /* an angle (radians; func_8011B1A0_gacode, func_8011840C_gacode) */
+    /* 0x34 */ f32 timingAngle;         /* the throw's timing, -pi/2 to pi/2 (func_8011B1A0_gacode); 0 is straight */
     /* 0x38 */ vec3_t direction;        /* GA_VecDirection of stance and aim */
-    /* 0x44 */ f32 unk_44;
+    /* 0x44 */ f32 hook;                /* added to the rolling ball's motion[0].vel[0] each frame */
 } gaCharacter_t;                        /* size 0x48 */
 
 extern gaCharacter_t ga_characters[];

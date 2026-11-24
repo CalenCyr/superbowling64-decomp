@@ -38,7 +38,7 @@ void Obj_Create( objParams_t *params ) {
     objNode_t *prev;
 
     obj = D_800E657C[(u32)params->type].create( params );
-    obj->unk_00 = D_800E657C[(u32)params->type].unk_04;
+    obj->update = D_800E657C[(u32)params->type].update;
     obj->priority = params->priority;
     obj->type = params->type;
     for ( prev = &D_80066E00; prev->next != NULL; prev = prev->next ) {

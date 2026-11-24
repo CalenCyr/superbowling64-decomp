@@ -267,7 +267,7 @@ INCLUDE_ASM("asm/nonmatchings/gacode/3E350", GA_PhysicsStep);
 ================
 GA_PlaceBody
 
-Places a body at its spot, offset by offset along x, and sets its object's unk_44 from the spot's height.
+Places a body at its spot, offset by offset along x, and sets its object's floorHeight from the spot's height.
 ================
 */
 void GA_PlaceBody( gaBody_t *body, gaSpot_t *spot, sceneObject_t *obj, f32 offset ) {
@@ -281,7 +281,7 @@ void GA_PlaceBody( gaBody_t *body, gaSpot_t *spot, sceneObject_t *obj, f32 offse
     body->pos[2] = spot->pos[2];
     GA_BodyMatrix( obj->mtx, body->pos, body->rot, body->scale );
     if ( spot->pos[2] <= -1186.0f ) {
-        obj->unk_44 = -1.0f;
+        obj->floorHeight = -1.0f;
         return;
     }
     switch ( body->kind ) {
@@ -295,7 +295,7 @@ void GA_PlaceBody( gaBody_t *body, gaSpot_t *spot, sceneObject_t *obj, f32 offse
         height = 0.0f;
         break;
     }
-    obj->unk_44 = spot->pos[1] - height;
+    obj->floorHeight = spot->pos[1] - height;
 }
 
 /*
@@ -447,8 +447,8 @@ GA_ScoreStandard
 A game mode. The player scores for their team when the sub-mode's argument is 1 (players 2 and 3 for player
 1). After a func_80116398_gacode turn (unless D_80068A50 is 2), records GA_IsSplit's result in the
 frame's flags and counts a split in D_8009CF80. When the throw ends the frame, counts the run D_800A304C on
-after a func_80116398_gacode turn (returns 2), else ends it (returns 1); otherwise plays the throw's sound and ends the run, returning 3 when
-the lane's callout was 3 or the run had reached 3, else 0.
+after a func_80116398_gacode turn (returns 2), else ends it (returns 1); otherwise plays the throw's sound
+and ends the run, returning 3 when the lane's callout was 3 or the run had reached 3, else 0.
 ================
 */
 s32 GA_ScoreStandard( s32 player ) {
@@ -1018,8 +1018,8 @@ void GA_ResetLane( s32 player, u8 *pins ) {
     s32 i;
 
     memmove( pl->obj->mtx, pl->homeMtx, sizeof( pl->homeMtx ) );
-    pl->character.unk_44 = ga_stage->unk_0C;
-    pl->character.unk_34 = 1.5707964f;
+    pl->character.hook = ga_stage->unk_0C;
+    pl->character.timingAngle = 1.5707964f;
     pl->character.spin = pl->character.aim[0] = pl->character.stance[0] = 0.0f;
     pl->character.speed = pl->character.minSpeed;
     memmove( lane->bodies, ga_initBodies, sizeof( lane->bodies ) );
@@ -1224,7 +1224,7 @@ inline void func_80116A64_gacode( gaPlayer_t *pl, s16 stickX, s16 stickY ) {
 GA_RollBall
 
 Rolls the ball of a player's throw, unless func_801168D0_gacode or func_80116998_gacode ends it: while the
-lane's motion[0].flags bit 1 is set, adds the character's unk_44 to its motion[0].vel[0] and starts the roll's sound;
+lane's motion[0].flags bit 1 is set, adds the character's hook to its motion[0].vel[0] and starts the roll's sound;
 else stops it.
 ================
 */
@@ -1236,7 +1236,7 @@ void GA_RollBall( s32 player, gaPlayer_t *pl ) {
         return;
     }
     if ( ( pl->lane->motion[0].flags >> 1 ) & 1 ) {
-        pl->lane->motion[0].vel[0] += pl->character.unk_44;
+        pl->lane->motion[0].vel[0] += pl->character.hook;
         if ( pl->lane->soundHandle == 0 ) {
             GA_SoundThrowResult( player, pl, 0 );
         }
@@ -1251,7 +1251,7 @@ void GA_RollBall( s32 player, gaPlayer_t *pl ) {
 ================
 GA_RollBallSpin
 
-As GA_RollBall, scaling the character's unk_44 by the stage's unk_10, and turns the lane's
+As GA_RollBall, scaling the character's hook by the stage's unk_10, and turns the lane's
 motion[0].vel into the ball's spin.
 ================
 */
@@ -1263,7 +1263,7 @@ void GA_RollBallSpin( s32 player, gaPlayer_t *pl ) {
         return;
     }
     if ( ( pl->lane->motion[0].flags >> 1 ) & 1 ) {
-        pl->lane->motion[0].vel[0] += pl->character.unk_44 * ga_stage->unk_10;
+        pl->lane->motion[0].vel[0] += pl->character.hook * ga_stage->unk_10;
         if ( pl->lane->soundHandle == 0 ) {
             GA_SoundThrowResult( player, pl, 0 );
         }
@@ -1650,17 +1650,17 @@ s32 func_80118270_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 func_8011840C_gacode
 
 Lane input handler: commits the throw (keeps the player object's unk_48 in releaseFrame and goes on to
-func_80118524_gacode) once the sine of the character's unk_34 is down to -0.3, on B at the last frame when
+func_80118524_gacode) once the sine of the character's timingAngle is down to -0.3, on B at the last frame when
 ga_earlyCommit allows it, or on input 1 while the sine is at most 0.5.
 ================
 */
 s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
-    if ( sinf( pl->character.unk_34 ) <= -0.3 ||
+    if ( sinf( pl->character.timingAngle ) <= -0.3 ||
          ( ga_earlyCommit && pl->port >= 0 && ( D_800E57E4[pl->port] & B_BUTTON ) &&
            pl->obj->frame == pl->character.data->unk_19 ) ||
-         ( sinf( pl->character.unk_34 ) <= 0.5 && input == 1 ) ) {
+         ( sinf( pl->character.timingAngle ) <= 0.5 && input == 1 ) ) {
         pl->releaseFrame = pl->obj->frame;
         pl->lane->inputFunc = func_80118524_gacode;
         pl->lane->panelFunc = func_8011B2E8_gacode;
@@ -1674,9 +1674,9 @@ s32 func_8011840C_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 func_80118524_gacode
 
 Lane input handler at the release: sets the ball's standState, aims from the ball's spot towards the character's
-aim (into direction), sets the ball's velocity from speed (turned by the sine and cosine of unk_34, the sideways
-part curved by its square), its spin from spin, scales unk_44 by the spin, picks the stage's unk_1E[1] or
-unk_1E[0] by how far unk_34 turns the throw, and hands over to func_801187D0_gacode.
+aim (into direction), sets the ball's velocity from speed (turned by the sine and cosine of timingAngle, the sideways
+part curved by its square), its spin from spin, scales hook by the spin, picks the stage's unk_1E[1] or
+unk_1E[0] by how far timingAngle turns the throw, and hands over to func_801187D0_gacode.
 ================
 */
 s32 func_80118524_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
@@ -1699,15 +1699,15 @@ s32 func_80118524_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     pl->lane->motion[0].vel[2] = pl->character.speed * pl->character.direction[2];
     pl->lane->motion[0].vel[0] = pl->character.speed * pl->character.direction[0];
     side = pl->character.data->unk_08 < 0 ? -1 : 1;
-    pl->lane->motion[0].vel[1] *= sinf( pl->character.unk_34 ) * side;
-    pl->lane->motion[0].vel[2] *= cosf( pl->character.unk_34 );
+    pl->lane->motion[0].vel[1] *= sinf( pl->character.timingAngle ) * side;
+    pl->lane->motion[0].vel[2] *= cosf( pl->character.timingAngle );
     side = pl->character.reverseSpin ? -1 : 1;
-    bend = sinf( pl->character.unk_34 ) * 10.0f;
+    bend = sinf( pl->character.timingAngle ) * 10.0f;
     dir = bend < 0.0f ? -1.0f : 1.0f;
     pl->lane->motion[0].vel[0] += pl->character.speed / 2.0f * ( dir * bend * bend / 100.0f ) * side;
     pl->lane->motion[0].spin[1] = pl->character.spin;
-    pl->character.unk_44 = pl->character.unk_44 * ( -pl->lane->motion[0].spin[1] / 15.0 );
-    if ( FABS( sinf( pl->character.unk_34 ) ) >= 0.15 ) {
+    pl->character.hook = pl->character.hook * ( -pl->lane->motion[0].spin[1] / 15.0 );
+    if ( FABS( sinf( pl->character.timingAngle ) ) >= 0.15 ) {
         pl->lane->bounceSound = ga_stage->unk_1E[1];
     } else {
         pl->lane->bounceSound = ga_stage->unk_1E[0];
@@ -1720,7 +1720,7 @@ s32 func_80118524_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
 ================
 func_801187D0_gacode
 
-Lane input handler while the ball rolls: halves the character's unk_44 when the ball's motion flag bit 6 is set,
+Lane input handler while the ball rolls: halves the character's hook when the ball's motion flag bit 6 is set,
 hands the view to the ball at the character's unk_1A frame, rolls the ball (GA_RollBallSpin while bit 1
 is set and the ball is short of the stage's unk_08, else GA_RollBall), switches the camera at -1050,
 lets Z steer it by the stick when ga_steerBall is set, and at -1186 stops the roll's sound and hands
@@ -1731,7 +1731,7 @@ s32 func_801187D0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( ( pl->lane->motion[0].flags >> 6 ) & 1 ) {
-        pl->character.unk_44 /= 2.0f;
+        pl->character.hook /= 2.0f;
     }
     if ( pl->obj->frame == pl->character.data->unk_1A ) {
         pl->obj->frame--;
@@ -2638,7 +2638,7 @@ void func_8011B07C_gacode( s32 player ) {
 ================
 func_8011B1A0_gacode
 
-panelFunc handler: as func_8011B2E8_gacode, by the player object's unk_48, and sets the character's unk_34 angle
+panelFunc handler: as func_8011B2E8_gacode, by the player object's unk_48, and sets the character's timingAngle
 from the same fraction (-pi/2 to pi/2).
 ================
 */
@@ -2658,7 +2658,7 @@ void func_8011B1A0_gacode( s32 player ) {
         Menu_DrawImage( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD,
                        0xA8 + 0x11 );
     }
-    pl->character.unk_34 = ( t - 0.5 ) * M_PI;
+    pl->character.timingAngle = ( t - 0.5 ) * M_PI;
 }
 
 /*
@@ -3380,7 +3380,7 @@ void GA_DebugText( s32 player ) {
             func_801205A0_gacode( target, pl->character.direction, pl->character.stance[0], pl->character.speed ) );
     } else if ( pl->lane->inputFunc == func_80118270_gacode || pl->lane->inputFunc == func_8011840C_gacode
         || pl->lane->inputFunc == func_80118524_gacode ) {
-        sprintf( text, "FR SIN[%8.4f]", sinf( pl->character.unk_34 ) );
+        sprintf( text, "FR SIN[%8.4f]", sinf( pl->character.timingAngle ) );
     } else if ( pl->lane->inputFunc == func_801187D0_gacode || pl->lane->inputFunc == func_80118F68_gacode ) {
         sprintf( text, "NOW Z[%8.4f]", pl->lane->spots[0].pos[2] );
     } else if ( pl->lane->inputFunc == func_80118CCC_gacode || pl->lane->inputFunc == func_80118E04_gacode ) {

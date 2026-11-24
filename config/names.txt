@@ -1078,3 +1078,8 @@ OPTION_MUSIC	gscode.h	invented: the options line of D_8009D098.music
 OPTION_RUMBLE	gscode.h	invented: the options line of D_8009D098.rumble
 GA_ScoreStandard	0x801151A0	invented: game mode of the duel, team and pair games: scores strikes (runs), spares and splits and sets the callout
 GA_ScorePar	0x801155BC	invented: game mode of the par game (GA_ParGameLoop): scores each frame against par
+gaCharacter_t.timingAngle	gacode.h	invented: the throw's timing as an angle (-pi/2 to pi/2, func_8011B1A0_gacode); its sine and cosine bend the release velocity (debug text 'FR SIN')
+gaCharacter_t.hook	gacode.h	invented: sideways pull added to the rolling ball's motion[0].vel[0] each frame (GA_RollBall); from the stage, scaled by the spin at release
+sceneObject_t.floorHeight	object.h	invented: height of the floor under the object (GA_PlaceBody: the spot's y less the body's height), which func_8002B9CC draws at when flags & 0xC000; negative: none
+objNode_t.update	object.h	invented: function func_8002A2F0 calls each frame with the object after the header; objClass_t.update of its class
+objClass_t.update	object.h	invented: the class's per-frame function (ga_classes: Obj_Draw, Cam_Update, ...), copied into objNode_t.update

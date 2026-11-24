@@ -20,7 +20,8 @@ typedef struct {
 
 /* Header of every object; the list from D_80066E00 is kept in priority order. */
 typedef struct objNode_s {
-    /* 0x00 */ u32 unk_00;          /* objClass_t.unk_04 of its class */
+    /* 0x00 */ void (*update)( void *obj ); /* objClass_t.update of its class; called each frame with the object
+                                           after this header (func_8002A2F0) */
     /* 0x04 */ u32 priority;
     /* 0x08 */ u32 type;
     /* 0x0C */ struct objNode_s *next;
@@ -28,7 +29,7 @@ typedef struct objNode_s {
 
 typedef struct {
     /* 0x00 */ objNode_t *(*create)( objParams_t *params );
-    /* 0x04 */ u32 unk_04;
+    /* 0x04 */ void (*update)( void *obj ); /* each frame (Obj_Draw, Cam_Update, ...) */
 } objClass_t;
 
 extern objNode_t D_80066E00;        /* list head */
@@ -58,7 +59,7 @@ typedef struct {
     /* 0x00 */ u16 flags;
     /* 0x02 */ u8 unk_02[2];
     /* 0x04 */ f32 mtx[4][4];           /* placement */
-    /* 0x44 */ f32 unk_44;
+    /* 0x44 */ f32 floorHeight;         /* drawn at by func_8002B9CC when flags & 0xC000; negative: none */
     /* 0x48 */ u16 frame;               /* of the animation */
     /* 0x4A */ u8 viewMask;             /* 0: not drawn */
     /* 0x4B */ u8 unk_4B;
