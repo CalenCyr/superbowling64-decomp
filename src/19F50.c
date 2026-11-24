@@ -20,7 +20,7 @@ void Synth_Init( N_ALGlobals *g, ALSynConfig *c ) {
         D_8005D110 = g;
         if ( D_8005D114 == NULL ) {
             Synth_UseCustomFx( c );
-            D_8005D114 = D_800EA098 = &D_8005D110->drvr;
+            D_8005D114 = synth_driver = &D_8005D110->drvr;
             Synth_Create( c );
         }
     }
@@ -109,19 +109,19 @@ ALFx *Synth_CreateFx( s16 bus, ALSynConfig *c, ALHeap *hp ) {
 ================
 Synth_AllocFx
 
-Allocates the effect into *fx, with storage for the largest preset in D_8005CE24, and sets it up with the
+Allocates the effect into *fx, with storage for the largest preset in synth_fxPresets, and sets it up with the
 preset in c.
 ================
 */
 void Synth_AllocFx( ALFx **fx, ALSynConfig *c, ALHeap *hp ) {
     *fx = alHeapAlloc( hp, 1, sizeof( ALFx ) );
     ( *fx )->paramHdl = alFxParamHdl;
-    D_800EA0A8.delays = alHeapAlloc( hp, Synth_MaxFxSections(), sizeof( ALDelay ) );
-    D_800EA0A8.buffer = alHeapAlloc( hp, Synth_MaxFxLength(), sizeof( s16 ) );
-    D_800EA0A8.resampler = alHeapAlloc( hp, 1, sizeof( ALResampler ) );
-    D_800EA0A8.resamplerState = alHeapAlloc( hp, 1, sizeof( RESAMPLE_STATE ) );
-    D_800EA0A8.lowPass = alHeapAlloc( hp, 1, sizeof( ALLowPass ) );
-    D_800EA0A8.lowPassState = alHeapAlloc( hp, 1, sizeof( POLEF_STATE ) );
+    synth_fxStorage.delays = alHeapAlloc( hp, Synth_MaxFxSections(), sizeof( ALDelay ) );
+    synth_fxStorage.buffer = alHeapAlloc( hp, Synth_MaxFxLength(), sizeof( s16 ) );
+    synth_fxStorage.resampler = alHeapAlloc( hp, 1, sizeof( ALResampler ) );
+    synth_fxStorage.resamplerState = alHeapAlloc( hp, 1, sizeof( RESAMPLE_STATE ) );
+    synth_fxStorage.lowPass = alHeapAlloc( hp, 1, sizeof( ALLowPass ) );
+    synth_fxStorage.lowPassState = alHeapAlloc( hp, 1, sizeof( POLEF_STATE ) );
     Synth_SetupFx( c->params );
 }
 
@@ -143,12 +143,12 @@ void Synth_SetupFx( s32 *param ) {
     u16 i;
     u16 j;
 
-    r = D_800EA098->auxBus->fxSlots[0];
+    r = synth_driver->auxBus->fxSlots[0];
     j = 0;
     r->section_count = param[j++];
     r->length = param[j++];
-    r->delay = D_800EA0A8.delays;
-    r->base = D_800EA0A8.buffer;
+    r->delay = synth_fxStorage.delays;
+    r->base = synth_fxStorage.buffer;
     r->input = r->base;
 
     for ( i = 0; i < r->length; i++ ) {
@@ -164,12 +164,12 @@ void Synth_SetupFx( s32 *param ) {
         d->gain = param[j++];
 
         if ( param[j] ) {
-            d->rsinc = ( ( (f32)param[j++] / 1000 ) * RANGE ) / D_800EA098->outputRate;
+            d->rsinc = ( ( (f32)param[j++] / 1000 ) * RANGE ) / synth_driver->outputRate;
             d->rsgain = ( (f32)param[j++] / CONVERT ) * ( d->output - d->input );
             d->rsval = 1.0;
             d->rsdelta = 0.0;
-            d->rs = D_800EA0A8.resampler;
-            d->rs->state = D_800EA0A8.resamplerState;
+            d->rs = synth_fxStorage.resampler;
+            d->rs->state = synth_fxStorage.resamplerState;
             d->rs->delta = 0.0;
             d->rs->first = 1;
         } else {
@@ -179,8 +179,8 @@ void Synth_SetupFx( s32 *param ) {
         }
 
         if ( param[j] ) {
-            d->lp = D_800EA0A8.lowPass;
-            d->lp->fstate = D_800EA0A8.lowPassState;
+            d->lp = synth_fxStorage.lowPass;
+            d->lp->fstate = synth_fxStorage.lowPassState;
             d->lp->fc = param[j++];
             _init_lpfilter( d->lp );
         } else {
@@ -199,7 +199,7 @@ Makes c's effect the custom one, with the default preset.
 */
 void Synth_UseCustomFx( ALSynConfig *c ) {
     c->fxType = AL_FX_CUSTOM;
-    c->params = D_8005CC98;
+    c->params = synth_defaultFx;
 }
 
 /*
@@ -214,9 +214,9 @@ s32 Synth_MaxFxSections( void ) {
     s32 most;
 
     most = 0;
-    for ( i = 0; D_8005CE24[i] != NULL; i++ ) {
-        if ( most < D_8005CE24[i][0] ) {
-            most = D_8005CE24[i][0];
+    for ( i = 0; synth_fxPresets[i] != NULL; i++ ) {
+        if ( most < synth_fxPresets[i][0] ) {
+            most = synth_fxPresets[i][0];
         }
     }
     return most;
@@ -234,9 +234,9 @@ s32 Synth_MaxFxLength( void ) {
     s32 longest;
 
     longest = 0;
-    for ( i = 0; D_8005CE24[i] != NULL; i++ ) {
-        if ( longest < D_8005CE24[i][1] ) {
-            longest = D_8005CE24[i][1];
+    for ( i = 0; synth_fxPresets[i] != NULL; i++ ) {
+        if ( longest < synth_fxPresets[i][1] ) {
+            longest = synth_fxPresets[i][1];
         }
     }
     return longest;
@@ -250,10 +250,10 @@ Switches the effect to preset index; returns 0, or 1 if there is no such preset.
 ================
 */
 s32 Synth_SetFxPreset( s32 index ) {
-    if ( index >= D_8005CE20 ) {
+    if ( index >= synth_numFxPresets ) {
         return 1;
     }
-    Synth_SetupFx( D_8005CE24[index] );
-    alFxParam( D_800EA098->auxBus->fx, AL_FILTER_SET_SOURCE, D_800EA098->auxBus );
+    Synth_SetupFx( synth_fxPresets[index] );
+    alFxParam( synth_driver->auxBus->fx, AL_FILTER_SET_SOURCE, synth_driver->auxBus );
     return 0;
 }

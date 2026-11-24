@@ -1375,3 +1375,31 @@ gridEd_heldFrames	0x8005C98E	invented: frames the D-pad has been held, to 100; f
 gridEd_page	0x80063AF0	invented: the editor's page, GRIDEDIT_*, picked with R held and up or down
 gridEd_mtx	0x80063AF8	invented: identity, the model matrix of the grid
 gridEd_marked	0x80063B40	invented: per grid point: marked (GRIDEDIT_SELECT, GRIDEDIT_HEIGHT)
+
+# include/variables.h: the audio manager: synthesizer, sample cache and audio thread (units 19F50, 1A7A0, 1ADA0)
+audio_samplePiHandle	0x800693D8	invented: the device tagged sample addresses (SAMPLE_ADDR_TAG) are read through (Snd_Init sets it, Audio_DmaRead)
+audio_sampleFlags	0x800DF6B0	invented: SAMPLES_IN_RAM etc., from the sound driver's config (Snd_Init, Audio_DmaRead)
+synth_driver	0x800EA098	invented: the synthesizer, as Snd_InitSynth set it up
+synth_fxStorage	0x800EA0A8	invented: the effect's delay, buffer, resampler and low-pass storage (Synth_AllocFx, Synth_SetupFx)
+synth_defaultFx	0x8005CC98	invented: effect preset: the default
+synth_numFxPresets	0x8005CE20	invented: presets in synth_fxPresets
+synth_fxPresets	0x8005CE24	invented: effect presets, NULL-terminated (Synth_SetFxPreset)
+audio_dmaUsed	0x80064390	invented: sample cache buffers in use, by startAddr (Audio_FindDmaBuffer)
+audio_dmaFree	0x80064394	invented: free sample cache buffers
+audio_dmaBuffers	0x80064398	invented: every sample cache buffer (Audio_InitDmaCache)
+audio_dmaRequests	0x8006439C	invented: DMA requests, two per buffer
+audio_dmaMsgs	0x800643A0	invented: audio_dmaQueue's messages
+audio_dmaBufferSize	0x800643A4	invented: bytes per sample cache buffer
+audio_dmaCount	0x800643A8	invented: DMAs started this frame (Audio_UpdateDmaCache)
+audio_dmaQueue	0x800643B0	invented: DMA completions
+audio_romHandle	0x800643C8	invented: the cartridge ROM's PI handle
+audio_sched	0x800643D0	invented: the scheduler the audio client uses (Audio_SetScheduler)
+audio_client	0x800643D4	invented: the audio thread's scheduler client (Audio_ClientInit)
+audio_defaultTaskFuncs	0x8005CE40	invented: Audio_ClientInit, Audio_ClientWaitFrame, Audio_ClientRunTask
+audio_taskFuncs	0x8005CE4C	invented: the routines the audio thread uses, &audio_defaultTaskFuncs by default
+audio_globals	0x800E64D0	invented: the n_audio globals (Synth_Init)
+audio_thread	0x800643E0	invented: the audio thread (Audio_Thread)
+audio_stack	0x80064590	invented: the audio thread's stack
+audio_buffers	0x80064594	invented: NUM_AUDIO_BUFFERS output buffers
+audio_cmdList	0x80064598	invented: the frame's command list
+audio_lastBuffer	0x8005CE50	invented: the buffer the last task filled, for the AI next; NULL: none yet

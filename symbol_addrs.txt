@@ -603,7 +603,7 @@ snd_maxFrameSize = 0x800645B8; // size:0x4
 snd_extraSamples = 0x800645BC; // size:0x4
 snd_frameSettled = 0x8005CE60; // size:0x4
 // lane/audio-mgr: symbols of units 19F50-1ADA0
-D_800EA0A8 = 0x800EA0A8; // size:0x18 allow_addend:True
+synth_fxStorage = 0x800EA0A8; // size:0x18 allow_addend:True
 aspMainTextStart = 0x8005A480;
 aspMainDataStart = 0x80060010;
 obj_list = 0x80066E00; // size:0x10 allow_addend:True
@@ -617,13 +617,13 @@ ga_menuPages = 0x80123608; // segment:gacode size:0x78
 D_80123A14_gacode = 0x80123A14; // segment:gacode size:0x8C
 ga_characterData = 0x80123AA0; // segment:gacode size:0x140
 D_800E6560 = 0x800E6560; // size:0x18
-D_800693D8 = 0x800693D8; // size:0x4
+audio_samplePiHandle = 0x800693D8; // size:0x4
 game_gamesWon = 0x800693DC; // size:0x2
 
 // gacode: main's per-player counter after sound_nextBgm (sound_nextBgm + 4 in the asm)
 game_strikeRun = 0x800A304C; // size:0x4
 
-// gacode and rscode: main's per-player counter after D_800DF6B0 (D_800DF6B0 + 4 in the asm)
+// gacode and rscode: main's per-player counter after audio_sampleFlags (audio_sampleFlags + 4 in the asm)
 game_strikes = 0x800DF6B4; // size:0x8
 
 // rscode: main's per-player pin masks (sound_nextBgm + 8 in the asm) and the overlay's pin positions
@@ -1384,3 +1384,27 @@ gridEd_heldFrames = 0x8005C98E;
 gridEd_page = 0x80063AF0;
 gridEd_mtx = 0x80063AF8;
 gridEd_marked = 0x80063B40;
+audio_sampleFlags = 0x800DF6B0;
+synth_driver = 0x800EA098;
+synth_defaultFx = 0x8005CC98;
+synth_numFxPresets = 0x8005CE20;
+synth_fxPresets = 0x8005CE24;
+audio_dmaUsed = 0x80064390;
+audio_dmaFree = 0x80064394;
+audio_dmaBuffers = 0x80064398;
+audio_dmaRequests = 0x8006439C;
+audio_dmaMsgs = 0x800643A0;
+audio_dmaBufferSize = 0x800643A4;
+audio_dmaCount = 0x800643A8;
+audio_dmaQueue = 0x800643B0;
+audio_romHandle = 0x800643C8;
+audio_sched = 0x800643D0;
+audio_client = 0x800643D4;
+audio_defaultTaskFuncs = 0x8005CE40;
+audio_taskFuncs = 0x8005CE4C;
+audio_globals = 0x800E64D0;
+audio_thread = 0x800643E0;
+audio_stack = 0x80064590;
+audio_buffers = 0x80064594;
+audio_cmdList = 0x80064598;
+audio_lastBuffer = 0x8005CE50;

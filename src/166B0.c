@@ -133,8 +133,8 @@ void Snd_Init( sndConfig_t *config ) {
     s32 i;
     ALVoiceConfig voiceConfig;
 
-    D_800693D8 = config->unk_40;
-    D_800DF6B0 = config->unk_00;
+    audio_samplePiHandle = config->unk_40;
+    audio_sampleFlags = config->unk_00;
     snd_numChannels = config->numVoices + NUM_MASTER_CHANNELS;
     if ( osTvType == OS_TV_PAL ) {
         snd_tickRate = TICK_RATE_PAL;
@@ -887,11 +887,11 @@ waveBank_t *Snd_GetSeWaveBank( seTable_t *table ) {
 ================
 func_8003C1FC
 
-Sets the task routines the audio thread uses (D_8005CE40 by default).
+Sets the task routines the audio thread uses (audio_defaultTaskFuncs by default).
 ================
 */
 void func_8003C1FC( audioTaskFuncs_t *funcs ) {
-    D_8005CE4C = funcs;
+    audio_taskFuncs = funcs;
 }
 
 /*

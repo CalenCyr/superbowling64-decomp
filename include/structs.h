@@ -298,7 +298,7 @@ typedef struct dmaBuffer_s {
     /* 0x04 */ struct dmaBuffer_s *next;
     /* 0x08 */ s32 framesLeft;              /* frames until it is freed, unless used again */
     /* 0x0C */ u32 startAddr;               /* ROM address of its data; -1: none yet */
-    /* 0x10 */ u8 *ptr;                     /* its data, D_800643A4 bytes */
+    /* 0x10 */ u8 *ptr;                     /* its data, audio_dmaBufferSize bytes */
 } dmaBuffer_t;
 
 #define AUDIO_CLIENT_MESGS  4   /* audioClient_t's queue sizes */
@@ -320,7 +320,7 @@ typedef struct {
     /* 0x0C */ u64 *ucodeData;
 } audioTask_t;
 
-/* The audio thread's three task routines (1A7A0.c, D_8005CE40): another table can stand in for them. */
+/* The audio thread's three task routines (1A7A0.c, audio_defaultTaskFuncs): another table can stand in for them. */
 typedef struct {
     /* 0x00 */ void (*init)( void );
     /* 0x04 */ void (*waitFrame)( void );
