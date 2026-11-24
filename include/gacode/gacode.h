@@ -72,7 +72,7 @@ typedef struct {
     /* 0x4C */ vec3_t rot;
     /* 0x58 */ f32 scale;
     /* 0x5C */ u8 unk_5C;
-    /* 0x5D */ u8 unk_5D;               /* 1: still standing (pins) */
+    /* 0x5D */ u8 standState;               /* 1: still standing (pins) */
     /* 0x5E */ u8 unk_5E[2];
 } gaBody_t;                             /* size 0x60 */
 
@@ -84,7 +84,7 @@ typedef struct {
     /* 0x1C */ u32 unk_1C;              /* contact bits of GA_CollideLane: bit 0 hit this frame, bit n touching spots[n] */
 } gaSpot_t;                             /* size 0x20 */
 
-/* View of a lane, set each frame by the lane's unk_B0C handler. Name invented. */
+/* View of a lane, set each frame by the lane's cameraFunc handler. Name invented. */
 typedef struct gaCamera_s {
     /* 0x00 */ vec3_t eye;
     /* 0x0C */ vec3_t at;
@@ -119,12 +119,12 @@ typedef struct {
     /* 0xAC8 */ sceneObject_t *bodyObjs[NUM_BODIES];
     /* 0xAF4 */ sceneObject_t *unk_AF4[3];
     /* 0xB00 */ gaCamera_t *camera;
-    /* 0xB04 */ void (*unk_B04)( s32 player );
-    /* 0xB08 */ void (*unk_B08)( s32 player );
-    /* 0xB0C */ void (*unk_B0C)( s32 player, gaCamera_t *camera );
-    /* 0xB10 */ s32 (*unk_B10)( s32 player, s32 input, s16 stickX, s16 stickY );
+    /* 0xB04 */ void (*turnFunc)( s32 player );
+    /* 0xB08 */ void (*panelFunc)( s32 player );
+    /* 0xB0C */ void (*cameraFunc)( s32 player, gaCamera_t *camera );
+    /* 0xB10 */ s32 (*inputFunc)( s32 player, s32 input, s16 stickX, s16 stickY );
     /* 0xB14 */ f32 unk_B14;
-    /* 0xB18 */ s64 unk_B18;            /* sound handle (Sound_PlaySe) */
+    /* 0xB18 */ s64 soundHandle;            /* sound handle (Sound_PlaySe) */
     /* 0xB20 */ s16 unk_B20;
     /* 0xB22 */ u8 unk_B22;
     /* 0xB23 */ u8 unk_B23;
@@ -132,7 +132,7 @@ typedef struct {
     /* 0xB25 */ u8 unk_B25;
     /* 0xB26 */ u8 unk_B26;
     /* 0xB27 */ u8 unk_B27;
-    /* 0xB28 */ f32 unk_B28;            /* camera height offset of func_8011B8AC_gacode */
+    /* 0xB28 */ f32 cameraRaise;            /* camera height offset of func_8011B8AC_gacode */
     /* 0xB2C */ u16 unk_B2C;            /* from gaStage_t.unk_1E[0] */
     /* 0xB2E */ u8 unk_B2E[2];
 } gaLane_t;                             /* size 0xB30 */
@@ -184,7 +184,7 @@ typedef struct {
     /* 0x8C */ gaLane_t *lane;
     /* 0x90 */ s8 port;                 /* controller port; -1: played by the game */
     /* 0x91 */ u8 laneIndex;
-    /* 0x92 */ s8 unk_92;               /* 0 to 4, stepped by func_8011BB44_gacode */
+    /* 0x92 */ s8 ballView;               /* 0 to 4, stepped by func_8011BB44_gacode */
     /* 0x93 */ u8 unk_93;               /* 0 to 10, chosen with C-left and C-right (func_801194D0_gacode) */
     /* 0x94 */ u16 unk_94;
     /* 0x96 */ u8 unk_96[0x02];

@@ -419,7 +419,7 @@ SCENE_RSCODE	include/overlay.h	invented: value 6, loads "RSCODE  SYS"
 vec3_t	gacode.h	invented: three floats (x, y, z); the Quake-style vector type
 gaBody_t	gacode.h	invented: 0x60-byte body of a lane, eleven per lane (index 0 the ball, 1-10 the pins: loops over 1..10 touch only pins); pos/rot/scale are the guPositionF arguments
 gaSpot_t	gacode.h	invented: 0x20-byte rest position of a body; GA_PlaceBody copies its pos into the body
-gaCamera_t	gacode.h	invented: three vectors the unk_B0C handlers write (eye, at, a third)
+gaCamera_t	gacode.h	invented: three vectors the cameraFunc handlers write (eye, at, a third)
 gaLane_t	gacode.h	invented: 0xB30-byte lane (two, ga_lanes): bodies, their scene objects, four handler slots, a sound handle
 gaCharacter_t	gacode.h	invented: 0x48-byte record of ga_characters, copied to the start of gaPlayer_t
 gaMenuPage_t	gacode.h	invented: 8-byte page of GA_PageBrowser's browser: image, cursor, back item, the pages its items open, the parent page
@@ -501,7 +501,7 @@ gaLaneAim_t	gacode.h	invented: 8-byte per-lane aiming state (two, ga_laneAim): a
 gaMotion_t	gacode.h	invented: 0x38-byte motion of a lane body (gaLane_t.motion, 11 from 0x420; initial copy ga_initMotion): velocity, spin, flags; stepped by GA_PhysicsStep
 FABS	include/gacode/gacode.h	invented: float absolute value macro (0 - x), func_80119638_gacode
 floorGrid_t	include/game.h	invented: 0xFAC-byte file at D_80100100 (point counts, spacing and origin along x and z, then s16 heights); GA_KeepInGrid clamps to its edges, GA_FloorHeight interpolates its heights
-GA_TogglePin	3E350.c	invented: the inline helper of GA_PinEditor that toggles a lane body's standing flag (unk_5D) and returns the new state
+GA_TogglePin	3E350.c	invented: the inline helper of GA_PinEditor that toggles a lane body's standing flag (standState) and returns the new state
 GRIDEDIT_EXIT, GRIDEDIT_LOAD, GRIDEDIT_SAVE, GRIDEDIT_SIZE, GRIDEDIT_STEP, GRIDEDIT_ORIGIN, GRIDEDIT_SELECT, GRIDEDIT_HEIGHT, GRIDEDIT_PAGES, GRIDEDIT_POINTS	include/gridedit.h	invented: the pages of the floor grid editor GridEd_Frame (from its page titles "EXIT", "FILE LOAD", "FILE SAVE", "MTX FORM", "MTX WH", "MTX OFS", "VTX SEL", "VTX Y"), and floorGrid_t.heights' 2000 points
 
 # rscode/56FF0.c results overlay
@@ -820,7 +820,7 @@ GA_DrawDistancePanels	0x8011A26C	invented: draws both players' distance panels
 GA_PinEditor	0x8011A404	invented: the pin editor: draws the pin chart with a cursor and edits it from the first controller
 GA_DrawAimLine	0x8011A8AC	invented: draws the lane's aim line in a cycling colour
 GA_SetBallView	0x8011B634	invented: sets the lane's camera to one of five views of the ball
-GA_FreeCamera	0x8011BD34	invented: an unk_B0C camera handler: a free camera moved by the stick
+GA_FreeCamera	0x8011BD34	invented: a cameraFunc camera handler: a free camera moved by the stick
 GA_CpuInput	0x8011C658	invented: input of a player the game plays
 GA_CpuSetup	0x8011C93C	invented: set-up of a player the game plays: picks its throw at random
 GA_DebugText	0x8011CF30	invented: draws debug text for a player
@@ -1003,3 +1003,13 @@ Mem_Free	0x80029F18	invented: frees the block that holds a pointer
 Mem_Resize	0x80029F68	invented: sets the size of an allocation
 Sram_GetHandle	0x800293E0	invented: sets up the SRAM PI handle once and returns it
 Ovl_KeepRoutines	0x80028590	invented: never called: refers to the library routines only the overlays call, so the link keeps them
+
+# gacode struct members
+gaLane_t.turnFunc	gacode.h	invented: the lane's turn handler, run first in GA_RunPlayer's frame and picked by GA_EndTurn
+gaLane_t.panelFunc	gacode.h	invented: the lane's handler that runs the mode's part of the frame and draws the player's panels
+gaLane_t.cameraFunc	gacode.h	invented: the lane's camera handler (writes a gaCamera_t)
+gaLane_t.inputFunc	gacode.h	invented: the lane's input handler, called with the buttons and the stick
+gaLane_t.soundHandle	gacode.h	invented: sound handle (Sound_PlaySe)
+gaLane_t.cameraRaise	gacode.h	invented: camera height offset that falls to 0 by 45 a frame
+gaPlayer_t.ballView	gacode.h	invented: which of GA_SetBallView's five views (0 to 4), stepped with R and L
+gaBody_t.standState	gacode.h	invented: 1 still standing, 2 falling (GA_TipBody), toggled by GA_TogglePin

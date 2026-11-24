@@ -410,7 +410,7 @@ f32 GA_CollideMomentum( gaMotion_t **out, gaMotion_t **in, gaSpot_t **spots ) {
 GA_TipBody
 
 For a body with rot[0] 0 that moves at speed 1 or more: by kind 0 or 1 sets its spin about x, heads it along
-its velocity (GA_SetBallHeading), moves unk_5D from 1 (still standing) to 2, and plays sound 0x32 (0x4B with
+its velocity (GA_SetBallHeading), moves standState from 1 (still standing) to 2, and plays sound 0x32 (0x4B with
 flags bit 1) on the lane of flags bit 0; returns 1. Otherwise returns 0.
 ================
 */
@@ -425,8 +425,8 @@ s32 GA_TipBody( u8 kind, gaMotion_t *motion, gaBody_t *body, u8 flags ) {
             break;
         }
         GA_SetBallHeading( motion->vel, body );
-        if ( body->unk_5D == 1 ) {
-            body->unk_5D = 2;
+        if ( body->standState == 1 ) {
+            body->standState = 2;
         }
         GA_PlayLaneSound( flags & 1, flags & 2 ? 0x4B : 0x32 );
         return 1;
@@ -466,7 +466,7 @@ spots[11..21]) of a body still in play is tested against each later body in play
 spot (or the segment from that spot to the midpoint with its spot2), then against its spot2 (or the
 segment from that midpoint to spot2). A new contact runs GA_CollideBodies on the two bodies, and each
 of them that stands flat (unk_5C 1, rot[0] 0) and was hit at 1 or more starts to tip toward its new
-heading, falls (unk_5D 2) and plays its sound (0x4B under the lane, else 0x32). unk_1C of a spot holds
+heading, falls (standState 2) and plays its sound (0x4B under the lane, else 0x32). unk_1C of a spot holds
 bit 0 (it was hit this frame) and one bit per spot it touches. Returns 1 when the last contact with
 the first spots knocked a body over.
 ================
@@ -495,12 +495,12 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
         }
         a = i % NUM_BODIES;
         which = i / NUM_BODIES;
-        if ( bodies[a].unk_5D == 0 ) {
+        if ( bodies[a].standState == 0 ) {
             continue;
         }
         for ( b = a + 1; b < NUM_BODIES; b++ ) {
             b2 = b + NUM_BODIES;
-            if ( bodies[b].unk_5D == 0 ) {
+            if ( bodies[b].standState == 0 ) {
                 continue;
             }
             if ( spots[b2].unk_18 != 0.0f ) {
@@ -520,8 +520,8 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                         if ( bodies[b].rot[0] == 0.0f && GA_VecLength( motion[b].vel ) >= 1.0 ) {
                             motion[b].spin[0] = 1.5f;
                             GA_SetBallHeading( motion[b].vel, &bodies[b] );
-                            if ( bodies[b].unk_5D == 1 ) {
-                                bodies[b].unk_5D = 2;
+                            if ( bodies[b].standState == 1 ) {
+                                bodies[b].standState = 2;
                             }
                             GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
                             hit = 1;
@@ -540,8 +540,8 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                                 break;
                             }
                             GA_SetBallHeading( motion[a].vel, &bodies[a] );
-                            if ( bodies[a].unk_5D == 1 ) {
-                                bodies[a].unk_5D = 2;
+                            if ( bodies[a].standState == 1 ) {
+                                bodies[a].standState = 2;
                             }
                             GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
                             hit = 1;
@@ -564,8 +564,8 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                          GA_VecLength( motion[b].vel ) >= 1.0 ) {
                         motion[b].spin[0] = -2.0f;
                         GA_SetBallHeading( motion[b].vel, &bodies[b] );
-                        if ( bodies[b].unk_5D == 1 ) {
-                            bodies[b].unk_5D = 2;
+                        if ( bodies[b].standState == 1 ) {
+                            bodies[b].standState = 2;
                         }
                         GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
                     }
@@ -580,8 +580,8 @@ s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *
                             break;
                         }
                         GA_SetBallHeading( motion[a].vel, &bodies[a] );
-                        if ( bodies[a].unk_5D == 1 ) {
-                            bodies[a].unk_5D = 2;
+                        if ( bodies[a].standState == 1 ) {
+                            bodies[a].standState = 2;
                         }
                         GA_PlayLaneSound( lane & 1, ( lane & 2 ) ? 0x4B : 0x32 );
                     }
@@ -614,7 +614,7 @@ void GA_SettleBodies( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots ) {
     s32 down;
 
     for ( i = 0; i < NUM_BODIES; i++ ) {
-        if ( bodies[i].unk_5D != 0 && bodies[i].unk_5C == 1 && ( ( motion[i].flags >> 1 ) & 1 ) ) {
+        if ( bodies[i].standState != 0 && bodies[i].unk_5C == 1 && ( ( motion[i].flags >> 1 ) & 1 ) ) {
             if ( bodies[i].rot[0] == 0.0f ) {
                 motion[i].vel[0] *= 0.75;
                 motion[i].vel[2] *= 0.75;
@@ -923,7 +923,7 @@ s32 GA_PickAimPin( vec3_t out, gaBody_t *bodies, gaSpot_t *spots, s32 side ) {
     s32 i;
 
     for ( i = 0; i < NUM_PINS; i++ ) {
-        if ( bodies[ga_pinRows[side][i]].unk_5D != 1 ) {
+        if ( bodies[ga_pinRows[side][i]].standState != 1 ) {
             continue;
         }
         switch ( i ) {
@@ -1039,12 +1039,12 @@ u8 GA_IsSplit( gaLane_t *lane ) {
     s32 numStanding = 0;
     s32 i;
 
-    if ( lane->bodies[1].unk_5D == 1 ) {
+    if ( lane->bodies[1].standState == 1 ) {
         return 0;
     }
     for ( i = 2; i < NUM_BODIES; i++ ) {
-        if ( lane->bodies[i].unk_5D == 1 ) {
-            mask |= lane->bodies[i].unk_5D << ( 10 - i );
+        if ( lane->bodies[i].standState == 1 ) {
+            mask |= lane->bodies[i].standState << ( 10 - i );
             numStanding++;
         }
     }
