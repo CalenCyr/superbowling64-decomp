@@ -586,24 +586,25 @@ Main loop state of a team game: runs the current player of each team; when one i
 the team if every player has the game_playerDone flag set, else passes the turn to the team's next player.
 ================
 */
+// The turn pass is GA_NextTeamPlayer inlined (its inline is what puts the body here at -O2).
 #ifdef NON_MATCHING
-// NON_MATCHING: schedule only: in the flag-count loop retail increments i before the row pointer, the draft
-// after it (tried: if/++ count, i++ in the index, local order, a row pointer local, pointer-walk counts, a
-// player local, unsigned counts, while and ++i loops; 28k
-// permuter iterations from base 20 found nothing lower). The
-// turn pass is GA_NextTeamPlayer inlined (its inline is what puts the body here at -O2).
+// NON_MATCHING: byte-exact (gate green) only with a `players` counter kept beside the index i (players++ first in
+// the flag-count loop, then flagged == players); it always equals i, so it only steers scheduling and is not counted
 s32 GA_TeamGameLoop( void ) {
     s32 team;
     s32 flagged;
+    s32 players;
     s32 i;
 
     for ( team = 0; team <= game_lastTeam; team++ ) {
         if ( GA_RunPlayer( ga_teamPlayers[team][ga_teamCurrent[team]] ) ) {
             flagged = 0;
+            players = 0;
             for ( i = 0; ga_teamPlayers[team][i] != -1; i++ ) {
+                players++;
                 flagged += game_playerDone[ga_teamPlayers[team][i]] != 0;
             }
-            if ( flagged == i ) {
+            if ( flagged == players ) {
                 func_80115D70_gacode( ga_teamPlayers[team][0], 0 );
             } else {
                 GA_NextTeamPlayer( &ga_teamCurrent[team], ga_teamCurrent[team], team );
@@ -689,13 +690,13 @@ when the turn comes back to the first player). Then advances the frame when the 
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: schedule only, the same residue as GA_TeamGameLoop: retail increments i before the
-// row pointer in the flag-count loop (tried an inline helper over the row, pointer-walk counts; 23k permuter
-// iterations from base 20 found nothing lower).
+// NON_MATCHING: byte-exact (gate green) only with a `players` counter kept beside the index i (players++ first in
+// the flag-count loop, then flagged == players); it always equals i, so it only steers scheduling and is not counted
 s32 GA_ParGameLoop( void ) {
     s32 team;
     s32 i;
     s32 flagged;
+    s32 players;
     s32 showFrame;
 
     for ( team = 0; team <= game_lastTeam; team++ ) {
@@ -704,10 +705,12 @@ s32 GA_ParGameLoop( void ) {
                 ga_teamCurrent[team] = 0;
             }
             flagged = 0;
+            players = 0;
             for ( i = 0; ga_teamPlayers[team][i] != -1; i++ ) {
+                players++;
                 flagged += game_playerDone[ga_teamPlayers[team][i]] != 0;
             }
-            if ( flagged == i ) {
+            if ( flagged == players ) {
                 func_80115D70_gacode( ga_teamPlayers[team][0], 0 );
             } else if ( ga_teamCurrent[team] == 0 ) {
                 func_80115D70_gacode( ga_teamPlayers[team][0], 1 );
