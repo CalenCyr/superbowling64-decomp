@@ -255,7 +255,7 @@ typedef struct {
 } gaPinSetup_t;                         /* size 0x6 */
 
 extern gaPinSetup_t D_801237F0_gacode[];   /* for func_801156D8_gacode, by D_800DF59C.unk_04[] */
-extern gaPinSetup_t D_80123950_gacode[];   /* for func_801155BC_gacode, by D_800DF59C.unk_04[] */
+extern gaPinSetup_t D_80123950_gacode[];   /* for GA_ScorePar, by D_800DF59C.unk_04[] */
 extern u16 ga_editorPins;              /* pins of func_801157F8_gacode */
 
 /* Handler of a player: the game mode (ga_gameMode) or what starts a turn (D_8012D23C_gacode). */
@@ -400,8 +400,8 @@ s32 GA_EndDuelGame( void );
 void func_80116170_gacode( s32 skip );
 s32 func_80115DF4_gacode( s32 player );
 s32 func_80115E24_gacode( u8 twoLanes );
-s32 func_801155BC_gacode( s32 player );
-s32 func_801151A0_gacode( s32 player );
+s32 GA_ScorePar( s32 player );
+s32 GA_ScoreStandard( s32 player );
 s32 func_8011582C_gacode( s32 player );
 s32 func_801156D8_gacode( s32 player );
 void func_80115054_gacode( void );

@@ -385,7 +385,7 @@ void GA_SetupMode( void ) {
         func_80113384_gacode();
         break;
     case 1:
-        GA_StartMode( GA_DuelLoop, func_801151A0_gacode );
+        GA_StartMode( GA_DuelLoop, GA_ScoreStandard );
         ga_bgm = ga_stage->unk_1A;
         break;
     case 3:
@@ -416,13 +416,13 @@ void func_80113384_gacode( void ) {
         /* the arguments that share a state still have a case each (retail keeps one block per case) */
         switch ( D_8005C160 >> 6 ) {
         case 0:
-            GA_StartMode( GA_TeamGameLoop, func_801151A0_gacode );
+            GA_StartMode( GA_TeamGameLoop, GA_ScoreStandard );
             break;
         case 2:
-            GA_StartMode( GA_TeamGameLoop, func_801151A0_gacode );
+            GA_StartMode( GA_TeamGameLoop, GA_ScoreStandard );
             break;
         case 1:
-            GA_StartMode( GA_PairGameLoop, func_801151A0_gacode );
+            GA_StartMode( GA_PairGameLoop, GA_ScoreStandard );
             break;
         }
         ga_bgm = ga_stage->unk_1A;
@@ -436,10 +436,10 @@ void func_80113384_gacode( void ) {
         /* the arguments that share a state still have a case each (retail keeps one block per case) */
         switch ( D_8005C160 >> 6 ) {
         case 0:
-            GA_StartMode( GA_ParGameLoop, func_801155BC_gacode );
+            GA_StartMode( GA_ParGameLoop, GA_ScorePar );
             break;
         case 1:
-            GA_StartMode( GA_ParGameLoop, func_801155BC_gacode );
+            GA_StartMode( GA_ParGameLoop, GA_ScorePar );
             break;
         }
         ga_bgm = ga_stage->unk_1A;
@@ -476,7 +476,7 @@ void GA_StartMode( gaState_t state, gaPlayerFunc_t mode ) {
     ga_gameMode = mode;
     if ( mode == func_801157F8_gacode ) {
         D_8012D23C_gacode = func_80115D38_gacode;
-    } else if ( mode == func_801155BC_gacode ) {
+    } else if ( mode == GA_ScorePar ) {
         D_8012D23C_gacode = func_80115CDC_gacode;
     } else if ( mode == func_801156D8_gacode ) {
         D_8012D23C_gacode = func_80115D38_gacode;

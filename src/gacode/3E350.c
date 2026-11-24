@@ -442,7 +442,7 @@ void GA_UpdateLaneCamera( s32 player ) {
 
 /*
 ================
-func_801151A0_gacode
+GA_ScoreStandard
 
 A game mode. The player scores for their team when the sub-mode's argument is 1 (players 2 and 3 for player
 1). After a func_80116398_gacode turn (unless D_80068A50 is 2), records GA_IsSplit's result in the
@@ -451,7 +451,7 @@ frame's flags. When the throw ends the frame, counts the run D_800A304C on after
 the lane's callout was 3 or the run had reached 3, else 0.
 ================
 */
-s32 func_801151A0_gacode( s32 player ) {
+s32 GA_ScoreStandard( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 strike = 0;
     s32 scorer;
@@ -536,7 +536,7 @@ s32 func_801151A0_gacode( s32 player ) {
 GA_ScoreResult
 
 Result of a game mode for a frame's score, given as 2 + the score against par: 1 for par, 2 for one under, else
-3. Retail has no out-of-line copy; func_801155BC_gacode expands it (the result reaches the caller's variable
+3. Retail has no out-of-line copy; GA_ScorePar expands it (the result reaches the caller's variable
 through a copy, which a plain ternary there does not give).
 ================
 */
@@ -546,13 +546,13 @@ static inline s32 GA_ScoreResult( s32 score ) {
 
 /*
 ================
-func_801155BC_gacode
+GA_ScorePar
 
 A game mode: when GA_CountParThrow ends the player's frame, plays the sound for its score against par,
 sets the lane's callout from the score and returns 1 for par, 2 for one under and 3 otherwise; else 0.
 ================
 */
-s32 func_801155BC_gacode( s32 player ) {
+s32 GA_ScorePar( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 result;
 
@@ -940,7 +940,7 @@ void GA_StartTurn( s32 player ) {
         mask = ga_editorPins;
     } else if ( ga_gameMode == func_801156D8_gacode ) {
         mask = D_801237F0_gacode[D_800DF59C.unk_04[D_8009D19C[player]]].pins;
-    } else if ( ga_gameMode == func_801155BC_gacode ) {
+    } else if ( ga_gameMode == GA_ScorePar ) {
         mask = D_80123950_gacode[D_800DF59C.unk_04[D_8009D19C[player]]].pins;
     } else {
         mask = 0x3FF;
@@ -1072,7 +1072,7 @@ Sets the handlers of a player's turn for the game mode.
 ================
 */
 void GA_SetTurnHandlers( gaPlayer_t *pl ) {
-    if ( ga_gameMode == func_801156D8_gacode || ga_gameMode == func_801155BC_gacode ) {
+    if ( ga_gameMode == func_801156D8_gacode || ga_gameMode == GA_ScorePar ) {
         pl->lane->inputFunc = func_801179FC_gacode;
         pl->lane->panelFunc = func_8011AA78_gacode;
     } else if ( ga_gameMode == func_801157F8_gacode ) {
@@ -1405,7 +1405,7 @@ s32 func_801178D8_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     if ( player == 0 ) {
         Sound_PlaySe( 100, 0 );
     }
-    if ( ga_gameMode == func_801156D8_gacode || ga_gameMode == func_801155BC_gacode ) {
+    if ( ga_gameMode == func_801156D8_gacode || ga_gameMode == GA_ScorePar ) {
         pl->lane->inputFunc = func_801179FC_gacode;
         pl->lane->panelFunc = func_8011AA78_gacode;
     } else if ( ga_gameMode == func_801157F8_gacode ) {
@@ -2547,7 +2547,7 @@ void func_8011AA78_gacode( s32 player ) {
 
     if ( ga_gameMode == func_801156D8_gacode ) {
         func_80119DD8_gacode( player, pl->laneIndex );
-    } else if ( ga_gameMode == func_801155BC_gacode ) {
+    } else if ( ga_gameMode == GA_ScorePar ) {
         GA_DrawParFramePanel( player, pl->laneIndex );
     } else if ( ga_gameMode == func_801157F8_gacode ) {
         GA_PinEditor( pl );
@@ -2569,7 +2569,7 @@ void func_8011AB0C_gacode( s32 player ) {
         GA_DrawAimLine( pl );
     } else if ( ga_gameMode == func_801156D8_gacode ) {
         func_80119C50_gacode( player, pl->laneIndex );
-    } else if ( ga_gameMode == func_801155BC_gacode ) {
+    } else if ( ga_gameMode == GA_ScorePar ) {
         GA_DrawParPanel( player, pl->laneIndex );
     } else if ( ga_gameMode == func_8011582C_gacode ) {
         func_80119F8C_gacode( player, pl->laneIndex );
@@ -2595,7 +2595,7 @@ void func_8011AD5C_gacode( s32 player ) {
     if ( ga_gameMode != func_801157F8_gacode ) {
         if ( ga_gameMode == func_801156D8_gacode ) {
             func_80119C50_gacode( player, pl->laneIndex );
-        } else if ( ga_gameMode == func_801155BC_gacode ) {
+        } else if ( ga_gameMode == GA_ScorePar ) {
             GA_DrawParPanel( player, pl->laneIndex );
         } else if ( ga_gameMode == func_8011582C_gacode ) {
             func_80119F8C_gacode( player, pl->laneIndex );
@@ -3362,7 +3362,7 @@ void GA_DebugText( s32 player ) {
     sprintf( text, "T[%6.2f]R[%6.2f]", pl->character.speed, pl->character.spin );
     Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
     row++;
-    if ( ga_gameMode == func_801156D8_gacode || ga_gameMode == func_801155BC_gacode ) {
+    if ( ga_gameMode == func_801156D8_gacode || ga_gameMode == GA_ScorePar ) {
         sprintf( text, "TABLE[%d]", D_800DF59C.unk_04[D_8009D19C[player]] );
         Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
         row++;
