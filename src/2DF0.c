@@ -174,7 +174,7 @@ void Cont_ReadPads( void ) {
     }
     if ( D_8005C0EC != 0 ) {
         if ( ( D_800E4D62 & START_BUTTON ) && D_800693B0 > 40 ) {
-            func_80037870( 1, 0 );
+            Sound_PlaySe( 1, 0 );
             D_800693B0 = 40;
         }
         D_800E4D62 &= ~START_BUTTON;

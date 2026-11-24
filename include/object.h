@@ -65,8 +65,8 @@ typedef struct {
     /* 0x48 */ u16 frame;               /* of the animation */
     /* 0x4A */ u8 viewMask;             /* 0: not drawn */
     /* 0x4B */ u8 unk_4B;
-    /* 0x4C */ fileType1_t *model;      /* a loaded FILE_TYPE1 file (func_80030C04) */
-    /* 0x50 */ s32 *anim;               /* a loaded file (func_80030C04); its first word is its frame count */
+    /* 0x4C */ fileType1_t *model;      /* a loaded FILE_TYPE1 file (Cache_GetFile) */
+    /* 0x50 */ s32 *anim;               /* a loaded file (Cache_GetFile); its first word is its frame count */
     /* 0x54 */ u8 unk_54[0x04];
     /* 0x58 */ sceneObjJoint_t joints[2];  /* one per joint of the model (at least two) */
 } sceneObject_t;
@@ -137,7 +137,7 @@ void func_8002BE00( sceneObject_t *obj );
 
 /* the cameras (unit 7250) */
 void Cam_SetAmbient( s32 index, u8 *color );
-void func_8002BED8( s16 file, s16 frame, f32 *eye, f32 *unk_2C );
+void Cam_ReadPathFrame( s16 file, s16 frame, f32 *eye, f32 *unk_2C );
 objNode_t *Cam_Create( objParams_t *params );
 void Cam_Update( sceneCamera_t *cam );
 void Cam_UpdateAndAdvance( sceneCamera_t *cam );

@@ -21,12 +21,12 @@ s32 GS_Options( void ) {
     u8 alpha;
 
     if ( gs_optionsState == 1 && ( D_800E4D62 & B_BUTTON ) && gs_optionsPage == 0 && D_8005C0BF == 0 ) {
-        func_80037870( 2, 0 );
+        Sound_PlaySe( 2, 0 );
         gs_optionsState = 3;
     }
 
     Draw_ClearScreen( 0, 0, 0 );
-    func_8002DF3C( 0xA58, 0, 0 );
+    Draw_Image( 0xA58, 0, 0 );
 
     for ( i = 0; i < 13; i++ ) {
         func_8003893C( gs_optionsMenu, i, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
@@ -54,7 +54,7 @@ s32 GS_Options( void ) {
                 gs_optionsCursor = OPTION_EXIT;
             }
             func_80026B28();
-            func_80037870( 0, 0x80 );
+            Sound_PlaySe( 0, 0x80 );
         } else if ( gs_optionsPage == 0
                     && ( ( D_800E6758 & D_JPAD )
                          || ( gs_optionsCursor == OPTION_CREDITS && ( D_800E6758 & R_JPAD ) ) ) ) {
@@ -62,7 +62,7 @@ s32 GS_Options( void ) {
                 gs_optionsCursor = 0;
             }
             func_80026B28();
-            func_80037870( 0, 0x80 );
+            Sound_PlaySe( 0, 0x80 );
         }
 
         switch ( gs_optionsCursor ) {
@@ -71,13 +71,13 @@ s32 GS_Options( void ) {
                 if ( ++D_8009D098.unk_78 == 3 ) {
                     D_8009D098.unk_78 = 0;
                 }
-                func_80037870( 0, 0x80 );
+                Sound_PlaySe( 0, 0x80 );
             }
             if ( D_800E6758 & L_JPAD ) {
                 if ( --D_8009D098.unk_78 == 0xFF ) {
                     D_8009D098.unk_78 = 2;
                 }
-                func_80037870( 0, 0x80 );
+                Sound_PlaySe( 0, 0x80 );
             }
             break;
         case OPTION_79:
@@ -85,7 +85,7 @@ s32 GS_Options( void ) {
                 if ( ++D_8009D098.unk_79 == 2 ) {
                     D_8009D098.unk_79 = 0;
                 }
-                func_80037870( 0, 0x80 );
+                Sound_PlaySe( 0, 0x80 );
             }
             break;
         case OPTION_SOUND_TEST:
@@ -94,17 +94,17 @@ s32 GS_Options( void ) {
                 if ( ++gs_soundTestSound == NUM_SOUND_TESTS ) {
                     gs_soundTestSound = 0;
                 }
-                func_80037870( 0, 0x80 );
+                Sound_PlaySe( 0, 0x80 );
             }
             if ( D_800E6758 & L_JPAD ) {
                 if ( --gs_soundTestSound == 0xFF ) {
                     gs_soundTestSound = NUM_SOUND_TESTS - 1;
                 }
-                func_80037870( 0, 0x80 );
+                Sound_PlaySe( 0, 0x80 );
             }
             if ( gs_soundTestFrames >= 16 && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
                 gs_soundTestFrames = 0;
-                func_80037870( 1, 0x80 );
+                Sound_PlaySe( 1, 0x80 );
                 // RULE-EXCEPTION: R30, i holds the saved setting: retail gives the counter this longer life, which
                 // ranks it below each loop's hoisted values and orders this block's loads
                 i = D_8009D098.unk_79;
@@ -119,14 +119,14 @@ s32 GS_Options( void ) {
                     D_8009D098.unk_7A = 0;
                 }
                 Sound_UpdateBgmVolume();
-                func_80037870( 0, 0x80 );
+                Sound_PlaySe( 0, 0x80 );
             }
             if ( D_800E6758 & L_JPAD ) {
                 if ( --D_8009D098.unk_7A == 0xFF ) {
                     D_8009D098.unk_7A = 4;
                 }
                 Sound_UpdateBgmVolume();
-                func_80037870( 0, 0x80 );
+                Sound_PlaySe( 0, 0x80 );
             }
             break;
         case OPTION_7B:
@@ -134,18 +134,18 @@ s32 GS_Options( void ) {
                 if ( ++D_8009D098.unk_7B == 2 ) {
                     D_8009D098.unk_7B = 0;
                 }
-                func_80037870( 0, 0x80 );
+                Sound_PlaySe( 0, 0x80 );
             }
             break;
         case OPTION_RECORDS:
             if ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
-                func_80037870( 1, 0 );
+                Sound_PlaySe( 1, 0 );
                 gs_optionsPage ^= 1;
             }
             break;
         case OPTION_CREDITS:
             if ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
-                func_80037870( 1, 0 );
+                Sound_PlaySe( 1, 0 );
                 D_8005C0BF = 1;
             }
             break;
@@ -182,18 +182,18 @@ s32 GS_Options( void ) {
         if ( gs_optionsState == 1 ) {
             for ( i = 0; i < 5; i++ ) {
                 if ( gs_optionsCursor != i ) {
-                    func_8002FDE4( 0xB0, i * 20 + 0x46, 0x46, 0x12, 0, 0, 0, 0x80 );
+                    Draw_FillRect( 0xB0, i * 20 + 0x46, 0x46, 0x12, 0, 0, 0, 0x80 );
                 }
             }
             if ( gs_optionsCursor == OPTION_EXIT && ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) ) {
-                func_80037870( 1, 0 );
+                Sound_PlaySe( 1, 0 );
                 gs_optionsState = 3;
             }
             if ( gs_optionsPage == 1 ) {
                 for ( i = 0; i < 4; i++ ) {
                     func_8003B034( &D_8009D098.unk_08[i], i, 0 );
                 }
-                func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
+                Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
                 Txt_LoadGlyphSheet( &D_800F8094 );
                 func_8003A970( 4, D_8009D098.unk_08, 0, 0x18, 0x38 );
             }
@@ -278,7 +278,7 @@ s32 GS_Options( void ) {
             } else {
                 alpha = gs_creditSprites[i].alpha;
             }
-            func_8002E4B0( gs_creditSprites[i].image, x, y, alpha, 1.0f, 1.0f );
+            Draw_ImageScaled( gs_creditSprites[i].image, x, y, alpha, 1.0f, 1.0f );
         }
     }
 

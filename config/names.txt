@@ -433,13 +433,13 @@ GA_ScoreResult	3E350.c	invented: the inline helper of func_801155BC_gacode that 
 unkImage_t	gacode.h	invented: image a resource points to: 0x10-byte header, then a 256-colour palette
 # units 53B0-13490 (lane match-main-53B0: types; functions keep placeholder names)
 fileCacheEntry_t	include/filecache.h	invented: {reference count, data} slot per str file index in D_800F80B0 (unit BEF0)
-fileType1_t	include/filecache.h	invented: file relocated by func_80030C04 type 1 (count, offset, part offsets); purpose unknown
+fileType1_t	include/filecache.h	invented: file relocated by Cache_GetFile type 1 (count, offset, part offsets); purpose unknown
 fileType1Part_t	include/filecache.h	invented: part of a fileType1_t, naming pairs of further files
 fileType1Ref_t	include/filecache.h	invented: pair of file indices in a fileType1Part_t
 fileRefA_t	include/filecache.h	invented: first file of a fileType1Ref_t pair (offsets 0x04, 0x08; 0x08 goes to func_8002B380)
 fileRefB_t	include/filecache.h	invented: second file of a fileType1Ref_t pair (offsets 0x2C, 0x30)
-fileType2_t	include/filecache.h	invented: file relocated by func_80030C04 type 2
-fileType3_t	include/filecache.h	invented: file relocated by func_80030C04 type 3
+fileType2_t	include/filecache.h	invented: file relocated by Cache_GetFile type 2
+fileType3_t	include/filecache.h	invented: file relocated by Cache_GetFile type 3
 FILE3_FOG	include/filecache.h	invented: fileType3_t.unk_38 bit func_800316C0 tests before drawing fog
 fileType3_t.fogColor, fogNear, fogFar	include/filecache.h	invented: the gDPSetFogColor and gSPFogPosition arguments of func_800316C0
 bmpHeader_t	include/gamesnd.h	evidence: D_8005CA40 is a BMP file and info header ("BM", 54-byte offset, 320x240, 24 bpp) written by func_80037E30
@@ -457,10 +457,10 @@ AUDIO_FRAME_SAMPLES	structs.h	invented: the 184 samples per audio frame that Snd
 objNode_t, objClass_t, objParams_t, OBJ_PARAMS_SKIP, OBJ_PARAMS_END	object.h	invented: the object list of 53B0 (func_80029FF4 inserts by priority; func_8002A1EC reads the float records up to -1.0)
 drawEntry_t, DRAW_BUCKETS, DRAW_NONE	ground.h	invented: the 12-byte entries of D_8009D1A0 that func_8003128C sorts into 0x400 buckets chained by func_80031650
 SCREEN_WIDTH, SCREEN_HEIGHT	boot.h	invented: the 320x240 framebuffers (func_80031BB0's scissor and color image)
-fileImage_t, IMAGE_CI4, IMAGE_CI8, CI4_PALETTE_SIZE, CI8_PALETTE_SIZE	sprite.h	invented: the image files func_8002DF3C draws (palette offsets 0x20 and 0x200 by type)
+fileImage_t, IMAGE_CI4, IMAGE_CI8, CI4_PALETTE_SIZE, CI8_PALETTE_SIZE	sprite.h	invented: the image files Draw_Image draws (palette offsets 0x20 and 0x200 by type)
 DRAW2D_COPY, DRAW2D_1CYCLE, DRAW2D_FILL	sprite.h	invented: the D_8005C190 values the 2D functions set with the cycle type they emit
-PROMPT_* (modes and states), PROMPT_ZOOM_FRAMES	save.h	invented: func_80036E60's modes, from its input handling, and D_8005C9BC's states
-SE_CURSOR, SE_DECIDE	gamesnd.h	invented: SE 0 on a cursor move and SE 1 on a choice in func_80036E60
+PROMPT_* (modes and states), PROMPT_ZOOM_FRAMES	save.h	invented: Save_ShowPrompt's modes, from its input handling, and D_8005C9BC's states
+SE_CURSOR, SE_DECIDE	gamesnd.h	invented: SE 0 on a cursor move and SE 1 on a choice in Save_ShowPrompt
 menuItem_t, MENU_END, MENU_NONE, MENU_SLIDE_STEPS, SLIDE_*	menu.h	invented: the 10-byte menu records func_800386E0 draws and func_8003893C edits
 SCORE_IMAGE_*, ROLL_STRIKE, ROLL_SPARE	menu.h	invented: indices of D_8005CAC0 that func_80039340 returns for the rolls of a frame
 Menu_SlidePos	13490.c	invented: the inline position calculation of func_800386E0's slides
@@ -478,7 +478,7 @@ Max	src/rscode/56FF0.c	invented: inline greater of two values; func_80113EC0_rsc
 Min	src/rscode/56FF0.c	invented: inline lesser of two values, Max's pair (func_80113EC0_rscode's low score)
 frameSlot_t	include/cacode/cacode.h	invented: a slot of cacode's cache of BMP frames (frame, clip, LRU stamp, 40 RGBA16 tiles)
 opImage_t	opcode.h	invented: an image of the Controller Pak screen (id, x, y, alpha), lists end with id -1
-opNoteName_t	opcode.h	invented: a pak note's name in glyphs (16 + extension + 0xFFFF end) for func_80029088
+opNoteName_t	opcode.h	invented: a pak note's name in glyphs (16 + extension + 0xFFFF end) for Txt_DrawGlyphs
 PAK_MAX_NOTES	opcode.h	invented: the 16 notes of a Controller Pak func_80113168_opcode lists
 PAK_NOTES_SHOWN	opcode.h	invented: the five note lines of the Controller Pak screen
 CAMODE_ROTATE	include/cacode/cacode.h	evidence: the mode text "ROTATE" func_80113280_cacode draws
@@ -743,3 +743,18 @@ Rumble_Start	0x80027B18	invented: starts the Rumble Pak of a port
 Rumble_Stop	0x80027B6C	invented: stops the Rumble Pak of a port
 Cont_ReadPads	0x80027BC0	invented: reads the pads of both ports into the per-port state
 Cont_FindStandard	0x80027FF0	invented: sets a bit of D_8005B190 for each port holding a standard controller
+
+# main units: shared text, drawing, prompt, sound and file-cache helpers
+Txt_DrawString	0x80028DA4	invented: draws a string in the 8x8 font
+Txt_DrawGlyphs	0x80029088	invented: draws a glyph string from the glyph sheet
+Cam_ReadPathFrame	0x8002BED8	invented: reads one frame of a camera path file
+Draw_CiImage	0x8002CE24	invented: draws a colour-indexed image in copy mode
+Draw_Image	0x8002DF3C	invented: draws an image unscaled in copy mode
+Draw_ImageCopyPalette	0x8002E0EC	invented: draws an image unscaled from a copy of its palette
+Draw_ImageScaled	0x8002E4B0	invented: draws an image scaled and with alpha
+Draw_FillRect	0x8002FDE4	invented: fills a rectangle with a colour
+Draw_Line3D	0x800308C4	invented: draws a line between two points in a camera's view
+Save_ShowPrompt	0x80036E60	invented: shows a prompt image for one frame, zooming in and out
+Sound_PlaySe	0x80037870	invented: plays a sound effect and returns its sound id
+Sound_Stop	0x800379A8	invented: stops a sound by id
+Cache_GetFile	0x80030C04	invented: returns a file, loading and relocating it when not cached

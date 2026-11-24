@@ -271,7 +271,7 @@ s32 func_80118040_gscode( void ) {
                         } while ( !( ( unlocked >> j ) & 1 ) );
                         D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] =
                             ( D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | j;
-                        func_80037870( SE_CURSOR, 0 );
+                        Sound_PlaySe( SE_CURSOR, 0 );
                     }
                     if ( repeat & R_JPAD ) {
                         do {
@@ -282,7 +282,7 @@ s32 func_80118040_gscode( void ) {
                         } while ( !( ( unlocked >> j ) & 1 ) );
                         D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] =
                             ( D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | j;
-                        func_80037870( SE_CURSOR, 0 );
+                        Sound_PlaySe( SE_CURSOR, 0 );
                     }
 
                     if ( D_8011FC84_gscode[1] == 0x80 ) {
@@ -291,7 +291,7 @@ s32 func_80118040_gscode( void ) {
                         pad = D_800E44E0[i];
                     }
                     if ( pad & ( A_BUTTON | Z_TRIG ) ) {
-                        func_80037870( SE_DECIDE, 0 );
+                        Sound_PlaySe( SE_DECIDE, 0 );
                         D_8011FC84_gscode[i]++;
                         if ( ( D_8005C160 & 0xF ) == 1 && D_8011FC84_gscode[i] == 1 ) {
                             D_8005C0E4[1] = ( D_8005C0E4[1] & 0xF0 ) | 1;
@@ -309,11 +309,11 @@ s32 func_80118040_gscode( void ) {
                     if ( pad & B_BUTTON ) {
                         if ( D_8005CB60 ) {
                             if ( D_8011FC84_gscode[i] ) {
-                                func_80037870( 2, 0 );
+                                Sound_PlaySe( 2, 0 );
                                 D_8011FC84_gscode[i]--;
                             }
                         } else {
-                            func_80037870( 2, 0 );
+                            Sound_PlaySe( 2, 0 );
                             if ( D_8011FC84_gscode[i] == 0 ) {
                                 D_8011FC81_gscode = CHOICE_BACK;
                                 break;
@@ -331,7 +331,7 @@ s32 func_80118040_gscode( void ) {
                         pad = D_800E44E0[i];
                     }
                     if ( ( pad & B_BUTTON ) && ( D_8011FC84_gscode[i] & 0x7F ) ) {
-                        func_80037870( 2, 0 );
+                        Sound_PlaySe( 2, 0 );
                         D_8011FC84_gscode[i] = ( D_8011FC84_gscode[i] & 0x7F ) - 1;
                     }
                 }
@@ -402,7 +402,7 @@ s32 func_80118040_gscode( void ) {
         }
     }
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-    func_8002DF3C( 0xA58, 0, 0 );
+    Draw_Image( 0xA58, 0, 0 );
     func_800386E0( D_8011FA80_gscode, D_8011FC80_gscode );
     /* an empty loop: retail still counts it out */
     for ( i = 0; i < 4; i++ ) {
@@ -444,9 +444,9 @@ s32 func_80118040_gscode( void ) {
                     if ( D_80120818_gscode[i][j] > D_8011FC50_gscode[character][j] ) {
                         D_80120818_gscode[i][j]--;
                     }
-                    func_8002FDE4( D_80120828_gscode[i][j], D_80120840_gscode[i][j], 3, 40 - D_80120818_gscode[i][j],
+                    Draw_FillRect( D_80120828_gscode[i][j], D_80120840_gscode[i][j], 3, 40 - D_80120818_gscode[i][j],
                                    0xB0, 0xB0, 0xB0, 0xC0 );
-                    func_8002FDE4( D_80120828_gscode[i][j], D_80120840_gscode[i][j] - ( D_80120818_gscode[i][j] - 40 ),
+                    Draw_FillRect( D_80120828_gscode[i][j], D_80120840_gscode[i][j] - ( D_80120818_gscode[i][j] - 40 ),
                                    3, D_80120818_gscode[i][j], D_8011FC44_gscode[j][0], D_8011FC44_gscode[j][1],
                                    D_8011FC44_gscode[j][2], 0xC0 );
                 }
@@ -477,8 +477,8 @@ s32 func_80118040_gscode( void ) {
             }
         } else if ( D_8011FC80_gscode == 28 ) {
             for ( i = 0; i < 8; i++ ) {
-                D_801207C0_gscode[i] = func_80030C04( D_8011F8E0_gscode[i], FILE_TYPE1 );
-                D_801207E0_gscode[i] = func_80030C04( D_8011F8F0_gscode[i], 2 );
+                D_801207C0_gscode[i] = Cache_GetFile( D_8011F8E0_gscode[i], FILE_TYPE1 );
+                D_801207E0_gscode[i] = Cache_GetFile( D_8011F8F0_gscode[i], 2 );
             }
         }
         break;

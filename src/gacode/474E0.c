@@ -1135,7 +1135,7 @@ Sets up a sprite of resource id with palette range first to last, keeping a copy
 ================
 */
 void func_80120A7C_gacode( gaSprite_t *sprite, u16 id, u16 first, u16 last ) {
-    func_8002DF3C( id, 320, 240 );
+    Draw_Image( id, 320, 240 );
     if ( D_800F80B0[id].data != NULL ) {
         memmove( sprite->palette, ( (unkImage_t *)D_800F80B0[id].data )->palette, sizeof( sprite->palette ) );
         sprite->id = id;
@@ -1238,7 +1238,7 @@ u64 func_80120D30_gacode( u8 lane, s32 id ) {
     if ( id != 0x4E && id != 0x4F ) {
         flags |= 0x80;
     }
-    return func_80037870( id, flags );
+    return Sound_PlaySe( id, flags );
 }
 
 /*
@@ -1250,7 +1250,7 @@ Stops the sound of *handle, if any, and clears it.
 */
 void func_80120D7C_gacode( s64 *handle ) {
     if ( *handle != 0 ) {
-        func_800379A8( *handle );
+        Sound_Stop( *handle );
         *handle = 0;
     }
 }

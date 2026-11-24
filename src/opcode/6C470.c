@@ -28,7 +28,7 @@ over: saving is then on (D_8005C0E0) with the settings loaded, or off.
 s32 OP_CheckSettings( void ) {
     s32 *checksum;
 
-    func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
+    Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
     switch ( op_checkStep ) {
     case 0:
         op_contMsg = 9;
@@ -45,7 +45,7 @@ s32 OP_CheckSettings( void ) {
         }
         break;
     case 2:
-        if ( func_80036E60( 0x94C, PROMPT_TIMED ) ) {
+        if ( Save_ShowPrompt( 0x94C, PROMPT_TIMED ) ) {
             op_checkStep = 10;
             D_80066C44 = 0;
         }
@@ -87,7 +87,7 @@ s32 OP_CheckSettings( void ) {
         D_800E4D68[0] = 0x1C;
         D_800E57E0[1] = 0x58;
         D_800E4D68[1] = 0x1C;
-        if ( func_80036E60( 0x950, PROMPT_CHOICE2_H ) ) {
+        if ( Save_ShowPrompt( 0x950, PROMPT_CHOICE2_H ) ) {
             if ( D_80066C44 == 0 ) {
                 D_8005C0E0 = 0;
                 return FALSE;
@@ -104,7 +104,7 @@ s32 OP_CheckSettings( void ) {
     case 14:
         break;
     case 15:
-        if ( func_80036E60( 0x95A, PROMPT_ANY_BUTTON ) ) {
+        if ( Save_ShowPrompt( 0x95A, PROMPT_ANY_BUTTON ) ) {
             op_checkStep = 0;
         }
         break;
@@ -134,7 +134,7 @@ s32 OP_CheckSettings( void ) {
         D_800E4D68[0] = 0x44;
         D_800E57E0[1] = 0x5E;
         D_800E4D68[1] = 0x44;
-        if ( func_80036E60( 0x94F, PROMPT_CHOICE2_H ) ) {
+        if ( Save_ShowPrompt( 0x94F, PROMPT_CHOICE2_H ) ) {
             if ( D_80066C44 == 0 ) {
                 op_contMsg = 0;
                 osSendMesg( &D_800E6690, &op_contMsg, OS_MESG_NOBLOCK );
@@ -147,7 +147,7 @@ s32 OP_CheckSettings( void ) {
         }
         break;
     case 22:
-        if ( func_80036E60( 0x955, PROMPT_CLOSE ) ) {
+        if ( Save_ShowPrompt( 0x955, PROMPT_CLOSE ) ) {
             osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             if ( D_80066B8C == 0 ) {
                 /* the checksum word through a raw view, as Save_SaveSettings does: a member store sinks past the
@@ -166,12 +166,12 @@ s32 OP_CheckSettings( void ) {
         }
         break;
     case 23:
-        if ( func_80036E60( 0x94E, PROMPT_TIMED_LONG ) ) {
+        if ( Save_ShowPrompt( 0x94E, PROMPT_TIMED_LONG ) ) {
             op_checkStep = 10;
         }
         break;
     case 24:
-        if ( func_80036E60( 0x95C, PROMPT_CLOSE ) ) {
+        if ( Save_ShowPrompt( 0x95C, PROMPT_CLOSE ) ) {
             osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             if ( D_80066B8C == 0 ) {
                 D_8005C0E0 = 1;
@@ -196,7 +196,7 @@ s32 OP_CheckSettings( void ) {
         D_800E4D68[1] = 0x36;
         D_800E57E0[2] = 0x78;
         D_800E4D68[2] = 0x36;
-        if ( func_80036E60( 0x954, PROMPT_CHOICE3 ) ) {
+        if ( Save_ShowPrompt( 0x954, PROMPT_CHOICE3 ) ) {
             if ( D_80066C44 == 0 ) {
                 D_80066C44 = 0;
                 op_checkStep = 29;
@@ -220,7 +220,7 @@ s32 OP_CheckSettings( void ) {
         D_800E4D68[0] = 0x32;
         D_800E57E0[1] = 0x4E;
         D_800E4D68[1] = 0x32;
-        if ( func_80036E60( 0xA5B, PROMPT_CHOICE2_H ) ) {
+        if ( Save_ShowPrompt( 0xA5B, PROMPT_CHOICE2_H ) ) {
             if ( D_80066C44 == 0 ) {
                 op_checkStep = 26;
                 D_80066C44 = 0;
@@ -234,13 +234,13 @@ s32 OP_CheckSettings( void ) {
         }
         break;
     case 26:
-        if ( func_80036E60( 0x953, PROMPT_CLOSE ) ) {
+        if ( Save_ShowPrompt( 0x953, PROMPT_CLOSE ) ) {
             osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             op_checkStep = 0;
         }
         break;
     case 27:
-        if ( func_80036E60( 0x94D, PROMPT_TIMED ) ) {
+        if ( Save_ShowPrompt( 0x94D, PROMPT_TIMED ) ) {
             op_checkStep = 10;
         }
         break;
@@ -259,7 +259,7 @@ s32 OP_CheckSettings( void ) {
         D_800E4D68[1] = 0x36;
         D_800E57E0[2] = 0x78;
         D_800E4D68[2] = 0x36;
-        if ( func_80036E60( 0xB59, PROMPT_CHOICE3 ) ) {
+        if ( Save_ShowPrompt( 0xB59, PROMPT_CHOICE3 ) ) {
             if ( D_80066C44 == 0 ) {
                 D_80066C44 = 0;
                 op_checkStep = 29;
@@ -275,7 +275,7 @@ s32 OP_CheckSettings( void ) {
         }
         break;
     case 30:
-        if ( func_80036E60( 0x956, PROMPT_TIMED ) ) {
+        if ( Save_ShowPrompt( 0x956, PROMPT_TIMED ) ) {
             op_checkStep = 10;
         }
         break;
@@ -285,7 +285,7 @@ s32 OP_CheckSettings( void ) {
     case 34:
         break;
     case 35:
-        if ( func_80036E60( 0x951, PROMPT_CLOSE ) ) {
+        if ( Save_ShowPrompt( 0x951, PROMPT_CLOSE ) ) {
             osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             if ( D_80066B8C == 0 && D_801000B8->unk_00 == Save_Checksum() ) {
                 D_8005C0E0 = 1;
@@ -296,7 +296,7 @@ s32 OP_CheckSettings( void ) {
         }
         break;
     case 36:
-        if ( func_80036E60( 0x952, PROMPT_TIMED ) ) {
+        if ( Save_ShowPrompt( 0x952, PROMPT_TIMED ) ) {
             op_checkStep = 10;
         }
         break;

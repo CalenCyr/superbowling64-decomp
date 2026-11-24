@@ -32,7 +32,7 @@ s32 GS_CharacterMenu( void ) {
 
     if ( ( D_80120657_gscode & 1 ) && D_80120655_gscode == CHOICE_RUN ) {
         if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-            func_80037870( SE_DECIDE, 0 );
+            Sound_PlaySe( SE_DECIDE, 0 );
             if ( ++D_80120658_gscode == D_801205DC_gscode[D_80120656_gscode] ) {
                 D_80120658_gscode = 0;
             }
@@ -40,10 +40,10 @@ s32 GS_CharacterMenu( void ) {
             Cache_Release( D_80120A48_gscode[D_80120656_gscode] );
             D_80120A48_gscode[D_80120656_gscode] = D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1];
             ( (sceneObject_t *)D_800EA120[10] )->anim =
-                func_80030C04( D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1], FILE_TYPE2 );
+                Cache_GetFile( D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1], FILE_TYPE2 );
         }
         if ( D_800E4D62 & B_BUTTON ) {
-            func_80037870( 2, 0 );
+            Sound_PlaySe( 2, 0 );
             D_80120655_gscode = CHOICE_BACK;
         }
         if ( D_800E6758 & L_JPAD ) {
@@ -52,7 +52,7 @@ s32 GS_CharacterMenu( void ) {
                     D_80120656_gscode = 7;
                 }
             } while ( !( D_8009D098.unk_04 & ( 1 << D_80120656_gscode ) ) );
-            func_80037870( SE_CURSOR, SE_NO_REUSE );
+            Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
         if ( D_800E6758 & R_JPAD ) {
             do {
@@ -60,14 +60,14 @@ s32 GS_CharacterMenu( void ) {
                     D_80120656_gscode = 0;
                 }
             } while ( !( D_8009D098.unk_04 & ( 1 << D_80120656_gscode ) ) );
-            func_80037870( SE_CURSOR, SE_NO_REUSE );
+            Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
     }
 
     func_8003893C( D_80120430_gscode, 9, MENU_NONE, ( D_80120656_gscode + 1 ) * 32, MENU_NONE, MENU_NONE );
     Draw_ClearScreen( 0, 0, 0 );
     if ( D_80120657_gscode & 1 ) {
-        func_8002DF3C( 0xA58, 0, 0 );
+        Draw_Image( 0xA58, 0, 0 );
     }
     func_800386E0( D_80120430_gscode, D_80120654_gscode );
 
@@ -84,7 +84,7 @@ s32 GS_CharacterMenu( void ) {
         D_80120A20_gscode = D_80120656_gscode;
         Cache_Release( D_80120A48_gscode[D_80120656_gscode] );
         D_80120A48_gscode[D_80120656_gscode] = D_801205E4_gscode[D_80120656_gscode][0];
-        ( (sceneObject_t *)D_800EA120[10] )->anim = func_80030C04( D_801205E4_gscode[D_80120656_gscode][0], FILE_TYPE2 );
+        ( (sceneObject_t *)D_800EA120[10] )->anim = Cache_GetFile( D_801205E4_gscode[D_80120656_gscode][0], FILE_TYPE2 );
         func_8002AAD0( ( (sceneObject_t *)D_800EA120[10] )->mtx, 0.0f, 0.0f, 0.0f,
                        D_801205AC_gscode[D_80120656_gscode] * 1.2, -100.0f, -100.0f, 300.0f );
     draw:
@@ -102,8 +102,8 @@ s32 GS_CharacterMenu( void ) {
             D_8009CFA0[0]->path->unk_38 |= 4;
         } else if ( D_80120654_gscode == 28 ) {
             for ( i = 0; i < 8; i++ ) {
-                D_80120A28_gscode[i] = func_80030C04( D_801205CC_gscode[i], FILE_TYPE1 );
-                func_80030C04( D_801205E4_gscode[i][0], FILE_TYPE2 );
+                D_80120A28_gscode[i] = Cache_GetFile( D_801205CC_gscode[i], FILE_TYPE1 );
+                Cache_GetFile( D_801205E4_gscode[i][0], FILE_TYPE2 );
                 D_80120A48_gscode[i] = D_801205E4_gscode[i][0];
             }
         }

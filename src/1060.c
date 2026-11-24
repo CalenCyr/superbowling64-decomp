@@ -545,9 +545,9 @@ void func_80026B44( void *arg ) {
 
         if ( D_8005C0EC != 0 ) {
             D_8005C190 = DRAW2D_FILL;
-            func_8002E4B0( 0xA71, 80, 120, D_8009CFB0, 1.0f, 1.0f );
-            func_8002DF3C( 0x87F, 200, 152 );
-            func_8002DF3C( D_8005B180[D_8005C0F0], 200, 200 );
+            Draw_ImageScaled( 0xA71, 80, 120, D_8009CFB0, 1.0f, 1.0f );
+            Draw_Image( 0x87F, 200, 152 );
+            Draw_Image( D_8005B180[D_8005C0F0], 200, 200 );
             if ( --D_800693B0 < 40 ) {
                 D_8005C0BF = 1;
                 if ( D_8005C0C0 >= 248 ) {
@@ -574,7 +574,7 @@ void func_80026B44( void *arg ) {
                     D_8005C0BF = 0;
                 }
             }
-            func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 192, 192, 192, D_8005C0C0 );
+            Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 192, 192, 192, D_8005C0C0 );
             Snd_SetMasterVolume( SND_BGM, ( 255 - D_8005C0C0 ) * 96 + 0x2000 );
         }
 

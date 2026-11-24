@@ -18,7 +18,7 @@ s32 GS_SubModeMenu( void ) {
     u8 choice;
 
     if ( gs_subModeState == CHOICE_RUN && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
-        func_80037870( SE_DECIDE, 0 );
+        Sound_PlaySe( SE_DECIDE, 0 );
         switch ( gs_subModeCursor ) {
         case 0:
             D_8005C160 = D_8005C160 & 0xCF;
@@ -35,12 +35,12 @@ s32 GS_SubModeMenu( void ) {
         gs_subModeState = CHOICE_TAKEN;
     }
     if ( gs_subModeState == CHOICE_RUN && ( D_800E4D62 & B_BUTTON ) ) {
-        func_80037870( 2, 0 );
+        Sound_PlaySe( 2, 0 );
         gs_subModeState = CHOICE_BACK;
     }
 
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-    func_8002DF3C( 0xA58, 0, 0 );
+    Draw_Image( 0xA58, 0, 0 );
     func_8003893C( gs_subModeMenu, 0, gs_subModeBlink[0][0], MENU_NONE, MENU_NONE, MENU_NONE );
     func_8003893C( gs_subModeMenu, 1, gs_subModeBlink[1][0], MENU_NONE, MENU_NONE, MENU_NONE );
     func_8003893C( gs_subModeMenu, 2, gs_subModeBlink[2][0], MENU_NONE, MENU_NONE, MENU_NONE );
@@ -88,7 +88,7 @@ s32 GS_SubModeMenu( void ) {
         if ( gs_subModeCursor != choice ) {
             gs_subModeBlinkFrame = 0;
             func_80026B28();
-            func_80037870( SE_CURSOR, SE_NO_REUSE );
+            Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
     }
 

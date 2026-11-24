@@ -37,15 +37,15 @@ void MG_Frame( void ) {
         Txt_SetupFont( &D_800F8094, 0 );
         gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
         sprintf( text, "CPU=%6.6d", D_8005B0EC );
-        func_80028DA4( &D_800F8094, 220, 180, text );
+        Txt_DrawString( &D_800F8094, 220, 180, text );
         sprintf( text, "SND=%6.6d", D_8005B0F0 );
-        func_80028DA4( &D_800F8094, 220, 188, text );
+        Txt_DrawString( &D_800F8094, 220, 188, text );
         sprintf( text, "RSP=%6.6d", D_8005B0E4 );
-        func_80028DA4( &D_800F8094, 220, 196, text );
+        Txt_DrawString( &D_800F8094, 220, 196, text );
         sprintf( text, "RDP=%6.6d", D_8005B0E8 );
-        func_80028DA4( &D_800F8094, 220, 204, text );
+        Txt_DrawString( &D_800F8094, 220, 204, text );
         sprintf( text, "FRATE=%3d", D_8005B0FC );
-        func_80028DA4( &D_800F8094, 220, 212, text );
+        Txt_DrawString( &D_800F8094, 220, 212, text );
     }
 }
 

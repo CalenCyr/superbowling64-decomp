@@ -8,7 +8,7 @@
 
 #define FILECACHE_SIZE      0x1000      /* file indices the cache can hold */
 
-/* how func_80030C04 relocates a file's offsets into pointers once it is loaded */
+/* how Cache_GetFile relocates a file's offsets into pointers once it is loaded */
 #define FILE_RAW            0
 #define FILE_TYPE1          1           /* a fileType1_t, and the files its parts name */
 #define FILE_TYPE2          2           /* a fileType2_t */
@@ -140,7 +140,7 @@ extern u8 D_8005C0BD;
 
 void Cache_Clear( void );
 void Cache_LoadFile( s16 index );
-void *func_80030C04( s16 index, s16 type );
+void *Cache_GetFile( s16 index, s16 type );
 void Cache_ReleaseData( void *data );
 void Cache_Release( s16 index );
 void Cache_FreeBelow( s16 count );

@@ -877,12 +877,12 @@ s32 func_80115FCC_gacode( void ) {
         rival = i != 1;
         pl->lane->unk_B26 = D_800EA090[i] > D_800EA090[rival] ? 3 : 4;
         pl->obj->frame = 0;
-        pl->obj->anim = func_80030C04( files[pl->lane->unk_B26 + 2], FILE_TYPE2 );
+        pl->obj->anim = Cache_GetFile( files[pl->lane->unk_B26 + 2], FILE_TYPE2 );
     }
     if ( winner >= 0 ) {
         func_80120D30_gacode( winner, 0x7A );
     } else {
-        func_80037870( 0x63, 0 );
+        Sound_PlaySe( 0x63, 0 );
     }
     return winner;
 }
@@ -1403,7 +1403,7 @@ s32 func_801178D8_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
         return 0;
     }
     if ( player == 0 ) {
-        func_80037870( 100, 0 );
+        Sound_PlaySe( 100, 0 );
     }
     if ( D_8012CDF4_gacode == func_801156D8_gacode || D_8012CDF4_gacode == func_801155BC_gacode ) {
         pl->lane->unk_B10 = func_801179FC_gacode;
@@ -1474,7 +1474,7 @@ s32 func_80117AE0_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
     }
     pl->obj->viewMask = 0;
     pl->obj->frame = 0;
-    pl->obj->anim = func_80030C04( files[1], FILE_TYPE2 );
+    pl->obj->anim = Cache_GetFile( files[1], FILE_TYPE2 );
     pl->lane->unk_AF4[0]->viewMask = pl->lane->unk_AF4[1]->viewMask = D_8012D658_gacode[player].laneIndex != 0 ? 2 : 1;
     pl->lane->unk_B10 = func_80117BDC_gacode;
     return 0;
@@ -1830,7 +1830,7 @@ s32 func_801189C4_gacode( s32 player, s32 input, s16 stickX, s16 stickY ) {
         }
         pl->lane->unk_B26 = reaction - 1;
         pl->obj->frame = 0;
-        pl->obj->anim = func_80030C04( files[pl->lane->unk_B26 + 2], 2 );
+        pl->obj->anim = Cache_GetFile( files[pl->lane->unk_B26 + 2], 2 );
         pl->lane->unk_B10 = func_80118CCC_gacode;
     } else {
         pl->lane->unk_B10 = func_80118E04_gacode;
@@ -2050,10 +2050,10 @@ inline void func_80119328_gacode( gaPlayer_t *pl ) {
     s16 y = 0x30;
     s32 i;
 
-    func_8002DF3C( 0x92A, x, y );
+    Draw_Image( 0x92A, x, y );
     for ( i = 1; i < NUM_BODIES; i++ ) {
         if ( pl->lane->bodies[i].unk_5D == 1 ) {
-            func_8002DF3C( 0x929, x + offsets[i][0], y + offsets[i][1] );
+            Draw_Image( 0x929, x + offsets[i][0], y + offsets[i][1] );
         }
     }
 }
@@ -2075,18 +2075,18 @@ void func_801194D0_gacode( gaPlayer_t *pl ) {
     }
     x = pl->laneIndex == 0 ? 0x6C : 0xA4;
     y = 0xC8;
-    func_8002DF3C( 0xAF7, x, y );
-    func_8002DF3C( D_8012C7F4_gacode[pl->unk_93], x + 0x10, y );
-    func_8002DF3C( 0xAF5, x + 0x20, y );
+    Draw_Image( 0xAF7, x, y );
+    Draw_Image( D_8012C7F4_gacode[pl->unk_93], x + 0x10, y );
+    Draw_Image( 0xAF5, x + 0x20, y );
     func_800393D8( pl->unk_93 + 6, x - 6, 0xD9 );
-    func_8002DF3C( 0xAF3, x + 0x10, 0xD8 );
+    Draw_Image( 0xAF3, x + 0x10, 0xD8 );
     if ( D_800E44E0[pl->port] & L_CBUTTONS ) {
-        func_8002DF3C( 0xAF6, x, y );
+        Draw_Image( 0xAF6, x, y );
         func_80120D30_gacode( pl->laneIndex, 0 );
         pl->unk_93 = pl->unk_93 == 0 ? 10 : pl->unk_93 - 1;
     }
     if ( D_800E44E0[pl->port] & R_CBUTTONS ) {
-        func_8002DF3C( 0xAF4, x + 0x20, y );
+        Draw_Image( 0xAF4, x + 0x20, y );
         func_80120D30_gacode( pl->laneIndex, 0 );
         if ( pl->unk_93 == 10 ) {
             pl->unk_93 = 0;
@@ -2144,9 +2144,9 @@ inline void func_80119800_gacode( s32 player, u8 full ) {
         x = 0x18;
     }
     y = 0xA8;
-    func_8002E0EC( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, y );
+    Draw_ImageCopyPalette( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, y );
     if ( full ) {
-        func_8002E0EC( pl->laneIndex != 0 ? 0xA47 : 0xA49, x + 0x1D, y );
+        Draw_ImageCopyPalette( pl->laneIndex != 0 ? 0xA47 : 0xA49, x + 0x1D, y );
     }
     func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, y + 0x11 );
 }
@@ -2167,20 +2167,20 @@ void func_801198E4_gacode( s32 player, u8 lane ) {
     x = lane != 0 ? 0xA8 : 0x18;
     func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x18 );
     x += 0x38;
-    func_8002DF3C( 0xA3B, x, 0x10 );
+    Draw_Image( 0xA3B, x, 0x10 );
     func_800393D8( D_8012D238_gacode + 1, x + 0x24, 0x15 );
     func_800393D8( D_80099458[0][D_8012D238_gacode], x + 0x24, 0x21 );
     y = 0x30;
     if ( lane != 0 ) {
         x -= 0x38;
     }
-    func_8002DF3C( D_80099458[0][D_8012D238_gacode] == 1 ? 0xA1B : 0xA1A, x, y );
+    Draw_Image( D_80099458[0][D_8012D238_gacode] == 1 ? 0xA1B : 0xA1A, x, y );
     x += 2;
     for ( i = 0; i < D_80066E18[player][D_8009D19C[player]]; i++ ) {
-        func_8002DF3C( 0xA19, x, y );
+        Draw_Image( 0xA19, x, y );
         x += 0xA;
     }
-    func_8002E4B0( 0xA19, x, y, (u8)D_80123600_gacode + 0x1F, 1.0f, 1.0f );
+    Draw_ImageScaled( 0xA19, x, y, (u8)D_80123600_gacode + 0x1F, 1.0f, 1.0f );
 }
 
 /*
@@ -2199,16 +2199,16 @@ void func_80119ACC_gacode( s32 player, u8 lane ) {
 
     x = lane != 0 ? 0xB0 : 0x20;
     y = 0x30;
-    func_8002DF3C( 0xA1D, x, y );
-    func_8002DF3C( D_8012C80A_gacode[D_8012D238_gacode + 1], x + 0x48, 0x36 );
-    func_8002DF3C( D_8012C80A_gacode[D_80099458[0][D_8012D238_gacode]], x + 0x48, 0x46 );
+    Draw_Image( 0xA1D, x, y );
+    Draw_Image( D_8012C80A_gacode[D_8012D238_gacode + 1], x + 0x48, 0x36 );
+    Draw_Image( D_8012C80A_gacode[D_80099458[0][D_8012D238_gacode]], x + 0x48, 0x46 );
     func_80120980_gacode( pins, D_80123950_gacode[D_800DF59C.unk_04[D_8012D238_gacode]].pins );
     for ( i = 0; i < NUM_PINS; i++ ) {
         if ( pins[i] == 1 ) {
-            func_8002DF3C( 0xA2B, x + D_8012C820_gacode[i][0], y + D_8012C820_gacode[i][1] );
+            Draw_Image( 0xA2B, x + D_8012C820_gacode[i][0], y + D_8012C820_gacode[i][1] );
         }
     }
-    func_8002DF3C( D_8012C848_gacode[D_8005C163], x + 0xC, y + 0x80 );
+    Draw_Image( D_8012C848_gacode[D_8005C163], x + 0xC, y + 0x80 );
 }
 
 /*
@@ -2228,17 +2228,17 @@ void func_80119C50_gacode( s32 player, u8 lane ) {
     x = lane != 0 ? 0xA8 : 0x18;
     func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x18 );
     x += 0x38;
-    func_8002DF3C( 0xAB7, x, 0x10 );
+    Draw_Image( 0xAB7, x, 0x10 );
     func_80039554( digits, D_8009D19C[player] + 1, 0, 0 );
     func_8003B1CC( digits[2], x + 0x30, 0x11 );
     func_8003B1CC( digits[3], x + 0x38, 0x11 );
     x += 0xF;
     y = 0x20;
     for ( i = 0; i < D_80068A50[player] - 1; i++ ) {
-        func_8002DF3C( 0xADB, x, y );
+        Draw_Image( 0xADB, x, y );
         x += 0xA;
     }
-    func_8002E4B0( 0xADB, x, y, (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
+    Draw_ImageScaled( 0xADB, x, y, (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
 }
 
 /*
@@ -2259,17 +2259,17 @@ void func_80119DD8_gacode( s32 player, u8 lane ) {
     x = lane != 0 ? 0xBC : 0x24;
     y = 0x40;
     setup = D_800DF59C.unk_04[D_8009D19C[player]];
-    func_8002DF3C( 0xABA, x, y );
+    Draw_Image( 0xABA, x, y );
     func_80120980_gacode( pins, D_801237F0_gacode[setup].pins );
     for ( i = 0; i < NUM_PINS; i++ ) {
         if ( pins[i] == 1 ) {
-            func_8002DF3C( 0xAB9, x + D_8012C858_gacode[i][0], y + D_8012C858_gacode[i][1] );
+            Draw_Image( 0xAB9, x + D_8012C858_gacode[i][0], y + D_8012C858_gacode[i][1] );
         }
     }
     func_800393D8( D_8009D19C[player] + 1, x + 0x3E, y + 6 );
-    func_8002DF3C( D_801237F0_gacode[setup].unk_04, x + 7, y + 0x11 );
+    Draw_Image( D_801237F0_gacode[setup].unk_04, x + 7, y + 0x11 );
     for ( i = 0; i < D_801237F0_gacode[setup].unk_00; i++ ) {
-        func_8002DF3C( 0xAB8, x + 0x26 + i * 0xA, y + 0x68 );
+        Draw_Image( 0xAB8, x + 0x26 + i * 0xA, y + 0x68 );
     }
 }
 
@@ -2290,25 +2290,25 @@ void func_80119F8C_gacode( s32 player, u8 lane ) {
     s16 aim;
 
     if ( D_8012D228_gacode[lane].unk_06 < 6 ) {
-        func_8002FDE4( lane ? 0xA0 : 0, 0, 0xA0, 0xF0, 0xFF, 0x7F, 0, (u8)D_80123600_gacode );
+        Draw_FillRect( lane ? 0xA0 : 0, 0, 0xA0, 0xF0, 0xFF, 0x7F, 0, (u8)D_80123600_gacode );
     }
     x = lane ? 0xA8 : 0x18;
-    func_8002DF3C( 0x9E0, x + 0x38, 0x10 );
-    func_8002DF3C( 0x9DF, x + 0x58, 0x10 );
+    Draw_Image( 0x9E0, x + 0x38, 0x10 );
+    Draw_Image( 0x9DF, x + 0x58, 0x10 );
     func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x19 );
     x += 0x38;
     y = 0x19;
-    func_8002DF3C( 0x86D, x, y );
+    Draw_Image( 0x86D, x, y );
     aim = D_8012D228_gacode[player].unk_04;
     func_800393D8( aim < 0 ? -aim : aim, x + 0xB, 0x20 );
     if ( D_8012D228_gacode[player].unk_04 != 0 ) {
-        func_8002DF3C( D_8012D228_gacode[player].unk_04 < 0 ? 0x9F0 : 0x9EF, x + 3, 0x1D );
+        Draw_Image( D_8012D228_gacode[player].unk_04 < 0 ? 0x9F0 : 0x9EF, x + 3, 0x1D );
         if ( D_8012D228_gacode[player].unk_04 > 0 ) {
-            func_8002E4B0( 0x86C, x, y, (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
+            Draw_ImageScaled( 0x86C, x, y, (u8)D_80123600_gacode + 0x40, 1.0f, 1.0f );
         }
     }
     x += 0x20;
-    func_8002DF3C( 0x86B, x, y );
+    Draw_Image( 0x86B, x, y );
     func_80039554( digits, FABS( 730.0f - pl->lane->unk_A68[2].pos[2] ), 1, 0 );
     y += 4;
     func_8003B1CC( digits[0], x + 0x5, y );
@@ -2336,11 +2336,11 @@ void func_8011A26C_gacode( void ) {
         x = i != 0 ? 0xB8 : 0x28;
         y = 0x60;
         pl = &D_8012D658_gacode[i];
-        func_8002DF3C( 0x9DF, x + 0x38, y );
+        Draw_Image( 0x9DF, x + 0x38, y );
         y += 9;
         func_800389D0( i, D_8005C0E4[i] >> 7, D_80068218[i].chars, x, y );
         x += 0x38;
-        func_8002DF3C( 0x86B, x, y );
+        Draw_Image( 0x86B, x, y );
         func_80039554( digits, FABS( 730.0f - pl->lane->unk_A68[2].pos[2] ), 1, 0 );
         y += 4;
         func_8003B1CC( digits[0], x + 5, y );
@@ -2382,26 +2382,26 @@ void func_8011A404_gacode( gaPlayer_t *pl ) {
 
     x = 0x20;
     y = 0x30;
-    func_8002DF3C( 0x881, x, y );
+    Draw_Image( 0x881, x, y );
     func_80120980_gacode( pins, D_8012C7C6_gacode );
     for ( i = 0; i < NUM_PINS; i++ ) {
         if ( pins[i] == 1 ) {
-            func_8002DF3C( 0x883, x + D_8012C880_gacode[i][0], y + D_8012C880_gacode[i][1] );
+            Draw_Image( 0x883, x + D_8012C880_gacode[i][0], y + D_8012C880_gacode[i][1] );
         }
     }
     if ( D_8012C8A9_gacode ) {
-        func_8002E4B0( 0x887, x + D_8012C880_gacode[D_8012C8A8_gacode][0] - 1,
+        Draw_ImageScaled( 0x887, x + D_8012C880_gacode[D_8012C8A8_gacode][0] - 1,
                        y + D_8012C880_gacode[D_8012C8A8_gacode][1] - 1, (u8)D_80123600_gacode + 0x7F, 1.0f, 1.0f );
     }
     if ( !D_8012C8A9_gacode ) {
-        func_8002E4B0( 0x886, x + 8, y + 0x7A, (u8)D_80123600_gacode + 0x30, 1.0f, 1.0f );
+        Draw_ImageScaled( 0x886, x + 8, y + 0x7A, (u8)D_80123600_gacode + 0x30, 1.0f, 1.0f );
     }
     if ( D_8005C0BF ) {
         return;
     }
     if ( D_800E6760[0] & U_JPAD ) {
         if ( !D_8012C8A9_gacode ) {
-            func_80037870( 0, 0 );
+            Sound_PlaySe( 0, 0 );
             D_8012C8A9_gacode = 1;
             D_8012C8A8_gacode = 0;
         } else {
@@ -2412,7 +2412,7 @@ void func_8011A404_gacode( gaPlayer_t *pl ) {
                 case 3:
                 case 4:
                 case 5:
-                    func_80037870( 0, 0 );
+                    Sound_PlaySe( 0, 0 );
                     break;
             }
             switch ( D_8012C8A8_gacode ) {
@@ -2437,7 +2437,7 @@ void func_8011A404_gacode( gaPlayer_t *pl ) {
     }
     if ( D_8012C8A9_gacode == 1 ) {
         if ( D_800E6760[0] & D_JPAD ) {
-            func_80037870( 0, 0 );
+            Sound_PlaySe( 0, 0 );
             switch ( D_8012C8A8_gacode ) {
                 case 0:
                     D_8012C8A9_gacode = 0;
@@ -2473,7 +2473,7 @@ void func_8011A404_gacode( gaPlayer_t *pl ) {
                 case 7:
                 case 8:
                 case 9:
-                    func_80037870( 0, 0 );
+                    Sound_PlaySe( 0, 0 );
                     D_8012C8A8_gacode--;
                     break;
             }
@@ -2486,7 +2486,7 @@ void func_8011A404_gacode( gaPlayer_t *pl ) {
                 case 6:
                 case 7:
                 case 8:
-                    func_80037870( 0, 0 );
+                    Sound_PlaySe( 0, 0 );
                     D_8012C8A8_gacode++;
                     break;
             }
@@ -2494,11 +2494,11 @@ void func_8011A404_gacode( gaPlayer_t *pl ) {
     }
     if ( D_800E44E0[0] & ( A_BUTTON | Z_TRIG ) ) {
         if ( !D_8012C8A9_gacode ) {
-            func_80037870( 1, 0 );
+            Sound_PlaySe( 1, 0 );
             pl->lane->unk_B10 = func_80117AE0_gacode;
             pl->lane->unk_B08 = func_8011AB0C_gacode;
         } else {
-            func_80037870( 0xB, 0 );
+            Sound_PlaySe( 0xB, 0 );
             if ( GA_TogglePin( pl->lane->bodies, D_8012C8A8_gacode + 1 ) == 1 ) {
                 D_8012C7C6_gacode |= 1 << ( 9 - D_8012C8A8_gacode );
             } else {
@@ -2527,7 +2527,7 @@ void func_8011A8AC_gacode( gaPlayer_t *pl ) {
     color[channel] = coss( D_8012C8B6_gacode ) / 256 + 0x7F;
     channel = D_8012C8AC_gacode[D_8012C8B8_gacode % 3][2];
     color[channel] = 0xFF;
-    func_800308C4( pl->laneIndex, pl->lane->unk_948[0].pos, pl->lane->unk_948[1].pos, color );
+    Draw_Line3D( pl->laneIndex, pl->lane->unk_948[0].pos, pl->lane->unk_948[1].pos, color );
     D_8012C8B6_gacode += 0x5B0;
     if ( D_8012C8B6_gacode >= 0x8000 ) {
         D_8012C8B6_gacode = 0;
@@ -2628,8 +2628,8 @@ void func_8011B07C_gacode( s32 player ) {
         return;
     }
     x = pl->laneIndex != 0 ? 0xB0 : 0x18;
-    func_8002E0EC( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
-    func_8002E0EC( pl->laneIndex != 0 ? 0xA47 : 0xA49, x + 0x1D, 0xA8 );
+    Draw_ImageCopyPalette( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
+    Draw_ImageCopyPalette( pl->laneIndex != 0 ? 0xA47 : 0xA49, x + 0x1D, 0xA8 );
     func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, 0xA8 + 0x11 );
 }
 
@@ -2654,7 +2654,7 @@ void func_8011B1A0_gacode( s32 player ) {
     func_80120C0C_gacode( &D_8012D8E0_gacode[pl->laneIndex], 0x7C1, t );
     if ( pl->port >= 0 ) {
         x = pl->laneIndex != 0 ? 0xB0 : 0x18;
-        func_8002E0EC( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
+        Draw_ImageCopyPalette( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
         func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD,
                        0xA8 + 0x11 );
     }
@@ -2683,7 +2683,7 @@ void func_8011B2E8_gacode( s32 player ) {
         return;
     }
     x = pl->laneIndex != 0 ? 0xB0 : 0x18;
-    func_8002E0EC( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
+    Draw_ImageCopyPalette( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
     func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, 0xA8 + 0x11 );
 }
 
@@ -2710,7 +2710,7 @@ void func_8011B408_gacode( s32 player ) {
     x = pl->laneIndex ? 0xA8 : 0x18;
     id = D_8012C784_gacode[pl->lane->unk_B25];
     if ( id >= 0 ) {
-        func_8002E4B0( id, x, 0x18, (u8)D_80123600_gacode + 0x5F, 1.0f, 1.0f );
+        Draw_ImageScaled( id, x, 0x18, (u8)D_80123600_gacode + 0x5F, 1.0f, 1.0f );
     }
 }
 
@@ -2726,9 +2726,9 @@ void func_8011B490_gacode( s32 lane ) {
     s32 rival = lane == 0;
 
     if ( D_800EA090[lane] > D_800EA090[rival] ) {
-        func_8002E4B0( 0x851, lane == 0 ? 0x14 : 0xA4, 0x94, (u8)D_80123600_gacode + 0x7F, 1.0f, 1.0f );
+        Draw_ImageScaled( 0x851, lane == 0 ? 0x14 : 0xA4, 0x94, (u8)D_80123600_gacode + 0x7F, 1.0f, 1.0f );
     } else if ( D_800EA090[lane] == D_800EA090[rival] ) {
-        func_8002E4B0( 0xA6B, lane != 0 ? 0xB4 : 0x24, 0x94, (u8)D_80123600_gacode + 0x7F, 1.0f, 1.0f );
+        Draw_ImageScaled( 0xA6B, lane != 0 ? 0xB4 : 0x24, 0x94, (u8)D_80123600_gacode + 0x7F, 1.0f, 1.0f );
     }
     if ( D_8012CDF4_gacode != func_8011582C_gacode ) {
         func_8003A658( lane, 0x18, lane == 0 ? 0x10 : 0xC0 );
@@ -2744,7 +2744,7 @@ void func_8011B564_gacode( s32 player ) {
     s32 x;
 
     x = D_8012D658_gacode[player].laneIndex == 0 ? 0x14 : 0xA4;
-    func_8002E4B0( 0x891, x, 0xB4, (u8)D_80123600_gacode + 0x5F, 1.0f, 1.0f );
+    Draw_ImageScaled( 0x891, x, 0xB4, (u8)D_80123600_gacode + 0x5F, 1.0f, 1.0f );
 }
 
 /*
@@ -2754,7 +2754,7 @@ func_8011B5C8_gacode
 */
 void func_8011B5C8_gacode( s32 lane ) {
     if ( D_800EA090[lane] == 0 ) {
-        func_8002FDE4( lane ? 0xA0 : 0, 0, 0xA0, 0xF0, 0xFF, 0x7F, 0, (u8)D_80123600_gacode + 0x4F );
+        Draw_FillRect( lane ? 0xA0 : 0, 0, 0xA0, 0xF0, 0xFF, 0x7F, 0, (u8)D_80123600_gacode + 0x4F );
     }
 }
 
@@ -3097,7 +3097,7 @@ void func_8011C254_gacode( s32 player, gaCamera_t *camera ) {
     }
     frame = pl->obj->frame * 200 / frames;
     frame = frame < 0 ? 0 : ( frame > 200 ? 200 : frame );
-    func_8002BED8( file, frame, camera->eye, camera->unk_18 );
+    Cam_ReadPathFrame( file, frame, camera->eye, camera->unk_18 );
     camera->at[2] = pl->obj->joints[joint].mtx[3][2];
     camera->at[0] = pl->obj->joints[joint].mtx[3][0];
     camera->at[1] = pl->obj->joints[joint].mtx[3][1];
@@ -3120,7 +3120,7 @@ void func_8011C468_gacode( s32 player, gaCamera_t *camera ) {
 
     frame = ( 730.0f - lane->spots[0].pos[2] ) * 480.0f / 1780.0;
     frame = frame < 0 ? 0 : ( frame > 480 ? 480 : frame );
-    func_8002BED8( D_8012C8D4_gacode[D_8012D8D8_gacode % 10], frame, camera->eye, camera->unk_18 );
+    Cam_ReadPathFrame( D_8012C8D4_gacode[D_8012D8D8_gacode % 10], frame, camera->eye, camera->unk_18 );
     camera->at[2] = lane->bodies[0].pos[2];
     camera->at[0] = lane->bodies[0].pos[0];
     camera->at[1] = lane->bodies[0].pos[1];
@@ -3137,7 +3137,7 @@ lane.
 void func_8011C57C_gacode( s32 player, gaCamera_t *camera ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
 
-    func_8002BED8( D_8012C8E8_gacode[D_8012D8D8_gacode % 5], 0, camera->eye, camera->unk_18 );
+    Cam_ReadPathFrame( D_8012C8E8_gacode[D_8012D8D8_gacode % 5], 0, camera->eye, camera->unk_18 );
     camera->at[2] = -1096.0f;
     camera->at[0] = pl->lane->unk_B14;
     camera->at[1] = D_8012D220_gacode->unk_14;
@@ -3354,17 +3354,17 @@ void func_8011CF30_gacode( s32 player ) {
     lane = pl->laneIndex;
     row = 14;
     sprintf( text, "SL[%8.4f]", D_8012D220_gacode->unk_10 );
-    func_80028DA4( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+    Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
     row++;
     sprintf( text, "FRM[%3d]", pl->obj->frame );
-    func_80028DA4( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+    Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
     row++;
     sprintf( text, "T[%6.2f]R[%6.2f]", pl->character.unk_2C, pl->character.unk_30 );
-    func_80028DA4( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+    Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
     row++;
     if ( D_8012CDF4_gacode == func_801156D8_gacode || D_8012CDF4_gacode == func_801155BC_gacode ) {
         sprintf( text, "TABLE[%d]", D_800DF59C.unk_04[D_8009D19C[player]] );
-        func_80028DA4( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+        Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
         row++;
     }
     if ( pl->lane->unk_B10 == func_80117BDC_gacode ) {
@@ -3390,7 +3390,7 @@ void func_8011CF30_gacode( s32 player ) {
     } else {
         return;
     }
-    func_80028DA4( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+    Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", func_8011CF30_gacode);

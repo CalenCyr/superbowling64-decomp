@@ -329,7 +329,7 @@ void func_80031E40( void ) {
             /* (0 - 0) * K5 + TEXEL0: the texel, whatever the multiplier */
             gDPSetCombineLERP( D_800F8094++, 0, 0, K5, TEXEL0, 0, 0, 0, TEXEL0, 0, 0, K5, TEXEL0, 0, 0, 0, TEXEL0 );
             gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
-            func_8002CE24( IMAGE_CI8, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+            Draw_CiImage( IMAGE_CI8, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                            ( (fileImage_t *)D_8009CFA0[0]->path->unk_50 )->data,
                            ( (fileImage_t *)D_8009CFA0[0]->path->unk_50 )->data + CI8_PALETTE_SIZE );
         } else {
@@ -706,7 +706,7 @@ void func_80035074( void ) {
         D_800E4D70[i].life = 0;
     }
     for ( i = 0; i < 2; i++ ) {
-        func_80030C04( D_8005C1E4[i], FILE_RAW );
+        Cache_GetFile( D_8005C1E4[i], FILE_RAW );
     }
     for ( i = 1; i < NUM_PUFF_SIZES; i++ ) {
         D_8005C1F0[i * 4] = D_8005C1F0[0];

@@ -124,7 +124,7 @@ typedef struct {
     /* 0xB0C */ void (*unk_B0C)( s32 player, gaCamera_t *camera );
     /* 0xB10 */ s32 (*unk_B10)( s32 player, s32 input, s16 stickX, s16 stickY );
     /* 0xB14 */ f32 unk_B14;
-    /* 0xB18 */ s64 unk_B18;            /* sound handle (func_80037870) */
+    /* 0xB18 */ s64 unk_B18;            /* sound handle (Sound_PlaySe) */
     /* 0xB20 */ s16 unk_B20;
     /* 0xB22 */ u8 unk_B22;
     /* 0xB23 */ u8 unk_B23;
@@ -351,7 +351,7 @@ extern gaPlayerFunc_t D_8012CDF4_gacode;  /* game mode */
 extern gaPlayerFunc_t D_8012D23C_gacode;
 extern gaState_t D_8012CDFC_gacode;     /* main loop state of the game mode (func_80113594_gacode) */
 extern s16 D_8012CE00_gacode;          /* BGM of the game (Sound_PlayBgm) */
-extern s64 D_8012CDE8_gacode;           /* sound handle (func_80037870) */
+extern s64 D_8012CDE8_gacode;           /* sound handle (Sound_PlaySe) */
 extern u8 D_8012CDF8_gacode[2];         /* per team: index in D_8012CE02_gacode of the current player */
 extern s8 D_8012CE02_gacode[2][5];      /* per team: player numbers, -1 ends */
 extern u8 D_80123684_gacode[2];         /* per pair of players: the index the turn passes to next (func_80113AD4_gacode) */

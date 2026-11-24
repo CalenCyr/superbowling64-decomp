@@ -38,7 +38,7 @@ s32 OP_Frame( void ) {
     switch ( D_8005C0E8 ) {
     case 10:
         Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-        func_8002DF3C( 0xB58, 0, 0 );
+        Draw_Image( 0xB58, 0, 0 );
         if ( ++op_modeFrames >= 150 ) {
             D_8005C0BF = 1;
             if ( D_8005C0C0 == 0xFF ) {
@@ -46,13 +46,13 @@ s32 OP_Frame( void ) {
                 D_8005C0BF = 2;
                 D_8005C0E8 = 0;
                 op_modeFrames = 0;
-                func_80037870( 0x43, 0 );
+                Sound_PlaySe( 0x43, 0 );
             }
         }
         break;
     case 0:
         Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-        func_8002DF3C( 0x925, 0x3C, 0x58 );
+        Draw_Image( 0x925, 0x3C, 0x58 );
         if ( ++op_modeFrames >= 70 ) {
             D_8005C0BF = 1;
             if ( D_8005C0C0 == 0xFF ) {
@@ -68,8 +68,8 @@ s32 OP_Frame( void ) {
             Sound_PlayBgm( 0 );
         }
         Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-        func_8002DF3C( 0xADD, 0, 0 );
-        func_8002E4B0( 0x890, 0x44, 0xA0, D_8009CFB0, 1.0f, 1.0f );
+        Draw_Image( 0xADD, 0, 0 );
+        Draw_ImageScaled( 0x890, 0x44, 0xA0, D_8009CFB0, 1.0f, 1.0f );
         if ( ++op_modeFrames >= 450 ) {
             D_8005C0BF = 1;
             if ( D_8005C0C0 == 0xFF ) {
@@ -116,14 +116,14 @@ s32 OP_Frame( void ) {
             }
         }
         if ( ( D_800E44E0[0] & START_BUTTON ) && !D_8005C0BF ) {
-            func_80037870( 1, 0 );
+            Sound_PlaySe( 1, 0 );
             D_8005C0E8 = 2;
             op_modeFrames = 0;
         }
         break;
     case 2:
         Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-        func_8002DF3C( 0xADD, 0, 0 );
+        Draw_Image( 0xADD, 0, 0 );
         if ( !OP_CheckSettings() ) {
             D_8005C0BF = 1;
             D_8005C0E8 = 3;
@@ -131,7 +131,7 @@ s32 OP_Frame( void ) {
         break;
     case 3:
         Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-        func_8002DF3C( 0xADD, 0, 0 );
+        Draw_Image( 0xADD, 0, 0 );
         if ( D_8005C0C0 == 0xFF ) {
             D_8005C0C0 = 0x107;
             D_8005C0BF = 2;
@@ -140,7 +140,7 @@ s32 OP_Frame( void ) {
         break;
     case 0xFD:
         Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-        func_8002DF3C( 0xB5A, 0x48, 0x60 );
+        Draw_Image( 0xB5A, 0x48, 0x60 );
         break;
     case 0xFE:
         if ( !func_80113168_opcode() ) {

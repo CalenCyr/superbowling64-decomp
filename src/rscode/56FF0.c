@@ -32,7 +32,7 @@ alpha.
 void RS_Frame( void ) {
     if ( !D_8005C0BF && rs_leaving ) {
         D_8005C0BF = 1;
-        func_80037870( 50, 0 );
+        Sound_PlaySe( 50, 0 );
     }
     if ( D_8005C0BF == 1 && D_8005C0C0 == 255 ) {
         D_8005C0BF = 2;
@@ -43,7 +43,7 @@ void RS_Frame( void ) {
     rs_buttonsPressed = D_8005C0BF ? 0 : D_800E4D62;
     Txt_LoadGlyphSheet( &D_800F8094 );
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-    func_8002DF3C( 0xA58, 0, 0 );
+    Draw_Image( 0xA58, 0, 0 );
     rs_state();
     if ( rs_boxAlphaFalling == 1 ) {
         rs_boxAlpha -= 8;
@@ -79,7 +79,7 @@ void RS_StartMode( void ) {
     case 1:
         rs_state = RS_DuelResults;
         Sound_PlayBgm( D_800EA090[0] <= D_800EA090[1] ? 15 : 14 );
-        func_80037870( D_800EA090[0] <= D_800EA090[1] ? 0x6D : 0x6C, 0 );
+        Sound_PlaySe( D_800EA090[0] <= D_800EA090[1] ? 0x6D : 0x6C, 0 );
         break;
     case 2:
         break;
@@ -118,7 +118,7 @@ void RS_StartMode0( void ) {
                 }
             }
             if ( found && !( D_8009D098.unk_04 & 0x200 ) ) {
-                func_80037870( 0x35, 0 );
+                Sound_PlaySe( 0x35, 0 );
                 rs_state = RS_PerfectMessage;
                 D_8009D098.unk_04 |= 0x200;
             }
@@ -146,7 +146,7 @@ void RS_StartMode0( void ) {
             }
         }
         if ( found && !( D_8009D098.unk_04 & 0x100 ) ) {
-            func_80037870( 0x35, 0 );
+            Sound_PlaySe( 0x35, 0 );
             rs_state = RS_FinishedMessage;
             D_8009D098.unk_04 |= 0x100;
         }
@@ -163,9 +163,9 @@ Shows message 0x88C in a box for 300 frames or until A or Z, then goes to RS_Res
 */
 void RS_FinishedMessage( void ) {
     Draw_RoundedBox( 0x26, 0x50, 0xF0, 0x40, 0xE0, 0xE0, 0xE0, rs_boxAlpha + 0x40 );
-    func_8002DF3C( 0x88C, 0x26, 0x50 );
+    Draw_Image( 0x88C, 0x26, 0x50 );
     if ( ++rs_messageFrames >= 300 || ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) ) {
-        func_80037870( SE_DECIDE, 0 );
+        Sound_PlaySe( SE_DECIDE, 0 );
         rs_state = RS_ResultsPage2;
     }
 }
@@ -179,9 +179,9 @@ Shows message 0xAE3 in a box for 300 frames or until A or Z, then goes to RS_Sco
 */
 void RS_PerfectMessage( void ) {
     Draw_RoundedBox( 0x26, 0x50, 0xF0, 0x40, 0xE0, 0xE0, 0xE0, rs_boxAlpha + 0x40 );
-    func_8002DF3C( 0xAE3, 0x26, 0x50 );
+    Draw_Image( 0xAE3, 0x26, 0x50 );
     if ( ++rs_messageFrames >= 300 || ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) ) {
-        func_80037870( SE_DECIDE, 0 );
+        Sound_PlaySe( SE_DECIDE, 0 );
         rs_state = RS_ScoreSheet;
     }
 }
@@ -238,14 +238,14 @@ void RS_ScoreSheet( void ) {
         empty += D_800E44E8[i].games ? 0 : 1;
     }
     if ( ( rs_dpadPressed & L_JPAD ) && rs_sheetPage == 1 ) {
-        func_80037870( SE_CURSOR, 0 );
+        Sound_PlaySe( SE_CURSOR, 0 );
         rs_sheetPage = 0;
     }
     if ( ( rs_dpadPressed & R_JPAD ) && rs_sheetPage == 0 ) {
-        func_80037870( SE_CURSOR, 0 );
+        Sound_PlaySe( SE_CURSOR, 0 );
         rs_sheetPage = 1;
     }
-    func_8002DF3C( 0x88D, 0x64, y );
+    Draw_Image( 0x88D, 0x64, y );
     y += 0x18;
     switch ( rs_sheetPage ) {
     case 0:
@@ -259,16 +259,16 @@ void RS_ScoreSheet( void ) {
     RS_DrawChoices( rs_sheetPage, images, y, 0x50, 0x10 );
     y += 0x1C;
     if ( !D_801142B4_rscode && empty != 4 ) {
-        func_8002E4B0( 0xA82, 0x48, y, 0x60, 1.0f, 1.0f );
-        func_8002E4B0( 0xA81, 0xA8, y, 0x60, 1.0f, 1.0f );
+        Draw_ImageScaled( 0xA82, 0x48, y, 0x60, 1.0f, 1.0f );
+        Draw_ImageScaled( 0xA81, 0xA8, y, 0x60, 1.0f, 1.0f );
     }
     if ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) {
-        func_80037870( SE_DECIDE, 0 );
+        Sound_PlaySe( SE_DECIDE, 0 );
         rs_state = RS_Menu;
         rs_returnState = RS_ScoreSheet;
     }
     if ( ( rs_dpadPressed & D_JPAD ) && !D_801142B4_rscode && empty != 4 ) {
-        func_80037870( SE_CURSOR, 0 );
+        Sound_PlaySe( SE_CURSOR, 0 );
         rs_state = RS_Records;
         rs_sheetPage += 2;
     }
@@ -287,14 +287,14 @@ void RS_Records( void ) {
     s16 y = 0x10;
 
     if ( ( rs_dpadPressed & L_JPAD ) && rs_sheetPage == 3 ) {
-        func_80037870( SE_CURSOR, 0 );
+        Sound_PlaySe( SE_CURSOR, 0 );
         rs_sheetPage = 2;
     }
     if ( ( rs_dpadPressed & R_JPAD ) && rs_sheetPage == 2 ) {
-        func_80037870( SE_CURSOR, 0 );
+        Sound_PlaySe( SE_CURSOR, 0 );
         rs_sheetPage = 3;
     }
-    func_8002DF3C( 0x88D, 0x64, y );
+    Draw_Image( 0x88D, 0x64, y );
     y += 0x18;
     switch ( rs_sheetPage ) {
     case 2:
@@ -305,17 +305,17 @@ void RS_Records( void ) {
         break;
     }
     y += 0x8C;
-    func_8002E4B0( 0x87A, 0x48, y, 0x60, 1.0f, 1.0f );
-    func_8002E4B0( 0x898, 0xA8, y, 0x60, 1.0f, 1.0f );
+    Draw_ImageScaled( 0x87A, 0x48, y, 0x60, 1.0f, 1.0f );
+    Draw_ImageScaled( 0x898, 0xA8, y, 0x60, 1.0f, 1.0f );
     y += 0x1C;
     RS_DrawChoices( rs_sheetPage - 2, images, y, 0x50, 0x10 );
     if ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) {
-        func_80037870( SE_DECIDE, 0 );
+        Sound_PlaySe( SE_DECIDE, 0 );
         rs_state = RS_Menu;
         rs_returnState = RS_Records;
     }
     if ( rs_dpadPressed & U_JPAD ) {
-        func_80037870( SE_CURSOR, 0 );
+        Sound_PlaySe( SE_CURSOR, 0 );
         rs_state = RS_ScoreSheet;
         rs_sheetPage -= 2;
     }
@@ -329,10 +329,10 @@ Results page; A or Z opens the menu of RS_Menu, which comes back here.
 ================
 */
 void RS_ResultsPage1( void ) {
-    func_8002DF3C( 0x88D, 0x64, 0x10 );
+    Draw_Image( 0x88D, 0x64, 0x10 );
     func_80039CBC( D_8005C160 >> 6, 1, 0x20, 0x28 );
     if ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) {
-        func_80037870( SE_DECIDE, 0 );
+        Sound_PlaySe( SE_DECIDE, 0 );
         rs_state = RS_Menu;
         rs_returnState = RS_ResultsPage1;
     }
@@ -346,10 +346,10 @@ Results page; A or Z opens the menu of RS_Menu, which comes back here.
 ================
 */
 void RS_ResultsPage2( void ) {
-    func_8002DF3C( 0x88D, 0x64, 0x10 );
+    Draw_Image( 0x88D, 0x64, 0x10 );
     func_8003A3F0( 1, 0x18, 0x28 );
     if ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) {
-        func_80037870( SE_DECIDE, 0 );
+        Sound_PlaySe( SE_DECIDE, 0 );
         rs_state = RS_Menu;
         rs_returnState = RS_ResultsPage2;
     }
@@ -377,15 +377,15 @@ void RS_DuelResults( void ) {
     s32 opponent;
     s32 i;
 
-    func_8002DF3C( 0x88D, 0x64, 0x10 );
+    Draw_Image( 0x88D, 0x64, 0x10 );
     y = 0x28;
     x = 0x78;
     games = D_800693DC[0] + D_800693DC[1];
     for ( i = 0; i < games; i++ ) {
-        func_8002DF3C( images[i], x, y );
+        Draw_Image( images[i], x, y );
         x += 0x20;
     }
-    func_8002DF3C( 0x871, x, y );
+    Draw_Image( 0x871, x, y );
     y += 9;
     for ( player = 0; player < 2; player++ ) {
         x = 0x40;
@@ -393,27 +393,27 @@ void RS_DuelResults( void ) {
         x += 0x38;
         opponent = !player;
         for ( i = 0; i < games; i++ ) {
-            func_8002DF3C( 0x86D, x, y );
+            Draw_Image( 0x86D, x, y );
             func_800393D8( D_8009D030[player][i], x + 6, y + 6 );
             if ( D_8009D030[player][i] > D_8009D030[opponent][i] ) {
-                func_8002E4B0( 0x86C, x, y, rs_boxAlpha + 0x20, 1.0f, 1.0f );
+                Draw_ImageScaled( 0x86C, x, y, rs_boxAlpha + 0x20, 1.0f, 1.0f );
             }
             x += 0x20;
         }
-        func_8002DF3C( 0x86B, x, y );
+        Draw_Image( 0x86B, x, y );
         func_8003A8B4( player, D_800693DC[player], 1, x + 4, y + 2 );
         y += 0x14;
     }
     if ( D_800693DC[0] > D_800693DC[1] ) {
-        func_8002E4B0( 0x869, 0x2C, y + 8, rs_boxAlpha + 0x7F, 1.0f, 1.0f );
+        Draw_ImageScaled( 0x869, 0x2C, y + 8, rs_boxAlpha + 0x7F, 1.0f, 1.0f );
         if ( !( D_8009D098.unk_04 & ( 1 << D_8005C163 ) ) ) {
-            func_8002DF3C( 0x870, 0x38, 0xAC );
+            Draw_Image( 0x870, 0x38, 0xAC );
         }
     } else {
-        func_8002E4B0( 0x86A, 0x2C, y + 8, rs_boxAlpha + 0x7F, 1.0f, 1.0f );
+        Draw_ImageScaled( 0x86A, 0x2C, y + 8, rs_boxAlpha + 0x7F, 1.0f, 1.0f );
     }
     if ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) {
-        func_80037870( SE_DECIDE, 0 );
+        Sound_PlaySe( SE_DECIDE, 0 );
         if ( D_800693DC[0] > D_800693DC[1] ) {
             rs_state = RS_Leave;
             D_8009D098.unk_04 |= 1 << D_8005C163;
@@ -436,9 +436,9 @@ Results page; A or Z opens the menu of RS_Menu, which comes back here.
 ================
 */
 void RS_ResultsPage( void ) {
-    func_8002DF3C( 0x88D, 0x64, 0x10 );
+    Draw_Image( 0x88D, 0x64, 0x10 );
     if ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) {
-        func_80037870( SE_DECIDE, 0 );
+        Sound_PlaySe( SE_DECIDE, 0 );
         rs_state = RS_Menu;
         rs_returnState = RS_ResultsPage;
     }
@@ -455,17 +455,17 @@ void RS_Menu( void ) {
     u16 images[2] = { 0xAB5, 0xA57 };
 
     if ( ( rs_dpadPressed & L_JPAD ) && rs_menuChoice == 1 ) {
-        func_80037870( SE_CURSOR, 0 );
+        Sound_PlaySe( SE_CURSOR, 0 );
         rs_menuChoice = 0;
     }
     if ( ( rs_dpadPressed & R_JPAD ) && rs_menuChoice == 0 ) {
-        func_80037870( SE_CURSOR, 0 );
+        Sound_PlaySe( SE_CURSOR, 0 );
         rs_menuChoice = 1;
     }
     RS_DrawChoices( rs_menuChoice, images, 0x68, 0x50, 0x10 );
-    func_8002E4B0( rs_menuChoice ? 0x84C : 0x84B, 0x98, 0x68, rs_boxAlpha + 0x40, 1.0f, 1.0f );
+    Draw_ImageScaled( rs_menuChoice ? 0x84C : 0x84B, 0x98, 0x68, rs_boxAlpha + 0x40, 1.0f, 1.0f );
     if ( ( rs_buttonsPressed & B_BUTTON ) && rs_returnState != RS_Menu ) {
-        func_80037870( 2, 0 );
+        Sound_PlaySe( 2, 0 );
         rs_menuChoice = 0;
         rs_state = rs_returnState;
     }
@@ -478,7 +478,7 @@ void RS_Menu( void ) {
             rs_leaving = 1;
             break;
         case 1:
-            func_80037870( SE_DECIDE, 0 );
+            Sound_PlaySe( SE_DECIDE, 0 );
             rs_state = RS_MenuConfirm;
             rs_menuChoice = 0;
             break;
@@ -540,12 +540,12 @@ else 0x89C for a pin of the second (D_800F7C18). Declared inline: RS_DrawPinDiag
 inline void RS_DrawPinDiagram( s32 player, u8 frame, s16 x, s16 y ) {
     s32 pin;
 
-    func_8002DF3C( 0x899, x, y );
+    Draw_Image( 0x899, x, y );
     for ( pin = 0; pin < 10; pin++ ) {
         if ( ( D_800A3050[player][frame] >> ( 9 - pin ) ) & 1 ) {
-            func_8002DF3C( 0x89D, x + rs_pinPos[pin][0], y + rs_pinPos[pin][1] );
+            Draw_Image( 0x89D, x + rs_pinPos[pin][0], y + rs_pinPos[pin][1] );
         } else if ( ( D_800F7C18[player][frame] >> ( 9 - pin ) ) & 1 ) {
-            func_8002DF3C( 0x89C, x + rs_pinPos[pin][0], y + rs_pinPos[pin][1] );
+            Draw_Image( 0x89C, x + rs_pinPos[pin][0], y + rs_pinPos[pin][1] );
         }
     }
 }
@@ -567,16 +567,16 @@ void RS_DrawPinDiagrams( s16 x, s16 y ) {
     s32 mate;
 
     if ( ( rs_buttonsPressed & R_CBUTTONS ) && !rs_pinPage ) {
-        func_80037870( 0x33, 0 );
+        Sound_PlaySe( 0x33, 0 );
         rs_pinPage = 1;
     }
     if ( ( rs_buttonsPressed & L_CBUTTONS ) && rs_pinPage == 1 ) {
-        func_80037870( 0x33, 0 );
+        Sound_PlaySe( 0x33, 0 );
         rs_pinPage = 0;
     }
-    func_8002DF3C( rs_pinPage ? 0x89B : 0x89A, 0xF8, 0x18 );
+    Draw_Image( rs_pinPage ? 0x89B : 0x89A, 0xF8, 0x18 );
     if ( D_801142B4_rscode == 2 ) {
-        func_8002DF3C( 0xA12, x, y - 3 );
+        Draw_Image( 0xA12, x, y - 3 );
     }
     func_80038D0C( rs_pinPage, x + 0x2C, y );
     y += 9;
@@ -584,7 +584,7 @@ void RS_DrawPinDiagrams( s16 x, s16 y ) {
     for ( player = 0; player < players; player++ ) {
         rowX = x;
         if ( D_801142B4_rscode == 2 && player == 2 ) {
-            func_8002DF3C( 0x9FB, rowX, y + 4 );
+            Draw_Image( 0x9FB, rowX, y + 4 );
             y += 0x10;
         }
         if ( D_801142B4_rscode == 1 ) {
@@ -609,7 +609,7 @@ void RS_DrawPinDiagrams( s16 x, s16 y ) {
         if ( rs_pinPage ) {
             rowX = pageX;
         }
-        func_8002E4B0( rs_pinPage ? 0x84C : 0x84B, rowX, y + 4, rs_boxAlpha + 0x40, 1.0f, 1.0f );
+        Draw_ImageScaled( rs_pinPage ? 0x84C : 0x84B, rowX, y + 4, rs_boxAlpha + 0x40, 1.0f, 1.0f );
         y += D_801142B4_rscode == 1 ? 0x38 : 0x1C;
     }
 }
@@ -625,8 +625,8 @@ void RS_DrawChoices( u8 choice, u16 *images, s16 y, u16 w, u16 h ) {
     s16 x[2] = { 0x48, 0xA8 };
 
     Draw_RoundedBox( x[choice], y, w, h, 0xE0, 0xE0, 0xE0, rs_boxAlpha + 0x40 );
-    func_8002DF3C( images[choice], x[choice], y );
-    func_8002E4B0( images[!choice], x[!choice], y, 0x60, 1.0f, 1.0f );
+    Draw_Image( images[choice], x[choice], y );
+    Draw_ImageScaled( images[!choice], x[!choice], y, 0x60, 1.0f, 1.0f );
 }
 
 /*

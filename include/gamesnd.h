@@ -12,7 +12,7 @@
 #define BGM_START_DELAY     10          /* frames from loading a BGM to starting it */
 #define BGM_STOPPED         0x100       /* D_8005C9E8: the BGM is not playing */
 
-/* func_80037870 flags */
+/* Sound_PlaySe flags */
 #define SE_PAN_MASK         0x03        /* 0: centre, 1: left, 2: right, 3: random pan and volume */
 #define SE_NO_REUSE         0x80
 
@@ -57,8 +57,8 @@ u32 Snd_PlaySeEx( s32 index, s32 volume, s32 pan, s32 reuse, s32 priority );
 s32 Snd_Stop( s32 id, s32 ticks );
 void Snd_SetSeWaveBank( seTable_t *table, waveBank_t *bank );
 
-u64 func_80037870( s32 index, s32 flags );
-void func_800379A8( u64 id );
+u64 Sound_PlaySe( s32 index, s32 flags );
+void Sound_Stop( u64 id );
 void Sound_PlayBgm( s32 index );
 void Sound_StopBgm( void );
 void Sound_UpdateBgmVolume( void );

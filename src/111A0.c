@@ -98,14 +98,14 @@ void func_80035DA0( void ) {
 
     switch ( D_80063AF0 ) {
         case GRIDEDIT_EXIT:
-            func_80028DA4( &D_800F8094, 32, 20, "EXIT" );
+            Txt_DrawString( &D_800F8094, 32, 20, "EXIT" );
             if ( D_800E4D62 & Z_TRIG ) {
                 D_8005C980 = 0;
             }
             break;
 
         case GRIDEDIT_LOAD:
-            func_80028DA4( &D_800F8094, 32, 20, "FILE LOAD" );
+            Txt_DrawString( &D_800F8094, 32, 20, "FILE LOAD" );
             if ( D_800E4D62 & Z_TRIG ) {
                 Host_Sync();
                 Host_GetFileSize( "ground.bin" );
@@ -114,7 +114,7 @@ void func_80035DA0( void ) {
             break;
 
         case GRIDEDIT_SAVE:
-            func_80028DA4( &D_800F8094, 32, 20, "FILE SAVE" );
+            Txt_DrawString( &D_800F8094, 32, 20, "FILE SAVE" );
             if ( D_800E4D62 & Z_TRIG ) {
                 Host_WriteFile( "ground.bin", (u8 *)&D_80100100[0],
                                sizeof( floorGrid_t ) - ( GRIDEDIT_POINTS - D_80100100[0].numX * D_80100100[0].numZ ) * sizeof( s16 ) );
@@ -122,7 +122,7 @@ void func_80035DA0( void ) {
             break;
 
         case GRIDEDIT_SIZE:
-            func_80028DA4( &D_800F8094, 32, 20, "MTX FORM" );
+            Txt_DrawString( &D_800F8094, 32, 20, "MTX FORM" );
             resized = FALSE;
             if ( ( D_800E4D62 & U_JPAD ) && !( D_800994BC & R_TRIG ) && D_80100100[0].numZ != 0 ) {
                 D_80100100[0].numZ--;
@@ -153,11 +153,11 @@ void func_80035DA0( void ) {
                 }
             }
             sprintf( text, "X*Z=(%d,%d)", D_80100100[0].numX, D_80100100[0].numZ );
-            func_80028DA4( &D_800F8094, 64, 30, text );
+            Txt_DrawString( &D_800F8094, 64, 30, text );
             break;
 
         case GRIDEDIT_STEP:
-            func_80028DA4( &D_800F8094, 32, 20, "MTX WH" );
+            Txt_DrawString( &D_800F8094, 32, 20, "MTX WH" );
             if ( ( D_800994BC & ( U_JPAD | R_TRIG ) ) == U_JPAD && D_80100100[0].stepZ != 0 ) {
                 D_80100100[0].stepZ--;
             }
@@ -171,11 +171,11 @@ void func_80035DA0( void ) {
                 D_80100100[0].stepX++;
             }
             sprintf( text, "WH=(%d,%d)", D_80100100[0].stepX, D_80100100[0].stepZ );
-            func_80028DA4( &D_800F8094, 64, 30, text );
+            Txt_DrawString( &D_800F8094, 64, 30, text );
             break;
 
         case GRIDEDIT_ORIGIN:
-            func_80028DA4( &D_800F8094, 32, 20, "MTX OFS" );
+            Txt_DrawString( &D_800F8094, 32, 20, "MTX OFS" );
             if ( ( D_800994BC & ( U_JPAD | R_TRIG ) ) == U_JPAD ) {
                 D_80100100[0].originZ--;
             }
@@ -189,11 +189,11 @@ void func_80035DA0( void ) {
                 D_80100100[0].originX++;
             }
             sprintf( text, "OFS=(%d,%d)", D_80100100[0].originX, D_80100100[0].originZ );
-            func_80028DA4( &D_800F8094, 64, 30, text );
+            Txt_DrawString( &D_800F8094, 64, 30, text );
             break;
 
         case GRIDEDIT_SELECT:
-            func_80028DA4( &D_800F8094, 32, 20, "VTX SEL" );
+            Txt_DrawString( &D_800F8094, 32, 20, "VTX SEL" );
             if ( ( D_800E4D62 & U_JPAD ) || ( D_8005C98E >= 7 && ( D_800994BC & U_JPAD ) ) ) {
                 if ( D_8005C98A > 0 ) {
                     D_8005C98A--;
@@ -248,11 +248,11 @@ void func_80035DA0( void ) {
                 }
             }
             sprintf( text, "SEL=%d", D_80063B40[D_8005C988 + D_8005C98A * D_80100100[0].numX] );
-            func_80028DA4( &D_800F8094, 64, 30, text );
+            Txt_DrawString( &D_800F8094, 64, 30, text );
             break;
 
         case GRIDEDIT_HEIGHT:
-            func_80028DA4( &D_800F8094, 32, 20, "VTX Y" );
+            Txt_DrawString( &D_800F8094, 32, 20, "VTX Y" );
             if ( ( D_800994BC & ( U_JPAD | R_TRIG ) ) == U_JPAD ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                     if ( D_80063B40[i] ) {
@@ -270,7 +270,7 @@ void func_80035DA0( void ) {
             for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                 if ( D_80063B40[i] ) {
                     sprintf( text, "Y=%d", D_80100100[0].heights[i] );
-                    func_80028DA4( &D_800F8094, 64, 30, text );
+                    Txt_DrawString( &D_800F8094, 64, 30, text );
                     break;
                 }
             }
@@ -279,7 +279,7 @@ void func_80035DA0( void ) {
 
     sprintf( text, "(%d,%d)=%d", D_8005C988, D_8005C98A,
              D_80100100[0].heights[D_8005C988 + D_8005C98A * D_80100100[0].numX] );
-    func_80028DA4( &D_800F8094, 120, 20, text );
+    Txt_DrawString( &D_800F8094, 120, 20, text );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/111A0", func_80035DA0);

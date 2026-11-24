@@ -24,7 +24,7 @@ s32 GS_CharacterSelect( void ) {
 
     if ( D_8011F8B9_gscode == CHOICE_RUN ) {
         if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-            func_80037870( SE_DECIDE, 0 );
+            Sound_PlaySe( SE_DECIDE, 0 );
             if ( D_8009D098.unk_7B ) {
                 GS_StartPakCheck();
                 D_8011F8B9_gscode = 4;
@@ -34,7 +34,7 @@ s32 GS_CharacterSelect( void ) {
             }
         }
         if ( D_800E4D62 & B_BUTTON ) {
-            func_80037870( 2, 0 );
+            Sound_PlaySe( 2, 0 );
             D_8011F8B9_gscode = CHOICE_BACK;
         }
     }
@@ -76,7 +76,7 @@ s32 GS_CharacterSelect( void ) {
                     D_8005C163 = 7;
                 }
             } while ( !( D_8009D098.unk_04 & ( 1 << D_8005C163 ) ) );
-            func_80037870( SE_CURSOR, 0 );
+            Sound_PlaySe( SE_CURSOR, 0 );
         }
         if ( D_800E6758 & R_JPAD ) {
             if ( D_8011F8BA_gscode == 15 ) {
@@ -90,7 +90,7 @@ s32 GS_CharacterSelect( void ) {
                     D_8005C163 = 0;
                 }
             } while ( !( D_8009D098.unk_04 & ( 1 << D_8005C163 ) ) );
-            func_80037870( SE_CURSOR, 0 );
+            Sound_PlaySe( SE_CURSOR, 0 );
         }
     }
 
@@ -100,12 +100,12 @@ s32 GS_CharacterSelect( void ) {
     func_8003893C( D_8011BDF0_gscode, 10, D_8011BE30_gscode[D_8011BE38_gscode[D_8005C163]], MENU_NONE, MENU_NONE,
                    D_8009CFB0 );
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-    func_8002DF3C( 0xA58, 0, 0 );
+    Draw_Image( 0xA58, 0, 0 );
     func_800386E0( D_8011BD50_gscode, D_8011F8B8_gscode );
 
     if ( D_8011F8B9_gscode == CHOICE_RUN && D_8011F8BA_gscode != 7 && D_8011F8BA_gscode != 8 &&
          D_8011F8BA_gscode != 9 ) {
-        func_8002FDE4( D_8009CFA0[0]->unk_2C, D_8009CFA0[0]->unk_2E, D_8009CFA0[0]->width - 1,
+        Draw_FillRect( D_8009CFA0[0]->unk_2C, D_8009CFA0[0]->unk_2E, D_8009CFA0[0]->width - 1,
                        D_8009CFA0[0]->height - 1, D_8009CFA0[0]->path->clearColor[0],
                        D_8009CFA0[0]->path->clearColor[1], D_8009CFA0[0]->path->clearColor[2], 0xFF );
         D_8009CFA0[0]->frame = -1;

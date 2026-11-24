@@ -717,21 +717,21 @@ void CA_Frame( void ) {
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
     switch ( ca_mode ) {
     case CAMODE_ROTATE:
-        func_80028DA4( &D_800F8094, 20, 20, "ROTATE" );
+        Txt_DrawString( &D_800F8094, 20, 20, "ROTATE" );
         sprintf( str, "H=%3.1f P=%3.1f B=%3.1f", model->parts[ca_part]->unk_08[0] * RAD_TO_DEG,
                  model->parts[ca_part]->unk_08[1] * RAD_TO_DEG,
                  model->parts[ca_part]->unk_08[2] * RAD_TO_DEG );
-        func_80028DA4( &D_800F8094, 64, 215, str );
+        Txt_DrawString( &D_800F8094, 64, 215, str );
         break;
     case CAMODE_FILE:
-        func_80028DA4( &D_800F8094, 20, 20, "FILE" );
+        Txt_DrawString( &D_800F8094, 20, 20, "FILE" );
         break;
     case CAMODE_IMAGE:
-        func_80028DA4( &D_800F8094, 20, 20, "IMAGE" );
+        Txt_DrawString( &D_800F8094, 20, 20, "IMAGE" );
         sprintf( str, "IMG1=%d IMG2=%d", D_80115374_cacode[1], D_80115374_cacode[2] );
-        func_80028DA4( &D_800F8094, 84, 30, str );
+        Txt_DrawString( &D_800F8094, 84, 30, str );
         break;
     }
     sprintf( str, "CAM=%d OBJ=%d FRAME=%d", ca_selected, ca_part, ca_frame );
-    func_80028DA4( &D_800F8094, 84, 20, str );
+    Txt_DrawString( &D_800F8094, 84, 20, str );
 }

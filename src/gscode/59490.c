@@ -24,7 +24,7 @@ s32 GS_ModeMenu( void ) {
     u8 choice;
 
     if ( gs_modeState == CHOICE_RUN && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
-        func_80037870( SE_DECIDE, 0 );
+        Sound_PlaySe( SE_DECIDE, 0 );
         switch ( gs_modeCursor ) {
         case 0:
             gs_modeState = CHOICE_TAKEN;
@@ -50,7 +50,7 @@ s32 GS_ModeMenu( void ) {
     }
 
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-    func_8002DF3C( 0xA58, 0, 0 );
+    Draw_Image( 0xA58, 0, 0 );
     func_800386E0( gs_modeMenu, gs_modeSlide );
     for ( i = 0; i < 5; i++ ) {
         func_8003893C( gs_modeChoices, i + 1, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
@@ -119,7 +119,7 @@ s32 GS_ModeMenu( void ) {
         if ( gs_modeCursor != choice ) {
             gs_modeBlinkFrame = 0;
             func_80026B28();
-            func_80037870( SE_CURSOR, SE_NO_REUSE );
+            Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
     }
 

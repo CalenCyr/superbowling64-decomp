@@ -6,7 +6,7 @@
 #include "common.h"
 #include "libultra.h"
 
-/* func_80036E60 modes */
+/* Save_ShowPrompt modes */
 #define PROMPT_TIMED        0           /* closes after 90 frames, or at any button */
 #define PROMPT_ANY_BUTTON   1           /* closes at any button */
 #define PROMPT_OPEN         2           /* stays open */
@@ -44,7 +44,7 @@ extern u16 D_800E4D68[2];           /* y */
 extern s16 D_800DF590[2];           /* width */
 extern s16 D_800E6538[2];           /* height */
 
-s32 func_80036E60( s32 id, s32 mode );
+s32 Save_ShowPrompt( s32 id, s32 mode );
 s32 Save_Checksum( void );
 s32 Save_SaveSettings( void );
 

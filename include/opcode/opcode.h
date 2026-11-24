@@ -28,7 +28,7 @@ typedef struct {
     /* 0x06 */ u8 alpha;            /* 0: not drawn */
 } opImage_t;                        /* size 0x8 */
 
-/* A note's name in glyphs (func_80113130_opcode), for func_80029088. Name invented. */
+/* A note's name in glyphs (func_80113130_opcode), for Txt_DrawGlyphs. Name invented. */
 typedef struct {
     /* 0x00 */ u16 name[16];
     /* 0x20 */ u16 ext;

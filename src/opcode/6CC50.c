@@ -82,35 +82,35 @@ s32 func_80113168_opcode( void ) {
         op_pakStep = 2;
         break;
     case 2:
-        func_8002DF3C( 0xA58, 0, 0 );
+        Draw_Image( 0xA58, 0, 0 );
         if ( op_pakState == 0 ) {
             Draw_RoundedBox( op_promptChoice == 0 ? 0x40 : 0xB0, 0xC0, 0x50, 0x10, 0xFF, 0xFF, 0xFF, D_8009CFB0 );
         }
         for ( i = 0; op_pakImages[i].id != -1; i++ ) {
             if ( op_pakImages[i].alpha ) {
-                func_8002E4B0( op_pakImages[i].id, op_pakImages[i].x, op_pakImages[i].y,
+                Draw_ImageScaled( op_pakImages[i].id, op_pakImages[i].x, op_pakImages[i].y,
                                op_pakImages[i].alpha, 1.0f, 1.0f );
             }
         }
         if ( op_firstNote != 0 ) {
-            func_8002E4B0( 0x888, 0x98, 0x38, D_8009CFB0, 1.0f, 1.0f );
+            Draw_ImageScaled( 0x888, 0x98, 0x38, D_8009CFB0, 1.0f, 1.0f );
         }
         if ( op_numNotes - op_firstNote >= 6 ) {
-            func_8002E4B0( 0x889, 0x98, 0xA4, D_8009CFB0, 1.0f, 1.0f );
+            Draw_ImageScaled( 0x889, 0x98, 0xA4, D_8009CFB0, 1.0f, 1.0f );
         }
         Txt_LoadGlyphSheet( &D_800F8094 );
         for ( i = 0; i < PAK_NOTES_SHOWN; i++ ) {
             if ( i + op_firstNote < op_numNotes ) {
                 Txt_NumberToGlyphs( glyphs, i + op_firstNote + 1, 2 );
-                func_80029088( &D_800F8094, 0x28, 0x49 + i * 18, 8, glyphs );
-                func_80029088( &D_800F8094, 0x3C, 0x49 + i * 18, 8, op_noteNames[i + op_firstNote].name );
+                Txt_DrawGlyphs( &D_800F8094, 0x28, 0x49 + i * 18, 8, glyphs );
+                Txt_DrawGlyphs( &D_800F8094, 0x3C, 0x49 + i * 18, 8, op_noteNames[i + op_firstNote].name );
                 Txt_NumberToGlyphs( glyphs, op_notePages[i + op_firstNote], 4 );
-                func_80029088( &D_800F8094, 0xF9, 0x49 + i * 18, 8, glyphs );
+                Txt_DrawGlyphs( &D_800F8094, 0xF9, 0x49 + i * 18, 8, glyphs );
             }
         }
         i = op_freeNotes < 10;
         Txt_NumberToGlyphs( glyphs, op_freeNotes, 2 );
-        func_80029088( &D_800F8094, 0x74 + i * 8, 0xA9, 8, glyphs );
+        Txt_DrawGlyphs( &D_800F8094, 0x74 + i * 8, 0xA9, 8, glyphs );
         if ( op_freePages >= 100 ) {
             i = 0;
         } else if ( op_freePages >= 10 ) {
@@ -119,12 +119,12 @@ s32 func_80113168_opcode( void ) {
             i = 2;
         }
         Txt_NumberToGlyphs( glyphs, op_freePages, 3 );
-        func_80029088( &D_800F8094, 0xFE + i * 8, 0xA9, 8, glyphs );
+        Txt_DrawGlyphs( &D_800F8094, 0xFE + i * 8, 0xA9, 8, glyphs );
         if ( D_8005C0BF == 0 ) {
             switch ( op_pakState ) {
             case 0:
                 if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-                    func_80037870( 1, 0 );
+                    Sound_PlaySe( 1, 0 );
                     if ( op_promptChoice == 0 ) {
                         op_pakState = 1;
                     } else {
@@ -133,11 +133,11 @@ s32 func_80113168_opcode( void ) {
                 }
                 if ( ( D_800E6758 & L_JPAD ) && op_promptChoice == 1 ) {
                     op_promptChoice = 0;
-                    func_80037870( 0, 0 );
+                    Sound_PlaySe( 0, 0 );
                 }
                 if ( ( D_800E6758 & R_JPAD ) && op_promptChoice == 0 ) {
                     op_promptChoice = 1;
-                    func_80037870( 0, 0 );
+                    Sound_PlaySe( 0, 0 );
                 }
                 break;
             case 1:
@@ -146,26 +146,26 @@ s32 func_80113168_opcode( void ) {
                     break;
                 }
                 if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-                    func_80037870( 1, 0 );
+                    Sound_PlaySe( 1, 0 );
                     op_pakState = 2;
                     D_80066C44 = 1;
                 }
                 if ( D_800E4D62 & B_BUTTON ) {
-                    func_80037870( 2, 0 );
+                    Sound_PlaySe( 2, 0 );
                     op_pakState = 0;
                 }
                 if ( D_800E6758 & U_JPAD ) {
                     if ( op_cursorLine != 0 ) {
-                        func_80037870( 0, 0 );
+                        Sound_PlaySe( 0, 0 );
                         op_cursorLine--;
                     } else if ( op_firstNote != 0 ) {
-                        func_80037870( 0, 0 );
+                        Sound_PlaySe( 0, 0 );
                         op_firstNote--;
                     }
                 }
                 if ( D_800E6758 & D_JPAD ) {
                     if ( op_cursorLine + op_firstNote < op_numNotes - 1 ) {
-                        func_80037870( 0, 0 );
+                        Sound_PlaySe( 0, 0 );
                         if ( op_cursorLine < PAK_NOTES_SHOWN - 1 ) {
                             op_cursorLine++;
                         } else {
@@ -173,11 +173,11 @@ s32 func_80113168_opcode( void ) {
                         }
                     }
                 }
-                func_8002DF3C( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
+                Draw_Image( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
                 Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
                 break;
             case 2:
-                func_8002DF3C( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
+                Draw_Image( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
                 Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
                 D_800DF590[0] = D_800DF590[1] = 0x24;
                 D_800E6538[0] = D_800E6538[1] = 0x10;
@@ -185,10 +185,10 @@ s32 func_80113168_opcode( void ) {
                 D_800E4D68[0] = 0x1E;
                 D_800E57E0[1] = 0x4E;
                 D_800E4D68[1] = 0x1E;
-                func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
-                if ( func_80036E60( 0x94B, PROMPT_CHOICE2_H ) ) {
+                Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
+                if ( Save_ShowPrompt( 0x94B, PROMPT_CHOICE2_H ) ) {
                     if ( D_80066C44 == 0 ) {
-                        func_80037870( 8, 0 );
+                        Sound_PlaySe( 8, 0 );
                         op_pakMsg = 10;
                         D_800E6584 = op_noteIndex[op_firstNote + op_cursorLine];
                         osSendMesg( &D_800E6690, &op_pakMsg, OS_MESG_NOBLOCK );
@@ -227,10 +227,10 @@ s32 func_80113168_opcode( void ) {
                 }
                 break;
             case 3:
-                func_8002DF3C( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
+                Draw_Image( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
                 Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, D_8009CFB0 );
-                func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
-                if ( func_80036E60( 0x94A, PROMPT_TIMED ) ) {
+                Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
+                if ( Save_ShowPrompt( 0x94A, PROMPT_TIMED ) ) {
                     op_pakState = 1;
                 }
                 break;

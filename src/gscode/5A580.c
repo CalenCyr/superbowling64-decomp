@@ -17,7 +17,7 @@ s32 GS_PlayersMenu( void ) {
     u8 choice;
 
     if ( gs_playersState == CHOICE_RUN && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
-        func_80037870( SE_DECIDE, 0 );
+        Sound_PlaySe( SE_DECIDE, 0 );
         switch ( gs_playersCursor ) {
         case 0:
             D_8005C161 = 1;
@@ -33,12 +33,12 @@ s32 GS_PlayersMenu( void ) {
         gs_playersState = CHOICE_TAKEN;
     }
     if ( gs_playersState == CHOICE_RUN && ( D_800E4D62 & B_BUTTON ) ) {
-        func_80037870( 2, 0 );
+        Sound_PlaySe( 2, 0 );
         gs_playersState = CHOICE_BACK;
     }
 
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-    func_8002DF3C( 0xA58, 0, 0 );
+    Draw_Image( 0xA58, 0, 0 );
     func_8003893C( gs_playersMenu, 0, gs_playersBlink[0][0], MENU_NONE, MENU_NONE, MENU_NONE );
     func_8003893C( gs_playersMenu, 1, gs_playersBlink[1][0], MENU_NONE, MENU_NONE, MENU_NONE );
 
@@ -68,7 +68,7 @@ s32 GS_PlayersMenu( void ) {
         if ( gs_playersCursor != choice ) {
             gs_playersBlinkFrame = 0;
             func_80026B28();
-            func_80037870( SE_CURSOR, SE_NO_REUSE );
+            Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
     }
 

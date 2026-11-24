@@ -12,12 +12,12 @@
 
 /*
 ================
-func_80037870
+Sound_PlaySe
 
 Plays SE index, panned by flags; returns its sound id.
 ================
 */
-u64 func_80037870( s32 index, s32 flags ) {
+u64 Sound_PlaySe( s32 index, s32 flags ) {
     s32 reuse;
     s32 volume;
     s32 pan;
@@ -51,12 +51,12 @@ u64 func_80037870( s32 index, s32 flags ) {
 
 /*
 ================
-func_800379A8
+Sound_Stop
 
 Stops sound id.
 ================
 */
-void func_800379A8( u64 id ) {
+void Sound_Stop( u64 id ) {
     Snd_Stop( id, 4 );
 }
 

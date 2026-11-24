@@ -72,12 +72,12 @@ void Txt_SetTint( Gfx **gdl, u8 mode, u8 primR, u8 primG, u8 primB, u8 envR, u8 
 
 /*
 ================
-func_80028DA4
+Txt_DrawString
 
 Draws str in the 8x8 font at x, y.
 ================
 */
-void func_80028DA4( Gfx **gdl, s16 x, s16 y, u8 *str ) {
+void Txt_DrawString( Gfx **gdl, s16 x, s16 y, u8 *str ) {
     s32 i;
 
     for ( i = 0; *str != '\0'; i += 8, str++ ) {
@@ -96,7 +96,7 @@ Loads the glyph sheet (file 0x9CE) and its palette, and sets the render state fo
 ================
 */
 void Txt_LoadGlyphSheet( Gfx **gdl ) {
-    D_800619E0 = func_80030C04( 0x9CE, 0 );
+    D_800619E0 = Cache_GetFile( 0x9CE, 0 );
     gDPLoadTLUT_pal16( ( *gdl )++, 0, D_800619E0 + 0x10 );
     D_800619E0 += 0x30;
     gDPSetTextureFilter( ( *gdl )++, G_TF_POINT );
@@ -111,12 +111,12 @@ void Txt_LoadGlyphSheet( Gfx **gdl ) {
 
 /*
 ================
-func_80029088
+Txt_DrawGlyphs
 
 Draws the glyph string glyphs from the glyph sheet at x, y, advance pixels apart.
 ================
 */
-void func_80029088( Gfx **gdl, s16 x, s16 y, u16 advance, u16 *glyphs ) {
+void Txt_DrawGlyphs( Gfx **gdl, s16 x, s16 y, u16 advance, u16 *glyphs ) {
     s32 i;
 
     for ( i = 0; *glyphs != GLYPH_END; i += advance, glyphs++ ) {

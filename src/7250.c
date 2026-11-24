@@ -30,17 +30,17 @@ void Cam_SetAmbient( s32 index, u8 *color ) {
 
 /*
 ================
-func_8002BED8
+Cam_ReadPathFrame
 
 Reads frame of camera path file into eye and unk_2C, each component from the frame or the path's default.
 ================
 */
-void func_8002BED8( s16 file, s16 frame, f32 *eye, f32 *unk_2C ) {
+void Cam_ReadPathFrame( s16 file, s16 frame, f32 *eye, f32 *unk_2C ) {
     fileType3_t *path;
     f32 *data;
     s32 i;
 
-    path = func_80030C04( file, FILE_TYPE3 );
+    path = Cache_GetFile( file, FILE_TYPE3 );
     data = path->frames + path->frameSize * frame;
     for ( i = 0; i < 3; i++ ) {
         if ( path->eyeMask & ( 4 >> i ) ) {
@@ -74,7 +74,7 @@ objNode_t *Cam_Create( objParams_t *params ) {
 
     node = func_80029E28( sizeof( sceneCameraNode_t ) );
     cam = &node->cam;
-    cam->path = func_80030C04( params->unk_08[0], FILE_TYPE3 );
+    cam->path = Cache_GetFile( params->unk_08[0], FILE_TYPE3 );
     for ( i = 0; i < 3; i++ ) {
         cam->at[i] = cam->path->at[i];
         cam->eye[i] = cam->path->eye[i];
@@ -216,7 +216,7 @@ outside it: one 16 by 16 intensity image (file 0xB33) drawn in four quadrants, e
 void Draw_RoundedBox( s16 x, s16 y, u16 w, u16 h, u8 r, u8 g, u8 b, u8 a ) {
     D_8005C190 = DRAW2D_FILL;
     if ( D_800F80B0[0xB33].refCount == 0 ) {
-        func_80030C04( 0xB33, FILE_RAW );
+        Cache_GetFile( 0xB33, FILE_RAW );
     }
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
     gDPSetRenderMode( D_800F8094++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
@@ -250,7 +250,7 @@ void Draw_RoundedBox( s16 x, s16 y, u16 w, u16 h, u8 r, u8 g, u8 b, u8 a ) {
 
 /*
 ================
-func_8002CE24
+Draw_CiImage
 
 Draws a colour-indexed image of width by height pixels at (x, y), in copy mode: loads its palette, then draws
 it in strips of whole rows that fit texture memory, first in the widest power-of-two columns that fit the
@@ -258,7 +258,7 @@ padded width, then in the power-of-two columns that cover the rest. The pixels a
 Any type other than IMAGE_CI4 draws as IMAGE_CI8 (without loading a palette, and with the strip sizes unset).
 ================
 */
-void func_8002CE24( s16 type, s16 x, s16 y, s16 width, s16 height, void *palette, void *pixels ) {
+void Draw_CiImage( s16 type, s16 x, s16 y, s16 width, s16 height, void *palette, void *pixels ) {
     s32 texels;         /* pixels in texture memory */
     s32 pad;
     s32 i;
@@ -373,12 +373,12 @@ void func_8002CE24( s16 type, s16 x, s16 y, s16 width, s16 height, void *palette
 
 /*
 ================
-func_8002DF3C
+Draw_Image
 
 Draws image id unscaled at (x, y), in copy mode.
 ================
 */
-void func_8002DF3C( u16 id, s16 x, s16 y ) {
+void Draw_Image( u16 id, s16 x, s16 y ) {
     fileImage_t *image;
     u32 type;
     u32 width;
@@ -392,7 +392,7 @@ void func_8002DF3C( u16 id, s16 x, s16 y ) {
         gDPSetAlphaCompare( D_800F8094++, G_AC_THRESHOLD );
     }
     if ( D_800F80B0[id].refCount == 0 ) {
-        func_80030C04( id, FILE_RAW );
+        Cache_GetFile( id, FILE_RAW );
     }
     image = D_800F80B0[id].data;
     type = image->type;
@@ -400,24 +400,24 @@ void func_8002DF3C( u16 id, s16 x, s16 y ) {
     height = image->height;
     data = image->data;
     if ( type == IMAGE_CI4 ) {
-        func_8002CE24( IMAGE_CI4, x, y, width, height, data, data + CI4_PALETTE_SIZE );
+        Draw_CiImage( IMAGE_CI4, x, y, width, height, data, data + CI4_PALETTE_SIZE );
     } else if ( type == IMAGE_CI8 ) {
-        func_8002CE24( IMAGE_CI8, x, y, width, height, data, data + CI8_PALETTE_SIZE );
+        Draw_CiImage( IMAGE_CI8, x, y, width, height, data, data + CI8_PALETTE_SIZE );
     } else {
-        func_8002CE24( type, x, y, width, height, data, data );
+        Draw_CiImage( type, x, y, width, height, data, data );
     }
 }
 
 /*
 ================
-func_8002E0EC
+Draw_ImageCopyPalette
 
 Draws image id unscaled at (x, y), in copy mode, from a copy of its palette: the RDP loads the palette after
 the file cache may have moved the image, so a colour-indexed image's palette goes to the next of the frame's
 four palette slots.
 ================
 */
-void func_8002E0EC( u16 id, s16 x, s16 y ) {
+void Draw_ImageCopyPalette( u16 id, s16 x, s16 y ) {
     fileImage_t *image;
     u32 type;
     u32 width;
@@ -431,7 +431,7 @@ void func_8002E0EC( u16 id, s16 x, s16 y ) {
         gDPSetAlphaCompare( D_800F8094++, G_AC_THRESHOLD );
     }
     if ( D_800F80B0[id].refCount == 0 ) {
-        func_80030C04( id, FILE_RAW );
+        Cache_GetFile( id, FILE_RAW );
     }
     image = D_800F80B0[id].data;
     type = image->type;
@@ -440,14 +440,14 @@ void func_8002E0EC( u16 id, s16 x, s16 y ) {
     data = image->data;
     if ( type == IMAGE_CI4 ) {
         memcpy( D_80062A70[D_8005C0B1][D_8005C194], data, CI4_PALETTE_SIZE );
-        func_8002CE24( type, x, y, width, height, D_80062A70[D_8005C0B1][D_8005C194],
+        Draw_CiImage( type, x, y, width, height, D_80062A70[D_8005C0B1][D_8005C194],
                        data + CI4_PALETTE_SIZE );
     } else if ( type == IMAGE_CI8 ) {
         memcpy( D_80062A70[D_8005C0B1][D_8005C194], data, CI8_PALETTE_SIZE );
-        func_8002CE24( type, x, y, width, height, D_80062A70[D_8005C0B1][D_8005C194],
+        Draw_CiImage( type, x, y, width, height, D_80062A70[D_8005C0B1][D_8005C194],
                        data + CI8_PALETTE_SIZE );
     } else {
-        func_8002CE24( type, x, y, width, height, D_80062A70[D_8005C0B1][D_8005C194], data );
+        Draw_CiImage( type, x, y, width, height, D_80062A70[D_8005C0B1][D_8005C194], data );
     }
     if ( ++D_8005C194 == 4 ) {
         D_8005C194 = 0;
@@ -456,15 +456,15 @@ void func_8002E0EC( u16 id, s16 x, s16 y ) {
 
 /*
 ================
-func_8002E4B0
+Draw_ImageScaled
 
 Draws image id at (x, y) scaled by (scaleX, scaleY), in one-cycle mode with its alpha multiplied by alpha:
-loads its palette, then draws it in strips of whole rows that fit texture memory, as func_8002CE24 does.
+loads its palette, then draws it in strips of whole rows that fit texture memory, as Draw_CiImage does.
 Any type other than IMAGE_CI4 draws as IMAGE_CI8 (without loading a palette, and with the strip sizes unset).
 The strips' screen positions are scaled in floating point and truncated to whole pixels.
 ================
 */
-void func_8002E4B0( u16 id, s16 x, s16 y, u8 alpha, f32 scaleX, f32 scaleY ) {
+void Draw_ImageScaled( u16 id, s16 x, s16 y, u8 alpha, f32 scaleX, f32 scaleY ) {
     fileImage_t *image;
     s32 type;
     s32 width;
@@ -491,7 +491,7 @@ void func_8002E4B0( u16 id, s16 x, s16 y, u8 alpha, f32 scaleX, f32 scaleY ) {
     gDPSetTextureFilter( D_800F8094++, G_TF_POINT );
     gDPSetPrimColor( D_800F8094++, 0, 0, 0xFF, 0xFF, 0xFF, alpha );
     if ( D_800F80B0[id].refCount == 0 ) {
-        func_80030C04( id, FILE_RAW );
+        Cache_GetFile( id, FILE_RAW );
     }
     image = D_800F80B0[id].data;
     type = image->type;
@@ -610,13 +610,13 @@ void func_8002E4B0( u16 id, s16 x, s16 y, u8 alpha, f32 scaleX, f32 scaleY ) {
 
 /*
 ================
-func_8002FDE4
+Draw_FillRect
 
 Fills the rectangle of width by height pixels at (x, y) with colour (r, g, b, a), clipped at the screen's top and
 left edges; translucent unless a is 0xFF.
 ================
 */
-void func_8002FDE4( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a ) {
+void Draw_FillRect( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a ) {
     D_8005C190 = DRAW2D_FILL;
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
     if ( a == 0xFF ) {
@@ -636,7 +636,7 @@ void func_8002FDE4( s16 x, s16 y, s16 width, s16 height, u8 r, u8 g, u8 b, u8 a 
 ================
 Draw_RectOutline
 
-Draws the one-pixel outline of the rectangle of width by height at (x, y) in colour (r, g, b, a), as func_8002FDE4
+Draws the one-pixel outline of the rectangle of width by height at (x, y) in colour (r, g, b, a), as Draw_FillRect
 does its fill.
 ================
 */
@@ -689,13 +689,13 @@ void Draw_ClearScreen( u32 r, u32 g, u32 b ) {
 
 /*
 ================
-func_800308C4
+Draw_Line3D
 
 Draws a line from start to end in the view of camera index, in colour (red, green, blue, alpha), color[4] pixels
 wide, through the camera's two vertices D_80063A70[index].
 ================
 */
-void func_800308C4( s32 index, f32 *start, f32 *end, u8 *color ) {
+void Draw_Line3D( s32 index, f32 *start, f32 *end, u8 *color ) {
     u32 i;
 
     for ( i = 0; i < 3; i++ ) {

@@ -114,21 +114,21 @@ void func_80122788_gacode( void ) {
     if ( D_8012C920_gacode == 0 ) {
         D_8012C920_gacode = 1;
         func_8012239C_gacode( 0 );
-        func_80030C04( 2682, FILE_RAW );
-        func_80030C04( 2698, FILE_RAW );
+        Cache_GetFile( 2682, FILE_RAW );
+        Cache_GetFile( 2698, FILE_RAW );
         D_8012CDD0_gacode[0] = ( (fileRefB_t *)D_800F80B0[1523].data )->unk_30;
         D_8012CDD0_gacode[1] = ( (fileRefB_t *)D_800F80B0[1524].data )->unk_30;
         for ( i = 0; i < 11; i++ ) {
-            func_80030C04( D_8012C928_gacode[i], FILE_RAW );
-            func_80030C04( D_8012C940_gacode[i], FILE_RAW );
+            Cache_GetFile( D_8012C928_gacode[i], FILE_RAW );
+            Cache_GetFile( D_8012C940_gacode[i], FILE_RAW );
         }
         for ( i = 0; i < 2; i++ ) {
-            func_80030C04( D_8012C958_gacode[i], FILE_RAW );
-            func_80030C04( D_8012C95C_gacode[i], FILE_RAW );
-            func_80030C04( D_8012C960_gacode[i], FILE_RAW );
+            Cache_GetFile( D_8012C958_gacode[i], FILE_RAW );
+            Cache_GetFile( D_8012C95C_gacode[i], FILE_RAW );
+            Cache_GetFile( D_8012C960_gacode[i], FILE_RAW );
         }
         for ( i = 0; i < 9; i++ ) {
-            func_80030C04( D_8012C964_gacode[i], FILE_RAW );
+            Cache_GetFile( D_8012C964_gacode[i], FILE_RAW );
         }
     }
     ( (fileRefB_t *)D_800F80B0[1648].data )->unk_30 =
@@ -198,17 +198,17 @@ void func_80122CE8_gacode( void ) {
         D_8012C920_gacode = 1;
         func_8012239C_gacode( 1 );
         for ( i = 0; i < 4; i++ ) {
-            func_80030C04( D_8012C978_gacode[i], FILE_RAW );
-            func_80030C04( D_8012C980_gacode[i], FILE_RAW );
-            func_80030C04( D_8012C988_gacode[i], FILE_RAW );
-            func_80030C04( D_8012C990_gacode[i], FILE_RAW );
+            Cache_GetFile( D_8012C978_gacode[i], FILE_RAW );
+            Cache_GetFile( D_8012C980_gacode[i], FILE_RAW );
+            Cache_GetFile( D_8012C988_gacode[i], FILE_RAW );
+            Cache_GetFile( D_8012C990_gacode[i], FILE_RAW );
         }
     }
     if ( --D_8012C99C_gacode == 0 ) {
         D_8012C99C_gacode = guRandom() % 140 + 10;
     }
     if ( --D_8012CDD8_gacode == 0 ) {
-        func_80037870( 70, 3 );
+        Sound_PlaySe( 70, 3 );
     }
     if ( D_8012C99C_gacode < 6 ) {
         if ( D_8012C99C_gacode == 1 ) {
@@ -295,8 +295,8 @@ void func_80123430_gacode( s32 lane, s32 alt, s32 index ) {
     } else {
         obj = D_800EA120[120];
     }
-    func_80030C04( D_8012C9A0_gacode[index][2], FILE_RAW );
-    func_80030C04( D_8012C9A0_gacode[index][3], FILE_RAW );
+    Cache_GetFile( D_8012C9A0_gacode[index][2], FILE_RAW );
+    Cache_GetFile( D_8012C9A0_gacode[index][3], FILE_RAW );
     ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[1].unk_02].data )->unk_30 =
         ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][3]].data )->palette;
     ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[2].unk_02].data )->unk_30 =
@@ -304,11 +304,11 @@ void func_80123430_gacode( s32 lane, s32 alt, s32 index ) {
     ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[3].unk_02].data )->unk_30 =
         ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][2]].data )->palette;
     if ( alt == 0 ) {
-        func_80030C04( D_8012C9A0_gacode[index][1], FILE_RAW );
+        Cache_GetFile( D_8012C9A0_gacode[index][1], FILE_RAW );
         ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[0].unk_02].data )->unk_30 =
             ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][1]].data )->palette;
     } else {
-        func_80030C04( D_8012C9A0_gacode[index][0], FILE_RAW );
+        Cache_GetFile( D_8012C9A0_gacode[index][0], FILE_RAW );
         ( (fileRefB_t *)D_800F80B0[obj->model->parts[0]->refs[0].unk_02].data )->unk_30 =
             ( (unkImage_t *)D_800F80B0[D_8012C9A0_gacode[index][0]].data )->palette;
     }

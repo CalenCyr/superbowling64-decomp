@@ -19,7 +19,7 @@ their right, from (x - 8, y - 8).
 void GS_DrawTintedImage( s16 x, s16 y, u8 r, u8 g, u8 b, u8 a ) {
     D_8005C190 = DRAW2D_FILL; /* neither cached mode: the next image or text sets its mode up again */
     if ( D_800F80B0[0x960].refCount == 0 ) {
-        func_80030C04( 0x960, FILE_RAW );
+        Cache_GetFile( 0x960, FILE_RAW );
     }
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
     gDPSetRenderMode( D_800F8094++, G_RM_XLU_SURF, G_RM_XLU_SURF2 );
@@ -115,7 +115,7 @@ s32 GS_NameEntry( void ) {
     }
 
     if ( D_800E6758 & U_JPAD ) {
-        func_80037870( 0, 0 );
+        Sound_PlaySe( 0, 0 );
         gs_nameCursorY--;
         if ( gs_nameCursorY == -1 ) {
             gs_gridExitColumn = gs_nameCursorX;
@@ -127,7 +127,7 @@ s32 GS_NameEntry( void ) {
         }
     }
     if ( D_800E6758 & D_JPAD ) {
-        func_80037870( 0, 0 );
+        Sound_PlaySe( 0, 0 );
         gs_nameCursorY++;
         if ( gs_nameCursorY == 0 ) {
             gs_nameCursorX = gs_gridExitColumn;
@@ -137,7 +137,7 @@ s32 GS_NameEntry( void ) {
         }
     }
     if ( ( D_800E6758 & L_JPAD ) && gs_nameCursorY != -1 ) {
-        func_80037870( 0, 0 );
+        Sound_PlaySe( 0, 0 );
         gs_nameCursorX--;
         if ( gs_nameCursorX == -1 ) {
             gs_nameCursorX = 11;
@@ -147,10 +147,10 @@ s32 GS_NameEntry( void ) {
         if ( gs_nameCursorY == -1 ) {
             if ( gs_nameCursorX < 7 ) {
                 gs_nameCursorX++;
-                func_80037870( 0, 0 );
+                Sound_PlaySe( 0, 0 );
             }
         } else {
-            func_80037870( 0, 0 );
+            Sound_PlaySe( 0, 0 );
             gs_nameCursorX++;
             if ( gs_nameCursorX == 12 ) {
                 gs_nameCursorX = 0;
@@ -159,15 +159,15 @@ s32 GS_NameEntry( void ) {
     }
 
     if ( ( D_800E4D62 & R_CBUTTONS ) && gs_nameCharCase == 0 ) {
-        func_80037870( 0, 0 );
+        Sound_PlaySe( 0, 0 );
         gs_nameCharCase = 1;
     }
     if ( ( D_800E4D62 & L_CBUTTONS ) && gs_nameCharCase == 1 ) {
-        func_80037870( 0, 0 );
+        Sound_PlaySe( 0, 0 );
         gs_nameCharCase = 0;
     }
     if ( D_800E4D62 & B_BUTTON ) {
-        func_80037870( 2, 0 );
+        Sound_PlaySe( 2, 0 );
         if ( gs_nameLength != 0 ) {
             gs_nameLength--;
         } else {
@@ -182,7 +182,7 @@ s32 GS_NameEntry( void ) {
                     D_8009D098.unk_08[player].name[0] = 0x57;
                     D_8009D098.unk_08[player].name[1] = 0xFFFF;
                 }
-                func_80037870( 6, 0 );
+                Sound_PlaySe( 6, 0 );
                 if ( gs_namePlayer < D_8005C161 - 1 ) {
                     gs_namePlayer++;
                     gs_nameEntryStep = 1;
@@ -191,7 +191,7 @@ s32 GS_NameEntry( void ) {
                 }
             }
         } else {
-            func_80037870( 5, 0 );
+            Sound_PlaySe( 5, 0 );
             gs_nameLength++;
             if ( gs_nameLength >= 5 ) {
                 gs_nameLength = 5;
@@ -368,7 +368,7 @@ s32 GS_PlayerSetup( void ) {
 
     gs_setupFrames++;
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
-    func_8002DF3C( 0xA58, 0, 0 );
+    Draw_Image( 0xA58, 0, 0 );
     func_8003893C( gs_nameEntryMenu, 0x17, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     func_8003893C( gs_nameEntryMenu, 0x18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     func_8003893C( gs_nameEntryMenu, 0x19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
@@ -397,14 +397,14 @@ s32 GS_PlayerSetup( void ) {
             case 2:
                 GS_DrawTintedImage( 0x16, 0x31, 0xFF, 0xFF, 0xFF, D_8009CFB0 );
                 if ( ( D_800E6758 & L_JPAD ) && D_8005C161 >= 2 ) {
-                    func_80037870( SE_CURSOR, SE_NO_REUSE );
+                    Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                     D_8005C161--;
                     if ( D_8005C162 == 1 && D_8005C161 == 1 ) {
                         D_8005C162 = 0;
                     }
                 }
                 if ( ( D_800E6758 & R_JPAD ) && D_8005C161 < 4 ) {
-                    func_80037870( SE_CURSOR, SE_NO_REUSE );
+                    Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                     team = ( D_8005C0E4[D_8005C161] >> 4 ) & 7;
                     for ( i = 0; i < D_8005C161; i++ ) {
                         if ( ( ( D_8005C0E4[i] >> 4 ) & 7 ) != 0 && ( ( D_8005C0E4[i] >> 4 ) & 7 ) == team ) {
@@ -420,12 +420,12 @@ s32 GS_PlayerSetup( void ) {
             case 1:
                 GS_DrawTintedImage( 0x16, 0x31, 0xFF, 0xFF, 0xFF, D_8009CFB0 );
                 if ( ( D_800E6758 & L_JPAD ) && D_8005C161 == 4 ) {
-                    func_80037870( SE_CURSOR, SE_NO_REUSE );
+                    Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                     D_8005C161 = 2;
                     D_8005C162 = 0;
                 }
                 if ( ( D_800E6758 & R_JPAD ) && D_8005C161 == 2 ) {
-                    func_80037870( SE_CURSOR, SE_NO_REUSE );
+                    Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                     D_8005C161 = 4;
                 }
                 break;
@@ -439,12 +439,12 @@ s32 GS_PlayerSetup( void ) {
                 break;
             }
             if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-                func_80037870( SE_DECIDE, 0 );
+                Sound_PlaySe( SE_DECIDE, 0 );
                 gs_nameEntryStep = 1;
                 gs_namePlayer = 0;
             }
             if ( D_800E4D62 & B_BUTTON ) {
-                func_80037870( 2, 0 );
+                Sound_PlaySe( 2, 0 );
                 gs_setupState = CHOICE_BACK;
             }
             if ( minPlayers < D_8005C161 ) {
@@ -462,24 +462,24 @@ s32 GS_PlayerSetup( void ) {
             }
             Draw_RoundedBox( gs_namePlayer * 62 + 0x2F, 0x78, 0x28, 2, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_8005C0E4[gs_namePlayer] & 0x80 ) {
-                func_8002E4B0( 0x84C, gs_namePlayer * 62 + 0x1F, 0x71, D_8009CFB0, 1.0f, 1.0f );
+                Draw_ImageScaled( 0x84C, gs_namePlayer * 62 + 0x1F, 0x71, D_8009CFB0, 1.0f, 1.0f );
             } else {
-                func_8002E4B0( 0x84B, gs_namePlayer * 62 + 0x57, 0x71, D_8009CFB0, 1.0f, 1.0f );
+                Draw_ImageScaled( 0x84B, gs_namePlayer * 62 + 0x57, 0x71, D_8009CFB0, 1.0f, 1.0f );
             }
             if ( ( D_800E6758 & L_JPAD ) && ( D_8005C0E4[gs_namePlayer] & 0x80 ) ) {
-                func_80037870( SE_CURSOR, SE_NO_REUSE );
+                Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 D_8005C0E4[gs_namePlayer] &= 0x7F;
             }
             if ( ( D_800E6758 & R_JPAD ) && !( D_8005C0E4[gs_namePlayer] & 0x80 ) ) {
-                func_80037870( SE_CURSOR, SE_NO_REUSE );
+                Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 D_8005C0E4[gs_namePlayer] = 0x80;
                 D_800DF5D0[gs_namePlayer] = 0;
             }
             if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-                func_80037870( SE_DECIDE, 0 );
+                Sound_PlaySe( SE_DECIDE, 0 );
                 gs_nameEntryStep = 2;
             } else if ( D_800E4D62 & B_BUTTON ) {
-                func_80037870( 2, 0 );
+                Sound_PlaySe( 2, 0 );
                 if ( gs_namePlayer != 0 ) {
                     gs_namePlayer--;
                     if ( !( D_8005C0E4[gs_namePlayer] & 0x80 ) ) {
@@ -502,7 +502,7 @@ s32 GS_PlayerSetup( void ) {
                 break;
             }
             if ( D_800E6758 & L_JPAD ) {
-                func_80037870( SE_CURSOR, SE_NO_REUSE );
+                Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 i = ( D_8005C0E4[gs_namePlayer] >> 4 ) & 7;
                 do {
                     i--;
@@ -521,7 +521,7 @@ s32 GS_PlayerSetup( void ) {
                 D_8005C0E4[gs_namePlayer] = ( D_8005C0E4[gs_namePlayer] & 0x8F ) | ( i << 4 );
             }
             if ( D_800E6758 & R_JPAD ) {
-                func_80037870( SE_CURSOR, SE_NO_REUSE );
+                Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 i = ( D_8005C0E4[gs_namePlayer] >> 4 ) & 7;
                 do {
                     i++;
@@ -540,7 +540,7 @@ s32 GS_PlayerSetup( void ) {
                 D_8005C0E4[gs_namePlayer] = ( D_8005C0E4[gs_namePlayer] & 0x8F ) | ( i << 4 );
             }
             if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-                func_80037870( SE_DECIDE, 0 );
+                Sound_PlaySe( SE_DECIDE, 0 );
                 i = ( D_8005C0E4[gs_namePlayer] >> 4 ) & 7;
                 if ( i == 0 ) {
                     if ( gs_namePlayer < D_8005C161 - 1 ) {
@@ -561,7 +561,7 @@ s32 GS_PlayerSetup( void ) {
                     gs_teamPromptChoice = 0;
                 }
             } else if ( D_800E4D62 & B_BUTTON ) {
-                func_80037870( 2, 0 );
+                Sound_PlaySe( 2, 0 );
                 if ( gs_namePlayer == 0 ) {
                     gs_nameEntryStep = 0;
                     if ( kind == 3 || kind == 4 ) {
@@ -577,8 +577,8 @@ s32 GS_PlayerSetup( void ) {
                 }
             } else {
                 Draw_RoundedBox( gs_namePlayer * 62 + 0x2B, 0x81, 0x30, 0x28, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
-                func_8002E4B0( 0x84C, gs_namePlayer * 62 + 0x1B, 0x95, D_8009CFB0, 1.0f, 1.0f );
-                func_8002E4B0( 0x84B, gs_namePlayer * 62 + 0x5B, 0x95, D_8009CFB0, 1.0f, 1.0f );
+                Draw_ImageScaled( 0x84C, gs_namePlayer * 62 + 0x1B, 0x95, D_8009CFB0, 1.0f, 1.0f );
+                Draw_ImageScaled( 0x84B, gs_namePlayer * 62 + 0x5B, 0x95, D_8009CFB0, 1.0f, 1.0f );
                 switch ( ( D_8005C0E4[gs_namePlayer] >> 4 ) & 7 ) {
                 case 1:
                     func_8003893C( gs_nameEntryMenu, 0x17, 0x906, gs_namePlayer * 62 + 0x3F, 0x97, 0xFF );
@@ -599,17 +599,17 @@ s32 GS_PlayerSetup( void ) {
         case 3:
             if ( ( D_800E6758 & U_JPAD ) && gs_teamPromptChoice == 1 ) {
                 gs_teamPromptChoice = 0;
-                func_80037870( SE_CURSOR, SE_NO_REUSE );
+                Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
             }
             if ( ( D_800E6758 & D_JPAD ) && gs_teamPromptChoice == 0 ) {
                 gs_teamPromptChoice = 1;
-                func_80037870( SE_CURSOR, SE_NO_REUSE );
+                Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
             }
             func_8003893C( gs_nameEntryMenu, 0x17, 0x8FD, gs_namePlayer * 62 + 0x2B, 0x81, 0xFF );
             func_8003893C( gs_nameEntryMenu, 0x18, 0x8FE, gs_namePlayer * 62 + 0x2B, gs_teamPromptChoice * 16 + 0x81,
                            D_8009CFB0 );
             if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-                func_80037870( SE_DECIDE, 0 );
+                Sound_PlaySe( SE_DECIDE, 0 );
                 if ( gs_teamPromptChoice == 0 ) {
                     if ( gs_namePlayer < D_8005C161 - 1 ) {
                         gs_namePlayer++;
@@ -622,7 +622,7 @@ s32 GS_PlayerSetup( void ) {
                 }
             }
             if ( D_800E4D62 & B_BUTTON ) {
-                func_80037870( 2, 0 );
+                Sound_PlaySe( 2, 0 );
                 gs_nameEntryStep = 2;
             }
             break;
@@ -668,25 +668,25 @@ s32 GS_PlayerSetup( void ) {
                 }
                 switch ( D_8005C161 ) {
                 case 2:
-                    func_8002E4B0( 0xAE4, 0x2C, 0x5A, 0x99, 1.0f, 1.0f );
-                    func_8002E4B0( 0x88E, 0x6A, 0x5A, 0x99, 1.0f, 1.0f );
+                    Draw_ImageScaled( 0xAE4, 0x2C, 0x5A, 0x99, 1.0f, 1.0f );
+                    Draw_ImageScaled( 0x88E, 0x6A, 0x5A, 0x99, 1.0f, 1.0f );
                     break;
                 case 3:
-                    func_8002E4B0( 0xAE5, 0x2C, 0x5A, 0x99, 1.0f, 1.0f );
-                    func_8002E4B0( 0x88E, 0xA8, 0x5A, 0x99, 1.0f, 1.0f );
+                    Draw_ImageScaled( 0xAE5, 0x2C, 0x5A, 0x99, 1.0f, 1.0f );
+                    Draw_ImageScaled( 0x88E, 0xA8, 0x5A, 0x99, 1.0f, 1.0f );
                     break;
                 case 4:
-                    func_8002E4B0( 0xAE5, 0x2C, 0x5A, 0x99, 1.0f, 1.0f );
-                    func_8002E4B0( 0x88F, 0xA8, 0x5A, 0x99, 1.0f, 1.0f );
+                    Draw_ImageScaled( 0xAE5, 0x2C, 0x5A, 0x99, 1.0f, 1.0f );
+                    Draw_ImageScaled( 0x88F, 0xA8, 0x5A, 0x99, 1.0f, 1.0f );
                     break;
                 }
             }
             if ( ( D_800E6758 & L_JPAD ) && D_8005C162 == 1 && minPlayers < D_8005C161 ) {
-                func_80037870( SE_CURSOR, SE_NO_REUSE );
+                Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 D_8005C162 = 0;
             }
             if ( ( D_800E6758 & R_JPAD ) && D_8005C162 == 0 && minPlayers < D_8005C161 ) {
-                func_80037870( SE_CURSOR, SE_NO_REUSE );
+                Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 D_8005C162 = 1;
             }
             if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
@@ -719,18 +719,18 @@ s32 GS_PlayerSetup( void ) {
                     if ( human == TRUE ) {
                         if ( kind == 4 ) {
                             if ( ( D_8005C0E4[1] >> 7 ) == 0 && !( D_8005B190 & 2 ) ) {
-                                func_80037870( 2, 0 );
+                                Sound_PlaySe( 2, 0 );
                                 gs_nameEntryStep = 7;
                                 break;
                             }
                         } else if ( !( D_8005B190 & 2 ) ) {
-                            func_80037870( 2, 0 );
+                            Sound_PlaySe( 2, 0 );
                             gs_nameEntryStep = 6;
                             break;
                         }
                     }
                 }
-                func_80037870( SE_DECIDE, 0 );
+                Sound_PlaySe( SE_DECIDE, 0 );
                 for ( i = 0; i < 4; i++ ) {
                     memcpy( D_800E44E8[i].name, D_8009D098.unk_08[i].name, sizeof( D_800E44E8[i].name ) );
                 }
@@ -745,7 +745,7 @@ s32 GS_PlayerSetup( void ) {
                 gs_setupState = CHOICE_TAKEN;
             }
             if ( D_800E4D62 & B_BUTTON ) {
-                func_80037870( 2, 0 );
+                Sound_PlaySe( 2, 0 );
                 gs_nameEntryStep = 1;
                 gs_namePlayer = 0;
             }
@@ -827,34 +827,34 @@ s32 GS_PlayerSetup( void ) {
         for ( i = 0; i < D_8005C161; i++ ) {
             team = ( D_8005C0E4[i] >> 4 ) & 7;
             if ( team != 0 && !( D_8005C0E4[i] & 0x80 ) && D_8009D098.unk_08[team - 1].name[0] != 0xFFFF ) {
-                func_80029088( &D_800F8094, i * 62 + 0x2F, 0x85, 8, D_8009D098.unk_08[team - 1].name );
+                Txt_DrawGlyphs( &D_800F8094, i * 62 + 0x2F, 0x85, 8, D_8009D098.unk_08[team - 1].name );
             }
         }
         if ( D_8005C160 == 0 ) {
             for ( i = 0; i < D_8005C161; i++ ) {
                 if ( D_800DF5D0[i] != 0 ) {
-                    func_8002DF3C( 0x9CF, i * 62 + 0x2B, 0x99 );
+                    Draw_Image( 0x9CF, i * 62 + 0x2B, 0x99 );
                     if ( D_800DF5D0[i] / 10 != 0 ) {
-                        func_8002DF3C( gs_handicapDigits[D_800DF5D0[i] / 10], i * 62 + 0x3F, 0xA1 );
+                        Draw_Image( gs_handicapDigits[D_800DF5D0[i] / 10], i * 62 + 0x3F, 0xA1 );
                     }
-                    func_8002DF3C( gs_handicapDigits[D_800DF5D0[i] % 10], i * 62 + 0x47, 0xA1 );
+                    Draw_Image( gs_handicapDigits[D_800DF5D0[i] % 10], i * 62 + 0x47, 0xA1 );
                 }
             }
         }
         if ( gs_nameEntryStep == 2 && D_8005C160 == 0 && !( D_8005C0E4[gs_namePlayer] & 0x80 ) ) {
-            func_8002DF3C( 0x9CF, gs_namePlayer * 62 + 0x2B, 0x99 );
+            Draw_Image( 0x9CF, gs_namePlayer * 62 + 0x2B, 0x99 );
             if ( D_800DF5D0[gs_namePlayer] / 10 != 0 ) {
-                func_8002DF3C( gs_handicapDigits[D_800DF5D0[gs_namePlayer] / 10], gs_namePlayer * 62 + 0x3F,
+                Draw_Image( gs_handicapDigits[D_800DF5D0[gs_namePlayer] / 10], gs_namePlayer * 62 + 0x3F,
                                0xA1 );
             }
-            func_8002DF3C( gs_handicapDigits[D_800DF5D0[gs_namePlayer] % 10], gs_namePlayer * 62 + 0x47,
+            Draw_Image( gs_handicapDigits[D_800DF5D0[gs_namePlayer] % 10], gs_namePlayer * 62 + 0x47,
                            0xA1 );
-            func_8002DF3C( 0x9D0, gs_namePlayer * 62 + 0x51, 0xA1 );
-            func_8002DF3C( 0x9D1, gs_namePlayer * 62 + 0x2F, 0xA1 );
+            Draw_Image( 0x9D0, gs_namePlayer * 62 + 0x51, 0xA1 );
+            Draw_Image( 0x9D1, gs_namePlayer * 62 + 0x2F, 0xA1 );
             if ( ( D_800E4D62 & R_CBUTTONS ) || ( ( D_800994BC & R_CBUTTONS ) && gs_cHeldFrames >= 9 ) ) {
                 gs_cHeldFrames = 0;
-                func_80037870( SE_CURSOR, SE_NO_REUSE );
-                func_8002DF3C( 0x9D2, gs_namePlayer * 62 + 0x51, 0xA1 );
+                Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
+                Draw_Image( 0x9D2, gs_namePlayer * 62 + 0x51, 0xA1 );
                 D_800DF5D0[gs_namePlayer] += 5;
                 if ( D_800DF5D0[gs_namePlayer] >= 0x60 ) {
                     D_800DF5D0[gs_namePlayer] = 0;
@@ -862,8 +862,8 @@ s32 GS_PlayerSetup( void ) {
             }
             if ( ( D_800E4D62 & L_CBUTTONS ) || ( ( D_800994BC & L_CBUTTONS ) && gs_cHeldFrames >= 9 ) ) {
                 gs_cHeldFrames = 0;
-                func_80037870( SE_CURSOR, SE_NO_REUSE );
-                func_8002DF3C( 0x9D3, gs_namePlayer * 62 + 0x2F, 0xA1 );
+                Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
+                Draw_Image( 0x9D3, gs_namePlayer * 62 + 0x2F, 0xA1 );
                 D_800DF5D0[gs_namePlayer] -= 5;
                 if ( D_800DF5D0[gs_namePlayer] < 0 ) {
                     D_800DF5D0[gs_namePlayer] = 0x5F;
@@ -878,9 +878,9 @@ s32 GS_PlayerSetup( void ) {
     }
 
     if ( gs_nameEntryStep == 4 || gs_nameEntryStep == 6 || gs_nameEntryStep == 7 || gs_nameEntryStep == 9 ) {
-        func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
+        Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
         if ( gs_nameEntryStep == 9 ) {
-            gs_clearRecordAnswer = func_80036E60( 0x94B, PROMPT_CHOICE2_H );
+            gs_clearRecordAnswer = Save_ShowPrompt( 0x94B, PROMPT_CHOICE2_H );
         }
     }
     func_8003893C( gs_setupMenu, 0x15, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
@@ -906,23 +906,23 @@ s32 GS_PlayerSetup( void ) {
 
     if ( gs_nameEntryStep == 4 ) {
         Txt_LoadGlyphSheet( &D_800F8094 );
-        func_80029088( &D_800F8094, 0x40, 0x40, 0xA,
+        Txt_DrawGlyphs( &D_800F8094, 0x40, 0x40, 0xA,
                        D_8009D098.unk_08[( ( D_8005C0E4[gs_namePlayer] >> 4 ) & 7 ) - 1].name );
         if ( gs_nameLength < 5 ) {
-            func_8002E4B0( 0xA5A, gs_nameLength * 10 + 0x40, 0x40, D_8009CFB0, 1.0f, 1.0f );
+            Draw_ImageScaled( 0xA5A, gs_nameLength * 10 + 0x40, 0x40, D_8009CFB0, 1.0f, 1.0f );
             if ( gs_nameLength + 1 < 5 ) {
-                func_8002E4B0( 0xA5A, ( gs_nameLength + 1 ) * 10 + 0x40, 0x40, D_8009CFB0, 1.0f, 1.0f );
+                Draw_ImageScaled( 0xA5A, ( gs_nameLength + 1 ) * 10 + 0x40, 0x40, D_8009CFB0, 1.0f, 1.0f );
             }
         }
     }
     switch ( gs_nameEntryStep ) {
     case 6:
-        if ( func_80036E60( 0x949, PROMPT_ANY_BUTTON ) ) {
+        if ( Save_ShowPrompt( 0x949, PROMPT_ANY_BUTTON ) ) {
             gs_nameEntryStep = 5;
         }
         break;
     case 7:
-        if ( func_80036E60( 0x93F, PROMPT_ANY_BUTTON ) ) {
+        if ( Save_ShowPrompt( 0x93F, PROMPT_ANY_BUTTON ) ) {
             gs_nameEntryStep = 5;
         }
         break;

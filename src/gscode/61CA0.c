@@ -85,7 +85,7 @@ s32 GS_PakCheck( void ) {
             break;
         }
     }
-    func_8002FDE4( 0, 0, 0x140, 0xF0, 0, 0, 0, 0x80 );
+    Draw_FillRect( 0, 0, 0x140, 0xF0, 0, 0, 0, 0x80 );
     switch ( gs_pakCheckStep ) {
     case 0:
         gs_pakCheckFrames++;
@@ -98,7 +98,7 @@ s32 GS_PakCheck( void ) {
             }
             gs_lastContStatus[i] = D_800F7BE8[i].status;
         }
-        if ( func_80036E60( 0x948, 1 ) ) {
+        if ( Save_ShowPrompt( 0x948, 1 ) ) {
             if ( D_800E4FD0[0] == 1 || ( gs_secondController == 1 && D_800E4FD0[1] == 1 ) ) {
                 gs_pakCheckStep = 1;
                 return 0;
@@ -110,25 +110,25 @@ s32 GS_PakCheck( void ) {
             return 0;
         }
         if ( D_800E4FD0[0] ) {
-            func_8002DF3C( 0x945, 0xD0, 0x65 );
+            Draw_Image( 0x945, 0xD0, 0x65 );
         } else {
-            func_8002DF3C( 0x947, 0xD0, 0x65 );
+            Draw_Image( 0x947, 0xD0, 0x65 );
         }
         if ( gs_secondController == 1 ) {
             if ( D_800E4FD0[1] ) {
-                func_8002DF3C( 0x944, 0xD0, 0x75 );
+                Draw_Image( 0x944, 0xD0, 0x75 );
             } else {
-                func_8002DF3C( 0x946, 0xD0, 0x75 );
+                Draw_Image( 0x946, 0xD0, 0x75 );
             }
         }
         if ( D_800E4FD0[0] || ( gs_secondController == 1 && D_800E4FD0[1] ) ) {
-            func_8002DF3C( D_80120660_gscode[gs_pakCheckFrames % 4], 0xB0, 0x65 );
+            Draw_Image( D_80120660_gscode[gs_pakCheckFrames % 4], 0xB0, 0x65 );
         } else {
-            func_8002DF3C( D_80120660_gscode[0], 0xB0, 0x65 );
+            Draw_Image( D_80120660_gscode[0], 0xB0, 0x65 );
         }
         return 0;
     case 1:
-        if ( func_80036E60( 0x940, 0 ) ) {
+        if ( Save_ShowPrompt( 0x940, 0 ) ) {
             gs_pakCheckStep = 2;
         }
         return 0;

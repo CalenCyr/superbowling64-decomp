@@ -12,14 +12,14 @@
 
 /*
 ================
-func_80036E60
+Save_ShowPrompt
 
 Shows the prompt image id, in the way of mode, for one frame: it zooms in, runs, then zooms out. Modes
 PROMPT_CHOICE2_H to PROMPT_CHOICE3 move a blinking cursor over the choices, D_80066C44, until A or Z.
 Returns TRUE in the frame it has closed, or once open in mode PROMPT_OPEN.
 ================
 */
-s32 func_80036E60( s32 id, s32 mode ) {
+s32 Save_ShowPrompt( s32 id, s32 mode ) {
     f32 scale;
     s32 x;
     s32 y;
@@ -42,7 +42,7 @@ s32 func_80036E60( s32 id, s32 mode ) {
             break;
         case PROMPT_ANY_BUTTON:
             if ( D_800E4D62 != 0 ) {
-                func_80037870( SE_DECIDE, 0 );
+                Sound_PlaySe( SE_DECIDE, 0 );
                 D_8005C9BC = PROMPT_CLOSING;
             }
             break;
@@ -53,48 +53,48 @@ s32 func_80036E60( s32 id, s32 mode ) {
             break;
         case PROMPT_CHOICE2_H:
             if ( D_80066C44 == 0 && ( D_800E6758 & R_JPAD ) ) {
-                func_80037870( SE_CURSOR, 0 );
+                Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 1;
             }
             if ( D_80066C44 == 1 && ( D_800E6758 & L_JPAD ) ) {
-                func_80037870( SE_CURSOR, 0 );
+                Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 0;
             }
             if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-                func_80037870( SE_DECIDE, 0 );
+                Sound_PlaySe( SE_DECIDE, 0 );
                 D_8005C9BC = PROMPT_CLOSING;
             }
             break;
         case PROMPT_CHOICE2_V:
             if ( D_80066C44 == 0 && ( D_800E6758 & D_JPAD ) ) {
-                func_80037870( SE_CURSOR, 0 );
+                Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 1;
             }
             if ( D_80066C44 == 1 && ( D_800E6758 & U_JPAD ) ) {
-                func_80037870( SE_CURSOR, 0 );
+                Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 0;
             }
             if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-                func_80037870( SE_DECIDE, 0 );
+                Sound_PlaySe( SE_DECIDE, 0 );
                 D_8005C9BC = PROMPT_CLOSING;
             }
             break;
         case PROMPT_CHOICE3:
             if ( D_80066C44 == 0 && ( D_800E6758 & R_JPAD ) ) {
-                func_80037870( SE_CURSOR, 0 );
+                Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 1;
             } else if ( D_80066C44 == 1 && ( D_800E6758 & L_JPAD ) ) {
-                func_80037870( SE_CURSOR, 0 );
+                Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 0;
             } else if ( D_80066C44 == 1 && ( D_800E6758 & R_JPAD ) ) {
-                func_80037870( SE_CURSOR, 0 );
+                Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 2;
             } else if ( D_80066C44 == 2 && ( D_800E6758 & L_JPAD ) ) {
-                func_80037870( SE_CURSOR, 0 );
+                Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 1;
             }
             if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
-                func_80037870( SE_DECIDE, 0 );
+                Sound_PlaySe( SE_DECIDE, 0 );
                 D_8005C9BC = PROMPT_CLOSING;
             }
             break;
@@ -129,16 +129,16 @@ s32 func_80036E60( s32 id, s32 mode ) {
         scale = 1.0f;
     }
     if ( D_800F80B0[id].refCount == 0 ) {
-        func_80030C04( id, FILE_RAW );
+        Cache_GetFile( id, FILE_RAW );
     }
     image = D_800F80B0[id].data;
     x = ( SCREEN_WIDTH - image->width * scale ) / 2.0f;
     y = ( 200 - image->height ) / 2;
-    func_8002E4B0( id, x, y, 0xFF, scale, 1.0f );
+    Draw_ImageScaled( id, x, y, 0xFF, scale, 1.0f );
 
     if ( D_8005C9BC == PROMPT_RUNNING && mode >= PROMPT_CHOICE2_H ) {
         if ( mode < PROMPT_TIMED_LONG ) {
-            func_8002FDE4( D_800E57E0[D_80066C44] + x, D_800E4D68[D_80066C44] + y, D_800DF590[D_80066C44],
+            Draw_FillRect( D_800E57E0[D_80066C44] + x, D_800E4D68[D_80066C44] + y, D_800DF590[D_80066C44],
                            D_800E6538[D_80066C44], 0, 0xFF, 0, D_8005C9C4 );
             D_8005C9C4 += D_8005C9C5;
             if ( D_8005C9C4 == 0x80 || D_8005C9C4 == 0x40 ) {
@@ -186,7 +186,7 @@ s32 Save_SaveSettings( void ) {
     if ( D_8005C0E0 == 0 ) {
         return FALSE;
     }
-    func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
+    Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
     switch ( D_8005C990 ) {
     case 0:
         D_80064314 = 9;
@@ -203,7 +203,7 @@ s32 Save_SaveSettings( void ) {
         }
         break;
     case 2:
-        if ( func_80036E60( 0x94C, PROMPT_TIMED ) ) {
+        if ( Save_ShowPrompt( 0x94C, PROMPT_TIMED ) ) {
             D_8005C990 = 10;
             D_80066C44 = 0;
         }
@@ -258,21 +258,21 @@ s32 Save_SaveSettings( void ) {
                 D_8005C990 = 11;
             }
         }
-        func_80036E60( 0x95C, PROMPT_OPEN );
+        Save_ShowPrompt( 0x95C, PROMPT_OPEN );
         break;
     case 7:
-        if ( func_80036E60( 0x95C, PROMPT_CLOSE ) ) {
+        if ( Save_ShowPrompt( 0x95C, PROMPT_CLOSE ) ) {
             D_8005C990 = 0;
             return FALSE;
         }
         break;
     case 8:
-        if ( func_80036E60( 0x959, PROMPT_TIMED ) ) {
+        if ( Save_ShowPrompt( 0x959, PROMPT_TIMED ) ) {
             D_8005C990 = 9;
         }
         break;
     case 9:
-        if ( func_80036E60( 0x95A, PROMPT_ANY_BUTTON ) ) {
+        if ( Save_ShowPrompt( 0x95A, PROMPT_ANY_BUTTON ) ) {
             D_8005C990 = 0;
         }
         break;
@@ -284,7 +284,7 @@ s32 Save_SaveSettings( void ) {
         D_800E4D68[0] = 0x2A;
         D_800E57E0[1] = 0x6E;
         D_800E4D68[1] = 0x2A;
-        if ( func_80036E60( 0x95B, PROMPT_CHOICE2_H ) ) {
+        if ( Save_ShowPrompt( 0x95B, PROMPT_CHOICE2_H ) ) {
             if ( D_80066C44 == 0 ) {
                 D_8005C990 = 9;
             }
@@ -302,7 +302,7 @@ s32 Save_SaveSettings( void ) {
         D_800E4D68[0] = 0x2A;
         D_800E57E0[1] = 0x66;
         D_800E4D68[1] = 0x2A;
-        if ( func_80036E60( 0x958, PROMPT_CHOICE2_H ) ) {
+        if ( Save_ShowPrompt( 0x958, PROMPT_CHOICE2_H ) ) {
             if ( D_80066C44 == 0 ) {
                 D_8005C990 = 9;
             }

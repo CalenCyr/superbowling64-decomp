@@ -31,7 +31,7 @@ Allocates and loads file index, from the host when host files are on, with one r
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: exact except its format string, which it shares with func_80030C04: the unit's .rodata stays asm until both are C
+// NON_MATCHING: exact except its format string, which it shares with Cache_GetFile: the unit's .rodata stays asm until both are C
 inline void Cache_LoadFile( s16 index ) {
     u8 name[0x18];
     u32 size;
@@ -58,7 +58,7 @@ INCLUDE_ASM("asm/nonmatchings/BEF0", Cache_LoadFile);
 
 /*
 ================
-func_80030C04
+Cache_GetFile
 
 Returns file index, loading it and relocating its offsets by type when it is not in the cache.
 ================
@@ -66,7 +66,7 @@ Returns file index, loading it and relocating its offsets by type when it is not
 #ifdef NON_MATCHING
 // NON_MATCHING: register/schedule; in the two Cache_LoadFile expansions of the part loop, retail forms the address of D_800A30C0[index].rawSize in $a3 (lui/addiu, then addu) where this folds it into the load (lui $at); everything else is exact. Tried: the
 // two reference indices read into s16 locals first (worse)
-void *func_80030C04( s16 index, s16 type ) {
+void *Cache_GetFile( s16 index, s16 type ) {
     fileType1_t *file1;
     fileType1Part_t *part;
     fileRefA_t *refA;
@@ -120,7 +120,7 @@ void *func_80030C04( s16 index, s16 type ) {
     return D_800F80B0[index].data;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/BEF0", func_80030C04);
+INCLUDE_ASM("asm/nonmatchings/BEF0", Cache_GetFile);
 #endif
 
 /*

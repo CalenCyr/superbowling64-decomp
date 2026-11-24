@@ -17,9 +17,9 @@ extern u8 *D_800619E0;              /* CI4 glyph sheet, 64 pixels wide, 8x16 gly
 void Txt_SetupFont( Gfx **gdl, s32 palette );
 void Txt_LoadFont( Gfx **gdl );
 void Txt_SetTint( Gfx **gdl, u8 mode, u8 primR, u8 primG, u8 primB, u8 envR, u8 envG, u8 envB, u8 primA );
-void func_80028DA4( Gfx **gdl, s16 x, s16 y, u8 *str );
+void Txt_DrawString( Gfx **gdl, s16 x, s16 y, u8 *str );
 void Txt_LoadGlyphSheet( Gfx **gdl );
-void func_80029088( Gfx **gdl, s16 x, s16 y, u16 advance, u16 *glyphs );
+void Txt_DrawGlyphs( Gfx **gdl, s16 x, s16 y, u16 advance, u16 *glyphs );
 void Txt_NumberToGlyphs( u16 *glyphs, s32 value, s32 digits );
 
 #endif
