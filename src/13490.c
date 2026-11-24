@@ -61,6 +61,8 @@ on the left of the first row, the exit on the right of the last.
 // them (declaration order of the locals tried, no effect; a stride = height * 2 + 1 local is much worse).
 // Permuter clue (target-only scoring, best 325 from 415): reusing a u32 local for height * 2 in the two final
 // stores (maze[row + 1], ... * (row + 1)) moves allocation toward retail; the inner-loop a0/a1 swap remains.
+// Also checked: wall as the best-wall search counter (worse), bestWall = 0 before best = 0, weight[j] > best and
+// from == set[j] (no effect).
 void func_80038214( u32 width, u32 height, u8 *maze ) {
     s32 i;
     s32 j;
@@ -553,6 +555,9 @@ of them when all is set.
 // computer flag s0, player * 2 s5 and the icons s6 (this draft s6, s0, s5). Declaration order and spellings of
 // player (ternary, if/else, u8) don't change it. Permuter (target-only scoring, 8 min): nothing below the base
 // score 100.
+// Also checked: the single-plate case first (mode != 1, worse), player = ( i == 1 ) * 2, player in the block's
+// scope, player++ for the second plate (worse), frameX = x after the frame-3 header (worse), the helper indexing
+// D_8005CAE4 without its icons local (worse here and in the other callers).
 void func_80039700( u8 mode, u8 all, s16 x, s16 y ) {
     s32 i;
     s32 frame;
