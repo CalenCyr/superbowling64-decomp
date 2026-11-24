@@ -59,9 +59,6 @@ func_8011B214_gscode
 Frame of the pak check, over a dimmed screen; returns 1 when it is over.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: expression shape; retail computes (status ^ old) & (status & 3), which gcc folds here to
-// status & ~old & 3 (or keeps as ((status ^ old) & status) & 3); every other instruction is the same
 s32 func_8011B214_gscode( void ) {
     s32 i;
 
@@ -93,7 +90,7 @@ s32 func_8011B214_gscode( void ) {
     case 0:
         D_80120668_gscode++;
         for ( i = 0; i < 2; i++ ) {
-            if ( ( D_800F7BE8[i].status ^ D_80120A68_gscode[i] ) & ( D_800F7BE8[i].status & 3 ) ) {
+            if ( ( D_800F7BE8[i].status ^ D_80120A68_gscode[i] ) & ( CONT_CARD_ON | CONT_CARD_PULL ) & D_800F7BE8[i].status ) {
                 if ( !D_800DF680[i] ) {
                     D_800DF680[i] = 8;
                 }
@@ -140,6 +137,3 @@ s32 func_8011B214_gscode( void ) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gscode/61CA0", func_8011B214_gscode);
-#endif
