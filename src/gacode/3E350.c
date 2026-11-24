@@ -3339,9 +3339,9 @@ modes that have one), and a value of the lane's current unk_B10 step.
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: register allocation only; retail gives row s2, lane s3, player s4 and &D_800F8094 s5 (here
-// player s2, &D_800F8094 s3, row s4, lane s5); instructions, constants and relocations are the same. The
-// permuter's best (score 110 against 365) sets row = 18 after the TABLE sprintf: fewer moves differ, none closed;
-// a target-only-scoring rerun found only states equal to the base (365)
+// player s2, &D_800F8094 s3, row s4, lane s5); instructions, constants, relocations and schedule are the same
+// (the line counter stepped per line puts the TABLE row's increment after its sprintf, as retail). Tried: row
+// as u8/s16, lane as s32, the two locals' declaration order
 void func_8011CF30_gacode( s32 player ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
     u8 lane;
@@ -3350,17 +3350,20 @@ void func_8011CF30_gacode( s32 player ) {
     vec3_t target;
 
     lane = pl->laneIndex;
+    row = 14;
     sprintf( text, "SL[%8.4f]", D_8012D220_gacode->unk_10 );
-    func_80028DA4( &D_800F8094, lane * 144 + 16, 128, text );
+    func_80028DA4( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+    row++;
     sprintf( text, "FRM[%3d]", pl->obj->frame );
-    func_80028DA4( &D_800F8094, lane * 144 + 16, 136, text );
+    func_80028DA4( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+    row++;
     sprintf( text, "T[%6.2f]R[%6.2f]", pl->character.unk_2C, pl->character.unk_30 );
-    func_80028DA4( &D_800F8094, lane * 144 + 16, 144, text );
-    row = 17;
+    func_80028DA4( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+    row++;
     if ( D_8012CDF4_gacode == func_801156D8_gacode || D_8012CDF4_gacode == func_801155BC_gacode ) {
-        row = 18;
         sprintf( text, "TABLE[%d]", D_800DF59C.unk_04[D_8009D19C[player]] );
-        func_80028DA4( &D_800F8094, lane * 144 + 16, 152, text );
+        func_80028DA4( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
+        row++;
     }
     if ( pl->lane->unk_B10 == func_80117BDC_gacode ) {
         sprintf( text, "ATX[%6.2f]", pl->character.unk_14[0] );
