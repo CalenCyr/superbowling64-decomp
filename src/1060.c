@@ -152,7 +152,7 @@ void Main_Thread( void *arg ) {
     osInvalDCache( boot_staticFile, knstatic_ROM_END - knstatic_ROM_START );
     FAT_ReadFile( "KNSTATICSYS", boot_staticFile, FAT_GetFileSize( "KNSTATICSYS" ), 0 );
     Cont_Init();
-    osContStartReadData( &D_80066B38 );
+    osContStartReadData( &cont_siQueue );
     osCreateThread( &boot_contThread, 2, func_80028064, arg, &boot_contStack[CONT_STACK_SIZE / sizeof( u64 )], 0x11 );
     osStartThread( &boot_contThread );
     osCreateThread( &boot_gameThread, 5, Game_Thread, arg, &boot_gameStack[GAME_STACK_SIZE / sizeof( u64 )], 8 );
@@ -169,12 +169,12 @@ void Main_Thread( void *arg ) {
             }
             break;
         case SCHED_MSG_RETRACE:
-            if ( D_8005B0F4 & 1 ) {
+            if ( sched_frameCount & 1 ) {
                 osSendMesg( &sound_frameQueue, &msg, OS_MESG_NOBLOCK );
             }
             osSendMesg( &sched_retraceQueue, &sched_msgRetrace, OS_MESG_NOBLOCK );
-            ++D_8005B0F4;
-            if ( D_8005B0F4 % 60 == 0 ) {
+            ++sched_frameCount;
+            if ( sched_frameCount % 60 == 0 ) {
                 sched_frameRate = sched_swaps;
                 sched_swaps = 0;
             }
@@ -226,7 +226,7 @@ void Main_Thread( void *arg ) {
                 sched_nextFb = sched_gfxFrames[sched_runList].fbIndex;
             }
             sched_rdpTime = OS_CYCLES_TO_USEC( osGetTime() - sched_gfxStartTime );
-            if ( D_8005C0BC != 0 && game_scene != 1 && ( D_800994BC & Z_TRIG ) && ( D_800E4D62 & L_TRIG ) ) {
+            if ( D_8005C0BC != 0 && game_scene != 1 && ( cont_allHeld & Z_TRIG ) && ( cont_allPressed & L_TRIG ) ) {
                 Dbg_ScreenShot();
             }
             break;
@@ -293,11 +293,11 @@ void Main_Thread( void *arg ) {
 ================
 func_80026B10
 
-Sets D_800DF680 of both ports to 8.
+Sets cont_rumble of both ports to 8.
 ================
 */
 inline void func_80026B10( void ) {
-    D_800DF680[0] = D_800DF680[1] = 8;
+    cont_rumble[0] = cont_rumble[1] = 8;
 }
 
 /*
@@ -362,47 +362,47 @@ void Game_Thread( void *arg ) {
         }
 
         if ( game_cursorLocked == 0 ) {
-            if ( D_8009D05C > 60 ) {
+            if ( cont_allStickX > 60 ) {
                 game_cursorX += game_cursorSpeeds[game_cursorSpeed][3];
-            } else if ( D_8009D05C > 45 ) {
+            } else if ( cont_allStickX > 45 ) {
                 game_cursorX += game_cursorSpeeds[game_cursorSpeed][2];
-            } else if ( D_8009D05C > 35 ) {
+            } else if ( cont_allStickX > 35 ) {
                 game_cursorX += game_cursorSpeeds[game_cursorSpeed][1];
-            } else if ( D_8009D05C > 25 ) {
+            } else if ( cont_allStickX > 25 ) {
                 game_cursorX += game_cursorSpeeds[game_cursorSpeed][0];
-            } else if ( D_8009D05C > 10 ) {
+            } else if ( cont_allStickX > 10 ) {
                 game_cursorX += 1;
-            } else if ( D_8009D05C < -9 ) {
-                if ( D_8009D05C > -25 ) {
+            } else if ( cont_allStickX < -9 ) {
+                if ( cont_allStickX > -25 ) {
                     game_cursorX -= 1;
-                } else if ( D_8009D05C > -35 ) {
+                } else if ( cont_allStickX > -35 ) {
                     game_cursorX -= game_cursorSpeeds[game_cursorSpeed][0];
-                } else if ( D_8009D05C > -45 ) {
+                } else if ( cont_allStickX > -45 ) {
                     game_cursorX -= game_cursorSpeeds[game_cursorSpeed][1];
-                } else if ( D_8009D05C > -60 ) {
+                } else if ( cont_allStickX > -60 ) {
                     game_cursorX -= game_cursorSpeeds[game_cursorSpeed][2];
                 } else {
                     game_cursorX -= game_cursorSpeeds[game_cursorSpeed][3];
                 }
             }
-            if ( D_800DF628 > 60 ) {
+            if ( cont_allStickY > 60 ) {
                 game_cursorY -= game_cursorSpeeds[game_cursorSpeed][3];
-            } else if ( D_800DF628 > 45 ) {
+            } else if ( cont_allStickY > 45 ) {
                 game_cursorY -= game_cursorSpeeds[game_cursorSpeed][2];
-            } else if ( D_800DF628 > 35 ) {
+            } else if ( cont_allStickY > 35 ) {
                 game_cursorY -= game_cursorSpeeds[game_cursorSpeed][1];
-            } else if ( D_800DF628 > 25 ) {
+            } else if ( cont_allStickY > 25 ) {
                 game_cursorY -= game_cursorSpeeds[game_cursorSpeed][0];
-            } else if ( D_800DF628 > 10 ) {
+            } else if ( cont_allStickY > 10 ) {
                 game_cursorY -= 1;
-            } else if ( D_800DF628 < -9 ) {
-                if ( D_800DF628 > -25 ) {
+            } else if ( cont_allStickY < -9 ) {
+                if ( cont_allStickY > -25 ) {
                     game_cursorY += 1;
-                } else if ( D_800DF628 > -35 ) {
+                } else if ( cont_allStickY > -35 ) {
                     game_cursorY += game_cursorSpeeds[game_cursorSpeed][0];
-                } else if ( D_800DF628 > -45 ) {
+                } else if ( cont_allStickY > -45 ) {
                     game_cursorY += game_cursorSpeeds[game_cursorSpeed][1];
-                } else if ( D_800DF628 > -60 ) {
+                } else if ( cont_allStickY > -60 ) {
                     game_cursorY += game_cursorSpeeds[game_cursorSpeed][2];
                 } else {
                     game_cursorY += game_cursorSpeeds[game_cursorSpeed][3];
@@ -543,19 +543,19 @@ void Game_Thread( void *arg ) {
             break;
         }
 
-        if ( D_8005C0EC != 0 ) {
+        if ( cont_demoMode != 0 ) {
             D_8005C190 = DRAW2D_FILL;
             Draw_ImageScaled( 0xA71, 80, 120, game_pulseAlpha, 1.0f, 1.0f );
             Draw_Image( 0x87F, 200, 152 );
             Draw_Image( game_demoTitles[game_demo], 200, 200 );
-            if ( --D_800693B0 < 40 ) {
+            if ( --cont_demoFrames < 40 ) {
                 game_leaveState = 1;
                 if ( game_fade >= 248 ) {
                     func_80112A74_gacode();
                     game_leaveState = 2;
                     game_fade = 263;
                     game_scene = SCENE_OPCODE;
-                    D_8005C0EC = 0;
+                    cont_demoMode = 0;
                     save_data.music = 1;
                 }
             }

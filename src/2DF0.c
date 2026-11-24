@@ -23,12 +23,12 @@ Sets up the controllers and the Rumble Paks of both ports.
 void Cont_Init( void ) {
     OSContPad pads[MAXCONTROLLERS];
 
-    osCreateMesgQueue( &D_80066B38, &D_800E4FCC, 1 );
-    osSetEventMesg( OS_EVENT_SI, &D_80066B38, (OSMesg)D_800619B8 );
-    osContInit( &D_80066B38, &D_8005B190, D_800F7BE8 );
+    osCreateMesgQueue( &cont_siQueue, &cont_siMsgs, 1 );
+    osSetEventMesg( OS_EVENT_SI, &cont_siQueue, (OSMesg)D_800619B8 );
+    osContInit( &cont_siQueue, &cont_standardMask, cont_status );
     osContSetCh( NUM_PLAYERS );
-    D_800E4FD0[1] = FALSE;
-    D_800E4FD0[0] = FALSE;
+    cont_hasRumble[1] = FALSE;
+    cont_hasRumble[0] = FALSE;
     Rumble_Probe( 0 );
     Rumble_Probe( 1 );
 }
@@ -44,14 +44,14 @@ Looks for a Rumble Pak on port chan, and stops it if there is one.
 ================
 */
 void Rumble_Probe( s32 chan ) {
-    if ( osMotorInit( &D_80066B38, &D_800E6400[chan], chan ) == 0 ) {
-        D_800E4FD0[chan] = TRUE;
+    if ( osMotorInit( &cont_siQueue, &cont_rumblePfs[chan], chan ) == 0 ) {
+        cont_hasRumble[chan] = TRUE;
         Rumble_Stop( chan );
     } else {
-        D_800E4FD0[chan] = FALSE;
+        cont_hasRumble[chan] = FALSE;
     }
     D_80066C24[chan] = 0;
-    D_800DF680[chan] = 0;
+    cont_rumble[chan] = 0;
 }
 
 /*
@@ -62,8 +62,8 @@ Starts the Rumble Pak of port chan, if it has one.
 ================
 */
 void Rumble_Start( s32 chan ) {
-    if ( D_800E4FD0[chan] == TRUE ) {
-        osMotorStart( &D_800E6400[chan] );
+    if ( cont_hasRumble[chan] == TRUE ) {
+        osMotorStart( &cont_rumblePfs[chan] );
     }
 }
 
@@ -75,8 +75,8 @@ Stops the Rumble Pak of port chan, if it has one.
 ================
 */
 void Rumble_Stop( s32 chan ) {
-    if ( D_800E4FD0[chan] == TRUE ) {
-        osMotorStop( &D_800E6400[chan] );
+    if ( cont_hasRumble[chan] == TRUE ) {
+        osMotorStop( &cont_rumblePfs[chan] );
     }
 }
 
@@ -94,101 +94,101 @@ void Cont_ReadPads( void ) {
     OSContPad *pad;
 
     for ( i = 0; i < NUM_PLAYERS; i++ ) {
-        if ( ( ( D_8005B190 >> i ) & 1 ) && ( D_800F7BE8[i].type & CONT_TYPE_MASK ) == CONT_TYPE_NORMAL ) {
-            pad = &D_80066B58[i];
-            D_800692D0[i] = 0;
-            D_800A2FD8[i] = 0;
+        if ( ( ( cont_standardMask >> i ) & 1 ) && ( cont_status[i].type & CONT_TYPE_MASK ) == CONT_TYPE_NORMAL ) {
+            pad = &cont_pads[i];
+            cont_stickX[i] = 0;
+            cont_stickY[i] = 0;
             if ( pad->errno != 0 ) {
-                D_800E57E4[i] = 0;
+                cont_held[i] = 0;
             } else {
-                D_800E57E4[i] = pad->button;
+                cont_held[i] = pad->button;
                 if ( pad->stick_x < -STICK_DEADZONE || pad->stick_x > STICK_DEADZONE ) {
-                    D_800692D0[i] = pad->stick_x;
+                    cont_stickX[i] = pad->stick_x;
                 }
                 if ( pad->stick_y < -STICK_DEADZONE || pad->stick_y > STICK_DEADZONE ) {
-                    D_800A2FD8[i] = pad->stick_y;
+                    cont_stickY[i] = pad->stick_y;
                 }
             }
-            D_800E44E0[i] = D_800E57E4[i] & ( D_800E57E4[i] ^ D_8009D198[i] );
-            D_8009D198[i] = D_800E57E4[i];
-            D_8005B1A0[i] = D_800619B0[i];
-            D_800619B0[i] = 0;
-            if ( D_800692D0[i] > STICK_DPAD ) {
-                D_800619B0[i] = R_JPAD;
+            cont_pressed[i] = cont_held[i] & ( cont_held[i] ^ cont_lastHeld[i] );
+            cont_lastHeld[i] = cont_held[i];
+            cont_lastStickDpad[i] = cont_stickDpad[i];
+            cont_stickDpad[i] = 0;
+            if ( cont_stickX[i] > STICK_DPAD ) {
+                cont_stickDpad[i] = R_JPAD;
             }
-            if ( D_800692D0[i] < -STICK_DPAD ) {
-                D_800619B0[i] |= L_JPAD;
+            if ( cont_stickX[i] < -STICK_DPAD ) {
+                cont_stickDpad[i] |= L_JPAD;
             }
-            if ( D_800A2FD8[i] > STICK_DPAD ) {
-                D_800619B0[i] |= U_JPAD;
+            if ( cont_stickY[i] > STICK_DPAD ) {
+                cont_stickDpad[i] |= U_JPAD;
             }
-            if ( D_800A2FD8[i] < -STICK_DPAD ) {
-                D_800619B0[i] |= D_JPAD;
+            if ( cont_stickY[i] < -STICK_DPAD ) {
+                cont_stickDpad[i] |= D_JPAD;
             }
-            D_800E6760[i] = D_800619B0[i] & ( D_800619B0[i] ^ D_8005B1A0[i] );
-            D_800E6760[i] |= D_800E44E0[i] & DPAD_BUTTONS;
-            if ( ( D_800E57E4[i] & DPAD_BUTTONS ) || D_800619B0[i] != 0 ) {
-                D_8005B1A4[i]++;
-                if ( D_800E6760[i] == 0 && D_8005B1A4[i] > REPEAT_DELAY && ( D_8005B1A4[i] & 3 ) == 0 ) {
-                    if ( D_800E57E4[i] & DPAD_BUTTONS ) {
-                        D_800E6760[i] = D_800E57E4[i] & DPAD_BUTTONS;
+            cont_dpadRepeat[i] = cont_stickDpad[i] & ( cont_stickDpad[i] ^ cont_lastStickDpad[i] );
+            cont_dpadRepeat[i] |= cont_pressed[i] & DPAD_BUTTONS;
+            if ( ( cont_held[i] & DPAD_BUTTONS ) || cont_stickDpad[i] != 0 ) {
+                cont_holdFrames[i]++;
+                if ( cont_dpadRepeat[i] == 0 && cont_holdFrames[i] > REPEAT_DELAY && ( cont_holdFrames[i] & 3 ) == 0 ) {
+                    if ( cont_held[i] & DPAD_BUTTONS ) {
+                        cont_dpadRepeat[i] = cont_held[i] & DPAD_BUTTONS;
                     } else {
-                        D_800E6760[i] = D_800619B0[i];
+                        cont_dpadRepeat[i] = cont_stickDpad[i];
                     }
                 }
             } else {
-                D_8005B1A4[i] = 0;
+                cont_holdFrames[i] = 0;
             }
         } else {
-            D_800E44E0[i] = 0;
-            D_800E57E4[i] = 0;
+            cont_pressed[i] = 0;
+            cont_held[i] = 0;
             if ( i == 0 ) {
-                D_8005B194 = 1;
+                cont_noController = 1;
             }
         }
     }
-    if ( D_800E57E4[0] != 0 ) {
-        D_800994BC = D_800E57E4[0];
+    if ( cont_held[0] != 0 ) {
+        cont_allHeld = cont_held[0];
     } else {
-        D_800994BC = D_800E57E4[1];
+        cont_allHeld = cont_held[1];
     }
-    if ( D_800E44E0[0] != 0 ) {
-        D_800E4D62 = D_800E44E0[0];
+    if ( cont_pressed[0] != 0 ) {
+        cont_allPressed = cont_pressed[0];
     } else {
-        D_800E4D62 = D_800E44E0[1];
+        cont_allPressed = cont_pressed[1];
     }
-    if ( D_800E6760[0] != 0 ) {
-        D_800E6758 = D_800E6760[0];
+    if ( cont_dpadRepeat[0] != 0 ) {
+        cont_allDpadRepeat = cont_dpadRepeat[0];
     } else {
-        D_800E6758 = D_800E6760[1];
+        cont_allDpadRepeat = cont_dpadRepeat[1];
     }
-    if ( D_800692D0[0] >= -5 && D_800692D0[0] <= 5 ) {
-        D_8009D05C = D_800692D0[1];
+    if ( cont_stickX[0] >= -5 && cont_stickX[0] <= 5 ) {
+        cont_allStickX = cont_stickX[1];
     } else {
-        D_8009D05C = D_800692D0[0];
+        cont_allStickX = cont_stickX[0];
     }
-    if ( D_800A2FD8[0] >= -5 && D_800A2FD8[0] <= 5 ) {
-        D_800DF628 = D_800A2FD8[1];
+    if ( cont_stickY[0] >= -5 && cont_stickY[0] <= 5 ) {
+        cont_allStickY = cont_stickY[1];
     } else {
-        D_800DF628 = D_800A2FD8[0];
+        cont_allStickY = cont_stickY[0];
     }
-    if ( D_8005C0EC != 0 ) {
-        if ( ( D_800E4D62 & START_BUTTON ) && D_800693B0 > 40 ) {
+    if ( cont_demoMode != 0 ) {
+        if ( ( cont_allPressed & START_BUTTON ) && cont_demoFrames > 40 ) {
             Sound_PlaySe( 1, 0 );
-            D_800693B0 = 40;
+            cont_demoFrames = 40;
         }
-        D_800E4D62 &= ~START_BUTTON;
-        D_800E57E4[0] &= ~U_CBUTTONS;
-        D_800E57E4[1] &= ~U_CBUTTONS;
-        if ( ( D_8005B0F4 & 0x7E ) == 0 ) {
-            D_800E44E0[0] = R_TRIG;
+        cont_allPressed &= ~START_BUTTON;
+        cont_held[0] &= ~U_CBUTTONS;
+        cont_held[1] &= ~U_CBUTTONS;
+        if ( ( sched_frameCount & 0x7E ) == 0 ) {
+            cont_pressed[0] = R_TRIG;
         } else {
-            D_800E44E0[0] = 0;
+            cont_pressed[0] = 0;
         }
-        if ( ( D_8005B0F4 & 0x7E ) == 0x3E ) {
-            D_800E44E0[1] |= R_TRIG;
+        if ( ( sched_frameCount & 0x7E ) == 0x3E ) {
+            cont_pressed[1] |= R_TRIG;
         } else {
-            D_800E44E0[1] = 0;
+            cont_pressed[1] = 0;
         }
     }
 }
@@ -197,16 +197,16 @@ void Cont_ReadPads( void ) {
 ================
 Cont_FindStandard
 
-Sets a bit of D_8005B190 for each port that holds a standard controller.
+Sets a bit of cont_standardMask for each port that holds a standard controller.
 ================
 */
 void Cont_FindStandard( void ) {
     s32 i;
 
-    D_8005B190 = 0;
+    cont_standardMask = 0;
     for ( i = 0; i < NUM_PLAYERS; i++ ) {
-        if ( D_800F7BE8[i].errno == 0 && ( D_800F7BE8[i].type & CONT_TYPE_MASK ) == CONT_TYPE_NORMAL ) {
-            D_8005B190 |= 1 << i;
+        if ( cont_status[i].errno == 0 && ( cont_status[i].type & CONT_TYPE_MASK ) == CONT_TYPE_NORMAL ) {
+            cont_standardMask |= 1 << i;
         }
     }
 }

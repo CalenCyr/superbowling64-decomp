@@ -149,17 +149,17 @@ s32 GA_RunPlayer( s32 player ) {
     stick[0] = 0;
     if ( game_leaveState == 0 ) {
         if ( port >= 0 ) {
-            stick[1] = D_800A2FD8[port];
-            stick[0] = D_800692D0[port];
+            stick[1] = cont_stickY[port];
+            stick[0] = cont_stickX[port];
             if ( ( stick[1] < 0 ? -stick[1] : stick[1] ) * 2 <= ( stick[0] < 0 ? -stick[0] : stick[0] ) ) {
                 stick[1] = 0;
             } else if ( ( stick[0] < 0 ? -stick[0] : stick[0] ) * 2 <= ( stick[1] < 0 ? -stick[1] : stick[1] ) ) {
                 stick[0] = 0;
             }
-            if ( D_800E44E0[port] & 0x4000 ) {
+            if ( cont_pressed[port] & 0x4000 ) {
                 input = -1;
             } else {
-                input = ( D_800E44E0[port] & 0xA000 ) != 0;
+                input = ( cont_pressed[port] & 0xA000 ) != 0;
             }
         } else {
             input = GA_CpuInput( pl, player );
@@ -239,14 +239,14 @@ void GA_PhysicsStep( s32 player, s32 port ) {
                         GA_PlayLaneSound( pl->laneIndex, pl->lane->bounceSound );
                     }
                     if ( port >= 0 ) {
-                        D_800DF680[port] = pl->lane->bounceSound == ga_stage->unk_1E[1] ? 6 : 4;
+                        cont_rumble[port] = pl->lane->bounceSound == ga_stage->unk_1E[1] ? 6 : 4;
                         D_8006940D[port] = 10;
                     }
                 }
                 if ( ( ( lane->motion[i].flags >> 2 ) & 1 ) || ( ( lane->motion[i].flags >> 6 ) & 1 ) ) {
                     GA_PlayLaneSound( pl->laneIndex, lane->spots[i].pos[1] <= -190.0f ? 0x4C : 0x2F );
                     if ( port >= 0 && ( ( lane->motion[i].flags >> 6 ) & 1 ) ) {
-                        D_800DF680[port] = 5;
+                        cont_rumble[port] = 5;
                         D_8006940D[port] = 10;
                     }
                 }
@@ -254,7 +254,7 @@ void GA_PhysicsStep( s32 player, s32 port ) {
         }
     }
     if ( GA_CollideLane( player, lane->bodies, lane->motion, lane->spots, pl->laneIndex ) && port >= 0 ) {
-        D_800DF680[port] = 5;
+        cont_rumble[port] = 5;
         D_8006940D[port] = 15;
     }
     GA_SettleBodies( lane->bodies, lane->motion, lane->spots );
@@ -1059,7 +1059,7 @@ void GA_ResetLane( s32 player, u8 *pins ) {
     lane->callout = 0;
     lane->inputFunc = GA_InputBeginTurn;
     if ( pl->port >= 0 ) {
-        D_800DF680[pl->port] = 8;
+        cont_rumble[pl->port] = 8;
         D_8006940D[pl->port] = 0;
     }
 }
@@ -1297,7 +1297,7 @@ inline s32 func_80116FF0_gacode( s32 lane, s8 port, f32 x, u8 step ) {
         } else if ( ga_laneAim[lane].unk_06 == step + 1 ) {
             GA_PlayLaneSound( lane, seIds[step - 1] );
             if ( port >= 0 ) {
-                D_800DF680[port] = 8 - step;
+                cont_rumble[port] = 8 - step;
                 D_8006940D[port] = 10;
             }
             ga_laneAim[lane].unk_06 = step;
@@ -1331,7 +1331,7 @@ s32 func_80117124_gacode( s32 player, gaPlayer_t *pl ) {
             if ( ga_laneAim[player].unk_07 == 0 ) {
                 ga_laneAim[player].unk_07 = 1;
                 if ( pl->port >= 0 ) {
-                    D_800DF680[pl->port] = 3;
+                    cont_rumble[pl->port] = 3;
                     D_8006940D[pl->port] = ga_laneAim[player].unk_04;
                 }
             }
@@ -1359,7 +1359,7 @@ s32 func_80117124_gacode( s32 player, gaPlayer_t *pl ) {
                 } else {
                     GA_PlayLaneSound( player, 0x6A );
                     if ( pl->port >= 0 ) {
-                        D_800DF680[pl->port] = 7;
+                        cont_rumble[pl->port] = 7;
                         D_8006940D[pl->port] = 20;
                     }
                 }
@@ -1579,7 +1579,7 @@ s32 GA_InputTakeBall( s32 player, s32 input, s16 stickX, s16 stickY ) {
     pl->lane->motion[0].mass = D_801239E8_gacode[pl->ballWeight];
     pl->lane->bodyObjs[0]->viewMask = pl->obj->viewMask = pl->laneIndex != 0 ? 2 : 1;
     if ( pl->port >= 0 ) {
-        D_800DF680[pl->port] = 8;
+        cont_rumble[pl->port] = 8;
         D_8006940D[pl->port] = 0;
     }
     pl->lane->cameraFunc = func_8011BA8C_gacode;
@@ -1660,7 +1660,7 @@ s32 GA_InputSwing( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( sinf( pl->character.timingAngle ) <= -0.3 ||
-         ( ga_earlyCommit && pl->port >= 0 && ( D_800E57E4[pl->port] & B_BUTTON ) &&
+         ( ga_earlyCommit && pl->port >= 0 && ( cont_held[pl->port] & B_BUTTON ) &&
            pl->obj->frame == pl->character.data->unk_19 ) ||
          ( sinf( pl->character.timingAngle ) <= 0.5 && input == 1 ) ) {
         pl->releaseFrame = pl->obj->frame;
@@ -1751,7 +1751,7 @@ s32 GA_InputRoll( s32 player, s32 input, s16 stickX, s16 stickY ) {
     if ( pl->lane->spots[0].pos[2] <= -1050.0 ) {
         pl->lane->cameraFunc = func_8011BC10_gacode;
     }
-    if ( ga_steerBall && pl->port >= 0 && ( D_800E57E4[pl->port] & Z_TRIG ) ) {
+    if ( ga_steerBall && pl->port >= 0 && ( cont_held[pl->port] & Z_TRIG ) ) {
         pl->lane->motion[0].vel[0] += stickX / 1800.0f;
     }
     if ( pl->lane->spots[0].pos[2] <= -1186.0f ) {
@@ -1856,7 +1856,7 @@ s32 GA_InputReaction( s32 player, s32 input, s16 stickX, s16 stickY ) {
     pl->lane->cameraFunc = func_8011BCA8_gacode;
     pl->lane->timer++;
     if ( pl->obj->frame == pl->character.data->unk_1B[pl->lane->reaction] - 1
-         || ( pl->lane->timer >= 30 && ( D_800E44E0[pl->laneIndex] & ( A_BUTTON | Z_TRIG ) ) ) ) {
+         || ( pl->lane->timer >= 30 && ( cont_pressed[pl->laneIndex] & ( A_BUTTON | Z_TRIG ) ) ) ) {
         pl->lane->timer = 0;
         pl->lane->cameraFunc = func_8011C650_gacode;
         D_8012D8D8_gacode++;
@@ -2094,12 +2094,12 @@ void func_801194D0_gacode( gaPlayer_t *pl ) {
     Draw_Image( 0xAF5, x + 0x20, y );
     Score_DrawNumber( pl->ballWeight + 6, x - 6, 0xD9 );
     Draw_Image( 0xAF3, x + 0x10, 0xD8 );
-    if ( D_800E44E0[pl->port] & L_CBUTTONS ) {
+    if ( cont_pressed[pl->port] & L_CBUTTONS ) {
         Draw_Image( 0xAF6, x, y );
         GA_PlayLaneSound( pl->laneIndex, 0 );
         pl->ballWeight = pl->ballWeight == 0 ? 10 : pl->ballWeight - 1;
     }
-    if ( D_800E44E0[pl->port] & R_CBUTTONS ) {
+    if ( cont_pressed[pl->port] & R_CBUTTONS ) {
         Draw_Image( 0xAF4, x + 0x20, y );
         GA_PlayLaneSound( pl->laneIndex, 0 );
         if ( pl->ballWeight == 10 ) {
@@ -2413,7 +2413,7 @@ void GA_PinEditor( gaPlayer_t *pl ) {
     if ( game_leaveState ) {
         return;
     }
-    if ( D_800E6760[0] & U_JPAD ) {
+    if ( cont_dpadRepeat[0] & U_JPAD ) {
         if ( !ga_editorOnPins ) {
             Sound_PlaySe( 0, 0 );
             ga_editorOnPins = 1;
@@ -2450,7 +2450,7 @@ void GA_PinEditor( gaPlayer_t *pl ) {
         }
     }
     if ( ga_editorOnPins == 1 ) {
-        if ( D_800E6760[0] & D_JPAD ) {
+        if ( cont_dpadRepeat[0] & D_JPAD ) {
             Sound_PlaySe( 0, 0 );
             switch ( ga_editorCursor ) {
                 case 0:
@@ -2479,7 +2479,7 @@ void GA_PinEditor( gaPlayer_t *pl ) {
                     break;
             }
         }
-        if ( D_800E6760[0] & L_JPAD ) {
+        if ( cont_dpadRepeat[0] & L_JPAD ) {
             switch ( ga_editorCursor ) {
                 case 2:
                 case 4:
@@ -2492,7 +2492,7 @@ void GA_PinEditor( gaPlayer_t *pl ) {
                     break;
             }
         }
-        if ( D_800E6760[0] & R_JPAD ) {
+        if ( cont_dpadRepeat[0] & R_JPAD ) {
             switch ( ga_editorCursor ) {
                 case 1:
                 case 3:
@@ -2506,7 +2506,7 @@ void GA_PinEditor( gaPlayer_t *pl ) {
             }
         }
     }
-    if ( D_800E44E0[0] & ( A_BUTTON | Z_TRIG ) ) {
+    if ( cont_pressed[0] & ( A_BUTTON | Z_TRIG ) ) {
         if ( !ga_editorOnPins ) {
             Sound_PlaySe( 1, 0 );
             pl->lane->inputFunc = GA_InputBeginTurn;
@@ -2940,7 +2940,7 @@ A cameraFunc handler: R and L step ballView through 0 to 4, wrapping; the camera
 void func_8011BB44_gacode( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
-    if ( D_800E44E0[pl->laneIndex] & R_TRIG ) {
+    if ( cont_pressed[pl->laneIndex] & R_TRIG ) {
         GA_PlayLaneSound( pl->laneIndex, 0x33 );
         if ( pl->ballView == 4 ) {
             pl->ballView = 0;
@@ -2948,7 +2948,7 @@ void func_8011BB44_gacode( s32 player, sceneCamera_t *camera ) {
             pl->ballView++;
         }
     }
-    if ( D_800E44E0[pl->laneIndex] & L_TRIG ) {
+    if ( cont_pressed[pl->laneIndex] & L_TRIG ) {
         GA_PlayLaneSound( pl->laneIndex, 0x33 );
         if ( pl->ballView == 0 ) {
             pl->ballView = 4;
@@ -3011,14 +3011,14 @@ void GA_FreeCamera( s32 player, sceneCamera_t *camera ) {
     f32 angle = ga_spinCameraAngle[pl->laneIndex] + M_PI;
     f32 speed;
 
-    if ( D_800E57E4[pl->laneIndex] & Z_TRIG ) {
-        speed = D_800692D0[pl->laneIndex] / 16.0f;
+    if ( cont_held[pl->laneIndex] & Z_TRIG ) {
+        speed = cont_stickX[pl->laneIndex] / 16.0f;
         ga_freeCameraPos[pl->laneIndex][2] -= speed * sinf( -angle );
         ga_freeCameraPos[pl->laneIndex][0] -= speed * cosf( -angle );
     } else {
-        ga_spinCameraAngle[pl->laneIndex] -= D_800692D0[pl->laneIndex] * 0.01 * ( M_PI / 180.0 );
+        ga_spinCameraAngle[pl->laneIndex] -= cont_stickX[pl->laneIndex] * 0.01 * ( M_PI / 180.0 );
     }
-    speed = D_800A2FD8[pl->laneIndex] / 8.0f;
+    speed = cont_stickY[pl->laneIndex] / 8.0f;
     ga_freeCameraPos[pl->laneIndex][2] += speed * cosf( angle );
     ga_freeCameraPos[pl->laneIndex][0] += speed * sinf( angle );
     ga_freeCameraPos[pl->laneIndex][2] = ga_freeCameraPos[pl->laneIndex][2] < -1000.0f ? -1000.0f

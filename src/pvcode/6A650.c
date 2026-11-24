@@ -13,7 +13,7 @@ objects come from its "sce.dat", else from the overlay's own records.
 ================
 */
 void PV_Init( void ) {
-    if ( D_800994BC & START_BUTTON ) {
+    if ( cont_allHeld & START_BUTTON ) {
         D_8005C0BC = 1;
         Host_Sync();
     }
@@ -41,25 +41,25 @@ void PV_Frame( void ) {
     if ( D_8005C980 ) {
         GridEd_Frame();
     }
-    if ( D_800E4D62 & R_TRIG ) {
+    if ( cont_allPressed & R_TRIG ) {
         D_8005C980 = 1;
     }
-    if ( D_800E4D62 & START_BUTTON ) {
+    if ( cont_allPressed & START_BUTTON ) {
         pv_stepDone = 0;
     }
     if ( !pv_stepDone && !Save_SaveSettings() ) {
         pv_stepDone = 1;
     }
-    if ( D_800E4D62 & R_JPAD ) {
+    if ( cont_allPressed & R_JPAD ) {
         pv_soundHandle = Sound_PlaySe( pv_sound, 0 );
     }
-    if ( D_800E4D62 & L_JPAD ) {
+    if ( cont_allPressed & L_JPAD ) {
         Sound_Stop( pv_soundHandle );
     }
-    if ( D_800E4D62 & U_JPAD ) {
+    if ( cont_allPressed & U_JPAD ) {
         pv_sound++;
     }
-    if ( D_800E4D62 & D_JPAD ) {
+    if ( cont_allPressed & D_JPAD ) {
         pv_sound--;
     }
     if ( D_800A2FDC ) {

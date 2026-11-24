@@ -37,7 +37,7 @@ s32 OP_CheckSettings( void ) {
         break;
     case 1:
         if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
-            if ( D_80066B8C == 0 ) {
+            if ( cont_result == 0 ) {
                 op_checkStep = 2;
             } else {
                 op_checkStep = 5;
@@ -61,15 +61,15 @@ s32 OP_CheckSettings( void ) {
         break;
     case 6:
         if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
-            if ( D_80066B8C == 0 ) {
+            if ( cont_result == 0 ) {
                 op_contMsg = 2;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
                 op_checkStep = 20;
-            } else if ( D_80066B8C == 10 ) {
+            } else if ( cont_result == 10 ) {
                 op_checkStep = 25;
-            } else if ( D_80066B8C == 2 ) {
+            } else if ( cont_result == 2 ) {
                 op_checkStep = 5;
-            } else if ( D_80066B8C == 1 ) {
+            } else if ( cont_result == 1 ) {
                 op_checkStep = 30;
             } else {
                 op_checkStep = 28;
@@ -115,7 +115,7 @@ s32 OP_CheckSettings( void ) {
         break;
     case 20:
         if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
-            if ( D_80066B8C == 0 ) {
+            if ( cont_result == 0 ) {
                 op_contMsg = 5;
                 D_800E6578 = 0;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
@@ -149,7 +149,7 @@ s32 OP_CheckSettings( void ) {
     case 22:
         if ( Save_ShowPrompt( 0x955, PROMPT_CLOSE ) ) {
             osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
-            if ( D_80066B8C == 0 ) {
+            if ( cont_result == 0 ) {
                 /* the checksum word through a raw view, as Save_SaveSettings does: a member store sinks past the
                    stores below */
                 checksum = (s32 *)save_dataPtr;
@@ -158,7 +158,7 @@ s32 OP_CheckSettings( void ) {
                 D_800E6578 = 1;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
                 op_checkStep = 24;
-            } else if ( D_80066B8C == 7 || D_80066B8C == 8 ) {
+            } else if ( cont_result == 7 || cont_result == 8 ) {
                 op_checkStep = 23;
             } else {
                 op_checkStep = 27;
@@ -173,7 +173,7 @@ s32 OP_CheckSettings( void ) {
     case 24:
         if ( Save_ShowPrompt( 0x95C, PROMPT_CLOSE ) ) {
             osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
-            if ( D_80066B8C == 0 ) {
+            if ( cont_result == 0 ) {
                 D_8005C0E0 = 1;
                 memcpy( D_800693E8, D_80066BA4, sizeof( D_800693E8 ) );
                 return FALSE;
@@ -183,7 +183,7 @@ s32 OP_CheckSettings( void ) {
         break;
     case 25:
         /* BUG: the rectangle arrays hold two entries; the third choice's stores land on the next
-           globals (__osContLastCmd and D_800DF595, D_800E57E4[0], D_800E4D6C; the height lands in unused bss) */
+           globals (__osContLastCmd and D_800DF595, cont_held[0], D_800E4D6C; the height lands in unused bss) */
         D_800DF590[0] = 0x34;
         D_800E6538[0] = 0xE;
         D_800DF590[1] = 0x34;
@@ -246,7 +246,7 @@ s32 OP_CheckSettings( void ) {
         break;
     case 28:
         /* BUG: the rectangle arrays hold two entries; the third choice's stores land on the next
-           globals (__osContLastCmd and D_800DF595, D_800E57E4[0], D_800E4D6C; the height lands in unused bss) */
+           globals (__osContLastCmd and D_800DF595, cont_held[0], D_800E4D6C; the height lands in unused bss) */
         D_800DF590[0] = 0x34;
         D_800E6538[0] = 0xE;
         D_800DF590[1] = 0x34;
@@ -287,7 +287,7 @@ s32 OP_CheckSettings( void ) {
     case 35:
         if ( Save_ShowPrompt( 0x951, PROMPT_CLOSE ) ) {
             osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
-            if ( D_80066B8C == 0 && save_dataPtr->checksum == Save_Checksum() ) {
+            if ( cont_result == 0 && save_dataPtr->checksum == Save_Checksum() ) {
                 D_8005C0E0 = 1;
                 memcpy( D_800693E8, D_80066BA4, sizeof( D_800693E8 ) );
                 return FALSE;

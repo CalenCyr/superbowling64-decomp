@@ -23,7 +23,7 @@ height under the cursor.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: register choices only: `resized` and the numZ address in page SIZE, and retail keeps &D_800994BC
+// NON_MATCHING: register choices only: `resized` and the numZ address in page SIZE, and retail keeps &cont_allHeld
 // in a register across the STEP and ORIGIN tests
 void GridEd_Frame( void ) {
     u8 text[40];
@@ -64,7 +64,7 @@ void GridEd_Frame( void ) {
                 D_8005C984[x + z * game_floorGrids[0].numX].v.cn[2] = 0xFF;
             }
             if ( D_8005C988 == x && D_8005C98A == z ) {
-                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[1] = D_8005B0F4 << 3;
+                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[1] = sched_frameCount << 3;
             }
         }
     }
@@ -89,24 +89,24 @@ void GridEd_Frame( void ) {
     Txt_SetupFont( &game_gfx, 0 );
     gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
 
-    if ( ( D_800E4D62 & U_JPAD ) && ( D_800994BC & R_TRIG ) && D_80063AF0 != GRIDEDIT_EXIT ) {
+    if ( ( cont_allPressed & U_JPAD ) && ( cont_allHeld & R_TRIG ) && D_80063AF0 != GRIDEDIT_EXIT ) {
         D_80063AF0--;
     }
-    if ( ( D_800E4D62 & D_JPAD ) && ( D_800994BC & R_TRIG ) && D_80063AF0 < GRIDEDIT_PAGES - 1 ) {
+    if ( ( cont_allPressed & D_JPAD ) && ( cont_allHeld & R_TRIG ) && D_80063AF0 < GRIDEDIT_PAGES - 1 ) {
         D_80063AF0++;
     }
 
     switch ( D_80063AF0 ) {
         case GRIDEDIT_EXIT:
             Txt_DrawString( &game_gfx, 32, 20, "EXIT" );
-            if ( D_800E4D62 & Z_TRIG ) {
+            if ( cont_allPressed & Z_TRIG ) {
                 D_8005C980 = 0;
             }
             break;
 
         case GRIDEDIT_LOAD:
             Txt_DrawString( &game_gfx, 32, 20, "FILE LOAD" );
-            if ( D_800E4D62 & Z_TRIG ) {
+            if ( cont_allPressed & Z_TRIG ) {
                 Host_Sync();
                 Host_GetFileSize( "ground.bin" );
                 Host_ReadFile( (u8 *)&game_floorGrids[0] );
@@ -115,7 +115,7 @@ void GridEd_Frame( void ) {
 
         case GRIDEDIT_SAVE:
             Txt_DrawString( &game_gfx, 32, 20, "FILE SAVE" );
-            if ( D_800E4D62 & Z_TRIG ) {
+            if ( cont_allPressed & Z_TRIG ) {
                 Host_WriteFile( "ground.bin", (u8 *)&game_floorGrids[0],
                                sizeof( floorGrid_t ) - ( GRIDEDIT_POINTS - game_floorGrids[0].numX * game_floorGrids[0].numZ ) * sizeof( s16 ) );
             }
@@ -124,24 +124,24 @@ void GridEd_Frame( void ) {
         case GRIDEDIT_SIZE:
             Txt_DrawString( &game_gfx, 32, 20, "MTX FORM" );
             resized = FALSE;
-            if ( ( D_800E4D62 & U_JPAD ) && !( D_800994BC & R_TRIG ) && game_floorGrids[0].numZ != 0 ) {
+            if ( ( cont_allPressed & U_JPAD ) && !( cont_allHeld & R_TRIG ) && game_floorGrids[0].numZ != 0 ) {
                 game_floorGrids[0].numZ--;
                 resized = TRUE;
             }
-            if ( ( D_800E4D62 & D_JPAD ) && !( D_800994BC & R_TRIG ) ) {
+            if ( ( cont_allPressed & D_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 if ( ( game_floorGrids[0].numZ + 1 ) * game_floorGrids[0].numX < GRIDEDIT_POINTS ) {
                     game_floorGrids[0].numZ++;
                 }
                 resized = TRUE;
             }
-            if ( ( D_800E4D62 & L_JPAD ) && !( D_800994BC & R_TRIG ) && game_floorGrids[0].numX > 2 ) {
+            if ( ( cont_allPressed & L_JPAD ) && !( cont_allHeld & R_TRIG ) && game_floorGrids[0].numX > 2 ) {
                 game_floorGrids[0].numX -= 2;
                 if ( !( game_floorGrids[0].numX & 1 ) ) {
                     game_floorGrids[0].numX++;
                 }
                 resized = TRUE;
             }
-            if ( ( D_800E4D62 & R_JPAD ) && !( D_800994BC & R_TRIG ) ) {
+            if ( ( cont_allPressed & R_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 if ( ( game_floorGrids[0].numX + 2 ) * game_floorGrids[0].numZ < GRIDEDIT_POINTS ) {
                     game_floorGrids[0].numX += 2;
                 }
@@ -158,16 +158,16 @@ void GridEd_Frame( void ) {
 
         case GRIDEDIT_STEP:
             Txt_DrawString( &game_gfx, 32, 20, "MTX WH" );
-            if ( ( D_800994BC & ( U_JPAD | R_TRIG ) ) == U_JPAD && game_floorGrids[0].stepZ != 0 ) {
+            if ( ( cont_allHeld & ( U_JPAD | R_TRIG ) ) == U_JPAD && game_floorGrids[0].stepZ != 0 ) {
                 game_floorGrids[0].stepZ--;
             }
-            if ( ( D_800994BC & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
+            if ( ( cont_allHeld & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
                 game_floorGrids[0].stepZ++;
             }
-            if ( ( D_800994BC & ( L_JPAD | R_TRIG ) ) == L_JPAD && game_floorGrids[0].stepX != 0 ) {
+            if ( ( cont_allHeld & ( L_JPAD | R_TRIG ) ) == L_JPAD && game_floorGrids[0].stepX != 0 ) {
                 game_floorGrids[0].stepX--;
             }
-            if ( ( D_800994BC & ( R_JPAD | R_TRIG ) ) == R_JPAD ) {
+            if ( ( cont_allHeld & ( R_JPAD | R_TRIG ) ) == R_JPAD ) {
                 game_floorGrids[0].stepX++;
             }
             sprintf( text, "WH=(%d,%d)", game_floorGrids[0].stepX, game_floorGrids[0].stepZ );
@@ -176,16 +176,16 @@ void GridEd_Frame( void ) {
 
         case GRIDEDIT_ORIGIN:
             Txt_DrawString( &game_gfx, 32, 20, "MTX OFS" );
-            if ( ( D_800994BC & ( U_JPAD | R_TRIG ) ) == U_JPAD ) {
+            if ( ( cont_allHeld & ( U_JPAD | R_TRIG ) ) == U_JPAD ) {
                 game_floorGrids[0].originZ--;
             }
-            if ( ( D_800994BC & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
+            if ( ( cont_allHeld & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
                 game_floorGrids[0].originZ++;
             }
-            if ( ( D_800994BC & ( L_JPAD | R_TRIG ) ) == L_JPAD ) {
+            if ( ( cont_allHeld & ( L_JPAD | R_TRIG ) ) == L_JPAD ) {
                 game_floorGrids[0].originX--;
             }
-            if ( ( D_800994BC & ( R_JPAD | R_TRIG ) ) == R_JPAD ) {
+            if ( ( cont_allHeld & ( R_JPAD | R_TRIG ) ) == R_JPAD ) {
                 game_floorGrids[0].originX++;
             }
             sprintf( text, "OFS=(%d,%d)", game_floorGrids[0].originX, game_floorGrids[0].originZ );
@@ -194,55 +194,55 @@ void GridEd_Frame( void ) {
 
         case GRIDEDIT_SELECT:
             Txt_DrawString( &game_gfx, 32, 20, "VTX SEL" );
-            if ( ( D_800E4D62 & U_JPAD ) || ( D_8005C98E >= 7 && ( D_800994BC & U_JPAD ) ) ) {
+            if ( ( cont_allPressed & U_JPAD ) || ( D_8005C98E >= 7 && ( cont_allHeld & U_JPAD ) ) ) {
                 if ( D_8005C98A > 0 ) {
                     D_8005C98A--;
                 }
-                if ( D_800994BC & Z_TRIG ) {
+                if ( cont_allHeld & Z_TRIG ) {
                     D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
                 }
             }
-            if ( ( D_800E4D62 & D_JPAD ) || ( D_8005C98E >= 7 && ( D_800994BC & D_JPAD ) ) ) {
+            if ( ( cont_allPressed & D_JPAD ) || ( D_8005C98E >= 7 && ( cont_allHeld & D_JPAD ) ) ) {
                 if ( D_8005C98A < game_floorGrids[0].numZ - 1 ) {
                     D_8005C98A++;
                 }
-                if ( D_800994BC & Z_TRIG ) {
+                if ( cont_allHeld & Z_TRIG ) {
                     D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
                 }
             }
-            if ( ( D_800E4D62 & L_JPAD ) || ( D_8005C98E >= 7 && ( D_800994BC & L_JPAD ) ) ) {
+            if ( ( cont_allPressed & L_JPAD ) || ( D_8005C98E >= 7 && ( cont_allHeld & L_JPAD ) ) ) {
                 if ( D_8005C988 > 0 ) {
                     D_8005C988--;
                 }
-                if ( D_800994BC & Z_TRIG ) {
+                if ( cont_allHeld & Z_TRIG ) {
                     D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
                 }
             }
-            if ( ( D_800E4D62 & R_JPAD ) || ( D_8005C98E >= 7 && ( D_800994BC & R_JPAD ) ) ) {
+            if ( ( cont_allPressed & R_JPAD ) || ( D_8005C98E >= 7 && ( cont_allHeld & R_JPAD ) ) ) {
                 if ( D_8005C988 < game_floorGrids[0].numX - 1 ) {
                     D_8005C988++;
                 }
-                if ( D_800994BC & Z_TRIG ) {
+                if ( cont_allHeld & Z_TRIG ) {
                     D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
                 }
             }
-            if ( D_800994BC & ( U_JPAD | D_JPAD | L_JPAD | R_JPAD ) ) {
+            if ( cont_allHeld & ( U_JPAD | D_JPAD | L_JPAD | R_JPAD ) ) {
                 if ( D_8005C98E < 100 ) {
                     D_8005C98E++;
                 }
             } else {
                 D_8005C98E = 0;
             }
-            if ( D_800E4D62 & Z_TRIG ) {
+            if ( cont_allPressed & Z_TRIG ) {
                 D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C =
                     D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] ^ 1;
             }
-            if ( ( D_800E4D62 & START_BUTTON ) && !( D_800994BC & R_TRIG ) ) {
+            if ( ( cont_allPressed & START_BUTTON ) && !( cont_allHeld & R_TRIG ) ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                     D_80063B40[i] = 0;
                 }
             }
-            if ( ( D_800E4D62 & START_BUTTON ) && ( D_800994BC & R_TRIG ) ) {
+            if ( ( cont_allPressed & START_BUTTON ) && ( cont_allHeld & R_TRIG ) ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                     D_80063B40[i] ^= 1;
                 }
@@ -253,14 +253,14 @@ void GridEd_Frame( void ) {
 
         case GRIDEDIT_HEIGHT:
             Txt_DrawString( &game_gfx, 32, 20, "VTX Y" );
-            if ( ( D_800994BC & ( U_JPAD | R_TRIG ) ) == U_JPAD ) {
+            if ( ( cont_allHeld & ( U_JPAD | R_TRIG ) ) == U_JPAD ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                     if ( D_80063B40[i] ) {
                         game_floorGrids[0].heights[i]++;
                     }
                 }
             }
-            if ( ( D_800994BC & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
+            if ( ( cont_allHeld & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                     if ( D_80063B40[i] ) {
                         game_floorGrids[0].heights[i]--;

@@ -741,7 +741,7 @@ Rumble_Probe	0x80027A7C	invented: looks for a Rumble Pak on a port and stops it
 Rumble_Start	0x80027B18	invented: starts the Rumble Pak of a port
 Rumble_Stop	0x80027B6C	invented: stops the Rumble Pak of a port
 Cont_ReadPads	0x80027BC0	invented: reads the pads of both ports into the per-port state
-Cont_FindStandard	0x80027FF0	invented: sets a bit of D_8005B190 for each port holding a standard controller
+Cont_FindStandard	0x80027FF0	invented: sets a bit of cont_standardMask for each port holding a standard controller
 
 # main units: shared text, drawing, prompt, sound and file-cache helpers
 Txt_DrawString	0x80028DA4	invented: draws a string in the 8x8 font
@@ -1217,3 +1217,40 @@ game_cursorLocked	0x8005B198	invented: when set, the cursor stays
 game_blankFrames	0x8005B188	invented: blank frames drawn before the next scene loads
 game_loadedScene	0x8005B0E0	invented: the scene loaded (game_scene); 0xFF at boot
 game_demoTitles	0x8005B180	invented: per demo (game_demo): the image the demo shows its title by
+
+# include/input.h: controllers, the controller thread's requests and the frame counter
+cont_siQueue	0x80066B38	invented: gets the serial interface events (osSetEventMesg OS_EVENT_SI, Cont_Init)
+cont_siMsgs	0x800E4FCC	invented: buffer of cont_siQueue
+cont_standardMask	0x8005B190	invented: bit per port with a standard controller (Cont_FindStandard)
+cont_status	0x800F7BE8	invented: OSContStatus of each port (Cont_FindStandard)
+cont_rumblePfs	0x800E6400	invented: per port: the OSPfs of its Rumble Pak (osMotorInit, Rumble_Probe)
+cont_hasRumble	0x800E4FD0	invented: per port: TRUE when it has a Rumble Pak (Rumble_Probe)
+cont_pads	0x80066B58	invented: OSContPad of each port, read by Cont_ReadPads
+cont_stickX	0x800692D0	invented: per port: stick x, 0 inside the dead zone (Cont_ReadPads)
+cont_stickY	0x800A2FD8	invented: per port: stick y, 0 inside the dead zone (Cont_ReadPads)
+cont_held	0x800E57E4	invented: per port: buttons held (Cont_ReadPads)
+cont_lastHeld	0x8009D198	invented: per port: buttons held last frame (Cont_ReadPads)
+cont_pressed	0x800E44E0	invented: per port: buttons pressed this frame (Cont_ReadPads)
+cont_stickDpad	0x800619B0	invented: per port: the stick as D-pad bits (Cont_ReadPads)
+cont_lastStickDpad	0x8005B1A0	invented: per port: cont_stickDpad last frame
+cont_dpadRepeat	0x800E6760	invented: per port: D-pad presses, auto-repeated every 4 frames after REPEAT_DELAY (Cont_ReadPads)
+cont_holdFrames	0x8005B1A4	invented: per port: frames a direction has been held (Cont_ReadPads)
+cont_noController	0x8005B194	invented: set when port 1 has no controller (Cont_ReadPads; opcode reads it)
+cont_allHeld	0x800994BC	invented: cont_held of both ports merged: port 1's, or port 2's when port 1's is 0
+cont_allPressed	0x800E4D62	invented: cont_pressed of both ports merged
+cont_allDpadRepeat	0x800E6758	invented: cont_dpadRepeat of both ports merged
+cont_allStickX	0x8009D05C	invented: cont_stickX of both ports merged (port 2's while port 1's is within 5)
+cont_allStickY	0x800DF628	invented: cont_stickY of both ports merged
+cont_demoMode	0x8005C0EC	invented: set while a demo plays (opcode); Cont_ReadPads then fakes the R presses and Start cuts the demo short, Game_Thread clears it when cont_demoFrames runs out
+cont_demoFrames	0x800693B0	invented: frames left of the demo (1200 at its start, opcode), counted down by Game_Thread
+sched_frameCount	0x8005B0F4	evidence: frame counter; Main_Thread increments it each retrace and copies the swaps per 60 of it into sched_frameRate
+cont_rumble	0x800DF680	invented: per port: rumble request in frames (8 from gscode's menus and Game_Thread, 4 to 6 from gacode's hits)
+cont_result	0x80066B8C	invented: result of the last request to the controller thread
+cont_noteIndex	0x800E6584	invented: request 10: the note to read
+cont_maxNotes	0x80066C28	evidence: request 4: func_80028064 passes it to osPfsNumFiles as max_files
+cont_usedNotes	0x800692D4	evidence: request 4: passed to osPfsNumFiles as files_used
+cont_freeBytes	0x8009944C	evidence: request 4: passed to osPfsFreeBlocks as leftoverBytes
+cont_deleteGameName	0x800F7C78	invented: request 1: game name of the note to delete
+cont_deleteExtName	0x80066E10	invented: request 1: extension of the note to delete
+cont_deleteCompany	0x8009D090	invented: request 1: company code of the note to delete
+cont_deleteGameCode	0x8009CF6C	invented: request 1: game code of the note to delete

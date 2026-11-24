@@ -35,13 +35,13 @@ s32 Save_ShowPrompt( s32 id, s32 mode ) {
     case PROMPT_RUNNING:
         switch ( mode ) {
         case PROMPT_TIMED:
-            if ( ++D_80064310 == 90 || D_800E4D62 != 0 ) {
+            if ( ++D_80064310 == 90 || cont_allPressed != 0 ) {
                 D_80064310 = PROMPT_ZOOM_FRAMES;
                 D_8005C9BC = PROMPT_CLOSING;
             }
             break;
         case PROMPT_ANY_BUTTON:
-            if ( D_800E4D62 != 0 ) {
+            if ( cont_allPressed != 0 ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
                 D_8005C9BC = PROMPT_CLOSING;
             }
@@ -52,54 +52,54 @@ s32 Save_ShowPrompt( s32 id, s32 mode ) {
             D_8005C9BC = PROMPT_CLOSING;
             break;
         case PROMPT_CHOICE2_H:
-            if ( D_80066C44 == 0 && ( D_800E6758 & R_JPAD ) ) {
+            if ( D_80066C44 == 0 && ( cont_allDpadRepeat & R_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 1;
             }
-            if ( D_80066C44 == 1 && ( D_800E6758 & L_JPAD ) ) {
+            if ( D_80066C44 == 1 && ( cont_allDpadRepeat & L_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 0;
             }
-            if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+            if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
                 D_8005C9BC = PROMPT_CLOSING;
             }
             break;
         case PROMPT_CHOICE2_V:
-            if ( D_80066C44 == 0 && ( D_800E6758 & D_JPAD ) ) {
+            if ( D_80066C44 == 0 && ( cont_allDpadRepeat & D_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 1;
             }
-            if ( D_80066C44 == 1 && ( D_800E6758 & U_JPAD ) ) {
+            if ( D_80066C44 == 1 && ( cont_allDpadRepeat & U_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 0;
             }
-            if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+            if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
                 D_8005C9BC = PROMPT_CLOSING;
             }
             break;
         case PROMPT_CHOICE3:
-            if ( D_80066C44 == 0 && ( D_800E6758 & R_JPAD ) ) {
+            if ( D_80066C44 == 0 && ( cont_allDpadRepeat & R_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 1;
-            } else if ( D_80066C44 == 1 && ( D_800E6758 & L_JPAD ) ) {
+            } else if ( D_80066C44 == 1 && ( cont_allDpadRepeat & L_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 0;
-            } else if ( D_80066C44 == 1 && ( D_800E6758 & R_JPAD ) ) {
+            } else if ( D_80066C44 == 1 && ( cont_allDpadRepeat & R_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 2;
-            } else if ( D_80066C44 == 2 && ( D_800E6758 & L_JPAD ) ) {
+            } else if ( D_80066C44 == 2 && ( cont_allDpadRepeat & L_JPAD ) ) {
                 Sound_PlaySe( SE_CURSOR, 0 );
                 D_80066C44 = 1;
             }
-            if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+            if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
                 D_8005C9BC = PROMPT_CLOSING;
             }
             break;
         case PROMPT_TIMED_LONG:
-            if ( ++D_80064310 == 270 || D_800E4D62 != 0 ) {
+            if ( ++D_80064310 == 270 || cont_allPressed != 0 ) {
                 D_80064310 = PROMPT_ZOOM_FRAMES;
                 D_8005C9BC = PROMPT_CLOSING;
             }
@@ -195,7 +195,7 @@ s32 Save_SaveSettings( void ) {
         break;
     case 1:
         if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
-            if ( D_80066B8C == 0 ) {
+            if ( cont_result == 0 ) {
                 D_8005C990 = 2;
             } else {
                 D_8005C990 = 3;
@@ -216,13 +216,13 @@ s32 Save_SaveSettings( void ) {
         break;
     case 4:
         if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
-            if ( D_80066B8C == 0 ) {
+            if ( cont_result == 0 ) {
                 if ( memcmp( D_800693E8, D_80066BA4, sizeof( D_800693E8 ) ) == 0 ) {
                     D_8005C990 = 5;
                 } else {
                     D_8005C990 = 8;
                 }
-            } else if ( D_80066B8C == 1 ) {
+            } else if ( cont_result == 1 ) {
                 D_8005C990 = 10;
             } else {
                 D_8005C990 = 11;
@@ -248,11 +248,11 @@ s32 Save_SaveSettings( void ) {
         break;
     case 6:
         if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&D_80064314, OS_MESG_NOBLOCK ) != -1 ) {
-            if ( D_80066B8C == 0 ) {
+            if ( cont_result == 0 ) {
                 D_8005C990 = 7;
-            } else if ( D_80066B8C == 2 ) {
+            } else if ( cont_result == 2 ) {
                 D_8005C990 = 8;
-            } else if ( D_80066B8C == 1 ) {
+            } else if ( cont_result == 1 ) {
                 D_8005C990 = 10;
             } else {
                 D_8005C990 = 11;

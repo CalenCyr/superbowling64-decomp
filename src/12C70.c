@@ -175,7 +175,7 @@ void Dbg_ScreenShot( void ) {
     s32 fb;
     u8 name[0x10];
 
-    if ( D_800E4D62 & L_TRIG ) {
+    if ( cont_allPressed & L_TRIG ) {
         file = (bmpFile_t *)sched_framebuffers[0];
         dst = (u8 *)file;
         file->header = D_8005CA40;
@@ -198,6 +198,6 @@ void Dbg_ScreenShot( void ) {
         }
         sprintf( name, "BW%3.3d.BMP", D_8005CA76++ );
         Host_WriteFile( name, (u8 *)file, SCREENSHOT_FILE_SIZE );
-        D_800E4D62 = 0;
+        cont_allPressed = 0;
     }
 }

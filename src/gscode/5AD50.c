@@ -114,7 +114,7 @@ s32 GS_NameEntry( void ) {
                        game_pulseAlpha );
     }
 
-    if ( D_800E6758 & U_JPAD ) {
+    if ( cont_allDpadRepeat & U_JPAD ) {
         Sound_PlaySe( 0, 0 );
         gs_nameCursorY--;
         if ( gs_nameCursorY == -1 ) {
@@ -126,7 +126,7 @@ s32 GS_NameEntry( void ) {
             gs_nameCursorX = gs_gridExitColumn;
         }
     }
-    if ( D_800E6758 & D_JPAD ) {
+    if ( cont_allDpadRepeat & D_JPAD ) {
         Sound_PlaySe( 0, 0 );
         gs_nameCursorY++;
         if ( gs_nameCursorY == 0 ) {
@@ -136,14 +136,14 @@ s32 GS_NameEntry( void ) {
             gs_nameCursorY = 0;
         }
     }
-    if ( ( D_800E6758 & L_JPAD ) && gs_nameCursorY != -1 ) {
+    if ( ( cont_allDpadRepeat & L_JPAD ) && gs_nameCursorY != -1 ) {
         Sound_PlaySe( 0, 0 );
         gs_nameCursorX--;
         if ( gs_nameCursorX == -1 ) {
             gs_nameCursorX = 11;
         }
     }
-    if ( D_800E6758 & R_JPAD ) {
+    if ( cont_allDpadRepeat & R_JPAD ) {
         if ( gs_nameCursorY == -1 ) {
             if ( gs_nameCursorX < 7 ) {
                 gs_nameCursorX++;
@@ -158,15 +158,15 @@ s32 GS_NameEntry( void ) {
         }
     }
 
-    if ( ( D_800E4D62 & R_CBUTTONS ) && gs_nameCharCase == 0 ) {
+    if ( ( cont_allPressed & R_CBUTTONS ) && gs_nameCharCase == 0 ) {
         Sound_PlaySe( 0, 0 );
         gs_nameCharCase = 1;
     }
-    if ( ( D_800E4D62 & L_CBUTTONS ) && gs_nameCharCase == 1 ) {
+    if ( ( cont_allPressed & L_CBUTTONS ) && gs_nameCharCase == 1 ) {
         Sound_PlaySe( 0, 0 );
         gs_nameCharCase = 0;
     }
-    if ( D_800E4D62 & B_BUTTON ) {
+    if ( cont_allPressed & B_BUTTON ) {
         Sound_PlaySe( 2, 0 );
         if ( gs_nameLength != 0 ) {
             gs_nameLength--;
@@ -175,7 +175,7 @@ s32 GS_NameEntry( void ) {
             save_data.records[player].name[0] = 0xFFFF;
         }
     }
-    if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+    if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
         if ( gs_nameCursorY == -1 ) {
             if ( gs_nameCursorX == 7 ) {
                 if ( gs_nameLength == 0 ) {
@@ -396,14 +396,14 @@ s32 GS_PlayerSetup( void ) {
             case 0:
             case 2:
                 GS_DrawTintedImage( 0x16, 0x31, 0xFF, 0xFF, 0xFF, game_pulseAlpha );
-                if ( ( D_800E6758 & L_JPAD ) && game_numPlayers >= 2 ) {
+                if ( ( cont_allDpadRepeat & L_JPAD ) && game_numPlayers >= 2 ) {
                     Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                     game_numPlayers--;
                     if ( game_lastTeam == 1 && game_numPlayers == 1 ) {
                         game_lastTeam = 0;
                     }
                 }
-                if ( ( D_800E6758 & R_JPAD ) && game_numPlayers < 4 ) {
+                if ( ( cont_allDpadRepeat & R_JPAD ) && game_numPlayers < 4 ) {
                     Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                     team = ( game_players[game_numPlayers] >> 4 ) & 7;
                     for ( i = 0; i < game_numPlayers; i++ ) {
@@ -419,12 +419,12 @@ s32 GS_PlayerSetup( void ) {
                 break;
             case 1:
                 GS_DrawTintedImage( 0x16, 0x31, 0xFF, 0xFF, 0xFF, game_pulseAlpha );
-                if ( ( D_800E6758 & L_JPAD ) && game_numPlayers == 4 ) {
+                if ( ( cont_allDpadRepeat & L_JPAD ) && game_numPlayers == 4 ) {
                     Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                     game_numPlayers = 2;
                     game_lastTeam = 0;
                 }
-                if ( ( D_800E6758 & R_JPAD ) && game_numPlayers == 2 ) {
+                if ( ( cont_allDpadRepeat & R_JPAD ) && game_numPlayers == 2 ) {
                     Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                     game_numPlayers = 4;
                 }
@@ -438,12 +438,12 @@ s32 GS_PlayerSetup( void ) {
                 gs_namePlayer = 0;
                 break;
             }
-            if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+            if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
                 gs_nameEntryStep = 1;
                 gs_namePlayer = 0;
             }
-            if ( D_800E4D62 & B_BUTTON ) {
+            if ( cont_allPressed & B_BUTTON ) {
                 Sound_PlaySe( 2, 0 );
                 gs_setupState = CHOICE_BACK;
             }
@@ -466,19 +466,19 @@ s32 GS_PlayerSetup( void ) {
             } else {
                 Draw_ImageScaled( 0x84B, gs_namePlayer * 62 + 0x57, 0x71, game_pulseAlpha, 1.0f, 1.0f );
             }
-            if ( ( D_800E6758 & L_JPAD ) && ( game_players[gs_namePlayer] & 0x80 ) ) {
+            if ( ( cont_allDpadRepeat & L_JPAD ) && ( game_players[gs_namePlayer] & 0x80 ) ) {
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 game_players[gs_namePlayer] &= 0x7F;
             }
-            if ( ( D_800E6758 & R_JPAD ) && !( game_players[gs_namePlayer] & 0x80 ) ) {
+            if ( ( cont_allDpadRepeat & R_JPAD ) && !( game_players[gs_namePlayer] & 0x80 ) ) {
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 game_players[gs_namePlayer] = 0x80;
                 D_800DF5D0[gs_namePlayer] = 0;
             }
-            if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+            if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
                 gs_nameEntryStep = 2;
-            } else if ( D_800E4D62 & B_BUTTON ) {
+            } else if ( cont_allPressed & B_BUTTON ) {
                 Sound_PlaySe( 2, 0 );
                 if ( gs_namePlayer != 0 ) {
                     gs_namePlayer--;
@@ -501,7 +501,7 @@ s32 GS_PlayerSetup( void ) {
                 }
                 break;
             }
-            if ( D_800E6758 & L_JPAD ) {
+            if ( cont_allDpadRepeat & L_JPAD ) {
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 i = ( game_players[gs_namePlayer] >> 4 ) & 7;
                 do {
@@ -520,7 +520,7 @@ s32 GS_PlayerSetup( void ) {
                 } while ( j != game_numPlayers );
                 game_players[gs_namePlayer] = ( game_players[gs_namePlayer] & 0x8F ) | ( i << 4 );
             }
-            if ( D_800E6758 & R_JPAD ) {
+            if ( cont_allDpadRepeat & R_JPAD ) {
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 i = ( game_players[gs_namePlayer] >> 4 ) & 7;
                 do {
@@ -539,7 +539,7 @@ s32 GS_PlayerSetup( void ) {
                 } while ( j != game_numPlayers );
                 game_players[gs_namePlayer] = ( game_players[gs_namePlayer] & 0x8F ) | ( i << 4 );
             }
-            if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+            if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
                 i = ( game_players[gs_namePlayer] >> 4 ) & 7;
                 if ( i == 0 ) {
@@ -560,7 +560,7 @@ s32 GS_PlayerSetup( void ) {
                     gs_nameEntryStep = 3;
                     gs_teamPromptChoice = 0;
                 }
-            } else if ( D_800E4D62 & B_BUTTON ) {
+            } else if ( cont_allPressed & B_BUTTON ) {
                 Sound_PlaySe( 2, 0 );
                 if ( gs_namePlayer == 0 ) {
                     gs_nameEntryStep = 0;
@@ -597,18 +597,18 @@ s32 GS_PlayerSetup( void ) {
             break;
 
         case 3:
-            if ( ( D_800E6758 & U_JPAD ) && gs_teamPromptChoice == 1 ) {
+            if ( ( cont_allDpadRepeat & U_JPAD ) && gs_teamPromptChoice == 1 ) {
                 gs_teamPromptChoice = 0;
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
             }
-            if ( ( D_800E6758 & D_JPAD ) && gs_teamPromptChoice == 0 ) {
+            if ( ( cont_allDpadRepeat & D_JPAD ) && gs_teamPromptChoice == 0 ) {
                 gs_teamPromptChoice = 1;
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
             }
             Menu_SetItem( gs_nameEntryMenu, 0x17, 0x8FD, gs_namePlayer * 62 + 0x2B, 0x81, 0xFF );
             Menu_SetItem( gs_nameEntryMenu, 0x18, 0x8FE, gs_namePlayer * 62 + 0x2B, gs_teamPromptChoice * 16 + 0x81,
                            game_pulseAlpha );
-            if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+            if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( SE_DECIDE, 0 );
                 if ( gs_teamPromptChoice == 0 ) {
                     if ( gs_namePlayer < game_numPlayers - 1 ) {
@@ -621,7 +621,7 @@ s32 GS_PlayerSetup( void ) {
                     gs_nameEntryStep = 9;
                 }
             }
-            if ( D_800E4D62 & B_BUTTON ) {
+            if ( cont_allPressed & B_BUTTON ) {
                 Sound_PlaySe( 2, 0 );
                 gs_nameEntryStep = 2;
             }
@@ -681,15 +681,15 @@ s32 GS_PlayerSetup( void ) {
                     break;
                 }
             }
-            if ( ( D_800E6758 & L_JPAD ) && game_lastTeam == 1 && minPlayers < game_numPlayers ) {
+            if ( ( cont_allDpadRepeat & L_JPAD ) && game_lastTeam == 1 && minPlayers < game_numPlayers ) {
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 game_lastTeam = 0;
             }
-            if ( ( D_800E6758 & R_JPAD ) && game_lastTeam == 0 && minPlayers < game_numPlayers ) {
+            if ( ( cont_allDpadRepeat & R_JPAD ) && game_lastTeam == 0 && minPlayers < game_numPlayers ) {
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 game_lastTeam = 1;
             }
-            if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+            if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                 if ( game_lastTeam == 1 ) {
                     human = FALSE;
                     if ( kind < 2 ) {
@@ -718,12 +718,12 @@ s32 GS_PlayerSetup( void ) {
                     }
                     if ( human == TRUE ) {
                         if ( kind == 4 ) {
-                            if ( ( game_players[1] >> 7 ) == 0 && !( D_8005B190 & 2 ) ) {
+                            if ( ( game_players[1] >> 7 ) == 0 && !( cont_standardMask & 2 ) ) {
                                 Sound_PlaySe( 2, 0 );
                                 gs_nameEntryStep = 7;
                                 break;
                             }
-                        } else if ( !( D_8005B190 & 2 ) ) {
+                        } else if ( !( cont_standardMask & 2 ) ) {
                             Sound_PlaySe( 2, 0 );
                             gs_nameEntryStep = 6;
                             break;
@@ -745,7 +745,7 @@ s32 GS_PlayerSetup( void ) {
                 }
                 gs_setupState = CHOICE_TAKEN;
             }
-            if ( D_800E4D62 & B_BUTTON ) {
+            if ( cont_allPressed & B_BUTTON ) {
                 Sound_PlaySe( 2, 0 );
                 gs_nameEntryStep = 1;
                 gs_namePlayer = 0;
@@ -852,7 +852,7 @@ s32 GS_PlayerSetup( void ) {
                            0xA1 );
             Draw_Image( 0x9D0, gs_namePlayer * 62 + 0x51, 0xA1 );
             Draw_Image( 0x9D1, gs_namePlayer * 62 + 0x2F, 0xA1 );
-            if ( ( D_800E4D62 & R_CBUTTONS ) || ( ( D_800994BC & R_CBUTTONS ) && gs_cHeldFrames >= 9 ) ) {
+            if ( ( cont_allPressed & R_CBUTTONS ) || ( ( cont_allHeld & R_CBUTTONS ) && gs_cHeldFrames >= 9 ) ) {
                 gs_cHeldFrames = 0;
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 Draw_Image( 0x9D2, gs_namePlayer * 62 + 0x51, 0xA1 );
@@ -861,7 +861,7 @@ s32 GS_PlayerSetup( void ) {
                     D_800DF5D0[gs_namePlayer] = 0;
                 }
             }
-            if ( ( D_800E4D62 & L_CBUTTONS ) || ( ( D_800994BC & L_CBUTTONS ) && gs_cHeldFrames >= 9 ) ) {
+            if ( ( cont_allPressed & L_CBUTTONS ) || ( ( cont_allHeld & L_CBUTTONS ) && gs_cHeldFrames >= 9 ) ) {
                 gs_cHeldFrames = 0;
                 Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
                 Draw_Image( 0x9D3, gs_namePlayer * 62 + 0x2F, 0xA1 );
@@ -870,7 +870,7 @@ s32 GS_PlayerSetup( void ) {
                     D_800DF5D0[gs_namePlayer] = 0x5F;
                 }
             }
-            if ( D_800994BC & ( R_CBUTTONS | L_CBUTTONS ) ) {
+            if ( cont_allHeld & ( R_CBUTTONS | L_CBUTTONS ) ) {
                 gs_cHeldFrames++;
             } else {
                 gs_cHeldFrames = 0;
@@ -887,17 +887,17 @@ s32 GS_PlayerSetup( void ) {
     Menu_SetItem( gs_setupMenu, 0x15, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     Menu_SetItem( gs_setupMenu, 0x16, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     for ( i = 0; i < 2; i++ ) {
-        if ( ( ( D_800F7BE8[i].status ^ gs_rumbleStatus[i] ) & 3 ) & D_800F7BE8[i].status ) {
-            if ( !D_800DF680[i] ) {
-                D_800DF680[i] = 8;
+        if ( ( ( cont_status[i].status ^ gs_rumbleStatus[i] ) & 3 ) & cont_status[i].status ) {
+            if ( !cont_rumble[i] ) {
+                cont_rumble[i] = 8;
             }
         }
     }
-    if ( save_data.rumble && gs_setupState == CHOICE_RUN && ( D_800E4FD0[0] || D_800E4FD0[1] ) ) {
-        if ( D_800E4FD0[0] ) {
+    if ( save_data.rumble && gs_setupState == CHOICE_RUN && ( cont_hasRumble[0] || cont_hasRumble[1] ) ) {
+        if ( cont_hasRumble[0] ) {
             Menu_SetItem( gs_setupMenu, 0x15, MENU_NONE, MENU_NONE, MENU_NONE, 0xA0 );
         }
-        if ( D_800E4FD0[1] ) {
+        if ( cont_hasRumble[1] ) {
             Menu_SetItem( gs_setupMenu, 0x16, MENU_NONE, MENU_NONE, MENU_NONE, 0xA0 );
         }
         Menu_SetItem( gs_setupMenu, 0x14, gs_rumbleBlink[gs_setupFrames % 4], MENU_NONE, MENU_NONE,

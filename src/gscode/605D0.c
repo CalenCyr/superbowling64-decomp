@@ -20,7 +20,7 @@ s32 GS_Options( void ) {
     s16 y;
     u8 alpha;
 
-    if ( gs_optionsState == 1 && ( D_800E4D62 & B_BUTTON ) && gs_optionsPage == 0 && game_leaveState == 0 ) {
+    if ( gs_optionsState == 1 && ( cont_allPressed & B_BUTTON ) && gs_optionsPage == 0 && game_leaveState == 0 ) {
         Sound_PlaySe( 2, 0 );
         gs_optionsState = 3;
     }
@@ -49,15 +49,16 @@ s32 GS_Options( void ) {
         }
 
         if ( gs_optionsPage == 0
-             && ( ( D_800E6758 & U_JPAD ) || ( gs_optionsCursor == OPTION_EXIT && ( D_800E6758 & L_JPAD ) ) ) ) {
+             && ( ( cont_allDpadRepeat & U_JPAD )
+                  || ( gs_optionsCursor == OPTION_EXIT && ( cont_allDpadRepeat & L_JPAD ) ) ) ) {
             if ( --gs_optionsCursor == 0xFF ) {
                 gs_optionsCursor = OPTION_EXIT;
             }
             func_80026B28();
             Sound_PlaySe( 0, 0x80 );
         } else if ( gs_optionsPage == 0
-                    && ( ( D_800E6758 & D_JPAD )
-                         || ( gs_optionsCursor == OPTION_CREDITS && ( D_800E6758 & R_JPAD ) ) ) ) {
+                    && ( ( cont_allDpadRepeat & D_JPAD )
+                         || ( gs_optionsCursor == OPTION_CREDITS && ( cont_allDpadRepeat & R_JPAD ) ) ) ) {
             if ( ++gs_optionsCursor == 8 ) {
                 gs_optionsCursor = 0;
             }
@@ -67,13 +68,13 @@ s32 GS_Options( void ) {
 
         switch ( gs_optionsCursor ) {
         case OPTION_DIFFICULTY:
-            if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || ( D_800E6758 & R_JPAD ) ) {
+            if ( ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) || ( cont_allDpadRepeat & R_JPAD ) ) {
                 if ( ++save_data.difficulty == 3 ) {
                     save_data.difficulty = 0;
                 }
                 Sound_PlaySe( 0, 0x80 );
             }
-            if ( D_800E6758 & L_JPAD ) {
+            if ( cont_allDpadRepeat & L_JPAD ) {
                 if ( --save_data.difficulty == 0xFF ) {
                     save_data.difficulty = 2;
                 }
@@ -81,7 +82,7 @@ s32 GS_Options( void ) {
             }
             break;
         case OPTION_MUSIC:
-            if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || ( D_800E6758 & ( L_JPAD | R_JPAD ) ) ) {
+            if ( ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) || ( cont_allDpadRepeat & ( L_JPAD | R_JPAD ) ) ) {
                 if ( ++save_data.music == 2 ) {
                     save_data.music = 0;
                 }
@@ -90,19 +91,19 @@ s32 GS_Options( void ) {
             break;
         case OPTION_SOUND_TEST:
             gs_soundTestFrames++;
-            if ( D_800E6758 & R_JPAD ) {
+            if ( cont_allDpadRepeat & R_JPAD ) {
                 if ( ++gs_soundTestSound == NUM_SOUND_TESTS ) {
                     gs_soundTestSound = 0;
                 }
                 Sound_PlaySe( 0, 0x80 );
             }
-            if ( D_800E6758 & L_JPAD ) {
+            if ( cont_allDpadRepeat & L_JPAD ) {
                 if ( --gs_soundTestSound == 0xFF ) {
                     gs_soundTestSound = NUM_SOUND_TESTS - 1;
                 }
                 Sound_PlaySe( 0, 0x80 );
             }
-            if ( gs_soundTestFrames >= 16 && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
+            if ( gs_soundTestFrames >= 16 && ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) ) {
                 gs_soundTestFrames = 0;
                 Sound_PlaySe( 1, 0x80 );
                 // RULE-EXCEPTION: R30, i holds the saved setting: retail gives the counter this longer life, which
@@ -114,14 +115,14 @@ s32 GS_Options( void ) {
             }
             break;
         case OPTION_BGM_VOLUME:
-            if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || ( D_800E6758 & R_JPAD ) ) {
+            if ( ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) || ( cont_allDpadRepeat & R_JPAD ) ) {
                 if ( ++save_data.musicVolume == 5 ) {
                     save_data.musicVolume = 0;
                 }
                 Sound_UpdateBgmVolume();
                 Sound_PlaySe( 0, 0x80 );
             }
-            if ( D_800E6758 & L_JPAD ) {
+            if ( cont_allDpadRepeat & L_JPAD ) {
                 if ( --save_data.musicVolume == 0xFF ) {
                     save_data.musicVolume = 4;
                 }
@@ -130,7 +131,7 @@ s32 GS_Options( void ) {
             }
             break;
         case OPTION_RUMBLE:
-            if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || ( D_800E6758 & ( L_JPAD | R_JPAD ) ) ) {
+            if ( ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) || ( cont_allDpadRepeat & ( L_JPAD | R_JPAD ) ) ) {
                 if ( ++save_data.rumble == 2 ) {
                     save_data.rumble = 0;
                 }
@@ -138,13 +139,13 @@ s32 GS_Options( void ) {
             }
             break;
         case OPTION_RECORDS:
-            if ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
+            if ( cont_allPressed & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( 1, 0 );
                 gs_optionsPage ^= 1;
             }
             break;
         case OPTION_CREDITS:
-            if ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
+            if ( cont_allPressed & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( 1, 0 );
                 game_leaveState = 1;
             }
@@ -185,7 +186,7 @@ s32 GS_Options( void ) {
                     Draw_FillRect( 0xB0, i * 20 + 0x46, 0x46, 0x12, 0, 0, 0, 0x80 );
                 }
             }
-            if ( gs_optionsCursor == OPTION_EXIT && ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) ) {
+            if ( gs_optionsCursor == OPTION_EXIT && ( cont_allPressed & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) ) {
                 Sound_PlaySe( 1, 0 );
                 gs_optionsState = 3;
             }

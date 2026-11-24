@@ -39,8 +39,8 @@ void RS_Frame( void ) {
         game_fade = 263;
         game_scene = rs_nextScene;
     }
-    rs_dpadPressed = game_leaveState ? 0 : D_800E6758;
-    rs_buttonsPressed = game_leaveState ? 0 : D_800E4D62;
+    rs_dpadPressed = game_leaveState ? 0 : cont_allDpadRepeat;
+    rs_buttonsPressed = game_leaveState ? 0 : cont_allPressed;
     Txt_LoadGlyphSheet( &game_gfx );
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     Draw_Image( 0xA58, 0, 0 );

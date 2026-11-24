@@ -84,15 +84,15 @@ void GA_Frame( void ) {
             game_leaveState = 1;
         }
         if ( !D_8012D650_gacode ) {
-            if ( D_800E4D62 & START_BUTTON ) {
+            if ( cont_allPressed & START_BUTTON ) {
                 Sound_PlaySe( 6, 0 );
                 D_8012D650_gacode = 1;
-                D_800DF680[0] = D_800DF680[1] = 8;
+                cont_rumble[0] = cont_rumble[1] = 8;
                 D_8006940D[0] = D_8006940D[1] = 0;
             }
-            if ( ( game_mode & 0xF ) != 2 && ( ( D_800E57E4[0] | D_800E57E4[1] ) & U_CBUTTONS ) ) {
+            if ( ( game_mode & 0xF ) != 2 && ( ( cont_held[0] | cont_held[1] ) & U_CBUTTONS ) ) {
                 cUpHeld = TRUE;
-                D_800DF680[0] = D_800DF680[1] = 8;
+                cont_rumble[0] = cont_rumble[1] = 8;
                 D_8006940D[0] = D_8006940D[1] = 0;
             }
         }
@@ -181,7 +181,7 @@ s32 GA_PauseMenu( void ) {
     Draw_Image( isMode2 ? 0x882 : 0x89E, 0x50, 0x40 );
     Draw_ImageScaled( 0x8A0, 0x66, cursorY[ga_pauseCursor], (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
     Draw_ImageScaled( 0x89F, markX[save_data.music], 0x6C, (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
-    if ( D_800E6758 & U_JPAD ) {
+    if ( cont_allDpadRepeat & U_JPAD ) {
         Sound_PlaySe( 0, 0 );
         if ( ga_pauseCursor == 0 ) {
             ga_pauseCursor = 3;
@@ -189,7 +189,7 @@ s32 GA_PauseMenu( void ) {
             ga_pauseCursor--;
         }
     }
-    if ( D_800E6758 & D_JPAD ) {
+    if ( cont_allDpadRepeat & D_JPAD ) {
         Sound_PlaySe( 0, 0 );
         if ( ga_pauseCursor == 3 ) {
             ga_pauseCursor = 0;
@@ -197,7 +197,7 @@ s32 GA_PauseMenu( void ) {
             ga_pauseCursor++;
         }
     }
-    if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+    if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
         switch ( ga_pauseCursor ) {
         case 0:
             D_8012D650_gacode = 0;
@@ -220,7 +220,7 @@ s32 GA_PauseMenu( void ) {
             Sound_PlaySe( 1, 0 );
             break;
         }
-    } else if ( D_800E4D62 & B_BUTTON ) {
+    } else if ( cont_allPressed & B_BUTTON ) {
         D_8012D650_gacode = 0;
         Sound_PlaySe( 2, 0 );
     }
@@ -235,7 +235,7 @@ func_80112D94_gacode
 s32 func_80112D94_gacode( void ) {
     Draw_ImageScaled( 0x89E, 0x50, 0x40, 0x40, 1.0f, 1.0f );
     func_80112E04_gacode();
-    if ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
+    if ( cont_allPressed & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
         Sound_PlaySe( 11, 0 );
         ga_state = GA_PauseMenu;
     }
@@ -288,7 +288,7 @@ s32 GA_PageBrowser( void ) {
                        (u8)ga_blinkLevel + 0x10, 1.0f, 1.0f );
     }
     if ( ga_menuPages[ga_menuPage].cursor >= 0 ) {
-        if ( D_800E6758 & U_JPAD ) {
+        if ( cont_allDpadRepeat & U_JPAD ) {
             Sound_PlaySe( 0, 0 );
             if ( ga_menuPages[ga_menuPage].cursor != 0 ) {
                 ga_menuPages[ga_menuPage].cursor--;
@@ -296,7 +296,7 @@ s32 GA_PageBrowser( void ) {
                 ga_menuPages[ga_menuPage].cursor = ga_menuPages[ga_menuPage].backItem;
             }
         }
-        if ( D_800E6758 & D_JPAD ) {
+        if ( cont_allDpadRepeat & D_JPAD ) {
             Sound_PlaySe( 0, 0 );
             if ( ga_menuPages[ga_menuPage].cursor != ga_menuPages[ga_menuPage].backItem ) {
                 ga_menuPages[ga_menuPage].cursor++;
@@ -304,7 +304,7 @@ s32 GA_PageBrowser( void ) {
                 ga_menuPages[ga_menuPage].cursor = 0;
             }
         }
-        if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+        if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
             if ( ga_menuPages[ga_menuPage].cursor == ga_menuPages[ga_menuPage].backItem ) {
                 ga_menuPages[ga_menuPage].cursor = 0;
                 if ( ga_menuPages[ga_menuPage].parent < 0 ) {
@@ -321,11 +321,11 @@ s32 GA_PageBrowser( void ) {
                                   + ga_menuPages[ga_menuPage].cursor;
             }
         }
-    } else if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+    } else if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
         Sound_PlaySe( 0x33, 0 );
         ga_menuPage = ga_menuPages[ga_menuPage].firstPage;
     }
-    if ( D_800E4D62 & B_BUTTON ) {
+    if ( cont_allPressed & B_BUTTON ) {
         Sound_PlaySe( 2, 0 );
         ga_menuPage = 0;
         ga_state = GA_PauseMenu;
@@ -757,7 +757,7 @@ s32 GA_DuelLoop( void ) {
         }
         return 0;
     }
-    if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) && results[0] + results[1] == -2 ) {
+    if ( ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) && results[0] + results[1] == -2 ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         if ( game_gamesWon[0] == 2 || game_gamesWon[1] == 2 ) {
             func_80116170_gacode( 1 );
@@ -793,7 +793,7 @@ s32 func_80114024_gacode( void ) {
         GA_EndDuelGame();
         return 0;
     }
-    if ( ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) || results[0] + results[1] == -2 ) {
+    if ( ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) || results[0] + results[1] == -2 ) {
         func_80116170_gacode( 1 );
     }
     return 0;

@@ -258,9 +258,9 @@ s32 GS_TeamSelect( void ) {
                     Menu_SetItem( D_8011FA80_gscode, player + 16, MENU_NONE, MENU_NONE, MENU_NONE, game_pulseAlpha );
 
                     if ( D_8011FC84_gscode[1] == 0x80 ) {
-                        repeat = D_800E6758;
+                        repeat = cont_allDpadRepeat;
                     } else {
-                        repeat = D_800E6760[i];
+                        repeat = cont_dpadRepeat[i];
                     }
                     if ( repeat & L_JPAD ) {
                         do {
@@ -286,9 +286,9 @@ s32 GS_TeamSelect( void ) {
                     }
 
                     if ( D_8011FC84_gscode[1] == 0x80 ) {
-                        pad = D_800E4D62;
+                        pad = cont_allPressed;
                     } else {
-                        pad = D_800E44E0[i];
+                        pad = cont_pressed[i];
                     }
                     if ( pad & ( A_BUTTON | Z_TRIG ) ) {
                         Sound_PlaySe( SE_DECIDE, 0 );
@@ -326,9 +326,9 @@ s32 GS_TeamSelect( void ) {
                     }
                 } else {
                     if ( D_8011FC84_gscode[1] == 0x80 ) {
-                        pad = D_800E4D62;
+                        pad = cont_allPressed;
                     } else {
-                        pad = D_800E44E0[i];
+                        pad = cont_pressed[i];
                     }
                     if ( ( pad & B_BUTTON ) && ( D_8011FC84_gscode[i] & 0x7F ) ) {
                         Sound_PlaySe( 2, 0 );

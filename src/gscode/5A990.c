@@ -16,7 +16,7 @@ once it has slid out, 1 for the left choice, 3 for the right one and 2 for backi
 s32 GS_TwoChoiceMenu( void ) {
     u8 choice;
 
-    if ( gs_twoChoiceState == CHOICE_RUN && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
+    if ( gs_twoChoiceState == CHOICE_RUN && ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         switch ( gs_twoChoiceCursor ) {
         case 0:
@@ -27,7 +27,7 @@ s32 GS_TwoChoiceMenu( void ) {
             break;
         }
     }
-    if ( gs_twoChoiceState == CHOICE_RUN && ( D_800E4D62 & B_BUTTON ) ) {
+    if ( gs_twoChoiceState == CHOICE_RUN && ( cont_allPressed & B_BUTTON ) ) {
         Sound_PlaySe( 2, 0 );
         gs_twoChoiceState = CHOICE_BACK;
     }
@@ -47,7 +47,7 @@ s32 GS_TwoChoiceMenu( void ) {
             Menu_SetItem( gs_twoChoiceMenu, 0, gs_twoChoiceBlink[0][gs_twoChoiceBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
             Draw_RoundedBox( 0x28, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
-            if ( D_800E6758 & R_JPAD ) {
+            if ( cont_allDpadRepeat & R_JPAD ) {
                 gs_twoChoiceCursor = 1;
             }
             break;
@@ -55,7 +55,7 @@ s32 GS_TwoChoiceMenu( void ) {
             Menu_SetItem( gs_twoChoiceMenu, 1, gs_twoChoiceBlink[1][gs_twoChoiceBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
             Draw_RoundedBox( 0xB8, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
-            if ( D_800E6758 & L_JPAD ) {
+            if ( cont_allDpadRepeat & L_JPAD ) {
                 gs_twoChoiceCursor = 0;
             }
             break;

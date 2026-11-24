@@ -27,7 +27,7 @@ Frame of the overlay: A builds a new maze; runs the scene's objects, then prints
 void MG_Frame( void ) {
     u8 text[0x50];
 
-    if ( D_800E4D62 & A_BUTTON ) {
+    if ( cont_allPressed & A_BUTTON ) {
         Maze_Build( MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
         Maze_Draw( 0x90F, MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
     }

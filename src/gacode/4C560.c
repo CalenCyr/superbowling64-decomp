@@ -104,7 +104,7 @@ void func_801224F8_gacode( void ) {
 GA_AnimateTextures
 
 Animated textures: loads the frame images on the first frame and saves the texels of resources 1523 and 1524,
-then points the palettes of seven resources at the images of the current frame of D_8005B0F4. Every other
+then points the palettes of seven resources at the images of the current frame of sched_frameCount. Every other
 64 frames, resources 1523 and 1524 show images 2682 and 2698 instead of their own texels.
 ================
 */
@@ -132,18 +132,18 @@ void GA_AnimateTextures( void ) {
         }
     }
     ( (fileRefB_t *)D_800F80B0[1648].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C964_gacode[D_8005B0F4 / 20 % 9]].data )->palette;
+        ( (unkImage_t *)D_800F80B0[D_8012C964_gacode[sched_frameCount / 20 % 9]].data )->palette;
     ( (fileRefB_t *)D_800F80B0[1528].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C95C_gacode[D_8005B0F4 / 64 & 1]].data )->palette;
+        ( (unkImage_t *)D_800F80B0[D_8012C95C_gacode[sched_frameCount / 64 & 1]].data )->palette;
     ( (fileRefB_t *)D_800F80B0[1529].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C960_gacode[D_8005B0F4 / 64 & 1]].data )->palette;
+        ( (unkImage_t *)D_800F80B0[D_8012C960_gacode[sched_frameCount / 64 & 1]].data )->palette;
     ( (fileRefB_t *)D_800F80B0[1496].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C958_gacode[D_8005B0F4 / 2 & 1]].data )->palette;
+        ( (unkImage_t *)D_800F80B0[D_8012C958_gacode[sched_frameCount / 2 & 1]].data )->palette;
     ( (fileRefB_t *)D_800F80B0[1663].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C928_gacode[D_8005B0F4 / 20 % 11]].data )->palette;
+        ( (unkImage_t *)D_800F80B0[D_8012C928_gacode[sched_frameCount / 20 % 11]].data )->palette;
     ( (fileRefB_t *)D_800F80B0[1664].data )->texels =
-        ( (unkImage_t *)D_800F80B0[D_8012C940_gacode[D_8005B0F4 / 20 % 11]].data )->palette;
-    if ( D_8005B0F4 & 0x40 ) {
+        ( (unkImage_t *)D_800F80B0[D_8012C940_gacode[sched_frameCount / 20 % 11]].data )->palette;
+    if ( sched_frameCount & 0x40 ) {
         ( (fileRefB_t *)D_800F80B0[1523].data )->texels = ( (unkImage_t *)D_800F80B0[2682].data )->palette;
         ( (fileRefB_t *)D_800F80B0[1524].data )->texels = ( (unkImage_t *)D_800F80B0[2698].data )->palette;
     } else {

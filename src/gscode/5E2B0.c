@@ -23,7 +23,7 @@ s32 GS_CharacterSelect( void ) {
     }
 
     if ( D_8011F8B9_gscode == CHOICE_RUN ) {
-        if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+        if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
             Sound_PlaySe( SE_DECIDE, 0 );
             if ( save_data.rumble ) {
                 GS_StartPakCheck();
@@ -33,7 +33,7 @@ s32 GS_CharacterSelect( void ) {
                 D_8011F8B9_gscode = CHOICE_TAKEN;
             }
         }
-        if ( D_800E4D62 & B_BUTTON ) {
+        if ( cont_allPressed & B_BUTTON ) {
             Sound_PlaySe( 2, 0 );
             D_8011F8B9_gscode = CHOICE_BACK;
         }
@@ -64,7 +64,7 @@ s32 GS_CharacterSelect( void ) {
     }
 
     if ( D_8011F8B9_gscode == CHOICE_RUN ) {
-        if ( D_800E6758 & L_JPAD ) {
+        if ( cont_allDpadRepeat & L_JPAD ) {
             if ( D_8011F8BA_gscode == 15 ) {
                 D_8011F8BA_gscode = 0;
             } else if ( D_8011F8BA_gscode >= 9 ) {
@@ -78,7 +78,7 @@ s32 GS_CharacterSelect( void ) {
             } while ( !( save_data.unlocks & ( 1 << game_stage ) ) );
             Sound_PlaySe( SE_CURSOR, 0 );
         }
-        if ( D_800E6758 & R_JPAD ) {
+        if ( cont_allDpadRepeat & R_JPAD ) {
             if ( D_8011F8BA_gscode == 15 ) {
                 D_8011F8BA_gscode = 0;
             } else if ( D_8011F8BA_gscode >= 9 ) {

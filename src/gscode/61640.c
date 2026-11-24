@@ -31,7 +31,7 @@ s32 GS_CharacterMenu( void ) {
     }
 
     if ( ( D_80120657_gscode & 1 ) && D_80120655_gscode == CHOICE_RUN ) {
-        if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+        if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
             Sound_PlaySe( SE_DECIDE, 0 );
             if ( ++D_80120658_gscode == D_801205DC_gscode[D_80120656_gscode] ) {
                 D_80120658_gscode = 0;
@@ -42,11 +42,11 @@ s32 GS_CharacterMenu( void ) {
             ( (sceneObject_t *)D_800EA120[10] )->anim =
                 Cache_GetFile( D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1], FILE_TYPE2 );
         }
-        if ( D_800E4D62 & B_BUTTON ) {
+        if ( cont_allPressed & B_BUTTON ) {
             Sound_PlaySe( 2, 0 );
             D_80120655_gscode = CHOICE_BACK;
         }
-        if ( D_800E6758 & L_JPAD ) {
+        if ( cont_allDpadRepeat & L_JPAD ) {
             do {
                 if ( --D_80120656_gscode == 0xFF ) {
                     D_80120656_gscode = 7;
@@ -54,7 +54,7 @@ s32 GS_CharacterMenu( void ) {
             } while ( !( save_data.unlocks & ( 1 << D_80120656_gscode ) ) );
             Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
-        if ( D_800E6758 & R_JPAD ) {
+        if ( cont_allDpadRepeat & R_JPAD ) {
             do {
                 if ( ++D_80120656_gscode == 8 ) {
                     D_80120656_gscode = 0;

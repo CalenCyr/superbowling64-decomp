@@ -23,7 +23,7 @@ s32 GS_ModeMenu( void ) {
     s32 i;
     u8 choice;
 
-    if ( gs_modeState == CHOICE_RUN && ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) ) {
+    if ( gs_modeState == CHOICE_RUN && ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         switch ( gs_modeCursor ) {
         case 0:
@@ -65,53 +65,53 @@ s32 GS_ModeMenu( void ) {
         case 0:
             Menu_SetItem( gs_modeChoices, 1, gs_modeBlink[1][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
             Draw_RoundedBox( 0x38, 0x30, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
-            if ( D_800E6758 & R_JPAD ) {
+            if ( cont_allDpadRepeat & R_JPAD ) {
                 gs_modeCursor = 1;
             }
-            if ( D_800E6758 & D_JPAD ) {
+            if ( cont_allDpadRepeat & D_JPAD ) {
                 gs_modeCursor = 2;
             }
             break;
         case 1:
             Menu_SetItem( gs_modeChoices, 2, gs_modeBlink[2][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
             Draw_RoundedBox( 0xA8, 0x30, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
-            if ( D_800E6758 & L_JPAD ) {
+            if ( cont_allDpadRepeat & L_JPAD ) {
                 gs_modeCursor = 0;
             }
-            if ( D_800E6758 & D_JPAD ) {
+            if ( cont_allDpadRepeat & D_JPAD ) {
                 gs_modeCursor = 3;
             }
             break;
         case 2:
             Menu_SetItem( gs_modeChoices, 3, gs_modeBlink[3][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
             Draw_RoundedBox( 0x18, 0x98, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
-            if ( D_800E6758 & R_JPAD ) {
+            if ( cont_allDpadRepeat & R_JPAD ) {
                 gs_modeCursor = 4;
             }
-            if ( D_800E6758 & U_JPAD ) {
+            if ( cont_allDpadRepeat & U_JPAD ) {
                 gs_modeCursor = 0;
             }
             break;
         case 3:
             Menu_SetItem( gs_modeChoices, 5, gs_modeBlink[4][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
             Draw_RoundedBox( 0xC8, 0x98, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
-            if ( D_800E6758 & L_JPAD ) {
+            if ( cont_allDpadRepeat & L_JPAD ) {
                 gs_modeCursor = 4;
             }
-            if ( D_800E6758 & U_JPAD ) {
+            if ( cont_allDpadRepeat & U_JPAD ) {
                 gs_modeCursor = 1;
             }
             break;
         case 4:
             Menu_SetItem( gs_modeChoices, 4, gs_modeBlink[0][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
             Draw_RoundedBox( 0x70, 0x70, 0x60, 0x48, 0xE0, 0xE0, 0xE0, game_pulseAlpha );
-            if ( D_800E6758 & L_JPAD ) {
+            if ( cont_allDpadRepeat & L_JPAD ) {
                 gs_modeCursor = 2;
-            } else if ( D_800E6758 & R_JPAD ) {
+            } else if ( cont_allDpadRepeat & R_JPAD ) {
                 gs_modeCursor = 3;
-            } else if ( D_800E6758 & U_JPAD ) {
+            } else if ( cont_allDpadRepeat & U_JPAD ) {
                 gs_modeCursor = 0;
-            } else if ( D_800E6758 & D_JPAD ) {
+            } else if ( cont_allDpadRepeat & D_JPAD ) {
                 gs_modeCursor = 3;
             }
             break;

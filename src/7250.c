@@ -161,22 +161,22 @@ void Cam_Update( sceneCamera_t *cam ) {
         cam->lights[sched_bufferIndex].l[1].l.dir[1] = dy * norm;
         cam->lights[sched_bufferIndex].l[1].l.dir[2] = dz * norm;
     } else {
-        if ( D_800994BC & 0x8000 ) {
+        if ( cont_allHeld & 0x8000 ) {
             guScaleF( m, 1.01f, 1.01f, 1.01f );
             guMtxCatF( m, cam->mtx, cam->mtx );
         }
-        if ( D_800994BC & 0x4000 ) {
+        if ( cont_allHeld & 0x4000 ) {
             guScaleF( m, 0.99f, 0.99f, 0.99f );
             guMtxCatF( m, cam->mtx, cam->mtx );
         }
-        if ( D_800994BC & 0x2000 ) {
-            if ( D_8009D05C * D_8009D05C + D_800DF628 * D_800DF628 > 20 ) {
-                guTranslateF( m, D_8009D05C / 4, D_800DF628 / 4, 0.0f );
+        if ( cont_allHeld & 0x2000 ) {
+            if ( cont_allStickX * cont_allStickX + cont_allStickY * cont_allStickY > 20 ) {
+                guTranslateF( m, cont_allStickX / 4, cont_allStickY / 4, 0.0f );
                 guMtxCatF( cam->mtx, m, cam->mtx );
             }
         } else {
-            if ( D_8009D05C * D_8009D05C + D_800DF628 * D_800DF628 > 20 ) {
-                guRotateRPYF( m, -D_800DF628 / 10.0f, D_8009D05C / 10.0f, 0.0f );
+            if ( cont_allStickX * cont_allStickX + cont_allStickY * cont_allStickY > 20 ) {
+                guRotateRPYF( m, -cont_allStickY / 10.0f, cont_allStickX / 10.0f, 0.0f );
                 guMtxCatF( m, cam->mtx, cam->mtx );
             }
         }

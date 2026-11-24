@@ -125,7 +125,7 @@ void CA_Init( void ) {
     s32 i;
     u32 j;
 
-    if ( D_800994BC & START_BUTTON ) {
+    if ( cont_allHeld & START_BUTTON ) {
         D_8005C0BC = 1;
         Host_Sync();
     }
@@ -336,18 +336,18 @@ void CA_Frame( void ) {
         }
     }
 
-    if ( ( D_800E4D62 & L_TRIG ) && ( D_800994BC & Z_TRIG ) ) {
+    if ( ( cont_allPressed & L_TRIG ) && ( cont_allHeld & Z_TRIG ) ) {
         if ( ++ca_mode == CAMODE_COUNT ) {
             ca_mode = CAMODE_ROTATE;
         }
     }
-    if ( D_800994BC == 0 ) {
+    if ( cont_allHeld == 0 ) {
         ca_dpadHeld = 0;
     }
 
     if ( ca_mode == CAMODE_FILE ) {
         size = MOTION_FILE_SIZE;
-        if ( D_800E4D62 & A_BUTTON ) {
+        if ( cont_allPressed & A_BUTTON ) {
             buf = Mem_Alloc( MOTION_FILE_SIZE );
             Host_LoadFile( "motion.dat", buf, MOTION_FILE_SIZE );
             size = 0;
@@ -365,7 +365,7 @@ void CA_Frame( void ) {
             size += 2 * sizeof( D_80115374_cacode[0] );
             Mem_Free( buf );
         }
-        if ( D_800E4D62 & B_BUTTON ) {
+        if ( cont_allPressed & B_BUTTON ) {
             buf = Mem_Alloc( size );
             size = 0;
             memcpy( buf + size, ca_partRotations, sizeof( ca_partRotations ) );
@@ -385,7 +385,7 @@ void CA_Frame( void ) {
         }
     }
 
-    if ( ( D_800E4D62 & START_BUTTON ) && !( D_800994BC & Z_TRIG ) ) {
+    if ( ( cont_allPressed & START_BUTTON ) && !( cont_allHeld & Z_TRIG ) ) {
         if ( ++ca_selected == 3 ) {
             ca_selected = 0;
         }
@@ -449,8 +449,8 @@ void CA_Frame( void ) {
         }
     }
 
-    if ( D_800994BC & L_JPAD ) {
-        if ( ( D_800E4D62 & L_JPAD ) || ca_dpadHeld >= 7 ) {
+    if ( cont_allHeld & L_JPAD ) {
+        if ( ( cont_allPressed & L_JPAD ) || ca_dpadHeld >= 7 ) {
             --ca_frame;
             if ( ca_frame < 0 ) {
                 ca_frame = D_80115374_cacode[0] - 1;
@@ -459,8 +459,8 @@ void CA_Frame( void ) {
         }
         ca_dpadHeld++;
     }
-    if ( D_800994BC & R_JPAD ) {
-        if ( ( D_800E4D62 & R_JPAD ) || ca_dpadHeld >= 7 ) {
+    if ( cont_allHeld & R_JPAD ) {
+        if ( ( cont_allPressed & R_JPAD ) || ca_dpadHeld >= 7 ) {
             ++ca_frame;
             if ( ca_frame >= D_80115374_cacode[0] ) {
                 ca_frame = 0;
@@ -470,8 +470,8 @@ void CA_Frame( void ) {
         ca_dpadHeld++;
     }
 
-    if ( D_800E4D62 & U_JPAD ) {
-        if ( D_800994BC & Z_TRIG ) {
+    if ( cont_allPressed & U_JPAD ) {
+        if ( cont_allHeld & Z_TRIG ) {
             if ( ca_frame == D_80115374_cacode[0] - 1 ) {
                 i = 0;
             } else {
@@ -494,18 +494,18 @@ void CA_Frame( void ) {
         }
     }
 
-    if ( ca_selected != 0 && ( D_800E4D62 & D_JPAD ) ) {
+    if ( ca_selected != 0 && ( cont_allPressed & D_JPAD ) ) {
         CA_CacheFrame( ca_frame, ca_selected );
     }
 
-    if ( ca_mode <= CAMODE_ROTATE && !( D_800994BC & Z_TRIG ) ) {
-        if ( D_800E4D62 & A_BUTTON ) {
+    if ( ca_mode <= CAMODE_ROTATE && !( cont_allHeld & Z_TRIG ) ) {
+        if ( cont_allPressed & A_BUTTON ) {
             if ( ++ca_part == model->numParts ) {
                 ca_part = 0;
             }
             memcpy( ca_keptRotation, ca_partRotations[ca_part][ca_frame], sizeof( ca_keptRotation ) );
         }
-        if ( D_800E4D62 & B_BUTTON ) {
+        if ( cont_allPressed & B_BUTTON ) {
             if ( --ca_part == -1 ) {
                 ca_part = model->numParts - 1;
             }
@@ -542,19 +542,19 @@ void CA_Frame( void ) {
     case CAMODE_ROTATE:
         cam = &ca_cameras[ca_selected]->cam;
         cam->frame = -1;
-        if ( D_800994BC & R_TRIG ) {
+        if ( cont_allHeld & R_TRIG ) {
             /* R: the stick moves the camera, with Z in depth */
             move[0] = move[1] = move[2] = 0.0f;
-            if ( D_800994BC & Z_TRIG ) {
-                if ( D_8009D05C > STICK_DEAD || D_8009D05C < -STICK_DEAD ) {
-                    move[2] = D_8009D05C / 8.0f;
+            if ( cont_allHeld & Z_TRIG ) {
+                if ( cont_allStickX > STICK_DEAD || cont_allStickX < -STICK_DEAD ) {
+                    move[2] = cont_allStickX / 8.0f;
                 }
             } else {
-                if ( D_8009D05C > STICK_DEAD || D_8009D05C < -STICK_DEAD ) {
-                    move[0] = -D_8009D05C / 8.0f;
+                if ( cont_allStickX > STICK_DEAD || cont_allStickX < -STICK_DEAD ) {
+                    move[0] = -cont_allStickX / 8.0f;
                 }
-                if ( D_800DF628 > STICK_DEAD || D_800DF628 < -STICK_DEAD ) {
-                    move[1] = -D_800DF628 / 8.0f;
+                if ( cont_allStickY > STICK_DEAD || cont_allStickY < -STICK_DEAD ) {
+                    move[1] = -cont_allStickY / 8.0f;
                 }
             }
             if ( move[0] != 0.0f || move[1] != 0.0f || move[2] != 0.0f ) {
@@ -569,13 +569,13 @@ void CA_Frame( void ) {
                 cam->upPoint[2] += move[2];
             }
         }
-        if ( D_800994BC & Z_TRIG ) {
+        if ( cont_allHeld & Z_TRIG ) {
             /* Z with A or B scales the object */
             scale[0] = 1.0f;
-            if ( D_800994BC & A_BUTTON ) {
+            if ( cont_allHeld & A_BUTTON ) {
                 scale[0] = 1.01f;
             }
-            if ( D_800994BC & B_BUTTON ) {
+            if ( cont_allHeld & B_BUTTON ) {
                 scale[0] = 0.99f;
             }
             if ( scale[0] != 1.0 ) {
@@ -583,19 +583,19 @@ void CA_Frame( void ) {
                 guMtxCatF( obj->mtx, m, obj->mtx );
             }
         }
-        if ( !( D_800994BC & R_TRIG ) ) {
+        if ( !( cont_allHeld & R_TRIG ) ) {
             /* the stick turns the object, with Z about its roll */
             rot[0] = rot[1] = rot[2] = 0.0f;
-            if ( D_800994BC & Z_TRIG ) {
-                if ( D_8009D05C > STICK_DEAD || D_8009D05C < -STICK_DEAD ) {
-                    rot[2] = -D_8009D05C / 8.0f;
+            if ( cont_allHeld & Z_TRIG ) {
+                if ( cont_allStickX > STICK_DEAD || cont_allStickX < -STICK_DEAD ) {
+                    rot[2] = -cont_allStickX / 8.0f;
                 }
             } else {
-                if ( D_8009D05C > STICK_DEAD || D_8009D05C < -STICK_DEAD ) {
-                    rot[1] = D_8009D05C / 8.0f;
+                if ( cont_allStickX > STICK_DEAD || cont_allStickX < -STICK_DEAD ) {
+                    rot[1] = cont_allStickX / 8.0f;
                 }
-                if ( D_800DF628 > STICK_DEAD || D_800DF628 < -STICK_DEAD ) {
-                    rot[0] = -D_800DF628 / 8.0f;
+                if ( cont_allStickY > STICK_DEAD || cont_allStickY < -STICK_DEAD ) {
+                    rot[0] = -cont_allStickY / 8.0f;
                 }
             }
             if ( rot[0] != 0.0f || rot[1] != 0.0f || rot[2] != 0.0f ) {
@@ -605,24 +605,24 @@ void CA_Frame( void ) {
         }
         /* the C buttons turn the selected part a degree a frame, with Z about its roll */
         rot[0] = rot[1] = rot[2] = 0.0f;
-        if ( D_800994BC & Z_TRIG ) {
-            if ( D_800994BC & R_CBUTTONS ) {
+        if ( cont_allHeld & Z_TRIG ) {
+            if ( cont_allHeld & R_CBUTTONS ) {
                 rot[2] = -1.0f;
             }
-            if ( D_800994BC & L_CBUTTONS ) {
+            if ( cont_allHeld & L_CBUTTONS ) {
                 rot[2] = 1.0f;
             }
         } else {
-            if ( D_800994BC & R_CBUTTONS ) {
+            if ( cont_allHeld & R_CBUTTONS ) {
                 rot[1] = 1.0f;
             }
-            if ( D_800994BC & L_CBUTTONS ) {
+            if ( cont_allHeld & L_CBUTTONS ) {
                 rot[1] = -1.0f;
             }
-            if ( D_800994BC & U_CBUTTONS ) {
+            if ( cont_allHeld & U_CBUTTONS ) {
                 rot[0] = -1.0f;
             }
-            if ( D_800994BC & D_CBUTTONS ) {
+            if ( cont_allHeld & D_CBUTTONS ) {
                 rot[0] = 1.0f;
             }
         }
@@ -636,25 +636,25 @@ void CA_Frame( void ) {
                 CA_DecomposeMatrix( m, move, ca_partRotations[ca_part][ca_frame], scale );
             }
         }
-        if ( ( D_800E4D62 & START_BUTTON ) && ( D_800994BC & Z_TRIG ) ) {
+        if ( ( cont_allPressed & START_BUTTON ) && ( cont_allHeld & Z_TRIG ) ) {
             memcpy( swap, ca_partRotations[ca_part][ca_frame], sizeof( swap ) );
             memcpy( ca_partRotations[ca_part][ca_frame], ca_keptRotation, sizeof( ca_keptRotation ) );
             memcpy( ca_keptRotation, swap, sizeof( ca_keptRotation ) );
         }
         break;
     case CAMODE_IMAGE:
-        if ( D_800994BC & Z_TRIG ) {
-            if ( D_800994BC & A_BUTTON ) {
+        if ( cont_allHeld & Z_TRIG ) {
+            if ( cont_allHeld & A_BUTTON ) {
                 D_80115374_cacode[2]++;
             }
-            if ( D_800994BC & B_BUTTON ) {
+            if ( cont_allHeld & B_BUTTON ) {
                 D_80115374_cacode[2]--;
             }
         } else {
-            if ( D_800994BC & A_BUTTON ) {
+            if ( cont_allHeld & A_BUTTON ) {
                 D_80115374_cacode[1]++;
             }
-            if ( D_800994BC & B_BUTTON ) {
+            if ( cont_allHeld & B_BUTTON ) {
                 D_80115374_cacode[1]--;
             }
         }
@@ -675,14 +675,14 @@ void CA_Frame( void ) {
     }
 
     if ( ca_selected != 0 ) {
-        if ( D_800994BC & Z_TRIG ) {
-            if ( D_800994BC & D_CBUTTONS ) {
+        if ( cont_allHeld & Z_TRIG ) {
+            if ( cont_allHeld & D_CBUTTONS ) {
                 ca_clipAlpha += 8;
                 if ( ca_clipAlpha > 247 ) {
                     ca_clipAlpha = 247;
                 }
             }
-            if ( D_800994BC & U_CBUTTONS ) {
+            if ( cont_allHeld & U_CBUTTONS ) {
                 ca_clipAlpha -= 8;
                 if ( ca_clipAlpha < 10 ) {
                     ca_clipAlpha = 10;

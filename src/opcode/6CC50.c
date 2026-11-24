@@ -41,16 +41,16 @@ s32 OP_PakScreen( void ) {
         D_800E4FC8 = 0;
         osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
         osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
-        if ( D_80066B8C != 0 ) {
+        if ( cont_result != 0 ) {
             return FALSE;
         }
         op_numNotes = 0;
         for ( i = 0; i < PAK_MAX_NOTES; i++ ) {
             op_pakMsg = 10;
-            D_800E6584 = i;
+            cont_noteIndex = i;
             osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
             osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
-            if ( D_80066B8C == 0 ) {
+            if ( cont_result == 0 ) {
                 n = op_numNotes;
                 op_noteIndex[n] = i;
                 op_notePages[n] = ( D_80066C00.note.file_size + 0xFF ) >> 8;
@@ -60,24 +60,24 @@ s32 OP_PakScreen( void ) {
                 op_noteNames[op_numNotes].ext = OP_ConvertPakChar( D_80066C00.note.ext_name[0] );
                 op_noteNames[op_numNotes].end = 0xFFFF;
                 op_numNotes++;
-            } else if ( D_80066B8C != 5 ) {
+            } else if ( cont_result != 5 ) {
                 return FALSE;
             }
         }
         op_pakMsg = 3;
         osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
         osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
-        if ( D_80066B8C != 0 ) {
+        if ( cont_result != 0 ) {
             return FALSE;
         }
         op_pakMsg = 4;
-        op_freeNotes = D_80066C28 - D_800692D4;
+        op_freeNotes = cont_maxNotes - cont_usedNotes;
         osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
         osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
-        if ( D_80066B8C != 0 ) {
+        if ( cont_result != 0 ) {
             return FALSE;
         }
-        op_freePages = D_8009944C / 256;
+        op_freePages = cont_freeBytes / 256;
         op_firstNote = 0;
         op_pakStep = 2;
         break;
@@ -123,7 +123,7 @@ s32 OP_PakScreen( void ) {
         if ( game_leaveState == 0 ) {
             switch ( op_pakState ) {
             case 0:
-                if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+                if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                     Sound_PlaySe( 1, 0 );
                     if ( op_promptChoice == 0 ) {
                         op_pakState = 1;
@@ -131,11 +131,11 @@ s32 OP_PakScreen( void ) {
                         game_leaveState = 1;
                     }
                 }
-                if ( ( D_800E6758 & L_JPAD ) && op_promptChoice == 1 ) {
+                if ( ( cont_allDpadRepeat & L_JPAD ) && op_promptChoice == 1 ) {
                     op_promptChoice = 0;
                     Sound_PlaySe( 0, 0 );
                 }
-                if ( ( D_800E6758 & R_JPAD ) && op_promptChoice == 0 ) {
+                if ( ( cont_allDpadRepeat & R_JPAD ) && op_promptChoice == 0 ) {
                     op_promptChoice = 1;
                     Sound_PlaySe( 0, 0 );
                 }
@@ -145,16 +145,16 @@ s32 OP_PakScreen( void ) {
                     op_pakState = 0;
                     break;
                 }
-                if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
+                if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
                     Sound_PlaySe( 1, 0 );
                     op_pakState = 2;
                     D_80066C44 = 1;
                 }
-                if ( D_800E4D62 & B_BUTTON ) {
+                if ( cont_allPressed & B_BUTTON ) {
                     Sound_PlaySe( 2, 0 );
                     op_pakState = 0;
                 }
-                if ( D_800E6758 & U_JPAD ) {
+                if ( cont_allDpadRepeat & U_JPAD ) {
                     if ( op_cursorLine != 0 ) {
                         Sound_PlaySe( 0, 0 );
                         op_cursorLine--;
@@ -163,7 +163,7 @@ s32 OP_PakScreen( void ) {
                         op_firstNote--;
                     }
                 }
-                if ( D_800E6758 & D_JPAD ) {
+                if ( cont_allDpadRepeat & D_JPAD ) {
                     if ( op_cursorLine + op_firstNote < op_numNotes - 1 ) {
                         Sound_PlaySe( 0, 0 );
                         if ( op_cursorLine < PAK_NOTES_SHOWN - 1 ) {
@@ -173,11 +173,11 @@ s32 OP_PakScreen( void ) {
                         }
                     }
                 }
-                Draw_Image( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
+                Draw_Image( op_cursorImages[sched_frameCount / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
                 Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, game_pulseAlpha );
                 break;
             case 2:
-                Draw_Image( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
+                Draw_Image( op_cursorImages[sched_frameCount / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
                 Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, game_pulseAlpha );
                 D_800DF590[0] = D_800DF590[1] = 0x24;
                 D_800E6538[0] = D_800E6538[1] = 0x10;
@@ -190,20 +190,20 @@ s32 OP_PakScreen( void ) {
                     if ( D_80066C44 == 0 ) {
                         Sound_PlaySe( 8, 0 );
                         op_pakMsg = 10;
-                        D_800E6584 = op_noteIndex[op_firstNote + op_cursorLine];
+                        cont_noteIndex = op_noteIndex[op_firstNote + op_cursorLine];
                         osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
                         osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
-                        if ( D_80066B8C != 0 ) {
+                        if ( cont_result != 0 ) {
                             op_pakState = 3;
                         } else {
-                            memcpy( D_800F7C78, D_80066C00.note.game_name, 16 );
-                            memcpy( D_80066E10, D_80066C00.note.ext_name, 4 );
+                            memcpy( cont_deleteGameName, D_80066C00.note.game_name, 16 );
+                            memcpy( cont_deleteExtName, D_80066C00.note.ext_name, 4 );
                             op_pakMsg = 1;
-                            D_8009D090 = D_80066C00.note.company_code;
-                            D_8009CF6C = D_80066C00.note.game_code;
+                            cont_deleteCompany = D_80066C00.note.company_code;
+                            cont_deleteGameCode = D_80066C00.note.game_code;
                             osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
                             osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
-                            if ( D_80066B8C == 0 ) {
+                            if ( cont_result == 0 ) {
                                 op_freeNotes++;
                                 op_freePages += ( D_80066C00.note.file_size + 0xFF ) >> 8;
                                 for ( i = op_cursorLine + op_firstNote; i < op_numNotes - 1; i++ ) {
@@ -227,7 +227,7 @@ s32 OP_PakScreen( void ) {
                 }
                 break;
             case 3:
-                Draw_Image( op_cursorImages[D_8005B0F4 / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
+                Draw_Image( op_cursorImages[sched_frameCount / 5 % 3], 0x12, op_cursorLine * 18 + 0x48 );
                 Draw_RectOutline( 0x25, op_cursorLine * 18 + 0x48, 0xF6, 0x11, 0xFF, 0, 0, game_pulseAlpha );
                 Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
                 if ( Save_ShowPrompt( 0x94A, PROMPT_TIMED ) ) {

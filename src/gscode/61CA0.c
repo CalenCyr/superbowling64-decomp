@@ -40,11 +40,11 @@ void GS_StartPakCheck( void ) {
     gs_lastContStatus[1] = 0;
     gs_lastContStatus[0] = 0;
     if ( save_data.rumble ) {
-        if ( !D_800E4FD0[0] || ( gs_secondController == 1 && !D_800E4FD0[1] ) ) {
+        if ( !cont_hasRumble[0] || ( gs_secondController == 1 && !cont_hasRumble[1] ) ) {
             gs_pakCheckStep = 0;
             return;
         }
-        if ( D_800E4FD0[0] == 1 || ( gs_secondController == 1 && D_800E4FD0[1] == 1 ) ) {
+        if ( cont_hasRumble[0] == 1 || ( gs_secondController == 1 && cont_hasRumble[1] == 1 ) ) {
             gs_pakCheckStep = 1;
             return;
         }
@@ -90,16 +90,16 @@ s32 GS_PakCheck( void ) {
     case 0:
         gs_pakCheckFrames++;
         for ( i = 0; i < 2; i++ ) {
-            if ( ( D_800F7BE8[i].status ^ gs_lastContStatus[i] ) & ( CONT_CARD_ON | CONT_CARD_PULL )
-                 & D_800F7BE8[i].status ) {
-                if ( !D_800DF680[i] ) {
-                    D_800DF680[i] = 8;
+            if ( ( cont_status[i].status ^ gs_lastContStatus[i] ) & ( CONT_CARD_ON | CONT_CARD_PULL )
+                 & cont_status[i].status ) {
+                if ( !cont_rumble[i] ) {
+                    cont_rumble[i] = 8;
                 }
             }
-            gs_lastContStatus[i] = D_800F7BE8[i].status;
+            gs_lastContStatus[i] = cont_status[i].status;
         }
         if ( Save_ShowPrompt( 0x948, 1 ) ) {
-            if ( D_800E4FD0[0] == 1 || ( gs_secondController == 1 && D_800E4FD0[1] == 1 ) ) {
+            if ( cont_hasRumble[0] == 1 || ( gs_secondController == 1 && cont_hasRumble[1] == 1 ) ) {
                 gs_pakCheckStep = 1;
                 return 0;
             }
@@ -109,19 +109,19 @@ s32 GS_PakCheck( void ) {
         if ( D_8005C9BC ) {
             return 0;
         }
-        if ( D_800E4FD0[0] ) {
+        if ( cont_hasRumble[0] ) {
             Draw_Image( 0x945, 0xD0, 0x65 );
         } else {
             Draw_Image( 0x947, 0xD0, 0x65 );
         }
         if ( gs_secondController == 1 ) {
-            if ( D_800E4FD0[1] ) {
+            if ( cont_hasRumble[1] ) {
                 Draw_Image( 0x944, 0xD0, 0x75 );
             } else {
                 Draw_Image( 0x946, 0xD0, 0x75 );
             }
         }
-        if ( D_800E4FD0[0] || ( gs_secondController == 1 && D_800E4FD0[1] ) ) {
+        if ( cont_hasRumble[0] || ( gs_secondController == 1 && cont_hasRumble[1] ) ) {
             Draw_Image( D_80120660_gscode[gs_pakCheckFrames % 4], 0xB0, 0x65 );
         } else {
             Draw_Image( D_80120660_gscode[0], 0xB0, 0x65 );

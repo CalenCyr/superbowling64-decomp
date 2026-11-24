@@ -8,43 +8,43 @@
 
 #define NUM_PLAYERS     2           /* controller ports the game reads */
 
-extern OSMesgQueue D_80066B38;      /* serial interface events */
-extern OSMesg D_800E4FCC;
+extern OSMesgQueue cont_siQueue;    /* serial interface events */
+extern OSMesg cont_siMsgs;
 extern u8 D_800619B8[];             /* its address is the serial event's message */
-extern u8 D_8005B190;               /* bit per port with a standard controller */
-extern OSContStatus D_800F7BE8[MAXCONTROLLERS];
-extern OSPfs D_800E6400[NUM_PLAYERS];
-extern u8 D_800E4FD0[NUM_PLAYERS];  /* TRUE when the port has a Rumble Pak */
+extern u8 cont_standardMask;        /* bit per port with a standard controller */
+extern OSContStatus cont_status[MAXCONTROLLERS];
+extern OSPfs cont_rumblePfs[NUM_PLAYERS];
+extern u8 cont_hasRumble[NUM_PLAYERS];   /* TRUE when the port has a Rumble Pak */
 extern s16 D_80066C24[NUM_PLAYERS];
-extern u8 D_800DF680[NUM_PLAYERS];
+extern u8 cont_rumble[NUM_PLAYERS];     /* rumble request: frames, 8 from the menus, 4 to 6 from gacode's hits */
 
 /* per-port pad state, rebuilt each frame by Cont_ReadPads */
-extern OSContPad D_80066B58[MAXCONTROLLERS];
-extern s8 D_800692D0[NUM_PLAYERS];  /* stick x, 0 inside the dead zone */
-extern s8 D_800A2FD8[NUM_PLAYERS];  /* stick y, 0 inside the dead zone */
-extern u16 D_800E57E4[NUM_PLAYERS]; /* buttons held */
-extern u16 D_8009D198[NUM_PLAYERS]; /* buttons held last frame */
-extern u16 D_800E44E0[NUM_PLAYERS]; /* buttons pressed this frame */
-extern u16 D_800619B0[NUM_PLAYERS]; /* stick as D-pad bits */
-extern u16 D_8005B1A0[NUM_PLAYERS]; /* the same, last frame */
-extern u16 D_800E6760[NUM_PLAYERS]; /* D-pad presses, with auto-repeat */
-extern s32 D_8005B1A4[NUM_PLAYERS]; /* frames a direction has been held */
-extern s32 D_8005B194;              /* set when port 1 has no controller */
+extern OSContPad cont_pads[MAXCONTROLLERS];
+extern s8 cont_stickX[NUM_PLAYERS];          /* stick x, 0 inside the dead zone */
+extern s8 cont_stickY[NUM_PLAYERS];          /* stick y, 0 inside the dead zone */
+extern u16 cont_held[NUM_PLAYERS];           /* buttons held */
+extern u16 cont_lastHeld[NUM_PLAYERS];       /* buttons held last frame */
+extern u16 cont_pressed[NUM_PLAYERS];        /* buttons pressed this frame */
+extern u16 cont_stickDpad[NUM_PLAYERS];      /* stick as D-pad bits */
+extern u16 cont_lastStickDpad[NUM_PLAYERS];  /* the same, last frame */
+extern u16 cont_dpadRepeat[NUM_PLAYERS];     /* D-pad presses, with auto-repeat */
+extern s32 cont_holdFrames[NUM_PLAYERS];     /* frames a direction has been held */
+extern s32 cont_noController;       /* set when port 1 has no controller */
 /* both ports merged: port 1's value, or port 2's when port 1's is 0 */
-extern u16 D_800994BC;
-extern u16 D_800E4D62;
-extern u16 D_800E6758;
-extern s8 D_8009D05C;
-extern s8 D_800DF628;
-extern s32 D_8005C0EC;
-extern u32 D_800693B0;
-extern volatile s32 D_8005B0F4;    /* frame counter (Main_Thread); volatile: it reloads it right after its own store */
+extern u16 cont_allHeld;
+extern u16 cont_allPressed;
+extern u16 cont_allDpadRepeat;
+extern s8 cont_allStickX;
+extern s8 cont_allStickY;
+extern s32 cont_demoMode;           /* a demo plays: Cont_ReadPads fakes its R presses */
+extern u32 cont_demoFrames;         /* frames left of the demo; Start cuts it to 40 */
+extern volatile s32 sched_frameCount;  /* frame counter (Main_Thread); volatile: it reloads it right after its own store */
 /* requests to the controller thread (func_80028064), and its replies */
 extern OSMesgQueue cont_requestQueue;
 extern OSMesgQueue cont_replyQueue;
-extern s32 D_80066B8C;              /* result of the last request */
+extern s32 cont_result;             /* result of the last request */
 extern s32 D_800E4FC8;
-extern s32 D_800E6584;              /* request 10: the note to read */
+extern s32 cont_noteIndex;          /* request 10: the note to read */
 /* Main's D_80066C00 (0x24 bytes). Name invented. */
 typedef struct {
     /* 0x00 */ OSPfsState note;            /* request 10: the state of the note read */
@@ -52,14 +52,14 @@ typedef struct {
 } unk80066C00_t;                        /* size 0x24 */
 
 extern unk80066C00_t D_80066C00;
-extern s32 D_80066C28;              /* request 4: notes in all (with D_800692D4) */
-extern s32 D_800692D4;
-extern s32 D_8009944C;              /* request 4: free bytes */
+extern s32 cont_maxNotes;           /* request 4: notes in all (with cont_usedNotes) */
+extern s32 cont_usedNotes;          /* request 4: notes used */
+extern s32 cont_freeBytes;          /* request 4: free bytes */
 /* request 1: the note to delete */
-extern u8 D_800F7C78[16];           /* game name */
-extern u8 D_80066E10[4];            /* extension */
-extern u16 D_8009D090;              /* company code */
-extern u32 D_8009CF6C;              /* game code */
+extern u8 cont_deleteGameName[16];  /* game name */
+extern u8 cont_deleteExtName[4];    /* extension */
+extern u16 cont_deleteCompany;      /* company code */
+extern u32 cont_deleteGameCode;     /* game code */
 extern u8 D_800E6578;
 
 void Cont_Init( void );
