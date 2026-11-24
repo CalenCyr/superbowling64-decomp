@@ -11,12 +11,12 @@
 
 /*
 ================
-func_80031250
+Scene_ClearDrawList
 
 Empties the draw list: no entries, and every bucket empty.
 ================
 */
-void func_80031250( void ) {
+void Scene_ClearDrawList( void ) {
     D_800E8070 = 0;
     D_800DF6A8 = DRAW_NONE;
     memset( D_800E4FE0, 0xFF, sizeof( D_800E4FE0 ) );
@@ -32,12 +32,12 @@ void func_80031250( void ) {
 // search as a while loop on next != DRAW_NONE with the append after it (each further from retail)
 /*
 ================
-func_8003128C_insert
+Scene_InsertEntry
 
 Adds entry D_800E8070 of the draw list to bucket, after the entries of a lower key.
 ================
 */
-static inline void func_8003128C_insert( u16 key, u16 bucket ) {
+static inline void Scene_InsertEntry( u16 key, u16 bucket ) {
     s16 *link;
     u16 entry;
     u16 next;
@@ -76,12 +76,12 @@ static inline void func_8003128C_insert( u16 key, u16 bucket ) {
 
 /*
 ================
-func_8003128C
+Scene_AddToDrawList
 
 Adds an entry to the draw list for each camera that draws, keeping its bucket in key order.
 ================
 */
-void func_8003128C( void ) {
+void Scene_AddToDrawList( void ) {
     u8 mask;
     u32 i;
     u32 key;
@@ -116,23 +116,23 @@ void func_8003128C( void ) {
                     bucket = key << 3;
                 }
             }
-            func_8003128C_insert( key, bucket );
+            Scene_InsertEntry( key, bucket );
         }
         mask >>= 1;
     }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/C650", func_8003128C);
+INCLUDE_ASM("asm/nonmatchings/C650", Scene_AddToDrawList);
 #endif
 
 /*
 ================
-func_80031650
+Scene_ChainDrawList
 
 Chains the buckets of the draw list, in key order, into one list from D_800DF6A8.
 ================
 */
-inline void func_80031650( void ) {
+inline void Scene_ChainDrawList( void ) {
     s16 *link;
     s32 i;
 
@@ -147,13 +147,13 @@ inline void func_80031650( void ) {
 
 /*
 ================
-func_800316C0
+Scene_BeginView
 
 Starts drawing the view of cam: the depth and colour images at its corner, its fog (turning the fog setting on or
 off when it changes), its matrices, look-at, viewport, scissor and lights.
 ================
 */
-void func_800316C0( sceneCamera_t *cam ) {
+void Scene_BeginView( sceneCamera_t *cam ) {
     gDPPipeSync( D_800F8094++ );
     gDPSetDepthImage( D_800F8094++,
                       osVirtualToPhysical( D_80000400 + ( cam->unk_2C & 0xFFC ) + cam->unk_2E * SCREEN_WIDTH ) );
@@ -165,7 +165,7 @@ void func_800316C0( sceneCamera_t *cam ) {
             D_800E6588 = 1;
             D_800DF682 = 1;
             D_80066B30 = 1;
-            func_80031CD0();
+            Scene_PickRenderModes();
         }
         gSPFogPosition( D_800F8094++, cam->path->fogNear, cam->path->fogFar );
         gDPSetFogColor( D_800F8094++, cam->path->fogColor >> 24, cam->path->fogColor >> 16, cam->path->fogColor >> 8,
@@ -175,7 +175,7 @@ void func_800316C0( sceneCamera_t *cam ) {
             D_800E6588 = 0;
             D_800DF682 = 1;
             D_80066B30 = 1;
-            func_80031CD0();
+            Scene_PickRenderModes();
         }
         gDPSetFogColor( D_800F8094++, 0, 0, 0, 0 );
         gSPFogPosition( D_800F8094++, 1000, 1200 );
@@ -190,12 +190,12 @@ void func_800316C0( sceneCamera_t *cam ) {
 
 /*
 ================
-func_80031BB0
+Scene_BeginFrame
 
 Starts the frame's drawing: viewport and scissor of the screen, the framebuffer D_8005B0F8 and the depth buffer.
 ================
 */
-void func_80031BB0( void ) {
+void Scene_BeginFrame( void ) {
     gDPPipeSync( D_800F8094++ );
     gSPViewport( D_800F8094++, &D_8010A290 );
     gDPSetScissor( D_800F8094++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT );
@@ -206,12 +206,12 @@ void func_80031BB0( void ) {
 
 /*
 ================
-func_80031C9C
+Scene_TextureSizeLog2
 
 Returns the n for which 1 << n, from 2 to 512 in D_8005C1D0, is the smallest power at least value; 10 if none is.
 ================
 */
-inline s32 func_80031C9C( u32 value ) {
+inline s32 Scene_TextureSizeLog2( u32 value ) {
     s32 i;
 
     for ( i = 0; i < 9; i++ ) {
@@ -224,13 +224,13 @@ inline s32 func_80031C9C( u32 value ) {
 
 /*
 ================
-func_80031CD0
+Scene_PickRenderModes
 
 Picks the render modes of the frame's two cycles, D_801000B4 and D_800E4D64, from the fog setting and the
 surface type D_800A30B4.
 ================
 */
-void func_80031CD0( void ) {
+void Scene_PickRenderModes( void ) {
     if ( D_800E4D6C == 0 ) {
         if ( D_800E4D60 != 0 ) {
             return;
@@ -284,20 +284,20 @@ void func_80031CD0( void ) {
 }
 
 #ifdef NON_MATCHING
-// NON_MATCHING: complete body, same calls and skeleton (func_80031650 and func_80031C9C expand inline). Differs in:
+// NON_MATCHING: complete body, same calls and skeleton (Scene_ChainDrawList and Scene_TextureSizeLog2 expand inline). Differs in:
 // the second texture's loads, where retail's render tile is at tmem 0 (only the load tile takes D_8009CF68), unlike
 // gDPLoadMultiBlock; the clear colour, which retail reads as one word at fileType3_t 0x44 (clearColor is bytes);
 // cms/cmt trade $s4/$s5; the order of the initial colour-byte stores; register choice around the load macros
 /*
 ================
-func_80031E40
+Scene_Draw
 
 Draws the frame's scene: clears the depth buffer and the background of camera 0, then walks the draw list,
 setting up for each entry its microcode, camera, cycle and render modes, material (colours, combiner, geometry
 mode and textures) and model matrix only where they change, and drawing its mesh.
 ================
 */
-void func_80031E40( void ) {
+void Scene_Draw( void ) {
     s16 *link;
     fileRefA_t *mesh;
     fileRefB_t *mat;
@@ -308,7 +308,7 @@ void func_80031E40( void ) {
     u32 cmt, cms;
     Gfx *gfx;
 
-    func_80031650();
+    Scene_ChainDrawList();
 
     /* clear the depth buffer */
     gDPSetCycleType( D_800F8094++, G_CYC_FILL );
@@ -376,7 +376,7 @@ void func_80031E40( void ) {
     D_800EA0C8.a = 0xFF;
     gDPSetEnvColor( D_800F8094++, D_800EA0C8.r, D_800EA0C8.g, D_800EA0C8.b, D_800EA0C8.a );
     D_800A3018 = 0;
-    func_800316C0( D_8009CFA0[0] );
+    Scene_BeginView( D_8009CFA0[0] );
     D_800DF682 = 1;
     D_80066B30 = 1;
 
@@ -411,7 +411,7 @@ void func_80031E40( void ) {
         view = D_8009D1A0[*link].unk_04 >> 14;
         if ( D_800A3018 != view ) {
             D_800A3018 = view;
-            func_800316C0( D_8009CFA0[view] );
+            Scene_BeginView( D_8009CFA0[view] );
         }
 
         if ( D_800E4D6C != ( ( D_8009D1A0[*link].unk_06 >> 13 ) & 1 ) ) {
@@ -422,7 +422,7 @@ void func_80031E40( void ) {
                 gDPSetCycleType( D_800F8094++, G_CYC_2CYCLE );
             }
             D_80066B30 = 1;
-            func_80031CD0();
+            Scene_PickRenderModes();
             D_800EA0CC = 1;
         }
         if ( D_800E4D60 != ( ( D_8009D1A0[*link].unk_06 >> 12 ) & 1 ) ) {
@@ -430,7 +430,7 @@ void func_80031E40( void ) {
             D_800DF682 = 1;
             D_80066B30 = 1;
             D_800EA0CC = 1;
-            func_80031CD0();
+            Scene_PickRenderModes();
         }
         if ( D_80066B31 != ( ( D_8009D1A0[*link].unk_06 >> 11 ) & 1 ) ) {
             D_80066B31 = ( D_8009D1A0[*link].unk_06 >> 11 ) & 1;
@@ -439,7 +439,7 @@ void func_80031E40( void ) {
         if ( D_800A30B4 != ( ( D_8009D1A0[*link].unk_04 >> 11 ) & 7 ) ) {
             D_800A30B4 = ( D_8009D1A0[*link].unk_04 >> 11 ) & 7;
             D_80066B30 = 1;
-            func_80031CD0();
+            Scene_PickRenderModes();
         }
 
         if ( D_800DF5D4 != ( D_8009D1A0[*link].unk_04 & 0x7FF ) ) {
@@ -511,33 +511,33 @@ void func_80031E40( void ) {
                 case MAT_I4:
                     gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
                     gDPLoadTextureBlock_4b( D_800F8094++, mat->unk_30, G_IM_FMT_I, mat->width, mat->height, 0, cms,
-                                            cmt, func_80031C9C( mat->width ), func_80031C9C( mat->height ),
+                                            cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                             G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI4:
                     gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
                     gDPLoadTLUT_pal16( D_800F8094++, 15, mat->unk_2C );
                     gDPLoadTextureBlock_4b( D_800F8094++, mat->unk_30, G_IM_FMT_CI, mat->width, mat->height, 15, cms,
-                                            cmt, func_80031C9C( mat->width ), func_80031C9C( mat->height ),
+                                            cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                             G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI8:
                     gDPSetTextureLUT( D_800F8094++, G_TT_RGBA16 );
                     gDPLoadTLUT_pal256( D_800F8094++, mat->unk_2C );
                     gDPLoadTextureBlock( D_800F8094++, mat->unk_30, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width, mat->height,
-                                         0, cms, cmt, func_80031C9C( mat->width ), func_80031C9C( mat->height ),
+                                         0, cms, cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                          G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_RGBA16:
                     gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
                     gDPLoadTextureBlock( D_800F8094++, mat->unk_30, G_IM_FMT_RGBA, G_IM_SIZ_16b, mat->width,
-                                         mat->height, 0, cms, cmt, func_80031C9C( mat->width ),
-                                         func_80031C9C( mat->height ), G_TX_NOLOD, G_TX_NOLOD );
+                                         mat->height, 0, cms, cmt, Scene_TextureSizeLog2( mat->width ),
+                                         Scene_TextureSizeLog2( mat->height ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_I8:
                     gDPSetTextureLUT( D_800F8094++, G_TT_NONE );
                     gDPLoadTextureBlock( D_800F8094++, mat->unk_30, G_IM_FMT_I, G_IM_SIZ_8b, mat->width, mat->height,
-                                         0, cms, cmt, func_80031C9C( mat->width ), func_80031C9C( mat->height ),
+                                         0, cms, cmt, Scene_TextureSizeLog2( mat->width ), Scene_TextureSizeLog2( mat->height ),
                                          G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 }
@@ -586,30 +586,30 @@ void func_80031E40( void ) {
                     /* loaded over the first texture, into tile 0 with palette 1: the tmem and tile of the others
                        went to the palette */
                     gDPLoadTextureBlock_4b( D_800F8094++, mat->unk_38, G_IM_FMT_I, mat->width2, mat->height2, 1, cms,
-                                            cmt, func_80031C9C( mat->width2 ), func_80031C9C( mat->height2 ),
+                                            cmt, Scene_TextureSizeLog2( mat->width2 ), Scene_TextureSizeLog2( mat->height2 ),
                                             G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI4:
                     gDPLoadTLUT_pal16( D_800F8094++, 14, mat->unk_34 );
                     gDPLoadMultiBlock_4b( D_800F8094++, mat->unk_38, D_8009CF68, 1, G_IM_FMT_CI, mat->width2,
-                                          mat->height2, 14, cms, cmt, func_80031C9C( mat->width2 ),
-                                          func_80031C9C( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
+                                          mat->height2, 14, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
+                                          Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_CI8:
                     gDPLoadMultiBlock( D_800F8094++, mat->unk_38, D_8009CF68, 1, G_IM_FMT_CI, G_IM_SIZ_8b, mat->width2,
-                                       mat->height2, 0, cms, cmt, func_80031C9C( mat->width2 ),
-                                       func_80031C9C( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
+                                       mat->height2, 0, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
+                                       Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_RGBA16:
                     gDPLoadMultiBlock( D_800F8094++, mat->unk_38, D_8009CF68, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-                                       mat->width2, mat->height2, 0, cms, cmt, func_80031C9C( mat->width2 ),
-                                       func_80031C9C( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
+                                       mat->width2, mat->height2, 0, cms, cmt, Scene_TextureSizeLog2( mat->width2 ),
+                                       Scene_TextureSizeLog2( mat->height2 ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 case MAT_I8:
                     /* the first texture again, not the second */
                     gDPLoadMultiBlock( D_800F8094++, mat->unk_30, D_8009CF68, 1, G_IM_FMT_I, G_IM_SIZ_8b, mat->width,
-                                       mat->height, 0, cms, cmt, func_80031C9C( mat->width ),
-                                       func_80031C9C( mat->height ), G_TX_NOLOD, G_TX_NOLOD );
+                                       mat->height, 0, cms, cmt, Scene_TextureSizeLog2( mat->width ),
+                                       Scene_TextureSizeLog2( mat->height ), G_TX_NOLOD, G_TX_NOLOD );
                     break;
                 }
             } else if ( D_8006940C ) {
@@ -689,17 +689,17 @@ void func_80031E40( void ) {
     }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/C650", func_80031E40);
+INCLUDE_ASM("asm/nonmatchings/C650", Scene_Draw);
 #endif
 
 /*
 ================
-func_80035074
+Scene_InitPuffs
 
 Frees every puff, loads the puff images, and makes the puff squares of each size from the first.
 ================
 */
-void func_80035074( void ) {
+void Scene_InitPuffs( void ) {
     s32 i;
 
     for ( i = 0; i < NUM_PUFFS; i++ ) {
@@ -726,12 +726,12 @@ void func_80035074( void ) {
 
 /*
 ================
-func_80035220
+Scene_FaceMatrix
 
 Sets m to stand at (x, y, z) and face (tx, ty, tz), turned about y then tilted.
 ================
 */
-inline void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz ) {
+inline void Scene_FaceMatrix( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz ) {
     f32 dx, dy, dz;
     f32 dist, distXZ;
     f32 cosPitch, sinPitch, cosYaw, sinYaw;
@@ -765,12 +765,12 @@ inline void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32
 
 /*
 ================
-func_80035380
+Scene_StartPuff
 
 Starts a puff of flags at (x, y, z), in the first free slot, facing each camera.
 ================
 */
-void func_80035380( u16 flags, f32 x, f32 y, f32 z ) {
+void Scene_StartPuff( u16 flags, f32 x, f32 y, f32 z ) {
     f32 m[4][4];
     u32 i;
 
@@ -796,15 +796,15 @@ void func_80035380( u16 flags, f32 x, f32 y, f32 z ) {
         D_800E4D70[i].life = 7;
         break;
     }
-    func_80035220( m, x, y, z, D_8009CFA0[0]->eye[0], D_8009CFA0[0]->eye[1], D_8009CFA0[0]->eye[2] );
+    Scene_FaceMatrix( m, x, y, z, D_8009CFA0[0]->eye[0], D_8009CFA0[0]->eye[1], D_8009CFA0[0]->eye[2] );
     guMtxF2L( m, &D_800E6770[0][i] );
-    func_80035220( m, x, y, z, D_8009CFA0[1]->eye[0], D_8009CFA0[1]->eye[1], D_8009CFA0[1]->eye[2] );
+    Scene_FaceMatrix( m, x, y, z, D_8009CFA0[1]->eye[0], D_8009CFA0[1]->eye[1], D_8009CFA0[1]->eye[2] );
     guMtxF2L( m, &D_800E6770[1][i] );
 }
 
 /*
 ================
-func_80035748
+Scene_DrawPuffs
 
 Ages the puffs, then draws the live ones: by kind, its texture, and for each camera that draws a puff, its square
 turned to face that camera in the kind's colour and the puff's alpha.
@@ -813,7 +813,7 @@ turned to face that camera in the kind's colour and the puff's alpha.
 #ifdef NON_MATCHING
 // NON_MATCHING: byte-exact (gate green) only with `kind` doubling as the "a puff is live" flag (marked R30
 // below); with a separate flag local it lands in $t1 instead of retail's $s2, and a reused variable is not counted
-void func_80035748( void ) {
+void Scene_DrawPuffs( void ) {
     u32 count[2];
     u32 i;
     u32 kind;   /* RULE-EXCEPTION: R30, also the "a puff is live" flag: retail keeps both in one register ($s2) */
@@ -869,7 +869,7 @@ void func_80035748( void ) {
         for ( view = 0; view < 2; view++ ) {
             if ( D_800A3018 != view ) {
                 D_800A3018 = view;
-                func_800316C0( D_8009CFA0[D_800A3018] );
+                Scene_BeginView( D_8009CFA0[D_800A3018] );
             }
             gSPTexture( D_800F8094++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON );
             gSPClearGeometryMode( D_800F8094++, G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN |
@@ -890,5 +890,5 @@ void func_80035748( void ) {
     }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/C650", func_80035748);
+INCLUDE_ASM("asm/nonmatchings/C650", Scene_DrawPuffs);
 #endif

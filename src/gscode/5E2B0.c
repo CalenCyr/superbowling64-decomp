@@ -18,7 +18,7 @@ s32 GS_CharacterSelect( void ) {
 
     for ( i = 0; i < 8; i++ ) {
         if ( D_8009D098.unk_04 & ( 1 << i ) ) {
-            func_8003893C( D_8011BD50_gscode, i, D_8011F8A8_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
+            Menu_SetItem( D_8011BD50_gscode, i, D_8011F8A8_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
         }
     }
 
@@ -44,7 +44,7 @@ s32 GS_CharacterSelect( void ) {
         if ( D_8011F8BA_gscode == 10 ) {
             Obj_FreeAll();
             Cache_FreeBelow( 0x825 );
-            func_8002A1EC( gs_classes, D_8011F880_gscode[D_8005C163] );
+            Obj_CreateAll( gs_classes, D_8011F880_gscode[D_8005C163] );
             D_8011F8A0_gscode = 30;
             D_8011F8A4_gscode = 3.1415927f;
             D_8009CFA0[0]->path->unk_38 |= 4;
@@ -94,14 +94,14 @@ s32 GS_CharacterSelect( void ) {
         }
     }
 
-    func_8003893C( D_8011BDF0_gscode, 8, D_8011BE10_gscode[D_8005C163], D_8011BE20_gscode[D_8005C163], MENU_NONE,
+    Menu_SetItem( D_8011BDF0_gscode, 8, D_8011BE10_gscode[D_8005C163], D_8011BE20_gscode[D_8005C163], MENU_NONE,
                    MENU_NONE );
-    func_8003893C( D_8011BD50_gscode, 9, MENU_NONE, ( D_8005C163 + 1 ) * 32, MENU_NONE, MENU_NONE );
-    func_8003893C( D_8011BDF0_gscode, 10, D_8011BE30_gscode[D_8011BE38_gscode[D_8005C163]], MENU_NONE, MENU_NONE,
+    Menu_SetItem( D_8011BD50_gscode, 9, MENU_NONE, ( D_8005C163 + 1 ) * 32, MENU_NONE, MENU_NONE );
+    Menu_SetItem( D_8011BDF0_gscode, 10, D_8011BE30_gscode[D_8011BE38_gscode[D_8005C163]], MENU_NONE, MENU_NONE,
                    D_8009CFB0 );
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     Draw_Image( 0xA58, 0, 0 );
-    func_800386E0( D_8011BD50_gscode, D_8011F8B8_gscode );
+    Menu_DrawItems( D_8011BD50_gscode, D_8011F8B8_gscode );
 
     if ( D_8011F8B9_gscode == CHOICE_RUN && D_8011F8BA_gscode != 7 && D_8011F8BA_gscode != 8 &&
          D_8011F8BA_gscode != 9 ) {
@@ -127,7 +127,7 @@ s32 GS_CharacterSelect( void ) {
         func_8002A2F0();
     }
 
-    func_800386E0( D_8011BDF0_gscode, D_8011F8B8_gscode );
+    Menu_DrawItems( D_8011BDF0_gscode, D_8011F8B8_gscode );
 
     switch ( D_8011F8B9_gscode ) {
     case CHOICE_IN:

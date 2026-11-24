@@ -12,9 +12,9 @@ Entry of the overlay: creates the scene's objects, then builds a new maze and it
 ================
 */
 void MG_Init( void ) {
-    func_8002A1EC( mg_classes, mg_sceneObjects );
-    func_80038214( MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
-    func_80038090( 0x90F, MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
+    Obj_CreateAll( mg_classes, mg_sceneObjects );
+    Maze_Build( MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
+    Maze_Draw( 0x90F, MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
 }
 
 /*
@@ -28,8 +28,8 @@ void MG_Frame( void ) {
     u8 text[0x50];
 
     if ( D_800E4D62 & A_BUTTON ) {
-        func_80038214( MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
-        func_80038090( 0x90F, MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
+        Maze_Build( MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
+        Maze_Draw( 0x90F, MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
     }
     func_8002A2F0();
     if ( D_800A2FDC ) {

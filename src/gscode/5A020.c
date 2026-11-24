@@ -45,9 +45,9 @@ s32 GS_TeamSizeMenu( void ) {
 
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     Draw_Image( 0xA58, 0, 0 );
-    func_8003893C( gs_teamSizeMenu, 0, gs_teamSizeBlink[0][0], MENU_NONE, MENU_NONE, MENU_NONE );
-    func_8003893C( gs_teamSizeMenu, 1, gs_teamSizeBlink[1][0], MENU_NONE, MENU_NONE, MENU_NONE );
-    func_8003893C( gs_teamSizeMenu, 2, gs_teamSizeBlink[2][0], MENU_NONE, MENU_NONE, MENU_NONE );
+    Menu_SetItem( gs_teamSizeMenu, 0, gs_teamSizeBlink[0][0], MENU_NONE, MENU_NONE, MENU_NONE );
+    Menu_SetItem( gs_teamSizeMenu, 1, gs_teamSizeBlink[1][0], MENU_NONE, MENU_NONE, MENU_NONE );
+    Menu_SetItem( gs_teamSizeMenu, 2, gs_teamSizeBlink[2][0], MENU_NONE, MENU_NONE, MENU_NONE );
 
     if ( gs_teamSizeState == CHOICE_RUN ) {
         if ( ++gs_teamSizeBlinkFrame == 30 ) {
@@ -56,7 +56,7 @@ s32 GS_TeamSizeMenu( void ) {
         choice = gs_teamSizeCursor;
         switch ( choice ) {
         case 0:
-            func_8003893C( gs_teamSizeMenu, 0, gs_teamSizeBlink[0][gs_teamSizeBlinkFrame / 5],
+            Menu_SetItem( gs_teamSizeMenu, 0, gs_teamSizeBlink[0][gs_teamSizeBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
             Draw_RoundedBox( 0x28, 0x38, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & R_JPAD ) {
@@ -67,7 +67,7 @@ s32 GS_TeamSizeMenu( void ) {
             }
             break;
         case 1:
-            func_8003893C( gs_teamSizeMenu, 1, gs_teamSizeBlink[1][gs_teamSizeBlinkFrame / 5],
+            Menu_SetItem( gs_teamSizeMenu, 1, gs_teamSizeBlink[1][gs_teamSizeBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
             Draw_RoundedBox( 0xB8, 0x38, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
@@ -78,7 +78,7 @@ s32 GS_TeamSizeMenu( void ) {
             }
             break;
         case 2:
-            func_8003893C( gs_teamSizeMenu, 2, gs_teamSizeBlink[2][gs_teamSizeBlinkFrame / 5],
+            Menu_SetItem( gs_teamSizeMenu, 2, gs_teamSizeBlink[2][gs_teamSizeBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
             Draw_RoundedBox( 0x70, 0x90, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
@@ -99,7 +99,7 @@ s32 GS_TeamSizeMenu( void ) {
         }
     }
 
-    func_800386E0( gs_teamSizeMenu, gs_teamSizeSlide );
+    Menu_DrawItems( gs_teamSizeMenu, gs_teamSizeSlide );
     switch ( gs_teamSizeState ) {
     case CHOICE_IN:
         gs_teamSizeMenu[5].slide = SLIDE_LEFT;

@@ -11,7 +11,7 @@
 #define OBJ_PARAMS_SKIP     2.0f        /* objParams_t.type: no object */
 #define OBJ_PARAMS_END      -1.0f       /* objParams_t.type: ends the records */
 
-/* Parameter record of one object, all floats; func_8002A1EC reads them in an array. */
+/* Parameter record of one object, all floats; Obj_CreateAll reads them in an array. */
 typedef struct {
     /* 0x00 */ f32 type;            /* index into D_800E657C */
     /* 0x04 */ f32 priority;
@@ -33,14 +33,14 @@ typedef struct {
 
 extern objNode_t D_80066E00;        /* list head */
 extern objClass_t *D_800E657C;      /* the classes, by objParams_t.type */
-extern objParams_t *D_800A2FE0;     /* the records func_8002A1EC creates objects from */
+extern objParams_t *D_800A2FE0;     /* the records Obj_CreateAll creates objects from */
 extern s32 D_800A2FDC;              /* TRUE when the records ended with OBJ_PARAMS_END */
 extern s32 D_80099480;              /* cameras in D_8009CFA0 */
 extern s32 D_800EA0C0;
 extern s32 D_800F7BF8;              /* frames each update advances; 1 at start */
 extern u8 D_800F30E0[0x4B00];       /* func_8002A7EC reads a host file here (D_800F7BE0 follows) */
 
-/* Model commands func_8002B380 converts: the opcode byte, then its arguments. */
+/* Model commands Obj_ConvertModel converts: the opcode byte, then its arguments. */
 #define MDLCMD_END          0           /* end of the list */
 #define MDLCMD_TRI1         2           /* vertices 1-3, flag 4 */
 #define MDLCMD_VTX_ST       9           /* vertex 1, texture coordinates 2-5 */
@@ -116,24 +116,24 @@ extern void *D_800EA120[];          /* main's scene objects, of several kinds: [
                                        others mostly sceneObject_t */
 
 void Obj_ClearList( void );
-void func_80029FF4( objParams_t *params );
-void func_8002A1EC( objClass_t *classes, objParams_t *params );
+void Obj_Create( objParams_t *params );
+void Obj_CreateAll( objClass_t *classes, objParams_t *params );
 void func_8002A2F0( void );
 void Obj_Free( objNode_t *obj );
 void Obj_FreeAll( void );
 f32 func_8002A724( u8 *str );
 void func_8002A7EC( u8 *name );
-void func_8002A810( f32 m[4][4], f32 x, f32 y, f32 z );
-void func_8002A864( f32 m[4][4], f32 x, f32 y, f32 z );
-void func_8002A8B0( f32 m[4][4], f32 rot[3][3] );
-void func_8002A98C( f32 m[4][4], f32 x, f32 y, f32 z );
-void func_8002AAD0( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, f32 ty, f32 tz );
-void func_8002AC84( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale );
-void func_8002AEBC( sceneObject_t *obj );
-void func_8002B380( Gfx *gfx );
+void Mtx_Translate( f32 m[4][4], f32 x, f32 y, f32 z );
+void Mtx_Scale( f32 m[4][4], f32 x, f32 y, f32 z );
+void Mtx_Rotate( f32 m[4][4], f32 rot[3][3] );
+void Mtx_RotateXYZ( f32 m[4][4], f32 x, f32 y, f32 z );
+void Mtx_SetRotScaleTrans( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, f32 ty, f32 tz );
+void Mtx_Place( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale );
+void Obj_MakeMatrix( sceneObject_t *obj );
+void Obj_ConvertModel( Gfx *gfx );
 objNode_t *func_8002B610( objParams_t *params );
 void func_8002B9CC( sceneObject_t *obj );
-void func_8002BE00( sceneObject_t *obj );
+void Obj_Draw( sceneObject_t *obj );
 
 /* the cameras (unit 7250) */
 void Cam_SetAmbient( s32 index, u8 *color );

@@ -194,7 +194,7 @@ typedef struct {
 
 /* Configuration of a stage (ga_stages); ga_stage points to the current one. Name invented. */
 typedef struct {
-    /* 0x00 */ objParams_t *unk_00;      /* the scene (func_8002A1EC); one object per player first */
+    /* 0x00 */ objParams_t *unk_00;      /* the scene (Obj_CreateAll); one object per player first */
     /* 0x04 */ f32 unk_04;
     /* 0x08 */ f32 unk_08;
     /* 0x0C */ f32 unk_0C;

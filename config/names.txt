@@ -377,7 +377,7 @@ __floatdidf	0x80056BF0	evidence: long long a0:a1 to double in $f0; the CORDIC ke
 matherr	0x80056CF0	evidence: SVID hook called with struct exception by the libm error path; default returns 0
 rspbootTextStart	0x80056D00	evidence: start of RSP boot microcode; game code computes TextEnd - TextStart as the boot size
 rspbootTextEnd	0x80056DD0	evidence: end of rspboot (0xD0 bytes), used as the boot microcode's end
-gspF3DEX2_Rej_fifoTextStart	0x80056DD0	evidence: SDK name; its data block carries the ID string "RSP Gfx ucode F3DEX.Rej   fifo 2.08" (F3DEX2 2.08), text paired with data by the G_LOAD_UCODE in func_80031E40 and the scheduler's task
+gspF3DEX2_Rej_fifoTextStart	0x80056DD0	evidence: SDK name; its data block carries the ID string "RSP Gfx ucode F3DEX.Rej   fifo 2.08" (F3DEX2 2.08), text paired with data by the G_LOAD_UCODE in Scene_Draw and the scheduler's task
 gspF3DEX2_Rej_fifoDataStart	0x8005F3F0	evidence: SDK name; ID string "RSP Gfx ucode F3DEX.Rej   fifo 2.08" at +0x138
 gspF3DEX2_fifoTextStart	0x80057F60	evidence: SDK name; paired by G_LOAD_UCODE with gspF3DEX2_fifoDataStart
 gspF3DEX2_fifoDataStart	0x8005F800	evidence: SDK name; ID string "RSP Gfx ucode F3DEX       fifo 2.08" at +0x138
@@ -436,12 +436,12 @@ fileCacheEntry_t	include/filecache.h	invented: {reference count, data} slot per 
 fileType1_t	include/filecache.h	invented: file relocated by Cache_GetFile type 1 (count, offset, part offsets); purpose unknown
 fileType1Part_t	include/filecache.h	invented: part of a fileType1_t, naming pairs of further files
 fileType1Ref_t	include/filecache.h	invented: pair of file indices in a fileType1Part_t
-fileRefA_t	include/filecache.h	invented: first file of a fileType1Ref_t pair (offsets 0x04, 0x08; 0x08 goes to func_8002B380)
+fileRefA_t	include/filecache.h	invented: first file of a fileType1Ref_t pair (offsets 0x04, 0x08; 0x08 goes to Obj_ConvertModel)
 fileRefB_t	include/filecache.h	invented: second file of a fileType1Ref_t pair (offsets 0x2C, 0x30)
 fileType2_t	include/filecache.h	invented: file relocated by Cache_GetFile type 2
 fileType3_t	include/filecache.h	invented: file relocated by Cache_GetFile type 3
-FILE3_FOG	include/filecache.h	invented: fileType3_t.unk_38 bit func_800316C0 tests before drawing fog
-fileType3_t.fogColor, fogNear, fogFar	include/filecache.h	invented: the gDPSetFogColor and gSPFogPosition arguments of func_800316C0
+FILE3_FOG	include/filecache.h	invented: fileType3_t.unk_38 bit Scene_BeginView tests before drawing fog
+fileType3_t.fogColor, fogNear, fogFar	include/filecache.h	invented: the gDPSetFogColor and gSPFogPosition arguments of Scene_BeginView
 bmpHeader_t	include/gamesnd.h	evidence: D_8005CA40 is a BMP file and info header ("BM", 54-byte offset, 320x240, 24 bpp) written by func_80037E30
 bmpFile_t	include/gamesnd.h	evidence: func_80037E30 writes the header and 320x240 BGR pixels to the host as "BW%3.3d.BMP"
 
@@ -454,23 +454,23 @@ snd_heap	0x800645A0	invented: the ALHeap of Snd_InitHeap
 snd_frameSize, snd_minFrameSize, snd_maxFrameSize, snd_extraSamples	0x800645B0-0x800645BC	invented: frame sizes from Snd_InitFrameSizes
 snd_frameSettled	0x8005CE60	invented: set while the AI queue is in range (Snd_NextFrameSize)
 AUDIO_FRAME_SAMPLES	structs.h	invented: the 184 samples per audio frame that Snd_InitFrameSizes and Snd_NextFrameSize use
-objNode_t, objClass_t, objParams_t, OBJ_PARAMS_SKIP, OBJ_PARAMS_END	object.h	invented: the object list of 53B0 (func_80029FF4 inserts by priority; func_8002A1EC reads the float records up to -1.0)
-drawEntry_t, DRAW_BUCKETS, DRAW_NONE	ground.h	invented: the 12-byte entries of D_8009D1A0 that func_8003128C sorts into 0x400 buckets chained by func_80031650
-SCREEN_WIDTH, SCREEN_HEIGHT	boot.h	invented: the 320x240 framebuffers (func_80031BB0's scissor and color image)
+objNode_t, objClass_t, objParams_t, OBJ_PARAMS_SKIP, OBJ_PARAMS_END	object.h	invented: the object list of 53B0 (Obj_Create inserts by priority; Obj_CreateAll reads the float records up to -1.0)
+drawEntry_t, DRAW_BUCKETS, DRAW_NONE	ground.h	invented: the 12-byte entries of D_8009D1A0 that Scene_AddToDrawList sorts into 0x400 buckets chained by Scene_ChainDrawList
+SCREEN_WIDTH, SCREEN_HEIGHT	boot.h	invented: the 320x240 framebuffers (Scene_BeginFrame's scissor and color image)
 fileImage_t, IMAGE_CI4, IMAGE_CI8, CI4_PALETTE_SIZE, CI8_PALETTE_SIZE	sprite.h	invented: the image files Draw_Image draws (palette offsets 0x20 and 0x200 by type)
 DRAW2D_COPY, DRAW2D_1CYCLE, DRAW2D_FILL	sprite.h	invented: the D_8005C190 values the 2D functions set with the cycle type they emit
 PROMPT_* (modes and states), PROMPT_ZOOM_FRAMES	save.h	invented: Save_ShowPrompt's modes, from its input handling, and D_8005C9BC's states
 SE_CURSOR, SE_DECIDE	gamesnd.h	invented: SE 0 on a cursor move and SE 1 on a choice in Save_ShowPrompt
-menuItem_t, MENU_END, MENU_NONE, MENU_SLIDE_STEPS, SLIDE_*	menu.h	invented: the 10-byte menu records func_800386E0 draws and func_8003893C edits
-SCORE_IMAGE_*, ROLL_STRIKE, ROLL_SPARE	menu.h	invented: indices of D_8005CAC0 that func_80039340 returns for the rolls of a frame
-Menu_SlidePos	13490.c	invented: the inline position calculation of func_800386E0's slides
+menuItem_t, MENU_END, MENU_NONE, MENU_SLIDE_STEPS, SLIDE_*	menu.h	invented: the 10-byte menu records Menu_DrawItems draws and Menu_SetItem edits
+SCORE_IMAGE_*, ROLL_STRIKE, ROLL_SPARE	menu.h	invented: indices of D_8005CAC0 that Score_RollImage returns for the rolls of a frame
+Menu_SlidePos	13490.c	invented: the inline position calculation of Menu_DrawItems's slides
 # main scene engine types (object.h, filecache.h, ground.h)
 sceneObject_t	object.h	invented: scene object (body after the objNode_t header; D_800EA120 holds pointers); matrix 0x04, frame 0x48, viewMask 0x4A, model 0x4C, anim 0x50, joints from 0x58; gacode.h's sceneObj_t is a partial copy
 sceneObjJoint_t	object.h	invented: 0x140-byte joint: float matrix, then Mtx[2] and mirrored Mtx[2] by D_8005C0B1 (func_8002AF20, func_8002B9CC)
 sceneCamera_t	object.h	invented: 0x248-byte camera (D_8009CFA0); eye/at/up are the guLookAtReflectF arguments of func_8002C324, path a FILE_TYPE3 file
 sceneObjectNode_t	object.h	invented: what func_8002B610 creates: the objNode_t header, then a sceneObject_t (cacode reads model at 0x5C and anim at 0x60 through it)
 sceneCameraNode_t	object.h	invented: what func_8002BFD8 creates: the objNode_t header, then a sceneCamera_t (it lists node + 0x10 in D_8009CFA0)
-puff_t	ground.h	invented: 12-byte camera-facing square (D_800E4D70, 50): flags, life, alpha, size and their steps (func_80035380 starts one, func_80035748 ages and draws them)
+puff_t	ground.h	invented: 12-byte camera-facing square (D_800E4D70, 50): flags, life, alpha, size and their steps (Scene_StartPuff starts one, Scene_DrawPuffs ages and draws them)
 
 # rscode overlay (include/rscode/rscode.h): invented from use
 rsState_t	rscode.h	invented: main-loop state function of the results overlay (D_801142AC_rscode), as gacode's gaState_t
@@ -488,21 +488,21 @@ CAMODE_COUNT	include/cacode/cacode.h	invented: number of cacode viewer modes (D_
 MOTION_FILE_SIZE	src/cacode/67370.c	invented: size of the "motion.dat" file func_80113280_cacode loads and saves (from the file name)
 STICK_DEAD	src/cacode/67370.c	invented: stick dead zone of 8 in func_80113280_cacode
 RAD_TO_DEG	src/cacode/67370.c	invented: the 180 / pi constant func_80113280_cacode prints H, P, B angles with
-mazeWork_t	include/menu.h	invented: the 0x3000-byte heap block func_80038214 builds a maze in (cell sets, wall flags, weights, order)
-rgba8_t	include/filecache.h	invented: 4-byte colour of a material, compared with memcmp and copied whole by func_80031E40 (gDPSetPrimColor/gDPSetEnvColor)
-combine_t	include/filecache.h	invented: the 16 gDPSetCombineLERP arguments of a material, emitted by func_80031E40
-MAT_TEXTURE	include/filecache.h	invented: fileRefB_t.flags bit 0, func_80031E40 loads the texture at unk_30 into tile 0
-MAT_TEXTURE2	include/filecache.h	invented: fileRefB_t.flags bit 1, func_80031E40 loads the texture at unk_38 into tile 1
-MAT_LIGHTING	include/filecache.h	invented: fileRefB_t.flags bit 2, sets G_LIGHTING in func_80031E40
-MAT_SMOOTH	include/filecache.h	invented: fileRefB_t.flags bit 3, sets G_SHADING_SMOOTH in func_80031E40
-MAT_TEXGEN	include/filecache.h	invented: fileRefB_t.flags bit 4, sets G_TEXTURE_GEN and the 0x7C0 texture scale in func_80031E40
-MAT_I4	include/filecache.h	invented: fileRefB_t.fmt values 0-4 (MAT_I4, MAT_CI4, MAT_CI8, MAT_RGBA16, MAT_I8), from the texture loads of func_80031E40
+mazeWork_t	include/menu.h	invented: the 0x3000-byte heap block Maze_Build builds a maze in (cell sets, wall flags, weights, order)
+rgba8_t	include/filecache.h	invented: 4-byte colour of a material, compared with memcmp and copied whole by Scene_Draw (gDPSetPrimColor/gDPSetEnvColor)
+combine_t	include/filecache.h	invented: the 16 gDPSetCombineLERP arguments of a material, emitted by Scene_Draw
+MAT_TEXTURE	include/filecache.h	invented: fileRefB_t.flags bit 0, Scene_Draw loads the texture at unk_30 into tile 0
+MAT_TEXTURE2	include/filecache.h	invented: fileRefB_t.flags bit 1, Scene_Draw loads the texture at unk_38 into tile 1
+MAT_LIGHTING	include/filecache.h	invented: fileRefB_t.flags bit 2, sets G_LIGHTING in Scene_Draw
+MAT_SMOOTH	include/filecache.h	invented: fileRefB_t.flags bit 3, sets G_SHADING_SMOOTH in Scene_Draw
+MAT_TEXGEN	include/filecache.h	invented: fileRefB_t.flags bit 4, sets G_TEXTURE_GEN and the 0x7C0 texture scale in Scene_Draw
+MAT_I4	include/filecache.h	invented: fileRefB_t.fmt values 0-4 (MAT_I4, MAT_CI4, MAT_CI8, MAT_RGBA16, MAT_I8), from the texture loads of Scene_Draw
 gaLaneAim_t	gacode.h	invented: 8-byte per-lane aiming state (two, ga_laneAim): a position, a counter within 999, the step reached
 gaMotion_t	gacode.h	invented: 0x38-byte motion of a lane body (gaLane_t.motion, 11 from 0x420; initial copy ga_initMotion): velocity, spin, flags; stepped by GA_PhysicsStep
 FABS	include/gacode/gacode.h	invented: float absolute value macro (0 - x), func_80119638_gacode
 floorGrid_t	include/game.h	invented: 0xFAC-byte file at D_80100100 (point counts, spacing and origin along x and z, then s16 heights); GA_KeepInGrid clamps to its edges, GA_FloorHeight interpolates its heights
 GA_TogglePin	3E350.c	invented: the inline helper of GA_PinEditor that toggles a lane body's standing flag (unk_5D) and returns the new state
-GRIDEDIT_EXIT, GRIDEDIT_LOAD, GRIDEDIT_SAVE, GRIDEDIT_SIZE, GRIDEDIT_STEP, GRIDEDIT_ORIGIN, GRIDEDIT_SELECT, GRIDEDIT_HEIGHT, GRIDEDIT_PAGES, GRIDEDIT_POINTS	include/gridedit.h	invented: the pages of the floor grid editor func_80035DA0 (from its page titles "EXIT", "FILE LOAD", "FILE SAVE", "MTX FORM", "MTX WH", "MTX OFS", "VTX SEL", "VTX Y"), and floorGrid_t.heights' 2000 points
+GRIDEDIT_EXIT, GRIDEDIT_LOAD, GRIDEDIT_SAVE, GRIDEDIT_SIZE, GRIDEDIT_STEP, GRIDEDIT_ORIGIN, GRIDEDIT_SELECT, GRIDEDIT_HEIGHT, GRIDEDIT_PAGES, GRIDEDIT_POINTS	include/gridedit.h	invented: the pages of the floor grid editor GridEd_Frame (from its page titles "EXIT", "FILE LOAD", "FILE SAVE", "MTX FORM", "MTX WH", "MTX OFS", "VTX SEL", "VTX Y"), and floorGrid_t.heights' 2000 points
 
 # rscode/56FF0.c results overlay
 RS_Init	0x80112350	invented: the overlay's init, run once after main loads it (overlay.h); starts the first state
@@ -519,7 +519,7 @@ RS_ResultsPage2	0x801130AC	invented: results-page state of sub-mode 2 (A/Z opens
 RS_DuelResults	0x8011311C	invented: state of a duel's results: each game's score, games won, the winner
 RS_ResultsPage	0x80113504	invented: results-page state (A/Z opens RS_Menu)
 RS_Menu	0x80113564	invented: state of the two-choice menu (leave the results, or the other choice)
-RS_MenuConfirm	0x8011372C	invented: state waiting on func_8003B204's answer: 1 leaves (RS_Leave), 2 back to RS_Menu
+RS_MenuConfirm	0x8011372C	invented: state waiting on Menu_TwoChoicePrompt's answer: 1 leaves (RS_Leave), 2 back to RS_Menu
 RS_Leave	0x8011377C	invented: state that waits for func_80037410, then leaves the overlay
 RS_Idle	0x801137CC	invented: last state, does nothing while the overlay is left
 RS_DrawPinDiagram	0x801137D4	invented: draws the pin diagram of one player's frame
@@ -559,7 +559,7 @@ MG_NullCreate	0x80112538	invented: empty function in the create slot of the scen
 MG_NullHandler	0x80112540	invented: empty function in the second slot of the scene's classes (objClass_t.unk_04)
 mg_classes	0x80112550	invented: the classes of the overlay's scene (objClass_t array)
 mg_sceneObjects	0x801125B0	invented: the overlay's scene objects
-mg_maze	0x80112730	invented: the maze grid, walls and cells, built by func_80038214 and drawn by func_80038090
+mg_maze	0x80112730	invented: the maze grid, walls and cells, built by Maze_Build and drawn by Maze_Draw
 OP_Init	0x80112350	invented: the overlay's init, run once after main loads it (overlay.h)
 OP_Frame	0x801123A8	invented: the overlay's per-frame function (overlay.h); runs the opening's modes
 OP_Null	0x80112950	invented: does nothing; nothing calls it
@@ -924,3 +924,54 @@ ga_sound	0x8012CDE8	invented: sound handle of the overlay's sound effect
 ga_teamCurrent	0x8012CDF8	invented: per team: index in ga_teamPlayers of the current player
 ga_teamPlayers	0x8012CE02	invented: per team: player numbers, -1 ends
 ga_pairNext	0x80123684	invented: per pair of players: the index the turn passes to next (GA_PairGameLoop)
+
+# main units: menus, scoreboard, maze, scene renderer, objects, matrices, grid editor
+Maze_Draw	0x80038090	invented: draws a maze grid into a 64 x 64 CI4 image, one pixel per byte
+Maze_Build	0x80038214	invented: builds a random maze by opening walls between unconnected cells
+Menu_DrawItems	0x800386E0	invented: draws the menu items at a step of their slide
+Menu_SetItem	0x8003893C	invented: sets the image, position and alpha of a menu item
+Menu_DrawNamePlate	0x800389D0	invented: draws a player's name plate: frame, number, icon and name
+Menu_DrawSmallNamePlate	0x80038AE8	invented: draws a player's small name plate
+Score_DrawFrameHeaders	0x80038C1C	invented: draws the headers of a run of the scoreboard's frames
+Score_DrawHeaders	0x80038D0C	invented: draws the headers of the scoreboard's frames (1 to 9, or the tenth)
+Score_DrawFrame	0x80038DD4	invented: draws a player's frame of the scoreboard: box, rolls and score
+Score_RollImage	0x80039340	invented: returns the scoreboard image of a roll: number, strike, spare, gutter or foul
+Score_DrawNumber	0x800393D8	invented: draws a value up to 999 in three digits without leading zeros
+Score_GetDigits	0x80039554	invented: sets the images of the four digits of a value
+Score_DrawTeamBoard	0x80039700	invented: draws the scoreboard of a game played by teams
+Score_DrawParCard	0x80039CBC	invented: draws the par game's score card
+Score_DrawCardFrame	0x8003A074	invented: draws a player's frame of the score card
+Score_DrawTotal	0x8003A21C	invented: draws a player's total, or a duel's lead
+Score_DrawAllBoards	0x8003A3F0	invented: draws the scoreboard of every player
+Score_DrawPlayerBoard	0x8003A658	invented: draws the scoreboard of one player
+Menu_DrawBox	0x8003A8B4	invented: draws a box of a number of pieces
+Score_DrawRecordTable	0x8003A970	invented: draws the table of records of a kind: games, average, high and low scores, percentages
+Score_DrawNumberBox	0x8003AE9C	invented: draws the box of two numbers, one above the other
+Score_SetRecordFigures	0x8003B034	invented: sets a record's figures in its kind's rows
+Menu_DrawImage	0x8003B1CC	invented: draws an image unless its id is negative
+Menu_TwoChoicePrompt	0x8003B204	invented: runs the two-choice prompt 0x957 for a frame
+Scene_ClearDrawList	0x80031250	invented: empties the draw list
+Scene_AddToDrawList	0x8003128C	invented: adds an entry to the draw list for each camera that draws
+Scene_ChainDrawList	0x80031650	invented: chains the draw list's buckets in key order into one list
+Scene_BeginView	0x800316C0	invented: starts drawing a camera's view: images, fog, matrices, viewport, lights
+Scene_BeginFrame	0x80031BB0	invented: starts the frame's drawing: viewport, scissor, framebuffer and depth buffer
+Scene_TextureSizeLog2	0x80031C9C	invented: returns n of the smallest power 1 << n (2 to 512) at least a value
+Scene_PickRenderModes	0x80031CD0	invented: picks the render modes of the frame's two cycles from the fog and surface
+Scene_Draw	0x80031E40	invented: draws the frame's scene by walking the draw list
+Scene_InitPuffs	0x80035074	invented: frees every puff and loads the puff images and squares
+Scene_FaceMatrix	0x80035220	invented: sets a matrix to stand at a point and face another
+Scene_StartPuff	0x80035380	invented: starts a puff at a point in the first free slot
+Scene_DrawPuffs	0x80035748	invented: ages the puffs and draws the live ones facing each camera
+Obj_Create	0x80029FF4	invented: creates an object from its parameter record and inserts it into the list by priority
+Obj_CreateAll	0x8002A1EC	invented: creates the objects of a list of parameter records
+Mtx_Translate	0x8002A810	invented: translates a matrix in its own axes
+Mtx_Scale	0x8002A864	invented: scales the axes of a matrix
+Mtx_Rotate	0x8002A8B0	invented: rotates the axes of a matrix by a 3 x 3 rotation
+Mtx_RotateXYZ	0x8002A98C	invented: rotates the axes of a matrix by x, y and z radians
+Mtx_SetRotScaleTrans	0x8002AAD0	invented: sets a matrix to a rotation, a scale and a translation
+Mtx_Place	0x8002AC84	invented: moves a matrix by a translation, then rotates and scales it
+Obj_MakeMatrix	0x8002AEBC	invented: makes an object's drawn matrix from its placement
+Obj_ConvertModel	0x8002B380	invented: converts model commands in place into the display list they stand for
+Obj_Draw	0x8002BE00	invented: draws an object and advances its animation
+GridEd_Frame	0x80035DA0	invented: the frame of the floor grid editor
+Scene_InsertEntry	C650.c	invented: the inline helper of Scene_AddToDrawList that adds an entry to a draw-list bucket in key order

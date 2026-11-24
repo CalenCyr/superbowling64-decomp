@@ -21,12 +21,12 @@ s32 GS_CharacterMenu( void ) {
     s32 i;
     sceneObject_t *obj;
 
-    func_8003893C( D_80120430_gscode, 10, D_80120644_gscode[D_80120656_gscode], MENU_NONE, MENU_NONE, MENU_NONE );
+    Menu_SetItem( D_80120430_gscode, 10, D_80120644_gscode[D_80120656_gscode], MENU_NONE, MENU_NONE, MENU_NONE );
     for ( i = 0; i < 8; i++ ) {
         if ( D_8009D098.unk_04 & ( 1 << i ) ) {
-            func_8003893C( D_80120430_gscode, i, D_801204DC_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
+            Menu_SetItem( D_80120430_gscode, i, D_801204DC_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
         } else {
-            func_8003893C( D_80120430_gscode, i, 0x8BC, MENU_NONE, MENU_NONE, MENU_NONE );
+            Menu_SetItem( D_80120430_gscode, i, 0x8BC, MENU_NONE, MENU_NONE, MENU_NONE );
         }
     }
 
@@ -64,12 +64,12 @@ s32 GS_CharacterMenu( void ) {
         }
     }
 
-    func_8003893C( D_80120430_gscode, 9, MENU_NONE, ( D_80120656_gscode + 1 ) * 32, MENU_NONE, MENU_NONE );
+    Menu_SetItem( D_80120430_gscode, 9, MENU_NONE, ( D_80120656_gscode + 1 ) * 32, MENU_NONE, MENU_NONE );
     Draw_ClearScreen( 0, 0, 0 );
     if ( D_80120657_gscode & 1 ) {
         Draw_Image( 0xA58, 0, 0 );
     }
-    func_800386E0( D_80120430_gscode, D_80120654_gscode );
+    Menu_DrawItems( D_80120430_gscode, D_80120654_gscode );
 
     if ( D_80120655_gscode == CHOICE_RUN ) {
         if ( D_80120A20_gscode == D_80120656_gscode ) {
@@ -85,7 +85,7 @@ s32 GS_CharacterMenu( void ) {
         Cache_Release( D_80120A48_gscode[D_80120656_gscode] );
         D_80120A48_gscode[D_80120656_gscode] = D_801205E4_gscode[D_80120656_gscode][0];
         ( (sceneObject_t *)D_800EA120[10] )->anim = Cache_GetFile( D_801205E4_gscode[D_80120656_gscode][0], FILE_TYPE2 );
-        func_8002AAD0( ( (sceneObject_t *)D_800EA120[10] )->mtx, 0.0f, 0.0f, 0.0f,
+        Mtx_SetRotScaleTrans( ( (sceneObject_t *)D_800EA120[10] )->mtx, 0.0f, 0.0f, 0.0f,
                        D_801205AC_gscode[D_80120656_gscode] * 1.2, -100.0f, -100.0f, 300.0f );
     draw:
         func_8002A2F0();
@@ -97,7 +97,7 @@ s32 GS_CharacterMenu( void ) {
         if ( D_80120654_gscode == 0 ) {
             D_80120655_gscode = CHOICE_RUN;
             func_80026B28();
-            func_8002A1EC( gs_classes, D_801204EC_gscode );
+            Obj_CreateAll( gs_classes, D_801204EC_gscode );
             D_80120A20_gscode = 0xFFFF;
             D_8009CFA0[0]->path->unk_38 |= 4;
         } else if ( D_80120654_gscode == 28 ) {

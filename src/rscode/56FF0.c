@@ -213,8 +213,8 @@ void RS_RankAndRecord( void ) {
             }
         }
         for ( character = 0; character < 4; character++ ) {
-            func_8003B034( &D_800E44E8[character], character, 0 );
-            func_8003B034( &D_8009D098.unk_08[character], character, 1 );
+            Score_SetRecordFigures( &D_800E44E8[character], character, 0 );
+            Score_SetRecordFigures( &D_8009D098.unk_08[character], character, 1 );
         }
     }
     rs_state = RS_ScoreSheet;
@@ -249,7 +249,7 @@ void RS_ScoreSheet( void ) {
     y += 0x18;
     switch ( rs_sheetPage ) {
     case 0:
-        func_80039700( D_801142B4_rscode, 1, 0x18, y );
+        Score_DrawTeamBoard( D_801142B4_rscode, 1, 0x18, y );
         break;
     case 1:
         RS_DrawPinDiagrams( 0x18, y );
@@ -298,10 +298,10 @@ void RS_Records( void ) {
     y += 0x18;
     switch ( rs_sheetPage ) {
     case 2:
-        func_8003A970( 4, D_800E44E8, 0, 0x18, y );
+        Score_DrawRecordTable( 4, D_800E44E8, 0, 0x18, y );
         break;
     case 3:
-        func_8003A970( 4, D_8009D098.unk_08, 1, 0x18, y );
+        Score_DrawRecordTable( 4, D_8009D098.unk_08, 1, 0x18, y );
         break;
     }
     y += 0x8C;
@@ -330,7 +330,7 @@ Results page; A or Z opens the menu of RS_Menu, which comes back here.
 */
 void RS_ResultsPage1( void ) {
     Draw_Image( 0x88D, 0x64, 0x10 );
-    func_80039CBC( D_8005C160 >> 6, 1, 0x20, 0x28 );
+    Score_DrawParCard( D_8005C160 >> 6, 1, 0x20, 0x28 );
     if ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         rs_state = RS_Menu;
@@ -347,7 +347,7 @@ Results page; A or Z opens the menu of RS_Menu, which comes back here.
 */
 void RS_ResultsPage2( void ) {
     Draw_Image( 0x88D, 0x64, 0x10 );
-    func_8003A3F0( 1, 0x18, 0x28 );
+    Score_DrawAllBoards( 1, 0x18, 0x28 );
     if ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         rs_state = RS_Menu;
@@ -364,7 +364,7 @@ leaves when player 1 won (setting the bit of D_8005C163 in D_8009D098.unk_04), e
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: retail passes x to func_800389D0 zero-extended and not folded to the constant 0x40 (then forms
+// NON_MATCHING: retail passes x to Menu_DrawNamePlate zero-extended and not folded to the constant 0x40 (then forms
 // x + 0x38 with ori), and allocates the first loop's registers differently (x in s1, i in s2)
 // The zero extension fits a call with no prototype in scope; the project keeps every call prototyped, so it stays
 // parked.
@@ -389,19 +389,19 @@ void RS_DuelResults( void ) {
     y += 9;
     for ( player = 0; player < 2; player++ ) {
         x = 0x40;
-        func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, y );
+        Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, y );
         x += 0x38;
         opponent = !player;
         for ( i = 0; i < games; i++ ) {
             Draw_Image( 0x86D, x, y );
-            func_800393D8( D_8009D030[player][i], x + 6, y + 6 );
+            Score_DrawNumber( D_8009D030[player][i], x + 6, y + 6 );
             if ( D_8009D030[player][i] > D_8009D030[opponent][i] ) {
                 Draw_ImageScaled( 0x86C, x, y, rs_boxAlpha + 0x20, 1.0f, 1.0f );
             }
             x += 0x20;
         }
         Draw_Image( 0x86B, x, y );
-        func_8003A8B4( player, D_800693DC[player], 1, x + 4, y + 2 );
+        Menu_DrawBox( player, D_800693DC[player], 1, x + 4, y + 2 );
         y += 0x14;
     }
     if ( D_800693DC[0] > D_800693DC[1] ) {
@@ -494,7 +494,7 @@ RS_MenuConfirm
 void RS_MenuConfirm( void ) {
     s32 choice;
 
-    choice = func_8003B204();
+    choice = Menu_TwoChoicePrompt();
     if ( choice == 2 ) {
         rs_state = RS_Menu;
     } else if ( choice == 1 ) {
@@ -578,7 +578,7 @@ void RS_DrawPinDiagrams( s16 x, s16 y ) {
     if ( D_801142B4_rscode == 2 ) {
         Draw_Image( 0xA12, x, y - 3 );
     }
-    func_80038D0C( rs_pinPage, x + 0x2C, y );
+    Score_DrawHeaders( rs_pinPage, x + 0x2C, y );
     y += 9;
     players = D_801142B4_rscode == 1 ? D_8005C161 >> 1 : D_8005C161;
     for ( player = 0; player < players; player++ ) {
@@ -589,10 +589,10 @@ void RS_DrawPinDiagrams( s16 x, s16 y ) {
         }
         if ( D_801142B4_rscode == 1 ) {
             mate = ( player == 1 ) * 2;
-            func_80038AE8( mate, D_8005C0E4[mate] >> 7, D_80068218[mate].chars, 0, rowX, y );
-            func_80038AE8( mate | 1, D_8005C0E4[mate + 1] >> 7, D_80068218[mate + 1].chars, 0, rowX, y + 0x1C );
+            Menu_DrawSmallNamePlate( mate, D_8005C0E4[mate] >> 7, D_80068218[mate].chars, 0, rowX, y );
+            Menu_DrawSmallNamePlate( mate | 1, D_8005C0E4[mate + 1] >> 7, D_80068218[mate + 1].chars, 0, rowX, y + 0x1C );
         } else {
-            func_80038AE8( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, 0, rowX, y );
+            Menu_DrawSmallNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, 0, rowX, y );
         }
         rowX += 0x2C;
         if ( D_801142B4_rscode == 1 ) {

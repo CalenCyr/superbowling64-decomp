@@ -20,9 +20,9 @@ void PV_Init( void ) {
     if ( D_8005C0BC ) {
         func_8002A7EC( "sce.dat" );
         D_8005C0BD = 1;
-        func_8002A1EC( pv_classes, (objParams_t *)D_800F30E0 );
+        Obj_CreateAll( pv_classes, (objParams_t *)D_800F30E0 );
     } else {
-        func_8002A1EC( pv_classes, pv_sceneObjects );
+        Obj_CreateAll( pv_classes, pv_sceneObjects );
     }
 }
 
@@ -30,7 +30,7 @@ void PV_Init( void ) {
 ================
 PV_Frame
 
-Frame of the overlay: runs the scene's objects; R starts func_80035DA0, Start restarts Save_SaveSettings;
+Frame of the overlay: runs the scene's objects; R starts GridEd_Frame, Start restarts Save_SaveSettings;
 right plays the sound up and down pick and left stops it; then prints the frame's times and rate.
 ================
 */
@@ -39,7 +39,7 @@ void PV_Frame( void ) {
 
     func_8002A2F0();
     if ( D_8005C980 ) {
-        func_80035DA0();
+        GridEd_Frame();
     }
     if ( D_800E4D62 & R_TRIG ) {
         D_8005C980 = 1;

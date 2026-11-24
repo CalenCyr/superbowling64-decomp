@@ -15,7 +15,7 @@
 
 /*
 ================
-func_80035DA0
+GridEd_Frame
 
 Frame of the floor grid editor: draws the grid D_80100100[0] in lines through camera 0, marked points red and the
 cursor flashing, then runs the page D_80063AF0 (R with up or down picks it) and prints the page, its values and the
@@ -25,7 +25,7 @@ height under the cursor.
 #ifdef NON_MATCHING
 // NON_MATCHING: register choices only: `resized` and the numZ address in page SIZE, and retail keeps &D_800994BC
 // in a register across the STEP and ORIGIN tests
-void func_80035DA0( void ) {
+void GridEd_Frame( void ) {
     u8 text[40];
     s32 x, z;
     s32 i;
@@ -39,7 +39,7 @@ void func_80035DA0( void ) {
     }
 
     gSPLoadUcodeL( D_800F8094++, gspL3DEX2_fifo );
-    func_800316C0( D_8009CFA0[0] );
+    Scene_BeginView( D_8009CFA0[0] );
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
     gDPSetRenderMode( D_800F8094++, G_RM_AA_ZB_XLU_LINE, G_RM_AA_ZB_XLU_LINE2 );
     gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
@@ -84,7 +84,7 @@ void func_80035DA0( void ) {
     }
 
     gDPPipeSync( D_800F8094++ );
-    func_80031BB0();
+    Scene_BeginFrame();
     Txt_LoadFont( &D_800F8094 );
     Txt_SetupFont( &D_800F8094, 0 );
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
@@ -282,5 +282,5 @@ void func_80035DA0( void ) {
     Txt_DrawString( &D_800F8094, 120, 20, text );
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/111A0", func_80035DA0);
+INCLUDE_ASM("asm/nonmatchings/111A0", GridEd_Frame);
 #endif

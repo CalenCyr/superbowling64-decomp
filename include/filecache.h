@@ -24,7 +24,7 @@ typedef struct {
 
 /* Pairs of file indices in a fileType1_t part, each loaded and relocated with it. */
 typedef struct {
-    /* 0x00 */ u16 unk_00;          /* a fileRefA_t, which func_8002B380 sets up */
+    /* 0x00 */ u16 unk_00;          /* a fileRefA_t, which Obj_ConvertModel sets up */
     /* 0x02 */ u16 unk_02;          /* a fileRefB_t */
 } fileType1Ref_t;
 
@@ -43,12 +43,12 @@ typedef struct {
     /* 0x08 */ fileType1Part_t *parts[1];    /* numParts entries */
 } fileType1_t;
 
-/* A mesh: its vertices, loaded at 0, and the commands that draw them (func_80031E40). */
+/* A mesh: its vertices, loaded at 0, and the commands that draw them (Scene_Draw). */
 typedef struct {
     /* 0x00 */ u16 numVerts;
     /* 0x02 */ u8 unk_02[0x02];
     /* 0x04 */ void *unk_04;        /* numVerts Vtx */
-    /* 0x08 */ Gfx *unk_08;         /* model commands, converted by func_8002B380 */
+    /* 0x08 */ Gfx *unk_08;         /* model commands, converted by Obj_ConvertModel */
 } fileRefA_t;
 
 /* An 8-bit colour, compared and copied whole (memcmp, assignment). */
@@ -76,7 +76,7 @@ typedef struct {
 #define MAT_RGBA16          3
 #define MAT_I8              4
 
-/* A material (func_80031E40): colours, combiner, and up to two textures. */
+/* A material (Scene_Draw): colours, combiner, and up to two textures. */
 typedef struct {
     /* 0x00 */ u32 flags;           /* MAT_* */
     /* 0x04 */ rgba8_t prim;

@@ -704,7 +704,7 @@ void Draw_Line3D( s32 index, f32 *start, f32 *end, u8 *color ) {
     }
     guMtxIdent( &D_80063AB0 );
     gSPLoadUcodeL( D_800F8094++, gspL3DEX2_fifo );
-    func_800316C0( D_8009CFA0[index] );
+    Scene_BeginView( D_8009CFA0[index] );
     gDPSetRenderMode( D_800F8094++, G_RM_AA_XLU_LINE, G_RM_AA_XLU_LINE2 );
     gDPSetAlphaCompare( D_800F8094++, G_AC_NONE );
     gDPSetCombineMode( D_800F8094++, G_CC_PRIMITIVE, G_CC_PRIMITIVE );
@@ -712,5 +712,5 @@ void Draw_Line3D( s32 index, f32 *start, f32 *end, u8 *color ) {
     gSPMatrix( D_800F8094++, &D_80063AB0, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
     gSPVertex( D_800F8094++, D_80063A70[index], 2, 0 );
     gSPLineW3D( D_800F8094++, 0, 1, color[4], 0 );
-    func_80031BB0();
+    Scene_BeginFrame();
 }

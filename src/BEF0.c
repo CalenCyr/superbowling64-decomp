@@ -92,7 +92,7 @@ void *Cache_GetFile( s16 index, s16 type ) {
                     refA = D_800F80B0[file1->parts[i]->refs[j].unk_00].data;
                     refA->unk_04 = FILE_RELOC( refA, refA->unk_04 );
                     refA->unk_08 = FILE_RELOC( refA, refA->unk_08 );
-                    func_8002B380( refA->unk_08 );
+                    Obj_ConvertModel( refA->unk_08 );
                 }
                 if ( D_800F80B0[file1->parts[i]->refs[j].unk_02].refCount == 0 ) {
                     Cache_LoadFile( file1->parts[i]->refs[j].unk_02 );

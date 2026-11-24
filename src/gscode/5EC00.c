@@ -57,41 +57,41 @@ s32 GS_TeamSelect( void ) {
         for ( i = 0; i < D_8005C161; i++ ) {
             slots[0][i] = i;
         }
-        func_8003893C( D_8011FA80_gscode, 12, 0x8CF, MENU_NONE, MENU_NONE, MENU_NONE );
-        func_8003893C( D_8011FA80_gscode, 13, 0x8D0, 0x78, 0x30, MENU_NONE );
-        func_8003893C( D_8011FA80_gscode, 14, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
-        func_8003893C( D_8011FA80_gscode, 15, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+        Menu_SetItem( D_8011FA80_gscode, 12, 0x8CF, MENU_NONE, MENU_NONE, MENU_NONE );
+        Menu_SetItem( D_8011FA80_gscode, 13, 0x8D0, 0x78, 0x30, MENU_NONE );
+        Menu_SetItem( D_8011FA80_gscode, 14, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+        Menu_SetItem( D_8011FA80_gscode, 15, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
         switch ( D_8005C161 ) {
         case 1:
-            func_8003893C( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x5A, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
-            func_8003893C( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
-            func_8003893C( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x5A, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
             break;
         case 2:
-            func_8003893C( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x46, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x6E, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
-            func_8003893C( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x46, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x6E, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
             break;
         case 3:
-            func_8003893C( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x50, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x64, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x50, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x64, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
             break;
         case 4:
-            func_8003893C( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x50, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x64, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, 0x78, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x50, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x64, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, 0x78, 0xFF );
             break;
         }
     } else {
-        func_8003893C( D_8011FA80_gscode, 12, 0x8A9, MENU_NONE, MENU_NONE, MENU_NONE );
-        func_8003893C( D_8011FA80_gscode, 13, 0x8D1, 0x28, 0x2C, MENU_NONE );
-        func_8003893C( D_8011FA80_gscode, 14, 0x8A8, MENU_NONE, MENU_NONE, 0x99 );
-        func_8003893C( D_8011FA80_gscode, 15, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
+        Menu_SetItem( D_8011FA80_gscode, 12, 0x8A9, MENU_NONE, MENU_NONE, MENU_NONE );
+        Menu_SetItem( D_8011FA80_gscode, 13, 0x8D1, 0x28, 0x2C, MENU_NONE );
+        Menu_SetItem( D_8011FA80_gscode, 14, 0x8A8, MENU_NONE, MENU_NONE, 0x99 );
+        Menu_SetItem( D_8011FA80_gscode, 15, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
         switch ( D_8005C161 ) {
         case 2:
             if ( ( D_8005C160 & 0xF ) != 1 ) {
@@ -108,10 +108,10 @@ s32 GS_TeamSelect( void ) {
                     unlocked = GS_UnlockMask( D_8009D098.unk_04 );
                 }
             }
-            func_8003893C( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x82, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
-            func_8003893C( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x82, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
             break;
         case 3:
             slots[0][0] = 0;
@@ -121,10 +121,10 @@ s32 GS_TeamSelect( void ) {
             } else {
                 slots[0][2] = 2;
             }
-            func_8003893C( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x34, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x44, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x82, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x34, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x44, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x82, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
             break;
         case 4:
             slots[0][0] = 0;
@@ -136,10 +136,10 @@ s32 GS_TeamSelect( void ) {
                 slots[0][2] = 2;
                 slots[0][3] = 3;
             }
-            func_8003893C( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x34, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x44, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x7A, 0xFF );
-            func_8003893C( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, 0x8A, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x34, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x44, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x7A, 0xFF );
+            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, 0x8A, 0xFF );
             break;
         }
     }
@@ -255,7 +255,7 @@ s32 GS_TeamSelect( void ) {
                     // RULE-EXCEPTION: R30, the character cursor shares j's register: retail allocates repeat and
                     // pad ahead of it, which a separate local reverses
                     j = D_8005C0E4[player] & 0xF;
-                    func_8003893C( D_8011FA80_gscode, player + 16, MENU_NONE, MENU_NONE, MENU_NONE, D_8009CFB0 );
+                    Menu_SetItem( D_8011FA80_gscode, player + 16, MENU_NONE, MENU_NONE, MENU_NONE, D_8009CFB0 );
 
                     if ( D_8011FC84_gscode[1] == 0x80 ) {
                         repeat = D_800E6758;
@@ -374,36 +374,36 @@ s32 GS_TeamSelect( void ) {
     }
 
     for ( i = 0; i < 4; i++ ) {
-        func_8003893C( D_8011FA80_gscode, i + 8, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+        Menu_SetItem( D_8011FA80_gscode, i + 8, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     }
     for ( i = 0; i < 8; i++ ) {
-        func_8003893C( D_8011FB98_gscode, i + 24, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+        Menu_SetItem( D_8011FB98_gscode, i + 24, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     }
     for ( i = 0; i < D_8005C161; i++ ) {
         if ( shown[i] ) {
             if ( !( D_8005C0E4[i] >> 7 ) ) {
-                func_8003893C( D_8011FA80_gscode, i + 8, D_8011FC68_gscode[i], ( D_8005C0E4[i] & 0xF ) * 32 + 32,
+                Menu_SetItem( D_8011FA80_gscode, i + 8, D_8011FC68_gscode[i], ( D_8005C0E4[i] & 0xF ) * 32 + 32,
                                MENU_NONE, 0xFF );
             } else {
-                func_8003893C( D_8011FA80_gscode, i + 8, D_8011FC70_gscode[i], ( D_8005C0E4[i] & 0xF ) * 32 + 32,
+                Menu_SetItem( D_8011FA80_gscode, i + 8, D_8011FC70_gscode[i], ( D_8005C0E4[i] & 0xF ) * 32 + 32,
                                MENU_NONE, 0xFF );
             }
-            func_8003893C( D_8011FA80_gscode, i + 16, D_8011FC34_gscode[D_8005C0E4[i] & 0xF],
+            Menu_SetItem( D_8011FA80_gscode, i + 16, D_8011FC34_gscode[D_8005C0E4[i] & 0xF],
                            D_8011FC24_gscode[D_8005C0E4[i] & 0xF], MENU_NONE, MENU_NONE );
         } else {
-            func_8003893C( D_8011FA80_gscode, i + 16, D_8011FC78_gscode[i], 0x82, MENU_NONE, MENU_NONE );
+            Menu_SetItem( D_8011FA80_gscode, i + 16, D_8011FC78_gscode[i], 0x82, MENU_NONE, MENU_NONE );
         }
     }
     for ( i = 0; i < 8; i++ ) {
         if ( ( unlocked >> i ) & 1 ) {
-            func_8003893C( D_8011FA80_gscode, i, D_8011FC14_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
+            Menu_SetItem( D_8011FA80_gscode, i, D_8011FC14_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
         } else {
-            func_8003893C( D_8011FA80_gscode, i, 0x8BC, MENU_NONE, MENU_NONE, MENU_NONE );
+            Menu_SetItem( D_8011FA80_gscode, i, 0x8BC, MENU_NONE, MENU_NONE, MENU_NONE );
         }
     }
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     Draw_Image( 0xA58, 0, 0 );
-    func_800386E0( D_8011FA80_gscode, D_8011FC80_gscode );
+    Menu_DrawItems( D_8011FA80_gscode, D_8011FC80_gscode );
     /* an empty loop: retail still counts it out */
     for ( i = 0; i < 4; i++ ) {
     }
@@ -422,7 +422,7 @@ s32 GS_TeamSelect( void ) {
                         if ( character == 6 ) {
                             D_80120800_gscode[i][1] += 40;
                         }
-                        func_8002AAD0( ( (sceneObject_t *)D_800EA120[10 + i] )->mtx, 0.0f, 0.0f, 0.0f,
+                        Mtx_SetRotScaleTrans( ( (sceneObject_t *)D_800EA120[10 + i] )->mtx, 0.0f, 0.0f, 0.0f,
                                        D_8011F8C0_gscode[character], D_80120800_gscode[i][0], D_80120800_gscode[i][1],
                                        D_80120800_gscode[i][2] );
                     }
@@ -450,15 +450,15 @@ s32 GS_TeamSelect( void ) {
                                    3, D_80120818_gscode[i][j], D_8011FC44_gscode[j][0], D_8011FC44_gscode[j][1],
                                    D_8011FC44_gscode[j][2], 0xC0 );
                 }
-                func_8003893C( D_8011FB98_gscode, i + 24, D_8011FC04_gscode[character], D_80120828_gscode[i][0] - 16,
+                Menu_SetItem( D_8011FB98_gscode, i + 24, D_8011FC04_gscode[character], D_80120828_gscode[i][0] - 16,
                                D_80120840_gscode[i][0] + 18, D_8009CFB0 );
-                func_8003893C( D_8011FB98_gscode, i + 28, D_8011FBF4_gscode[character], D_80120828_gscode[i][0] - 16,
+                Menu_SetItem( D_8011FB98_gscode, i + 28, D_8011FBF4_gscode[character], D_80120828_gscode[i][0] - 16,
                                D_80120840_gscode[i][0] + 26, D_8009CFB0 );
             }
         }
     }
 
-    func_800386E0( D_8011FB98_gscode, D_8011FC80_gscode );
+    Menu_DrawItems( D_8011FB98_gscode, D_8011FC80_gscode );
 
     switch ( D_8011FC81_gscode ) {
     case CHOICE_IN:
@@ -467,7 +467,7 @@ s32 GS_TeamSelect( void ) {
         if ( D_8011FC80_gscode == 0 ) {
             D_8011FC81_gscode = CHOICE_RUN;
             func_80026B28();
-            func_8002A1EC( gs_classes, D_8011F900_gscode );
+            Obj_CreateAll( gs_classes, D_8011F900_gscode );
             D_8009CFA0[0]->path->unk_38 |= 4;
             for ( i = 0; i < 4; i++ ) {
                 D_801207B4_gscode[i] = 0xFFFF;

@@ -357,7 +357,7 @@ void GA_HoldBall( s32 player ) {
     guMtxXFMF( pl->lane->bodyObjs[0]->mtx, 0.0f, 0.0f, 0.0f, &pl->lane->spots[0].pos[0], &pl->lane->spots[0].pos[1],
                &pl->lane->spots[0].pos[2] );
     pl->lane->spots[0].pos[0] -= pl->lane->unk_B14;
-    func_8002AEBC( pl->lane->bodyObjs[0] );
+    Obj_MakeMatrix( pl->lane->bodyObjs[0] );
 }
 
 /*
@@ -2005,7 +2005,7 @@ void GA_DrawScorePanel( s32 player, u8 lane ) {
     if ( lane == 0 ) {
         x = 0x18;
     }
-    func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x19 );
+    Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x19 );
     x += 0x38;
     y = 0x10;
     if ( ( D_8005C160 >> 6 ) == 1 ) {
@@ -2018,16 +2018,16 @@ void GA_DrawScorePanel( s32 player, u8 lane ) {
     } else {
         first = D_8009D19C[scorer] - 2;
     }
-    func_80038C1C( 3, first, x, y );
+    Score_DrawFrameHeaders( 3, first, x, y );
     for ( i = 0; i < 3; i++ ) {
-        func_80038DD4( scorer, first + i, D_8009D19C[scorer], D_80068A50[scorer], D_800994BE[scorer], x, y + 9 );
+        Score_DrawFrame( scorer, first + i, D_8009D19C[scorer], D_80068A50[scorer], D_800994BE[scorer], x, y + 9 );
         x += 0x14;
     }
     x = 0xAC;
     if ( lane == 0 ) {
         x = 0x78;
     }
-    func_8003A8B4( player, D_800693DC[player], 0, x, y + 0x20 );
+    Menu_DrawBox( player, D_800693DC[player], 0, x, y + 0x20 );
 }
 
 /*
@@ -2078,7 +2078,7 @@ void func_801194D0_gacode( gaPlayer_t *pl ) {
     Draw_Image( 0xAF7, x, y );
     Draw_Image( D_8012C7F4_gacode[pl->unk_93], x + 0x10, y );
     Draw_Image( 0xAF5, x + 0x20, y );
-    func_800393D8( pl->unk_93 + 6, x - 6, 0xD9 );
+    Score_DrawNumber( pl->unk_93 + 6, x - 6, 0xD9 );
     Draw_Image( 0xAF3, x + 0x10, 0xD8 );
     if ( D_800E44E0[pl->port] & L_CBUTTONS ) {
         Draw_Image( 0xAF6, x, y );
@@ -2148,7 +2148,7 @@ inline void func_80119800_gacode( s32 player, u8 full ) {
     if ( full ) {
         Draw_ImageCopyPalette( pl->laneIndex != 0 ? 0xA47 : 0xA49, x + 0x1D, y );
     }
-    func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, y + 0x11 );
+    Menu_DrawImage( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, y + 0x11 );
 }
 
 /*
@@ -2165,11 +2165,11 @@ void GA_DrawParPanel( s32 player, u8 lane ) {
     s32 i;
 
     x = lane != 0 ? 0xA8 : 0x18;
-    func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x18 );
+    Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x18 );
     x += 0x38;
     Draw_Image( 0xA3B, x, 0x10 );
-    func_800393D8( ga_parFrame + 1, x + 0x24, 0x15 );
-    func_800393D8( D_80099458[0][ga_parFrame], x + 0x24, 0x21 );
+    Score_DrawNumber( ga_parFrame + 1, x + 0x24, 0x15 );
+    Score_DrawNumber( D_80099458[0][ga_parFrame], x + 0x24, 0x21 );
     y = 0x30;
     if ( lane != 0 ) {
         x -= 0x38;
@@ -2226,12 +2226,12 @@ void func_80119C50_gacode( s32 player, u8 lane ) {
     s32 i;
 
     x = lane != 0 ? 0xA8 : 0x18;
-    func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x18 );
+    Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x18 );
     x += 0x38;
     Draw_Image( 0xAB7, x, 0x10 );
-    func_80039554( digits, D_8009D19C[player] + 1, 0, 0 );
-    func_8003B1CC( digits[2], x + 0x30, 0x11 );
-    func_8003B1CC( digits[3], x + 0x38, 0x11 );
+    Score_GetDigits( digits, D_8009D19C[player] + 1, 0, 0 );
+    Menu_DrawImage( digits[2], x + 0x30, 0x11 );
+    Menu_DrawImage( digits[3], x + 0x38, 0x11 );
     x += 0xF;
     y = 0x20;
     for ( i = 0; i < D_80068A50[player] - 1; i++ ) {
@@ -2266,7 +2266,7 @@ void func_80119DD8_gacode( s32 player, u8 lane ) {
             Draw_Image( 0xAB9, x + ga_pinPanelPins[i][0], y + ga_pinPanelPins[i][1] );
         }
     }
-    func_800393D8( D_8009D19C[player] + 1, x + 0x3E, y + 6 );
+    Score_DrawNumber( D_8009D19C[player] + 1, x + 0x3E, y + 6 );
     Draw_Image( D_801237F0_gacode[setup].unk_04, x + 7, y + 0x11 );
     for ( i = 0; i < D_801237F0_gacode[setup].unk_00; i++ ) {
         Draw_Image( 0xAB8, x + 0x26 + i * 0xA, y + 0x68 );
@@ -2295,12 +2295,12 @@ void func_80119F8C_gacode( s32 player, u8 lane ) {
     x = lane ? 0xA8 : 0x18;
     Draw_Image( 0x9E0, x + 0x38, 0x10 );
     Draw_Image( 0x9DF, x + 0x58, 0x10 );
-    func_800389D0( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x19 );
+    Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x19 );
     x += 0x38;
     y = 0x19;
     Draw_Image( 0x86D, x, y );
     aim = ga_laneAim[player].unk_04;
-    func_800393D8( aim < 0 ? -aim : aim, x + 0xB, 0x20 );
+    Score_DrawNumber( aim < 0 ? -aim : aim, x + 0xB, 0x20 );
     if ( ga_laneAim[player].unk_04 != 0 ) {
         Draw_Image( ga_laneAim[player].unk_04 < 0 ? 0x9F0 : 0x9EF, x + 3, 0x1D );
         if ( ga_laneAim[player].unk_04 > 0 ) {
@@ -2309,12 +2309,12 @@ void func_80119F8C_gacode( s32 player, u8 lane ) {
     }
     x += 0x20;
     Draw_Image( 0x86B, x, y );
-    func_80039554( digits, FABS( 730.0f - pl->lane->unk_A68[2].pos[2] ), 1, 0 );
+    Score_GetDigits( digits, FABS( 730.0f - pl->lane->unk_A68[2].pos[2] ), 1, 0 );
     y += 4;
-    func_8003B1CC( digits[0], x + 0x5, y );
-    func_8003B1CC( digits[1], x + 0xD, y );
-    func_8003B1CC( digits[2], x + 0x15, y );
-    func_8003B1CC( digits[3], x + 0x1D, y );
+    Menu_DrawImage( digits[0], x + 0x5, y );
+    Menu_DrawImage( digits[1], x + 0xD, y );
+    Menu_DrawImage( digits[2], x + 0x15, y );
+    Menu_DrawImage( digits[3], x + 0x1D, y );
 }
 
 /*
@@ -2338,15 +2338,15 @@ void GA_DrawDistancePanels( void ) {
         pl = &ga_players[i];
         Draw_Image( 0x9DF, x + 0x38, y );
         y += 9;
-        func_800389D0( i, D_8005C0E4[i] >> 7, D_80068218[i].chars, x, y );
+        Menu_DrawNamePlate( i, D_8005C0E4[i] >> 7, D_80068218[i].chars, x, y );
         x += 0x38;
         Draw_Image( 0x86B, x, y );
-        func_80039554( digits, FABS( 730.0f - pl->lane->unk_A68[2].pos[2] ), 1, 0 );
+        Score_GetDigits( digits, FABS( 730.0f - pl->lane->unk_A68[2].pos[2] ), 1, 0 );
         y += 4;
-        func_8003B1CC( digits[0], x + 5, y );
-        func_8003B1CC( digits[1], x + 0xD, y );
-        func_8003B1CC( digits[2], x + 0x15, y );
-        func_8003B1CC( digits[3], x + 0x1D, y );
+        Menu_DrawImage( digits[0], x + 5, y );
+        Menu_DrawImage( digits[1], x + 0xD, y );
+        Menu_DrawImage( digits[2], x + 0x15, y );
+        Menu_DrawImage( digits[3], x + 0x1D, y );
     }
 }
 
@@ -2630,7 +2630,7 @@ void func_8011B07C_gacode( s32 player ) {
     x = pl->laneIndex != 0 ? 0xB0 : 0x18;
     Draw_ImageCopyPalette( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
     Draw_ImageCopyPalette( pl->laneIndex != 0 ? 0xA47 : 0xA49, x + 0x1D, 0xA8 );
-    func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, 0xA8 + 0x11 );
+    Menu_DrawImage( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, 0xA8 + 0x11 );
 }
 
 
@@ -2655,7 +2655,7 @@ void func_8011B1A0_gacode( s32 player ) {
     if ( pl->port >= 0 ) {
         x = pl->laneIndex != 0 ? 0xB0 : 0x18;
         Draw_ImageCopyPalette( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
-        func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD,
+        Menu_DrawImage( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD,
                        0xA8 + 0x11 );
     }
     pl->character.unk_34 = ( t - 0.5 ) * M_PI;
@@ -2684,7 +2684,7 @@ void func_8011B2E8_gacode( s32 player ) {
     }
     x = pl->laneIndex != 0 ? 0xB0 : 0x18;
     Draw_ImageCopyPalette( pl->laneIndex != 0 ? 0xA46 : 0xA48, x, 0xA8 );
-    func_8003B1CC( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, 0xA8 + 0x11 );
+    Menu_DrawImage( D_801236B0_gacode[pl->laneIndex].ids[D_801236B0_gacode[pl->laneIndex].cur], x + 0xD, 0xA8 + 0x11 );
 }
 
 /*
@@ -2731,7 +2731,7 @@ void func_8011B490_gacode( s32 lane ) {
         Draw_ImageScaled( 0xA6B, lane != 0 ? 0xB4 : 0x24, 0x94, (u8)ga_blinkLevel + 0x7F, 1.0f, 1.0f );
     }
     if ( ga_gameMode != func_8011582C_gacode ) {
-        func_8003A658( lane, 0x18, lane == 0 ? 0x10 : 0xC0 );
+        Score_DrawPlayerBoard( lane, 0x18, lane == 0 ? 0x10 : 0xC0 );
     }
 }
 

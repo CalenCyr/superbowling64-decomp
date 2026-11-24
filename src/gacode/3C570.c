@@ -36,7 +36,7 @@ void GA_Init( void ) {
         params->unk_08[1] = D_80123A14_gacode[character][1];
         params->unk_08[4] = ga_characterData[character].unk_04;
     }
-    func_8002A1EC( ga_classes, ga_stage->unk_00 );
+    Obj_CreateAll( ga_classes, ga_stage->unk_00 );
     if ( ga_stage->unk_1C >= 0 ) {
         ga_sound = Sound_PlaySe( ga_stage->unk_1C, 0 );
     } else {
@@ -254,13 +254,13 @@ void func_80112E04_gacode( void ) {
     }
     switch ( ( D_8005C160 >> 4 ) & 3 ) {
     case 0:
-        func_80039700( D_8005C160 >> 6, 0, 0x18, 0x30 );
+        Score_DrawTeamBoard( D_8005C160 >> 6, 0, 0x18, 0x30 );
         break;
     case 1:
-        func_80039CBC( D_8005C160 >> 6, 0, 0x20, 0x30 );
+        Score_DrawParCard( D_8005C160 >> 6, 0, 0x20, 0x30 );
         break;
     case 2:
-        func_8003A3F0( 0, 0x18, 0x30 );
+        Score_DrawAllBoards( 0, 0x18, 0x30 );
         break;
     }
 }
@@ -339,7 +339,7 @@ func_80113210_gacode
 ================
 */
 s32 func_80113210_gacode( void ) {
-    switch ( func_8003B204() ) {
+    switch ( Menu_TwoChoicePrompt() ) {
     case 1:
         ga_state = func_80113270_gacode;
         break;

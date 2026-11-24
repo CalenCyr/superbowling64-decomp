@@ -39,8 +39,8 @@ s32 GS_PlayersMenu( void ) {
 
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     Draw_Image( 0xA58, 0, 0 );
-    func_8003893C( gs_playersMenu, 0, gs_playersBlink[0][0], MENU_NONE, MENU_NONE, MENU_NONE );
-    func_8003893C( gs_playersMenu, 1, gs_playersBlink[1][0], MENU_NONE, MENU_NONE, MENU_NONE );
+    Menu_SetItem( gs_playersMenu, 0, gs_playersBlink[0][0], MENU_NONE, MENU_NONE, MENU_NONE );
+    Menu_SetItem( gs_playersMenu, 1, gs_playersBlink[1][0], MENU_NONE, MENU_NONE, MENU_NONE );
 
     if ( gs_playersState == CHOICE_RUN ) {
         if ( ++gs_playersBlinkFrame == 30 ) {
@@ -49,7 +49,7 @@ s32 GS_PlayersMenu( void ) {
         choice = gs_playersCursor;
         switch ( choice ) {
         case 0:
-            func_8003893C( gs_playersMenu, 0, gs_playersBlink[0][gs_playersBlinkFrame / 5],
+            Menu_SetItem( gs_playersMenu, 0, gs_playersBlink[0][gs_playersBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
             Draw_RoundedBox( 0x28, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & R_JPAD ) {
@@ -57,7 +57,7 @@ s32 GS_PlayersMenu( void ) {
             }
             break;
         case 1:
-            func_8003893C( gs_playersMenu, 1, gs_playersBlink[1][gs_playersBlinkFrame / 5],
+            Menu_SetItem( gs_playersMenu, 1, gs_playersBlink[1][gs_playersBlinkFrame / 5],
                            MENU_NONE, MENU_NONE, MENU_NONE );
             Draw_RoundedBox( 0xB8, 0x54, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
@@ -72,7 +72,7 @@ s32 GS_PlayersMenu( void ) {
         }
     }
 
-    func_800386E0( gs_playersMenu, gs_playersSlide );
+    Menu_DrawItems( gs_playersMenu, gs_playersSlide );
     switch ( gs_playersState ) {
     case CHOICE_IN:
         gs_playersMenu[5].slide = SLIDE_LEFT;

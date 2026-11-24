@@ -51,9 +51,9 @@ s32 GS_ModeMenu( void ) {
 
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     Draw_Image( 0xA58, 0, 0 );
-    func_800386E0( gs_modeMenu, gs_modeSlide );
+    Menu_DrawItems( gs_modeMenu, gs_modeSlide );
     for ( i = 0; i < 5; i++ ) {
-        func_8003893C( gs_modeChoices, i + 1, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+        Menu_SetItem( gs_modeChoices, i + 1, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     }
 
     if ( gs_modeState == CHOICE_RUN ) {
@@ -63,7 +63,7 @@ s32 GS_ModeMenu( void ) {
         choice = gs_modeCursor;
         switch ( choice ) {
         case 0:
-            func_8003893C( gs_modeChoices, 1, gs_modeBlink[1][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
+            Menu_SetItem( gs_modeChoices, 1, gs_modeBlink[1][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
             Draw_RoundedBox( 0x38, 0x30, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & R_JPAD ) {
                 gs_modeCursor = 1;
@@ -73,7 +73,7 @@ s32 GS_ModeMenu( void ) {
             }
             break;
         case 1:
-            func_8003893C( gs_modeChoices, 2, gs_modeBlink[2][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
+            Menu_SetItem( gs_modeChoices, 2, gs_modeBlink[2][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
             Draw_RoundedBox( 0xA8, 0x30, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
                 gs_modeCursor = 0;
@@ -83,7 +83,7 @@ s32 GS_ModeMenu( void ) {
             }
             break;
         case 2:
-            func_8003893C( gs_modeChoices, 3, gs_modeBlink[3][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
+            Menu_SetItem( gs_modeChoices, 3, gs_modeBlink[3][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
             Draw_RoundedBox( 0x18, 0x98, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & R_JPAD ) {
                 gs_modeCursor = 4;
@@ -93,7 +93,7 @@ s32 GS_ModeMenu( void ) {
             }
             break;
         case 3:
-            func_8003893C( gs_modeChoices, 5, gs_modeBlink[4][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
+            Menu_SetItem( gs_modeChoices, 5, gs_modeBlink[4][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
             Draw_RoundedBox( 0xC8, 0x98, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
                 gs_modeCursor = 4;
@@ -103,7 +103,7 @@ s32 GS_ModeMenu( void ) {
             }
             break;
         case 4:
-            func_8003893C( gs_modeChoices, 4, gs_modeBlink[0][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
+            Menu_SetItem( gs_modeChoices, 4, gs_modeBlink[0][gs_modeBlinkFrame / 5], MENU_NONE, MENU_NONE, 0xFF );
             Draw_RoundedBox( 0x70, 0x70, 0x60, 0x48, 0xE0, 0xE0, 0xE0, D_8009CFB0 );
             if ( D_800E6758 & L_JPAD ) {
                 gs_modeCursor = 2;
@@ -123,7 +123,7 @@ s32 GS_ModeMenu( void ) {
         }
     }
 
-    func_800386E0( gs_modeChoices, gs_modeSlide );
+    Menu_DrawItems( gs_modeChoices, gs_modeSlide );
     switch ( gs_modeState ) {
     case CHOICE_IN:
         gs_modeMenu[5].slide = SLIDE_LEFT;

@@ -22,18 +22,18 @@ void Obj_ClearList( void ) {
     D_80099480 = 0;
     D_800EA0C0 = 0;
     D_800F7BF8 = 1;
-    func_80035074();
+    Scene_InitPuffs();
 }
 
 /*
 ================
-func_80029FF4
+Obj_Create
 
 Creates the object of params with its class and inserts it into the list, after the objects of the same or
 a lower priority.
 ================
 */
-void func_80029FF4( objParams_t *params ) {
+void Obj_Create( objParams_t *params ) {
     objNode_t *obj;
     objNode_t *prev;
 
@@ -52,19 +52,19 @@ void func_80029FF4( objParams_t *params ) {
 
 /*
 ================
-func_8002A1EC
+Obj_CreateAll
 
 Creates the objects of the records params with classes, up to the first record of a negative type.
 ================
 */
-void func_8002A1EC( objClass_t *classes, objParams_t *params ) {
+void Obj_CreateAll( objClass_t *classes, objParams_t *params ) {
     s32 i;
 
     D_800E657C = classes;
     D_800A2FE0 = params;
     for ( i = 0; !( D_800A2FE0[i].type <= OBJ_PARAMS_END ); i++ ) {
         if ( D_800A2FE0[i].type != OBJ_PARAMS_SKIP ) {
-            func_80029FF4( &D_800A2FE0[i] );
+            Obj_Create( &D_800A2FE0[i] );
         }
     }
     if ( D_800A2FE0[i].type == OBJ_PARAMS_END ) {
@@ -162,12 +162,12 @@ void func_8002A7EC( u8 *name ) {
 
 /*
 ================
-func_8002A810
+Mtx_Translate
 
 Translates m by (x, y, z) in its own axes.
 ================
 */
-void func_8002A810( f32 m[4][4], f32 x, f32 y, f32 z ) {
+void Mtx_Translate( f32 m[4][4], f32 x, f32 y, f32 z ) {
     s32 i;
 
     for ( i = 0; i < 4; i++ ) {
@@ -177,12 +177,12 @@ void func_8002A810( f32 m[4][4], f32 x, f32 y, f32 z ) {
 
 /*
 ================
-func_8002A864
+Mtx_Scale
 
 Scales the axes of m by x, y and z.
 ================
 */
-void func_8002A864( f32 m[4][4], f32 x, f32 y, f32 z ) {
+void Mtx_Scale( f32 m[4][4], f32 x, f32 y, f32 z ) {
     s32 i;
 
     for ( i = 0; i < 3; i++ ) {
@@ -194,12 +194,12 @@ void func_8002A864( f32 m[4][4], f32 x, f32 y, f32 z ) {
 
 /*
 ================
-func_8002A8B0
+Mtx_Rotate
 
 Rotates the axes of m by rot.
 ================
 */
-void func_8002A8B0( f32 m[4][4], f32 rot[3][3] ) {
+void Mtx_Rotate( f32 m[4][4], f32 rot[3][3] ) {
     f32 result[3][3];
     s32 i;
     s32 j;
@@ -222,7 +222,7 @@ void func_8002A8B0( f32 m[4][4], f32 rot[3][3] ) {
 
 /*
 ================
-func_8002A98C
+Mtx_RotateXYZ
 
 Rotates the axes of m by x, y and z radians.
 ================
@@ -230,7 +230,7 @@ Rotates the axes of m by x, y and z radians.
 #ifdef NON_MATCHING
 // NON_MATCHING: byte-exact (gate green) only with one float temporary for both shared products (marked R30
 // below); a reused local is not counted as a match
-void func_8002A98C( f32 m[4][4], f32 x, f32 y, f32 z ) {
+void Mtx_RotateXYZ( f32 m[4][4], f32 x, f32 y, f32 z ) {
     f32 rot[3][3];
     f32 sx, cx, sy, cy, sz, cz;
     f32 t;      // RULE-EXCEPTION: R30, one temporary for both shared products: two locals schedule differently
@@ -252,15 +252,15 @@ void func_8002A98C( f32 m[4][4], f32 x, f32 y, f32 z ) {
     rot[2][0] = cx * sy;
     rot[2][1] = -sx;
     rot[2][2] = cx * cy;
-    func_8002A8B0( m, rot );
+    Mtx_Rotate( m, rot );
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002A98C);
+INCLUDE_ASM("asm/nonmatchings/53B0", Mtx_RotateXYZ);
 #endif
 
 /*
 ================
-func_8002AAD0
+Mtx_SetRotScaleTrans
 
 Sets m to a rotation by x, y and z radians, scaled by scale, then moved to (tx, ty, tz).
 ================
@@ -268,10 +268,10 @@ Sets m to a rotation by x, y and z radians, scaled by scale, then moved to (tx, 
 #ifdef NON_MATCHING
 // NON_MATCHING: MATCH-PENDING (R17): byte-exact only with the unused local rot, which supplies retail's 0x28
 // bytes of unused frame; without it the frame is 0x50 instead of 0x78
-void func_8002AAD0( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, f32 ty, f32 tz ) {
+void Mtx_SetRotScaleTrans( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, f32 ty, f32 tz ) {
     f32 rot[3][3];
     f32 sx, cx, sy, cy, sz, cz;
-    f32 t;      // RULE-EXCEPTION: R30, one temporary for both shared products, as in func_8002A98C
+    f32 t;      // RULE-EXCEPTION: R30, one temporary for both shared products, as in Mtx_RotateXYZ
 
     sx = sinf( x );
     cx = cosf( x );
@@ -299,33 +299,33 @@ void func_8002AAD0( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, f32 ty,
     m[3][3] = 1.0f;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002AAD0);
+INCLUDE_ASM("asm/nonmatchings/53B0", Mtx_SetRotScaleTrans);
 #endif
 
 /*
 ================
-func_8002AC84
+Mtx_Place
 
 Moves m by trans, then rotates it by rot (radians) and scales it by scale.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) as written, but at -O3 it inlines func_8002A98C, which is parked, so it
+// NON_MATCHING: byte-exact (gate green) as written, but at -O3 it inlines Mtx_RotateXYZ, which is parked, so it
 // can only be built from source together with that function
-void func_8002AC84( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale ) {
-    func_8002A810( m, trans[0], trans[1], trans[2] );
+void Mtx_Place( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale ) {
+    Mtx_Translate( m, trans[0], trans[1], trans[2] );
     if ( rot[0] != 0.0 || rot[1] != 0.0 || rot[2] != 0.0 ) {
-        func_8002A98C( m, rot[0], rot[1], rot[2] );
+        Mtx_RotateXYZ( m, rot[0], rot[1], rot[2] );
     }
-    func_8002A864( m, scale[0], scale[1], scale[2] );
+    Mtx_Scale( m, scale[0], scale[1], scale[2] );
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002AC84);
+INCLUDE_ASM("asm/nonmatchings/53B0", Mtx_Place);
 #endif
 
 /*
 ================
-func_8002AEBC
+Obj_MakeMatrix
 
 Makes the drawn matrix of obj from its placement.
 ================
@@ -333,25 +333,25 @@ Makes the drawn matrix of obj from its placement.
 #ifdef NON_MATCHING
 // NON_MATCHING: MATCH-PENDING (R2): exact only with D_8005C0B1 declared a plain s8 (lb); boot.h declares it volatile,
 // as units 1060, 7250 and C650 read it, which loads it with lbu and a sign extension
-void func_8002AEBC( sceneObject_t *obj ) {
-    func_8002A864( obj->mtx, 1.0f, 1.0f, 1.0f );
+void Obj_MakeMatrix( sceneObject_t *obj ) {
+    Mtx_Scale( obj->mtx, 1.0f, 1.0f, 1.0f );
     guMtxF2L( obj->mtx, &obj->joints[0].mtxL[D_8005C0B1] );
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002AEBC);
+INCLUDE_ASM("asm/nonmatchings/53B0", Obj_MakeMatrix);
 #endif
 
 INCLUDE_ASM("asm/nonmatchings/53B0", func_8002AF20);
 
 /*
 ================
-func_8002B380
+Obj_ConvertModel
 
 Converts the model commands at gfx, in place, into the display list they stand for: each command is 8 bytes,
 like the Gfx it becomes.
 ================
 */
-void func_8002B380( Gfx *gfx ) {
+void Obj_ConvertModel( Gfx *gfx ) {
     u8 cmd[0x18];   /* a command, read with more bytes than it has */
     s32 end;
 
@@ -382,12 +382,12 @@ INCLUDE_ASM("asm/nonmatchings/53B0", func_8002B9CC);
 
 /*
 ================
-func_8002BE00
+Obj_Draw
 
 Draws obj, and advances its animation, from the start after its last frame.
 ================
 */
-void func_8002BE00( sceneObject_t *obj ) {
+void Obj_Draw( sceneObject_t *obj ) {
     func_8002B9CC( obj );
     obj->frame += D_800F7BF8;
     if ( obj->frame == obj->anim[0] ) {

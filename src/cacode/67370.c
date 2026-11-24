@@ -530,13 +530,13 @@ void CA_Frame( void ) {
                 sizeof( ca_cameras[i]->cam.unk_18 ) );
     }
 
-    func_80031250();
-    func_80035074();
+    Scene_ClearDrawList();
+    Scene_InitPuffs();
     for ( i = 0; i < 3; i++ ) {
         Cam_Update( &ca_cameras[i]->cam );
         func_8002B9CC( &ca_objects[i]->obj );
     }
-    func_80031E40();
+    Scene_Draw();
 
     switch ( ca_mode ) {
     case CAMODE_ROTATE:
@@ -693,7 +693,7 @@ void CA_Frame( void ) {
     }
 
     gSPLoadUcodeL( D_800F8094++, gspL3DEX2_fifo );
-    func_800316C0( &ca_cameras[ca_selected]->cam );
+    Scene_BeginView( &ca_cameras[ca_selected]->cam );
 
     /* the selected part's axes */
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
@@ -710,7 +710,7 @@ void CA_Frame( void ) {
     gSPLine3D( D_800F8094++, 0, 2, 0 );
     gSPLine3D( D_800F8094++, 0, 3, 0 );
     gDPPipeSync( D_800F8094++ );
-    func_80031BB0();
+    Scene_BeginFrame();
 
     Txt_LoadFont( &D_800F8094 );
     Txt_SetupFont( &D_800F8094, 0 );

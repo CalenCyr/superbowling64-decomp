@@ -36,7 +36,7 @@ typedef struct {
     /* 0x0A */ s16 sizeStep;
 } puff_t;                           /* size 0xC */
 
-extern s16 D_800DF6A8;              /* first entry of the draw list, once func_80031650 has chained the buckets */
+extern s16 D_800DF6A8;              /* first entry of the draw list, once Scene_ChainDrawList has chained the buckets */
 extern s16 D_800E8070;              /* entries in D_8009D1A0 */
 extern s16 D_800E4FE0[DRAW_BUCKETS];    /* first entry of each bucket, or DRAW_NONE */
 extern s16 D_800E4560[DRAW_BUCKETS];    /* last entry of each bucket */
@@ -56,7 +56,7 @@ extern u8 D_800F8090;
 extern u16 D_800DF6BC;
 extern u8 D_801000B0;
 extern u8 D_80099448;
-extern void *D_80099420;            /* drawEntry_t.unk_08 of the entries func_8003128C adds */
+extern void *D_80099420;            /* drawEntry_t.unk_08 of the entries Scene_AddToDrawList adds */
 extern u16 D_80066E14;
 extern u8 D_800693AC;
 extern u8 D_800DF682;               /* set when the fog setting D_800E6588 changes */
@@ -79,25 +79,25 @@ extern u16 D_8009CF68;              /* tmem words of the first texture: where th
 extern u16 D_800DF5D4;              /* the material (file index) last set up; 0xFFFF: none */
 extern void *D_800A30B0;            /* the model matrix last loaded */
 
-void func_80031250( void );
-void func_8003128C( void );
-void func_800316C0( sceneCamera_t *cam );
-void func_80031E40( void );
-void func_80031650( void );
-void func_80031BB0( void );
-void func_80031CD0( void );
-s32 func_80031C9C( u32 value );
+void Scene_ClearDrawList( void );
+void Scene_AddToDrawList( void );
+void Scene_BeginView( sceneCamera_t *cam );
+void Scene_Draw( void );
+void Scene_ChainDrawList( void );
+void Scene_BeginFrame( void );
+void Scene_PickRenderModes( void );
+s32 Scene_TextureSizeLog2( u32 value );
 extern puff_t D_800E4D70[NUM_PUFFS];
 extern u16 D_8005C1E4[2];           /* image files of the two kinds of puff */
 extern Vtx D_8005C1F0[NUM_PUFF_SIZES * 4]; /* squares of four vertices, by size */
 extern Mtx D_800E6770[2][NUM_PUFFS];    /* each puff turned to face camera 0, then camera 1 */
 extern u8 D_8005C970[2][3];         /* rgb of the two kinds of puff */
-extern u8 D_800A3018;               /* index in D_8009CFA0 of the camera func_800316C0 last set up; 2: none */
+extern u8 D_800A3018;               /* index in D_8009CFA0 of the camera Scene_BeginView last set up; 2: none */
 extern u8 D_80066C34;               /* microcode loaded: 0 gspF3DEX2_Rej_fifo, 1 gspF3DEX2_fifo, 2 gspL3DEX2_fifo */
 
-void func_80035074( void );
-void func_80035220( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz );
-void func_80035380( u16 flags, f32 x, f32 y, f32 z );
-void func_80035748( void );
+void Scene_InitPuffs( void );
+void Scene_FaceMatrix( f32 m[4][4], f32 x, f32 y, f32 z, f32 tx, f32 ty, f32 tz );
+void Scene_StartPuff( u16 flags, f32 x, f32 y, f32 z );
+void Scene_DrawPuffs( void );
 
 #endif
