@@ -262,7 +262,8 @@ from a's path over the sum of the radii.
 // first one's length into $f4 before the zero test and divides by $f4, and in the second takes sqrt.s into $f0
 // and copies it to $f2 after the sqrtf fallback joins; this draft uses the sqrt register directly. Everything
 // else matches, including $f20/$f22, which need along reused as the push and t as the clamped distance (with
-// separate push and dist locals they land in caller-saved registers instead).
+// separate push and dist locals they land in caller-saved registers instead). Also tried: the inline's length
+// through func_8011D3D4_gacode (no change).
 f32 func_8011DCB8_gacode( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     f32 along;
     f32 speedSq;

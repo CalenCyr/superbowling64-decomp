@@ -64,7 +64,8 @@ Returns file index, loading it and relocating its offsets by type when it is not
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: register/schedule; in the two func_80030B14 expansions of the part loop, retail forms the address of D_800A30C0[index].rawSize in $a3 (lui/addiu, then addu) where this folds it into the load (lui $at); everything else is exact
+// NON_MATCHING: register/schedule; in the two func_80030B14 expansions of the part loop, retail forms the address of D_800A30C0[index].rawSize in $a3 (lui/addiu, then addu) where this folds it into the load (lui $at); everything else is exact. Tried: the
+// two reference indices read into s16 locals first (worse)
 void *func_80030C04( s16 index, s16 type ) {
     fileType1_t *file1;
     fileType1Part_t *part;

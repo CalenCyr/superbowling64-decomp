@@ -130,6 +130,8 @@ result.
 // NON_MATCHING: register only: before the body loop retail loads pl->lane into a0 (this into v0); the
 // loops' pointer order (spot set and stepped first) was found by A/B, and indexed &pl->lane->bodies[i] or a
 // lane local miss the loop-invariant base; the permuter (target-only scoring, 1.3k iterations from 15) found nothing better.
+// Also tried: the increments' order (i first, body first), the pointers set in the for's init, i as
+// s16/u8/u32, body declared before spot.
 s32 func_80114640_gacode( s32 player ) {
     gaPlayer_t *pl = &D_8012D658_gacode[player];
     s32 port;

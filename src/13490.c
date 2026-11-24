@@ -347,7 +347,8 @@ frame's box, the image of each roll played, and the frame's score.
 #ifdef NON_MATCHING
 // NON_MATCHING: calls, CFG, constants and stack match; registers differ: retail gives rowY s4 (frame s5, arg4 s6)
 // and roll v0 (so its bne delay slots are not likely-branches). Tried: rowY as s32 (worse), y itself as the cursor
-// (same), roll by ternary/if (block 1 needs the if), foul as an s32 local (needed for retail's andi).
+// (same), roll by ternary/if (block 1 needs the if), foul as an s32 local (needed for retail's andi),
+// rowY = y + 2 once before the frame test (worse).
 // Permuter (target-only scoring, 7 min): best 615 from 865 only through noise (a u16 temporary for the third
 // roll, a duplicated if/else), no source clue.
 void func_80038DD4( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s16 y ) {
@@ -808,7 +809,8 @@ name plate and, once it holds a game, its games, average, high and low scores an
 // lhu field and the truncated float as they are); the frame is 8 bytes short (0x98, retail 0xA0): retail spills x
 // to sp+0x2E, reloads it each row and adds 0x2C there (s5 = x + 0x2C, then s5 + 2 ...), while this draft keeps x
 // in s5 and folds the offsets (x + 0x2E); rowY + 2 as topY reproduces retail's early s2. Tried: rowX/rowY/played
-// as s16/s32/u8, the inline small plate func_80038AE8 (no change).
+// as s16/s32/u8, the inline small plate func_80038AE8 (no change), x and rowX as u16 (no change;
+// retail reloads x with lhu), the name plate drawn at x with rowX = x + 0x2C (worse).
 void func_8003A970( u16 count, UnkRecord *records, u8 kind, s16 x, s32 y ) {
     s16 digits[4];
     s32 i;
