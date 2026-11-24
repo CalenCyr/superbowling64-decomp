@@ -13,24 +13,24 @@
 
 /*
 ================
-func_8003F9A0
+Audio_Init
 
 Sets up the synthesizer, the ROM sample cache and the output buffers from config, ticking tickRate times a
 second with effect fxType, and starts the audio thread.
 ================
 */
-void func_8003F9A0( sndConfig_t *config, s32 tickRate, s32 fxType ) {
+void Audio_Init( sndConfig_t *config, s32 tickRate, s32 fxType ) {
     ALSynConfig c;
     u32 bufSamples;
     u32 i;
 
     c.maxVVoices = c.maxPVoices = config->numVoices;
     c.maxUpdates = config->maxUpdates;
-    c.dmaproc = func_8003F3A0( config->numDmaBuffers, config->dmaBufferSize );
+    c.dmaproc = Audio_InitDmaCache( config->numDmaBuffers, config->dmaBufferSize );
     c.fxType = fxType;
     c.outputRate = osAiSetFrequency( config->outputRate );
     c.heap = Snd_GetHeap();
-    func_8003EB50( &D_800E64D0, &c );
+    Synth_Init( &D_800E64D0, &c );
 
     bufSamples = Snd_InitFrameSizes( config->ticksPerFrame, c.outputRate, tickRate, FRAME_QUEUE_PERCENT );
     D_80064598 = Snd_Alloc( config->maxCmds * sizeof( Acmd ) );
@@ -40,19 +40,19 @@ void func_8003F9A0( sndConfig_t *config, s32 tickRate, s32 fxType ) {
     }
 
     D_80064590 = Snd_Alloc( AUDIO_STACK_SIZE );
-    osCreateThread( &D_800643E0, AUDIO_THREAD_ID, func_8003FAD8, NULL, D_80064590 + AUDIO_STACK_SIZE,
+    osCreateThread( &D_800643E0, AUDIO_THREAD_ID, Audio_Thread, NULL, D_80064590 + AUDIO_STACK_SIZE,
                     config->voicePriority );
     osStartThread( &D_800643E0 );
 }
 
 /*
 ================
-func_8003FAD8
+Audio_Thread
 
 The audio thread. NOTE: cmdLen is read before the first frame sets it.
 ================
 */
-void func_8003FAD8( void *arg ) {
+void Audio_Thread( void *arg ) {
     audioTask_t task;
     s32 cmdLen;
     u32 frame;
@@ -73,7 +73,7 @@ void func_8003FAD8( void *arg ) {
             queued = osAiGetLength() / 4;
         } while ( status & AI_STATUS_FIFO_FULL );
 
-        func_8003F514();
+        Audio_UpdateDmaCache();
         if ( D_8005CE50 != NULL && cmdLen != 0 ) {
             osAiSetNextBuffer( D_8005CE50->ptr, D_8005CE50->samples * 2 * sizeof( s16 ) );
         }

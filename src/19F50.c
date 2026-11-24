@@ -10,31 +10,31 @@
 
 /*
 ================
-func_8003EB50
+Synth_Init
 
 Sets up the n_audio globals in g and the synthesizer from c, once.
 ================
 */
-void func_8003EB50( N_ALGlobals *g, ALSynConfig *c ) {
+void Synth_Init( N_ALGlobals *g, ALSynConfig *c ) {
     if ( D_8005D110 == NULL ) {
         D_8005D110 = g;
         if ( D_8005D114 == NULL ) {
-            func_8003F2A0( c );
+            Synth_UseCustomFx( c );
             D_8005D114 = D_800EA098 = &D_8005D110->drvr;
-            func_8003EBB8( c );
+            Synth_Create( c );
         }
     }
 }
 
 /*
 ================
-func_8003EBB8
+Synth_Create
 
 Builds the synthesizer from c on c's heap: the effect and main buses, the effect if c has one, the physical
 voices on the free list, and the free parameter updates.
 ================
 */
-void func_8003EBB8( ALSynConfig *c ) {
+void Synth_Create( ALSynConfig *c ) {
     s32 i;
     N_PVoice *pv;
     N_PVoice *pvoices;
@@ -60,7 +60,7 @@ void func_8003EBB8( ALSynConfig *c ) {
 
     D_8005D114->mainBus = alHeapAlloc( hp, 1, sizeof( N_ALMainBus ) );
     if ( c->fxType != AL_FX_NONE ) {
-        D_8005D114->auxBus->fx = func_8003EE28( 0, c, hp );
+        D_8005D114->auxBus->fx = Synth_CreateFx( 0, c, hp );
         D_8005D114->mainBus->handler = func_80041760;
     } else {
         D_8005D114->mainBus->handler = func_8003FED0;
@@ -95,34 +95,34 @@ void func_8003EBB8( ALSynConfig *c ) {
 
 /*
 ================
-func_8003EE28
+Synth_CreateFx
 
 Creates the effect of bus bus and returns it.
 ================
 */
-ALFx *func_8003EE28( s16 bus, ALSynConfig *c, ALHeap *hp ) {
-    func_8003EE78( &D_8005D114->auxBus->fxSlots[bus], c, hp );
+ALFx *Synth_CreateFx( s16 bus, ALSynConfig *c, ALHeap *hp ) {
+    Synth_AllocFx( &D_8005D114->auxBus->fxSlots[bus], c, hp );
     return D_8005D114->auxBus->fxSlots[bus];
 }
 
 /*
 ================
-func_8003EE78
+Synth_AllocFx
 
 Allocates the effect into *fx, with storage for the largest preset in D_8005CE24, and sets it up with the
 preset in c.
 ================
 */
-void func_8003EE78( ALFx **fx, ALSynConfig *c, ALHeap *hp ) {
+void Synth_AllocFx( ALFx **fx, ALSynConfig *c, ALHeap *hp ) {
     *fx = alHeapAlloc( hp, 1, sizeof( ALFx ) );
     ( *fx )->paramHdl = alFxParamHdl;
-    D_800EA0A8.delays = alHeapAlloc( hp, func_8003F2B8(), sizeof( ALDelay ) );
-    D_800EA0A8.buffer = alHeapAlloc( hp, func_8003F2FC(), sizeof( s16 ) );
+    D_800EA0A8.delays = alHeapAlloc( hp, Synth_MaxFxSections(), sizeof( ALDelay ) );
+    D_800EA0A8.buffer = alHeapAlloc( hp, Synth_MaxFxLength(), sizeof( s16 ) );
     D_800EA0A8.resampler = alHeapAlloc( hp, 1, sizeof( ALResampler ) );
     D_800EA0A8.resamplerState = alHeapAlloc( hp, 1, sizeof( RESAMPLE_STATE ) );
     D_800EA0A8.lowPass = alHeapAlloc( hp, 1, sizeof( ALLowPass ) );
     D_800EA0A8.lowPassState = alHeapAlloc( hp, 1, sizeof( POLEF_STATE ) );
-    func_8003EFC0( c->params );
+    Synth_SetupFx( c->params );
 }
 
 /* modulation rate range, and hundredths of a cent per natural-log unit of pitch ratio (120000 / ln 2) */
@@ -131,13 +131,13 @@ void func_8003EE78( ALFx **fx, ALSynConfig *c, ALHeap *hp ) {
 
 /*
 ================
-func_8003EFC0
+Synth_SetupFx
 
 Sets the effect up from preset param: the section count and buffer length, then for each section its delay
 line, coefficients, and the optional modulation and low-pass filter.
 ================
 */
-void func_8003EFC0( s32 *param ) {
+void Synth_SetupFx( s32 *param ) {
     ALFx *r;
     ALDelay *d;
     u16 i;
@@ -192,24 +192,24 @@ void func_8003EFC0( s32 *param ) {
 
 /*
 ================
-func_8003F2A0
+Synth_UseCustomFx
 
 Makes c's effect the custom one, with the default preset.
 ================
 */
-void func_8003F2A0( ALSynConfig *c ) {
+void Synth_UseCustomFx( ALSynConfig *c ) {
     c->fxType = AL_FX_CUSTOM;
     c->params = D_8005CC98;
 }
 
 /*
 ================
-func_8003F2B8
+Synth_MaxFxSections
 
 Returns the most sections of any preset.
 ================
 */
-s32 func_8003F2B8( void ) {
+s32 Synth_MaxFxSections( void ) {
     s32 i;
     s32 most;
 
@@ -224,12 +224,12 @@ s32 func_8003F2B8( void ) {
 
 /*
 ================
-func_8003F2FC
+Synth_MaxFxLength
 
 Returns the longest buffer of any preset.
 ================
 */
-s32 func_8003F2FC( void ) {
+s32 Synth_MaxFxLength( void ) {
     s32 i;
     s32 longest;
 
@@ -244,16 +244,16 @@ s32 func_8003F2FC( void ) {
 
 /*
 ================
-func_8003F340
+Synth_SetFxPreset
 
 Switches the effect to preset index; returns 0, or 1 if there is no such preset.
 ================
 */
-s32 func_8003F340( s32 index ) {
+s32 Synth_SetFxPreset( s32 index ) {
     if ( index >= D_8005CE20 ) {
         return 1;
     }
-    func_8003EFC0( D_8005CE24[index] );
+    Synth_SetupFx( D_8005CE24[index] );
     alFxParam( D_800EA098->auxBus->fx, AL_FILTER_SET_SOURCE, D_800EA098->auxBus );
     return 0;
 }

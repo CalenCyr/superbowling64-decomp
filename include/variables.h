@@ -58,7 +58,7 @@ extern OSMesgQueue D_800643B0;      /* DMA completions */
 extern OSPiHandle *D_800643C8;      /* the cartridge ROM */
 extern OSSched *D_800643D0;
 extern audioClient_t *D_800643D4;
-extern audioTaskFuncs_t D_8005CE40; /* func_8003F7FC, func_8003F860, func_8003F8C0 */
+extern audioTaskFuncs_t D_8005CE40; /* Audio_ClientInit, Audio_ClientWaitFrame, Audio_ClientRunTask */
 extern audioTaskFuncs_t *D_8005CE4C;    /* the routines the audio thread uses, &D_8005CE40 by default */
 
 /* audio manager: audio thread (1ADA0.c) */

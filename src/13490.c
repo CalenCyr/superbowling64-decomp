@@ -82,7 +82,7 @@ void Maze_Build( u32 width, u32 height, u8 *maze ) {
     u32 row;
     u32 col;
 
-    work = func_80029E28( sizeof( mazeWork_t ) );
+    work = Mem_Alloc( sizeof( mazeWork_t ) );
     set = work->set;
     closed = work->closed;
     weight = work->weight;
@@ -158,7 +158,7 @@ void Maze_Build( u32 width, u32 height, u8 *maze ) {
     }
     maze[height * 2 + 1] = 0;
     maze[( width * 2 - 1 ) * ( height * 2 + 1 ) + height * 2] = 0;
-    func_80029F18( work );
+    Mem_Free( work );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/13490", Maze_Build);

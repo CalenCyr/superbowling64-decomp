@@ -19,9 +19,9 @@ extern u8 *D_80062A24;                  /* end of the heap */
 extern s32 D_80062A28;
 extern s32 D_80066B88;                  /* bytes left after the last block */
 
-void func_80029DF0( HeapBlock *base, u8 *end );
-void *func_80029E28( u32 size );
-void func_80029F18( void *ptr );
-void func_80029F68( void *ptr, u32 size );
+void Mem_Reset( HeapBlock *base, u8 *end );
+void *Mem_Alloc( u32 size );
+void Mem_Free( void *ptr );
+void Mem_Resize( void *ptr, u32 size );
 
 #endif

@@ -167,9 +167,9 @@ void CA_Init( void ) {
     for ( i = 0; i < ca_numSlots; i++ ) {
         ca_frameCache[i].frame = -1;
         ca_frameCache[i].stamp = 0;
-        ca_frameCache[i].tiles = func_80029E28( 40 * sizeof( *ca_frameCache[i].tiles ) );
+        ca_frameCache[i].tiles = Mem_Alloc( 40 * sizeof( *ca_frameCache[i].tiles ) );
     }
-    ca_bmpBuffer = func_80029E28( 54 + 320 * 240 * 2 );
+    ca_bmpBuffer = Mem_Alloc( 54 + 320 * 240 * 2 );
 }
 
 /*
@@ -348,7 +348,7 @@ void CA_Frame( void ) {
     if ( ca_mode == CAMODE_FILE ) {
         size = MOTION_FILE_SIZE;
         if ( D_800E4D62 & A_BUTTON ) {
-            buf = func_80029E28( MOTION_FILE_SIZE );
+            buf = Mem_Alloc( MOTION_FILE_SIZE );
             Host_LoadFile( "motion.dat", buf, MOTION_FILE_SIZE );
             size = 0;
             memcpy( ca_partRotations, buf + size, sizeof( ca_partRotations ) );
@@ -363,10 +363,10 @@ void CA_Frame( void ) {
             size += sizeof( ca_cameraUp );
             memcpy( &D_80115374_cacode[1], buf + size, 2 * sizeof( D_80115374_cacode[0] ) );
             size += 2 * sizeof( D_80115374_cacode[0] );
-            func_80029F18( buf );
+            Mem_Free( buf );
         }
         if ( D_800E4D62 & B_BUTTON ) {
-            buf = func_80029E28( size );
+            buf = Mem_Alloc( size );
             size = 0;
             memcpy( buf + size, ca_partRotations, sizeof( ca_partRotations ) );
             size += sizeof( ca_partRotations );
@@ -381,7 +381,7 @@ void CA_Frame( void ) {
             memcpy( buf + size, &D_80115374_cacode[1], 2 * sizeof( D_80115374_cacode[0] ) );
             size += 2 * sizeof( D_80115374_cacode[0] );
             Host_WriteFile( "motion.dat", buf, size );
-            func_80029F18( buf );
+            Mem_Free( buf );
         }
     }
 

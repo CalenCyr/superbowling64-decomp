@@ -109,7 +109,7 @@ typedef struct {
     /* 0x18 */ seEntry_t entries[1];    /* numEntries entries */
 } seTable_t;
 
-/* Configuration passed to Snd_Init; filled on the stack by its caller. 0x28 to 0x3C are func_8003F9A0's. */
+/* Configuration passed to Snd_Init; filled on the stack by its caller. 0x28 to 0x3C are Audio_Init's. */
 typedef struct {
     /* 0x00 */ s32 unk_00;
     /* 0x04 */ s32 numVoices;       /* NUM_MASTER_CHANNELS more channels are added */
@@ -127,7 +127,7 @@ typedef struct {
     /* 0x34 */ s32 ticksPerFrame;       /* audio frame length, in ticks */
     /* 0x38 */ s32 numDmaBuffers;       /* ROM sample cache buffers */
     /* 0x3C */ s32 dmaBufferSize;       /* bytes per cache buffer */
-    /* 0x40 */ OSPiHandle *unk_40;      /* PI handle of the sample addresses tagged 0xFF000000 (func_8003F65C) */
+    /* 0x40 */ OSPiHandle *unk_40;      /* PI handle of the sample addresses tagged 0xFF000000 (Audio_FindDmaBuffer) */
 } sndConfig_t;
 
 #define AUDIO_FRAME_SAMPLES 184     /* audio frame granularity: frame sizes are whole multiples of 184 samples */

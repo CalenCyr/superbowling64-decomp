@@ -33,7 +33,7 @@ void GridEd_Frame( void ) {
 
     if ( D_8005C984 == NULL ) {
         D_80063AF0 = GRIDEDIT_EXIT;
-        D_8005C984 = func_80029E28( GRIDEDIT_POINTS * sizeof( Vtx ) );
+        D_8005C984 = Mem_Alloc( GRIDEDIT_POINTS * sizeof( Vtx ) );
         memset( D_80063B40, 0, sizeof( D_80063B40 ) );
         guMtxIdent( &D_80063AF8 );
     }

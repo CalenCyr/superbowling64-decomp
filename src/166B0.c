@@ -46,7 +46,7 @@
 typedef enum {
     SNDMSG_PAUSE,                   /* sets CHAN_PAUSED on the channels of arg */
     SNDMSG_RESUME,                  /* clears it */
-    SNDMSG_SETFX                    /* func_8003F340( arg ) */
+    SNDMSG_SETFX                    /* Synth_SetFxPreset( arg ) */
 } sndMsgType_t;
 
 /*
@@ -143,7 +143,7 @@ void Snd_Init( sndConfig_t *config ) {
     }
     snd_tickTime = 1000000 / snd_tickRate;
     Snd_InitHeap( config->heapBase, config->heapSize );
-    func_8003F7F0( config->sched );
+    Audio_SetScheduler( config->sched );
     snd_voices = Snd_Alloc( ( snd_numChannels - NUM_MASTER_CHANNELS ) * sizeof( N_ALVoice ) );
     snd_channels = Snd_Alloc( snd_numChannels * sizeof( sndChannel_t ) );
     snd_voiceChannels = snd_channels + NUM_MASTER_CHANNELS;
@@ -160,7 +160,7 @@ void Snd_Init( sndConfig_t *config ) {
     }
     snd_markerCallback = NULL;
     snd_fxType = FX_DEFAULT;
-    func_8003F9A0( config, snd_tickRate, 2 );
+    Audio_Init( config, snd_tickRate, 2 );
     Snd_SetMasterVolume( SND_SE | SND_BGM, VOLUME_MAX );
     snd_nextId = 1;
     snd_randomSeed = RANDOM_SEED;
@@ -998,7 +998,7 @@ void Snd_HandleMessage( sndMsg_t *msg ) {
         Snd_SetChannelFlags( msg->arg, ~CHAN_PAUSED, 0 );
         break;
     case SNDMSG_SETFX:
-        func_8003F340( msg->arg );
+        Synth_SetFxPreset( msg->arg );
         break;
     }
 }
@@ -2654,7 +2654,7 @@ u8 *Snd_CmdAutoPan( sndChannel_t *chan, u8 *src ) {
 ================
 Snd_CmdFxType
 
-Command 0xAA <setting>: passes setting to func_8003F340 (the effect) while snd_seqFxEnabled is 1.
+Command 0xAA <setting>: passes setting to Synth_SetFxPreset (the effect) while snd_seqFxEnabled is 1.
 ================
 */
 u8 *Snd_CmdFxType( sndChannel_t *chan, u8 *src ) {
@@ -2662,7 +2662,7 @@ u8 *Snd_CmdFxType( sndChannel_t *chan, u8 *src ) {
 
     arg = *src++;
     if ( snd_seqFxEnabled == 1 ) {
-        func_8003F340( arg );
+        Synth_SetFxPreset( arg );
     }
     return src;
 }

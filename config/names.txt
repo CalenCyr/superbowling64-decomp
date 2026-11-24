@@ -27,7 +27,7 @@ Snd_GetDefaultWaveBank	0x8003BFFC	invented: returns snd_defaultWaveBank
 Snd_GetWaveBank	0x8003C008	invented: returns the wave bank of the channels of one id
 Snd_Pause	0x8003C064	invented: posts SNDMSG_PAUSE (sets CHAN_PAUSED on the id's channels)
 Snd_Resume	0x8003C088	invented: posts SNDMSG_RESUME (clears CHAN_PAUSED)
-Snd_SetFxType	0x8003C0B0	invented: remembers the effect setting and posts SNDMSG_SETFX, which reaches func_8003F340 (alFxParam)
+Snd_SetFxType	0x8003C0B0	invented: remembers the effect setting and posts SNDMSG_SETFX, which reaches Synth_SetFxPreset (alFxParam)
 Snd_EnableSeqFx	0x8003C0E0	invented: sets snd_seqFxEnabled, which lets command 0xAA change the effect
 Snd_LoadSeTable	0x8003C13C	invented: relocates an SE table (SEPTR) in place; default if none
 Snd_SetSeTable	0x8003C1C8	invented: sets snd_seTable
@@ -975,3 +975,31 @@ Obj_ConvertModel	0x8002B380	invented: converts model commands in place into the 
 Obj_Draw	0x8002BE00	invented: draws an object and advances its animation
 GridEd_Frame	0x80035DA0	invented: the frame of the floor grid editor
 Scene_InsertEntry	C650.c	invented: the inline helper of Scene_AddToDrawList that adds an entry to a draw-list bucket in key order
+
+# main units: synthesizer, audio thread and sample cache, heap, SRAM handle
+Synth_Init	0x8003EB50	invented: sets up the n_audio globals and the synthesizer once
+Synth_Create	0x8003EBB8	invented: builds the synthesizer on its heap: buses, effect, voices and parameter updates
+Synth_CreateFx	0x8003EE28	invented: creates the effect of a bus
+Synth_AllocFx	0x8003EE78	invented: allocates the effect with storage for the largest preset
+Synth_SetupFx	0x8003EFC0	invented: sets the effect up from a preset
+Synth_UseCustomFx	0x8003F2A0	invented: makes the configuration's effect the custom one, with the default preset
+Synth_MaxFxSections	0x8003F2B8	invented: returns the most sections of any effect preset
+Synth_MaxFxLength	0x8003F2FC	invented: returns the longest buffer of any effect preset
+Synth_SetFxPreset	0x8003F340	invented: switches the effect to a preset
+Audio_InitDmaCache	0x8003F3A0	invented: sets up the ROM sample cache's buffers
+Audio_UpdateDmaCache	0x8003F514	invented: once a frame collects the DMAs and frees unused cache buffers
+Audio_DmaSetup	0x8003F5E4	invented: the synthesizer's DMA set-up routine
+Audio_DmaRead	0x8003F5F0	invented: returns the address of samples, in a cache buffer or in RAM
+Audio_FindDmaBuffer	0x8003F65C	invented: returns the cache buffer holding samples, starting a DMA when none does
+Audio_SetScheduler	0x8003F7F0	invented: sets the scheduler the audio thread's client registers with
+Audio_ClientInit	0x8003F7FC	invented: the scheduler client's init: registers the audio thread's client
+Audio_ClientWaitFrame	0x8003F860	invented: the scheduler client's waitFrame: waits for the next retrace
+Audio_ClientRunTask	0x8003F8C0	invented: the scheduler client's runTask: runs audio on the RSP and waits
+Audio_Init	0x8003F9A0	invented: sets up the synthesizer, sample cache and output buffers and starts the audio thread
+Audio_Thread	0x8003FAD8	invented: the audio thread
+Mem_Reset	0x80029DF0	invented: starts the heap over
+Mem_Alloc	0x80029E28	invented: allocates a cleared block in the first gap that holds it
+Mem_Free	0x80029F18	invented: frees the block that holds a pointer
+Mem_Resize	0x80029F68	invented: sets the size of an allocation
+Sram_GetHandle	0x800293E0	invented: sets up the SRAM PI handle once and returns it
+Ovl_KeepRoutines	0x80028590	invented: never called: refers to the library routines only the overlays call, so the link keeps them

@@ -1,9 +1,9 @@
 /*
  * 1A7A0.c -- the synthesizer's ROM sample cache, and the audio thread's scheduler client.
  *
- * The synthesizer reads samples through func_8003F5F0, which serves them from a cache of fixed-size ROM DMA
+ * The synthesizer reads samples through Audio_DmaRead, which serves them from a cache of fixed-size ROM DMA
  * buffers: a read inside a buffer already loaded uses it, any other starts a DMA into a free buffer. The DMA
- * completes before the frame's RSP task runs; func_8003F514 collects the completions each frame and frees the
+ * completes before the frame's RSP task runs; Audio_UpdateDmaCache collects the completions each frame and frees the
  * buffers that went unused.
  */
 
@@ -20,12 +20,12 @@
 
 /*
 ================
-func_8003F3A0
+Audio_InitDmaCache
 
 Sets the cache up with count buffers of size bytes; returns the synthesizer's DMA set-up routine.
 ================
 */
-ALDMANew func_8003F3A0( s32 count, s32 size ) {
+ALDMANew Audio_InitDmaCache( s32 count, s32 size ) {
     s32 i;
 
     D_800643C8 = osCartRomInit();
@@ -46,18 +46,18 @@ ALDMANew func_8003F3A0( s32 count, s32 size ) {
     D_80064390 = NULL;
     D_80064394 = D_80064398;
     osCreateMesgQueue( &D_800643B0, D_800643A0, count * 2 );
-    return func_8003F5E4;
+    return Audio_DmaSetup;
 }
 
 /*
 ================
-func_8003F514
+Audio_UpdateDmaCache
 
 Once a frame: collects the completions of the frame's DMAs, and frees the buffers no read has used for
 DMA_BUFFER_FRAMES frames.
 ================
 */
-void func_8003F514( void ) {
+void Audio_UpdateDmaCache( void ) {
     OSMesg msg;
     dmaBuffer_t *buf;
     dmaBuffer_t *next;
@@ -91,27 +91,27 @@ void func_8003F514( void ) {
 
 /*
 ================
-func_8003F5E4
+Audio_DmaSetup
 
-The synthesizer's DMA set-up routine: every voice reads through func_8003F5F0.
+The synthesizer's DMA set-up routine: every voice reads through Audio_DmaRead.
 ================
 */
-ALDMAproc func_8003F5E4( void *state ) {
-    return func_8003F5F0;
+ALDMAproc Audio_DmaSetup( void *state ) {
+    return Audio_DmaRead;
 }
 
 /*
 ================
-func_8003F5F0
+Audio_DmaRead
 
 Returns the physical address of the samples at addr, len bytes: in a cache buffer, or where they are if
 they need no DMA.
 ================
 */
-s32 func_8003F5F0( s32 addr, s32 len, void *state ) {
+s32 Audio_DmaRead( s32 addr, s32 len, void *state ) {
     dmaBuffer_t *buf;
 
-    buf = func_8003F65C( addr, len );
+    buf = Audio_FindDmaBuffer( addr, len );
     if ( buf == NULL ) {
         return osVirtualToPhysical( (void *)addr );
     }
@@ -124,13 +124,13 @@ s32 func_8003F5F0( s32 addr, s32 len, void *state ) {
 
 /*
 ================
-func_8003F65C
+Audio_FindDmaBuffer
 
 Returns the cache buffer holding addr to addr + len, starting a DMA into a free buffer if none does; NULL
 if the samples are in RAM. With no buffer free, returns the first buffer in use (the wrong data).
 ================
 */
-dmaBuffer_t *func_8003F65C( u32 addr, s32 len ) {
+dmaBuffer_t *Audio_FindDmaBuffer( u32 addr, s32 len ) {
     OSPiHandle *handle;
     dmaBuffer_t *buf;
     dmaBuffer_t *prev;
@@ -196,23 +196,23 @@ dmaBuffer_t *func_8003F65C( u32 addr, s32 len ) {
 
 /*
 ================
-func_8003F7F0
+Audio_SetScheduler
 
 Sets the scheduler the audio thread's client registers with.
 ================
 */
-void func_8003F7F0( OSSched *sc ) {
+void Audio_SetScheduler( OSSched *sc ) {
     D_800643D0 = sc;
 }
 
 /*
 ================
-func_8003F7FC
+Audio_ClientInit
 
 D_8005CE40's init: registers the audio thread's client with the scheduler.
 ================
 */
-void func_8003F7FC( void ) {
+void Audio_ClientInit( void ) {
     D_800643D4 = Snd_Alloc( sizeof( audioClient_t ) );
     osCreateMesgQueue( &D_800643D4->msgQ, D_800643D4->msgBuf, AUDIO_CLIENT_MESGS );
     osCreateMesgQueue( &D_800643D4->taskDoneQ, D_800643D4->taskDoneMsgBuf, AUDIO_CLIENT_MESGS );
@@ -221,12 +221,12 @@ void func_8003F7FC( void ) {
 
 /*
 ================
-func_8003F860
+Audio_ClientWaitFrame
 
 D_8005CE40's waitFrame: waits for the next retrace message, dropping any other.
 ================
 */
-void func_8003F860( void ) {
+void Audio_ClientWaitFrame( void ) {
     OSScMsg *msg;
 
     do {
@@ -237,12 +237,12 @@ void func_8003F860( void ) {
 
 /*
 ================
-func_8003F8C0
+Audio_ClientRunTask
 
 D_8005CE40's runTask: runs audio on the RSP through the scheduler and waits until it is done.
 ================
 */
-void func_8003F8C0( audioTask_t *audio ) {
+void Audio_ClientRunTask( audioTask_t *audio ) {
     OSScTask task;
     OSScMsg doneMsg;
 

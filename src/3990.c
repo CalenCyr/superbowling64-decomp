@@ -42,12 +42,12 @@ char *strcat();
 
 /*
 ================
-func_80028590
+Ovl_KeepRoutines
 
 Never called: it only refers to each routine once, for the overlays.
 ================
 */
-void func_80028590( void ) {
+void Ovl_KeepRoutines( void ) {
     guRandom();
     sins();
     coss();

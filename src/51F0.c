@@ -11,12 +11,12 @@
 
 /*
 ================
-func_80029DF0
+Mem_Reset
 
 Starts the heap over: at base, ending at end, when base is given; otherwise over the current region.
 ================
 */
-void func_80029DF0( HeapBlock *base, u8 *end ) {
+void Mem_Reset( HeapBlock *base, u8 *end ) {
     if ( base != NULL ) {
         D_80062A20 = base;
         D_80062A24 = end;
@@ -28,13 +28,13 @@ void func_80029DF0( HeapBlock *base, u8 *end ) {
 
 /*
 ================
-func_80029E28
+Mem_Alloc
 
 Allocates size bytes, rounded up to 8, in the first gap between blocks that holds them, or after the last
 block; returns them cleared.
 ================
 */
-void *func_80029E28( u32 size ) {
+void *Mem_Alloc( u32 size ) {
     HeapBlock *block;
     HeapBlock *newBlock;
 
@@ -61,12 +61,12 @@ void *func_80029E28( u32 size ) {
 
 /*
 ================
-func_80029F18
+Mem_Free
 
 Frees the block that holds ptr.
 ================
 */
-void func_80029F18( void *ptr ) {
+void Mem_Free( void *ptr ) {
     HeapBlock *prev;
     HeapBlock *block;
 
@@ -80,12 +80,12 @@ void func_80029F18( void *ptr ) {
 
 /*
 ================
-func_80029F68
+Mem_Resize
 
 Sets the size of the allocation at ptr to size bytes, rounded up to 8.
 ================
 */
-void func_80029F68( void *ptr, u32 size ) {
+void Mem_Resize( void *ptr, u32 size ) {
     HeapBlock *block;
 
     block = D_80062A20;

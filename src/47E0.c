@@ -13,12 +13,12 @@
 
 /*
 ================
-func_800293E0
+Sram_GetHandle
 
 Sets up the SRAM handle and adds it to the PI handle table, once; returns it.
 ================
 */
-OSPiHandle *func_800293E0( void ) {
+OSPiHandle *Sram_GetHandle( void ) {
     if ( D_80069338.baseAddress == PHYS_TO_K1( SRAM_START_ADDR ) ) {
         return &D_80069338;
     }

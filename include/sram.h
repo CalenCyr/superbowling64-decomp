@@ -8,6 +8,6 @@
 
 extern OSPiHandle D_80069338;
 
-OSPiHandle *func_800293E0( void );
+OSPiHandle *Sram_GetHandle( void );
 
 #endif

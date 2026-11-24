@@ -72,7 +72,7 @@ objNode_t *Cam_Create( objParams_t *params ) {
     sceneCamera_t *cam;
     s32 i;
 
-    node = func_80029E28( sizeof( sceneCameraNode_t ) );
+    node = Mem_Alloc( sizeof( sceneCameraNode_t ) );
     cam = &node->cam;
     cam->path = Cache_GetFile( params->unk_08[0], FILE_TYPE3 );
     for ( i = 0; i < 3; i++ ) {

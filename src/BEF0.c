@@ -43,7 +43,7 @@ inline void Cache_LoadFile( s16 index ) {
     } else {
         size = D_800A30C0[index].rawSize;
     }
-    data = func_80029E28( size );
+    data = Mem_Alloc( size );
     D_800F80B0[index].refCount = 1;
     D_800F80B0[index].data = data;
     if ( D_8005C0BC && D_8005C0BD ) {
@@ -136,7 +136,7 @@ void Cache_ReleaseData( void *data ) {
     for ( i = 0; i < FILECACHE_SIZE; i++ ) {
         if ( D_800F80B0[i].data == data ) {
             if ( --D_800F80B0[i].refCount == 0 ) {
-                func_80029F18( D_800F80B0[i].data );
+                Mem_Free( D_800F80B0[i].data );
                 return;
             }
         }
@@ -152,7 +152,7 @@ Drops a reference to file index; frees it with the last one.
 */
 void Cache_Release( s16 index ) {
     if ( --D_800F80B0[index].refCount == 0 ) {
-        func_80029F18( D_800F80B0[index].data );
+        Mem_Free( D_800F80B0[index].data );
     }
 }
 
@@ -168,7 +168,7 @@ void Cache_FreeBelow( s16 count ) {
 
     for ( i = 0; i < count; i++ ) {
         if ( D_800F80B0[i].refCount != 0 ) {
-            func_80029F18( D_800F80B0[i].data );
+            Mem_Free( D_800F80B0[i].data );
             D_800F80B0[i].refCount = 0;
         }
     }

@@ -35,32 +35,32 @@ s32 Snd_StartSe( seTable_t *table, s32 index, s32 volume, s32 pan, s32 priority 
 void Snd_SetChannelFlags( s32 id, s32 mask, s32 bits );
 
 /* synthesizer and effect setup (19F50.c) */
-void func_8003EB50( N_ALGlobals *g, ALSynConfig *c );
-void func_8003EBB8( ALSynConfig *c );
-ALFx *func_8003EE28( s16 bus, ALSynConfig *c, ALHeap *hp );
-void func_8003EE78( ALFx **fx, ALSynConfig *c, ALHeap *hp );
-void func_8003EFC0( s32 *param );
-void func_8003F2A0( ALSynConfig *c );
-s32 func_8003F2B8( void );
-s32 func_8003F2FC( void );
-s32 func_8003F340( s32 index );
+void Synth_Init( N_ALGlobals *g, ALSynConfig *c );
+void Synth_Create( ALSynConfig *c );
+ALFx *Synth_CreateFx( s16 bus, ALSynConfig *c, ALHeap *hp );
+void Synth_AllocFx( ALFx **fx, ALSynConfig *c, ALHeap *hp );
+void Synth_SetupFx( s32 *param );
+void Synth_UseCustomFx( ALSynConfig *c );
+s32 Synth_MaxFxSections( void );
+s32 Synth_MaxFxLength( void );
+s32 Synth_SetFxPreset( s32 index );
 
 
 /* ROM sample cache and scheduler client (1A7A0.c) */
-ALDMANew func_8003F3A0( s32 count, s32 size );
-void func_8003F514( void );
-ALDMAproc func_8003F5E4( void *state );
-s32 func_8003F5F0( s32 addr, s32 len, void *state );
-dmaBuffer_t *func_8003F65C( u32 addr, s32 len );
-void func_8003F7F0( OSSched *sc );
-void func_8003F7FC( void );
-void func_8003F860( void );
-void func_8003F8C0( audioTask_t *audio );
+ALDMANew Audio_InitDmaCache( s32 count, s32 size );
+void Audio_UpdateDmaCache( void );
+ALDMAproc Audio_DmaSetup( void *state );
+s32 Audio_DmaRead( s32 addr, s32 len, void *state );
+dmaBuffer_t *Audio_FindDmaBuffer( u32 addr, s32 len );
+void Audio_SetScheduler( OSSched *sc );
+void Audio_ClientInit( void );
+void Audio_ClientWaitFrame( void );
+void Audio_ClientRunTask( audioTask_t *audio );
 
 
 /* audio thread (1ADA0.c) */
-void func_8003F9A0( sndConfig_t *config, s32 tickRate, s32 fxType );
-void func_8003FAD8( void *arg );
+void Audio_Init( sndConfig_t *config, s32 tickRate, s32 fxType );
+void Audio_Thread( void *arg );
 void Snd_InitHeap( u8 *base, s32 len );
 void *Snd_Alloc( s32 size );
 s32 Snd_HeapUsed( void );

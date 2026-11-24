@@ -95,7 +95,7 @@ void Obj_Free( objNode_t *obj ) {
         } while ( prev->next != obj );
         prev->next = obj->next;
     }
-    func_80029F18( obj );
+    Mem_Free( obj );
 }
 
 /*

@@ -37,7 +37,7 @@ void main( void ) {
     D_80066C38[0] = (u16 *)0x8038F800;
     D_80066C38[1] = (u16 *)0x803B5000;
     D_80066C38[2] = (u16 *)0x803DA800;
-    func_80029DF0( (HeapBlock *)HEAP_START, (u8 *)HEAP_END );
+    Mem_Reset( (HeapBlock *)HEAP_START, (u8 *)HEAP_END );
     D_801000B8 = &D_8009D098;
     D_8009D098.unk_00 = 0;
     D_8009D098.unk_04 = 3;
@@ -447,7 +447,7 @@ void Game_Thread( void *arg ) {
                 continue;
             }
             D_8005B188 = 0;
-            func_80029DF0( NULL, NULL );
+            Mem_Reset( NULL, NULL );
             Cache_Clear();
             Obj_ClearList();
             switch ( D_8005C0B6 ) {
