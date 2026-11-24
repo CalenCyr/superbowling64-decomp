@@ -542,3 +542,43 @@ rs_nextScene	0x801142A8	invented: copied back to the scene (D_8005C0B6) on leavi
 rs_state	0x801142AC	invented: current state, run each frame by RS_Frame
 rs_returnState	0x801142B0	invented: state to return to
 rs_sheetPage	0x80114251	invented: RS_ScoreSheet's page, 0 the score sheet, 1 the pin diagrams (left and right choose)
+
+# pvcode, mgcode and opcode overlays
+PV_Init	0x80112350	invented: the overlay's init, run once after main loads it (overlay.h); creates the scene's objects
+PV_Frame	0x801123D8	invented: the overlay's per-frame function (overlay.h)
+PV_NullCreate	0x80112640	invented: empty function in the create slot of each of the scene's classes (objClass_t)
+PV_NullHandler	0x80112648	invented: empty function in the second slot of each of the scene's classes (objClass_t.unk_04)
+pv_stepDone	0x80112650	invented: 0 while func_80037410 is still stepping
+pv_sound	0x80112654	invented: the sound the D-pad picks
+pv_soundHandle	0x80112658	invented: handle of the playing sound
+pv_classes	0x80112660	invented: the classes of the overlay's scene (objClass_t array)
+pv_sceneObjects	0x801126C0	invented: the overlay's scene objects, unless read from the host's "sce.dat"
+MG_Init	0x80112350	invented: the overlay's init, run once after main loads it (overlay.h); builds a maze
+MG_Frame	0x801123AC	invented: the overlay's per-frame function (overlay.h)
+MG_NullCreate	0x80112538	invented: empty function in the create slot of the scene's classes (objClass_t)
+MG_NullHandler	0x80112540	invented: empty function in the second slot of the scene's classes (objClass_t.unk_04)
+mg_classes	0x80112550	invented: the classes of the overlay's scene (objClass_t array)
+mg_sceneObjects	0x801125B0	invented: the overlay's scene objects
+mg_maze	0x80112730	invented: the maze grid, walls and cells, built by func_80038214 and drawn by func_80038090
+OP_Init	0x80112350	invented: the overlay's init, run once after main loads it (overlay.h)
+OP_Frame	0x801123A8	invented: the overlay's per-frame function (overlay.h); runs the opening's modes
+OP_Null	0x80112950	invented: does nothing; nothing calls it
+OP_CheckSettings	0x80112958	invented: one frame of the boot-time Controller Pak / saved-settings check
+op_checkStep	0x801140B0	invented: step of OP_CheckSettings
+op_charEntries	0x801140C0	invented: entry of each character code 0x10-0x94 (func_80113130_opcode)
+op_pakImages	0x801141CC	invented: images of the Controller Pak screen
+op_cursorImages	0x8011429C	invented: cursor images, a frame each
+op_pakStep	0x801142A2	invented: step of the Controller Pak screen (func_80113168_opcode)
+op_promptChoice	0x801142A3	invented: choice of the Controller Pak screen's first prompt
+op_cursorLine	0x801142A4	invented: line of the cursor
+op_pakState	0x801142A5	invented: state of the Controller Pak screen
+op_modeFrames	0x80114350	invented: frames in the current mode
+op_contMsg	0x80114360	invented: OP_CheckSettings's message to and from the controller thread
+op_pakMsg	0x80114370	invented: the Controller Pak screen's message to and from the controller thread
+op_numNotes	0x80114374	invented: notes listed
+op_firstNote	0x80114376	invented: first note shown
+op_noteIndex	0x80114378	invented: per note listed: its index on the pak
+op_notePages	0x80114398	invented: per note listed: its pages
+op_noteNames	0x801143B8	invented: per note listed: its name
+op_freeNotes	0x801145F8	invented: free notes on the pak
+op_freePages	0x801145FC	invented: free pages on the pak

@@ -6,30 +6,30 @@
 
 /*
 ================
-func_80112350_mgcode
+MG_Init
 
 Entry of the overlay: creates the scene's objects, then builds a new maze and its image.
 ================
 */
-void func_80112350_mgcode( void ) {
-    func_8002A1EC( D_80112550_mgcode, D_801125B0_mgcode );
-    func_80038214( MG_MAZE_SIZE, MG_MAZE_SIZE, D_80112730_mgcode );
-    func_80038090( 0x90F, MG_MAZE_SIZE, MG_MAZE_SIZE, D_80112730_mgcode );
+void MG_Init( void ) {
+    func_8002A1EC( mg_classes, mg_sceneObjects );
+    func_80038214( MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
+    func_80038090( 0x90F, MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
 }
 
 /*
 ================
-func_801123AC_mgcode
+MG_Frame
 
 Frame of the overlay: A builds a new maze; runs the scene's objects, then prints the frame's times and rate.
 ================
 */
-void func_801123AC_mgcode( void ) {
+void MG_Frame( void ) {
     u8 text[0x50];
 
     if ( D_800E4D62 & A_BUTTON ) {
-        func_80038214( MG_MAZE_SIZE, MG_MAZE_SIZE, D_80112730_mgcode );
-        func_80038090( 0x90F, MG_MAZE_SIZE, MG_MAZE_SIZE, D_80112730_mgcode );
+        func_80038214( MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
+        func_80038090( 0x90F, MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
     }
     func_8002A2F0();
     if ( D_800A2FDC ) {
@@ -51,20 +51,20 @@ void func_801123AC_mgcode( void ) {
 
 /*
 ================
-func_80112538_mgcode
+MG_NullCreate
 
 An empty handler of the scene's classes.
 ================
 */
-void func_80112538_mgcode( void ) {
+void MG_NullCreate( void ) {
 }
 
 /*
 ================
-func_80112540_mgcode
+MG_NullHandler
 
 An empty handler of the scene's classes.
 ================
 */
-void func_80112540_mgcode( void ) {
+void MG_NullHandler( void ) {
 }

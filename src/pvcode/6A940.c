@@ -6,20 +6,20 @@
 
 /*
 ================
-func_80112640_pvcode
+PV_NullCreate
 
 An empty handler of the scene's classes.
 ================
 */
-void func_80112640_pvcode( void ) {
+void PV_NullCreate( void ) {
 }
 
 /*
 ================
-func_80112648_pvcode
+PV_NullHandler
 
 An empty handler of the scene's classes.
 ================
 */
-void func_80112648_pvcode( void ) {
+void PV_NullHandler( void ) {
 }

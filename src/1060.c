@@ -494,7 +494,7 @@ void func_80026B44( void *arg ) {
                 osInvalDCache( pvcode_VRAM, i );
                 func_80028744( "PVCODE  SYS", pvcode_VRAM, i, 0 );
                 func_80026B10();
-                func_80112350_pvcode();
+                PV_Init();
                 break;
             case SCENE_MGCODE:
                 i = func_8002889C( "MGCODE  SYS" );
@@ -503,7 +503,7 @@ void func_80026B44( void *arg ) {
                 osInvalDCache( mgcode_VRAM, i );
                 func_80028744( "MGCODE  SYS", mgcode_VRAM, i, 0 );
                 func_80026B10();
-                func_80112350_mgcode();
+                MG_Init();
                 break;
             case SCENE_OPCODE:
                 i = func_8002889C( "OPCODE  SYS" );
@@ -512,7 +512,7 @@ void func_80026B44( void *arg ) {
                 osInvalDCache( opcode_VRAM, i );
                 func_80028744( "OPCODE  SYS", opcode_VRAM, i, 0 );
                 func_80026B10();
-                func_80112350_opcode();
+                OP_Init();
                 break;
             }
             D_8005B0E0 = D_8005C0B6;
@@ -533,13 +533,13 @@ void func_80026B44( void *arg ) {
             func_80113280_cacode();
             break;
         case SCENE_PVCODE:
-            func_801123D8_pvcode();
+            PV_Frame();
             break;
         case SCENE_MGCODE:
-            func_801123AC_mgcode();
+            MG_Frame();
             break;
         case SCENE_OPCODE:
-            func_801123A8_opcode();
+            OP_Frame();
             break;
         }
 

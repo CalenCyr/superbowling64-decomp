@@ -16,11 +16,11 @@
 #include "save.h"
 #include "gridedit.h"
 
-extern s32 D_80112650_pvcode;       /* 0: func_80037410 is still stepping */
-extern u8 D_80112654_pvcode;        /* sound the D-pad picks */
-extern u64 D_80112658_pvcode;       /* handle of the playing sound */
+extern s32 pv_stepDone;    /* 0: func_80037410 is still stepping */
+extern u8 pv_sound;        /* sound the D-pad picks */
+extern u64 pv_soundHandle; /* handle of the playing sound */
 
-extern objClass_t D_80112660_pvcode[];  /* the classes of the overlay's scene */
-extern objParams_t D_801126C0_pvcode[]; /* the overlay's scene objects, unless read from the host */
+extern objClass_t pv_classes[];       /* the classes of the overlay's scene */
+extern objParams_t pv_sceneObjects[]; /* the overlay's scene objects, unless read from the host */
 
 #endif

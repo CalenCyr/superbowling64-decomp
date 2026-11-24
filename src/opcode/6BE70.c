@@ -6,13 +6,13 @@
 
 /*
 ================
-func_80112350_opcode
+OP_Init
 
 Entry of the overlay: in mode 0xA, Start held selects mode 0xFE, and no controller in port 1 mode 0xFD.
 ================
 */
-void func_80112350_opcode( void ) {
-    D_80114350_opcode = 0;
+void OP_Init( void ) {
+    op_modeFrames = 0;
     if ( D_8005C0E8 == 10 ) {
         if ( D_800994BC & START_BUTTON ) {
             D_8005C0E8 = 0xFE;
@@ -25,27 +25,27 @@ void func_80112350_opcode( void ) {
 
 /*
 ================
-func_801123A8_opcode
+OP_Frame
 
-The opening's modes: two logo screens, the title with its demo games, then func_80112958_opcode's and
-func_80113168_opcode's screens. Each logo and the title count frames in D_80114350_opcode, then ask to leave.
+The opening's modes: two logo screens, the title with its demo games, then OP_CheckSettings's and
+func_80113168_opcode's screens. Each logo and the title count frames in op_modeFrames, then ask to leave.
 ================
 */
 // RULE-EXCEPTION: s32 with no return value: retail keeps v0 live at the exit
-s32 func_801123A8_opcode( void ) {
+s32 OP_Frame( void ) {
     s32 i;
 
     switch ( D_8005C0E8 ) {
     case 10:
         func_8003068C( 0xE0, 0xE0, 0xE0 );
         func_8002DF3C( 0xB58, 0, 0 );
-        if ( ++D_80114350_opcode >= 150 ) {
+        if ( ++op_modeFrames >= 150 ) {
             D_8005C0BF = 1;
             if ( D_8005C0C0 == 0xFF ) {
                 D_8005C0C0 = 0x107;
                 D_8005C0BF = 2;
                 D_8005C0E8 = 0;
-                D_80114350_opcode = 0;
+                op_modeFrames = 0;
                 func_80037870( 0x43, 0 );
             }
         }
@@ -53,24 +53,24 @@ s32 func_801123A8_opcode( void ) {
     case 0:
         func_8003068C( 0xE0, 0xE0, 0xE0 );
         func_8002DF3C( 0x925, 0x3C, 0x58 );
-        if ( ++D_80114350_opcode >= 70 ) {
+        if ( ++op_modeFrames >= 70 ) {
             D_8005C0BF = 1;
             if ( D_8005C0C0 == 0xFF ) {
                 D_8005C0C0 = 0x107;
                 D_8005C0BF = 2;
                 D_8005C0E8 = 1;
-                D_80114350_opcode = 0;
+                op_modeFrames = 0;
             }
         }
         break;
     case 1:
-        if ( D_80114350_opcode == 6 ) {
+        if ( op_modeFrames == 6 ) {
             func_800379C8( 0 );
         }
         func_8003068C( 0xE0, 0xE0, 0xE0 );
         func_8002DF3C( 0xADD, 0, 0 );
         func_8002E4B0( 0x890, 0x44, 0xA0, D_8009CFB0, 1.0f, 1.0f );
-        if ( ++D_80114350_opcode >= 450 ) {
+        if ( ++op_modeFrames >= 450 ) {
             D_8005C0BF = 1;
             if ( D_8005C0C0 == 0xFF ) {
                 D_8005C0C0 = 0x107;
@@ -118,13 +118,13 @@ s32 func_801123A8_opcode( void ) {
         if ( ( D_800E44E0[0] & START_BUTTON ) && !D_8005C0BF ) {
             func_80037870( 1, 0 );
             D_8005C0E8 = 2;
-            D_80114350_opcode = 0;
+            op_modeFrames = 0;
         }
         break;
     case 2:
         func_8003068C( 0xE0, 0xE0, 0xE0 );
         func_8002DF3C( 0xADD, 0, 0 );
-        if ( !func_80112958_opcode() ) {
+        if ( !OP_CheckSettings() ) {
             D_8005C0BF = 1;
             D_8005C0E8 = 3;
         }

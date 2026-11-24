@@ -43,11 +43,11 @@ void func_80112350_gscode( void );
 s32 func_80112414_gscode( void );
 void func_801128F4_cacode( void );
 void func_80113280_cacode( void );
-void func_80112350_pvcode( void );
-void func_801123D8_pvcode( void );
-void func_80112350_mgcode( void );
-void func_801123AC_mgcode( void );
-void func_80112350_opcode( void );
-s32 func_801123A8_opcode( void );
+void PV_Init( void );
+void PV_Frame( void );
+void MG_Init( void );
+void MG_Frame( void );
+void OP_Init( void );
+s32 OP_Frame( void );
 
 #endif

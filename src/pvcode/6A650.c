@@ -6,13 +6,13 @@
 
 /*
 ================
-func_80112350_pvcode
+PV_Init
 
 Entry of the overlay: Start switches to files from the development host; from the host, the scene's
 objects come from its "sce.dat", else from the overlay's own records.
 ================
 */
-void func_80112350_pvcode( void ) {
+void PV_Init( void ) {
     if ( D_800994BC & START_BUTTON ) {
         D_8005C0BC = 1;
         func_80029524();
@@ -20,21 +20,21 @@ void func_80112350_pvcode( void ) {
     if ( D_8005C0BC ) {
         func_8002A7EC( "sce.dat" );
         D_8005C0BD = 1;
-        func_8002A1EC( D_80112660_pvcode, (objParams_t *)D_800F30E0 );
+        func_8002A1EC( pv_classes, (objParams_t *)D_800F30E0 );
     } else {
-        func_8002A1EC( D_80112660_pvcode, D_801126C0_pvcode );
+        func_8002A1EC( pv_classes, pv_sceneObjects );
     }
 }
 
 /*
 ================
-func_801123D8_pvcode
+PV_Frame
 
 Frame of the overlay: runs the scene's objects; R starts func_80035DA0, Start restarts func_80037410;
 right plays the sound up and down pick and left stops it; then prints the frame's times and rate.
 ================
 */
-void func_801123D8_pvcode( void ) {
+void PV_Frame( void ) {
     u8 text[0x50];
 
     func_8002A2F0();
@@ -45,22 +45,22 @@ void func_801123D8_pvcode( void ) {
         D_8005C980 = 1;
     }
     if ( D_800E4D62 & START_BUTTON ) {
-        D_80112650_pvcode = 0;
+        pv_stepDone = 0;
     }
-    if ( !D_80112650_pvcode && !func_80037410() ) {
-        D_80112650_pvcode = 1;
+    if ( !pv_stepDone && !func_80037410() ) {
+        pv_stepDone = 1;
     }
     if ( D_800E4D62 & R_JPAD ) {
-        D_80112658_pvcode = func_80037870( D_80112654_pvcode, 0 );
+        pv_soundHandle = func_80037870( pv_sound, 0 );
     }
     if ( D_800E4D62 & L_JPAD ) {
-        func_800379A8( D_80112658_pvcode );
+        func_800379A8( pv_soundHandle );
     }
     if ( D_800E4D62 & U_JPAD ) {
-        D_80112654_pvcode++;
+        pv_sound++;
     }
     if ( D_800E4D62 & D_JPAD ) {
-        D_80112654_pvcode--;
+        pv_sound--;
     }
     if ( D_800A2FDC ) {
         func_80028A0C( &D_800F8094 );

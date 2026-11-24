@@ -8,45 +8,45 @@
 
 /*
 ================
-func_80112950_opcode
+OP_Null
 
 Does nothing.
 ================
 */
-void func_80112950_opcode( void ) {
+void OP_Null( void ) {
 }
 
 /*
 ================
-func_80112958_opcode
+OP_CheckSettings
 
 Runs one frame of the settings check at boot, over a dimmed screen: asks the controller thread for the
 Controller Pak and the saved settings, and prompts to load, create or repair them. Returns FALSE when it is
 over: saving is then on (D_8005C0E0) with the settings loaded, or off.
 ================
 */
-s32 func_80112958_opcode( void ) {
+s32 OP_CheckSettings( void ) {
     s32 *checksum;
 
     func_8002FDE4( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
-    switch ( D_801140B0_opcode ) {
+    switch ( op_checkStep ) {
     case 0:
-        D_80114360_opcode = 9;
-        osSendMesg( &D_800E6690, &D_80114360_opcode, OS_MESG_NOBLOCK );
-        D_801140B0_opcode = 1;
+        op_contMsg = 9;
+        osSendMesg( &D_800E6690, &op_contMsg, OS_MESG_NOBLOCK );
+        op_checkStep = 1;
         break;
     case 1:
-        if ( osRecvMesg( &D_800F8098, (OSMesg *)&D_80114360_opcode, OS_MESG_NOBLOCK ) != -1 ) {
+        if ( osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
             if ( D_80066B8C == 0 ) {
-                D_801140B0_opcode = 2;
+                op_checkStep = 2;
             } else {
-                D_801140B0_opcode = 5;
+                op_checkStep = 5;
             }
         }
         break;
     case 2:
         if ( func_80036E60( 0x94C, PROMPT_TIMED ) ) {
-            D_801140B0_opcode = 10;
+            op_checkStep = 10;
             D_80066C44 = 0;
         }
         break;
@@ -54,25 +54,25 @@ s32 func_80112958_opcode( void ) {
     case 4:
         break;
     case 5:
-        D_80114360_opcode = 6;
+        op_contMsg = 6;
         D_800E4FC8 = 0;
-        osSendMesg( &D_800E6690, &D_80114360_opcode, OS_MESG_NOBLOCK );
-        D_801140B0_opcode = 6;
+        osSendMesg( &D_800E6690, &op_contMsg, OS_MESG_NOBLOCK );
+        op_checkStep = 6;
         break;
     case 6:
-        if ( osRecvMesg( &D_800F8098, (OSMesg *)&D_80114360_opcode, OS_MESG_NOBLOCK ) != -1 ) {
+        if ( osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
             if ( D_80066B8C == 0 ) {
-                D_80114360_opcode = 2;
-                osSendMesg( &D_800E6690, &D_80114360_opcode, OS_MESG_NOBLOCK );
-                D_801140B0_opcode = 20;
+                op_contMsg = 2;
+                osSendMesg( &D_800E6690, &op_contMsg, OS_MESG_NOBLOCK );
+                op_checkStep = 20;
             } else if ( D_80066B8C == 10 ) {
-                D_801140B0_opcode = 25;
+                op_checkStep = 25;
             } else if ( D_80066B8C == 2 ) {
-                D_801140B0_opcode = 5;
+                op_checkStep = 5;
             } else if ( D_80066B8C == 1 ) {
-                D_801140B0_opcode = 30;
+                op_checkStep = 30;
             } else {
-                D_801140B0_opcode = 28;
+                op_checkStep = 28;
             }
         }
         break;
@@ -94,7 +94,7 @@ s32 func_80112958_opcode( void ) {
             }
             if ( D_80066C44 == 1 ) {
                 D_80066C44 = 0;
-                D_801140B0_opcode = 15;
+                op_checkStep = 15;
             }
         }
         break;
@@ -105,7 +105,7 @@ s32 func_80112958_opcode( void ) {
         break;
     case 15:
         if ( func_80036E60( 0x95A, PROMPT_ANY_BUTTON ) ) {
-            D_801140B0_opcode = 0;
+            op_checkStep = 0;
         }
         break;
     case 16:
@@ -114,14 +114,14 @@ s32 func_80112958_opcode( void ) {
     case 19:
         break;
     case 20:
-        if ( osRecvMesg( &D_800F8098, (OSMesg *)&D_80114360_opcode, OS_MESG_NOBLOCK ) != -1 ) {
+        if ( osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
             if ( D_80066B8C == 0 ) {
-                D_80114360_opcode = 5;
+                op_contMsg = 5;
                 D_800E6578 = 0;
-                osSendMesg( &D_800E6690, &D_80114360_opcode, OS_MESG_NOBLOCK );
-                D_801140B0_opcode = 35;
+                osSendMesg( &D_800E6690, &op_contMsg, OS_MESG_NOBLOCK );
+                op_checkStep = 35;
             } else {
-                D_801140B0_opcode = 21;
+                op_checkStep = 21;
             }
         }
         break;
@@ -136,48 +136,48 @@ s32 func_80112958_opcode( void ) {
         D_800E4D68[1] = 0x44;
         if ( func_80036E60( 0x94F, PROMPT_CHOICE2_H ) ) {
             if ( D_80066C44 == 0 ) {
-                D_80114360_opcode = 0;
-                osSendMesg( &D_800E6690, &D_80114360_opcode, OS_MESG_NOBLOCK );
-                D_801140B0_opcode = 22;
+                op_contMsg = 0;
+                osSendMesg( &D_800E6690, &op_contMsg, OS_MESG_NOBLOCK );
+                op_checkStep = 22;
             }
             if ( D_80066C44 == 1 ) {
                 D_80066C44 = 0;
-                D_801140B0_opcode = 10;
+                op_checkStep = 10;
             }
         }
         break;
     case 22:
         if ( func_80036E60( 0x955, PROMPT_CLOSE ) ) {
-            osRecvMesg( &D_800F8098, (OSMesg *)&D_80114360_opcode, OS_MESG_BLOCK );
+            osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             if ( D_80066B8C == 0 ) {
                 /* the checksum word through a raw view, as func_80037410 does: a member store sinks past the stores below */
                 checksum = (s32 *)D_801000B8;
                 *checksum = func_800373DC();
-                D_80114360_opcode = 5;
+                op_contMsg = 5;
                 D_800E6578 = 1;
-                osSendMesg( &D_800E6690, &D_80114360_opcode, OS_MESG_NOBLOCK );
-                D_801140B0_opcode = 24;
+                osSendMesg( &D_800E6690, &op_contMsg, OS_MESG_NOBLOCK );
+                op_checkStep = 24;
             } else if ( D_80066B8C == 7 || D_80066B8C == 8 ) {
-                D_801140B0_opcode = 23;
+                op_checkStep = 23;
             } else {
-                D_801140B0_opcode = 27;
+                op_checkStep = 27;
             }
         }
         break;
     case 23:
         if ( func_80036E60( 0x94E, PROMPT_TIMED_LONG ) ) {
-            D_801140B0_opcode = 10;
+            op_checkStep = 10;
         }
         break;
     case 24:
         if ( func_80036E60( 0x95C, PROMPT_CLOSE ) ) {
-            osRecvMesg( &D_800F8098, (OSMesg *)&D_80114360_opcode, OS_MESG_BLOCK );
+            osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             if ( D_80066B8C == 0 ) {
                 D_8005C0E0 = 1;
                 memcpy( D_800693E8, D_80066BA4, sizeof( D_800693E8 ) );
                 return FALSE;
             }
-            D_801140B0_opcode = 27;
+            op_checkStep = 27;
         }
         break;
     case 25:
@@ -198,11 +198,11 @@ s32 func_80112958_opcode( void ) {
         if ( func_80036E60( 0x954, PROMPT_CHOICE3 ) ) {
             if ( D_80066C44 == 0 ) {
                 D_80066C44 = 0;
-                D_801140B0_opcode = 29;
+                op_checkStep = 29;
             }
             if ( D_80066C44 == 1 ) {
                 D_80066C44 = 0;
-                D_801140B0_opcode = 15;
+                op_checkStep = 15;
             }
             if ( D_80066C44 == 2 ) {
                 D_8005C0E0 = 0;
@@ -221,26 +221,26 @@ s32 func_80112958_opcode( void ) {
         D_800E4D68[1] = 0x32;
         if ( func_80036E60( 0xA5B, PROMPT_CHOICE2_H ) ) {
             if ( D_80066C44 == 0 ) {
-                D_801140B0_opcode = 26;
+                op_checkStep = 26;
                 D_80066C44 = 0;
-                D_80114360_opcode = 7;
-                osSendMesg( &D_800E6690, &D_80114360_opcode, OS_MESG_NOBLOCK );
+                op_contMsg = 7;
+                osSendMesg( &D_800E6690, &op_contMsg, OS_MESG_NOBLOCK );
             }
             if ( D_80066C44 == 1 ) {
                 D_80066C44 = 0;
-                D_801140B0_opcode = 15;
+                op_checkStep = 15;
             }
         }
         break;
     case 26:
         if ( func_80036E60( 0x953, PROMPT_CLOSE ) ) {
-            osRecvMesg( &D_800F8098, (OSMesg *)&D_80114360_opcode, OS_MESG_BLOCK );
-            D_801140B0_opcode = 0;
+            osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
+            op_checkStep = 0;
         }
         break;
     case 27:
         if ( func_80036E60( 0x94D, PROMPT_TIMED ) ) {
-            D_801140B0_opcode = 10;
+            op_checkStep = 10;
         }
         break;
     case 28:
@@ -261,11 +261,11 @@ s32 func_80112958_opcode( void ) {
         if ( func_80036E60( 0xB59, PROMPT_CHOICE3 ) ) {
             if ( D_80066C44 == 0 ) {
                 D_80066C44 = 0;
-                D_801140B0_opcode = 29;
+                op_checkStep = 29;
             }
             if ( D_80066C44 == 1 ) {
                 D_80066C44 = 0;
-                D_801140B0_opcode = 15;
+                op_checkStep = 15;
             }
             if ( D_80066C44 == 2 ) {
                 D_8005C0E0 = 0;
@@ -275,7 +275,7 @@ s32 func_80112958_opcode( void ) {
         break;
     case 30:
         if ( func_80036E60( 0x956, PROMPT_TIMED ) ) {
-            D_801140B0_opcode = 10;
+            op_checkStep = 10;
         }
         break;
     case 31:
@@ -285,18 +285,18 @@ s32 func_80112958_opcode( void ) {
         break;
     case 35:
         if ( func_80036E60( 0x951, PROMPT_CLOSE ) ) {
-            osRecvMesg( &D_800F8098, (OSMesg *)&D_80114360_opcode, OS_MESG_BLOCK );
+            osRecvMesg( &D_800F8098, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             if ( D_80066B8C == 0 && D_801000B8->unk_00 == func_800373DC() ) {
                 D_8005C0E0 = 1;
                 memcpy( D_800693E8, D_80066BA4, sizeof( D_800693E8 ) );
                 return FALSE;
             }
-            D_801140B0_opcode = 36;
+            op_checkStep = 36;
         }
         break;
     case 36:
         if ( func_80036E60( 0x952, PROMPT_TIMED ) ) {
-            D_801140B0_opcode = 10;
+            op_checkStep = 10;
         }
         break;
     }

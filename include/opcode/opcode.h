@@ -15,10 +15,10 @@
 #include "sprite.h"
 
 /* main (owner unit not identified yet) */
-extern u8 D_8005C0E8;               /* the next mode: 0xA on entry; the overlay sets 0xFE or 0xFD */
+extern u8 D_8005C0E8; /* the next mode: 0xA on entry; the overlay sets 0xFE or 0xFD */
 
-extern u8 D_801140B0_opcode;         /* step of func_80112958_opcode */
-extern u16 D_801140C0_opcode[];     /* character code 0x10-0x94 -> entry (func_80113130_opcode) */
+extern u8 op_checkStep;      /* step of OP_CheckSettings */
+extern u16 op_charEntries[]; /* character code 0x10-0x94 -> entry (func_80113130_opcode) */
 
 /* An image of the Controller Pak screen; a list of them ends with an id of -1. Name invented. */
 typedef struct {
@@ -38,25 +38,25 @@ typedef struct {
 #define PAK_MAX_NOTES   16
 #define PAK_NOTES_SHOWN 5
 
-extern opImage_t D_801141CC_opcode[];   /* images of the Controller Pak screen */
-extern u16 D_8011429C_opcode[3];        /* cursor images, a frame each */
-extern u8 D_801142A2_opcode;            /* step of func_80113168_opcode */
-extern u8 D_801142A3_opcode;            /* choice of the first prompt */
-extern u8 D_801142A4_opcode;            /* line of the cursor */
-extern u8 D_801142A5_opcode;            /* state of the screen */
+extern opImage_t op_pakImages[]; /* images of the Controller Pak screen */
+extern u16 op_cursorImages[3];   /* cursor images, a frame each */
+extern u8 op_pakStep;            /* step of func_80113168_opcode */
+extern u8 op_promptChoice;       /* choice of the first prompt */
+extern u8 op_cursorLine;         /* line of the cursor */
+extern u8 op_pakState;           /* state of the screen */
 
-extern u16 D_80114350_opcode;     /* frames in the current mode */
-extern s32 D_80114360_opcode;     /* message to and from the controller thread */
-extern s32 D_80114370_opcode;     /* func_80113168_opcode's message to and from the controller thread */
-extern u16 D_80114374_opcode;      /* notes listed */
-extern u16 D_80114376_opcode;      /* first note shown */
-extern u16 D_80114378_opcode[PAK_MAX_NOTES];    /* per note listed: its index on the pak */
-extern u16 D_80114398_opcode[PAK_MAX_NOTES];    /* per note listed: its pages */
-extern opNoteName_t D_801143B8_opcode[PAK_MAX_NOTES];
-extern s32 D_801145F8_opcode;     /* free notes */
-extern s32 D_801145FC_opcode;     /* free pages */
+extern u16 op_modeFrames;               /* frames in the current mode */
+extern s32 op_contMsg;                  /* message to and from the controller thread */
+extern s32 op_pakMsg;                   /* func_80113168_opcode's message to and from the controller thread */
+extern u16 op_numNotes;                 /* notes listed */
+extern u16 op_firstNote;                /* first note shown */
+extern u16 op_noteIndex[PAK_MAX_NOTES]; /* per note listed: its index on the pak */
+extern u16 op_notePages[PAK_MAX_NOTES]; /* per note listed: its pages */
+extern opNoteName_t op_noteNames[PAK_MAX_NOTES];
+extern s32 op_freeNotes;                /* free notes */
+extern s32 op_freePages;                /* free pages */
 
-s32 func_80112958_opcode( void );
+s32 OP_CheckSettings( void );
 s32 func_80113168_opcode( void );
 
 #endif

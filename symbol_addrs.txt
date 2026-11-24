@@ -647,15 +647,15 @@ D_80120655_gscode = 0x80120655; // segment:gscode size:0x1
 
 // opcode: unit 6C470's byte at the start of .data (its 15 bytes of padding end that unit's .data), then unit
 // 6CC50's character-code table (u16, codes 0x10-0x94; the asm reaches it as D_801140A0 = table - 0x20)
-D_801140B0_opcode = 0x801140B0; // segment:opcode size:0x1
-D_801140C0_opcode = 0x801140C0; // segment:opcode size:0x10A
+op_checkStep = 0x801140B0; // segment:opcode size:0x1
+op_charEntries = 0x801140C0; // segment:opcode size:0x10A
 // opcode: unit 6CC50's images of the Controller Pak screen (8-byte entries, ended by id -1), and its list of the pak's notes
-D_801141CC_opcode = 0x801141CC; // segment:opcode size:0xD0
-D_801143B8_opcode = 0x801143B8; // segment:opcode size:0x240
-D_801142A2_opcode = 0x801142A2; // segment:opcode size:0x1
-D_801142A3_opcode = 0x801142A3; // segment:opcode size:0x1
-D_80114374_opcode = 0x80114374; // segment:opcode size:0x2
-D_80114376_opcode = 0x80114376; // segment:opcode size:0x2
+op_pakImages = 0x801141CC; // segment:opcode size:0xD0
+op_noteNames = 0x801143B8; // segment:opcode size:0x240
+op_pakStep = 0x801142A2; // segment:opcode size:0x1
+op_promptChoice = 0x801142A3; // segment:opcode size:0x1
+op_numNotes = 0x80114374; // segment:opcode size:0x2
+op_firstNote = 0x80114376; // segment:opcode size:0x2
 
 // gscode: the options screen of unit 605D0 (menu, credits script, settings images, state, credits sprites and their script position)
 D_8011FC90_gscode = 0x8011FC90; // segment:gscode size:0xC8
@@ -726,3 +726,33 @@ rs_nextScene = 0x801142A8; // segment:rscode
 rs_state = 0x801142AC; // segment:rscode
 rs_returnState = 0x801142B0; // segment:rscode
 rs_sheetPage = 0x80114251; // segment:rscode
+PV_Init = 0x80112350; // type:func segment:pvcode
+PV_Frame = 0x801123D8; // type:func segment:pvcode
+PV_NullCreate = 0x80112640; // type:func segment:pvcode
+PV_NullHandler = 0x80112648; // type:func segment:pvcode
+pv_stepDone = 0x80112650; // segment:pvcode
+pv_sound = 0x80112654; // segment:pvcode
+pv_soundHandle = 0x80112658; // segment:pvcode
+pv_classes = 0x80112660; // segment:pvcode
+pv_sceneObjects = 0x801126C0; // segment:pvcode
+MG_Init = 0x80112350; // type:func segment:mgcode
+MG_Frame = 0x801123AC; // type:func segment:mgcode
+MG_NullCreate = 0x80112538; // type:func segment:mgcode
+MG_NullHandler = 0x80112540; // type:func segment:mgcode
+mg_classes = 0x80112550; // segment:mgcode
+mg_sceneObjects = 0x801125B0; // segment:mgcode
+mg_maze = 0x80112730; // segment:mgcode
+OP_Init = 0x80112350; // type:func segment:opcode
+OP_Frame = 0x801123A8; // type:func segment:opcode
+OP_Null = 0x80112950; // type:func segment:opcode
+OP_CheckSettings = 0x80112958; // type:func segment:opcode
+op_cursorImages = 0x8011429C; // segment:opcode
+op_cursorLine = 0x801142A4; // segment:opcode
+op_pakState = 0x801142A5; // segment:opcode
+op_modeFrames = 0x80114350; // segment:opcode
+op_contMsg = 0x80114360; // segment:opcode
+op_pakMsg = 0x80114370; // segment:opcode
+op_noteIndex = 0x80114378; // segment:opcode
+op_notePages = 0x80114398; // segment:opcode
+op_freeNotes = 0x801145F8; // segment:opcode
+op_freePages = 0x801145FC; // segment:opcode
