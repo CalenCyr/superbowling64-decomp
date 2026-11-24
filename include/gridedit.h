@@ -1,7 +1,7 @@
 #ifndef GRIDEDIT_H
 #define GRIDEDIT_H
 
-/* gridedit.h -- unit 111A0: the debug editor of the floor grid (D_80100100[0], saved to the host as "ground.bin") */
+/* gridedit.h -- unit 111A0: the debug editor of the floor grid (game_floorGrids[0], saved to the host as "ground.bin") */
 
 #include "common.h"
 #include "libultra.h"

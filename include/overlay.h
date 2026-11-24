@@ -8,7 +8,7 @@ linker's bounds of each, and the entry points main calls in them
 
 #include "common.h"
 
-/* values of D_8005C0B6: the scene, and the overlay file that runs it */
+/* values of game_scene: the scene, and the overlay file that runs it */
 #define SCENE_GACODE        0           /* "GACODE  SYS": the game */
 #define SCENE_CACODE        1           /* "CACODE  SYS" */
 #define SCENE_PVCODE        2           /* "PVCODE  SYS" */

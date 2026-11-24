@@ -20,7 +20,7 @@ s32 GS_Options( void ) {
     s16 y;
     u8 alpha;
 
-    if ( gs_optionsState == 1 && ( D_800E4D62 & B_BUTTON ) && gs_optionsPage == 0 && D_8005C0BF == 0 ) {
+    if ( gs_optionsState == 1 && ( D_800E4D62 & B_BUTTON ) && gs_optionsPage == 0 && game_leaveState == 0 ) {
         Sound_PlaySe( 2, 0 );
         gs_optionsState = 3;
     }
@@ -32,7 +32,7 @@ s32 GS_Options( void ) {
         Menu_SetItem( gs_optionsMenu, i, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     }
 
-    if ( gs_optionsState == 1 && D_8005C0BF == 0 ) {
+    if ( gs_optionsState == 1 && game_leaveState == 0 ) {
         Menu_SetItem( gs_optionsMenu, 10, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
         Menu_SetItem( gs_optionsMenu, 11, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
         Menu_SetItem( gs_optionsMenu, 1, D_80120404_gscode[D_8009D098.difficulty], MENU_NONE, MENU_NONE, 0xFF );
@@ -146,7 +146,7 @@ s32 GS_Options( void ) {
         case OPTION_CREDITS:
             if ( D_800E4D62 & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
                 Sound_PlaySe( 1, 0 );
-                D_8005C0BF = 1;
+                game_leaveState = 1;
             }
             break;
         case OPTION_EXIT:
@@ -160,9 +160,9 @@ s32 GS_Options( void ) {
         }
     }
 
-    if ( D_8005C0BF == 1 && D_8005C0C0 == 0xFF ) {
-        D_8005C0BF = 2;
-        D_8005C0C0 = 0x107;
+    if ( game_leaveState == 1 && game_fade == 0xFF ) {
+        game_leaveState = 2;
+        game_fade = 0x107;
         if ( gs_optionsPage == 0 ) {
             Sound_PlayBgm( 0x13 );
             gs_optionsPage = 2;
@@ -231,7 +231,7 @@ s32 GS_Options( void ) {
                     break;
                 case CREDIT_END:
                     gs_creditsWait = 0xFFFF;
-                    D_8005C0BF = 1;
+                    game_leaveState = 1;
                     break;
                 }
                 gs_creditsPos++;

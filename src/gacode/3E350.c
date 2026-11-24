@@ -147,7 +147,7 @@ s32 GA_RunPlayer( s32 player ) {
     input = 0;
     stick[1] = 0;
     stick[0] = 0;
-    if ( D_8005C0BF == 0 ) {
+    if ( game_leaveState == 0 ) {
         if ( port >= 0 ) {
             stick[1] = D_800A2FD8[port];
             stick[0] = D_800692D0[port];
@@ -446,7 +446,7 @@ GA_ScoreStandard
 
 A game mode. The player scores for their team when the sub-mode's argument is 1 (players 2 and 3 for player
 1). After a func_80116398_gacode turn (unless D_80068A50 is 2), records GA_IsSplit's result in the
-frame's flags and counts a split in D_8009CF80. When the throw ends the frame, counts the run D_800A304C on
+frame's flags and counts a split in game_splits. When the throw ends the frame, counts the run game_strikeRun on
 after a func_80116398_gacode turn (returns 2), else ends it (returns 1); otherwise plays the throw's sound
 and ends the run, returning 3 when the lane's callout was 3 or the run had reached 3, else 0.
 ================
@@ -458,46 +458,46 @@ s32 GA_ScoreStandard( s32 player ) {
     s32 frame;
     s32 result;
 
-    if ( ( D_8005C160 >> 6 ) == 1 ) {
+    if ( ( game_mode >> 6 ) == 1 ) {
         scorer = player >= 2;
     } else {
         scorer = player;
     }
-    frame = D_8009D19C[scorer];
+    frame = game_frame[scorer];
     if ( pl->lane->turnFunc == func_80116398_gacode && D_80068A50[scorer] != 2 ) {
         split = GA_IsSplit( pl->lane );
         if ( split != 0 ) {
-            D_8009CF80[scorer]++;
+            game_splits[scorer]++;
         }
-        D_80099458[scorer][frame] = split | ( D_80099458[scorer][frame] & 0xF0 );
+        game_frameFlags[scorer][frame] = split | ( game_frameFlags[scorer][frame] & 0xF0 );
         if ( frame == 9 && split != 0 ) {
-            D_80099458[scorer][frame] |= 0x10 << D_80068A50[scorer];
+            game_frameFlags[scorer][frame] |= 0x10 << D_80068A50[scorer];
         }
     }
     func_80121FD0_gacode( scorer, pl->lane->pinsHit );
     if ( pl->lane->pinsDown == 10 ) {
         if ( pl->lane->turnFunc == func_80116398_gacode ) {
-            GA_PlayLaneSound( pl->laneIndex, ga_runSounds[D_800A304C[scorer]] );
-            pl->lane->callout = D_800A304C[scorer] + 6;
-            D_800A304C[scorer]++;
-            D_800DF6B4[scorer]++;
-            if ( D_800A304C[scorer] >= 3 ) {
+            GA_PlayLaneSound( pl->laneIndex, ga_runSounds[game_strikeRun[scorer]] );
+            pl->lane->callout = game_strikeRun[scorer] + 6;
+            game_strikeRun[scorer]++;
+            game_strikes[scorer]++;
+            if ( game_strikeRun[scorer] >= 3 ) {
                 GA_PlayLaneSound( pl->laneIndex, 0x36 );
             } else {
                 GA_PlayLaneSound( pl->laneIndex, 0x37 );
             }
             result = 2;
         } else {
-            if ( frame != 9 ? D_80099458[scorer][frame] != 0
-                            : ( D_80099458[scorer][9] & 1 )
-                              && ( ( D_80099458[scorer][9] & 0x10 ) || ( D_80099458[scorer][9] & 0x20 ) ) ) {
+            if ( frame != 9 ? game_frameFlags[scorer][frame] != 0
+                            : ( game_frameFlags[scorer][9] & 1 )
+                              && ( ( game_frameFlags[scorer][9] & 0x10 ) || ( game_frameFlags[scorer][9] & 0x20 ) ) ) {
                 GA_PlayLaneSound( pl->laneIndex, 0x7E );
             } else {
                 GA_PlayLaneSound( pl->laneIndex, 0x5A );
             }
-            pl->lane->callout = D_80099458[scorer][frame] ? 5 : 1;
-            D_800A304C[scorer] = 0;
-            D_8009D088[scorer]++;
+            pl->lane->callout = game_frameFlags[scorer][frame] ? 5 : 1;
+            game_strikeRun[scorer] = 0;
+            game_spares[scorer]++;
             GA_PlayLaneSound( pl->laneIndex, 0x38 );
             result = 1;
         }
@@ -510,7 +510,7 @@ s32 GA_ScoreStandard( s32 player ) {
             }
             GA_PlayLaneSound( pl->laneIndex, 0x62 );
             result = 3;
-        } else if ( D_800A304C[scorer] >= 3 ) {
+        } else if ( game_strikeRun[scorer] >= 3 ) {
             if ( split != 0 ) {
                 GA_PlayLaneSound( pl->laneIndex, 0x7C );
                 pl->lane->callout = 2;
@@ -526,7 +526,7 @@ s32 GA_ScoreStandard( s32 player ) {
             pl->lane->callout = 2;
         }
         pl->lane->frameOver = pl->lane->turnFunc == func_80116414_gacode;
-        D_800A304C[scorer] = 0;
+        game_strikeRun[scorer] = 0;
     }
     return result;
 }
@@ -557,8 +557,8 @@ s32 GA_ScorePar( s32 player ) {
     s32 result;
 
     if ( ( pl->lane->frameOver = GA_CountParThrow( player, pl->lane->pinsDown == 10 ) ) != 0 ) {
-        GA_PlayLaneSound( pl->laneIndex, D_8012C7E6_gacode[D_800DF630[player][D_8009D19C[player] - 1]] );
-        pl->lane->callout = D_800DF630[player][D_8009D19C[player] - 1] + 0x1A;
+        GA_PlayLaneSound( pl->laneIndex, D_8012C7E6_gacode[game_frameScores[player][game_frame[player] - 1]] );
+        pl->lane->callout = game_frameScores[player][game_frame[player] - 1] + 0x1A;
         result = GA_ScoreResult( pl->lane->callout - 0x18 );
     } else {
         pl->lane->callout = 0;
@@ -579,7 +579,7 @@ s32 GA_ScoreSetupGame( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( ( pl->lane->frameOver = GA_EndFrame( player, pl->lane->pinsDown == 10 ) ) != 0 ) {
-        if ( D_8009D19C[player] == 10 ) {
+        if ( game_frame[player] == 10 ) {
             GA_PlayLaneSound( pl->laneIndex, 0x77 );
             pl->lane->callout = 0x14;
             GA_PlayLaneSound( pl->laneIndex, 0x36 );
@@ -620,8 +620,8 @@ s32 GA_ScorePinEditor( s32 player ) {
 GA_ScoreBattle
 
 A game mode. When the throw ends the frame (pinsDown is 10): after a func_80116398_gacode turn plays the sound
-for the player's run D_800A304C, adds to the other player's ga_laneAim unk_04 and counts the run on;
-otherwise scores by D_80068A50 and D_80099458 and ends the run. Else scores the throw by GA_IsSplit.
+for the player's run game_strikeRun, adds to the other player's ga_laneAim unk_04 and counts the run on;
+otherwise scores by D_80068A50 and game_frameFlags and ends the run. Else scores the throw by GA_IsSplit.
 Returns 0.
 ================
 */
@@ -633,32 +633,32 @@ s32 GA_ScoreBattle( s32 player ) {
 
     if ( ( pl->lane->frameOver = pl->lane->pinsDown == 10 ) ) {
         if ( pl->lane->turnFunc == func_80116398_gacode ) {
-            run = D_800A304C[player];
+            run = game_strikeRun[player];
             if ( run > 10 ) {
                 run = 10;
             }
             GA_PlayLaneSound( pl->laneIndex, ga_runSounds[run] );
             pl->lane->callout = run < 10 ? run + 6 : 0;
-            ga_laneAim[other].unk_04 += 25 + D_800A304C[player] * 10;
-            if ( D_800A304C[player] < 255 ) {
-                D_800A304C[player]++;
+            ga_laneAim[other].unk_04 += 25 + game_strikeRun[player] * 10;
+            if ( game_strikeRun[player] < 255 ) {
+                game_strikeRun[player]++;
             }
         } else {
             if ( D_80068A50[player] == 1 ) {
-                GA_PlayLaneSound( pl->laneIndex, D_80099458[player][0] ? 0x7E : 0x5A );
-                pl->lane->callout = D_80099458[player][0] ? 5 : 1;
-                ga_laneAim[other].unk_04 += D_80099458[player][0] ? 30 : 0;
+                GA_PlayLaneSound( pl->laneIndex, game_frameFlags[player][0] ? 0x7E : 0x5A );
+                pl->lane->callout = game_frameFlags[player][0] ? 5 : 1;
+                ga_laneAim[other].unk_04 += game_frameFlags[player][0] ? 30 : 0;
                 ga_laneAim[player].unk_04 -= 15;
             } else {
-                ga_laneAim[other].unk_04 += D_80099458[player][0] ? 10 : 0;
+                ga_laneAim[other].unk_04 += game_frameFlags[player][0] ? 10 : 0;
             }
             ga_laneAim[player].unk_04 -= 10;
-            D_800A304C[player] = 0;
+            game_strikeRun[player] = 0;
         }
         D_80068A50[player] = 0;
     } else {
         result = GA_IsSplit( pl->lane );
-        D_80099458[player][0] = result;
+        game_frameFlags[player][0] = result;
         if ( pl->lane->callout == 3 ) {
             GA_PlayLaneSound( pl->laneIndex, 0x62 );
             ga_laneAim[player].unk_04 += 30;
@@ -690,11 +690,11 @@ s32 GA_EndTurn( s32 player ) {
     s32 result;
     s32 frame;
 
-    if ( ( D_8005C160 >> 6 ) == 1 ) {
+    if ( ( game_mode >> 6 ) == 1 ) {
         player = player < 2 ? 0 : 1;
     }
-    frame = D_8009D19C[player];
-    if ( D_800994BE[player] != 0 ) {
+    frame = game_frame[player];
+    if ( game_playerDone[player] != 0 ) {
         lane->turnFunc = GA_StartTurn;
         D_80066C00.unk_20[player]++;
         lane->frameOver = 0;
@@ -706,13 +706,13 @@ s32 GA_EndTurn( s32 player ) {
         D_80066C00.unk_20[player]++;
         if ( frame != 9 ) {
             result = 1;
-        } else if ( D_80066E18[player][9] != -1 && D_800A3020[player][9] != -1 ) {
+        } else if ( game_firstRolls[player][9] != -1 && game_secondRolls[player][9] != -1 ) {
             result = 1;
         }
     } else {
         lane->turnFunc = func_801163A0_gacode;
     }
-    if ( result == 0 && ( D_8005C160 >> 6 ) == 1 ) {
+    if ( result == 0 && ( game_mode >> 6 ) == 1 ) {
         result = -1;
     }
     lane->frameOver = 0;
@@ -858,24 +858,24 @@ s32 GA_EndDuelGame( void ) {
     s32 winner;
     s32 i;
 
-    if ( D_800EA090[0] > D_800EA090[1] ) {
+    if ( game_totals[0] > game_totals[1] ) {
         winner = 0;
     } else {
-        winner = D_800EA090[0] < D_800EA090[1] ? 1 : -1;
+        winner = game_totals[0] < game_totals[1] ? 1 : -1;
     }
     for ( i = 0; i < 2; i++ ) {
         gaPlayer_t *pl;
         s16 *files;
         s32 rival;
 
-        D_8009D030[i][D_800693DC[0] + D_800693DC[1]] = D_800EA090[i];
+        game_duelScores[i][game_gamesWon[0] + game_gamesWon[1]] = game_totals[i];
         pl = &ga_players[i];
         files = pl->character.data->unk_00;
         pl->lane->inputFunc = GA_InputGameOver;
         pl->lane->panelFunc = func_8011B490_gacode;
         pl->lane->cameraFunc = func_8011BCA8_gacode;
         rival = i != 1;
-        pl->lane->reaction = D_800EA090[i] > D_800EA090[rival] ? 3 : 4;
+        pl->lane->reaction = game_totals[i] > game_totals[rival] ? 3 : 4;
         pl->obj->frame = 0;
         pl->obj->anim = Cache_GetFile( files[pl->lane->reaction + 2], FILE_TYPE2 );
     }
@@ -939,9 +939,9 @@ void GA_StartTurn( s32 player ) {
     if ( ga_gameMode == GA_ScorePinEditor ) {
         mask = ga_editorPins;
     } else if ( ga_gameMode == GA_ScoreSetupGame ) {
-        mask = D_801237F0_gacode[D_800DF59C.unk_04[D_8009D19C[player]]].pins;
+        mask = D_801237F0_gacode[D_800DF59C.unk_04[game_frame[player]]].pins;
     } else if ( ga_gameMode == GA_ScorePar ) {
-        mask = D_80123950_gacode[D_800DF59C.unk_04[D_8009D19C[player]]].pins;
+        mask = D_80123950_gacode[D_800DF59C.unk_04[game_frame[player]]].pins;
     } else {
         mask = 0x3FF;
     }
@@ -1353,9 +1353,9 @@ s32 func_80117124_gacode( s32 player, gaPlayer_t *pl ) {
         if ( pl->lane->markerSpots[2].pos[2] >= 730.0f ) {
             pl->lane->markerSpots[2].pos[2] = 730.0f;
             for ( i = 0; i != 2; i++ ) {
-                D_800994BE[i] = 1;
+                game_playerDone[i] = 1;
                 if ( i != player ) {
-                    D_800EA090[i] = 1;
+                    game_totals[i] = 1;
                 } else {
                     GA_PlayLaneSound( player, 0x6A );
                     if ( pl->port >= 0 ) {
@@ -1785,12 +1785,12 @@ s32 GA_InputCountPins( s32 player, s32 input, s16 stickX, s16 stickY ) {
         return 0;
     }
     pl->lane->timer = 0;
-    if ( ( D_8005C160 & 0xF ) != 2 && ( ( D_8005C160 >> 4 ) & 3 ) != 2 ) {
+    if ( ( game_mode & 0xF ) != 2 && ( ( game_mode >> 4 ) & 3 ) != 2 ) {
         ga_stage->unk_10 += 0.05;
     }
     pl->lane->bodies[0].standState = 0;
     pl->lane->bodyObjs[0]->viewMask = 0;
-    if ( ( D_8005C160 >> 6 ) == 1 ) {
+    if ( ( game_mode >> 6 ) == 1 ) {
         scorer = player >= 2;
     } else {
         scorer = player;
@@ -2019,29 +2019,29 @@ void GA_DrawScorePanel( s32 player, u8 lane ) {
     if ( lane == 0 ) {
         x = 0x18;
     }
-    Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x19 );
+    Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, x, 0x19 );
     x += 0x38;
     y = 0x10;
-    if ( ( D_8005C160 >> 6 ) == 1 ) {
+    if ( ( game_mode >> 6 ) == 1 ) {
         scorer = player >= 2;
     } else {
         scorer = player;
     }
-    if ( D_8009D19C[scorer] < 2 ) {
+    if ( game_frame[scorer] < 2 ) {
         first = 0;
     } else {
-        first = D_8009D19C[scorer] - 2;
+        first = game_frame[scorer] - 2;
     }
     Score_DrawFrameHeaders( 3, first, x, y );
     for ( i = 0; i < 3; i++ ) {
-        Score_DrawFrame( scorer, first + i, D_8009D19C[scorer], D_80068A50[scorer], D_800994BE[scorer], x, y + 9 );
+        Score_DrawFrame( scorer, first + i, game_frame[scorer], D_80068A50[scorer], game_playerDone[scorer], x, y + 9 );
         x += 0x14;
     }
     x = 0xAC;
     if ( lane == 0 ) {
         x = 0x78;
     }
-    Menu_DrawBox( player, D_800693DC[player], 0, x, y + 0x20 );
+    Menu_DrawBox( player, game_gamesWon[player], 0, x, y + 0x20 );
 }
 
 /*
@@ -2179,18 +2179,18 @@ void GA_DrawParPanel( s32 player, u8 lane ) {
     s32 i;
 
     x = lane != 0 ? 0xA8 : 0x18;
-    Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x18 );
+    Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, x, 0x18 );
     x += 0x38;
     Draw_Image( 0xA3B, x, 0x10 );
     Score_DrawNumber( ga_parFrame + 1, x + 0x24, 0x15 );
-    Score_DrawNumber( D_80099458[0][ga_parFrame], x + 0x24, 0x21 );
+    Score_DrawNumber( game_frameFlags[0][ga_parFrame], x + 0x24, 0x21 );
     y = 0x30;
     if ( lane != 0 ) {
         x -= 0x38;
     }
-    Draw_Image( D_80099458[0][ga_parFrame] == 1 ? 0xA1B : 0xA1A, x, y );
+    Draw_Image( game_frameFlags[0][ga_parFrame] == 1 ? 0xA1B : 0xA1A, x, y );
     x += 2;
-    for ( i = 0; i < D_80066E18[player][D_8009D19C[player]]; i++ ) {
+    for ( i = 0; i < game_firstRolls[player][game_frame[player]]; i++ ) {
         Draw_Image( 0xA19, x, y );
         x += 0xA;
     }
@@ -2215,14 +2215,14 @@ void GA_DrawParFramePanel( s32 player, u8 lane ) {
     y = 0x30;
     Draw_Image( 0xA1D, x, y );
     Draw_Image( ga_numberImages[ga_parFrame + 1], x + 0x48, 0x36 );
-    Draw_Image( ga_numberImages[D_80099458[0][ga_parFrame]], x + 0x48, 0x46 );
+    Draw_Image( ga_numberImages[game_frameFlags[0][ga_parFrame]], x + 0x48, 0x46 );
     GA_UnpackPinMask( pins, D_80123950_gacode[D_800DF59C.unk_04[ga_parFrame]].pins );
     for ( i = 0; i < NUM_PINS; i++ ) {
         if ( pins[i] == 1 ) {
             Draw_Image( 0xA2B, x + ga_parChartPins[i][0], y + ga_parChartPins[i][1] );
         }
     }
-    Draw_Image( D_8012C848_gacode[D_8005C163], x + 0xC, y + 0x80 );
+    Draw_Image( D_8012C848_gacode[game_stage], x + 0xC, y + 0x80 );
 }
 
 /*
@@ -2240,10 +2240,10 @@ void func_80119C50_gacode( s32 player, u8 lane ) {
     s32 i;
 
     x = lane != 0 ? 0xA8 : 0x18;
-    Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x18 );
+    Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, x, 0x18 );
     x += 0x38;
     Draw_Image( 0xAB7, x, 0x10 );
-    Score_GetDigits( digits, D_8009D19C[player] + 1, 0, 0 );
+    Score_GetDigits( digits, game_frame[player] + 1, 0, 0 );
     Menu_DrawImage( digits[2], x + 0x30, 0x11 );
     Menu_DrawImage( digits[3], x + 0x38, 0x11 );
     x += 0xF;
@@ -2272,7 +2272,7 @@ void func_80119DD8_gacode( s32 player, u8 lane ) {
 
     x = lane != 0 ? 0xBC : 0x24;
     y = 0x40;
-    setup = D_800DF59C.unk_04[D_8009D19C[player]];
+    setup = D_800DF59C.unk_04[game_frame[player]];
     Draw_Image( 0xABA, x, y );
     GA_UnpackPinMask( pins, D_801237F0_gacode[setup].pins );
     for ( i = 0; i < NUM_PINS; i++ ) {
@@ -2280,7 +2280,7 @@ void func_80119DD8_gacode( s32 player, u8 lane ) {
             Draw_Image( 0xAB9, x + ga_pinPanelPins[i][0], y + ga_pinPanelPins[i][1] );
         }
     }
-    Score_DrawNumber( D_8009D19C[player] + 1, x + 0x3E, y + 6 );
+    Score_DrawNumber( game_frame[player] + 1, x + 0x3E, y + 6 );
     Draw_Image( D_801237F0_gacode[setup].unk_04, x + 7, y + 0x11 );
     for ( i = 0; i < D_801237F0_gacode[setup].unk_00; i++ ) {
         Draw_Image( 0xAB8, x + 0x26 + i * 0xA, y + 0x68 );
@@ -2309,7 +2309,7 @@ void func_80119F8C_gacode( s32 player, u8 lane ) {
     x = lane ? 0xA8 : 0x18;
     Draw_Image( 0x9E0, x + 0x38, 0x10 );
     Draw_Image( 0x9DF, x + 0x58, 0x10 );
-    Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, 0x19 );
+    Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, x, 0x19 );
     x += 0x38;
     y = 0x19;
     Draw_Image( 0x86D, x, y );
@@ -2352,7 +2352,7 @@ void GA_DrawDistancePanels( void ) {
         pl = &ga_players[i];
         Draw_Image( 0x9DF, x + 0x38, y );
         y += 9;
-        Menu_DrawNamePlate( i, D_8005C0E4[i] >> 7, D_80068218[i].chars, x, y );
+        Menu_DrawNamePlate( i, game_players[i] >> 7, game_playerNames[i].chars, x, y );
         x += 0x38;
         Draw_Image( 0x86B, x, y );
         Score_GetDigits( digits, FABS( 730.0f - pl->lane->markerSpots[2].pos[2] ), 1, 0 );
@@ -2410,7 +2410,7 @@ void GA_PinEditor( gaPlayer_t *pl ) {
     if ( !ga_editorOnPins ) {
         Draw_ImageScaled( 0x886, x + 8, y + 0x7A, (u8)ga_blinkLevel + 0x30, 1.0f, 1.0f );
     }
-    if ( D_8005C0BF ) {
+    if ( game_leaveState ) {
         return;
     }
     if ( D_800E6760[0] & U_JPAD ) {
@@ -2739,9 +2739,9 @@ except in mode GA_ScoreBattle, draws the lane's panel.
 void func_8011B490_gacode( s32 lane ) {
     s32 rival = lane == 0;
 
-    if ( D_800EA090[lane] > D_800EA090[rival] ) {
+    if ( game_totals[lane] > game_totals[rival] ) {
         Draw_ImageScaled( 0x851, lane == 0 ? 0x14 : 0xA4, 0x94, (u8)ga_blinkLevel + 0x7F, 1.0f, 1.0f );
-    } else if ( D_800EA090[lane] == D_800EA090[rival] ) {
+    } else if ( game_totals[lane] == game_totals[rival] ) {
         Draw_ImageScaled( 0xA6B, lane != 0 ? 0xB4 : 0x24, 0x94, (u8)ga_blinkLevel + 0x7F, 1.0f, 1.0f );
     }
     if ( ga_gameMode != GA_ScoreBattle ) {
@@ -2767,7 +2767,7 @@ func_8011B5C8_gacode
 ================
 */
 void func_8011B5C8_gacode( s32 lane ) {
-    if ( D_800EA090[lane] == 0 ) {
+    if ( game_totals[lane] == 0 ) {
         Draw_FillRect( lane ? 0xA0 : 0, 0, 0xA0, 0xF0, 0xFF, 0x7F, 0, (u8)ga_blinkLevel + 0x4F );
     }
 }
@@ -3184,9 +3184,9 @@ s32 GA_CpuInput( gaPlayer_t *pl, s32 player ) {
     s16 longWait = wait * 2;
     s32 steps;
 
-    steps = ( D_8005C160 & 0xF ) == 3 ? 20 : 25;
+    steps = ( game_mode & 0xF ) == 3 ? 20 : 25;
     if ( pl->lane->inputFunc == GA_InputBeginTurn ) {
-        if ( ( ( D_8005C160 >> 4 ) & 3 ) == 2 && D_8005C163 == 0 && ( D_8005C0E4[player] & 0xF ) == 0 ) {
+        if ( ( ( game_mode >> 4 ) & 3 ) == 2 && game_stage == 0 && ( game_players[player] & 0xF ) == 0 ) {
             func_8011CEE4_gacode( pl, player );
         } else {
             GA_CpuSetup( pl, player );
@@ -3251,7 +3251,7 @@ void GA_CpuSetup( gaPlayer_t *pl, s32 player ) {
 
     pl->character.speed = RAND( range ) / 100.0f + pl->character.minSpeed;
     GA_PickAimPin( target, pl->lane->bodies, pl->lane->spots, pl->character.reverseSpin );
-    if ( ( D_8005C160 & 0xF ) == 3 || ( ( D_8005C160 >> 4 ) & 3 ) == 1 ) {
+    if ( ( game_mode & 0xF ) == 3 || ( ( game_mode >> 4 ) & 3 ) == 1 ) {
         switch ( D_8009D098.difficulty ) {
             case 0:
                 spread = 32;
@@ -3337,7 +3337,7 @@ Gives the player the four values of its character's ga_cpuThrows row.
 ================
 */
 void func_8011CEE4_gacode( gaPlayer_t *pl, s32 player ) {
-    f32 *values = ga_cpuThrows[D_800DF59C.unk_04[D_8009D19C[player]]];
+    f32 *values = ga_cpuThrows[D_800DF59C.unk_04[game_frame[player]]];
 
     pl->cpuAim = values[0];
     pl->cpuStance = values[1];
@@ -3377,7 +3377,7 @@ void GA_DebugText( s32 player ) {
     Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
     row++;
     if ( ga_gameMode == GA_ScoreSetupGame || ga_gameMode == GA_ScorePar ) {
-        sprintf( text, "TABLE[%d]", D_800DF59C.unk_04[D_8009D19C[player]] );
+        sprintf( text, "TABLE[%d]", D_800DF59C.unk_04[game_frame[player]] );
         Txt_DrawString( &D_800F8094, lane * 144 + 16, ( row + 2 ) * 8, text );
         row++;
     }

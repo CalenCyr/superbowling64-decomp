@@ -17,7 +17,7 @@ void RS_Init( void ) {
     rs_boxAlpha = 0;
     rs_boxAlphaFalling = 0;
     rs_state = RS_ScoreSheet;
-    rs_nextScene = D_8005C0B6;
+    rs_nextScene = game_scene;
     RS_StartMode();
 }
 
@@ -30,17 +30,17 @@ alpha.
 ================
 */
 void RS_Frame( void ) {
-    if ( !D_8005C0BF && rs_leaving ) {
-        D_8005C0BF = 1;
+    if ( !game_leaveState && rs_leaving ) {
+        game_leaveState = 1;
         Sound_PlaySe( 50, 0 );
     }
-    if ( D_8005C0BF == 1 && D_8005C0C0 == 255 ) {
-        D_8005C0BF = 2;
-        D_8005C0C0 = 263;
-        D_8005C0B6 = rs_nextScene;
+    if ( game_leaveState == 1 && game_fade == 255 ) {
+        game_leaveState = 2;
+        game_fade = 263;
+        game_scene = rs_nextScene;
     }
-    rs_dpadPressed = D_8005C0BF ? 0 : D_800E6758;
-    rs_buttonsPressed = D_8005C0BF ? 0 : D_800E4D62;
+    rs_dpadPressed = game_leaveState ? 0 : D_800E6758;
+    rs_buttonsPressed = game_leaveState ? 0 : D_800E4D62;
     Txt_LoadGlyphSheet( &D_800F8094 );
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     Draw_Image( 0xA58, 0, 0 );
@@ -71,15 +71,15 @@ Picks the first state and the BGM for the game mode.
 ================
 */
 void RS_StartMode( void ) {
-    switch ( D_8005C160 & 0xF ) {
+    switch ( game_mode & 0xF ) {
     case 0:
         RS_StartMode0();
         Sound_PlayBgm( 10 );
         break;
     case 1:
         rs_state = RS_DuelResults;
-        Sound_PlayBgm( D_800EA090[0] <= D_800EA090[1] ? 15 : 14 );
-        Sound_PlaySe( D_800EA090[0] <= D_800EA090[1] ? 0x6D : 0x6C, 0 );
+        Sound_PlayBgm( game_totals[0] <= game_totals[1] ? 15 : 14 );
+        Sound_PlaySe( game_totals[0] <= game_totals[1] ? 0x6D : 0x6C, 0 );
         break;
     case 2:
         break;
@@ -96,23 +96,23 @@ RS_StartMode0
 
 Picks the state of mode 0's results by its sub-mode; a perfect game (bit 0x200 of D_8009D098.unlocks) or a
 finished game (bit 0x100) first shows its message, once. Sub-mode 0 checks for a perfect game only with
-argument 0 (bits 6-7 of D_8005C160); its switch lists the other three arguments, which do nothing.
+argument 0 (bits 6-7 of game_mode); its switch lists the other three arguments, which do nothing.
 ================
 */
 void RS_StartMode0( void ) {
     s32 found = 0;
     s32 i;
 
-    switch ( ( D_8005C160 >> 4 ) & 3 ) {
+    switch ( ( game_mode >> 4 ) & 3 ) {
     case 0:
         RS_RankAndRecord();
-        switch ( D_8005C160 >> 6 ) {
+        switch ( game_mode >> 6 ) {
         case 0:
-            if ( D_8005C163 ) {
+            if ( game_stage ) {
                 break;
             }
-            for ( i = 0; i < D_8005C161; i++ ) {
-                if ( !( D_8005C0E4[i] >> 7 ) && D_800DF630[i][9] == 300 ) {
+            for ( i = 0; i < game_numPlayers; i++ ) {
+                if ( !( game_players[i] >> 7 ) && game_frameScores[i][9] == 300 ) {
                     found = 1;
                     break;
                 }
@@ -136,11 +136,11 @@ void RS_StartMode0( void ) {
         break;
     case 2:
         rs_state = RS_ResultsPage2;
-        if ( D_8005C163 ) {
+        if ( game_stage ) {
             break;
         }
-        for ( i = 0; i < D_8005C161; i++ ) {
-            if ( D_8009D19C[i] == 10 ) {
+        for ( i = 0; i < game_numPlayers; i++ ) {
+            if ( game_frame[i] == 10 ) {
                 found = 1;
                 break;
             }
@@ -199,14 +199,14 @@ void RS_RankAndRecord( void ) {
     s32 i;
     s32 character;
 
-    D_801142B4_rscode = D_8005C160 >> 6;
-    for ( i = 0; i < D_8005C161; i++ ) {
-        scores[i] = D_800DF630[i][9];
+    D_801142B4_rscode = game_mode >> 6;
+    for ( i = 0; i < game_numPlayers; i++ ) {
+        scores[i] = game_frameScores[i][9];
     }
-    RS_RankHighest( rs_ranks, D_8005C161, scores, 0, 300 );
+    RS_RankHighest( rs_ranks, game_numPlayers, scores, 0, 300 );
     if ( !D_801142B4_rscode ) {
-        for ( i = 0; i < D_8005C161; i++ ) {
-            character = ( ( D_8005C0E4[i] >> 4 ) & 7 ) - 1;
+        for ( i = 0; i < game_numPlayers; i++ ) {
+            character = ( ( game_players[i] >> 4 ) & 7 ) - 1;
             if ( character >= 0 ) {
                 RS_AddToRecord( &D_800E44E8[character], i );
                 RS_AddToRecord( &D_8009D098.records[character], i );
@@ -330,7 +330,7 @@ Results page; A or Z opens the menu of RS_Menu, which comes back here.
 */
 void RS_ResultsPage1( void ) {
     Draw_Image( 0x88D, 0x64, 0x10 );
-    Score_DrawParCard( D_8005C160 >> 6, 1, 0x20, 0x28 );
+    Score_DrawParCard( game_mode >> 6, 1, 0x20, 0x28 );
     if ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         rs_state = RS_Menu;
@@ -360,7 +360,7 @@ void RS_ResultsPage2( void ) {
 RS_DuelResults
 
 Results of a duel: the score of each game, the higher one marked, the games won, and the winner; A or Z
-leaves when player 1 won (setting the bit of D_8005C163 in D_8009D098.unlocks), else opens the menu.
+leaves when player 1 won (setting the bit of game_stage in D_8009D098.unlocks), else opens the menu.
 ================
 */
 #ifdef NON_MATCHING
@@ -380,7 +380,7 @@ void RS_DuelResults( void ) {
     Draw_Image( 0x88D, 0x64, 0x10 );
     y = 0x28;
     x = 0x78;
-    games = D_800693DC[0] + D_800693DC[1];
+    games = game_gamesWon[0] + game_gamesWon[1];
     for ( i = 0; i < games; i++ ) {
         Draw_Image( images[i], x, y );
         x += 0x20;
@@ -389,24 +389,24 @@ void RS_DuelResults( void ) {
     y += 9;
     for ( player = 0; player < 2; player++ ) {
         x = 0x40;
-        Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, x, y );
+        Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, x, y );
         x += 0x38;
         opponent = !player;
         for ( i = 0; i < games; i++ ) {
             Draw_Image( 0x86D, x, y );
-            Score_DrawNumber( D_8009D030[player][i], x + 6, y + 6 );
-            if ( D_8009D030[player][i] > D_8009D030[opponent][i] ) {
+            Score_DrawNumber( game_duelScores[player][i], x + 6, y + 6 );
+            if ( game_duelScores[player][i] > game_duelScores[opponent][i] ) {
                 Draw_ImageScaled( 0x86C, x, y, rs_boxAlpha + 0x20, 1.0f, 1.0f );
             }
             x += 0x20;
         }
         Draw_Image( 0x86B, x, y );
-        Menu_DrawBox( player, D_800693DC[player], 1, x + 4, y + 2 );
+        Menu_DrawBox( player, game_gamesWon[player], 1, x + 4, y + 2 );
         y += 0x14;
     }
-    if ( D_800693DC[0] > D_800693DC[1] ) {
+    if ( game_gamesWon[0] > game_gamesWon[1] ) {
         Draw_ImageScaled( 0x869, 0x2C, y + 8, rs_boxAlpha + 0x7F, 1.0f, 1.0f );
-        if ( !( D_8009D098.unlocks & ( 1 << D_8005C163 ) ) ) {
+        if ( !( D_8009D098.unlocks & ( 1 << game_stage ) ) ) {
             Draw_Image( 0x870, 0x38, 0xAC );
         }
     } else {
@@ -414,9 +414,9 @@ void RS_DuelResults( void ) {
     }
     if ( rs_buttonsPressed & ( A_BUTTON | Z_TRIG ) ) {
         Sound_PlaySe( SE_DECIDE, 0 );
-        if ( D_800693DC[0] > D_800693DC[1] ) {
+        if ( game_gamesWon[0] > game_gamesWon[1] ) {
             rs_state = RS_Leave;
-            D_8009D098.unlocks |= 1 << D_8005C163;
+            D_8009D098.unlocks |= 1 << game_stage;
         } else {
             rs_state = RS_Menu;
             rs_returnState = RS_DuelResults;
@@ -473,7 +473,7 @@ void RS_Menu( void ) {
         switch ( rs_menuChoice ) {
         case 0:
             rs_nextScene = 4;
-            D_8005CB60 = 1;
+            game_replay = 1;
             rs_state = RS_Idle;
             rs_leaving = 1;
             break;
@@ -515,7 +515,7 @@ void RS_Leave( void ) {
     }
     rs_leaving = 1;
     rs_nextScene = 4;
-    D_8005CB60 = 0;
+    game_replay = 0;
     rs_state = RS_Idle;
 }
 
@@ -580,7 +580,7 @@ void RS_DrawPinDiagrams( s16 x, s16 y ) {
     }
     Score_DrawHeaders( rs_pinPage, x + 0x2C, y );
     y += 9;
-    players = D_801142B4_rscode == 1 ? D_8005C161 >> 1 : D_8005C161;
+    players = D_801142B4_rscode == 1 ? game_numPlayers >> 1 : game_numPlayers;
     for ( player = 0; player < players; player++ ) {
         rowX = x;
         if ( D_801142B4_rscode == 2 && player == 2 ) {
@@ -589,10 +589,10 @@ void RS_DrawPinDiagrams( s16 x, s16 y ) {
         }
         if ( D_801142B4_rscode == 1 ) {
             mate = ( player == 1 ) * 2;
-            Menu_DrawSmallNamePlate( mate, D_8005C0E4[mate] >> 7, D_80068218[mate].chars, 0, rowX, y );
-            Menu_DrawSmallNamePlate( mate | 1, D_8005C0E4[mate + 1] >> 7, D_80068218[mate + 1].chars, 0, rowX, y + 0x1C );
+            Menu_DrawSmallNamePlate( mate, game_players[mate] >> 7, game_playerNames[mate].chars, 0, rowX, y );
+            Menu_DrawSmallNamePlate( mate | 1, game_players[mate + 1] >> 7, game_playerNames[mate + 1].chars, 0, rowX, y + 0x1C );
         } else {
-            Menu_DrawSmallNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, 0, rowX, y );
+            Menu_DrawSmallNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, 0, rowX, y );
         }
         rowX += 0x2C;
         if ( D_801142B4_rscode == 1 ) {
@@ -663,19 +663,19 @@ void RS_AddToRecord( playerRecord_t *record, s32 player ) {
     if ( record->games + 1 < 256 ) {
         record->games++;
     }
-    if ( record->total + D_800DF630[player][9] <= 0xFFFF ) {
-        record->total += D_800DF630[player][9];
+    if ( record->total + game_frameScores[player][9] <= 0xFFFF ) {
+        record->total += game_frameScores[player][9];
     }
-    record->high = Max( D_800DF630[player][9], record->high );
-    record->low = Min( D_800DF630[player][9], record->low );
-    if ( record->strikes + D_800DF6B4[player] < 10000 ) {
-        record->strikes += D_800DF6B4[player];
+    record->high = Max( game_frameScores[player][9], record->high );
+    record->low = Min( game_frameScores[player][9], record->low );
+    if ( record->strikes + game_strikes[player] < 10000 ) {
+        record->strikes += game_strikes[player];
     }
-    if ( record->spares + D_8009D088[player] < 10000 ) {
-        record->spares += D_8009D088[player];
+    if ( record->spares + game_spares[player] < 10000 ) {
+        record->spares += game_spares[player];
     }
-    if ( record->splits + D_8009CF80[player] < 10000 ) {
-        record->splits += D_8009CF80[player];
+    if ( record->splits + game_splits[player] < 10000 ) {
+        record->splits += game_splits[player];
     }
 }
 

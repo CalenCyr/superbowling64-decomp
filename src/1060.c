@@ -226,7 +226,7 @@ void Main_Thread( void *arg ) {
                 D_8005C0B2 = D_80069410[D_8005B120].fbIndex;
             }
             D_8005B0E8 = OS_CYCLES_TO_USEC( osGetTime() - D_80066C48 );
-            if ( D_8005C0BC != 0 && D_8005C0B6 != 1 && ( D_800994BC & Z_TRIG ) && ( D_800E4D62 & L_TRIG ) ) {
+            if ( D_8005C0BC != 0 && game_scene != 1 && ( D_800994BC & Z_TRIG ) && ( D_800E4D62 & L_TRIG ) ) {
                 Dbg_ScreenShot();
             }
             break;
@@ -317,13 +317,13 @@ Game_Thread
 Game thread: finishes the first three frames empty, sets the VI mode for the TV type, loads the floor grid,
 then draws a frame each time the main thread asks: it moves the cursor by the stick, starts the display list,
 and when the scene changed, draws two blank frames, then loads the scene's overlay and runs its init; then
-the scene's per-frame function, the demo's titles, the fade of D_8005C0BF with the master volume, and the
+the scene's per-frame function, the demo's titles, the fade of game_leaveState with the master volume, and the
 CPU time of the frame.
 ================
 */
 #ifdef NON_MATCHING
 // NON_MATCHING: the frame is 0x48 bytes, retail's 0x58 (16 bytes of locals no instruction uses); retail's lbu
-// and separate andi of D_8005C0B6 before each switch need it volatile (game.h); otherwise only relocation
+// and separate andi of game_scene before each switch need it volatile (game.h); otherwise only relocation
 // names differ (D_8005C0BA is retail's D_8005C0B8 + 2). One local holds the counter, the file size and the
 // second switch's index, as retail's s2 does. An unused 16-byte local gives retail's frame (not adopted, R17);
 // the inlined func_80026B10 and func_80026B28 have no locals, so their frames add nothing.
@@ -349,8 +349,8 @@ void Game_Thread( void *arg ) {
     }
     osViSetSpecialFeatures( OS_VI_GAMMA_OFF | OS_VI_DITHER_FILTER_ON );
     Cont_ReadPads();
-    i = Str_ReadFile( 0xB5C, (u8 *)&D_80100100[0] );
-    memcpy( &D_80100100[1], &D_80100100[0], i );
+    i = Str_ReadFile( 0xB5C, (u8 *)&game_floorGrids[0] );
+    memcpy( &game_floorGrids[1], &game_floorGrids[0], i );
 
     for ( ;; ) {
         osRecvMesg( &D_800DF688, NULL, OS_MESG_BLOCK );
@@ -432,7 +432,7 @@ void Game_Thread( void *arg ) {
                           osVirtualToPhysical( D_80066C38[D_8005B0F8] ) );
         gDPPipeSync( D_800F8094++ );
 
-        if ( D_8005B0E0 != D_8005C0B6 ) {
+        if ( D_8005B0E0 != game_scene ) {
             if ( D_8005B188 < 2 ) {
                 gDPSetCycleType( D_800F8094++, G_CYC_FILL );
                 gDPSetFillColor( D_800F8094++, ( GPACK_RGBA5551( 192, 192, 192, 1 ) << 16 ) |
@@ -450,7 +450,7 @@ void Game_Thread( void *arg ) {
             Mem_Reset( NULL, NULL );
             Cache_Clear();
             Obj_ClearList();
-            switch ( D_8005C0B6 ) {
+            switch ( game_scene ) {
             case SCENE_GACODE:
                 i = FAT_GetFileSize( "GACODE  SYS" );
                 memset( gacode_VRAM + i, 0, gacode_BSS_END - gacode_VRAM - i );
@@ -515,10 +515,10 @@ void Game_Thread( void *arg ) {
                 OP_Init();
                 break;
             }
-            D_8005B0E0 = D_8005C0B6;
+            D_8005B0E0 = game_scene;
         }
 
-        i = D_8005C0B6;
+        i = game_scene;
         switch ( i ) {
         case SCENE_GACODE:
             GA_Frame();
@@ -547,35 +547,35 @@ void Game_Thread( void *arg ) {
             D_8005C190 = DRAW2D_FILL;
             Draw_ImageScaled( 0xA71, 80, 120, D_8009CFB0, 1.0f, 1.0f );
             Draw_Image( 0x87F, 200, 152 );
-            Draw_Image( D_8005B180[D_8005C0F0], 200, 200 );
+            Draw_Image( D_8005B180[game_demo], 200, 200 );
             if ( --D_800693B0 < 40 ) {
-                D_8005C0BF = 1;
-                if ( D_8005C0C0 >= 248 ) {
+                game_leaveState = 1;
+                if ( game_fade >= 248 ) {
                     func_80112A74_gacode();
-                    D_8005C0BF = 2;
-                    D_8005C0C0 = 263;
-                    D_8005C0B6 = SCENE_OPCODE;
+                    game_leaveState = 2;
+                    game_fade = 263;
+                    game_scene = SCENE_OPCODE;
                     D_8005C0EC = 0;
                     D_8009D098.music = 1;
                 }
             }
         }
 
-        if ( D_8005C0BF != 0 ) {
-            if ( D_8005C0BF == 1 ) {
-                D_8005C0C0 += 8;
-                if ( D_8005C0C0 > 255 ) {
-                    D_8005C0C0 = 255;
+        if ( game_leaveState != 0 ) {
+            if ( game_leaveState == 1 ) {
+                game_fade += 8;
+                if ( game_fade > 255 ) {
+                    game_fade = 255;
                 }
             } else {
-                D_8005C0C0 -= 8;
-                if ( D_8005C0C0 < 0 ) {
-                    D_8005C0C0 = 0;
-                    D_8005C0BF = 0;
+                game_fade -= 8;
+                if ( game_fade < 0 ) {
+                    game_fade = 0;
+                    game_leaveState = 0;
                 }
             }
-            Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 192, 192, 192, D_8005C0C0 );
-            Snd_SetMasterVolume( SND_BGM, ( 255 - D_8005C0C0 ) * 96 + 0x2000 );
+            Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 192, 192, 192, game_fade );
+            Snd_SetMasterVolume( SND_BGM, ( 255 - game_fade ) * 96 + 0x2000 );
         }
 
         gDPFullSync( D_800F8094++ );

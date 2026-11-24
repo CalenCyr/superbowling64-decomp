@@ -10,7 +10,7 @@ GS_TeamSizeMenu
 
 Frame of a three-choice menu like GS_SubModeMenu, choosing the number of players on one team:
 the left choice sets up one player, the other two set up two players, with argument 2 (right) or
-1 (below) in bits 6-7 of D_8005C160. Up from the lower choice moves to the right one. Returns 0
+1 (below) in bits 6-7 of game_mode. Up from the lower choice moves to the right one. Returns 0
 while the menu runs; once it has slid out, 1 for a choice taken and 2 for backing out.
 ================
 */
@@ -21,19 +21,19 @@ s32 GS_TeamSizeMenu( void ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         switch ( gs_teamSizeCursor ) {
         case 0:
-            D_8005C161 = 1;
-            D_8005C162 = 0;
-            D_8005C160 = D_8005C160 & 0x3F;
+            game_numPlayers = 1;
+            game_lastTeam = 0;
+            game_mode = game_mode & 0x3F;
             break;
         case 1:
-            D_8005C161 = 2;
-            D_8005C162 = 0;
-            D_8005C160 = ( D_8005C160 & 0x3F ) | 0x80;
+            game_numPlayers = 2;
+            game_lastTeam = 0;
+            game_mode = ( game_mode & 0x3F ) | 0x80;
             break;
         case 2:
-            D_8005C161 = 2;
-            D_8005C162 = 0;
-            D_8005C160 = ( D_8005C160 & 0x3F ) | 0x40;
+            game_numPlayers = 2;
+            game_lastTeam = 0;
+            game_mode = ( game_mode & 0x3F ) | 0x40;
             break;
         }
         gs_teamSizeState = CHOICE_TAKEN;

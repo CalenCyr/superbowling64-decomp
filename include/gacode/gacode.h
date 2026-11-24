@@ -185,7 +185,7 @@ typedef struct {
     /* 0x0C */ f32 unk_0C;
     /* 0x10 */ f32 unk_10;
     /* 0x14 */ f32 unk_14;
-    /* 0x18 */ u16 unk_18;              /* archive index of the floor grid (D_80100100) */
+    /* 0x18 */ u16 unk_18;              /* archive index of the floor grid (game_floorGrids) */
     /* 0x1A */ u16 unk_1A;
     /* 0x1C */ s16 unk_1C;              /* sound id; -1: none */
     /* 0x1E */ s16 unk_1E[9];
@@ -264,7 +264,7 @@ extern f32 D_8012C158_gacode[];
 extern f32 ga_cpuThrows[][4];     /* unk_98, unk_9C, unk_2C, unk_30 of a player, by D_800DF59C.unk_04[] */
 extern s16 D_8012C784_gacode[];
 extern vec3_t D_8012C758_gacode;      /* (0, 24, 0) (GA_PhysicsStep) */
-extern s16 ga_runSounds[];      /* sound ids, by D_800A304C[] up to 10 (GA_ScoreBattle) */
+extern s16 ga_runSounds[];      /* sound ids, by game_strikeRun[] up to 10 (GA_ScoreBattle) */
 /* by score against par; TODO identity: scores below par read before the label, so the table likely starts
    earlier */
 extern s16 D_8012C7E6_gacode[];
@@ -272,12 +272,12 @@ extern f32 D_801239E8_gacode[11];      /* by gaPlayer_t.ballWeight */
 extern u16 D_8012C7F4_gacode[11];      /* image ids, by gaPlayer_t.ballWeight */
 extern u16 ga_numberImages[11];      /* image ids of the numbers 1 to 9, by number ([0] and [10] none) */
 extern u16 ga_parChartPins[NUM_PINS][2];  /* x and y of each pin in the pin chart (GA_DrawParFramePanel) */
-extern u16 D_8012C848_gacode[8];       /* image ids, by D_8005C163 */
+extern u16 D_8012C848_gacode[8];       /* image ids, by game_stage */
 extern u16 ga_pinPanelPins[NUM_PINS][2];  /* x and y of each pin in the pin panel (func_80119DD8_gacode) */
 extern u16 ga_editorPinPos[NUM_PINS][2];  /* x and y of each pin in the pin editor (GA_PinEditor) */
 extern u8 ga_editorCursor;           /* pin editor: the pin under the cursor (0 to 9) */
 extern u8 ga_editorOnPins;           /* pin editor: nonzero while the cursor is on the pins */
-extern u8 ga_parFrame;           /* current frame of the par game (0 to 9; par in D_80099458[0][]) */
+extern u8 ga_parFrame;           /* current frame of the par game (0 to 9; par in game_frameFlags[0][]) */
 extern f32 ga_spinCameraAngle[2];       /* per lane: angle of func_8011C158_gacode's camera */
 extern vec3_t ga_freeCameraPos[2];    /* per lane: position of GA_FreeCamera's camera (x and z) */
 extern u8 D_8012C7C8_gacode;           /* func_8011C57C_gacode's camera has started (GA_UpdateLaneCamera) */

@@ -16,21 +16,21 @@ void GS_StartPakCheck( void ) {
     s32 i;
 
     gs_secondController = 0;
-    if ( D_8005C162 == 1 ) {
-        switch ( D_8005C161 ) {
+    if ( game_lastTeam == 1 ) {
+        switch ( game_numPlayers ) {
         case 2:
-            if ( !( D_8005C0E4[1] >> 7 ) ) {
+            if ( !( game_players[1] >> 7 ) ) {
                 gs_secondController = 1;
             }
             break;
         case 3:
-            if ( !( D_8005C0E4[2] >> 7 ) ) {
+            if ( !( game_players[2] >> 7 ) ) {
                 gs_secondController = 1;
             }
             break;
         case 4:
             for ( i = 2; i < 4; i++ ) {
-                if ( !( D_8005C0E4[i] >> 7 ) ) {
+                if ( !( game_players[i] >> 7 ) ) {
                     gs_secondController = 1;
                 }
             }
@@ -64,21 +64,21 @@ s32 GS_PakCheck( void ) {
 
     D_8005B191 = 1;
     gs_secondController = 0;
-    if ( D_8005C162 == 1 ) {
-        switch ( D_8005C161 ) {
+    if ( game_lastTeam == 1 ) {
+        switch ( game_numPlayers ) {
         case 2:
-            if ( !( D_8005C0E4[1] >> 7 ) ) {
+            if ( !( game_players[1] >> 7 ) ) {
                 gs_secondController = 1;
             }
             break;
         case 3:
-            if ( !( D_8005C0E4[2] >> 7 ) ) {
+            if ( !( game_players[2] >> 7 ) ) {
                 gs_secondController = 1;
             }
             break;
         case 4:
             for ( i = 2; i < 4; i++ ) {
-                if ( !( D_8005C0E4[i] >> 7 ) ) {
+                if ( !( game_players[i] >> 7 ) ) {
                     gs_secondController = 1;
                 }
             }

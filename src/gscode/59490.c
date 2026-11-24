@@ -10,7 +10,7 @@ GS_ModeMenu
 
 Frame of the first menu, five choices laid out as two rows of two around one in the middle (choice 4):
 the pad moves the cursor between neighbours and A or Z takes the highlighted choice, which sets the
-game mode in the low nibble of D_8005C160. There is no backing out. Once the menu has slid in it
+game mode in the low nibble of game_mode. There is no backing out. Once the menu has slid in it
 resets the game setup to one player with no characters. Returns 0 while the menu runs and 1 once it
 has slid out after a choice.
 ================
@@ -28,23 +28,23 @@ s32 GS_ModeMenu( void ) {
         switch ( gs_modeCursor ) {
         case 0:
             gs_modeState = CHOICE_TAKEN;
-            D_8005C160 = D_8005C160 & 0xF0;
+            game_mode = game_mode & 0xF0;
             break;
         case 1:
-            D_8005C160 = 1;
+            game_mode = 1;
             gs_modeState = CHOICE_TAKEN;
             break;
         case 2:
-            D_8005C160 = 2;
+            game_mode = 2;
             gs_modeState = CHOICE_TAKEN;
             break;
         case 3:
-            D_8005C160 = 3;
+            game_mode = 3;
             gs_modeState = CHOICE_TAKEN;
             break;
         case 4:
             gs_modeState = CHOICE_TAKEN;
-            D_8005C160 = ( D_8005C160 & 0xF0 ) | 4;
+            game_mode = ( game_mode & 0xF0 ) | 4;
             break;
         }
     }
@@ -131,10 +131,10 @@ s32 GS_ModeMenu( void ) {
         if ( gs_modeSlide == 0 ) {
             gs_modeState = CHOICE_RUN;
             func_80026B28();
-            D_8005C160 = 0;
-            D_8005C161 = 1;
+            game_mode = 0;
+            game_numPlayers = 1;
             for ( i = 3; i >= 0; i-- ) {
-                D_8005C0E4[i] = 0;
+                game_players[i] = 0;
             }
         }
         break;

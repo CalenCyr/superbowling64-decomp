@@ -9,7 +9,7 @@
 GS_SubModeMenu
 
 Frame of a three-choice menu built like GS_PlayersMenu: two choices side by side and a third
-below them. Taking a choice sets the sub-mode of D_8005C160 to it (bits 4-5); the third also sets up
+below them. Taking a choice sets the sub-mode of game_mode to it (bits 4-5); the third also sets up
 one player on one team and clears the argument. Returns 0 while the menu runs; once it has slid out,
 1 for a choice taken and 2 for backing out.
 ================
@@ -21,15 +21,15 @@ s32 GS_SubModeMenu( void ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         switch ( gs_subModeCursor ) {
         case 0:
-            D_8005C160 = D_8005C160 & 0xCF;
+            game_mode = game_mode & 0xCF;
             break;
         case 1:
-            D_8005C160 = ( D_8005C160 & 0xCF ) | 0x10;
+            game_mode = ( game_mode & 0xCF ) | 0x10;
             break;
         case 2:
-            D_8005C161 = 1;
-            D_8005C162 = 0;
-            D_8005C160 = ( ( D_8005C160 & 0xCF ) | 0x20 ) & 0x3F;
+            game_numPlayers = 1;
+            game_lastTeam = 0;
+            game_mode = ( ( game_mode & 0xCF ) | 0x20 ) & 0x3F;
             break;
         }
         gs_subModeState = CHOICE_TAKEN;

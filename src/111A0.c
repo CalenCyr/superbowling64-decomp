@@ -17,7 +17,7 @@
 ================
 GridEd_Frame
 
-Frame of the floor grid editor: draws the grid D_80100100[0] in lines through camera 0, marked points red and the
+Frame of the floor grid editor: draws the grid game_floorGrids[0] in lines through camera 0, marked points red and the
 cursor flashing, then runs the page D_80063AF0 (R with up or down picks it) and prints the page, its values and the
 height under the cursor.
 ================
@@ -49,35 +49,35 @@ void GridEd_Frame( void ) {
     gSPClearGeometryMode( D_800F8094++, G_SHADE | G_SHADING_SMOOTH | G_LIGHTING | G_TEXTURE_GEN | G_FOG );
     gSPSetGeometryMode( D_800F8094++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH );
 
-    for ( z = 0; z < D_80100100[0].numZ; z++ ) {
-        for ( x = 0; x < D_80100100[0].numX; x++ ) {
-            D_8005C984[x + z * D_80100100[0].numX].v.ob[0] = D_80100100[0].originX + x * D_80100100[0].stepX;
-            D_8005C984[x + z * D_80100100[0].numX].v.ob[1] = D_80100100[0].heights[x + z * D_80100100[0].numX];
-            D_8005C984[x + z * D_80100100[0].numX].v.ob[2] = D_80100100[0].originZ + z * D_80100100[0].stepZ;
-            if ( D_80063B40[x + z * D_80100100[0].numX] ) {
-                D_8005C984[x + z * D_80100100[0].numX].v.cn[0] = 0xFF;
-                D_8005C984[x + z * D_80100100[0].numX].v.cn[1] = 0;
-                D_8005C984[x + z * D_80100100[0].numX].v.cn[2] = 0;
+    for ( z = 0; z < game_floorGrids[0].numZ; z++ ) {
+        for ( x = 0; x < game_floorGrids[0].numX; x++ ) {
+            D_8005C984[x + z * game_floorGrids[0].numX].v.ob[0] = game_floorGrids[0].originX + x * game_floorGrids[0].stepX;
+            D_8005C984[x + z * game_floorGrids[0].numX].v.ob[1] = game_floorGrids[0].heights[x + z * game_floorGrids[0].numX];
+            D_8005C984[x + z * game_floorGrids[0].numX].v.ob[2] = game_floorGrids[0].originZ + z * game_floorGrids[0].stepZ;
+            if ( D_80063B40[x + z * game_floorGrids[0].numX] ) {
+                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[0] = 0xFF;
+                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[1] = 0;
+                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[2] = 0;
             } else {
-                D_8005C984[x + z * D_80100100[0].numX].v.cn[0] = 0xFF;
-                D_8005C984[x + z * D_80100100[0].numX].v.cn[1] = 0xFF;
-                D_8005C984[x + z * D_80100100[0].numX].v.cn[2] = 0xFF;
+                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[0] = 0xFF;
+                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[1] = 0xFF;
+                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[2] = 0xFF;
             }
             if ( D_8005C988 == x && D_8005C98A == z ) {
-                D_8005C984[x + z * D_80100100[0].numX].v.cn[1] = D_8005B0F4 << 3;
+                D_8005C984[x + z * game_floorGrids[0].numX].v.cn[1] = D_8005B0F4 << 3;
             }
         }
     }
 
-    for ( z = 0; z < D_80100100[0].numZ; z++ ) {
-        for ( x = 0; x < D_80100100[0].numX; x++ ) {
-            gSPVertex( D_800F8094++, D_8005C984 + x + z * D_80100100[0].numX, 1, 0 );
-            if ( x + 1 < D_80100100[0].numX ) {
-                gSPVertex( D_800F8094++, D_8005C984 + x + z * D_80100100[0].numX + 1, 1, 1 );
+    for ( z = 0; z < game_floorGrids[0].numZ; z++ ) {
+        for ( x = 0; x < game_floorGrids[0].numX; x++ ) {
+            gSPVertex( D_800F8094++, D_8005C984 + x + z * game_floorGrids[0].numX, 1, 0 );
+            if ( x + 1 < game_floorGrids[0].numX ) {
+                gSPVertex( D_800F8094++, D_8005C984 + x + z * game_floorGrids[0].numX + 1, 1, 1 );
                 gSPLine3D( D_800F8094++, 0, 1, 0 );
             }
-            if ( z + 1 < D_80100100[0].numZ ) {
-                gSPVertex( D_800F8094++, D_8005C984 + x + ( z + 1 ) * D_80100100[0].numX, 1, 1 );
+            if ( z + 1 < game_floorGrids[0].numZ ) {
+                gSPVertex( D_800F8094++, D_8005C984 + x + ( z + 1 ) * game_floorGrids[0].numX, 1, 1 );
                 gSPLine3D( D_800F8094++, 0, 1, 0 );
             }
         }
@@ -109,86 +109,86 @@ void GridEd_Frame( void ) {
             if ( D_800E4D62 & Z_TRIG ) {
                 Host_Sync();
                 Host_GetFileSize( "ground.bin" );
-                Host_ReadFile( (u8 *)&D_80100100[0] );
+                Host_ReadFile( (u8 *)&game_floorGrids[0] );
             }
             break;
 
         case GRIDEDIT_SAVE:
             Txt_DrawString( &D_800F8094, 32, 20, "FILE SAVE" );
             if ( D_800E4D62 & Z_TRIG ) {
-                Host_WriteFile( "ground.bin", (u8 *)&D_80100100[0],
-                               sizeof( floorGrid_t ) - ( GRIDEDIT_POINTS - D_80100100[0].numX * D_80100100[0].numZ ) * sizeof( s16 ) );
+                Host_WriteFile( "ground.bin", (u8 *)&game_floorGrids[0],
+                               sizeof( floorGrid_t ) - ( GRIDEDIT_POINTS - game_floorGrids[0].numX * game_floorGrids[0].numZ ) * sizeof( s16 ) );
             }
             break;
 
         case GRIDEDIT_SIZE:
             Txt_DrawString( &D_800F8094, 32, 20, "MTX FORM" );
             resized = FALSE;
-            if ( ( D_800E4D62 & U_JPAD ) && !( D_800994BC & R_TRIG ) && D_80100100[0].numZ != 0 ) {
-                D_80100100[0].numZ--;
+            if ( ( D_800E4D62 & U_JPAD ) && !( D_800994BC & R_TRIG ) && game_floorGrids[0].numZ != 0 ) {
+                game_floorGrids[0].numZ--;
                 resized = TRUE;
             }
             if ( ( D_800E4D62 & D_JPAD ) && !( D_800994BC & R_TRIG ) ) {
-                if ( ( D_80100100[0].numZ + 1 ) * D_80100100[0].numX < GRIDEDIT_POINTS ) {
-                    D_80100100[0].numZ++;
+                if ( ( game_floorGrids[0].numZ + 1 ) * game_floorGrids[0].numX < GRIDEDIT_POINTS ) {
+                    game_floorGrids[0].numZ++;
                 }
                 resized = TRUE;
             }
-            if ( ( D_800E4D62 & L_JPAD ) && !( D_800994BC & R_TRIG ) && D_80100100[0].numX > 2 ) {
-                D_80100100[0].numX -= 2;
-                if ( !( D_80100100[0].numX & 1 ) ) {
-                    D_80100100[0].numX++;
+            if ( ( D_800E4D62 & L_JPAD ) && !( D_800994BC & R_TRIG ) && game_floorGrids[0].numX > 2 ) {
+                game_floorGrids[0].numX -= 2;
+                if ( !( game_floorGrids[0].numX & 1 ) ) {
+                    game_floorGrids[0].numX++;
                 }
                 resized = TRUE;
             }
             if ( ( D_800E4D62 & R_JPAD ) && !( D_800994BC & R_TRIG ) ) {
-                if ( ( D_80100100[0].numX + 2 ) * D_80100100[0].numZ < GRIDEDIT_POINTS ) {
-                    D_80100100[0].numX += 2;
+                if ( ( game_floorGrids[0].numX + 2 ) * game_floorGrids[0].numZ < GRIDEDIT_POINTS ) {
+                    game_floorGrids[0].numX += 2;
                 }
                 resized = TRUE;
             }
             if ( resized ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
-                    D_80100100[0].heights[i] = 0;
+                    game_floorGrids[0].heights[i] = 0;
                 }
             }
-            sprintf( text, "X*Z=(%d,%d)", D_80100100[0].numX, D_80100100[0].numZ );
+            sprintf( text, "X*Z=(%d,%d)", game_floorGrids[0].numX, game_floorGrids[0].numZ );
             Txt_DrawString( &D_800F8094, 64, 30, text );
             break;
 
         case GRIDEDIT_STEP:
             Txt_DrawString( &D_800F8094, 32, 20, "MTX WH" );
-            if ( ( D_800994BC & ( U_JPAD | R_TRIG ) ) == U_JPAD && D_80100100[0].stepZ != 0 ) {
-                D_80100100[0].stepZ--;
+            if ( ( D_800994BC & ( U_JPAD | R_TRIG ) ) == U_JPAD && game_floorGrids[0].stepZ != 0 ) {
+                game_floorGrids[0].stepZ--;
             }
             if ( ( D_800994BC & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
-                D_80100100[0].stepZ++;
+                game_floorGrids[0].stepZ++;
             }
-            if ( ( D_800994BC & ( L_JPAD | R_TRIG ) ) == L_JPAD && D_80100100[0].stepX != 0 ) {
-                D_80100100[0].stepX--;
+            if ( ( D_800994BC & ( L_JPAD | R_TRIG ) ) == L_JPAD && game_floorGrids[0].stepX != 0 ) {
+                game_floorGrids[0].stepX--;
             }
             if ( ( D_800994BC & ( R_JPAD | R_TRIG ) ) == R_JPAD ) {
-                D_80100100[0].stepX++;
+                game_floorGrids[0].stepX++;
             }
-            sprintf( text, "WH=(%d,%d)", D_80100100[0].stepX, D_80100100[0].stepZ );
+            sprintf( text, "WH=(%d,%d)", game_floorGrids[0].stepX, game_floorGrids[0].stepZ );
             Txt_DrawString( &D_800F8094, 64, 30, text );
             break;
 
         case GRIDEDIT_ORIGIN:
             Txt_DrawString( &D_800F8094, 32, 20, "MTX OFS" );
             if ( ( D_800994BC & ( U_JPAD | R_TRIG ) ) == U_JPAD ) {
-                D_80100100[0].originZ--;
+                game_floorGrids[0].originZ--;
             }
             if ( ( D_800994BC & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
-                D_80100100[0].originZ++;
+                game_floorGrids[0].originZ++;
             }
             if ( ( D_800994BC & ( L_JPAD | R_TRIG ) ) == L_JPAD ) {
-                D_80100100[0].originX--;
+                game_floorGrids[0].originX--;
             }
             if ( ( D_800994BC & ( R_JPAD | R_TRIG ) ) == R_JPAD ) {
-                D_80100100[0].originX++;
+                game_floorGrids[0].originX++;
             }
-            sprintf( text, "OFS=(%d,%d)", D_80100100[0].originX, D_80100100[0].originZ );
+            sprintf( text, "OFS=(%d,%d)", game_floorGrids[0].originX, game_floorGrids[0].originZ );
             Txt_DrawString( &D_800F8094, 64, 30, text );
             break;
 
@@ -199,15 +199,15 @@ void GridEd_Frame( void ) {
                     D_8005C98A--;
                 }
                 if ( D_800994BC & Z_TRIG ) {
-                    D_80063B40[D_8005C988 + D_8005C98A * D_80100100[0].numX] = D_8005C98C;
+                    D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
                 }
             }
             if ( ( D_800E4D62 & D_JPAD ) || ( D_8005C98E >= 7 && ( D_800994BC & D_JPAD ) ) ) {
-                if ( D_8005C98A < D_80100100[0].numZ - 1 ) {
+                if ( D_8005C98A < game_floorGrids[0].numZ - 1 ) {
                     D_8005C98A++;
                 }
                 if ( D_800994BC & Z_TRIG ) {
-                    D_80063B40[D_8005C988 + D_8005C98A * D_80100100[0].numX] = D_8005C98C;
+                    D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
                 }
             }
             if ( ( D_800E4D62 & L_JPAD ) || ( D_8005C98E >= 7 && ( D_800994BC & L_JPAD ) ) ) {
@@ -215,15 +215,15 @@ void GridEd_Frame( void ) {
                     D_8005C988--;
                 }
                 if ( D_800994BC & Z_TRIG ) {
-                    D_80063B40[D_8005C988 + D_8005C98A * D_80100100[0].numX] = D_8005C98C;
+                    D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
                 }
             }
             if ( ( D_800E4D62 & R_JPAD ) || ( D_8005C98E >= 7 && ( D_800994BC & R_JPAD ) ) ) {
-                if ( D_8005C988 < D_80100100[0].numX - 1 ) {
+                if ( D_8005C988 < game_floorGrids[0].numX - 1 ) {
                     D_8005C988++;
                 }
                 if ( D_800994BC & Z_TRIG ) {
-                    D_80063B40[D_8005C988 + D_8005C98A * D_80100100[0].numX] = D_8005C98C;
+                    D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C;
                 }
             }
             if ( D_800994BC & ( U_JPAD | D_JPAD | L_JPAD | R_JPAD ) ) {
@@ -234,8 +234,8 @@ void GridEd_Frame( void ) {
                 D_8005C98E = 0;
             }
             if ( D_800E4D62 & Z_TRIG ) {
-                D_80063B40[D_8005C988 + D_8005C98A * D_80100100[0].numX] = D_8005C98C =
-                    D_80063B40[D_8005C988 + D_8005C98A * D_80100100[0].numX] ^ 1;
+                D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] = D_8005C98C =
+                    D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] ^ 1;
             }
             if ( ( D_800E4D62 & START_BUTTON ) && !( D_800994BC & R_TRIG ) ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
@@ -247,7 +247,7 @@ void GridEd_Frame( void ) {
                     D_80063B40[i] ^= 1;
                 }
             }
-            sprintf( text, "SEL=%d", D_80063B40[D_8005C988 + D_8005C98A * D_80100100[0].numX] );
+            sprintf( text, "SEL=%d", D_80063B40[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] );
             Txt_DrawString( &D_800F8094, 64, 30, text );
             break;
 
@@ -256,20 +256,20 @@ void GridEd_Frame( void ) {
             if ( ( D_800994BC & ( U_JPAD | R_TRIG ) ) == U_JPAD ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                     if ( D_80063B40[i] ) {
-                        D_80100100[0].heights[i]++;
+                        game_floorGrids[0].heights[i]++;
                     }
                 }
             }
             if ( ( D_800994BC & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                     if ( D_80063B40[i] ) {
-                        D_80100100[0].heights[i]--;
+                        game_floorGrids[0].heights[i]--;
                     }
                 }
             }
             for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                 if ( D_80063B40[i] ) {
-                    sprintf( text, "Y=%d", D_80100100[0].heights[i] );
+                    sprintf( text, "Y=%d", game_floorGrids[0].heights[i] );
                     Txt_DrawString( &D_800F8094, 64, 30, text );
                     break;
                 }
@@ -278,7 +278,7 @@ void GridEd_Frame( void ) {
     }
 
     sprintf( text, "(%d,%d)=%d", D_8005C988, D_8005C98A,
-             D_80100100[0].heights[D_8005C988 + D_8005C98A * D_80100100[0].numX] );
+             game_floorGrids[0].heights[D_8005C988 + D_8005C98A * game_floorGrids[0].numX] );
     Txt_DrawString( &D_800F8094, 120, 20, text );
 }
 #else

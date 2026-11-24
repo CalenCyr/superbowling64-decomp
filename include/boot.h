@@ -170,8 +170,8 @@ extern u8 D_8005C0BE;               /* row of D_8005B134 the cursor moves by */
 extern u8 D_8005B134[3][4];         /* pixels a frame the cursor moves by, from the least to the most tilt */
 extern u8 D_8005B198;               /* when set, the cursor stays */
 extern u8 D_8005B188;               /* blank frames drawn before the next scene loads */
-extern u8 D_8005B0E0;               /* the scene loaded (D_8005C0B6); 0xFF at boot */
-extern u16 D_8005B180[4];           /* per demo (D_8005C0F0): the image the demo shows its title by */
+extern u8 D_8005B0E0;               /* the scene loaded (game_scene); 0xFF at boot */
+extern u16 D_8005B180[4];           /* per demo (game_demo): the image the demo shows its title by */
 extern Gfx D_8010A2C8[];            /* display lists of the KNSTATICSYS file each frame starts with */
 extern Gfx D_8010A2A0[];
 

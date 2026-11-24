@@ -16,7 +16,7 @@ nothing calls (gcc 2.7 emits an extern inline function).
 */
 inline void GA_CountFrame( void ) {
     ga_frameCount++;
-    if ( ( D_8005C160 & 0xF ) == 3 ) {
+    if ( ( game_mode & 0xF ) == 3 ) {
         ( (unkImage_t *)D_800F80B0[1673].data )->unk_07 = D_8009CFB0;
         ( (unkImage_t *)D_800F80B0[1674].data )->unk_07 = D_8009CFB0;
     }
@@ -27,7 +27,7 @@ inline void GA_CountFrame( void ) {
 GA_SetPlayerObjectFlags
 
 With set nonzero, gives each player's scene object (140 on) the flag bits of the low nibble of its
-D_8005C0E4 entry.
+game_players entry.
 ================
 */
 void GA_SetPlayerObjectFlags( s32 set ) {
@@ -36,8 +36,8 @@ void GA_SetPlayerObjectFlags( s32 set ) {
     if ( !set ) {
         return;
     }
-    for ( i = 0; i < D_8005C161; i++ ) {
-        switch ( D_8005C0E4[i] & 0xF ) {
+    for ( i = 0; i < game_numPlayers; i++ ) {
+        switch ( game_players[i] & 0xF ) {
         case 1:
             ( (sceneObject_t *)D_800EA120[140 + i] )->flags |= 0x1400;
             break;
@@ -80,7 +80,7 @@ void func_80122470_gacode( void ) {
 func_801224F8_gacode
 
 Like func_80122BD8_gacode, then on every other frame puts a 0x300 effect near each lane's ball while that
-ball's state is 1 (the second lane only when D_8005C162 is 1).
+ball's state is 1 (the second lane only when game_lastTeam is 1).
 ================
 */
 void func_801224F8_gacode( void ) {
@@ -93,7 +93,7 @@ void func_801224F8_gacode( void ) {
         Scene_StartPuff( 0x300, D_800E6560[0][0] + guRandom() % 20 - 10.0f,
                        D_800E6560[0][1] - 10.0f + guRandom() % 20 - 10.0f, D_800E6560[0][2] + 10.0f );
     }
-    if ( D_800DF595[1] == 1 && D_8005C162 == 1 && ( ga_frameCount & 1 ) ) {
+    if ( D_800DF595[1] == 1 && game_lastTeam == 1 && ( ga_frameCount & 1 ) ) {
         Scene_StartPuff( 0x300, D_800E6560[1][0] + guRandom() % 20 - 10.0f,
                        D_800E6560[1][1] - 10.0f + guRandom() % 20 - 10.0f, D_800E6560[1][2] + 10.0f );
     }
@@ -249,7 +249,7 @@ void func_80123004_gacode( void ) {
     }
     ( (fileRefB_t *)D_800F80B0[883].data )->scroll[0]--;
     GA_CountFrame();
-    if ( D_8005C162 == 1 ) {
+    if ( game_lastTeam == 1 ) {
         if ( D_800DF595[0] == 3 && ( ga_frameCount & 3 ) == 0 ) {
             Scene_StartPuff( 0x301, D_800E6560[0][0] + guRandom() % 10 - 5.0f,
                            D_800E6560[0][1] + 15.0f + guRandom() % 10 - 5.0f, D_800E6560[0][2] + 10.0f );

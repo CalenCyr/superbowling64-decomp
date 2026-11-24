@@ -363,10 +363,10 @@ void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s
         Draw_Image( 0x87D, x, y );
         rowY = y + 2;
         if ( last == 9 && throw != 0 ) {
-            if ( ( D_80099458[player][9] & 1 ) && ( D_80099458[player][9] & 0x10 ) ) {
+            if ( ( game_frameFlags[player][9] & 1 ) && ( game_frameFlags[player][9] & 0x10 ) ) {
                 Draw_Image( 0x85F, x - 1, y );
             }
-            pins = D_80066E18[player][frame];
+            pins = game_firstRolls[player][frame];
             if ( pins == -1 ) {
                 roll = -2;
             } else {
@@ -375,29 +375,29 @@ void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s
             Menu_DrawImage( Score_RollImage( roll, FALSE ), x + 1, rowY );
         }
         if ( last == 9 && ( throw >= 2 || arg4 ) ) {
-            if ( ( D_80099458[player][frame] & 1 ) && ( D_80099458[player][frame] & 0x20 ) ) {
+            if ( ( game_frameFlags[player][frame] & 1 ) && ( game_frameFlags[player][frame] & 0x20 ) ) {
                 Draw_Image( 0x85F, x + 9, rowY - 2 );
             }
-            pins = D_800A3020[player][frame];
-            roll = pins == -1 && D_80066E18[player][frame] == pins ? -2 : pins;
+            pins = game_secondRolls[player][frame];
+            roll = pins == -1 && game_firstRolls[player][frame] == pins ? -2 : pins;
             foul = TRUE;
             if ( roll == 0 ) {
-                foul = D_80066E18[player][frame] != -2;
+                foul = game_firstRolls[player][frame] != -2;
             }
             Menu_DrawImage( Score_RollImage( roll, foul ), x + 11, rowY );
         }
         if ( arg4 ) {
-            if ( D_80066E18[player][frame] == -1 || D_800A3020[player][frame] == -1 ) {
+            if ( game_firstRolls[player][frame] == -1 || game_secondRolls[player][frame] == -1 ) {
                 pins = D_800994B8[player];
-                roll = pins == -1 && D_800A3020[player][frame] == pins ? -2 : pins;
+                roll = pins == -1 && game_secondRolls[player][frame] == pins ? -2 : pins;
                 foul = TRUE;
                 if ( roll == 0 ) {
-                    foul = D_800A3020[player][frame] >= 0;
+                    foul = game_secondRolls[player][frame] >= 0;
                 }
                 Menu_DrawImage( Score_RollImage( roll, foul ), x + 21, rowY );
             }
             rowY += 9;
-            pins = D_800DF630[player][frame];
+            pins = game_frameScores[player][frame];
             if ( pins >= 0 ) {
                 pins += D_800DF5D0[player];
             }
@@ -407,15 +407,15 @@ void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 arg4, s16 x, s
         Draw_Image( 0x87E, x, y );
         rowY = y + 2;
         if ( last > frame || ( last == frame && throw != 0 ) ) {
-            if ( D_80099458[player][frame] != 0 ) {
+            if ( game_frameFlags[player][frame] != 0 ) {
                 Draw_Image( 0x85F, x - 1, y );
             }
-            Menu_DrawImage( Score_RollImage( D_80066E18[player][frame], FALSE ), x + 1, rowY );
+            Menu_DrawImage( Score_RollImage( game_firstRolls[player][frame], FALSE ), x + 1, rowY );
         }
         if ( frame < last ) {
-            Menu_DrawImage( Score_RollImage( D_800A3020[player][frame], TRUE ), x + 11, rowY );
+            Menu_DrawImage( Score_RollImage( game_secondRolls[player][frame], TRUE ), x + 11, rowY );
             rowY += 9;
-            pins = D_800DF630[player][frame];
+            pins = game_frameScores[player][frame];
             if ( pins >= 0 ) {
                 pins += D_800DF5D0[player];
             }
@@ -570,7 +570,7 @@ void Score_DrawTeamBoard( u8 mode, u8 all, s16 x, s16 y ) {
     }
     Score_DrawFrameHeaders( 10, 0, x + 0x38, y );
     y += 9;
-    count = mode == 1 ? D_8005C161 / 2 : D_8005C161;
+    count = mode == 1 ? game_numPlayers / 2 : game_numPlayers;
     for ( i = 0; i < count; i++ ) {
         frameX = x;
         if ( mode == 2 && i == 2 ) {
@@ -579,24 +579,24 @@ void Score_DrawTeamBoard( u8 mode, u8 all, s16 x, s16 y ) {
         }
         if ( mode == 1 ) {
             player = i == 1 ? 2 : 0;
-            Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, frameX, y );
-            Menu_DrawNamePlate( player + 1, D_8005C0E4[player + 1] >> 7, D_80068218[player + 1].chars, frameX, y + 20 );
+            Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, frameX, y );
+            Menu_DrawNamePlate( player + 1, game_players[player + 1] >> 7, game_playerNames[player + 1].chars, frameX, y + 20 );
         } else {
-            Menu_DrawNamePlate( i, D_8005C0E4[i] >> 7, D_80068218[i].chars, frameX, y );
+            Menu_DrawNamePlate( i, game_players[i] >> 7, game_playerNames[i].chars, frameX, y );
         }
         frameX += 0x38;
         if ( mode == 1 ) {
             y += 10;
         }
         for ( frame = 0; frame < 9; frame++ ) {
-            Score_DrawFrame( i, frame, all ? 9 : D_8009D19C[i], D_80068A50[i], D_800994BE[i], frameX, y );
+            Score_DrawFrame( i, frame, all ? 9 : game_frame[i], D_80068A50[i], game_playerDone[i], frameX, y );
             frameX += 20;
         }
-        Score_DrawFrame( i, 9, all ? 9 : D_8009D19C[i], D_80068A50[i], D_800994BE[i], frameX, y );
+        Score_DrawFrame( i, 9, all ? 9 : game_frame[i], D_80068A50[i], game_playerDone[i], frameX, y );
         y += mode == 1 ? 40 : 20;
         if ( mode == 2 && i % 2 == 1 ) {
             Draw_Image( i == 1 ? 0xA13 : 0x9FC, 0xCC, y );
-            Score_DrawNumber( D_800EA090[i - 1] + D_800EA090[i], 0x10E, y + 4 );
+            Score_DrawNumber( game_totals[i - 1] + game_totals[i], 0x10E, y + 4 );
         }
     }
 }
@@ -622,7 +622,7 @@ void Score_DrawParCard( u8 kind, u8 all, s16 x, s16 y ) {
 
     Draw_Image( !kind ? 0xA1C : 0xA2D, x, y );
     rowY = y + 16;
-    for ( row = 0; row < D_8005C161 + 2; row++ ) {
+    for ( row = 0; row < game_numPlayers + 2; row++ ) {
         player = row - 2;
         rowX = x;
         switch ( row ) {
@@ -633,7 +633,7 @@ void Score_DrawParCard( u8 kind, u8 all, s16 x, s16 y ) {
             Draw_Image( 0xA2C, rowX, rowY );
             break;
         default:
-            Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, rowX, rowY );
+            Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, rowX, rowY );
             break;
         }
         rowX += 0x38;
@@ -644,7 +644,7 @@ void Score_DrawParCard( u8 kind, u8 all, s16 x, s16 y ) {
                 Draw_Image( D_8005CB2C[i], rowX + 6, rowY + 3 );
                 break;
             case 1:
-                Score_DrawNumber( D_80099458[0][i], rowX - 6, rowY + 4 );
+                Score_DrawNumber( game_frameFlags[0][i], rowX - 6, rowY + 4 );
                 break;
             default:
                 Score_DrawCardFrame( player, i, kind, all, rowX, rowY );
@@ -658,7 +658,7 @@ void Score_DrawParCard( u8 kind, u8 all, s16 x, s16 y ) {
             Draw_Image( 0x9E8, rowX, rowY );
             break;
         case 1:
-            Score_DrawNumber( D_8009CF80[0], rowX + 2, rowY + 4 );
+            Score_DrawNumber( game_splits[0], rowX + 2, rowY + 4 );
             break;
         default:
             Score_DrawTotal( player, kind, rowX, rowY );
@@ -673,7 +673,7 @@ void Score_DrawParCard( u8 kind, u8 all, s16 x, s16 y ) {
 Score_DrawCardFrame
 
 Draws the player's frame at (x, y), once it is played or when all is set: kind 0 its score, signed; otherwise
-the image of its D_800A3020 entry.
+the image of its game_secondRolls entry.
 ================
 */
 void Score_DrawCardFrame( s32 player, u8 frame, u8 kind, u8 all, s16 x, s16 y ) {
@@ -682,14 +682,14 @@ void Score_DrawCardFrame( s32 player, u8 frame, u8 kind, u8 all, s16 x, s16 y ) 
     s32 sign;
 
     if ( kind == 0 ) {
-        score = D_800DF630[player][frame];
-        if ( all || frame < D_8009D19C[player] ) {
+        score = game_frameScores[player][frame];
+        if ( all || frame < game_frame[player] ) {
             sign = score < 0 ? 0 : score > 0 ? 2 : 1;
             Draw_Image( D_8005CB58[sign], x + 3, y + 4 );
             Score_DrawNumber( score < 0 ? -score : score, x - 2, y + 7 );
         }
-    } else if ( all || frame < D_8009D19C[player] ) {
-        Menu_DrawImage( images[D_800A3020[player][frame]], x + 4, y + 3 );
+    } else if ( all || frame < game_frame[player] ) {
+        Menu_DrawImage( images[game_secondRolls[player][frame]], x + 4, y + 3 );
     }
 }
 
@@ -710,7 +710,7 @@ void Score_DrawTotal( s32 player, u8 duel, s16 x, s16 y ) {
     s32 sign;
 
     if ( !duel ) {
-        score = D_800EA090[player];
+        score = game_totals[player];
         sign = score < 0 ? 0 : score > 0 ? 2 : 1;
         Draw_Image( D_8005CB58[sign], x + 4, y + 4 );
         Score_DrawNumber( score < 0 ? -score : score, x + 8, y + 7 );
@@ -741,13 +741,13 @@ void Score_DrawAllBoards( s32 arg0, s16 x, s16 y ) {
 
     Score_DrawFrameHeaders( 10, 0, x + 0x38, y );
     y += 9;
-    for ( player = 0; player < D_8005C161; player++ ) {
+    for ( player = 0; player < game_numPlayers; player++ ) {
         frameX = x;
-        Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, frameX, y );
+        Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, frameX, y );
         frameX += 0x38;
         for ( i = 0; i < 10; i++ ) {
             Draw_Image( i == 9 ? 0xA36 : 0xAD3, frameX, y );
-            if ( i < D_8009D19C[player] ) {
+            if ( i < game_frame[player] ) {
                 Draw_Image( 0x9EB, frameX + ( i == 9 ? 10 : 5 ), y + 3 );
             }
             frameX += 20;
@@ -771,13 +771,13 @@ void Score_DrawPlayerBoard( s32 player, s16 x, s16 y ) {
     Score_DrawFrameHeaders( 10, 0, x + 0x38, y );
     y += 9;
     frameX = x;
-    Menu_DrawNamePlate( player, D_8005C0E4[player] >> 7, D_80068218[player].chars, frameX, y );
+    Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, frameX, y );
     frameX += 0x38;
     for ( i = 0; i < 9; i++ ) {
-        Score_DrawFrame( player, i, 9, D_80068A50[player], D_800994BE[player], frameX, y );
+        Score_DrawFrame( player, i, 9, D_80068A50[player], game_playerDone[player], frameX, y );
         frameX += 20;
     }
-    Score_DrawFrame( player, 9, 9, D_80068A50[player], D_800994BE[player], frameX, y );
+    Score_DrawFrame( player, 9, 9, D_80068A50[player], game_playerDone[player], frameX, y );
 }
 
 /*

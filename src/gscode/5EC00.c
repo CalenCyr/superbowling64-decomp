@@ -53,15 +53,15 @@ s32 GS_TeamSelect( void ) {
     unlocked = D_8009D098.unlocks;
     memset( slots, 0xFF, sizeof( slots ) );
 
-    if ( D_8005C162 == 0 ) {
-        for ( i = 0; i < D_8005C161; i++ ) {
+    if ( game_lastTeam == 0 ) {
+        for ( i = 0; i < game_numPlayers; i++ ) {
             slots[0][i] = i;
         }
         Menu_SetItem( D_8011FA80_gscode, 12, 0x8CF, MENU_NONE, MENU_NONE, MENU_NONE );
         Menu_SetItem( D_8011FA80_gscode, 13, 0x8D0, 0x78, 0x30, MENU_NONE );
         Menu_SetItem( D_8011FA80_gscode, 14, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
         Menu_SetItem( D_8011FA80_gscode, 15, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
-        switch ( D_8005C161 ) {
+        switch ( game_numPlayers ) {
         case 1:
             Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x5A, 0xFF );
             Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
@@ -92,11 +92,11 @@ s32 GS_TeamSelect( void ) {
         Menu_SetItem( D_8011FA80_gscode, 13, 0x8D1, 0x28, 0x2C, MENU_NONE );
         Menu_SetItem( D_8011FA80_gscode, 14, 0x8A8, MENU_NONE, MENU_NONE, 0x99 );
         Menu_SetItem( D_8011FA80_gscode, 15, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
-        switch ( D_8005C161 ) {
+        switch ( game_numPlayers ) {
         case 2:
-            if ( ( D_8005C160 & 0xF ) != 1 ) {
+            if ( ( game_mode & 0xF ) != 1 ) {
                 slots[0][0] = 0;
-                if ( !( D_8005C0E4[1] >> 7 ) ) {
+                if ( !( game_players[1] >> 7 ) ) {
                     slots[1][0] = 1;
                 } else {
                     slots[0][1] = 1;
@@ -116,7 +116,7 @@ s32 GS_TeamSelect( void ) {
         case 3:
             slots[0][0] = 0;
             slots[0][1] = 1;
-            if ( !( D_8005C0E4[2] >> 7 ) ) {
+            if ( !( game_players[2] >> 7 ) ) {
                 slots[1][0] = 2;
             } else {
                 slots[0][2] = 2;
@@ -129,7 +129,7 @@ s32 GS_TeamSelect( void ) {
         case 4:
             slots[0][0] = 0;
             slots[0][1] = 1;
-            if ( !( D_8005C0E4[2] >> 7 ) || !( D_8005C0E4[3] >> 7 ) ) {
+            if ( !( game_players[2] >> 7 ) || !( game_players[3] >> 7 ) ) {
                 slots[1][0] = 2;
                 slots[1][1] = 3;
             } else {
@@ -144,7 +144,7 @@ s32 GS_TeamSelect( void ) {
         }
     }
 
-    switch ( D_8005C161 ) {
+    switch ( game_numPlayers ) {
     case 1:
         D_80120828_gscode[0][0] = 0x38;
         D_80120840_gscode[0][0] = 0x7A;
@@ -254,7 +254,7 @@ s32 GS_TeamSelect( void ) {
                     if ( player != 0xFF ) {
                     // RULE-EXCEPTION: R30, the character cursor shares j's register: retail allocates repeat and
                     // pad ahead of it, which a separate local reverses
-                    j = D_8005C0E4[player] & 0xF;
+                    j = game_players[player] & 0xF;
                     Menu_SetItem( D_8011FA80_gscode, player + 16, MENU_NONE, MENU_NONE, MENU_NONE, D_8009CFB0 );
 
                     if ( D_8011FC84_gscode[1] == 0x80 ) {
@@ -269,8 +269,8 @@ s32 GS_TeamSelect( void ) {
                                 j = 7;
                             }
                         } while ( !( ( unlocked >> j ) & 1 ) );
-                        D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] =
-                            ( D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | j;
+                        game_players[slots[i][D_8011FC84_gscode[i]]] =
+                            ( game_players[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | j;
                         Sound_PlaySe( SE_CURSOR, 0 );
                     }
                     if ( repeat & R_JPAD ) {
@@ -280,8 +280,8 @@ s32 GS_TeamSelect( void ) {
                                 j = 0;
                             }
                         } while ( !( ( unlocked >> j ) & 1 ) );
-                        D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] =
-                            ( D_8005C0E4[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | j;
+                        game_players[slots[i][D_8011FC84_gscode[i]]] =
+                            ( game_players[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | j;
                         Sound_PlaySe( SE_CURSOR, 0 );
                     }
 
@@ -293,21 +293,21 @@ s32 GS_TeamSelect( void ) {
                     if ( pad & ( A_BUTTON | Z_TRIG ) ) {
                         Sound_PlaySe( SE_DECIDE, 0 );
                         D_8011FC84_gscode[i]++;
-                        if ( ( D_8005C160 & 0xF ) == 1 && D_8011FC84_gscode[i] == 1 ) {
-                            D_8005C0E4[1] = ( D_8005C0E4[1] & 0xF0 ) | 1;
+                        if ( ( game_mode & 0xF ) == 1 && D_8011FC84_gscode[i] == 1 ) {
+                            game_players[1] = ( game_players[1] & 0xF0 ) | 1;
                             unlocked = GS_UnlockMask( D_8009D098.unlocks );
                             /* BUG: this reuses the team loop's counter, so the team loop goes on from the character
                                found (or ends) */
                             for ( i = 0; i < 8; i++ ) {
                                 if ( ( unlocked ^ D_8009D098.unlocks ) & ( 1 << i ) ) {
-                                    D_8005C0E4[1] = ( D_8005C0E4[1] & 0xF0 ) | i;
+                                    game_players[1] = ( game_players[1] & 0xF0 ) | i;
                                     break;
                                 }
                             }
                         }
                     }
                     if ( pad & B_BUTTON ) {
-                        if ( D_8005CB60 ) {
+                        if ( game_replay ) {
                             if ( D_8011FC84_gscode[i] ) {
                                 Sound_PlaySe( 2, 0 );
                                 D_8011FC84_gscode[i]--;
@@ -343,20 +343,20 @@ s32 GS_TeamSelect( void ) {
             break;
         case 1:
             if ( --D_801207B2_gscode == 0 ) {
-                if ( ( D_8005C160 & 0xF ) == 1 ) {
+                if ( ( game_mode & 0xF ) == 1 ) {
                     if ( D_8009D098.rumble ) {
                         GS_StartPakCheck();
                         D_8011FC81_gscode = 4;
                     } else {
-                        D_8005C0BF = 1;
+                        game_leaveState = 1;
                         D_8011FC81_gscode = CHOICE_TAKEN;
                     }
                 } else {
                     D_8011FC81_gscode = CHOICE_TAKEN;
                 }
-                for ( i = 0; i < D_8005C161; i++ ) {
-                    if ( ( D_8005C0E4[i] >> 7 ) || !( ( D_8005C0E4[i] >> 4 ) & 7 ) ) {
-                        D_80068218[i] = D_8005C0F8[D_8005C0E4[i] & 0xF];
+                for ( i = 0; i < game_numPlayers; i++ ) {
+                    if ( ( game_players[i] >> 7 ) || !( ( game_players[i] >> 4 ) & 7 ) ) {
+                        game_playerNames[i] = game_defaultNames[game_players[i] & 0xF];
                     }
                 }
             }
@@ -379,17 +379,17 @@ s32 GS_TeamSelect( void ) {
     for ( i = 0; i < 8; i++ ) {
         Menu_SetItem( D_8011FB98_gscode, i + 24, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     }
-    for ( i = 0; i < D_8005C161; i++ ) {
+    for ( i = 0; i < game_numPlayers; i++ ) {
         if ( shown[i] ) {
-            if ( !( D_8005C0E4[i] >> 7 ) ) {
-                Menu_SetItem( D_8011FA80_gscode, i + 8, D_8011FC68_gscode[i], ( D_8005C0E4[i] & 0xF ) * 32 + 32,
+            if ( !( game_players[i] >> 7 ) ) {
+                Menu_SetItem( D_8011FA80_gscode, i + 8, D_8011FC68_gscode[i], ( game_players[i] & 0xF ) * 32 + 32,
                                MENU_NONE, 0xFF );
             } else {
-                Menu_SetItem( D_8011FA80_gscode, i + 8, D_8011FC70_gscode[i], ( D_8005C0E4[i] & 0xF ) * 32 + 32,
+                Menu_SetItem( D_8011FA80_gscode, i + 8, D_8011FC70_gscode[i], ( game_players[i] & 0xF ) * 32 + 32,
                                MENU_NONE, 0xFF );
             }
-            Menu_SetItem( D_8011FA80_gscode, i + 16, D_8011FC34_gscode[D_8005C0E4[i] & 0xF],
-                           D_8011FC24_gscode[D_8005C0E4[i] & 0xF], MENU_NONE, MENU_NONE );
+            Menu_SetItem( D_8011FA80_gscode, i + 16, D_8011FC34_gscode[game_players[i] & 0xF],
+                           D_8011FC24_gscode[game_players[i] & 0xF], MENU_NONE, MENU_NONE );
         } else {
             Menu_SetItem( D_8011FA80_gscode, i + 16, D_8011FC78_gscode[i], 0x82, MENU_NONE, MENU_NONE );
         }
@@ -410,8 +410,8 @@ s32 GS_TeamSelect( void ) {
 
     if ( D_8011FC81_gscode == CHOICE_RUN ) {
         for ( i = 0; i < 4; i++ ) {
-            if ( i < D_8005C161 ) {
-                character = D_8005C0E4[i] & 0xF;
+            if ( i < game_numPlayers ) {
+                character = game_players[i] & 0xF;
                 if ( shown[i] ) {
                     ( (sceneObject_t *)D_800EA120[10 + i] )->viewMask = 1;
                     if ( D_801207B4_gscode[i] != character ) {
@@ -434,9 +434,9 @@ s32 GS_TeamSelect( void ) {
             }
         }
         func_8002A2F0();
-        for ( i = 0; i < D_8005C161; i++ ) {
+        for ( i = 0; i < game_numPlayers; i++ ) {
             if ( shown[i] ) {
-                character = D_8005C0E4[i] & 0xF;
+                character = game_players[i] & 0xF;
                 for ( j = 0; j < 3; j++ ) {
                     if ( D_80120818_gscode[i][j] < D_8011FC50_gscode[character][j] ) {
                         D_80120818_gscode[i][j]++;
@@ -487,13 +487,13 @@ s32 GS_TeamSelect( void ) {
         D_8011FA80_gscode[5].slide = SLIDE_RIGHT;
         D_8011FC80_gscode += 2;
         if ( D_8011FC80_gscode == 30 ) {
-            if ( D_8005C0BF == 1 ) {
-                if ( D_8005C0C0 != 0xFF ) {
+            if ( game_leaveState == 1 ) {
+                if ( game_fade != 0xFF ) {
                     D_8011FC80_gscode = 28;
                     return 0;
                 }
-                D_8005C0BF = 2;
-                D_8005C0C0 = 0x107;
+                game_leaveState = 2;
+                game_fade = 0x107;
             }
             for ( i = 0; i < 4; i++ ) {
                 shown[i] = 0;
@@ -512,7 +512,7 @@ s32 GS_TeamSelect( void ) {
         break;
     case 4:
         if ( GS_PakCheck() ) {
-            D_8005C0BF = 1;
+            game_leaveState = 1;
             D_8011FC81_gscode = CHOICE_TAKEN;
         }
         break;

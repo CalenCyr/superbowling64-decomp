@@ -37,8 +37,8 @@ extern u8 rs_pinPage;            /* page of the pin diagrams: 0 frames 1-9, 1 th
 extern u8 rs_ranks[4];           /* per player: rank by score, 1 the best */
 extern u16 rs_buttonsPressed;    /* buttons pressed this frame (0 once leaving) */
 extern u16 rs_dpadPressed;       /* D-pad presses this frame (0 once leaving) */
-extern u8 D_801142B4_rscode;     /* D_8005C160 >> 6 */
-extern u8 rs_nextScene;          /* copied back to D_8005C0B6 on leaving */
+extern u8 D_801142B4_rscode;     /* game_mode >> 6 */
+extern u8 rs_nextScene;          /* copied back to game_scene on leaving */
 extern rsState_t rs_state;       /* current state */
 extern rsState_t rs_returnState; /* state to return to */
 

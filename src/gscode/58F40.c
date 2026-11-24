@@ -8,7 +8,7 @@
 ================
 GS_Init
 
-Entry of the overlay: starts BGM 1; coming back from a game (D_8005CB60 set) opens screen 6, else clears
+Entry of the overlay: starts BGM 1; coming back from a game (game_replay set) opens screen 6, else clears
 the players and opens screen 0.
 ================
 */
@@ -16,12 +16,12 @@ void GS_Init( void ) {
     s32 i;
 
     Sound_PlayBgm( 1 );
-    if ( !D_8005CB60 ) {
+    if ( !game_replay ) {
         for ( i = 0; i < 4; i++ ) {
-            D_8005C0E4[i] = 0;
+            game_players[i] = 0;
             D_800DF5D0[i] = 0;
         }
-        D_8005C163 = 0;
+        game_stage = 0;
         gs_screen = 0;
     } else {
         gs_screen = 6;
@@ -65,26 +65,26 @@ s32 GS_Frame( void ) {
     case 0:
         if ( GS_ModeMenu() == 1 ) {
             GS_PushScreen( 0 );
-            switch ( D_8005C160 & 0xF ) {
+            switch ( game_mode & 0xF ) {
             case 0:
                 gs_screen = 1;
                 break;
             case 1:
-                D_8005C162 = 1;
-                D_8005C161 = 2;
-                D_8005C0E4[1] = 0x81;
-                D_8005C0E4[0] = 0;
+                game_lastTeam = 1;
+                game_numPlayers = 2;
+                game_players[1] = 0x81;
+                game_players[0] = 0;
                 gs_screen = 4;
                 break;
             case 2:
-                D_8005C161 = 1;
-                D_8005C162 = 0;
-                D_8005C0E4[0] = 0;
+                game_numPlayers = 1;
+                game_lastTeam = 0;
+                game_players[0] = 0;
                 gs_screen = 6;
                 break;
             case 3:
-                D_8005C162 = 1;
-                D_8005C161 = 2;
+                game_lastTeam = 1;
+                game_numPlayers = 2;
                 gs_screen = 5;
                 break;
             case 4:
@@ -97,7 +97,7 @@ s32 GS_Frame( void ) {
         switch ( GS_SubModeMenu() ) {
         case 1:
             GS_PushScreen( 1 );
-            switch ( ( D_8005C160 >> 4 ) & 3 ) {
+            switch ( ( game_mode >> 4 ) & 3 ) {
             case 0:
                 gs_screen = 2;
                 break;
@@ -167,16 +167,16 @@ s32 GS_Frame( void ) {
         switch ( GS_TeamSelect() ) {
         case 1:
             GS_PushScreen( 6 );
-            switch ( D_8005C160 & 0xF ) {
+            switch ( game_mode & 0xF ) {
             case 0:
             case 2:
             case 3:
                 gs_screen = 7;
                 break;
             case 1:
-                D_8005C0BF = 2;
-                D_8005C0B6 = 0;
-                D_8005C163 = D_8005C0E4[1] & 0xF;
+                game_leaveState = 2;
+                game_scene = 0;
+                game_stage = game_players[1] & 0xF;
                 break;
             }
             break;
@@ -188,8 +188,8 @@ s32 GS_Frame( void ) {
     case 7:
         switch ( GS_CharacterSelect() ) {
         case 1:
-            D_8005C0BF = 2;
-            D_8005C0B6 = 0;
+            game_leaveState = 2;
+            game_scene = 0;
             break;
         case 2:
             GS_PopScreen();

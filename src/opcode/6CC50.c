@@ -120,7 +120,7 @@ s32 OP_PakScreen( void ) {
         }
         Txt_NumberToGlyphs( glyphs, op_freePages, 3 );
         Txt_DrawGlyphs( &D_800F8094, 0xFE + i * 8, 0xA9, 8, glyphs );
-        if ( D_8005C0BF == 0 ) {
+        if ( game_leaveState == 0 ) {
             switch ( op_pakState ) {
             case 0:
                 if ( D_800E4D62 & ( A_BUTTON | Z_TRIG ) ) {
@@ -128,7 +128,7 @@ s32 OP_PakScreen( void ) {
                     if ( op_promptChoice == 0 ) {
                         op_pakState = 1;
                     } else {
-                        D_8005C0BF = 1;
+                        game_leaveState = 1;
                     }
                 }
                 if ( ( D_800E6758 & L_JPAD ) && op_promptChoice == 1 ) {
@@ -236,9 +236,9 @@ s32 OP_PakScreen( void ) {
                 break;
             }
         }
-        if ( D_8005C0BF == 1 && D_8005C0C0 == 0xFF ) {
-            D_8005C0BF = 2;
-            D_8005C0C0 = 0x107;
+        if ( game_leaveState == 1 && game_fade == 0xFF ) {
+            game_leaveState = 2;
+            game_fade = 0x107;
             return FALSE;
         }
         break;

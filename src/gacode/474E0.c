@@ -740,50 +740,50 @@ f32 GA_FloorHeight( f32 x, f32 z, vec3_t normal ) {
     f32 b;
     f32 height;
 
-    pos[0] = x + -D_80100100[0].originX;
-    pos[1] = z + -D_80100100[0].originZ;
-    cell[0] = (s16)pos[0] / D_80100100[0].stepX;
-    cell[1] = (s16)pos[1] / D_80100100[0].stepZ;
+    pos[0] = x + -game_floorGrids[0].originX;
+    pos[1] = z + -game_floorGrids[0].originZ;
+    cell[0] = (s16)pos[0] / game_floorGrids[0].stepX;
+    cell[1] = (s16)pos[1] / game_floorGrids[0].stepZ;
     if ( cell[0] < 0 ) {
         cell[0] = 0;
-    } else if ( cell[0] >= D_80100100[0].numX - 1 ) {
-        cell[0] = D_80100100[0].numX - 2;
+    } else if ( cell[0] >= game_floorGrids[0].numX - 1 ) {
+        cell[0] = game_floorGrids[0].numX - 2;
     }
     if ( cell[1] < 0 ) {
         cell[1] = 0;
-    } else if ( cell[1] >= D_80100100[0].numZ - 1 ) {
-        cell[1] = D_80100100[0].numZ - 2;
+    } else if ( cell[1] >= game_floorGrids[0].numZ - 1 ) {
+        cell[1] = game_floorGrids[0].numZ - 2;
     }
-    h[0] = D_80100100[0].heights[cell[1] * D_80100100[0].numX + cell[0]];
-    h[1] = D_80100100[0].heights[cell[1] * D_80100100[0].numX + cell[0] + 1];
-    h[2] = D_80100100[0].heights[( cell[1] + 1 ) * D_80100100[0].numX + cell[0]];
-    h[3] = D_80100100[0].heights[( cell[1] + 1 ) * D_80100100[0].numX + cell[0] + 1];
+    h[0] = game_floorGrids[0].heights[cell[1] * game_floorGrids[0].numX + cell[0]];
+    h[1] = game_floorGrids[0].heights[cell[1] * game_floorGrids[0].numX + cell[0] + 1];
+    h[2] = game_floorGrids[0].heights[( cell[1] + 1 ) * game_floorGrids[0].numX + cell[0]];
+    h[3] = game_floorGrids[0].heights[( cell[1] + 1 ) * game_floorGrids[0].numX + cell[0] + 1];
 
-    dx = pos[0] - cell[0] * D_80100100[0].stepX;
-    dz = pos[1] - cell[1] * D_80100100[0].stepZ;
-    edge = D_80100100[0].stepZ * dx / D_80100100[0].stepX;
+    dx = pos[0] - cell[0] * game_floorGrids[0].stepX;
+    dz = pos[1] - cell[1] * game_floorGrids[0].stepZ;
+    edge = game_floorGrids[0].stepZ * dx / game_floorGrids[0].stepX;
     if ( dz < edge && dx != 0.0f ) {
-        a = ( h[1] - h[0] ) * dx / D_80100100[0].stepX + h[0];
-        b = ( h[3] - h[0] ) * dx / D_80100100[0].stepX + h[0];
+        a = ( h[1] - h[0] ) * dx / game_floorGrids[0].stepX + h[0];
+        b = ( h[3] - h[0] ) * dx / game_floorGrids[0].stepX + h[0];
         height = ( b - a ) * dz / edge + a;
         if ( normal != 0 ) {
-            alongZ[2] = D_80100100[0].stepZ;
+            alongZ[2] = game_floorGrids[0].stepZ;
             alongZ[0] = 0.0f;
             alongX[2] = 0.0f;
-            alongX[0] = D_80100100[0].stepX;
+            alongX[0] = game_floorGrids[0].stepX;
             alongX[1] = h[1] - h[0];
             alongZ[1] = h[3] - h[1];
             GA_VecCrossNormal( normal, alongZ, alongX );
         }
     } else {
-        a = ( h[3] - h[0] ) * dx / D_80100100[0].stepX + h[0];
-        b = ( h[3] - h[2] ) * dx / D_80100100[0].stepX + h[2];
-        height = ( b - a ) * ( dz - edge ) / ( D_80100100[0].stepZ - edge ) + a;
+        a = ( h[3] - h[0] ) * dx / game_floorGrids[0].stepX + h[0];
+        b = ( h[3] - h[2] ) * dx / game_floorGrids[0].stepX + h[2];
+        height = ( b - a ) * ( dz - edge ) / ( game_floorGrids[0].stepZ - edge ) + a;
         if ( normal != 0 ) {
-            alongZ[2] = D_80100100[0].stepZ;
+            alongZ[2] = game_floorGrids[0].stepZ;
             alongZ[0] = 0.0f;
             alongX[2] = 0.0f;
-            alongX[0] = D_80100100[0].stepX;
+            alongX[0] = game_floorGrids[0].stepX;
             alongX[1] = h[3] - h[2];
             alongZ[1] = h[2] - h[0];
             GA_VecCrossNormal( normal, alongZ, alongX );
@@ -872,8 +872,8 @@ void GA_KeepInGrid( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, f32 cei
     motion->flags &= ~4;
     motion->flags &= ~1;
 
-    edge = (f32)( ( D_80100100[0].numZ - 1 ) * D_80100100[0].stepZ + D_80100100[0].originZ ) - 0.0002;
-    if ( spot->pos[2] > edge || spot->pos[2] < ( edge = D_80100100[0].originZ ) ) {
+    edge = (f32)( ( game_floorGrids[0].numZ - 1 ) * game_floorGrids[0].stepZ + game_floorGrids[0].originZ ) - 0.0002;
+    if ( spot->pos[2] > edge || spot->pos[2] < ( edge = game_floorGrids[0].originZ ) ) {
         spot->pos[2] -= spot->pos[2] - edge;
         if ( spot2->radius != 0.0f ) {
             spot2->pos[2] -= spot->pos[2] - edge;
@@ -882,8 +882,8 @@ void GA_KeepInGrid( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, f32 cei
         motion->flags |= 4;
     }
 
-    edge = ( D_80100100[0].numX - 1 ) * D_80100100[0].stepX + D_80100100[0].originX;
-    if ( spot->pos[0] > edge || spot->pos[0] < ( edge = D_80100100[0].originX ) ) {
+    edge = ( game_floorGrids[0].numX - 1 ) * game_floorGrids[0].stepX + game_floorGrids[0].originX;
+    if ( spot->pos[0] > edge || spot->pos[0] < ( edge = game_floorGrids[0].originX ) ) {
         spot->pos[0] -= spot->pos[0] - edge;
         if ( spot2->radius != 0.0f ) {
             spot2->pos[0] -= spot2->pos[0] - edge;
@@ -1230,7 +1230,7 @@ Starts sound id for a lane; returns its handle.
 u64 GA_PlayLaneSound( u8 lane, s32 id ) {
     u8 flags;
 
-    if ( D_8005C162 ) {
+    if ( game_lastTeam ) {
         flags = lane + 1;
     } else {
         flags = 0;
@@ -1275,9 +1275,9 @@ ball, as GA_ScoreSecondBall reads them). A strike before the tenth frame ends th
 */
 void GA_ScoreFirstBall( u8 player ) {
     if ( D_8012D8DA_gacode == 10 ) {
-        if ( D_8009D19C[player] == 9 ) {
-            D_80066E18[player][D_8009D19C[player]] = -1;
-            D_800DF630[player][D_8009D19C[player]] = -1;
+        if ( game_frame[player] == 9 ) {
+            game_firstRolls[player][game_frame[player]] = -1;
+            game_frameScores[player][game_frame[player]] = -1;
             switch ( D_8012CDE0_gacode[player] ) {
             case 0:
                 D_8012CDE0_gacode[player] = 5;
@@ -1285,8 +1285,8 @@ void GA_ScoreFirstBall( u8 player ) {
                 D_80068A50[player] = 1;
                 break;
             case 1:
-                D_800DF630[player][D_8009D19C[player] - 1] = D_800DF630[player][D_8009D19C[player] - 2] + 20;
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 1];
+                game_frameScores[player][game_frame[player] - 1] = game_frameScores[player][game_frame[player] - 2] + 20;
+                game_totals[player] = game_frameScores[player][game_frame[player] - 1];
                 D_8012CDE0_gacode[player] = 5;
                 D_8012D8DA_gacode = 0;
                 D_80068A50[player] = 1;
@@ -1297,54 +1297,54 @@ void GA_ScoreFirstBall( u8 player ) {
                 D_80068A50[player] = 1;
                 break;
             case 3:
-                D_800DF630[player][D_8009D19C[player] - 2] = D_800DF630[player][D_8009D19C[player] - 3] + 30;
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 2];
+                game_frameScores[player][game_frame[player] - 2] = game_frameScores[player][game_frame[player] - 3] + 30;
+                game_totals[player] = game_frameScores[player][game_frame[player] - 2];
                 D_8012CDE0_gacode[player] = 6;
                 D_8012D8DA_gacode = 0;
                 D_80068A50[player] = 1;
                 break;
             }
         } else {
-            D_80066E18[player][D_8009D19C[player]] = -1;
-            D_800A3020[player][D_8009D19C[player]] = -2;
-            D_800DF630[player][D_8009D19C[player]] = -1;
+            game_firstRolls[player][game_frame[player]] = -1;
+            game_secondRolls[player][game_frame[player]] = -2;
+            game_frameScores[player][game_frame[player]] = -1;
             switch ( D_8012CDE0_gacode[player] ) {
             case 0:
                 D_8012CDE0_gacode[player] = 2;
                 D_8012D8DA_gacode = 0;
                 D_80068A50[player] = 0;
-                D_8009D19C[player]++;
+                game_frame[player]++;
                 break;
             case 1:
-                D_800DF630[player][D_8009D19C[player] - 1] = D_800DF630[player][D_8009D19C[player] - 2] + 20;
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 1];
+                game_frameScores[player][game_frame[player] - 1] = game_frameScores[player][game_frame[player] - 2] + 20;
+                game_totals[player] = game_frameScores[player][game_frame[player] - 1];
                 D_8012CDE0_gacode[player] = 2;
                 D_8012D8DA_gacode = 0;
                 D_80068A50[player] = 0;
-                D_8009D19C[player]++;
+                game_frame[player]++;
                 break;
             case 2:
                 D_8012CDE0_gacode[player] = 3;
                 D_8012D8DA_gacode = 0;
                 D_80068A50[player] = 0;
-                D_8009D19C[player]++;
+                game_frame[player]++;
                 break;
             case 3:
-                if ( D_8009D19C[player] == 2 ) {
-                    D_800DF630[player][D_8009D19C[player] - 2] = 30;
+                if ( game_frame[player] == 2 ) {
+                    game_frameScores[player][game_frame[player] - 2] = 30;
                 } else {
-                    D_800DF630[player][D_8009D19C[player] - 2] = D_800DF630[player][D_8009D19C[player] - 3] + 30;
+                    game_frameScores[player][game_frame[player] - 2] = game_frameScores[player][game_frame[player] - 3] + 30;
                 }
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 2];
+                game_totals[player] = game_frameScores[player][game_frame[player] - 2];
                 D_8012CDE0_gacode[player] = 3;
                 D_8012D8DA_gacode = 0;
                 D_80068A50[player] = 0;
-                D_8009D19C[player]++;
+                game_frame[player]++;
                 break;
             }
         }
     } else {
-        D_80066E18[player][D_8009D19C[player]] = D_8012D8DA_gacode;
+        game_firstRolls[player][game_frame[player]] = D_8012D8DA_gacode;
         switch ( D_8012CDE0_gacode[player] ) {
         case 0:
             D_8012CDE0_gacode[player] = 0;
@@ -1352,9 +1352,9 @@ void GA_ScoreFirstBall( u8 player ) {
             D_80068A50[player] = 1;
             break;
         case 1:
-            D_800DF630[player][D_8009D19C[player] - 1] =
-                10 + D_80066E18[player][D_8009D19C[player]] + D_800DF630[player][D_8009D19C[player] - 2];
-            D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 1];
+            game_frameScores[player][game_frame[player] - 1] =
+                10 + game_firstRolls[player][game_frame[player]] + game_frameScores[player][game_frame[player] - 2];
+            game_totals[player] = game_frameScores[player][game_frame[player] - 1];
             D_8012CDE0_gacode[player] = 0;
             D_8012D8DA_gacode = 0;
             D_80068A50[player] = 1;
@@ -1365,13 +1365,13 @@ void GA_ScoreFirstBall( u8 player ) {
             D_80068A50[player] = 1;
             break;
         case 3:
-            if ( D_8009D19C[player] == 2 ) {
-                D_800DF630[player][D_8009D19C[player] - 2] = 20 + D_80066E18[player][D_8009D19C[player]];
+            if ( game_frame[player] == 2 ) {
+                game_frameScores[player][game_frame[player] - 2] = 20 + game_firstRolls[player][game_frame[player]];
             } else {
-                D_800DF630[player][D_8009D19C[player] - 2] =
-                    20 + D_80066E18[player][D_8009D19C[player]] + D_800DF630[player][D_8009D19C[player] - 3];
+                game_frameScores[player][game_frame[player] - 2] =
+                    20 + game_firstRolls[player][game_frame[player]] + game_frameScores[player][game_frame[player] - 3];
             }
-            D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 2];
+            game_totals[player] = game_frameScores[player][game_frame[player] - 2];
             D_8012CDE0_gacode[player] = 4;
             D_8012D8DA_gacode = 0;
             D_80068A50[player] = 1;
@@ -1392,12 +1392,12 @@ strike's bonus owed) a strike leaves 3, anything else 2, and the third ball foll
 */
 void GA_ScoreSecondBall( u8 player ) {
     if ( D_8012CDE0_gacode[player] == 0 || D_8012CDE0_gacode[player] == 4 ) {
-        if ( D_80066E18[player][D_8009D19C[player]] + D_8012D8DA_gacode == 10 ) {
-            D_800A3020[player][D_8009D19C[player]] = -1;
-            D_800DF630[player][D_8009D19C[player]] = -1;
+        if ( game_firstRolls[player][game_frame[player]] + D_8012D8DA_gacode == 10 ) {
+            game_secondRolls[player][game_frame[player]] = -1;
+            game_frameScores[player][game_frame[player]] = -1;
             switch ( D_8012CDE0_gacode[player] ) {
             case 0:
-                if ( D_8009D19C[player] == 9 ) {
+                if ( game_frame[player] == 9 ) {
                     D_8012CDE0_gacode[player] = 1;
                     D_8012D8DA_gacode = 0;
                     D_80068A50[player] = 2;
@@ -1405,13 +1405,13 @@ void GA_ScoreSecondBall( u8 player ) {
                     D_8012CDE0_gacode[player] = 1;
                     D_8012D8DA_gacode = 0;
                     D_80068A50[player] = 0;
-                    D_8009D19C[player]++;
+                    game_frame[player]++;
                 }
                 break;
             case 4:
-                D_800DF630[player][D_8009D19C[player] - 1] = D_800DF630[player][D_8009D19C[player] - 2] + 20;
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 1];
-                if ( D_8009D19C[player] == 9 ) {
+                game_frameScores[player][game_frame[player] - 1] = game_frameScores[player][game_frame[player] - 2] + 20;
+                game_totals[player] = game_frameScores[player][game_frame[player] - 1];
+                if ( game_frame[player] == 9 ) {
                     D_8012CDE0_gacode[player] = 1;
                     D_8012D8DA_gacode = 0;
                     D_80068A50[player] = 2;
@@ -1419,58 +1419,58 @@ void GA_ScoreSecondBall( u8 player ) {
                     D_8012CDE0_gacode[player] = 1;
                     D_8012D8DA_gacode = 0;
                     D_80068A50[player] = 0;
-                    D_8009D19C[player]++;
+                    game_frame[player]++;
                 }
                 break;
             }
         } else {
-            D_800A3020[player][D_8009D19C[player]] = D_8012D8DA_gacode;
+            game_secondRolls[player][game_frame[player]] = D_8012D8DA_gacode;
             if ( D_8012CDE0_gacode[player] == 4 ) {
-                if ( D_8009D19C[player] == 1 ) {
-                    D_800DF630[player][D_8009D19C[player] - 1] =
-                        10 + D_80066E18[player][D_8009D19C[player]] + D_800A3020[player][D_8009D19C[player]];
+                if ( game_frame[player] == 1 ) {
+                    game_frameScores[player][game_frame[player] - 1] =
+                        10 + game_firstRolls[player][game_frame[player]] + game_secondRolls[player][game_frame[player]];
                 } else {
-                    D_800DF630[player][D_8009D19C[player] - 1] = D_800DF630[player][D_8009D19C[player] - 2] +
-                        ( 10 + D_80066E18[player][D_8009D19C[player]] + D_800A3020[player][D_8009D19C[player]] );
+                    game_frameScores[player][game_frame[player] - 1] = game_frameScores[player][game_frame[player] - 2] +
+                        ( 10 + game_firstRolls[player][game_frame[player]] + game_secondRolls[player][game_frame[player]] );
                 }
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 1];
+                game_totals[player] = game_frameScores[player][game_frame[player] - 1];
             }
-            if ( D_8009D19C[player] == 0 ) {
-                D_800DF630[player][D_8009D19C[player]] =
-                    D_80066E18[player][D_8009D19C[player]] + D_800A3020[player][D_8009D19C[player]];
+            if ( game_frame[player] == 0 ) {
+                game_frameScores[player][game_frame[player]] =
+                    game_firstRolls[player][game_frame[player]] + game_secondRolls[player][game_frame[player]];
             } else {
-                D_800DF630[player][D_8009D19C[player]] = D_800DF630[player][D_8009D19C[player] - 1] +
-                    ( D_80066E18[player][D_8009D19C[player]] + D_800A3020[player][D_8009D19C[player]] );
+                game_frameScores[player][game_frame[player]] = game_frameScores[player][game_frame[player] - 1] +
+                    ( game_firstRolls[player][game_frame[player]] + game_secondRolls[player][game_frame[player]] );
             }
-            D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
-            if ( D_8009D19C[player] == 9 ) {
-                D_800994BE[player] = 1;
+            game_totals[player] = game_frameScores[player][game_frame[player]];
+            if ( game_frame[player] == 9 ) {
+                game_playerDone[player] = 1;
                 D_80068A50[player]++;
             } else {
                 D_8012CDE0_gacode[player] = 0;
                 D_8012D8DA_gacode = 0;
                 D_80068A50[player] = 0;
-                D_8009D19C[player]++;
+                game_frame[player]++;
             }
         }
     }
     if ( D_8012CDE0_gacode[player] == 5 || D_8012CDE0_gacode[player] == 6 ) {
         if ( D_8012D8DA_gacode == 10 ) {
-            D_800A3020[player][D_8009D19C[player]] = -1;
-            D_800DF630[player][D_8009D19C[player]] = -1;
+            game_secondRolls[player][game_frame[player]] = -1;
+            game_frameScores[player][game_frame[player]] = -1;
             if ( D_8012CDE0_gacode[player] == 6 ) {
-                D_800DF630[player][D_8009D19C[player] - 1] = D_800DF630[player][D_8009D19C[player] - 2] + 30;
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 1];
+                game_frameScores[player][game_frame[player] - 1] = game_frameScores[player][game_frame[player] - 2] + 30;
+                game_totals[player] = game_frameScores[player][game_frame[player] - 1];
             }
             D_8012CDE0_gacode[player] = 3;
             D_8012D8DA_gacode = 0;
             D_80068A50[player] = 2;
         } else {
-            D_800A3020[player][D_8009D19C[player]] = D_8012D8DA_gacode;
+            game_secondRolls[player][game_frame[player]] = D_8012D8DA_gacode;
             if ( D_8012CDE0_gacode[player] == 6 ) {
-                D_800DF630[player][D_8009D19C[player] - 1] =
-                    20 + D_800A3020[player][D_8009D19C[player]] + D_800DF630[player][D_8009D19C[player] - 2];
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player] - 1];
+                game_frameScores[player][game_frame[player] - 1] =
+                    20 + game_secondRolls[player][game_frame[player]] + game_frameScores[player][game_frame[player] - 2];
+                game_totals[player] = game_frameScores[player][game_frame[player] - 1];
             }
             D_8012CDE0_gacode[player] = 2;
             D_8012D8DA_gacode = 0;
@@ -1486,7 +1486,7 @@ GA_ScoreThirdBall
 Scores the third ball of player's frame (D_80068A50_gacode 2) from the D_8012D8DA_gacode pins it knocked
 down, by D_8012CDE0_gacode: 1 and 3 add 10 or 20 to the previous score plus the third ball (a strike
 counts 10 more), 2 adds 10 plus the second and third balls (20 when they make a spare). The third ball
-is stored in D_800994B8 (-1 for a strike or spare) and the player's game ends (D_800994BE).
+is stored in D_800994B8 (-1 for a strike or spare) and the player's game ends (game_playerDone).
 ================
 */
 void GA_ScoreThirdBall( u8 player ) {
@@ -1494,50 +1494,50 @@ void GA_ScoreThirdBall( u8 player ) {
         if ( D_8012D8DA_gacode == 10 ) {
             D_800994B8[player] = -1;
             if ( D_8012CDE0_gacode[player] == 1 ) {
-                D_800DF630[player][D_8009D19C[player]] = D_800DF630[player][D_8009D19C[player] - 1] + 20;
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
+                game_frameScores[player][game_frame[player]] = game_frameScores[player][game_frame[player] - 1] + 20;
+                game_totals[player] = game_frameScores[player][game_frame[player]];
                 D_80068A50[player]++;
-                D_800994BE[player] = 1;
+                game_playerDone[player] = 1;
             }
             if ( D_8012CDE0_gacode[player] == 3 ) {
-                D_800DF630[player][D_8009D19C[player]] = D_800DF630[player][D_8009D19C[player] - 1] + 30;
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
+                game_frameScores[player][game_frame[player]] = game_frameScores[player][game_frame[player] - 1] + 30;
+                game_totals[player] = game_frameScores[player][game_frame[player]];
                 D_80068A50[player]++;
-                D_800994BE[player] = 1;
+                game_playerDone[player] = 1;
             }
         } else {
             D_800994B8[player] = D_8012D8DA_gacode;
             if ( D_8012CDE0_gacode[player] == 1 ) {
-                D_800DF630[player][D_8009D19C[player]] =
-                    10 + D_800994B8[player] + D_800DF630[player][D_8009D19C[player] - 1];
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
+                game_frameScores[player][game_frame[player]] =
+                    10 + D_800994B8[player] + game_frameScores[player][game_frame[player] - 1];
+                game_totals[player] = game_frameScores[player][game_frame[player]];
                 D_80068A50[player]++;
-                D_800994BE[player] = 1;
+                game_playerDone[player] = 1;
             }
             if ( D_8012CDE0_gacode[player] == 3 ) {
-                D_800DF630[player][D_8009D19C[player]] =
-                    20 + D_800994B8[player] + D_800DF630[player][D_8009D19C[player] - 1];
-                D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
+                game_frameScores[player][game_frame[player]] =
+                    20 + D_800994B8[player] + game_frameScores[player][game_frame[player] - 1];
+                game_totals[player] = game_frameScores[player][game_frame[player]];
                 D_80068A50[player]++;
-                D_800994BE[player] = 1;
+                game_playerDone[player] = 1;
             }
         }
     }
     if ( D_8012CDE0_gacode[player] == 2 ) {
-        if ( D_800A3020[player][D_8009D19C[player]] + D_8012D8DA_gacode == 10 ) {
+        if ( game_secondRolls[player][game_frame[player]] + D_8012D8DA_gacode == 10 ) {
             D_800994B8[player] = -1;
-            D_800DF630[player][D_8009D19C[player]] = D_800DF630[player][D_8009D19C[player] - 1] + 20;
-            D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
+            game_frameScores[player][game_frame[player]] = game_frameScores[player][game_frame[player] - 1] + 20;
+            game_totals[player] = game_frameScores[player][game_frame[player]];
             D_80068A50[player]++;
-            D_800994BE[player] = 1;
+            game_playerDone[player] = 1;
         } else {
             D_800994B8[player] = D_8012D8DA_gacode;
-            D_800DF630[player][D_8009D19C[player]] =
-                10 + D_800A3020[player][D_8009D19C[player]] + D_800994B8[player] +
-                D_800DF630[player][D_8009D19C[player] - 1];
-            D_800EA090[player] = D_800DF630[player][D_8009D19C[player]];
+            game_frameScores[player][game_frame[player]] =
+                10 + game_secondRolls[player][game_frame[player]] + D_800994B8[player] +
+                game_frameScores[player][game_frame[player] - 1];
+            game_totals[player] = game_frameScores[player][game_frame[player]];
             D_80068A50[player]++;
-            D_800994BE[player] = 1;
+            game_playerDone[player] = 1;
         }
     }
 }
@@ -1555,25 +1555,25 @@ void GA_ClearScores( void ) {
 
     for ( player = 0; player < 4; player++ ) {
         for ( frame = 0; frame < 10; frame++ ) {
-            D_80066E18[player][frame] = 0;
-            D_800A3020[player][frame] = 0;
-            D_80099458[player][frame] = 0;
-            D_800DF630[player][frame] = 0;
+            game_firstRolls[player][frame] = 0;
+            game_secondRolls[player][frame] = 0;
+            game_frameFlags[player][frame] = 0;
+            game_frameScores[player][frame] = 0;
         }
         for ( frame = 0; frame < 12; frame++ ) {
             D_800A3050[player][frame] = 0;
             D_800F7C18[player][frame] = 0;
         }
-        D_800DF6B4[player] = 0;
-        D_8009D088[player] = 0;
-        D_8009CF80[player] = 0;
-        D_800EA090[player] = 0;
+        game_strikes[player] = 0;
+        game_spares[player] = 0;
+        game_splits[player] = 0;
+        game_totals[player] = 0;
         D_800994B8[player] = 0;
-        D_8009D19C[player] = 0;
+        game_frame[player] = 0;
         D_80068A50[player] = 0;
         D_8012CDE0_gacode[player] = 0;
-        D_800994BE[player] = 0;
-        D_800A304C[player] = 0;
+        game_playerDone[player] = 0;
+        game_strikeRun[player] = 0;
         D_80066C00.unk_20[player] = 0;
     }
     D_8012D8DA_gacode = 0;
@@ -1612,18 +1612,18 @@ reaches 0.
 ================
 */
 s32 GA_EndFrame( u8 player, s32 done ) {
-    u8 frame = D_8009D19C[player];
+    u8 frame = game_frame[player];
     s32 advanced = 0;
 
     if ( done ) {
-        D_80066E18[player][frame] = D_800A3020[player][frame] = -1;
-        D_8009D19C[player]++;
+        game_firstRolls[player][frame] = game_secondRolls[player][frame] = -1;
+        game_frame[player]++;
         advanced = 1;
     } else {
         D_80068A50[player]--;
     }
-    if ( D_8009D19C[player] == 10 || D_80068A50[player] == 0 ) {
-        D_800994BE[player] = 1;
+    if ( game_frame[player] == 10 || D_80068A50[player] == 0 ) {
+        game_playerDone[player] = 1;
     }
     return advanced;
 }
@@ -1632,8 +1632,8 @@ s32 GA_EndFrame( u8 player, s32 done ) {
 ================
 GA_CountParThrow
 
-Counts a throw of the player's frame; once forced, or at D_80099458 + 5 throws, scores the frame against
-D_80099458 and moves on (returns 1 then). The player is finished after frame 9.
+Counts a throw of the player's frame; once forced, or at game_frameFlags + 5 throws, scores the frame against
+game_frameFlags and moves on (returns 1 then). The player is finished after frame 9.
 ================
 */
 s32 GA_CountParThrow( u8 player, s32 force ) {
@@ -1641,16 +1641,16 @@ s32 GA_CountParThrow( u8 player, s32 force ) {
     s8 throws;
     s32 advanced = 0;
 
-    frame = D_8009D19C[player];
-    throws = ++D_80066E18[player][frame];
+    frame = game_frame[player];
+    throws = ++game_firstRolls[player][frame];
 
-    if ( force || throws >= D_80099458[0][frame] + 5 ) {
-        D_800EA090[player] += D_800DF630[player][frame] = throws - D_80099458[0][frame];
-        D_8009D19C[player]++;
+    if ( force || throws >= game_frameFlags[0][frame] + 5 ) {
+        game_totals[player] += game_frameScores[player][frame] = throws - game_frameFlags[0][frame];
+        game_frame[player]++;
         advanced = 1;
     }
-    if ( D_8009D19C[player] == 9 ) {
-        D_800994BE[player] = 1;
+    if ( game_frame[player] == 9 ) {
+        game_playerDone[player] = 1;
     }
     return advanced;
 }
@@ -1659,21 +1659,21 @@ s32 GA_CountParThrow( u8 player, s32 force ) {
 ================
 GA_DecideFrame
 
-Decides a frame between players 0 and 1: the lower D_80066E18 result takes 2 and the other 0, a tie gives
+Decides a frame between players 0 and 1: the lower game_firstRolls result takes 2 and the other 0, a tie gives
 both 1; a 2 counts in the player's D_800994B8.
 ================
 */
 void GA_DecideFrame( u8 frame ) {
-    if ( D_80066E18[0][frame] < D_80066E18[1][frame] ) {
-        D_800A3020[0][frame] = 2;
-        D_800A3020[1][frame] = 0;
-    } else if ( D_80066E18[0][frame] > D_80066E18[1][frame] ) {
-        D_800A3020[1][frame] = 2;
-        D_800A3020[0][frame] = 0;
+    if ( game_firstRolls[0][frame] < game_firstRolls[1][frame] ) {
+        game_secondRolls[0][frame] = 2;
+        game_secondRolls[1][frame] = 0;
+    } else if ( game_firstRolls[0][frame] > game_firstRolls[1][frame] ) {
+        game_secondRolls[1][frame] = 2;
+        game_secondRolls[0][frame] = 0;
     } else {
-        D_800A3020[1][frame] = 1;
-        D_800A3020[0][frame] = 1;
+        game_secondRolls[1][frame] = 1;
+        game_secondRolls[0][frame] = 1;
     }
-    D_800994B8[0] += D_800A3020[0][frame] == 2 ? 1 : 0;
-    D_800994B8[1] += D_800A3020[1][frame] == 2 ? 1 : 0;
+    D_800994B8[0] += game_secondRolls[0][frame] == 2 ? 1 : 0;
+    D_800994B8[1] += game_secondRolls[1][frame] == 2 ? 1 : 0;
 }

@@ -618,19 +618,19 @@ D_80123A14_gacode = 0x80123A14; // segment:gacode size:0x8C
 ga_characterData = 0x80123AA0; // segment:gacode size:0x140
 D_800E6560 = 0x800E6560; // size:0x18
 D_800693D8 = 0x800693D8; // size:0x4
-D_800693DC = 0x800693DC; // size:0x2
+game_gamesWon = 0x800693DC; // size:0x2
 
 // gacode: main's per-player counter after D_800A3048 (D_800A3048 + 4 in the asm)
-D_800A304C = 0x800A304C; // size:0x4
+game_strikeRun = 0x800A304C; // size:0x4
 
 // gacode and rscode: main's per-player counter after D_800DF6B0 (D_800DF6B0 + 4 in the asm)
-D_800DF6B4 = 0x800DF6B4; // size:0x8
+game_strikes = 0x800DF6B4; // size:0x8
 
 // rscode: main's per-player pin masks (D_800A3048 + 8 in the asm) and the overlay's pin positions
 D_800A3050 = 0x800A3050; // size:0x60
 rs_menuChoice = 0x80114256; // segment:rscode size:0x1
 rs_pinPos = 0x80114258; // segment:rscode size:0x28
-D_8009D030 = 0x8009D030; // size:0xC
+game_duelScores = 0x8009D030; // size:0xC
 
 // gscode: the choice menus of units 59B00, 5A020, 5A580 and 5A990 (images, slide step, state, choice, blink counter)
 gs_twoChoiceMenu = 0x8011B850; // segment:gscode size:0x5A
@@ -1154,3 +1154,26 @@ Mem_Free = 0x80029F18; // type:func
 Mem_Resize = 0x80029F68; // type:func
 Sram_GetHandle = 0x800293E0; // type:func
 Ovl_KeepRoutines = 0x80028590; // type:func
+game_players = 0x8005C0E4;
+game_mode = 0x8005C160;
+game_numPlayers = 0x8005C161;
+game_lastTeam = 0x8005C162;
+game_stage = 0x8005C163;
+game_replay = 0x8005CB60;
+game_frame = 0x8009D19C;
+game_frameScores = 0x800DF630;
+game_firstRolls = 0x80066E18;
+game_secondRolls = 0x800A3020;
+game_totals = 0x800EA090;
+game_scene = 0x8005C0B6;
+game_leaveState = 0x8005C0BF;
+game_fade = 0x8005C0C0;
+game_demo = 0x8005C0F0;
+game_demoCharacter = 0x8005C0F4;
+game_defaultNames = 0x8005C0F8;
+game_playerNames = 0x80068218;
+game_playerDone = 0x800994BE;
+game_frameFlags = 0x80099458;
+game_splits = 0x8009CF80;
+game_spares = 0x8009D088;
+game_floorGrids = 0x80100100;

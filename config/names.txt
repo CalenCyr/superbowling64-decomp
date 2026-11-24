@@ -407,7 +407,7 @@ CURSOR_MIN_X	include/boot.h	invented: the game thread clamps the cursor x D_8005
 CURSOR_MAX_X	include/boot.h	invented: the game thread clamps the cursor x to 303 or less
 CURSOR_MIN_Y	include/boot.h	invented: the game thread clamps the cursor y D_8005C0BA to 16 or more
 CURSOR_MAX_Y	include/boot.h	invented: the game thread clamps the cursor y to 227 or less
-SCENE_GACODE	include/overlay.h	invented: D_8005C0B6 value 0, for which the game thread loads "GACODE  SYS" (ROM string)
+SCENE_GACODE	include/overlay.h	invented: game_scene value 0, for which the game thread loads "GACODE  SYS" (ROM string)
 SCENE_CACODE	include/overlay.h	invented: value 1, loads "CACODE  SYS"
 SCENE_PVCODE	include/overlay.h	invented: value 2, loads "PVCODE  SYS"
 SCENE_OPCODE	include/overlay.h	invented: value 3, loads "OPCODE  SYS"
@@ -499,14 +499,14 @@ MAT_I4	include/filecache.h	invented: fileRefB_t.fmt values 0-4 (MAT_I4, MAT_CI4,
 gaLaneAim_t	gacode.h	invented: 8-byte per-lane aiming state (two, ga_laneAim): a position, a counter within 999, the step reached
 gaMotion_t	gacode.h	invented: 0x38-byte motion of a lane body (gaLane_t.motion, 11 from 0x420; initial copy ga_initMotion): velocity, spin, flags; stepped by GA_PhysicsStep
 FABS	include/gacode/gacode.h	invented: float absolute value macro (0 - x), func_80119638_gacode
-floorGrid_t	include/game.h	invented: 0xFAC-byte file at D_80100100 (point counts, spacing and origin along x and z, then s16 heights); GA_KeepInGrid clamps to its edges, GA_FloorHeight interpolates its heights
+floorGrid_t	include/game.h	invented: 0xFAC-byte file at game_floorGrids (point counts, spacing and origin along x and z, then s16 heights); GA_KeepInGrid clamps to its edges, GA_FloorHeight interpolates its heights
 GA_TogglePin	3E350.c	invented: the inline helper of GA_PinEditor that toggles a lane body's standing flag (standState) and returns the new state
 GRIDEDIT_EXIT, GRIDEDIT_LOAD, GRIDEDIT_SAVE, GRIDEDIT_SIZE, GRIDEDIT_STEP, GRIDEDIT_ORIGIN, GRIDEDIT_SELECT, GRIDEDIT_HEIGHT, GRIDEDIT_PAGES, GRIDEDIT_POINTS	include/gridedit.h	invented: the pages of the floor grid editor GridEd_Frame (from its page titles "EXIT", "FILE LOAD", "FILE SAVE", "MTX FORM", "MTX WH", "MTX OFS", "VTX SEL", "VTX Y"), and floorGrid_t.heights' 2000 points
 
 # rscode/56FF0.c results overlay
 RS_Init	0x80112350	invented: the overlay's init, run once after main loads it (overlay.h); starts the first state
 RS_Frame	0x801123A8	invented: the overlay's per-frame function (overlay.h); input, background, current state
-RS_StartMode	0x80112574	invented: picks the first state and the BGM by the game mode (D_8005C160 & 0xF)
+RS_StartMode	0x80112574	invented: picks the first state and the BGM by the game mode (game_mode & 0xF)
 RS_StartMode0	0x80112674	invented: picks mode 0's first state by its sub-mode
 RS_FinishedMessage	0x8011286C	invented: state showing the finished-game message (bit 0x100) for 300 frames or until A/Z
 RS_PerfectMessage	0x8011291C	invented: state showing the perfect-game message (a player's tenth frame at 300; bit 0x200)
@@ -537,7 +537,7 @@ rs_pinPage	0x80114280	invented: page of the pin diagrams
 rs_ranks	0x801142A2	invented: each player's rank by score, 1 the best
 rs_buttonsPressed	0x801142A0	invented: buttons pressed this frame (0 once leaving)
 rs_dpadPressed	0x801142A6	invented: D-pad presses this frame (0 once leaving)
-rs_nextScene	0x801142A8	invented: copied back to the scene (D_8005C0B6) on leaving
+rs_nextScene	0x801142A8	invented: copied back to the scene (game_scene) on leaving
 rs_state	0x801142AC	invented: current state, run each frame by RS_Frame
 rs_returnState	0x801142B0	invented: state to return to
 rs_sheetPage	0x80114251	invented: RS_ScoreSheet's page, 0 the score sheet, 1 the pin diagrams (left and right choose)
@@ -614,8 +614,8 @@ ca_bmpBuffer	0x8013E880	invented: buffer one BMP file is read into
 GS_Init	0x80112350	invented: the overlay's init, run once after main loads it (overlay.h)
 GS_NullCreate	0x8011288C	invented: empty function in the create slot of each of the scene classes gs_classes (objClass_t)
 GS_NullHandler	0x80112894	invented: empty function in the second slot of each of the scene classes gs_classes (objClass_t.unk_04)
-GS_ModeMenu	0x801128A0	invented: screen of the first menu, which sets the game mode (low nibble of D_8005C160)
-GS_SubModeMenu	0x80112F10	invented: three-choice screen that sets the sub-mode (bits 4-5 of D_8005C160)
+GS_ModeMenu	0x801128A0	invented: screen of the first menu, which sets the game mode (low nibble of game_mode)
+GS_SubModeMenu	0x80112F10	invented: three-choice screen that sets the sub-mode (bits 4-5 of game_mode)
 GS_TeamSizeMenu	0x80113430	invented: three-choice screen choosing the number of players on one team
 GS_PlayersMenu	0x80113990	invented: two-choice screen of one or two players
 GS_TwoChoiceMenu	0x80113DA0	invented: two-choice screen that slides in and out (left, right or back)
@@ -779,7 +779,7 @@ GA_Init	0x80112350	invented: the overlay's init (overlay.h): sets up the players
 GA_Frame	0x801125A0	invented: the overlay's per-frame function (overlay.h): pause menu, stage, players, drawing
 GA_PauseMenu	0x80112AF0	invented: runs the pause menu: four items with the cursor, B closes it
 GA_PageBrowser	0x80112EBC	invented: main loop state of the pause menu's page browser (mode 2)
-GA_SetupMode	0x801132B0	invented: sets up the game for the mode in the low nibble of D_8005C160, with its BGM
+GA_SetupMode	0x801132B0	invented: sets up the game for the mode in the low nibble of game_mode, with its BGM
 GA_StartMode	0x80113594	invented: starts a game mode: main loop state, handlers and each player's lane
 GA_FillTeams	0x801136FC	invented: fills the teams' player lists
 GA_NextTeamPlayer	0x801138EC	invented: advances to the team's next player still playing
@@ -788,7 +788,7 @@ GA_PairGameLoop	0x80113AD4	invented: main loop state of the pair game
 GA_ParGameLoop	0x80113D48	invented: main loop state of the par game
 GA_DuelLoop	0x80113EE4	invented: main loop state of a two-lane game that counts games won (a duel, GA_EndDuelGame)
 GA_CountFrame	0x80122340	invented: counts a frame (and in mode 3 updates two resources)
-GA_SetPlayerObjectFlags	0x8012239C	invented: gives each player's scene object the flag bits of its D_8005C0E4 entry
+GA_SetPlayerObjectFlags	0x8012239C	invented: gives each player's scene object the flag bits of its game_players entry
 GA_AnimateTextures	0x80122788	invented: animated textures: points seven resources' palettes at the current frame's images
 GA_FlickerLight	0x80122CE8	invented: flickering light: random brightness steps for lights 0 and 1 and four resources' palettes
 GA_LoadLanePalettes	0x80123430	invented: loads a set of images and points the palettes of a lane's scene object parts at them
@@ -901,7 +901,7 @@ ga_laneCamPaths	0x8012C8E8	invented: path files of the camera that looks down th
 ga_aimChannelOrders	0x8012C8AC	invented: channel orders of GA_DrawAimLine's colour
 ga_aimColorAngle	0x8012C8B6	invented: angle of GA_DrawAimLine's colour cycle
 ga_aimChannelOrder	0x8012C8B8	invented: current channel order of GA_DrawAimLine's colour
-ga_stages	0x80123EB0	invented: the stage records, by D_8005C163
+ga_stages	0x80123EB0	invented: the stage records, by game_stage
 ga_stage	0x8012D220	invented: the current stage (GA_Init points it into ga_stages)
 ga_classes	0x80124050	invented: the object classes of the game's scene
 ga_steerBall	0x8012D224	invented: nonzero: Z steers the rolling ball by the stick
@@ -1068,9 +1068,9 @@ saveData_t.difficulty	boot.h	invented: option 0 to 2 (gscode's options menu); na
 saveData_t.music	boot.h	invented: option: music on (Sound_PlayBgm), toggled in gacode's pause menu
 saveData_t.musicVolume	boot.h	invented: option 0 to 4, index of the BGM volume (Sound_UpdateBgmVolume)
 saveData_t.rumble	boot.h	invented: option: use the Rumble Pak (gscode's pak check)
-playerRecord_t.strikes	boot.h	invented: summed D_800DF6B4 (counted with the strike run), to 9999; of 12 a game
-playerRecord_t.spares	boot.h	invented: summed D_8009D088 (frames ended by the second throw), to 9999; of 10 a game
-playerRecord_t.splits	boot.h	invented: summed D_8009CF80 (counted by GA_IsSplit's result), to 9999; of 10 a game
+playerRecord_t.strikes	boot.h	invented: summed game_strikes (counted with the strike run), to 9999; of 12 a game
+playerRecord_t.spares	boot.h	invented: summed game_spares (frames ended by the second throw), to 9999; of 10 a game
+playerRecord_t.splits	boot.h	invented: summed game_splits (counted by GA_IsSplit's result), to 9999; of 10 a game
 playerRecord_t	boot.h	invented: a player's record: name, games, total, high and low scores, strikes, spares, splits (RS_AddToRecord)
 saveData_t	boot.h	invented: the block D_8009D098 saved with Save_Checksum: checksum, unlocks, the four records and the options
 OPTION_DIFFICULTY	gscode.h	invented: the options line of D_8009D098.difficulty (was OPTION_SOUND, which the use in GA_CpuSetup contradicts)
@@ -1106,3 +1106,32 @@ GA_InputGameOver	0x80118EA0	invented: inputFunc handler at a duel game's end (GA
 GA_InputParkedRestart	0x80118F08	invented: inputFunc handler of a lane parked until the lanes restart at GA_StartTurn (debug text ' WAIT... ')
 GA_InputParked	0x80118F38	invented: inputFunc handler of a parked lane: the lanes' first handler (GA_SetupLanes), and where their players wait once done (debug text ' WAIT... ')
 GA_InputGutter	0x80118F68	invented: inputFunc handler while the ball rolls in the gutter (set when it drops off the lane, callout 3), then GA_InputCountPins
+
+# include/game.h: main's game state the overlays read
+game_players	0x8005C0E4	invented: per player of the game: bit 7 set for one the game plays, low nibble its character (GS_PlayerSetup, the demos of opcode)
+game_mode	0x8005C160	invented: low nibble the game mode, bits 4-5 a sub-mode, bits 6-7 its argument (GA_StartMode's callers, RS_StartMode0)
+game_numPlayers	0x8005C161	invented: number of players; bounds every per-player loop of the overlays
+game_lastTeam	0x8005C162	invented: index of the last team (opcode's demos set it with the players)
+game_stage	0x8005C163	invented: index of the stage (gacode: ga_stage = &ga_stages[game_stage]); gscode's character menu sets it to the duel opponent's character, whose unlocks bit rscode sets on a win
+game_replay	0x8005CB60	invented: set by the results overlay's first menu choice, cleared by RS_Leave; GS_Init then reopens team select instead of clearing the players
+game_gamesWon	0x800693DC	invented: per lane: games won (RS_DuelResults)
+game_frame	0x8009D19C	invented: per player: current frame, 10 once the game is over
+game_frameScores	0x800DF630	invented: per player and frame: running score (RS_StartMode0 checks [9] == 300 for a perfect game)
+game_firstRolls	0x80066E18	invented: per player and frame: pins of the first roll (Score_DrawFrame draws it left by Score_RollImage, -1 and -2 special)
+game_secondRolls	0x800A3020	invented: per player and frame: pins of the second roll (Score_DrawFrame draws it right)
+game_totals	0x800EA090	invented: per player: total score, set from game_frameScores (GA_Score*); Score_DrawTotal shows it signed
+game_duelScores	0x8009D030	invented: per player of a duel and game: score (RS_DuelResults)
+game_scene	0x8005C0B6	invented: the scene to run, SCENE_* (overlay.h); Game_Thread switches overlays by it
+game_leaveState	0x8005C0BF	invented: 0, then 1 once an overlay asks to leave, 2 when it goes (Game_Thread)
+game_fade	0x8005C0C0	invented: alpha of the gray screen fill Game_Thread draws over a scene change (0-255), which also lowers the BGM volume
+game_demo	0x8005C0F0	invented: demo the opening overlay plays next, 0 to 3
+game_demoCharacter	0x8005C0F4	invented: counter whose low 3 bits give each demo player's character (opcode)
+game_defaultNames	0x8005C0F8	invented: per character: its default name
+game_playerNames	0x80068218	invented: per player: name
+game_playerDone	0x800994BE	invented: per player: set once the player's game is over (GA_Score*), so team turns skip the player
+game_frameFlags	0x80099458	invented: per player and frame: flags (split, rolls 0x10 << n); in the par game [0] holds each frame's par
+game_splits	0x8009CF80	evidence: per player: splits this game (GA_IsSplit); RS_AddToRecord adds it into playerRecord_t.splits
+game_strikes	0x800DF6B4	evidence: per player: strikes this game; RS_AddToRecord adds it into playerRecord_t.strikes
+game_spares	0x8009D088	evidence: per player: spares this game; RS_AddToRecord adds it into playerRecord_t.spares
+game_strikeRun	0x800A304C	invented: per player: strikes in a row (to 255), counted with game_strikes; picks ga_runSounds and the callout, reset on a non-strike
+game_floorGrids	0x80100100	invented: the lane's floor height grids: [0] the stage's, [1] a copy main loads at boot

@@ -20,14 +20,14 @@ s32 GS_PlayersMenu( void ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         switch ( gs_playersCursor ) {
         case 0:
-            D_8005C161 = 1;
-            D_8005C162 = 0;
-            D_8005C160 = D_8005C160 & 0x3F;
+            game_numPlayers = 1;
+            game_lastTeam = 0;
+            game_mode = game_mode & 0x3F;
             break;
         case 1:
-            D_8005C161 = 2;
-            D_8005C162 = 1;
-            D_8005C160 = ( D_8005C160 & 0x3F ) | 0x40;
+            game_numPlayers = 2;
+            game_lastTeam = 1;
+            game_mode = ( game_mode & 0x3F ) | 0x40;
             break;
         }
         gs_playersState = CHOICE_TAKEN;
