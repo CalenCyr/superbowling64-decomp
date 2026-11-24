@@ -27,46 +27,46 @@ typedef struct {
     /* 0x08 */ u16 ( *tiles )[32 * 64];
 } frameSlot_t;                          /* size 0xC */
 
-extern s32 D_80115360_cacode;           /* frames the D-pad has been held; frames step on their own from 7 */
-extern s32 D_80115364_cacode;           /* the viewer's mode, a CAMODE_ value */
-extern s32 D_80115368_cacode;           /* the selected camera and object (0 to 2) */
-extern s32 D_8011536C_cacode;           /* the selected model part */
-// volatile: func_80113280_cacode reads it twice after each D-pad frame step, the first read unused
-extern volatile s32 D_80115370_cacode;           /* the frame shown */
+extern s32 ca_dpadHeld;                 /* frames the D-pad has been held; frames step on their own from 7 */
+extern s32 ca_mode;                     /* the viewer's mode, a CAMODE_ value */
+extern s32 ca_selected;                 /* the selected camera and object (0 to 2) */
+extern s32 ca_part;                     /* the selected model part */
+// volatile: CA_Frame reads it twice after each D-pad frame step, the first read unused
+extern volatile s32 ca_frame;           /* the frame shown */
 extern s32 D_80115374_cacode[3];        /* [0]: frames of the animation; [1], [2]: first BMP frame of clips 1, 2 */
-extern Vtx D_80115380_cacode[4];        /* the origin and the ends of the three axes, drawn as lines */
+extern Vtx ca_axes[4];                  /* the origin and the ends of the three axes, drawn as lines */
 
-extern objParams_t D_801153C0_cacode[6];     /* the scene: three cameras, then three objects; or the host's sce.dat */
-extern u8 D_80115540_cacode;            /* alpha of the frame drawn behind cameras 1 and 2 */
+extern objParams_t ca_sceneParams[6];   /* the scene: three cameras, then three objects; or the host's sce.dat */
+extern u8 ca_clipAlpha;                 /* alpha of the frame drawn behind cameras 1 and 2 */
 
-extern frameSlot_t D_80115630_cacode[35];
-extern u8 D_801157D4_cacode;            /* slots in use */
-extern sceneObjectNode_t *D_801157D8_cacode[3];     /* the scene's objects */
-extern sceneCameraNode_t *D_801157E4_cacode[3];     /* the scene's cameras */
-extern f32 D_801157F0_cacode[4][4];
-extern f32 D_80115830_cacode[30][300][3];   /* by model part, per frame: the part's rotation (radians) */
+extern frameSlot_t ca_frameCache[35];
+extern u8 ca_numSlots;                   /* slots in use */
+extern sceneObjectNode_t *ca_objects[3]; /* the scene's objects */
+extern sceneCameraNode_t *ca_cameras[3]; /* the scene's cameras */
+extern f32 ca_camera0Matrix[4][4];
+extern f32 ca_partRotations[30][300][3]; /* by model part, per frame: the part's rotation (radians) */
 
 /*
 The motion tables, saved to and loaded from the host's "motion.dat" in this order, followed by D_80115374_cacode[1]
 and [2]. Cameras and objects 1 and 2 follow the tables of index 0 and 1; camera 0 has the one matrix
-D_801157F0_cacode. They lie contiguously after D_80115830_cacode, inside the overlay's bss (which main's loader
+ca_camera0Matrix. They lie contiguously after ca_partRotations, inside the overlay's bss (which main's loader
 clears up to 0x8013E890).
 */
-extern f32 D_8012FE10_cacode[2][300][4][4];    /* per frame, for objects 1 and 2 */
-extern f32 D_80139410_cacode[2][300][3];       /* per frame: the at of cameras 1 and 2 */
-extern f32 D_8013B030_cacode[2][300][3];       /* the eye */
-extern f32 D_8013CC50_cacode[2][300][3];       /* the up point */
-extern f32 D_8013E870_cacode[3];               /* the rotation of the selected part, kept while frames are stepped */
-extern u8 *D_8013E880_cacode;                  /* buffer one BMP file is read into */
+extern f32 ca_objectMatrices[2][300][4][4]; /* per frame, for objects 1 and 2 */
+extern f32 ca_cameraAt[2][300][3];          /* per frame: the at of cameras 1 and 2 */
+extern f32 ca_cameraEye[2][300][3];         /* the eye */
+extern f32 ca_cameraUp[2][300][3];          /* the up point */
+extern f32 ca_keptRotation[3];              /* the rotation of the selected part, kept while frames are stepped */
+extern u8 *ca_bmpBuffer;                    /* buffer one BMP file is read into */
 
-/* D_80115364_cacode */
+/* ca_mode */
 #define CAMODE_ROTATE       0           /* the pad moves the camera, the object and the selected part */
 #define CAMODE_FILE         1           /* A loads motion.dat, B saves it */
 #define CAMODE_IMAGE        2           /* A and B move the first BMP frame of clip 1 (with Z: clip 2) */
 #define CAMODE_COUNT        3
 
-void func_8011268C_cacode( s32 frame, s32 clip );
-void func_80112CDC_cacode( f32 src[4][4], f32 *trans, f32 *rot, f32 *scale );
-void func_8011306C_cacode( float src[4][4], float dst[4][4] );
+void CA_CacheFrame( s32 frame, s32 clip );
+void CA_DecomposeMatrix( f32 src[4][4], f32 *trans, f32 *rot, f32 *scale );
+void CA_InvertMatrix( float src[4][4], float dst[4][4] );
 
 #endif

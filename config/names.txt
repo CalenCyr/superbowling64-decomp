@@ -582,3 +582,31 @@ op_notePages	0x80114398	invented: per note listed: its pages
 op_noteNames	0x801143B8	invented: per note listed: its name
 op_freeNotes	0x801145F8	invented: free notes on the pak
 op_freePages	0x801145FC	invented: free pages on the pak
+
+# cacode/67370.c motion editor overlay
+CA_DrawFrame	0x80112350	invented: draws one cached frame of a clip as 40 textured rectangles over the screen
+CA_CacheFrame	0x8011268C	invented: makes sure one frame of a clip is in the frame cache, reading its BMP file on a miss
+CA_Init	0x801128F4	invented: the overlay's init, run once after main loads it (overlay.h)
+CA_DecomposeMatrix	0x80112CDC	invented: splits a matrix into translation, rotation angles and a uniform scale
+CA_InvertMatrix	0x8011306C	invented: inverts a 4 x 4 matrix by Gauss-Jordan elimination
+CA_Frame	0x80113280	invented: the overlay's per-frame function (overlay.h); the motion editor
+ca_dpadHeld	0x80115360	invented: frames the D-pad has been held
+ca_mode	0x80115364	invented: the editor's mode, a CAMODE_ value
+ca_selected	0x80115368	invented: the selected camera and object (0 to 2)
+ca_part	0x8011536C	invented: the selected model part
+ca_frame	0x80115370	invented: the frame shown
+ca_axes	0x80115380	invented: the origin and the ends of the three axes, drawn as lines
+ca_sceneParams	0x801153C0	invented: the scene's object records (three cameras, three objects)
+ca_clipAlpha	0x80115540	invented: alpha of the clip frame drawn behind cameras 1 and 2
+ca_frameCache	0x80115630	invented: the slots of the BMP frame cache (frameSlot_t)
+ca_numSlots	0x801157D4	invented: frame-cache slots in use
+ca_objects	0x801157D8	invented: the scene's objects
+ca_cameras	0x801157E4	invented: the scene's cameras
+ca_camera0Matrix	0x801157F0	invented: the one matrix of camera 0 (cacode.h motion tables comment)
+ca_partRotations	0x80115830	invented: by model part, per frame: the part's rotation
+ca_objectMatrices	0x8012FE10	invented: per frame, the matrices of objects 1 and 2 (motion.dat)
+ca_cameraAt	0x80139410	invented: per frame, the at point of cameras 1 and 2 (motion.dat)
+ca_cameraEye	0x8013B030	invented: per frame, the eye of cameras 1 and 2 (motion.dat)
+ca_cameraUp	0x8013CC50	invented: per frame, the up point of cameras 1 and 2 (motion.dat)
+ca_keptRotation	0x8013E870	invented: the selected part's rotation, kept while frames are stepped
+ca_bmpBuffer	0x8013E880	invented: buffer one BMP file is read into

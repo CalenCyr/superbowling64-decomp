@@ -6,22 +6,22 @@
 
 /*
 ================
-func_80112350_cacode
+CA_DrawFrame
 
 Draws frame frame of clip clip from the frame cache as 40 textured rectangles filling the 320 x 240 screen, with
 alpha alpha; nothing when the frame is not cached.
 ================
 */
-void func_80112350_cacode( s32 frame, s32 clip, u8 alpha ) {
+void CA_DrawFrame( s32 frame, s32 clip, u8 alpha ) {
     s32 slot;
     s32 row, col;
 
-    for ( slot = 0; slot < D_801157D4_cacode; slot++ ) {
-        if ( D_80115630_cacode[slot].frame == frame && D_80115630_cacode[slot].clip == clip ) {
+    for ( slot = 0; slot < ca_numSlots; slot++ ) {
+        if ( ca_frameCache[slot].frame == frame && ca_frameCache[slot].clip == clip ) {
             break;
         }
     }
-    if ( slot == D_801157D4_cacode ) {
+    if ( slot == ca_numSlots ) {
         return;
     }
 
@@ -34,7 +34,7 @@ void func_80112350_cacode( s32 frame, s32 clip, u8 alpha ) {
     gDPSetPrimColor( D_800F8094++, 0, 0, 255, 255, 255, alpha );
     for ( row = 0; row < 8; row++ ) {
         for ( col = 0; col < 5; col++ ) {
-            gDPLoadTextureBlock( D_800F8094++, D_80115630_cacode[slot].tiles[col + row * 5], G_IM_FMT_RGBA,
+            gDPLoadTextureBlock( D_800F8094++, ca_frameCache[slot].tiles[col + row * 5], G_IM_FMT_RGBA,
                                  G_IM_SIZ_16b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 5,
                                  G_TX_NOLOD, G_TX_NOLOD );
             gSPTextureRectangle( D_800F8094++, ( col * 64 ) << 2, ( row * 32 ) << 2, ( col * 64 + 64 ) << 2,
@@ -46,14 +46,14 @@ void func_80112350_cacode( s32 frame, s32 clip, u8 alpha ) {
 
 /*
 ================
-func_8011268C_cacode
+CA_CacheFrame
 
-Makes sure frame frame of clip clip is in the frame cache. A miss reads the clip's BMP file into D_8013E880_cacode
+Makes sure frame frame of clip clip is in the frame cache. A miss reads the clip's BMP file into ca_bmpBuffer
 (from the development host, or else a fixed file of the str segment) over the least recently used slot, and
 cuts its bottom-up 320 x 240 picture into the slot's tiles.
 ================
 */
-void func_8011268C_cacode( s32 frame, s32 clip ) {
+void CA_CacheFrame( s32 frame, s32 clip ) {
     u8 name[24];
     u8 *pixels;
     u16 *tile;
@@ -62,36 +62,36 @@ void func_8011268C_cacode( s32 frame, s32 clip ) {
     s32 i;
     s32 row, col, y, x;
 
-    for ( slot = 0; slot < D_801157D4_cacode; slot++ ) {
-        if ( D_80115630_cacode[slot].frame == frame && D_80115630_cacode[slot].clip == clip ) {
+    for ( slot = 0; slot < ca_numSlots; slot++ ) {
+        if ( ca_frameCache[slot].frame == frame && ca_frameCache[slot].clip == clip ) {
             break;
         }
     }
-    if ( slot != D_801157D4_cacode ) {
+    if ( slot != ca_numSlots ) {
         return;
     }
 
     oldest = -1;
-    for ( i = 0; i < D_801157D4_cacode; i++ ) {
-        if ( D_80115630_cacode[i].stamp < oldest ) {
-            oldest = D_80115630_cacode[i].stamp;
+    for ( i = 0; i < ca_numSlots; i++ ) {
+        if ( ca_frameCache[i].stamp < oldest ) {
+            oldest = ca_frameCache[i].stamp;
             slot = i;
         }
     }
 
     if ( D_8005C0BC ) {
         sprintf( name, "%1.1d - Frame %4.4d.bmp", clip, frame + D_80115374_cacode[clip] );
-        func_80029728( name, D_8013E880_cacode, 54 + 320 * 240 * 2 );    /* the headers and the picture */
+        func_80029728( name, ca_bmpBuffer, 54 + 320 * 240 * 2 );    /* the headers and the picture */
     } else {
-        func_80029AF4( 0xA58, D_8013E880_cacode );
+        func_80029AF4( 0xA58, ca_bmpBuffer );
     }
 
-    D_80115630_cacode[slot].frame = frame;
-    D_80115630_cacode[slot].clip = clip;
-    D_80115630_cacode[slot].stamp = -2;
+    ca_frameCache[slot].frame = frame;
+    ca_frameCache[slot].clip = clip;
+    ca_frameCache[slot].stamp = -2;
 
     /* the file header's offset of the pixel data (bfOffBits, little-endian) */
-    pixels = D_8013E880_cacode + ( D_8013E880_cacode[10] + ( D_8013E880_cacode[11] << 8 ) + ( D_8013E880_cacode[12] << 16 ) + ( D_8013E880_cacode[13] << 24 ) );
+    pixels = ca_bmpBuffer + ( ca_bmpBuffer[10] + ( ca_bmpBuffer[11] << 8 ) + ( ca_bmpBuffer[12] << 16 ) + ( ca_bmpBuffer[13] << 24 ) );
     /*
     BMP rows run bottom-up, 640 bytes of little-endian 5-5-5 texels each; the texel is shifted into RGBA16 with alpha
     set. Eight rows of 32-line tiles are 256 lines, so the last 16 lines of the bottom row of tiles read the bytes
@@ -99,7 +99,7 @@ void func_8011268C_cacode( s32 frame, s32 clip ) {
     */
     for ( row = 0; row < 8; row++ ) {
         for ( col = 0; col < 5; col++ ) {
-            tile = D_80115630_cacode[slot].tiles[col + row * 5];
+            tile = ca_frameCache[slot].tiles[col + row * 5];
             for ( y = 0; y < 32; y++ ) {
                 for ( x = 0; x < 64; x++ ) {
                     tile[y * 64 + x] = ( ( pixels[( 239 - ( y + row * 32 ) ) * 640 + ( col * 128 + x * 2 )]
@@ -112,15 +112,15 @@ void func_8011268C_cacode( s32 frame, s32 clip ) {
 
 /*
 ================
-func_801128F4_cacode
+CA_Init
 
 Entry of the overlay: Start switches to files from the development host; from the host, the scene's records come
 from its "sce.dat". Creates the scene's three cameras and three objects, fills the per-frame tables from cameras 1
-and 2 and the parts of object D_80115368_cacode, and allocates the frame cache (34 slots when D_800A2FE4 is set,
+and 2 and the parts of object ca_selected, and allocates the frame cache (34 slots when D_800A2FE4 is set,
 else 9) and the BMP buffer.
 ================
 */
-void func_801128F4_cacode( void ) {
+void CA_Init( void ) {
     fileType1_t *model;
     s32 i;
     u32 j;
@@ -130,57 +130,57 @@ void func_801128F4_cacode( void ) {
         func_80029524();
     }
     if ( D_8005C0BC ) {
-        func_80029728( "sce.dat", (u8 *)D_801153C0_cacode, sizeof( D_801153C0_cacode ) );
+        func_80029728( "sce.dat", (u8 *)ca_sceneParams, sizeof( ca_sceneParams ) );
         D_8005C0BD = 1;
         for ( i = 0; i < 3; i++ ) {
-            D_801157E4_cacode[i] = (sceneCameraNode_t *)func_8002BFD8( &D_801153C0_cacode[i] );
-            D_801157D8_cacode[i] = (sceneObjectNode_t *)func_8002B610( &D_801153C0_cacode[i + 3] );
+            ca_cameras[i] = (sceneCameraNode_t *)func_8002BFD8( &ca_sceneParams[i] );
+            ca_objects[i] = (sceneObjectNode_t *)func_8002B610( &ca_sceneParams[i + 3] );
         }
         D_8005C0BD = 0;
     } else {
         for ( i = 0; i < 3; i++ ) {
-            D_801157E4_cacode[i] = (sceneCameraNode_t *)func_8002BFD8( &D_801153C0_cacode[i] );
-            D_801157D8_cacode[i] = (sceneObjectNode_t *)func_8002B610( &D_801153C0_cacode[i + 3] );
+            ca_cameras[i] = (sceneCameraNode_t *)func_8002BFD8( &ca_sceneParams[i] );
+            ca_objects[i] = (sceneObjectNode_t *)func_8002B610( &ca_sceneParams[i + 3] );
         }
     }
-    model = D_801157D8_cacode[D_80115368_cacode]->obj.model;
-    D_80115374_cacode[0] = D_801157D8_cacode[0]->obj.anim[0];
+    model = ca_objects[ca_selected]->obj.model;
+    D_80115374_cacode[0] = ca_objects[0]->obj.anim[0];
     for ( i = 0; i < 300; i++ ) {
-        guMtxIdentF( D_8012FE10_cacode[0][i] );
-        guMtxIdentF( D_8012FE10_cacode[1][i] );
-        memcpy( D_80139410_cacode[0][i], D_801157E4_cacode[1]->cam.at, sizeof( D_80139410_cacode[0][i] ) );
-        memcpy( D_8013B030_cacode[0][i], D_801157E4_cacode[1]->cam.eye, sizeof( D_8013B030_cacode[0][i] ) );
-        memcpy( D_8013CC50_cacode[0][i], D_801157E4_cacode[1]->cam.unk_18, sizeof( D_8013CC50_cacode[0][i] ) );
-        memcpy( D_80139410_cacode[1][i], D_801157E4_cacode[2]->cam.at, sizeof( D_80139410_cacode[1][i] ) );
-        memcpy( D_8013B030_cacode[1][i], D_801157E4_cacode[2]->cam.eye, sizeof( D_8013B030_cacode[1][i] ) );
-        memcpy( D_8013CC50_cacode[1][i], D_801157E4_cacode[2]->cam.unk_18, sizeof( D_8013CC50_cacode[1][i] ) );
+        guMtxIdentF( ca_objectMatrices[0][i] );
+        guMtxIdentF( ca_objectMatrices[1][i] );
+        memcpy( ca_cameraAt[0][i], ca_cameras[1]->cam.at, sizeof( ca_cameraAt[0][i] ) );
+        memcpy( ca_cameraEye[0][i], ca_cameras[1]->cam.eye, sizeof( ca_cameraEye[0][i] ) );
+        memcpy( ca_cameraUp[0][i], ca_cameras[1]->cam.unk_18, sizeof( ca_cameraUp[0][i] ) );
+        memcpy( ca_cameraAt[1][i], ca_cameras[2]->cam.at, sizeof( ca_cameraAt[1][i] ) );
+        memcpy( ca_cameraEye[1][i], ca_cameras[2]->cam.eye, sizeof( ca_cameraEye[1][i] ) );
+        memcpy( ca_cameraUp[1][i], ca_cameras[2]->cam.unk_18, sizeof( ca_cameraUp[1][i] ) );
         for ( j = 0; j < model->numParts; j++ ) {
-            memcpy( D_80115830_cacode[j][i], model->parts[j]->unk_08, sizeof( D_80115830_cacode[j][i] ) );
+            memcpy( ca_partRotations[j][i], model->parts[j]->unk_08, sizeof( ca_partRotations[j][i] ) );
         }
     }
-    guMtxIdentF( D_801157F0_cacode );
+    guMtxIdentF( ca_camera0Matrix );
     if ( D_800A2FE4 ) {
-        D_801157D4_cacode = 34;
+        ca_numSlots = 34;
     } else {
-        D_801157D4_cacode = 9;
+        ca_numSlots = 9;
     }
-    for ( i = 0; i < D_801157D4_cacode; i++ ) {
-        D_80115630_cacode[i].frame = -1;
-        D_80115630_cacode[i].stamp = 0;
-        D_80115630_cacode[i].tiles = func_80029E28( 40 * sizeof( *D_80115630_cacode[i].tiles ) );
+    for ( i = 0; i < ca_numSlots; i++ ) {
+        ca_frameCache[i].frame = -1;
+        ca_frameCache[i].stamp = 0;
+        ca_frameCache[i].tiles = func_80029E28( 40 * sizeof( *ca_frameCache[i].tiles ) );
     }
-    D_8013E880_cacode = func_80029E28( 54 + 320 * 240 * 2 );
+    ca_bmpBuffer = func_80029E28( 54 + 320 * 240 * 2 );
 }
 
 /*
 ================
-func_80112CDC_cacode
+CA_DecomposeMatrix
 
 Splits the matrix src into its translation trans, its rotation angles rot (radians, wrapped into 0 to 2 pi) and
 one uniform scale, written to all three components of scale.
 ================
 */
-void func_80112CDC_cacode( f32 src[4][4], f32 *trans, f32 *rot, f32 *scale ) {
+void CA_DecomposeMatrix( f32 src[4][4], f32 *trans, f32 *rot, f32 *scale ) {
     f32 mtx[4][4];
     f32 xx, yy, zz;
     f32 sinX;
@@ -241,12 +241,12 @@ void func_80112CDC_cacode( f32 src[4][4], f32 *trans, f32 *rot, f32 *scale ) {
 
 /*
 ================
-func_8011306C_cacode
+CA_InvertMatrix
 
 Inverts the 4 x 4 matrix src into dst by Gauss-Jordan elimination on [src | I], without pivoting.
 ================
 */
-void func_8011306C_cacode( float src[4][4], float dst[4][4] ) {
+void CA_InvertMatrix( float src[4][4], float dst[4][4] ) {
     float aug[4][8];
     float scale;
     int i, j, k;
@@ -291,27 +291,27 @@ void func_8011306C_cacode( float src[4][4], float dst[4][4] ) {
 }
 
 /* the size of motion.dat: the motion tables, then D_80115374_cacode[1] and [2] */
-#define MOTION_FILE_SIZE    ( sizeof( D_80115830_cacode ) + sizeof( D_8012FE10_cacode ) + sizeof( D_80139410_cacode ) \
-                              + sizeof( D_8013B030_cacode ) + sizeof( D_8013CC50_cacode ) + 2 * sizeof( D_80115374_cacode[0] ) )
+#define MOTION_FILE_SIZE    ( sizeof( ca_partRotations ) + sizeof( ca_objectMatrices ) + sizeof( ca_cameraAt ) \
+                              + sizeof( ca_cameraEye ) + sizeof( ca_cameraUp ) + 2 * sizeof( D_80115374_cacode[0] ) )
 #define STICK_DEAD          8           /* stick values within this of 0 are ignored */
 #define RAD_TO_DEG          57.2957795130823229
 
 /*
 ================
-func_80113280_cacode
+CA_Frame
 
 Per-frame update and drawing of the overlay, a motion editor for the scene. L cycles the mode; Start selects the
 next camera and object (camera 2 only once clip 2 has a first frame); left and right on the D-pad step the frame
 (on their own once held), up copies the next or previous frame (with Z: the next) into this one, and down caches
 the selected camera's BMP frame. In CAMODE_ROTATE, A and B select the model part, the stick and R move the camera
 or turn the object, Z with A or B scales it, and the C buttons turn the selected part, whose rotation is stored
-for the frame; Z with Start swaps that rotation with the one kept in D_8013E870_cacode. CAMODE_FILE loads and saves the
+for the frame; Z with Start swaps that rotation with the one kept in ca_keptRotation. CAMODE_FILE loads and saves the
 tables as motion.dat; CAMODE_IMAGE moves the clips' first BMP frames. Cameras 1 and 2 draw their clip's frame behind
 the scene (Z with the down and up C buttons sets its alpha), and the selected part's axes and the mode's text are
 drawn over it.
 ================
 */
-void func_80113280_cacode( void ) {
+void CA_Frame( void ) {
     u8 str[80];
     f32 inv[4][4];
     f32 m[4][4];
@@ -327,40 +327,40 @@ void func_80113280_cacode( void ) {
     s32 size;
     s32 i, j;
 
-    obj = &D_801157D8_cacode[D_80115368_cacode]->obj;
+    obj = &ca_objects[ca_selected]->obj;
     model = obj->model;
-    D_801157E4_cacode[D_80115368_cacode]->cam.frame = -1;
-    for ( i = 0; i < D_801157D4_cacode; i++ ) {
-        if ( D_80115630_cacode[i].stamp ) {
-            D_80115630_cacode[i].stamp--;
+    ca_cameras[ca_selected]->cam.frame = -1;
+    for ( i = 0; i < ca_numSlots; i++ ) {
+        if ( ca_frameCache[i].stamp ) {
+            ca_frameCache[i].stamp--;
         }
     }
 
     if ( ( D_800E4D62 & L_TRIG ) && ( D_800994BC & Z_TRIG ) ) {
-        if ( ++D_80115364_cacode == CAMODE_COUNT ) {
-            D_80115364_cacode = CAMODE_ROTATE;
+        if ( ++ca_mode == CAMODE_COUNT ) {
+            ca_mode = CAMODE_ROTATE;
         }
     }
     if ( D_800994BC == 0 ) {
-        D_80115360_cacode = 0;
+        ca_dpadHeld = 0;
     }
 
-    if ( D_80115364_cacode == CAMODE_FILE ) {
+    if ( ca_mode == CAMODE_FILE ) {
         size = MOTION_FILE_SIZE;
         if ( D_800E4D62 & A_BUTTON ) {
             buf = func_80029E28( MOTION_FILE_SIZE );
             func_80029728( "motion.dat", buf, MOTION_FILE_SIZE );
             size = 0;
-            memcpy( D_80115830_cacode, buf + size, sizeof( D_80115830_cacode ) );
-            size += sizeof( D_80115830_cacode );
-            memcpy( D_8012FE10_cacode, buf + size, sizeof( D_8012FE10_cacode ) );
-            size += sizeof( D_8012FE10_cacode );
-            memcpy( D_80139410_cacode, buf + size, sizeof( D_80139410_cacode ) );
-            size += sizeof( D_80139410_cacode );
-            memcpy( D_8013B030_cacode, buf + size, sizeof( D_8013B030_cacode ) );
-            size += sizeof( D_8013B030_cacode );
-            memcpy( D_8013CC50_cacode, buf + size, sizeof( D_8013CC50_cacode ) );
-            size += sizeof( D_8013CC50_cacode );
+            memcpy( ca_partRotations, buf + size, sizeof( ca_partRotations ) );
+            size += sizeof( ca_partRotations );
+            memcpy( ca_objectMatrices, buf + size, sizeof( ca_objectMatrices ) );
+            size += sizeof( ca_objectMatrices );
+            memcpy( ca_cameraAt, buf + size, sizeof( ca_cameraAt ) );
+            size += sizeof( ca_cameraAt );
+            memcpy( ca_cameraEye, buf + size, sizeof( ca_cameraEye ) );
+            size += sizeof( ca_cameraEye );
+            memcpy( ca_cameraUp, buf + size, sizeof( ca_cameraUp ) );
+            size += sizeof( ca_cameraUp );
             memcpy( &D_80115374_cacode[1], buf + size, 2 * sizeof( D_80115374_cacode[0] ) );
             size += 2 * sizeof( D_80115374_cacode[0] );
             func_80029F18( buf );
@@ -368,16 +368,16 @@ void func_80113280_cacode( void ) {
         if ( D_800E4D62 & B_BUTTON ) {
             buf = func_80029E28( size );
             size = 0;
-            memcpy( buf + size, D_80115830_cacode, sizeof( D_80115830_cacode ) );
-            size += sizeof( D_80115830_cacode );
-            memcpy( buf + size, D_8012FE10_cacode, sizeof( D_8012FE10_cacode ) );
-            size += sizeof( D_8012FE10_cacode );
-            memcpy( buf + size, D_80139410_cacode, sizeof( D_80139410_cacode ) );
-            size += sizeof( D_80139410_cacode );
-            memcpy( buf + size, D_8013B030_cacode, sizeof( D_8013B030_cacode ) );
-            size += sizeof( D_8013B030_cacode );
-            memcpy( buf + size, D_8013CC50_cacode, sizeof( D_8013CC50_cacode ) );
-            size += sizeof( D_8013CC50_cacode );
+            memcpy( buf + size, ca_partRotations, sizeof( ca_partRotations ) );
+            size += sizeof( ca_partRotations );
+            memcpy( buf + size, ca_objectMatrices, sizeof( ca_objectMatrices ) );
+            size += sizeof( ca_objectMatrices );
+            memcpy( buf + size, ca_cameraAt, sizeof( ca_cameraAt ) );
+            size += sizeof( ca_cameraAt );
+            memcpy( buf + size, ca_cameraEye, sizeof( ca_cameraEye ) );
+            size += sizeof( ca_cameraEye );
+            memcpy( buf + size, ca_cameraUp, sizeof( ca_cameraUp ) );
+            size += sizeof( ca_cameraUp );
             memcpy( buf + size, &D_80115374_cacode[1], 2 * sizeof( D_80115374_cacode[0] ) );
             size += 2 * sizeof( D_80115374_cacode[0] );
             func_80029814( "motion.dat", buf, size );
@@ -386,61 +386,61 @@ void func_80113280_cacode( void ) {
     }
 
     if ( ( D_800E4D62 & START_BUTTON ) && !( D_800994BC & Z_TRIG ) ) {
-        if ( ++D_80115368_cacode == 3 ) {
-            D_80115368_cacode = 0;
+        if ( ++ca_selected == 3 ) {
+            ca_selected = 0;
         }
-        if ( D_80115368_cacode == 2 && D_80115374_cacode[2] < 0 ) {
-            D_80115368_cacode = 0;
+        if ( ca_selected == 2 && D_80115374_cacode[2] < 0 ) {
+            ca_selected = 0;
         }
-        obj = &D_801157D8_cacode[D_80115368_cacode]->obj;
+        obj = &ca_objects[ca_selected]->obj;
         /* the selected camera fills the screen; the others are drawn small */
-        switch ( D_80115368_cacode ) {
+        switch ( ca_selected ) {
         case 0:
-            cam = &D_801157E4_cacode[0]->cam;
+            cam = &ca_cameras[0]->cam;
             cam->width = 320;
             cam->height = 240;
             cam->unk_2C = 0;
             cam->unk_2E = 0;
-            cam = &D_801157E4_cacode[1]->cam;
+            cam = &ca_cameras[1]->cam;
             cam->width = 120;
             cam->height = 120;
             cam->unk_2C = 200;
             cam->unk_2E = 0;
-            cam = &D_801157E4_cacode[2]->cam;
+            cam = &ca_cameras[2]->cam;
             cam->width = 120;
             cam->height = 120;
             cam->unk_2C = 200;
             cam->unk_2E = 120;
             break;
         case 1:
-            cam = &D_801157E4_cacode[0]->cam;
+            cam = &ca_cameras[0]->cam;
             cam->width = 120;
             cam->height = 120;
             cam->unk_2C = 0;
             cam->unk_2E = 0;
-            cam = &D_801157E4_cacode[1]->cam;
+            cam = &ca_cameras[1]->cam;
             cam->width = 320;
             cam->height = 240;
             cam->unk_2C = 0;
             cam->unk_2E = 0;
-            cam = &D_801157E4_cacode[2]->cam;
+            cam = &ca_cameras[2]->cam;
             cam->width = 120;
             cam->height = 120;
             cam->unk_2C = 200;
             cam->unk_2E = 120;
             break;
         case 2:
-            cam = &D_801157E4_cacode[0]->cam;
+            cam = &ca_cameras[0]->cam;
             cam->width = 120;
             cam->height = 120;
             cam->unk_2C = 0;
             cam->unk_2E = 0;
-            cam = &D_801157E4_cacode[1]->cam;
+            cam = &ca_cameras[1]->cam;
             cam->width = 120;
             cam->height = 120;
             cam->unk_2C = 200;
             cam->unk_2E = 0;
-            cam = &D_801157E4_cacode[2]->cam;
+            cam = &ca_cameras[2]->cam;
             cam->width = 320;
             cam->height = 240;
             cam->unk_2C = 0;
@@ -450,97 +450,97 @@ void func_80113280_cacode( void ) {
     }
 
     if ( D_800994BC & L_JPAD ) {
-        if ( ( D_800E4D62 & L_JPAD ) || D_80115360_cacode >= 7 ) {
-            --D_80115370_cacode;
-            if ( D_80115370_cacode < 0 ) {
-                D_80115370_cacode = D_80115374_cacode[0] - 1;
+        if ( ( D_800E4D62 & L_JPAD ) || ca_dpadHeld >= 7 ) {
+            --ca_frame;
+            if ( ca_frame < 0 ) {
+                ca_frame = D_80115374_cacode[0] - 1;
             }
-            memcpy( D_8013E870_cacode, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], sizeof( D_8013E870_cacode ) );
+            memcpy( ca_keptRotation, ca_partRotations[ca_part][ca_frame], sizeof( ca_keptRotation ) );
         }
-        D_80115360_cacode++;
+        ca_dpadHeld++;
     }
     if ( D_800994BC & R_JPAD ) {
-        if ( ( D_800E4D62 & R_JPAD ) || D_80115360_cacode >= 7 ) {
-            ++D_80115370_cacode;
-            if ( D_80115370_cacode >= D_80115374_cacode[0] ) {
-                D_80115370_cacode = 0;
+        if ( ( D_800E4D62 & R_JPAD ) || ca_dpadHeld >= 7 ) {
+            ++ca_frame;
+            if ( ca_frame >= D_80115374_cacode[0] ) {
+                ca_frame = 0;
             }
-            memcpy( D_8013E870_cacode, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], sizeof( D_8013E870_cacode ) );
+            memcpy( ca_keptRotation, ca_partRotations[ca_part][ca_frame], sizeof( ca_keptRotation ) );
         }
-        D_80115360_cacode++;
+        ca_dpadHeld++;
     }
 
     if ( D_800E4D62 & U_JPAD ) {
         if ( D_800994BC & Z_TRIG ) {
-            if ( D_80115370_cacode == D_80115374_cacode[0] - 1 ) {
+            if ( ca_frame == D_80115374_cacode[0] - 1 ) {
                 i = 0;
             } else {
-                i = D_80115370_cacode + 1;
+                i = ca_frame + 1;
             }
-        } else if ( D_80115370_cacode == 0 ) {
+        } else if ( ca_frame == 0 ) {
             i = D_80115374_cacode[0] - 1;
         } else {
-            i = D_80115370_cacode - 1;
+            i = ca_frame - 1;
         }
         for ( j = 0; j < 2; j++ ) {
-            memcpy( D_8012FE10_cacode[j][D_80115370_cacode], D_8012FE10_cacode[j][i], sizeof( D_8012FE10_cacode[j][i] ) );
-            memcpy( D_80139410_cacode[j][D_80115370_cacode], D_80139410_cacode[j][i], sizeof( D_80139410_cacode[j][i] ) );
-            memcpy( D_8013B030_cacode[j][D_80115370_cacode], D_8013B030_cacode[j][i], sizeof( D_8013B030_cacode[j][i] ) );
-            memcpy( D_8013CC50_cacode[j][D_80115370_cacode], D_8013CC50_cacode[j][i], sizeof( D_8013CC50_cacode[j][i] ) );
+            memcpy( ca_objectMatrices[j][ca_frame], ca_objectMatrices[j][i], sizeof( ca_objectMatrices[j][i] ) );
+            memcpy( ca_cameraAt[j][ca_frame], ca_cameraAt[j][i], sizeof( ca_cameraAt[j][i] ) );
+            memcpy( ca_cameraEye[j][ca_frame], ca_cameraEye[j][i], sizeof( ca_cameraEye[j][i] ) );
+            memcpy( ca_cameraUp[j][ca_frame], ca_cameraUp[j][i], sizeof( ca_cameraUp[j][i] ) );
         }
         for ( j = 0; j < 30; j++ ) {
-            memcpy( D_80115830_cacode[j][D_80115370_cacode], D_80115830_cacode[j][i],
-                    sizeof( D_80115830_cacode[j][i] ) );
+            memcpy( ca_partRotations[j][ca_frame], ca_partRotations[j][i],
+                    sizeof( ca_partRotations[j][i] ) );
         }
     }
 
-    if ( D_80115368_cacode != 0 && ( D_800E4D62 & D_JPAD ) ) {
-        func_8011268C_cacode( D_80115370_cacode, D_80115368_cacode );
+    if ( ca_selected != 0 && ( D_800E4D62 & D_JPAD ) ) {
+        CA_CacheFrame( ca_frame, ca_selected );
     }
 
-    if ( D_80115364_cacode <= CAMODE_ROTATE && !( D_800994BC & Z_TRIG ) ) {
+    if ( ca_mode <= CAMODE_ROTATE && !( D_800994BC & Z_TRIG ) ) {
         if ( D_800E4D62 & A_BUTTON ) {
-            if ( ++D_8011536C_cacode == model->numParts ) {
-                D_8011536C_cacode = 0;
+            if ( ++ca_part == model->numParts ) {
+                ca_part = 0;
             }
-            memcpy( D_8013E870_cacode, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], sizeof( D_8013E870_cacode ) );
+            memcpy( ca_keptRotation, ca_partRotations[ca_part][ca_frame], sizeof( ca_keptRotation ) );
         }
         if ( D_800E4D62 & B_BUTTON ) {
-            if ( --D_8011536C_cacode == -1 ) {
-                D_8011536C_cacode = model->numParts - 1;
+            if ( --ca_part == -1 ) {
+                ca_part = model->numParts - 1;
             }
-            memcpy( D_8013E870_cacode, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], sizeof( D_8013E870_cacode ) );
+            memcpy( ca_keptRotation, ca_partRotations[ca_part][ca_frame], sizeof( ca_keptRotation ) );
         }
     }
 
     /* pose the object for the frame */
     for ( i = 0; i < model->numParts; i++ ) {
-        memcpy( model->parts[i]->unk_08, D_80115830_cacode[i][D_80115370_cacode], sizeof( model->parts[i]->unk_08 ) );
+        memcpy( model->parts[i]->unk_08, ca_partRotations[i][ca_frame], sizeof( model->parts[i]->unk_08 ) );
     }
-    if ( D_80115368_cacode == 0 ) {
-        memcpy( obj->mtx, D_801157F0_cacode, sizeof( obj->mtx ) );
+    if ( ca_selected == 0 ) {
+        memcpy( obj->mtx, ca_camera0Matrix, sizeof( obj->mtx ) );
     } else {
-        memcpy( obj->mtx, D_8012FE10_cacode[D_80115368_cacode - 1][D_80115370_cacode], sizeof( obj->mtx ) );
+        memcpy( obj->mtx, ca_objectMatrices[ca_selected - 1][ca_frame], sizeof( obj->mtx ) );
     }
     for ( i = 1; i < 3; i++ ) {
-        memcpy( D_801157D8_cacode[i]->obj.mtx, D_8012FE10_cacode[i - 1][D_80115370_cacode], sizeof( D_801157D8_cacode[i]->obj.mtx ) );
-        memcpy( D_801157E4_cacode[i]->cam.at, D_80139410_cacode[i - 1][D_80115370_cacode], sizeof( D_801157E4_cacode[i]->cam.at ) );
-        memcpy( D_801157E4_cacode[i]->cam.eye, D_8013B030_cacode[i - 1][D_80115370_cacode], sizeof( D_801157E4_cacode[i]->cam.eye ) );
-        memcpy( D_801157E4_cacode[i]->cam.unk_18, D_8013CC50_cacode[i - 1][D_80115370_cacode],
-                sizeof( D_801157E4_cacode[i]->cam.unk_18 ) );
+        memcpy( ca_objects[i]->obj.mtx, ca_objectMatrices[i - 1][ca_frame], sizeof( ca_objects[i]->obj.mtx ) );
+        memcpy( ca_cameras[i]->cam.at, ca_cameraAt[i - 1][ca_frame], sizeof( ca_cameras[i]->cam.at ) );
+        memcpy( ca_cameras[i]->cam.eye, ca_cameraEye[i - 1][ca_frame], sizeof( ca_cameras[i]->cam.eye ) );
+        memcpy( ca_cameras[i]->cam.unk_18, ca_cameraUp[i - 1][ca_frame],
+                sizeof( ca_cameras[i]->cam.unk_18 ) );
     }
 
     func_80031250();
     func_80035074();
     for ( i = 0; i < 3; i++ ) {
-        func_8002C324( &D_801157E4_cacode[i]->cam );
-        func_8002B9CC( &D_801157D8_cacode[i]->obj );
+        func_8002C324( &ca_cameras[i]->cam );
+        func_8002B9CC( &ca_objects[i]->obj );
     }
     func_80031E40();
 
-    switch ( D_80115364_cacode ) {
+    switch ( ca_mode ) {
     case CAMODE_ROTATE:
-        cam = &D_801157E4_cacode[D_80115368_cacode]->cam;
+        cam = &ca_cameras[ca_selected]->cam;
         cam->frame = -1;
         if ( D_800994BC & R_TRIG ) {
             /* R: the stick moves the camera, with Z in depth */
@@ -628,18 +628,18 @@ void func_80113280_cacode( void ) {
         }
         if ( rot[0] != 0.0f || rot[1] != 0.0f || rot[2] != 0.0f ) {
             guRotateRPYF( rotM, rot[0], rot[1], rot[2] );
-            guMtxCatF( obj->joints[D_8011536C_cacode].mtx, rotM, m );
-            if ( D_8011536C_cacode > 0 ) {
+            guMtxCatF( obj->joints[ca_part].mtx, rotM, m );
+            if ( ca_part > 0 ) {
                 /* back to the parent's frame, and store the part's new rotation */
-                func_8011306C_cacode( obj->joints[model->parts[D_8011536C_cacode]->unk_04].mtx, inv );
+                CA_InvertMatrix( obj->joints[model->parts[ca_part]->unk_04].mtx, inv );
                 guMtxCatF( m, inv, m );
-                func_80112CDC_cacode( m, move, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], scale );
+                CA_DecomposeMatrix( m, move, ca_partRotations[ca_part][ca_frame], scale );
             }
         }
         if ( ( D_800E4D62 & START_BUTTON ) && ( D_800994BC & Z_TRIG ) ) {
-            memcpy( swap, D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], sizeof( swap ) );
-            memcpy( D_80115830_cacode[D_8011536C_cacode][D_80115370_cacode], D_8013E870_cacode, sizeof( D_8013E870_cacode ) );
-            memcpy( D_8013E870_cacode, swap, sizeof( D_8013E870_cacode ) );
+            memcpy( swap, ca_partRotations[ca_part][ca_frame], sizeof( swap ) );
+            memcpy( ca_partRotations[ca_part][ca_frame], ca_keptRotation, sizeof( ca_keptRotation ) );
+            memcpy( ca_keptRotation, swap, sizeof( ca_keptRotation ) );
         }
         break;
     case CAMODE_IMAGE:
@@ -662,38 +662,38 @@ void func_80113280_cacode( void ) {
     }
 
     /* keep what was edited */
-    if ( D_80115368_cacode == 0 ) {
-        memcpy( D_801157F0_cacode, obj->mtx, sizeof( D_801157F0_cacode ) );
+    if ( ca_selected == 0 ) {
+        memcpy( ca_camera0Matrix, obj->mtx, sizeof( ca_camera0Matrix ) );
     } else {
-        memcpy( D_8012FE10_cacode[D_80115368_cacode - 1][D_80115370_cacode], obj->mtx, sizeof( obj->mtx ) );
-        memcpy( D_80139410_cacode[D_80115368_cacode - 1][D_80115370_cacode], D_801157E4_cacode[D_80115368_cacode]->cam.at,
-                sizeof( D_80139410_cacode[0][0] ) );
-        memcpy( D_8013B030_cacode[D_80115368_cacode - 1][D_80115370_cacode], D_801157E4_cacode[D_80115368_cacode]->cam.eye,
-                sizeof( D_8013B030_cacode[0][0] ) );
-        memcpy( D_8013CC50_cacode[D_80115368_cacode - 1][D_80115370_cacode], D_801157E4_cacode[D_80115368_cacode]->cam.unk_18,
-                sizeof( D_8013CC50_cacode[0][0] ) );
+        memcpy( ca_objectMatrices[ca_selected - 1][ca_frame], obj->mtx, sizeof( obj->mtx ) );
+        memcpy( ca_cameraAt[ca_selected - 1][ca_frame], ca_cameras[ca_selected]->cam.at,
+                sizeof( ca_cameraAt[0][0] ) );
+        memcpy( ca_cameraEye[ca_selected - 1][ca_frame], ca_cameras[ca_selected]->cam.eye,
+                sizeof( ca_cameraEye[0][0] ) );
+        memcpy( ca_cameraUp[ca_selected - 1][ca_frame], ca_cameras[ca_selected]->cam.unk_18,
+                sizeof( ca_cameraUp[0][0] ) );
     }
 
-    if ( D_80115368_cacode != 0 ) {
+    if ( ca_selected != 0 ) {
         if ( D_800994BC & Z_TRIG ) {
             if ( D_800994BC & D_CBUTTONS ) {
-                D_80115540_cacode += 8;
-                if ( D_80115540_cacode > 247 ) {
-                    D_80115540_cacode = 247;
+                ca_clipAlpha += 8;
+                if ( ca_clipAlpha > 247 ) {
+                    ca_clipAlpha = 247;
                 }
             }
             if ( D_800994BC & U_CBUTTONS ) {
-                D_80115540_cacode -= 8;
-                if ( D_80115540_cacode < 10 ) {
-                    D_80115540_cacode = 10;
+                ca_clipAlpha -= 8;
+                if ( ca_clipAlpha < 10 ) {
+                    ca_clipAlpha = 10;
                 }
             }
         }
-        func_80112350_cacode( D_80115370_cacode, D_80115368_cacode, D_80115540_cacode );
+        CA_DrawFrame( ca_frame, ca_selected, ca_clipAlpha );
     }
 
     gSPLoadUcodeL( D_800F8094++, gspL3DEX2_fifo );
-    func_800316C0( &D_801157E4_cacode[D_80115368_cacode]->cam );
+    func_800316C0( &ca_cameras[ca_selected]->cam );
 
     /* the selected part's axes */
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
@@ -703,9 +703,9 @@ void func_80113280_cacode( void ) {
                        ENVIRONMENT );
     gDPSetPrimColor( D_800F8094++, 0, 0, 128, 128, 128, 128 );
     gDPSetEnvColor( D_800F8094++, 0, 0, 0, 128 );
-    gSPMatrix( D_800F8094++, &obj->joints[D_8011536C_cacode].mtxL[D_8005C0B1],
+    gSPMatrix( D_800F8094++, &obj->joints[ca_part].mtxL[D_8005C0B1],
                G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
-    gSPVertex( D_800F8094++, D_80115380_cacode, 4, 0 );
+    gSPVertex( D_800F8094++, ca_axes, 4, 0 );
     gSPLine3D( D_800F8094++, 0, 1, 0 );
     gSPLine3D( D_800F8094++, 0, 2, 0 );
     gSPLine3D( D_800F8094++, 0, 3, 0 );
@@ -715,12 +715,12 @@ void func_80113280_cacode( void ) {
     func_80028A0C( &D_800F8094 );
     func_80028950( &D_800F8094, 0 );
     gDPSetCycleType( D_800F8094++, G_CYC_1CYCLE );
-    switch ( D_80115364_cacode ) {
+    switch ( ca_mode ) {
     case CAMODE_ROTATE:
         func_80028DA4( &D_800F8094, 20, 20, "ROTATE" );
-        sprintf( str, "H=%3.1f P=%3.1f B=%3.1f", model->parts[D_8011536C_cacode]->unk_08[0] * RAD_TO_DEG,
-                 model->parts[D_8011536C_cacode]->unk_08[1] * RAD_TO_DEG,
-                 model->parts[D_8011536C_cacode]->unk_08[2] * RAD_TO_DEG );
+        sprintf( str, "H=%3.1f P=%3.1f B=%3.1f", model->parts[ca_part]->unk_08[0] * RAD_TO_DEG,
+                 model->parts[ca_part]->unk_08[1] * RAD_TO_DEG,
+                 model->parts[ca_part]->unk_08[2] * RAD_TO_DEG );
         func_80028DA4( &D_800F8094, 64, 215, str );
         break;
     case CAMODE_FILE:
@@ -732,6 +732,6 @@ void func_80113280_cacode( void ) {
         func_80028DA4( &D_800F8094, 84, 30, str );
         break;
     }
-    sprintf( str, "CAM=%d OBJ=%d FRAME=%d", D_80115368_cacode, D_8011536C_cacode, D_80115370_cacode );
+    sprintf( str, "CAM=%d OBJ=%d FRAME=%d", ca_selected, ca_part, ca_frame );
     func_80028DA4( &D_800F8094, 84, 20, str );
 }

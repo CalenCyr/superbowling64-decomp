@@ -485,7 +485,7 @@ void func_80026B44( void *arg ) {
                 osInvalDCache( cacode_VRAM, i );
                 func_80028744( "CACODE  SYS", cacode_VRAM, i, 0 );
                 func_80026B10();
-                func_801128F4_cacode();
+                CA_Init();
                 break;
             case SCENE_PVCODE:
                 i = func_8002889C( "PVCODE  SYS" );
@@ -530,7 +530,7 @@ void func_80026B44( void *arg ) {
             func_80112414_gscode();
             break;
         case SCENE_CACODE:
-            func_80113280_cacode();
+            CA_Frame();
             break;
         case SCENE_PVCODE:
             PV_Frame();
