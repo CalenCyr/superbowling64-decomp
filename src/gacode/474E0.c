@@ -466,7 +466,7 @@ Collisions between the bodies of a lane. Each spot in use (spots[0..10], then sp
 spots[11..21]) of a body still in play is tested against each later body in play, first against its
 spot (or the segment from that spot to the midpoint with its spot2), then against its spot2 (or the
 segment from that midpoint to spot2). A new contact runs GA_CollideBodies on the two bodies, and each
-of them that stands flat (kind 1, rot[0] 0) and was hit at 1 or more starts to tip toward its new
+of them of kind 1 goes through GA_TipBody: when it stands flat (rot[0] 0) and was hit at 1 or more it tips toward its new
 heading, falls (standState 2) and plays its sound (0x4B under the lane, else 0x32). contacts of a spot holds
 bit 0 (it was hit this frame) and one bit per spot it touches. Returns 1 when the last contact with
 the first spots knocked a body over.
