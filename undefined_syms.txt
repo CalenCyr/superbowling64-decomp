@@ -2,3 +2,6 @@
 func_84001064 = 0x84001064;
 /* rspboot's end: no storage of its own, the address of gspF3DEX2_Rej_fifoTextStart that follows it */
 rspbootTextEnd = 0x80056DD0;
+/* BEF0's format string "data.%4.4d", which Cache_LoadFile (C) emits as its .rodata; the parked asm of Cache_GetFile,
+   which shares it, refers to it by address until Cache_GetFile is C */
+D_800603D0 = 0x800603D0;
