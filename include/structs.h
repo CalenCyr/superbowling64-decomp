@@ -65,7 +65,7 @@ typedef struct {
 
 /*
  * Tuning of one wave (waveBank_t.tunes): a signed byte of hundredths of a semitone that Snd_RelocateWaveBank
- * turns in place into a float in semitones, adding the matching digit of waveBank_t.unk_24.
+ * turns in place into a float in semitones, adding the matching digit of waveBank_t.tuneDigits.
  */
 typedef union {
     u8 raw;
@@ -81,7 +81,7 @@ typedef struct {
     /* 0x10 */ s32 flags;           /* WAVEBANK_RELOCATED */
     /* 0x14 */ u8 unk_14[0x20 - 0x14];
     /* 0x20 */ s32 numWaves;        /* entries in unk_24, tunes and waves */
-    /* 0x24 */ u8 *unk_24;          /* '0'-based digits added to the tunes */
+    /* 0x24 */ u8 *tuneDigits;      /* '0'-based digits added to the tunes */
     /* 0x28 */ waveTune_t *tunes;
     /* 0x2C */ ALWaveTable **waves;
 } waveBank_t;
@@ -127,7 +127,7 @@ typedef struct {
     /* 0x34 */ s32 ticksPerFrame;       /* audio frame length, in ticks */
     /* 0x38 */ s32 numDmaBuffers;       /* ROM sample cache buffers */
     /* 0x3C */ s32 dmaBufferSize;       /* bytes per cache buffer */
-    /* 0x40 */ OSPiHandle *unk_40;      /* PI handle of the sample addresses tagged 0xFF000000 (Audio_FindDmaBuffer) */
+    /* 0x40 */ OSPiHandle *sampleHandle; /* PI handle of the sample addresses tagged 0xFF000000 (Audio_FindDmaBuffer) */
 } sndConfig_t;
 
 #define AUDIO_FRAME_SAMPLES 184     /* audio frame granularity: frame sizes are whole multiples of 184 samples */

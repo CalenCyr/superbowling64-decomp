@@ -1424,3 +1424,5 @@ txt_glyphs	0x800619E0	invented: CI4 glyph sheet, 64 pixels wide, 8x16 glyphs (GL
 draw_rdpMode	0x8005C190	invented: the RDP mode the last 2D drawing set up (DRAW2D_FILL, DRAW2D_COPY; 0xFF: none, set by unit 3D50)
 cont_siEvent	0x800619B8	invented: its address is the message of the serial interface event (Cont_Init)
 Scene_LoadMultiBlock	src/C650.c	invented: the second-texture load of Scene_Draw, gDPLoadMultiBlock with the render tile at tmem 0
+waveBank_t.tuneDigits	structs.h	invented: '0'-based digits added to the tunes, one per wave
+sndConfig_t.sampleHandle	structs.h	invented: PI handle of the ROM samples (Audio_FindDmaBuffer)

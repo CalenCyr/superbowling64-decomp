@@ -133,7 +133,7 @@ void Snd_Init( sndConfig_t *config ) {
     s32 i;
     ALVoiceConfig voiceConfig;
 
-    audio_samplePiHandle = config->unk_40;
+    audio_samplePiHandle = config->sampleHandle;
     audio_sampleFlags = config->unk_00;
     snd_numChannels = config->numVoices + NUM_MASTER_CHANNELS;
     if ( osTvType == OS_TV_PAL ) {
@@ -1650,13 +1650,13 @@ void Snd_RelocateWaveBank( void *data, s32 romBase ) {
         return;
     }
     bank->flags |= WAVEBANK_RELOCATED;
-    Snd_RelocateTable( (s32 *)&bank->unk_24, (s32)bank, 3 );
+    Snd_RelocateTable( (s32 *)&bank->tuneDigits, (s32)bank, 3 );
     Snd_RelocateTable( (s32 *)bank->waves, (s32)bank, bank->numWaves );
     for ( i = 0; i < bank->numWaves; i++ ) {
         tune = &bank->tunes[i];
         value = tune->raw;
         tune->value = (f32)Snd_SignExtend8( value ) / 100.0;
-        tune->value += (f32)Snd_SignExtend8( bank->unk_24[i] - '0' );
+        tune->value += (f32)Snd_SignExtend8( bank->tuneDigits[i] - '0' );
         if ( bank->waves[i]->flags == 0 ) {
             if ( ( (u32)bank->waves[i]->base & 0xFF000000 ) != 0xFF000000 ) {
                 bank->waves[i]->base += romBase;
