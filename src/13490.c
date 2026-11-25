@@ -553,20 +553,13 @@ totals: the numbered heads of the ten frames, then per player (or team) its name
 of them when all is set.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: calls, CFG, constants and stack match; only the team plates' registers differ: retail gives the
-// computer flag s0, player * 2 s5 and the icons s6 (this draft s6, s0, s5). Declaration order and spellings of
-// player (ternary, if/else, u8) don't change it. Permuter (target-only scoring, 8 min): nothing below the base
-// score 100.
-// Also checked: the single-plate case first (mode != 1, worse), player = ( i == 1 ) * 2, player in the block's
-// scope, player++ for the second plate (worse), frameX = x after the frame-3 header (worse), the helper indexing
-// score_playerIcons without its icons local (worse here and in the other callers).
 void Score_DrawTeamBoard( u8 mode, u8 all, s16 x, s16 y ) {
     s32 i;
     s32 frame;
     s32 count;
     s32 player;
     s16 frameX;
+    u8 cpu;             /* the plate's player is played by the game */
 
     if ( mode == 2 ) {
         Draw_Image( 0xA12, x, y - 3 );
@@ -582,10 +575,13 @@ void Score_DrawTeamBoard( u8 mode, u8 all, s16 x, s16 y ) {
         }
         if ( mode == 1 ) {
             player = i == 1 ? 2 : 0;
-            Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, frameX, y );
-            Menu_DrawNamePlate( player + 1, game_players[player + 1] >> 7, game_playerNames[player + 1].chars, frameX, y + 20 );
+            cpu = game_players[player] >> 7;
+            Menu_DrawNamePlate( player, cpu, game_playerNames[player].chars, frameX, y );
+            cpu = game_players[player + 1] >> 7;
+            Menu_DrawNamePlate( player + 1, cpu, game_playerNames[player + 1].chars, frameX, y + 20 );
         } else {
-            Menu_DrawNamePlate( i, game_players[i] >> 7, game_playerNames[i].chars, frameX, y );
+            cpu = game_players[i] >> 7;
+            Menu_DrawNamePlate( i, cpu, game_playerNames[i].chars, frameX, y );
         }
         frameX += 0x38;
         if ( mode == 1 ) {
@@ -603,9 +599,6 @@ void Score_DrawTeamBoard( u8 mode, u8 all, s16 x, s16 y ) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/13490", Score_DrawTeamBoard);
-#endif
 
 /*
 ================
