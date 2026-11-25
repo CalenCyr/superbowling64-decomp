@@ -49,7 +49,7 @@ extern u8 game_strikeRun[4];        /* per player: strikes in a row (to 255), wh
 extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
 extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */
 
-/* The lane's floor height grid: a file (the stage's gaStage_t.unk_18). Name invented. */
+/* The lane's floor height grid: a file (the stage's gaStage_t.floorGridFile). Name invented. */
 typedef struct {
     /* 0x000 */ u16 numX;                  /* grid points along x */
     /* 0x002 */ u16 numZ;                  /* grid points along z */

@@ -118,26 +118,26 @@ typedef struct {
     /* 0xB26 */ u8 reaction;                /* the character's reaction animation (files[reaction + 2]) */
     /* 0xB27 */ u8 unk_B27;
     /* 0xB28 */ f32 cameraRaise;            /* camera height offset of func_8011B8AC_gacode */
-    /* 0xB2C */ s16 bounceSound;            /* of the ball's floor hits: gaStage_t.unk_1E[0], [1] for a curving throw */
+    /* 0xB2C */ s16 bounceSound;            /* of the ball's floor hits: gaStage_t.sounds[0], [1] for a curving throw */
     /* 0xB2E */ u8 unk_B2E[2];
 } gaLane_t;                             /* size 0xB30 */
 
 /* What gaCharacter_t.data points to. Name invented. */
 typedef struct {
-    /* 0x00 */ s16 *unk_00;                 /* file indices */
+    /* 0x00 */ s16 *fileIndices;            /* file indices */
     /* 0x04 */ f32 unk_04;                  /* objParams_t.unk_08[4] of the player's scene object */
-    /* 0x08 */ s8 unk_08;                   /* +-: a joint of the player's object */
+    /* 0x08 */ s8 ballJoint;                /* +-: a joint of the player's object */
     /* 0x09 */ u8 unk_09[0x03];
-    /* 0x0C */ vec3_t unk_0C;               /* offset of the ball from that joint */
+    /* 0x0C */ vec3_t ballOffset;           /* offset of the ball from that joint */
     /* 0x18 */ u8 unk_18;
     /* 0x19 */ u8 unk_19;
     /* 0x1A */ u8 unk_1A;
-    /* 0x1B */ u8 unk_1B[5];            /* indexed by gaLane_t.reaction */
+    /* 0x1B */ u8 reactionFrames[5];    /* indexed by gaLane_t.reaction */
 } gaCharacterData_t;                        /* size 0x20 */
 
 /* Per character (the last two empty): file indices, [0] and [1] the player's scene object's (GA_Init) */
 extern s16 D_80123A14_gacode[10][7];
-extern gaCharacterData_t ga_characterData[10];   /* per character; unk_00 points to its row of D_80123A14_gacode */
+extern gaCharacterData_t ga_characterData[10];   /* per character; fileIndices points to its row of D_80123A14_gacode */
 
 /* Character record (ga_characters), copied into gaPlayer_t. Name invented. */
 typedef struct {
@@ -179,16 +179,16 @@ typedef struct {
 
 /* Configuration of a stage (ga_stages); ga_stage points to the current one. Name invented. */
 typedef struct {
-    /* 0x00 */ objParams_t *unk_00;      /* the scene (Obj_CreateAll); one object per player first */
+    /* 0x00 */ objParams_t *scene;       /* the scene (Obj_CreateAll); one object per player first */
     /* 0x04 */ f32 unk_04;
     /* 0x08 */ f32 unk_08;
-    /* 0x0C */ f32 unk_0C;
+    /* 0x0C */ f32 hook;
     /* 0x10 */ f32 unk_10;
-    /* 0x14 */ f32 unk_14;
-    /* 0x18 */ u16 unk_18;              /* archive index of the floor grid (game_floorGrids) */
-    /* 0x1A */ u16 unk_1A;
-    /* 0x1C */ s16 unk_1C;              /* sound id; -1: none */
-    /* 0x1E */ s16 unk_1E[9];
+    /* 0x14 */ f32 floorHeight;
+    /* 0x18 */ u16 floorGridFile;       /* archive index of the floor grid (game_floorGrids) */
+    /* 0x1A */ u16 bgm;
+    /* 0x1C */ s16 ambientSound;        /* sound id; -1: none */
+    /* 0x1E */ s16 sounds[9];
     /* 0x30 */ void (*update)( void );  /* each frame */
 } gaStage_t;                            /* size 0x34 */
 
@@ -298,7 +298,7 @@ extern u8 ga_earlyCommit;            /* nonzero: B commits the throw early (GA_I
 typedef struct {
     /* 0x00 */ f32 unk_00;
     /* 0x04 */ s16 unk_04;                 /* within 999 either way */
-    /* 0x06 */ u8 unk_06;                  /* step reached (func_80116FF0_gacode), 6 at start */
+    /* 0x06 */ u8 step;                    /* step reached (func_80116FF0_gacode), 6 at start */
     /* 0x07 */ u8 unk_07;
 } gaLaneAim_t;                              /* size 0x08 */
 

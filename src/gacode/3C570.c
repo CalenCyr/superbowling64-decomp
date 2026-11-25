@@ -28,17 +28,17 @@ void GA_Init( void ) {
     ga_parFrame = 0;
     ga_pauseCursor = 0;
     ga_state = GA_PauseMenu;
-    Str_ReadFile( ga_stage->unk_18, (u8 *)&game_floorGrids[0] );
-    params = ga_stage->unk_00;
+    Str_ReadFile( ga_stage->floorGridFile, (u8 *)&game_floorGrids[0] );
+    params = ga_stage->scene;
     for ( i = 0; i < game_numPlayers; i++, params++ ) {
         character = game_players[i] & 0xF;
         params->unk_08[0] = D_80123A14_gacode[character][0];
         params->unk_08[1] = D_80123A14_gacode[character][1];
         params->unk_08[4] = ga_characterData[character].unk_04;
     }
-    Obj_CreateAll( ga_classes, ga_stage->unk_00 );
-    if ( ga_stage->unk_1C >= 0 ) {
-        ga_sound = Sound_PlaySe( ga_stage->unk_1C, 0 );
+    Obj_CreateAll( ga_classes, ga_stage->scene );
+    if ( ga_stage->ambientSound >= 0 ) {
+        ga_sound = Sound_PlaySe( ga_stage->ambientSound, 0 );
     } else {
         ga_sound = 0;
     }
@@ -386,7 +386,7 @@ void GA_SetupMode( void ) {
         break;
     case 1:
         GA_StartMode( GA_DuelLoop, GA_ScoreStandard );
-        ga_bgm = ga_stage->unk_1A;
+        ga_bgm = ga_stage->bgm;
         break;
     case 3:
         GA_StartMode( func_80114024_gacode, GA_ScoreBattle );
@@ -425,7 +425,7 @@ void func_80113384_gacode( void ) {
             GA_StartMode( GA_PairGameLoop, GA_ScoreStandard );
             break;
         }
-        ga_bgm = ga_stage->unk_1A;
+        ga_bgm = ga_stage->bgm;
         break;
     case 1:
         GA_ShuffleOrder( D_800DF59C.unk_04, 25, 0 );
@@ -442,7 +442,7 @@ void func_80113384_gacode( void ) {
             GA_StartMode( GA_ParGameLoop, GA_ScorePar );
             break;
         }
-        ga_bgm = ga_stage->unk_1A;
+        ga_bgm = ga_stage->bgm;
         break;
     case 2:
         GA_ShuffleOrder( &D_800DF59C.unk_04[0], 5, 0 );

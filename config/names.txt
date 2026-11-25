@@ -1426,3 +1426,15 @@ cont_siEvent	0x800619B8	invented: its address is the message of the serial inter
 Scene_LoadMultiBlock	src/C650.c	invented: the second-texture load of Scene_Draw, gDPLoadMultiBlock with the render tile at tmem 0
 waveBank_t.tuneDigits	structs.h	invented: '0'-based digits added to the tunes, one per wave
 sndConfig_t.sampleHandle	structs.h	invented: PI handle of the ROM samples (Audio_FindDmaBuffer)
+gaStage_t.scene	gacode.h	invented: the scene handed to Obj_CreateAll
+gaStage_t.floorGridFile	gacode.h	invented: archive index of the floor grid, read by GA_Init
+gaStage_t.bgm	gacode.h	invented: copied to ga_bgm by GA_SetupMode
+gaStage_t.ambientSound	gacode.h	invented: sound id started by GA_Init, -1 none
+gaStage_t.floorHeight	gacode.h	invented: floor height the bodies are kept above (GA_KeepOnFloor)
+gaStage_t.hook	gacode.h	invented: copied to the player's character.hook
+gaStage_t.sounds	gacode.h	invented: sound ids; [0], [1] the ball's bounce sounds
+gaCharacterData_t.fileIndices	gacode.h	invented: file indices of the character's animations
+gaCharacterData_t.ballJoint	gacode.h	invented: joint of the player's object the ball hangs from; sign is the side
+gaCharacterData_t.ballOffset	gacode.h	invented: offset of the ball from that joint
+gaCharacterData_t.reactionFrames	gacode.h	invented: frame of the reaction animation, indexed by gaLane_t.reaction
+gaLaneAim_t.step	gacode.h	invented: step reached, comment of the member

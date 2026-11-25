@@ -58,7 +58,7 @@ void GA_SetupLanes( u8 twoTeams, f32 offset, u8 distanceMode ) {
         ga_lanes[i].markerObjs[2] = obj_scene[base + j];
         if ( distanceMode ) {
             ga_lanes[i].markerObjs[2]->viewMask = i + 1;
-            D_8012C110_gacode[2].pos[1] = ga_stage->unk_14;
+            D_8012C110_gacode[2].pos[1] = ga_stage->floorHeight;
         }
         ga_lanes[i].cameraRaise = 2700.0f;
         GA_RestorePalette( &D_8012D240_gacode[i] );
@@ -69,10 +69,10 @@ void GA_SetupLanes( u8 twoTeams, f32 offset, u8 distanceMode ) {
         ga_lanes[i].frameOver = 0;
         ga_lanes[i].soundHandle = 0;
         ga_lanes[i].timer = 0;
-        ga_lanes[i].bounceSound = ga_stage->unk_1E[0];
+        ga_lanes[i].bounceSound = ga_stage->sounds[0];
         ga_laneAim[i].unk_00 = -1096.0f;
         ga_laneAim[i].unk_04 = 0;
-        ga_laneAim[i].unk_06 = 6;
+        ga_laneAim[i].step = 6;
         ga_laneAim[i].unk_07 = 0;
     }
     D_8012D8D8_gacode = 0;
@@ -242,7 +242,7 @@ void GA_PhysicsStep( s32 player, s32 port ) {
             continue;
         }
         /* spots[i + NUM_BODIES] is secondSpots[i], which follows spots in the lane (as in GA_CollideLane) */
-        hit = GA_KeepOnFloor( &motion[i], &spots[i], &spots[i + NUM_BODIES], 180.0f, ga_stage->unk_14 );
+        hit = GA_KeepOnFloor( &motion[i], &spots[i], &spots[i + NUM_BODIES], 180.0f, ga_stage->floorHeight );
         if ( lane->bodies[i].kind != 0 ) {
             continue;
         }
@@ -253,7 +253,7 @@ void GA_PhysicsStep( s32 player, s32 port ) {
                 GA_PlayLaneSound( pl->laneIndex, pl->lane->bounceSound );
             }
             if ( port >= 0 ) {
-                if ( pl->lane->bounceSound == ga_stage->unk_1E[1] ) {
+                if ( pl->lane->bounceSound == ga_stage->sounds[1] ) {
                     cont_rumble[port] = 6;
                 } else {
                     cont_rumble[port] = 4;
@@ -367,8 +367,8 @@ void GA_HoldBall( s32 player ) {
         return;
     }
     data = pl->character.data;
-    joint = data->unk_08 < 0 ? -data->unk_08 : data->unk_08;
-    guTranslateF( mf, data->unk_0C[0], data->unk_0C[1], data->unk_0C[2] );
+    joint = data->ballJoint < 0 ? -data->ballJoint : data->ballJoint;
+    guTranslateF( mf, data->ballOffset[0], data->ballOffset[1], data->ballOffset[2] );
     guMtxCatF( mf, pl->obj->joints[joint].mtx, pl->lane->bodyObjs[0]->mtx );
     guMtxXFMF( pl->lane->bodyObjs[0]->mtx, 0.0f, 0.0f, 0.0f, &pl->lane->spots[0].pos[0], &pl->lane->spots[0].pos[1],
                &pl->lane->spots[0].pos[2] );
@@ -886,7 +886,7 @@ s32 GA_EndDuelGame( void ) {
 
         game_duelScores[i][game_gamesWon[0] + game_gamesWon[1]] = game_totals[i];
         pl = &ga_players[i];
-        files = pl->character.data->unk_00;
+        files = pl->character.data->fileIndices;
         pl->lane->inputFunc = GA_InputGameOver;
         pl->lane->panelFunc = func_8011B490_gacode;
         pl->lane->cameraFunc = func_8011BCA8_gacode;
@@ -1034,7 +1034,7 @@ void GA_ResetLane( s32 player, u8 *pins ) {
     s32 i;
 
     memmove( pl->obj->mtx, pl->homeMtx, sizeof( pl->homeMtx ) );
-    pl->character.hook = ga_stage->unk_0C;
+    pl->character.hook = ga_stage->hook;
     pl->character.timingAngle = 1.5707964f;
     pl->character.spin = pl->character.aim[0] = pl->character.stance[0] = 0.0f;
     pl->character.speed = pl->character.minSpeed;
@@ -1047,7 +1047,7 @@ void GA_ResetLane( s32 player, u8 *pins ) {
     for ( i = 0; i < NUM_BODIES; i++, spot2++ ) {
         if ( i != 0 ) {
             body[i].standState = pins[i - 1];
-            body[i].pos[1] += ga_stage->unk_14;
+            body[i].pos[1] += ga_stage->floorHeight;
         }
         spot[i].pos[0] = body[i].pos[0];
         spot[i].pos[1] = body[i].pos[1];
@@ -1146,11 +1146,11 @@ inline void GA_SoundThrowResult( s32 player, gaPlayer_t *pl, u8 strong ) {
     if ( pl->lane->spots[0].pos[1] <= -190.0f ) {
         id = 0x49;
     } else if ( pl->lane->motion[0].vel[2] >= -13.0f ) {
-        id = strong ? ga_stage->unk_1E[5] : ga_stage->unk_1E[2];
+        id = strong ? ga_stage->sounds[5] : ga_stage->sounds[2];
     } else if ( pl->lane->motion[0].vel[2] <= -16.0f ) {
-        id = strong ? ga_stage->unk_1E[7] : ga_stage->unk_1E[4];
+        id = strong ? ga_stage->sounds[7] : ga_stage->sounds[4];
     } else {
-        id = strong ? ga_stage->unk_1E[6] : ga_stage->unk_1E[3];
+        id = strong ? ga_stage->sounds[6] : ga_stage->sounds[3];
     }
     pl->lane->soundHandle = GA_PlayLaneSound( pl->laneIndex, id );
 }
@@ -1166,7 +1166,7 @@ inline s32 func_801168D0_gacode( gaPlayer_t *pl ) {
     f32 height = lane->spots[0].pos[1] - lane->spots[0].radius;
 
     if ( lane->spots[0].pos[2] > -1186.0f
-         && height < ga_stage->unk_14
+         && height < ga_stage->floorHeight
          && ( lane->motion[0].flags & 1 ) ) {
         GA_StopLaneSound( &lane->soundHandle );
         GA_PlayLaneSound( pl->laneIndex, 0x2F );
@@ -1305,18 +1305,18 @@ inline s32 func_80116FF0_gacode( s32 lane, s8 port, f32 x, u8 step ) {
     s16 seIds[5] = { 0x69, 0x68, 0x67, 0x66, 0x65 };
 
     if ( 730 - step * 60 < x ) {
-        if ( ga_laneAim[lane].unk_06 == step ) {
+        if ( ga_laneAim[lane].step == step ) {
             return 1;
-        } else if ( ga_laneAim[lane].unk_06 == step - 1 ) {
-            ga_laneAim[lane].unk_06 = step;
+        } else if ( ga_laneAim[lane].step == step - 1 ) {
+            ga_laneAim[lane].step = step;
             return 1;
-        } else if ( ga_laneAim[lane].unk_06 == step + 1 ) {
+        } else if ( ga_laneAim[lane].step == step + 1 ) {
             GA_PlayLaneSound( lane, seIds[step - 1] );
             if ( port >= 0 ) {
                 cont_rumble[port] = 8 - step;
                 D_8006940D[port] = 10;
             }
-            ga_laneAim[lane].unk_06 = step;
+            ga_laneAim[lane].step = step;
             return 1;
         }
     }
@@ -1397,7 +1397,7 @@ s32 func_80117124_gacode( s32 player, gaPlayer_t *pl ) {
              && !func_80116FF0_gacode( player, pl->port, pl->lane->markerSpots[2].pos[2], 3 )
              && !func_80116FF0_gacode( player, pl->port, pl->lane->markerSpots[2].pos[2], 4 )
              && !func_80116FF0_gacode( player, pl->port, pl->lane->markerSpots[2].pos[2], 5 ) ) {
-            ga_laneAim[player].unk_06 = 6;
+            ga_laneAim[player].step = 6;
         }
     }
     return 0;
@@ -1482,7 +1482,7 @@ GA_InputAim.
 */
 s32 GA_InputBeginTurn( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
-    s16 *files = pl->character.data->unk_00;
+    s16 *files = pl->character.data->fileIndices;
     gaLane_t *lane = pl->lane;
     s32 i;
 
@@ -1693,8 +1693,8 @@ GA_InputRelease
 
 Lane input handler at the release: sets the ball's standState, aims from the ball's spot towards the character's
 aim (into direction), sets the ball's velocity from speed (turned by the sine and cosine of timingAngle, the sideways
-part curved by its square), its spin from spin, scales hook by the spin, picks the stage's unk_1E[1] or
-unk_1E[0] by how far timingAngle turns the throw, and hands over to GA_InputRoll.
+part curved by its square), its spin from spin, scales hook by the spin, picks the stage's sounds[1] or
+sounds[0] by how far timingAngle turns the throw, and hands over to GA_InputRoll.
 ================
 */
 s32 GA_InputRelease( s32 player, s32 input, s16 stickX, s16 stickY ) {
@@ -1716,7 +1716,7 @@ s32 GA_InputRelease( s32 player, s32 input, s16 stickX, s16 stickY ) {
     pl->lane->motion[0].vel[1] = pl->character.speed * pl->character.direction[2];
     pl->lane->motion[0].vel[2] = pl->character.speed * pl->character.direction[2];
     pl->lane->motion[0].vel[0] = pl->character.speed * pl->character.direction[0];
-    side = pl->character.data->unk_08 < 0 ? -1 : 1;
+    side = pl->character.data->ballJoint < 0 ? -1 : 1;
     pl->lane->motion[0].vel[1] *= sinf( pl->character.timingAngle ) * side;
     pl->lane->motion[0].vel[2] *= cosf( pl->character.timingAngle );
     side = pl->character.reverseSpin ? -1 : 1;
@@ -1726,9 +1726,9 @@ s32 GA_InputRelease( s32 player, s32 input, s16 stickX, s16 stickY ) {
     pl->lane->motion[0].spin[1] = pl->character.spin;
     pl->character.hook = pl->character.hook * ( -pl->lane->motion[0].spin[1] / 15.0 );
     if ( FABS( sinf( pl->character.timingAngle ) ) >= 0.15 ) {
-        pl->lane->bounceSound = ga_stage->unk_1E[1];
+        pl->lane->bounceSound = ga_stage->sounds[1];
     } else {
-        pl->lane->bounceSound = ga_stage->unk_1E[0];
+        pl->lane->bounceSound = ga_stage->sounds[0];
     }
     pl->lane->inputFunc = GA_InputRoll;
     return 0;
@@ -1790,7 +1790,7 @@ the character's reaction (1 to 3) and hands over to GA_InputReaction, else to GA
 */
 s32 GA_InputCountPins( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
-    s16 *files = pl->character.data->unk_00;
+    s16 *files = pl->character.data->fileIndices;
     s32 scorer;
     s32 result;
     s32 reaction;
@@ -1871,7 +1871,7 @@ s32 GA_InputReaction( s32 player, s32 input, s16 stickX, s16 stickY ) {
 
     pl->lane->cameraFunc = func_8011BCA8_gacode;
     pl->lane->timer++;
-    if ( pl->obj->frame == pl->character.data->unk_1B[pl->lane->reaction] - 1
+    if ( pl->obj->frame == pl->character.data->reactionFrames[pl->lane->reaction] - 1
          || ( pl->lane->timer >= 30 && ( cont_pressed[pl->laneIndex] & ( A_BUTTON | Z_TRIG ) ) ) ) {
         pl->lane->timer = 0;
         pl->lane->cameraFunc = func_8011C650_gacode;
@@ -1937,7 +1937,7 @@ s32 GA_InputGameOver( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     pl->obj->viewMask = pl->laneIndex ? 2 : 1;
-    if ( pl->obj->frame == pl->character.data->unk_1B[pl->lane->reaction] ) {
+    if ( pl->obj->frame == pl->character.data->reactionFrames[pl->lane->reaction] ) {
         pl->obj->frame--;
         return -1;
     }
@@ -2319,7 +2319,7 @@ void func_80119F8C_gacode( s32 player, u8 lane ) {
     s16 y;
     s16 aim;
 
-    if ( ga_laneAim[lane].unk_06 < 6 ) {
+    if ( ga_laneAim[lane].step < 6 ) {
         Draw_FillRect( lane ? 0xA0 : 0, 0, 0xA0, 0xF0, 0xFF, 0x7F, 0, (u8)ga_blinkLevel );
     }
     x = lane ? 0xA8 : 0x18;
@@ -2985,10 +2985,10 @@ void func_8011BC10_gacode( s32 player, sceneCamera_t *camera ) {
 
     camera->eye[2] = -896.0f;
     camera->eye[0] = pl->lane->offsetX;
-    camera->eye[1] = ga_stage->unk_14 + 80.0f;
+    camera->eye[1] = ga_stage->floorHeight + 80.0f;
     camera->at[2] = -1096.0f;
     camera->at[0] = pl->lane->offsetX;
-    camera->at[1] = ga_stage->unk_14 + 24.0f;
+    camera->at[1] = ga_stage->floorHeight + 24.0f;
     camera->upPoint[2] = camera->eye[2];
     camera->upPoint[0] = camera->eye[0];
     camera->upPoint[1] = 512.0f;
@@ -3120,7 +3120,7 @@ void func_8011C254_gacode( s32 player, sceneCamera_t *camera ) {
     joint = 1;
     if ( pl->lane->inputFunc == GA_InputReaction || pl->lane->inputFunc == GA_InputGameOver ) {
         file = ga_throwCamPathsLate[D_8012D8D8_gacode % 5];
-        frames = pl->character.data->unk_1B[pl->lane->reaction];
+        frames = pl->character.data->reactionFrames[pl->lane->reaction];
     } else {
         file = ga_throwCamPaths[D_8012D8D8_gacode % 5];
         frames = pl->character.data->unk_1A;
@@ -3170,7 +3170,7 @@ void func_8011C57C_gacode( s32 player, sceneCamera_t *camera ) {
     Cam_ReadPathFrame( ga_laneCamPaths[D_8012D8D8_gacode % 5], 0, camera->eye, camera->upPoint );
     camera->at[2] = -1096.0f;
     camera->at[0] = pl->lane->offsetX;
-    camera->at[1] = ga_stage->unk_14;
+    camera->at[1] = ga_stage->floorHeight;
     camera->upPoint[2] = camera->eye[2];
     camera->upPoint[0] = camera->eye[0];
     camera->upPoint[1] = 512.0f;
@@ -3312,7 +3312,7 @@ void GA_CpuSetup( gaPlayer_t *pl, s32 player ) {
         from[2] = pl->character.stance[2];
         GA_VecDirection( dir, from, to );
         pl->character.spin = func_801205A0_gacode( target, dir, from[0], pl->character.speed );
-        if ( ga_stage->unk_14 >= 0.0f && FABS( pl->character.spin ) <= FABS( pl->character.maxSpin ) ) {
+        if ( ga_stage->floorHeight >= 0.0f && FABS( pl->character.spin ) <= FABS( pl->character.maxSpin ) ) {
             return;
         }
     }
@@ -3334,7 +3334,7 @@ void GA_CpuSetup( gaPlayer_t *pl, s32 player ) {
         GA_VecDirection( dir, from, to );
         pl->character.spin = func_801205A0_gacode( target, dir, from[0], pl->character.speed );
     }
-    if ( ga_stage->unk_14 >= 0.0f && FABS( pl->character.spin ) <= FABS( pl->character.maxSpin ) ) {
+    if ( ga_stage->floorHeight >= 0.0f && FABS( pl->character.spin ) <= FABS( pl->character.maxSpin ) ) {
         return;
     }
 

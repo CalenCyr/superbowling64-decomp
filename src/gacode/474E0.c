@@ -941,7 +941,7 @@ f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale ) {
     vz = scale * vel[2];
     vx = scale * vel[0];
     return ( vz * vz * 2 * dx - vx * 2 * vz * ( width + dz ) )
-         / ( width * width + width * 2 * dz + ga_stage->unk_10 * ( dz * dz ) ) * 15.0 / ga_stage->unk_0C;
+         / ( width * width + width * 2 * dz + ga_stage->unk_10 * ( dz * dz ) ) * 15.0 / ga_stage->hook;
 }
 
 /*
