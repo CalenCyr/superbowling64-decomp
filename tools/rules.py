@@ -38,7 +38,7 @@ that names it):
                config/rules.txt as `asm-helper NAME` (counted, listed) or `original-asm NAME` (listed
                apart, counted neither way).
 
-Advisory (never fail a match): R7 placeholder and address-like names (function, parameters, locals,
+Advisory (never fail a match): R7 placeholder and address-like names, argN included (function, parameters, locals,
 globals, types and members referenced); R8 Table 1 style (K&R braces, spaces inside parentheses,
 `Prefix_VerbNoun` functions, `lowerCamel` locals); R33 missing header comment; R35 braceless bodies;
 R25 block-scope `extern` of a function; R37 `#if 0`.
@@ -235,7 +235,7 @@ PAD_RE = re.compile(r"^_*(pad|padding|filler|dummy)(_?[0-9A-Fa-fx]*)$", re.I)
 PLACEHOLDER_RE = re.compile(
     r"^(func_[0-9A-Fa-f]{8}|D_[0-9A-Fa-f]{8}|jtbl_[0-9A-Fa-f]{8}|L[0-9A-Fa-f]{8})(_\w+)?$"
     r"|^(FUN_|DAT_|sub_|unk_|unk[0-9A-F]|Unk|local_|param_|field_0x|uStack|iVar|m_Unk|UnkType_)"
-    r"|^(var|temp|tmp|ptr|result|v)\d+$")
+    r"|^(var|temp|tmp|ptr|result|v|arg)\d+$")
 ADDRESS_RE = re.compile(r"\b[A-Za-z_]*?_?(?=[0-9a-fA-F]*[0-9])[0-9a-fA-F]{6,8}\b")
 LOWER_CAMEL_RE = re.compile(r"^[a-z][A-Za-z0-9]*$")
 FUNC_STYLE_RE = re.compile(r"^([A-Z][A-Za-z0-9]*_)?[A-Z][A-Za-z0-9]*(_f)?$")
@@ -1021,6 +1021,8 @@ class Checker:
     def check_advisory(self, fn, globals_types):
         src, body = fn.src, fn.body
         libultra = "libultra" in src.rel or src.rel.startswith("lib/")
+        if "libkmc" in src.rel:
+            return    # KMC's C runtime keeps its ANSI C / SVID names (struct exception's arg1, arg2)
         # R7: names in the function, params, locals, referenced globals/types/members
         names = []
         for t in list(fn.head) + list(body):

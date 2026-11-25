@@ -46,8 +46,21 @@ def run(fixture):
     return errors, len(want), len(pend)
 
 
+def check_placeholders():
+    """R7's placeholder pattern: argN parameters count, words that merely start with arg do not."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import rules
+    errors = [f"placeholder({n!r}) should be {w}" for n, w in
+              (("arg0", True), ("arg12", True), ("args", False), ("argument", False), ("argc", False))
+              if rules.placeholder(n) != w]
+    print(f"{'FAIL' if errors else 'ok':4} placeholder pattern: {len(errors)} wrong")
+    for e in errors:
+        print(f"     {e}")
+    return bool(errors)
+
+
 def main():
-    bad = 0
+    bad = check_placeholders()
     for fx in sorted(HERE.glob("*.c")):
         errors, nw, npend = run(fx)
         status = "FAIL" if errors else "ok"
