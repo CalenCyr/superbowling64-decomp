@@ -61,6 +61,8 @@ on the left of the first row, the exit on the right of the last.
 // them (declaration order of the locals tried, no effect; a stride = height * 2 + 1 local is much worse).
 // Permuter clue (target-only scoring, best 325 from 415): reusing a u32 local for height * 2 in the two final
 // stores (maze[row + 1], ... * (row + 1)) moves allocation toward retail; the inner-loop a0/a1 swap remains.
+// A 60-minute batch run reached 40 from 415 by holding i - (width - 1) * height in j for the last loop's row: 8 lines
+// left, but that reuses j (not counted); a fresh local for it, for row alone or for row and col, stays at 36.
 // Also checked: wall as the best-wall search counter (worse), bestWall = 0 before best = 0, weight[j] > best and
 // from == set[j] (no effect).
 void Maze_Build( u32 width, u32 height, u8 *maze ) {
