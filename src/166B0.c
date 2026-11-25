@@ -1707,10 +1707,6 @@ CHANNEL ALLOCATION
 ==============================================================================
 */
 
-#ifdef NON_MATCHING
-// NON_MATCHING: registers only: retail swaps a0 and a1 between the 0xFF constant and the tempo quotient. Also checked:
-// statement order of the tempo division, one assignment chain vs two RESEND stores, u32/s16/u16 tempo, an inline
-// byte-clearing helper (u32 or s32 size), the order of p and started; no change or worse.
 /*
 ================
 Snd_ResetChannel
@@ -1736,16 +1732,16 @@ void Snd_ResetChannel( sndChannel_t *chan ) {
     chan->fixedVelocity = 0x7F;
     chan->trackVolume = 0x7F;
     chan->envPeakLevel = 0x7F;
-    chan->envDecayTime = 0xFF;
     chan->pan = PAN_CENTRE;
-    chan->envSustainLevel = 0x7F;
     chan->envInterval = 1;
     chan->envAttackTime = 1;
+    chan->envDecayTime = 0xFF;
     chan->envReleaseTime = 15;
     chan->lastVolume = 0xFFFF;
     chan->noteLength = 1;
     chan->volStreamWait = 1;
     chan->bendStreamWait = 1;
+    chan->envSustainLevel = 0x7F;
     chan->fadeLeft = FADE_NONE;
     chan->playVolume = SCALE_ONE;
     chan->playPan = SCALE_ONE;
@@ -1755,14 +1751,10 @@ void Snd_ResetChannel( sndChannel_t *chan ) {
     chan->attackSlope = 1.0f;
     chan->decaySlope = 1.0f / 255;
     chan->releaseSlope = 1.0f / 15;
-    chan->baseTempo = tempo;
-    chan->tempo = tempo;
+    chan->tempo = chan->baseTempo = tempo;
     chan->waveBank = snd_nextWaveBank != NULL ? snd_nextWaveBank : snd_defaultWaveBank;
     chan->voiceActive = started;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/166B0", Snd_ResetChannel);
-#endif
 
 /*
 ================
