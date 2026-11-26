@@ -610,7 +610,8 @@ class Checker:
                     nt, is_func, _ = declarator_name(part)
                     if nt is None or is_func:
                         continue
-                    ty = base + " " + norm([x for x in part if x is not nt]).split(" = ")[0]
+                    eq = next((i for i, x in enumerate(part) if x.text == "="), len(part))
+                    ty = base + " " + norm([x for x in part[:eq] if x is not nt])
                     ty = re.sub(r"\[\s*[^\]]*\]", "[]", ty)
                     decls.setdefault(nt.text, []).append((u.src, nt.line, ext, ty.strip(), self.is_header(u.src), static))
         for name, places in decls.items():
