@@ -6,6 +6,10 @@
 #include "archive.h"
 #include "libc.h"
 
+/* ===== State ===== */
+
+static u8 lz_window[LZSS_N + LZSS_F - 1];  /* LZSS window, and its look-ahead copy at the end */
+
 #define ARCHIVE_DMA_CHUNK   0x1000      /* bytes per ROM DMA */
 
 /*

@@ -25,7 +25,6 @@ typedef struct {
 } HostPacket;                       /* size 0x5C */
 
 extern HostPacket host_packet;      /* the request header of the next transfer */
-extern s32 host_fileSize;           /* bytes of the file Host_GetFileSize announced */
 
 void Host_Send( u8 *buf, s32 len );
 void Host_Recv( u8 *buf, s32 len );

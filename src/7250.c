@@ -12,6 +12,12 @@
 #include "input.h"
 #include "libc.h"
 
+/* ===== State ===== */
+
+static u16 draw_palettes[2][4][256];  /* palette copies of Draw_ImageCopyPalette: four per frame buffer (sched_bufferIndex) */
+static Vtx draw_lineVtx[2][2];      /* the two ends of the line Draw_Line3D draws, by camera */
+static Mtx draw_lineMtx;            /* identity, the model matrix of that line */
+
 /* ===== Data ===== */
 
 u8 draw_rdpMode = 0xFF;

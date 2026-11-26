@@ -5,6 +5,10 @@
 #include "boot.h"
 #include "hostio.h"
 
+/* ===== State ===== */
+
+static s32 host_fileSize;           /* bytes of the file Host_GetFileSize announced */
+
 /*
 ================
 Host_Send

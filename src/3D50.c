@@ -5,6 +5,10 @@
 #include "dbgtext.h"
 #include "filecache.h"
 
+/* ===== State ===== */
+
+static u8 *txt_glyphs;              /* CI4 glyph sheet, 64 pixels wide, 8x16 glyphs */
+
 /*
 ================
 Txt_SetupFont

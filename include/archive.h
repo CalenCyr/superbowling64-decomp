@@ -24,7 +24,6 @@
 extern u8 str_ROM_START[];          /* linker: ROM address of the str segment */
 
 extern u32 str_files[];             /* the str segment's file table, STR_FILE_WORDS words per file */
-extern u8 lz_window[LZSS_N];        /* LZSS window */
 extern u8 lz_readBuffer[];          /* where compressed files are read before decompression */
 
 void LZ_Decompress( u8 *dst, u8 *src, u16 len );
