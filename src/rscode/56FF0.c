@@ -377,27 +377,20 @@ Results of a duel: the score of each game, the higher one marked, the games won,
 leaves when player 1 won (setting the bit of game_stage in save_data.unlocks), else opens the menu.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: retail passes x to Menu_DrawNamePlate zero-extended and not folded to the constant 0x40 (then forms
-// x + 0x38 with ori), and allocates the first loop's registers differently (x in s1, i in s2)
-// The zero extension fits a call with no prototype in scope; the project keeps every call prototyped, so it stays
-// parked.
-// Permuter clue (795 -> 105): 0x40 held in a separate short temporary set before the first loop; a split step only.
-// Not the call's declaration: a K&R Menu_DrawNamePlate (no parameter list), a u16 x parameter, and a u16 x local each
-// leave `li a3,64` (x folded) unchanged, and the K&R form breaks the gacode callers. Retail keeps 0x40 in s0 at the
-// loop top and converts it (sll/srl) at the call, so x is not a known constant there: look for what hides it from cse.
 void RS_DuelResults( void ) {
     u16 images[3] = { 0x874, 0x873, 0x872 };
     s16 x;
     s16 y;
+    s16 left;
     s32 games;
     s32 player;
     s32 opponent;
     s32 i;
 
     Draw_Image( 0x88D, 0x64, 0x10 );
+    left = 0x40; // the table's left edge: the name plates; the game headers and score boxes start 0x38 further right
     y = 0x28;
-    x = 0x78;
+    x = left + 0x38;
     games = game_gamesWon[0] + game_gamesWon[1];
     for ( i = 0; i < games; i++ ) {
         Draw_Image( images[i], x, y );
@@ -406,10 +399,10 @@ void RS_DuelResults( void ) {
     Draw_Image( 0x871, x, y );
     y += 9;
     for ( player = 0; player < 2; player++ ) {
-        x = 0x40;
+        opponent = !player;
+        x = left;
         Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, x, y );
         x += 0x38;
-        opponent = !player;
         for ( i = 0; i < games; i++ ) {
             Draw_Image( 0x86D, x, y );
             Score_DrawNumber( game_duelScores[player][i], x + 6, y + 6 );
@@ -441,10 +434,6 @@ void RS_DuelResults( void ) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/rscode/56FF0", RS_DuelResults);
-INCLUDE_RODATA("asm/nonmatchings/rscode/56FF0", D_80114290_rscode);
-#endif
 
 /*
 ================
