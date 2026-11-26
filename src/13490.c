@@ -56,17 +56,17 @@ on the left of the first row, the exit on the right of the last.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: calls, CFG, constants and the frame match; registers differ only in the inner loops: retail keeps
-// the inner counter j (and the first cell of a wall) in a1 and the walking pointer or bound in a0, this draft swaps
-// them (declaration order of the locals tried, no effect; a stride = height * 2 + 1 local is much worse).
-// Permuter clue (target-only scoring, best 325 from 415): reusing a u32 local for height * 2 in the two final
-// stores (maze[row + 1], ... * (row + 1)) moves allocation toward retail; the inner-loop a0/a1 swap remains.
-// A 60-minute batch run reached 40 from 415 by holding i - (width - 1) * height in j for the last loop's row: 8 lines
-// left, but that reuses j (not counted); a fresh local for it, for row alone or for row and col, stays at 36.
-// Also checked: wall as the best-wall search counter (worse), bestWall = 0 before best = 0, weight[j] > best and
-// from == set[j] (no effect).
+// NON_MATCHING: byte-exact (gate green) only with locals doing two jobs (marked R30 below): retail keeps the
+// inner counter j, the first cell of a wall and the last loop's i - (width - 1) * height in one register (a1), and
+// the last loop's row in next's; that long life is what drops j below the inner loops' pointers and bounds in
+// allocation order. With separate cell/row locals the inner loops swap a0/a1 (36 lines); j alone as the last
+// loop's counter, or a fresh local for its offset, fixes only some loops (row in wall instead of next also works).
+// Also checked: declaration order, a stride local, wall as the best-wall counter, bestWall = 0 first,
+// weight[j] > best, from == set[j] (no effect or worse).
 void Maze_Build( u32 width, u32 height, u8 *maze ) {
     s32 i;
+    // RULE-EXCEPTION: R30, j is also the first cell of a wall and the last loop's offset of a wall within the
+    // walls between columns, and next is also the last loop's row; separate locals change the register allocation.
     s32 j;
     mazeWork_t *work;
     u16 *set;
@@ -77,11 +77,9 @@ void Maze_Build( u32 width, u32 height, u8 *maze ) {
     u16 best;
     u16 bestWall;
     u32 wall;
-    u32 cell;
     u32 next;
     u16 from;
     u16 to;
-    u32 row;
     u32 col;
 
     work = Mem_Alloc( sizeof( mazeWork_t ) );
@@ -112,20 +110,20 @@ void Maze_Build( u32 width, u32 height, u8 *maze ) {
     for ( i = 0; i < walls; i++ ) {
         wall = order[i];
         if ( wall < ( width - 1 ) * height ) {
-            cell = wall % ( width - 1 ) * height + wall / ( width - 1 );
-            next = cell + height;
+            j = wall % ( width - 1 ) * height + wall / ( width - 1 );
+            next = j + height;
         } else {
             wall -= ( width - 1 ) * height;
-            cell = wall % width * height + wall / width;
-            next = cell + 1;
+            j = wall % width * height + wall / width;
+            next = j + 1;
         }
-        if ( set[cell] != set[next] ) {
+        if ( set[j] != set[next] ) {
             closed[order[i]] = 0;
-            if ( set[cell] < set[next] ) {
+            if ( set[j] < set[next] ) {
                 from = set[next];
-                to = set[cell];
+                to = set[j];
             } else {
-                from = set[cell];
+                from = set[j];
                 to = set[next];
             }
             for ( j = 0; j < width * height; j++ ) {
@@ -150,12 +148,13 @@ void Maze_Build( u32 width, u32 height, u8 *maze ) {
         if ( closed[i] == 0 ) {
             if ( i < ( width - 1 ) * height ) {
                 col = i / ( width - 1 ) * 2 + 1;
-                row = i % ( width - 1 ) * 2 + 2;
+                next = i % ( width - 1 ) * 2 + 2;
             } else {
-                col = ( i - ( width - 1 ) * height ) / width * 2 + 2;
-                row = ( i - ( width - 1 ) * height ) % width * 2 + 1;
+                j = i - ( width - 1 ) * height;
+                col = j / width * 2 + 2;
+                next = j % width * 2 + 1;
             }
-            maze[row * ( height * 2 + 1 ) + col] = 0;
+            maze[next * ( height * 2 + 1 ) + col] = 0;
         }
     }
     maze[height * 2 + 1] = 0;
