@@ -43,7 +43,7 @@ s32 n_alSynAllocVoice( N_ALVoice *voice, ALVoiceConfig *vc ) {
             update = func_80042B68();
             update->delta = D_8005D114->paramSamples;
             update->type = N_PARAM_SET_VOLUME;
-            update->data = 0;
+            update->data.i = 0;
             update->moredata = N_PVOICE_STEAL_FADE;
             func_80040A08( voice->pvoice, AL_FILTER_ADD_UPDATE, update );
 

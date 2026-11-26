@@ -41,7 +41,11 @@ typedef struct ALParam_s {
     /* 0x04 */ s32 delta;
     /* 0x08 */ s16 type;                /* N_PARAM_* */
     /* 0x0A */ s16 unityPitch;          /* N_PARAM_START_VOICE: the voice's unityPitch */
-    /* 0x0C */ s32 data;
+    /* 0x0C */ union {
+                   s32 i;
+                   f32 f;               /* N_PARAM_SET_PITCH */
+                   void *p;             /* N_PARAM_START_VOICE */
+               } data;
     /* 0x10 */ s32 moredata;
     /* 0x14 */ s32 stillmoredata;
     /* 0x18 */ s32 yetstillmoredata;
@@ -179,12 +183,13 @@ ALParam *func_80042B68( void );        /* takes an update off the free list, NUL
 s32 func_80042C94( ALMicroTime t );    /* t in output samples, rounded down to a multiple of 16 */
 
 void n_alSynAddPlayer( ALPlayer *client );
+void Synth_Destroy( void );
 s32 Synth_AllocPVoice( N_PVoice **pvoice, s16 priority );
 s32 n_alSynAllocVoice( N_ALVoice *voice, ALVoiceConfig *vc );
 void n_alSynSetFXMix( N_ALVoice *voice, u8 fxmix );
-void n_alSynSetPan( N_ALVoice *voice, s32 pan );
+void n_alSynSetPan( N_ALVoice *voice, u8 pan );
 void n_alSynSetPitch( N_ALVoice *voice, f32 pitch );
-void n_alSynSetVol( N_ALVoice *voice, s32 volume, ALMicroTime t );
+void n_alSynSetVol( N_ALVoice *voice, s16 volume, ALMicroTime t );
 void n_alSynStartVoice( N_ALVoice *voice, ALWaveTable *table );
 void n_alSynStopVoice( N_ALVoice *voice );
 

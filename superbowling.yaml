@@ -100,7 +100,7 @@ segments:
       - [0x1D550, asm]
       - [0x1D5D0, c]
       - [0x1D620, c]
-      - [0x1D800, asm]
+      - [0x1D800, c]
       - [0x1D8B0, asm]
       - [0x1D940, asm]
       - [0x1D9D0, asm]
