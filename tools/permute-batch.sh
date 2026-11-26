@@ -23,7 +23,14 @@ for spec in "$@"; do
     log=$dir/batch.log
     setsid .permuter-venv/bin/python3 tools/decomp-permuter/permuter.py "$dir" -j"$jobs" --best-only > "$log" 2>&1 &
     pid=$!
-    sleep $((mins * 60))
+    # A work copy that does not compile (e.g. pycparser misprinting `sizeof( T ) - x` as a cast) ends the run at
+    # once; record it rather than wait out the slot.
+    sleep 60
+    if grep -q 'Unable to compile' "$log"; then
+        kill -KILL -- -"$pid" 2>/dev/null
+        echo "$(date +%F\ %T) $spec COMPILE FAILED (see $log)" >> "$report"; continue
+    fi
+    sleep $((mins * 60 - 60))
     kill -TERM -- -"$pid" 2>/dev/null; sleep 5; kill -KILL -- -"$pid" 2>/dev/null
     base=$(grep -m1 -o 'base score = [0-9]*' "$log" | grep -o '[0-9]*$')
     best=$(ls -d "$dir"/output-* 2>/dev/null | sed 's/.*output-\([0-9]*\)-.*/\1/' | sort -n | head -1)
