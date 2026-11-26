@@ -382,8 +382,8 @@ extern s32 D_8005CF88[];            /* AL_FX_CHORUS */
 extern s32 D_8005CFB0[];            /* AL_FX_FLANGE */
 extern s32 D_8005CFD8[];            /* any other fxType */
 
-Acmd *func_80040490( N_PVoice *pv, s32 sampleOffset, Acmd *p );       /* pulls one frame of a physical voice */
-Acmd *func_80040AAC( N_PVoice *pv, s16 *inp, s16 *outp, s32 outCount, Acmd *p ); /* mixes one frame */
+Acmd *func_80040490( void *filter, s32 sampleOffset, Acmd *p );        /* pulls one frame of a physical voice */
+Acmd *func_80040AAC( void *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p ); /* mixes one frame */
 s16 func_80040CCC( f64 vol, f64 tgt, s32 count, u16 *ratel );         /* the ramp step from vol to tgt */
 s16 func_80040E0C( s16 vol, s32 count, s16 ratem, u16 ratel );        /* the volume count samples into a ramp */
 

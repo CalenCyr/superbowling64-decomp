@@ -7,18 +7,18 @@
 #include "functions.h"
 #include "variables.h"
 
-#ifdef NON_MATCHING
-// NON_MATCHING: the prologue schedules the save and copy of s2 (p) first; the body matches
 /*
 ================
 func_80040490
 
-Pulls one frame of pv: mixes the samples up to each queued update due in this frame, applies the update, and
-mixes the rest of the frame.
+Pulls one frame of the physical voice filter: mixes the samples up to each queued update due in this frame,
+applies the update, and mixes the rest of the frame.
 ================
 */
-Acmd *func_80040490( N_PVoice *pv, s32 sampleOffset, Acmd *p ) {
+Acmd *func_80040490( void *filter, s32 sampleOffset, Acmd *p ) {
+    N_PVoice *pv = (N_PVoice *)filter;
     Acmd *ptr = p;
+    s32 offset = sampleOffset;          /* the sample the next update falls on */
     s16 outp = 0;
     s16 inp = 0;
     s32 outCount = N_FRAME_SAMPLES;
@@ -29,11 +29,11 @@ Acmd *func_80040490( N_PVoice *pv, s32 sampleOffset, Acmd *p ) {
     ALParam *done;                      /* the update applied, back to the free list */
 
     while ( pv->ctrlList != NULL ) {
-        lastOffset = sampleOffset;
-        sampleOffset = pv->ctrlList->delta;
-        samples = N_ROUND_FRAMES( sampleOffset - lastOffset );
+        lastOffset = offset;
+        offset = pv->ctrlList->delta;
+        samples = N_ROUND_FRAMES( offset - lastOffset );
         if ( samples == 0 ) {
-            sampleOffset = lastOffset;
+            offset = lastOffset;
         }
         if ( samples > outCount ) {
             break;
@@ -156,9 +156,6 @@ Acmd *func_80040490( N_PVoice *pv, s32 sampleOffset, Acmd *p ) {
     }
     return ptr;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/1B890", func_80040490);
-#endif
 
 /*
 ================
@@ -198,18 +195,17 @@ s32 func_80040A08( N_PVoice *pv, s32 paramID, void *param ) {
     return 0;
 }
 
-#ifdef NON_MATCHING
-// NON_MATCHING: the prologue schedules the save of s3 (inp) first; the body matches
 /*
 ================
 func_80040AAC
 
-Mixes one frame of pv into the dry and wet mix: resamples it to *inp, sets the volume ramps when they changed,
-and runs the envelope mixer. outp is not used. Nothing is made unless pv plays and outCount is not 0.
+Mixes one frame of the physical voice filter into the dry and wet mix: resamples it to *inp, sets the volume
+ramps when they changed, and runs the envelope mixer. outp is not used. Nothing is made unless pv plays and outCount is not 0.
 ================
 */
-Acmd *func_80040AAC( N_PVoice *pv, s16 *inp, s16 *outp, s32 outCount, Acmd *p ) {
+Acmd *func_80040AAC( void *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p ) {
     Acmd *ptr = p;
+    N_PVoice *pv = (N_PVoice *)filter;
 
     if ( pv->motion != N_MOTION_PLAYING || outCount == 0 ) {
         return ptr;
@@ -232,9 +228,6 @@ Acmd *func_80040AAC( N_PVoice *pv, s16 *inp, s16 *outp, s32 outCount, Acmd *p ) 
     pv->envDelta += N_FRAME_SAMPLES;
     return ptr;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/1B890", func_80040AAC);
-#endif
 
 #ifdef NON_MATCHING
 // NON_MATCHING: FP register choice from the first product on (f0/f2 swapped) and the order of s + c - 1
