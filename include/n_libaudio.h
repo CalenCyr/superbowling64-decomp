@@ -10,10 +10,12 @@ n_alSyn* take no ALSynth argument: n_audio has a single synthesizer.
 
 #include "libultra.h"
 
+struct N_PVoice_s;
+
 /* n_audio voice: owned by the synthesizer once n_alSynAllocVoice has set it up */
 typedef struct {
     /* 0x00 */ ALLink node;
-    /* 0x08 */ void *pvoice;
+    /* 0x08 */ struct N_PVoice_s *pvoice;  /* the physical voice it plays on, NULL: none */
     /* 0x0C */ ALWaveTable *table;
     /* 0x10 */ void *clientPrivate;
     /* 0x14 */ s16 state;
@@ -23,22 +25,35 @@ typedef struct {
 } N_ALVoice;
 
 /* the physical voice: on the synthesizer's free list until a voice is allocated; 0x8C bytes */
-typedef struct {
+typedef struct N_PVoice_s {
     /* 0x00 */ ALLink node;
     /* 0x08 */ N_ALVoice *vvoice;       /* the voice using it, NULL while free */
-    /* 0x0C */ u8 unk_0C[0x8C - 0x0C];
+    /* 0x0C */ u8 unk_0C[0x88 - 0x0C];
+    /* 0x88 */ s32 offset;              /* samples its updates wait: N_PVOICE_STEAL_DELAY while a stolen voice fades */
 } N_PVoice;
+
+#define N_PVOICE_STEAL_DELAY    552     /* N_PVoice.offset of a stolen voice: three frames */
+#define N_PVOICE_STEAL_FADE     368     /* samples a stolen voice's volume ramps to 0 over: two frames */
 
 /* parameter update queued for a later frame (libaudio ALParam shape); 0x1C bytes */
 typedef struct ALParam_s {
     /* 0x00 */ struct ALParam_s *next;
     /* 0x04 */ s32 delta;
-    /* 0x08 */ s16 type;
+    /* 0x08 */ s16 type;                /* N_PARAM_* */
+    /* 0x0A */ s16 unityPitch;          /* N_PARAM_START_VOICE: the voice's unityPitch */
     /* 0x0C */ s32 data;
     /* 0x10 */ s32 moredata;
     /* 0x14 */ s32 stillmoredata;
     /* 0x18 */ s32 yetstillmoredata;
 } ALParam;
+
+/* ALParam.type values the n_alSyn* calls queue */
+#define N_PARAM_SET_PITCH       7       /* data: the pitch ratio, as f32 */
+#define N_PARAM_SET_VOLUME      11      /* data: the volume, moredata: the ramp time in samples */
+#define N_PARAM_SET_PAN         12      /* data: the pan */
+#define N_PARAM_START_VOICE     14      /* data: the wave table */
+#define N_PARAM_STOP_VOICE      15
+#define N_PARAM_SET_FXMIX       16      /* data: the effect mix, 0-127 */
 
 /* pulls a bus's commands for one frame: appends them at cmdList and returns the new end */
 typedef Acmd *(*N_ALPullHandler)( s32 sampleOffset, Acmd *cmdList );
@@ -99,6 +114,7 @@ typedef struct {
 /* filter message ids, libaudio's first two */
 #define AL_FILTER_FREE_VOICE    0
 #define AL_FILTER_SET_SOURCE    1
+#define AL_FILTER_ADD_UPDATE    3       /* param: an ALParam to append to the physical voice's queue */
 
 s32 alFxParam( void *filter, s32 paramID, void *param );
 s32 alFxParamHdl( void *filter, s32 paramID, void *param );
@@ -158,8 +174,13 @@ void func_8004035C( N_PVoice *pv, ALDMANew dma, ALHeap *hp );  /* sets up a phys
 Acmd *func_80041760( s32 sampleOffset, Acmd *cmdList );    /* main bus pull through the effect */
 Acmd *func_80042A00( Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen );   /* synthesizes one frame */
 
+s32 func_80040A08( N_PVoice *pv, s32 paramID, void *param );   /* a physical voice's parameter handler */
+ALParam *func_80042B68( void );        /* takes an update off the free list, NULL: none left */
+s32 func_80042C94( ALMicroTime t );    /* t in output samples, rounded down to a multiple of 16 */
+
 void n_alSynAddPlayer( ALPlayer *client );
-void n_alSynAllocVoice( N_ALVoice *voice, ALVoiceConfig *vc );
+s32 Synth_AllocPVoice( N_PVoice **pvoice, s16 priority );
+s32 n_alSynAllocVoice( N_ALVoice *voice, ALVoiceConfig *vc );
 void n_alSynSetFXMix( N_ALVoice *voice, u8 fxmix );
 void n_alSynSetPan( N_ALVoice *voice, s32 pan );
 void n_alSynSetPitch( N_ALVoice *voice, f32 pitch );

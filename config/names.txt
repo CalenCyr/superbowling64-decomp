@@ -1489,3 +1489,9 @@ ga_endThrowFunc	0x8012D23C	invented: the game mode's handler that ends the throw
 ga_throwCount	0x8012D8D8	invented: counts throws; picks the camera paths by its remainder
 ga_paused	0x8012D650	invented: set while the pause menu shows (START)
 rspProgram_t	boot.h	invented: the task microcode, its data and its data pointer an audio task runs
+Synth_AllocPVoice	0x80042338	invented: takes a waiting or free physical voice onto the allocated list, else picks one to steal (n_alSynAllocVoice)
+offset	N_PVoice+0x88	invented: samples the physical voice's updates wait; n_alSynAllocVoice sets 552 on a stolen voice, the n_alSyn* calls add it to each update's delta
+unityPitch	ALParam+0x0A	invented: n_alSynStartVoice copies the voice's unityPitch there
+N_PARAM_SET_PITCH, N_PARAM_SET_VOLUME, N_PARAM_SET_PAN, N_PARAM_START_VOICE, N_PARAM_STOP_VOICE, N_PARAM_SET_FXMIX	n_libaudio.h	invented: ALParam.type 7, 11, 12, 14, 15, 16 that n_alSynSetPitch, SetVol, SetPan, StartVoice, StopVoice and SetFXMix queue
+N_PVOICE_STEAL_DELAY, N_PVOICE_STEAL_FADE	n_libaudio.h	invented: 552 and 368 samples (three and two 184-sample frames) n_alSynAllocVoice uses on a stolen voice
+AL_FILTER_ADD_UPDATE	n_libaudio.h	invented: paramID 3, on which func_80040A08 appends the ALParam to the physical voice's queue
