@@ -7,7 +7,7 @@
 /* ===== Data ===== */
 
 /* the character select: [5] its title, ids 0-7 the portraits, id 9 the cursor */
-static menuItem_t D_8011BD50_gscode[16] = {
+static menuItem_t gs_selectItems[16] = {
     { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
     { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
     { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
@@ -27,34 +27,34 @@ static menuItem_t D_8011BD50_gscode[16] = {
 };
 
 /* the character menu's name (id 8) and marker (id 10) */
-static menuItem_t D_8011BDF0_gscode[3] = {
+static menuItem_t gs_nameItems[3] = {
     { 8, 0x916, 103, 152, 0xFF, SLIDE_BOTTOM },
     { 10, 0x914, 264, 114, 128, SLIDE_RIGHT },
     { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
 };
 
 /* per character: image of its name */
-static s16 D_8011BE10_gscode[8] = {
+static s16 gs_nameImages[8] = {
     0x916, 0x919, 0x924, 0x91A, 0x918, 0x923, 0x915, 0x917,
 };
 
 /* per character: x of its name */
-static s16 D_8011BE20_gscode[8] = {
+static s16 gs_nameX[8] = {
     103, 99, 108, 103, 122, 111, 109, 101,
 };
 
 /* images of the marker */
-static s16 D_8011BE30_gscode[4] = {
+static s16 gs_markerImages[4] = {
     0x914, 0x913, 0x912, 0x911,
 };
 
-/* per character: its image in D_8011BE30_gscode */
-static u8 D_8011BE38_gscode[8] = {
+/* per character: its image in gs_markerImages */
+static u8 gs_markerByCharacter[8] = {
     0x00, 0x03, 0x00, 0x03, 0x01, 0x01, 0x02, 0x02,
 };
 
-/* the scene of character 0's model (D_8011F880_gscode) */
-static objParams_t D_8011BE40_gscode[] = {
+/* the scene of character 0's model (gs_modelScenes) */
+static objParams_t gs_modelScene0[] = {
     { 1.0f, 0.0f, { 2056.0f, 224.0f, 120.0f, 48.0f, 54.0f } },
     { 0.0f, 5.0f, { 430.0f, 1982.0f, 0.0f, 0.0f, 0.0f, 3.0f, 1.0f } },
     { 0.0f, 5.0f, { 430.0f, 1982.0f, 196.0f, 0.0f, 0.0f, 3.0f, 1.0f } },
@@ -87,8 +87,8 @@ static objParams_t D_8011BE40_gscode[] = {
     { -2.0f, 0.0f },
 };
 
-/* the scene of character 1's model (D_8011F880_gscode) */
-static objParams_t D_8011C5C0_gscode[] = {
+/* the scene of character 5's model (gs_modelScenes) */
+static objParams_t gs_modelScene5[] = {
     { 1.0f, 0.0f, { 2122.0f, 224.0f, 120.0f, 48.0f, 54.0f } },
     { 0.0f, 5.0f, { 1965.0f, 1977.0f, 0.0f, 0.0f, 0.0f, 3.0f, 1.0f, 1.0f } },
     { 0.0f, 5.0f, { 1944.0f, 2045.0f, 0.0f, 0.0f, 0.0f, 3.0f, 1.0f, 1.0f } },
@@ -114,8 +114,8 @@ static objParams_t D_8011C5C0_gscode[] = {
     { -2.0f, 0.0f },
 };
 
-/* the scene of character 2's model (D_8011F880_gscode) */
-static objParams_t D_8011CB80_gscode[] = {
+/* the scene of character 3's model (gs_modelScenes) */
+static objParams_t gs_modelScene3[] = {
     { 1.0f, 0.0f, { 2058.0f, 224.0f, 120.0f, 48.0f, 54.0f } },
     { 0.0f, 5.0f, { 451.0f, 1979.0f, 0.0f, 0.0f, 0.0f, 3.0f, 1.0f, 1.0f } },
     { 0.0f, 5.0f, { 451.0f, 1979.0f, 255.0f, 0.0f, 0.0f, 3.0f, 1.0f, 1.0f } },
@@ -149,8 +149,8 @@ static objParams_t D_8011CB80_gscode[] = {
     { -2.0f, 0.0f },
 };
 
-/* the scene of character 3's model (D_8011F880_gscode) */
-static objParams_t D_8011D340_gscode[] = {
+/* the scene of character 6's model (gs_modelScenes) */
+static objParams_t gs_modelScene6[] = {
     { 1.0f, 0.0f, { 2069.0f, 224.0f, 120.0f, 48.0f, 54.0f } },
     { 0.0f, 5.0f, { 891.0f, 1966.0f, 0.0f, 0.0f, 0.0f, 3.0f, 1.0f } },
     { 0.0f, 5.0f, { 891.0f, 1966.0f, 255.0f, 0.0f, 0.0f, 3.0f, 1.0f } },
@@ -186,8 +186,8 @@ static objParams_t D_8011D340_gscode[] = {
     { -2.0f, 0.0f },
 };
 
-/* the scene of character 4's model (D_8011F880_gscode) */
-static objParams_t D_8011DB80_gscode[] = {
+/* the scene of character 1's model (gs_modelScenes) */
+static objParams_t gs_modelScene1[] = {
     { 1.0f, 0.0f, { 2083.0f, 224.0f, 120.0f, 48.0f, 54.0f } },
     { 0.0f, 5.0f, { 1318.0f, 2018.0f, 0.0f, 0.0f, 0.0f, 3.0f, 1.0f, 1.0f } },
     { 0.0f, 5.0f, { 1358.0f, 2020.0f, 11.0f, 0.0f, 0.0f, 3.0f, 1.0f, 1.0f } },
@@ -255,8 +255,8 @@ static objParams_t D_8011DB80_gscode[] = {
     { -2.0f, 0.0f },
 };
 
-/* the scene of character 5's model (D_8011F880_gscode) */
-static objParams_t D_8011EBC0_gscode[] = {
+/* the scene of character 7's model (gs_modelScenes) */
+static objParams_t gs_modelScene7[] = {
     { 1.0f, 0.0f, { 2049.0f, 224.0f, 120.0f, 48.0f, 54.0f } },
     { 0.0f, 5.0f, { 168.0f, 1967.0f, 0.0f, 0.0f, 0.0f, 3.0f, 1.0f, 1.0f } },
     { 0.0f, 5.0f, { 201.0f, 1966.0f, 0.0f, 0.0f, 200.0f, 3.0f, 1.0f, 1.0f } },
@@ -285,8 +285,8 @@ static objParams_t D_8011EBC0_gscode[] = {
     { -2.0f, 0.0f },
 };
 
-/* the scene of character 6's model (D_8011F880_gscode) */
-static objParams_t D_8011F240_gscode[] = {
+/* the scene of character 4's model (gs_modelScenes) */
+static objParams_t gs_modelScene4[] = {
     { 1.0f, 0.0f, { 2067.0f, 224.0f, 120.0f, 48.0f, 54.0f } },
     { 0.0f, 5.0f, { 740.0f, 1977.0f, 0.0f, 0.0f, 0.0f, 3.0f, 1.0f, 1.0f } },
     { 0.0f, 5.0f, { 779.0f, 1997.0f, 0.0f, 0.0f, 0.0f, 3.0f, 1.0f, 1.0f } },
@@ -301,8 +301,8 @@ static objParams_t D_8011F240_gscode[] = {
     { -2.0f, 0.0f },
 };
 
-/* the scene of character 7's model (D_8011F880_gscode) */
-static objParams_t D_8011F540_gscode[] = {
+/* the scene of character 2's model (gs_modelScenes) */
+static objParams_t gs_modelScene2[] = {
     { 1.0f, 0.0f, { 2089.0f, 224.0f, 120.0f, 48.0f, 54.0f } },
     { 0.0f, 5.0f, { 1531.0f, 2035.0f, 0.0f, 0.0f, 0.0f, 3.0f, 1.0f } },
     { 0.0f, 5.0f, { 1531.0f, 2035.0f, 255.0f, 0.0f, 0.0f, 3.0f, 1.0f } },
@@ -319,21 +319,21 @@ static objParams_t D_8011F540_gscode[] = {
 };
 
 /* per character: the scene of its model */
-static objParams_t * D_8011F880_gscode[8] = {
-    D_8011BE40_gscode, D_8011DB80_gscode, D_8011F540_gscode, D_8011CB80_gscode, D_8011F240_gscode, D_8011C5C0_gscode, D_8011D340_gscode, D_8011EBC0_gscode,
+static objParams_t * gs_modelScenes[8] = {
+    gs_modelScene0, gs_modelScene1, gs_modelScene2, gs_modelScene3, gs_modelScene4, gs_modelScene5, gs_modelScene6, gs_modelScene7,
 };
 
-static u8 D_8011F8A0_gscode = 30; /* frames before the camera turns */
-static f32 D_8011F8A4_gscode = 3.1415927f; /* angle of the camera about the model */
+static u8 gs_cameraDelay = 30; /* frames before the camera turns */
+static f32 gs_cameraAngle = 3.1415927f; /* angle of the camera about the model */
 
 /* per character: its portrait image */
-static s16 D_8011F8A8_gscode[8] = {
+static s16 gs_portraitImages[8] = {
     0x922, 0x921, 0x920, 0x91F, 0x91E, 0x91D, 0x91C, 0x91B,
 };
 
-static u8 D_8011F8B8_gscode = 30; /* slide step of the character menu */
-static u8 D_8011F8B9_gscode = 0; /* CHOICE_IN etc.; 4: the name entry */
-static u8 D_8011F8BA_gscode = 8; /* frame of the viewport's zoom, 0 to 15 */
+static u8 gs_slideStep = 30; /* slide step of the character menu */
+static u8 gs_choice = 0; /* CHOICE_IN etc.; 4: the name entry */
+static u8 gs_zoomFrame = 8; /* frame of the viewport's zoom, 0 to 15 */
 
 /*
 ================
@@ -349,43 +349,43 @@ s32 GS_CharacterSelect( void ) {
 
     for ( i = 0; i < 8; i++ ) {
         if ( save_data.unlocks & ( 1 << i ) ) {
-            Menu_SetItem( D_8011BD50_gscode, i, D_8011F8A8_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
+            Menu_SetItem( gs_selectItems, i, gs_portraitImages[i], MENU_NONE, MENU_NONE, MENU_NONE );
         }
     }
 
-    if ( D_8011F8B9_gscode == CHOICE_RUN ) {
+    if ( gs_choice == CHOICE_RUN ) {
         if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
             Sound_PlaySe( SE_DECIDE, 0 );
             if ( save_data.rumble ) {
                 GS_StartPakCheck();
-                D_8011F8B9_gscode = 4;
+                gs_choice = 4;
             } else {
                 game_leaveState = 1;
-                D_8011F8B9_gscode = CHOICE_TAKEN;
+                gs_choice = CHOICE_TAKEN;
             }
         }
         if ( cont_allPressed & B_BUTTON ) {
             Sound_PlaySe( 2, 0 );
-            D_8011F8B9_gscode = CHOICE_BACK;
+            gs_choice = CHOICE_BACK;
         }
     }
 
-    if ( D_8011F8BA_gscode < 15 && D_8011F8B9_gscode == CHOICE_RUN ) {
-        D_8011F8BA_gscode++;
-        if ( D_8011F8BA_gscode == 10 ) {
+    if ( gs_zoomFrame < 15 && gs_choice == CHOICE_RUN ) {
+        gs_zoomFrame++;
+        if ( gs_zoomFrame == 10 ) {
             Obj_FreeAll();
             Cache_FreeBelow( 0x825 );
-            Obj_CreateAll( gs_classes, D_8011F880_gscode[game_stage] );
-            D_8011F8A0_gscode = 30;
-            D_8011F8A4_gscode = 3.1415927f;
+            Obj_CreateAll( gs_classes, gs_modelScenes[game_stage] );
+            gs_cameraDelay = 30;
+            gs_cameraAngle = 3.1415927f;
             cam_cameras[0]->path->flags |= 4;
         }
-        if ( D_8011F8BA_gscode < 7 ) {
-            cam_cameras[0]->width = 224.0f - D_8011F8BA_gscode * 32;
-            cam_cameras[0]->height = 120.0f - D_8011F8BA_gscode * 17;
-        } else if ( D_8011F8BA_gscode >= 9 ) {
-            cam_cameras[0]->width = ( D_8011F8BA_gscode - 8 ) * 32.0f;
-            cam_cameras[0]->height = ( D_8011F8BA_gscode - 8 ) * 17.0f;
+        if ( gs_zoomFrame < 7 ) {
+            cam_cameras[0]->width = 224.0f - gs_zoomFrame * 32;
+            cam_cameras[0]->height = 120.0f - gs_zoomFrame * 17;
+        } else if ( gs_zoomFrame >= 9 ) {
+            cam_cameras[0]->width = ( gs_zoomFrame - 8 ) * 32.0f;
+            cam_cameras[0]->height = ( gs_zoomFrame - 8 ) * 17.0f;
         } else {
             cam_cameras[0]->width = 32;
             cam_cameras[0]->height = 17;
@@ -394,12 +394,12 @@ s32 GS_CharacterSelect( void ) {
         cam_cameras[0]->top = 114 - cam_cameras[0]->height / 2;
     }
 
-    if ( D_8011F8B9_gscode == CHOICE_RUN ) {
+    if ( gs_choice == CHOICE_RUN ) {
         if ( cont_allDpadRepeat & L_JPAD ) {
-            if ( D_8011F8BA_gscode == 15 ) {
-                D_8011F8BA_gscode = 0;
-            } else if ( D_8011F8BA_gscode >= 9 ) {
-                D_8011F8BA_gscode = 6;
+            if ( gs_zoomFrame == 15 ) {
+                gs_zoomFrame = 0;
+            } else if ( gs_zoomFrame >= 9 ) {
+                gs_zoomFrame = 6;
             }
             do {
                 game_stage--;
@@ -410,10 +410,10 @@ s32 GS_CharacterSelect( void ) {
             Sound_PlaySe( SE_CURSOR, 0 );
         }
         if ( cont_allDpadRepeat & R_JPAD ) {
-            if ( D_8011F8BA_gscode == 15 ) {
-                D_8011F8BA_gscode = 0;
-            } else if ( D_8011F8BA_gscode >= 9 ) {
-                D_8011F8BA_gscode = 6;
+            if ( gs_zoomFrame == 15 ) {
+                gs_zoomFrame = 0;
+            } else if ( gs_zoomFrame >= 9 ) {
+                gs_zoomFrame = 6;
             }
             do {
                 game_stage++;
@@ -425,17 +425,17 @@ s32 GS_CharacterSelect( void ) {
         }
     }
 
-    Menu_SetItem( D_8011BDF0_gscode, 8, D_8011BE10_gscode[game_stage], D_8011BE20_gscode[game_stage], MENU_NONE,
+    Menu_SetItem( gs_nameItems, 8, gs_nameImages[game_stage], gs_nameX[game_stage], MENU_NONE,
                    MENU_NONE );
-    Menu_SetItem( D_8011BD50_gscode, 9, MENU_NONE, ( game_stage + 1 ) * 32, MENU_NONE, MENU_NONE );
-    Menu_SetItem( D_8011BDF0_gscode, 10, D_8011BE30_gscode[D_8011BE38_gscode[game_stage]], MENU_NONE, MENU_NONE,
+    Menu_SetItem( gs_selectItems, 9, MENU_NONE, ( game_stage + 1 ) * 32, MENU_NONE, MENU_NONE );
+    Menu_SetItem( gs_nameItems, 10, gs_markerImages[gs_markerByCharacter[game_stage]], MENU_NONE, MENU_NONE,
                    game_pulseAlpha );
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     Draw_Image( 0xA58, 0, 0 );
-    Menu_DrawItems( D_8011BD50_gscode, D_8011F8B8_gscode );
+    Menu_DrawItems( gs_selectItems, gs_slideStep );
 
-    if ( D_8011F8B9_gscode == CHOICE_RUN && D_8011F8BA_gscode != 7 && D_8011F8BA_gscode != 8 &&
-         D_8011F8BA_gscode != 9 ) {
+    if ( gs_choice == CHOICE_RUN && gs_zoomFrame != 7 && gs_zoomFrame != 8 &&
+         gs_zoomFrame != 9 ) {
         Draw_FillRect( cam_cameras[0]->left, cam_cameras[0]->top, cam_cameras[0]->width - 1,
                        cam_cameras[0]->height - 1, cam_cameras[0]->path->clearColor >> 16,
                        cam_cameras[0]->path->clearColor >> 8, cam_cameras[0]->path->clearColor, 0xFF );
@@ -444,13 +444,13 @@ s32 GS_CharacterSelect( void ) {
         cam_cameras[0]->eye[0] = 0.0f;
         cam_cameras[0]->eye[1] = 100.0f;
         cam_cameras[0]->eye[2] = 0.0f;
-        cam_cameras[0]->at[2] = cosf( D_8011F8A4_gscode ) * 100.0f;
-        cam_cameras[0]->at[0] = sinf( D_8011F8A4_gscode ) * 100.0f;
+        cam_cameras[0]->at[2] = cosf( gs_cameraAngle ) * 100.0f;
+        cam_cameras[0]->at[0] = sinf( gs_cameraAngle ) * 100.0f;
         cam_cameras[0]->at[1] = cam_cameras[0]->eye[1];
-        if ( D_8011F8A0_gscode ) {
-            D_8011F8A0_gscode--;
+        if ( gs_cameraDelay ) {
+            gs_cameraDelay--;
         } else {
-            D_8011F8A4_gscode += 0.010471975511965976;
+            gs_cameraAngle += 0.010471975511965976;
         }
         cam_cameras[0]->upPoint[2] = cam_cameras[0]->eye[2];
         cam_cameras[0]->upPoint[0] = cam_cameras[0]->eye[0];
@@ -458,45 +458,45 @@ s32 GS_CharacterSelect( void ) {
         Obj_Frame();
     }
 
-    Menu_DrawItems( D_8011BDF0_gscode, D_8011F8B8_gscode );
+    Menu_DrawItems( gs_nameItems, gs_slideStep );
 
-    switch ( D_8011F8B9_gscode ) {
+    switch ( gs_choice ) {
     case CHOICE_IN:
-        D_8011BD50_gscode[5].slide = SLIDE_LEFT;
-        D_8011F8B8_gscode -= 2;
-        if ( D_8011F8B8_gscode == 0 ) {
-            D_8011F8B9_gscode = CHOICE_RUN;
+        gs_selectItems[5].slide = SLIDE_LEFT;
+        gs_slideStep -= 2;
+        if ( gs_slideStep == 0 ) {
+            gs_choice = CHOICE_RUN;
             Game_StartPulse();
         }
         break;
     case CHOICE_TAKEN:
     case CHOICE_BACK:
-        D_8011BD50_gscode[5].slide = SLIDE_RIGHT;
-        D_8011F8B8_gscode += 2;
-        if ( D_8011F8B8_gscode == 30 ) {
+        gs_selectItems[5].slide = SLIDE_RIGHT;
+        gs_slideStep += 2;
+        if ( gs_slideStep == 30 ) {
             if ( game_leaveState == 1 ) {
                 if ( game_fade != 0xFF ) {
-                    D_8011F8B8_gscode = 28;
+                    gs_slideStep = 28;
                     return 0;
                 }
                 game_leaveState = 2;
                 game_fade = 0x107;
             }
-            D_8011F8BA_gscode = 8;
+            gs_zoomFrame = 8;
             Obj_FreeAll();
             Cache_FreeBelow( 0x825 );
-            if ( D_8011F8B9_gscode == CHOICE_TAKEN ) {
-                D_8011F8B9_gscode = CHOICE_IN;
+            if ( gs_choice == CHOICE_TAKEN ) {
+                gs_choice = CHOICE_IN;
                 return 1;
             }
-            D_8011F8B9_gscode = CHOICE_IN;
+            gs_choice = CHOICE_IN;
             return 2;
         }
         break;
     case 4:
         if ( GS_PakCheck() ) {
             game_leaveState = 1;
-            D_8011F8B9_gscode = CHOICE_TAKEN;
+            gs_choice = CHOICE_TAKEN;
         }
         break;
     }

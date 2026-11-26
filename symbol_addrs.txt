@@ -636,16 +636,16 @@ game_duelScores = 0x8009D030; // size:0xC
 
 // gscode: the choice menus of units 59B00, 5A020, 5A580 and 5A990 (images, slide step, state, choice, blink counter)
 gs_twoChoiceMenu = 0x8011B850; // segment:gscode size:0x5A
-D_8011BD50_gscode = 0x8011BD50; // segment:gscode size:0xA0
+gs_selectItems = 0x8011BD50; // segment:gscode size:0xA0
 gs_twoChoiceCursor = 0x8011B8C6; // segment:gscode size:0x1
 gs_twoChoiceBlinkFrame = 0x8011B8C7; // segment:gscode size:0x1
 gs_playersMenu = 0x8011B7D0; // segment:gscode size:0x5A
 gs_subModeMenu = 0x8011B6B0; // segment:gscode size:0x64
 gs_teamSizeMenu = 0x8011B740; // segment:gscode size:0x64
 // gscode: the menu of the eight characters of unit 61640 (images, slide step, state)
-D_80120430_gscode = 0x80120430; // segment:gscode size:0xAA
-D_80120654_gscode = 0x80120654; // segment:gscode size:0x1
-D_80120655_gscode = 0x80120655; // segment:gscode size:0x1
+gs_menuItems = 0x80120430; // segment:gscode size:0xAA
+gs_menuSlideStep = 0x80120654; // segment:gscode size:0x1
+gs_menuChoice = 0x80120655; // segment:gscode size:0x1
 
 // opcode: unit 6C470's byte, all of its .data (padded to 16), then unit 6CC50's character-code table (u16, codes
 // 0x10-0x94; the asm reaches it as D_801140A0 = table - 0x20)

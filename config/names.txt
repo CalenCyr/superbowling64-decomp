@@ -1662,3 +1662,40 @@ game_ballPos	0x800E6560	invented: per lane: the ball's position, published by GA
 game_ballState	0x800DF595	invented: per lane: the ball's state, published by GA_PublishBall (read by the stage effects)
 objParams_t.args	object.h	invented: class-specific arguments of the record (scene object: model, animation, position, view mask, flags; camera: path, viewport, target; image: x, y, alpha, scales)
 Sound_AudioInit	0x80037BD8	invented: the init callback of sound_taskFuncs (audioTaskFuncs_t.init); empty
+gs_selectItems	0x8011BD50	invented: menu items of the character select: title, portraits, cursor
+gs_nameItems	0x8011BDF0	invented: menu items of the character select's name and marker
+gs_nameImages	0x8011BE10	invented: per character: image of its name
+gs_nameX	0x8011BE20	invented: per character: x of its name image
+gs_markerImages	0x8011BE30	invented: images of the pulsing marker
+gs_markerByCharacter	0x8011BE38	invented: per character: its image in gs_markerImages
+gs_modelScenes	0x8011F880	invented: per character: the scene of its model, created by GS_CharacterSelect
+gs_cameraDelay	0x8011F8A0	invented: frames before the camera starts circling the model
+gs_cameraAngle	0x8011F8A4	invented: angle of the camera about the model
+gs_portraitImages	0x8011F8A8	invented: per character: its portrait image
+gs_slideStep	0x8011F8B8	invented: slide step of the character select
+gs_choice	0x8011F8B9	invented: state of the character select (CHOICE_IN, CHOICE_RUN, ...)
+gs_zoomFrame	0x8011F8BA	invented: frame of the viewport's zoom, 0 to 15
+gs_modelScene0	0x8011BE40	invented: the scene of character 0's model (gs_modelScenes[0])
+gs_modelScene1	0x8011DB80	invented: the scene of character 1's model (gs_modelScenes[1])
+gs_modelScene2	0x8011F540	invented: the scene of character 2's model (gs_modelScenes[2])
+gs_modelScene3	0x8011CB80	invented: the scene of character 3's model (gs_modelScenes[3])
+gs_modelScene4	0x8011F240	invented: the scene of character 4's model (gs_modelScenes[4])
+gs_modelScene5	0x8011C5C0	invented: the scene of character 5's model (gs_modelScenes[5])
+gs_modelScene6	0x8011D340	invented: the scene of character 6's model (gs_modelScenes[6])
+gs_modelScene7	0x8011EBC0	invented: the scene of character 7's model (gs_modelScenes[7])
+gs_menuItems	0x80120430	invented: menu items of the character menu: characters, cursor, name
+gs_menuPortraits	0x801204DC	invented: per character: its image once unlocked (character menu)
+gs_menuScene	0x801204EC	invented: the scene of the character menu
+gs_modelScales	0x801205AC	invented: per character: scale of its model
+gs_modelFiles	0x801205CC	invented: per character: file of its model
+gs_animCounts	0x801205DC	invented: per character: number of its animations in gs_animFiles
+gs_animFiles	0x801205E4	invented: per character: files of its animations; [0] the idle one
+gs_menuNames	0x80120644	invented: per character: image of its name (character menu)
+gs_menuSlideStep	0x80120654	invented: slide step of the character menu
+gs_menuChoice	0x80120655	invented: state of the character menu (CHOICE_IN, CHOICE_RUN, ...)
+gs_menuCharacter	0x80120656	invented: highlighted character of the character menu, 0 to 7
+gs_menuFlags	0x80120657	invented: character menu flags; bit 0: it takes input
+gs_menuAnim	0x80120658	invented: animation of the highlighted character
+gs_shownModel	0x80120A20	invented: character whose model is shown; 0xFFFF: none
+gs_models	0x80120A28	invented: per character: its loaded model
+gs_loadedAnims	0x80120A48	invented: per character: file of its loaded animation

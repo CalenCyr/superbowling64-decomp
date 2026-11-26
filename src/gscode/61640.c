@@ -7,7 +7,7 @@
 /* ===== Data ===== */
 
 /* the character menu: [0-7] the characters, [9] the cursor, [10] the name */
-static menuItem_t D_80120430_gscode[17] = {
+static menuItem_t gs_menuItems[17] = {
     { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
     { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
     { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
@@ -28,34 +28,34 @@ static menuItem_t D_80120430_gscode[17] = {
 };
 
 /* per character: its image once unlocked */
-static s16 D_801204DC_gscode[8] = {
+static s16 gs_menuPortraits[8] = {
     0x8C2, 0x8C5, 0x8BE, 0x8C3, 0x8BF, 0x8C4, 0x8C1, 0x8C0,
 };
 
 /* the scene of the character menu */
-static objParams_t D_801204EC_gscode[] = {
+static objParams_t gs_menuScene[] = {
     { 1.0f, 0.0f, { 2056.0f, 320.0f, 240.0f } },
     { 0.0f, 10.0f, { 568.0f, 2032.0f, -100.0f, -100.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -0.5f } },
     { -2.0f, 0.0f },
 };
 
 /* per character: scale of its model */
-static f32 D_801205AC_gscode[8] = {
+static f32 gs_modelScales[8] = {
     1.0f, 1.0f, 1.0f, 1.2f, 1.2f, 0.7f, 1.1f, 1.0f,
 };
 
 /* per character: file of its model */
-static s16 D_801205CC_gscode[8] = {
+static s16 gs_modelFiles[8] = {
     0x462, 0x4E0, 0x6DC, 0x5BE, 0x13A, 0x2AA, 0x590, 0x238,
 };
 
-/* per character: animations in D_801205E4_gscode */
-static u8 D_801205DC_gscode[8] = {
+/* per character: animations in gs_animFiles */
+static u8 gs_animCounts[8] = {
     4, 5, 5, 4, 5, 3, 5, 4,
 };
 
 /* per character: files of its animations; [0] the idle one */
-static s16 D_801205E4_gscode[8][6] = {
+static s16 gs_animFiles[8][6] = {
     { 0x7D8, 0x7FE, 0x7D5, 0x7D7, 0x7D9, 0x7FE },
     { 0x7DB, 0x7DE, 0x7DD, 0x7E0, 0x7DA, 0x7E1 },
     { 0x7F9, 0x7F7, 0x7F6, 0x7F8, 0x7F5, 0x7FA },
@@ -67,21 +67,21 @@ static s16 D_801205E4_gscode[8][6] = {
 };
 
 /* per character: image of its name */
-static s16 D_80120644_gscode[8] = {
+static s16 gs_menuNames[8] = {
     0xA95, 0xA94, 0xA93, 0xA92, 0xA91, 0xA90, 0xA8F, 0xA8E,
 };
 
-static u8 D_80120654_gscode = 30; /* slide step of the character menu */
-static u8 D_80120655_gscode = 0; /* CHOICE_IN etc. */
-static u8 D_80120656_gscode = 0; /* highlighted character, 0 to 7 */
-static u8 D_80120657_gscode = 1; /* bit 0: the character menu takes input */
-static u8 D_80120658_gscode = 0; /* animation of the highlighted character */
+static u8 gs_menuSlideStep = 30; /* slide step of the character menu */
+static u8 gs_menuChoice = 0; /* CHOICE_IN etc. */
+static u8 gs_menuCharacter = 0; /* highlighted character, 0 to 7 */
+static u8 gs_menuFlags = 1; /* bit 0: the character menu takes input */
+static u8 gs_menuAnim = 0; /* animation of the highlighted character */
 
 /* ===== State ===== */
 
-static u16 D_80120A20_gscode;               /* character whose model is shown; 0xFFFF: none */
-static fileType1_t *D_80120A28_gscode[8];   /* per character: its loaded model */
-static u16 D_80120A48_gscode[8];            /* per character: file of its loaded animation */
+static u16 gs_shownModel;               /* character whose model is shown; 0xFFFF: none */
+static fileType1_t *gs_models[8];   /* per character: its loaded model */
+static u16 gs_loadedAnims[8];            /* per character: file of its loaded animation */
 
 /*
 ================
@@ -96,107 +96,107 @@ it has slid out, 1 when a character was taken and 2 for backing out.
 s32 GS_CharacterMenu( void ) {
     s32 i;
 
-    Menu_SetItem( D_80120430_gscode, 10, D_80120644_gscode[D_80120656_gscode], MENU_NONE, MENU_NONE, MENU_NONE );
+    Menu_SetItem( gs_menuItems, 10, gs_menuNames[gs_menuCharacter], MENU_NONE, MENU_NONE, MENU_NONE );
     for ( i = 0; i < 8; i++ ) {
         if ( save_data.unlocks & ( 1 << i ) ) {
-            Menu_SetItem( D_80120430_gscode, i, D_801204DC_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
+            Menu_SetItem( gs_menuItems, i, gs_menuPortraits[i], MENU_NONE, MENU_NONE, MENU_NONE );
         } else {
-            Menu_SetItem( D_80120430_gscode, i, 0x8BC, MENU_NONE, MENU_NONE, MENU_NONE );
+            Menu_SetItem( gs_menuItems, i, 0x8BC, MENU_NONE, MENU_NONE, MENU_NONE );
         }
     }
 
-    if ( ( D_80120657_gscode & 1 ) && D_80120655_gscode == CHOICE_RUN ) {
+    if ( ( gs_menuFlags & 1 ) && gs_menuChoice == CHOICE_RUN ) {
         if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
             Sound_PlaySe( SE_DECIDE, 0 );
-            if ( ++D_80120658_gscode == D_801205DC_gscode[D_80120656_gscode] ) {
-                D_80120658_gscode = 0;
+            if ( ++gs_menuAnim == gs_animCounts[gs_menuCharacter] ) {
+                gs_menuAnim = 0;
             }
             ( (sceneObject_t *)obj_scene[10] )->frame = 1;
-            Cache_Release( D_80120A48_gscode[D_80120656_gscode] );
-            D_80120A48_gscode[D_80120656_gscode] = D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1];
+            Cache_Release( gs_loadedAnims[gs_menuCharacter] );
+            gs_loadedAnims[gs_menuCharacter] = gs_animFiles[gs_menuCharacter][gs_menuAnim + 1];
             ( (sceneObject_t *)obj_scene[10] )->anim =
-                Cache_GetFile( D_801205E4_gscode[D_80120656_gscode][D_80120658_gscode + 1], FILE_TYPE2 );
+                Cache_GetFile( gs_animFiles[gs_menuCharacter][gs_menuAnim + 1], FILE_TYPE2 );
         }
         if ( cont_allPressed & B_BUTTON ) {
             Sound_PlaySe( 2, 0 );
-            D_80120655_gscode = CHOICE_BACK;
+            gs_menuChoice = CHOICE_BACK;
         }
         if ( cont_allDpadRepeat & L_JPAD ) {
             do {
-                if ( --D_80120656_gscode == 0xFF ) {
-                    D_80120656_gscode = 7;
+                if ( --gs_menuCharacter == 0xFF ) {
+                    gs_menuCharacter = 7;
                 }
-            } while ( !( save_data.unlocks & ( 1 << D_80120656_gscode ) ) );
+            } while ( !( save_data.unlocks & ( 1 << gs_menuCharacter ) ) );
             Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
         if ( cont_allDpadRepeat & R_JPAD ) {
             do {
-                if ( ++D_80120656_gscode == 8 ) {
-                    D_80120656_gscode = 0;
+                if ( ++gs_menuCharacter == 8 ) {
+                    gs_menuCharacter = 0;
                 }
-            } while ( !( save_data.unlocks & ( 1 << D_80120656_gscode ) ) );
+            } while ( !( save_data.unlocks & ( 1 << gs_menuCharacter ) ) );
             Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
     }
 
-    Menu_SetItem( D_80120430_gscode, 9, MENU_NONE, ( D_80120656_gscode + 1 ) * 32, MENU_NONE, MENU_NONE );
+    Menu_SetItem( gs_menuItems, 9, MENU_NONE, ( gs_menuCharacter + 1 ) * 32, MENU_NONE, MENU_NONE );
     Draw_ClearScreen( 0, 0, 0 );
-    if ( D_80120657_gscode & 1 ) {
+    if ( gs_menuFlags & 1 ) {
         Draw_Image( 0xA58, 0, 0 );
     }
-    Menu_DrawItems( D_80120430_gscode, D_80120654_gscode );
+    Menu_DrawItems( gs_menuItems, gs_menuSlideStep );
 
-    if ( D_80120655_gscode == CHOICE_RUN ) {
-        if ( D_80120A20_gscode == D_80120656_gscode ) {
+    if ( gs_menuChoice == CHOICE_RUN ) {
+        if ( gs_shownModel == gs_menuCharacter ) {
             if ( ( (sceneObject_t *)obj_scene[10] )->frame ) {
                 goto draw;
             }
         } else {
-            D_80120658_gscode = 0;
+            gs_menuAnim = 0;
         }
         ( (sceneObject_t *)obj_scene[10] )->frame = 0;
-        ( (sceneObject_t *)obj_scene[10] )->model = D_80120A28_gscode[D_80120656_gscode];
-        D_80120A20_gscode = D_80120656_gscode;
-        Cache_Release( D_80120A48_gscode[D_80120656_gscode] );
-        D_80120A48_gscode[D_80120656_gscode] = D_801205E4_gscode[D_80120656_gscode][0];
-        ( (sceneObject_t *)obj_scene[10] )->anim = Cache_GetFile( D_801205E4_gscode[D_80120656_gscode][0], FILE_TYPE2 );
+        ( (sceneObject_t *)obj_scene[10] )->model = gs_models[gs_menuCharacter];
+        gs_shownModel = gs_menuCharacter;
+        Cache_Release( gs_loadedAnims[gs_menuCharacter] );
+        gs_loadedAnims[gs_menuCharacter] = gs_animFiles[gs_menuCharacter][0];
+        ( (sceneObject_t *)obj_scene[10] )->anim = Cache_GetFile( gs_animFiles[gs_menuCharacter][0], FILE_TYPE2 );
         Mtx_SetRotScaleTrans( ( (sceneObject_t *)obj_scene[10] )->mtx, 0.0f, 0.0f, 0.0f,
-                       D_801205AC_gscode[D_80120656_gscode] * 1.2, -100.0f, -100.0f, 300.0f );
+                       gs_modelScales[gs_menuCharacter] * 1.2, -100.0f, -100.0f, 300.0f );
     draw:
         Obj_Frame();
     }
 
-    switch ( D_80120655_gscode ) {
+    switch ( gs_menuChoice ) {
     case CHOICE_IN:
-        D_80120654_gscode -= 2;
-        if ( D_80120654_gscode == 0 ) {
-            D_80120655_gscode = CHOICE_RUN;
+        gs_menuSlideStep -= 2;
+        if ( gs_menuSlideStep == 0 ) {
+            gs_menuChoice = CHOICE_RUN;
             Game_StartPulse();
-            Obj_CreateAll( gs_classes, D_801204EC_gscode );
-            D_80120A20_gscode = 0xFFFF;
+            Obj_CreateAll( gs_classes, gs_menuScene );
+            gs_shownModel = 0xFFFF;
             cam_cameras[0]->path->flags |= 4;
-        } else if ( D_80120654_gscode == 28 ) {
+        } else if ( gs_menuSlideStep == 28 ) {
             for ( i = 0; i < 8; i++ ) {
-                D_80120A28_gscode[i] = Cache_GetFile( D_801205CC_gscode[i], FILE_TYPE1 );
-                Cache_GetFile( D_801205E4_gscode[i][0], FILE_TYPE2 );
-                D_80120A48_gscode[i] = D_801205E4_gscode[i][0];
+                gs_models[i] = Cache_GetFile( gs_modelFiles[i], FILE_TYPE1 );
+                Cache_GetFile( gs_animFiles[i][0], FILE_TYPE2 );
+                gs_loadedAnims[i] = gs_animFiles[i][0];
             }
         }
         break;
     case CHOICE_TAKEN:
     case CHOICE_BACK:
-        D_80120430_gscode[5].slide = SLIDE_RIGHT;
-        D_80120654_gscode += 2;
-        if ( D_80120654_gscode == 30 ) {
+        gs_menuItems[5].slide = SLIDE_RIGHT;
+        gs_menuSlideStep += 2;
+        if ( gs_menuSlideStep == 30 ) {
             Sound_PlayBgm( 1 );
             Obj_FreeAll();
             Cache_FreeBelow( 0x825 );
-            D_80120430_gscode[5].slide = SLIDE_LEFT;
-            if ( D_80120655_gscode == CHOICE_TAKEN ) {
-                D_80120655_gscode = CHOICE_IN;
+            gs_menuItems[5].slide = SLIDE_LEFT;
+            if ( gs_menuChoice == CHOICE_TAKEN ) {
+                gs_menuChoice = CHOICE_IN;
                 return 1;
             }
-            D_80120655_gscode = CHOICE_IN;
+            gs_menuChoice = CHOICE_IN;
             return 2;
         }
         break;
