@@ -4,6 +4,79 @@
 #include "libultra.h"
 #include "gscode/gscode.h"
 
+/* ===== Data ===== */
+
+/* the character menu: [0-7] the characters, [9] the cursor, [10] the name */
+static menuItem_t D_80120430_gscode[17] = {
+    { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 192, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 256, 8, 0xFF, SLIDE_NONE },
+    { -1, 0xA8D, 40, 12, 0xFF, SLIDE_LEFT },
+    { 10, 0xA95, 216, 48, 0xFF, SLIDE_RIGHT },
+    { 0, 0x8C2, 32, 188, 0xFF, SLIDE_BOTTOM },
+    { 1, 0x8C5, 64, 188, 0xFF, SLIDE_BOTTOM },
+    { 2, 0x8BE, 96, 188, 0xFF, SLIDE_BOTTOM },
+    { 3, 0x8C3, 128, 188, 0xFF, SLIDE_BOTTOM },
+    { 4, 0x8BF, 160, 188, 0xFF, SLIDE_BOTTOM },
+    { 5, 0x8C4, 192, 188, 0xFF, SLIDE_BOTTOM },
+    { 6, 0x8C1, 224, 188, 0xFF, SLIDE_BOTTOM },
+    { 7, 0x8C0, 256, 188, 0xFF, SLIDE_BOTTOM },
+    { 9, 0x92D, 32, 180, 0xFF, SLIDE_BOTTOM },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* per character: its image once unlocked */
+static s16 D_801204DC_gscode[8] = {
+    0x8C2, 0x8C5, 0x8BE, 0x8C3, 0x8BF, 0x8C4, 0x8C1, 0x8C0,
+};
+
+/* the scene of the character menu */
+static objParams_t D_801204EC_gscode[] = {
+    { 1.0f, 0.0f, { 2056.0f, 320.0f, 240.0f } },
+    { 0.0f, 10.0f, { 568.0f, 2032.0f, -100.0f, -100.0f, 300.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -0.5f } },
+    { -2.0f, 0.0f },
+};
+
+/* per character: scale of its model */
+static f32 D_801205AC_gscode[8] = {
+    1.0f, 1.0f, 1.0f, 1.2f, 1.2f, 0.7f, 1.1f, 1.0f,
+};
+
+/* per character: file of its model */
+static s16 D_801205CC_gscode[8] = {
+    0x462, 0x4E0, 0x6DC, 0x5BE, 0x13A, 0x2AA, 0x590, 0x238,
+};
+
+/* per character: animations in D_801205E4_gscode */
+static u8 D_801205DC_gscode[8] = {
+    4, 5, 5, 4, 5, 3, 5, 4,
+};
+
+/* per character: files of its animations; [0] the idle one */
+static s16 D_801205E4_gscode[8][6] = {
+    { 0x7D8, 0x7FE, 0x7D5, 0x7D7, 0x7D9, 0x7FE },
+    { 0x7DB, 0x7DE, 0x7DD, 0x7E0, 0x7DA, 0x7E1 },
+    { 0x7F9, 0x7F7, 0x7F6, 0x7F8, 0x7F5, 0x7FA },
+    { 0x7F0, 0x7ED, 0x7EC, 0x7EE, 0x7F1, 0x7ED },
+    { 0x7B3, 0x7B5, 0x7B4, 0x7B7, 0x7B2, 0x7B8 },
+    { 0x7C8, 0x7CA, 0x7C9, 0x7CC, 0x7CC, 0x7CA },
+    { 0x7EA, 0x7E7, 0x7E6, 0x7E8, 0x7E5, 0x7EB },
+    { 0x7C2, 0x7C4, 0x7C3, 0x7C6, 0x7C1, 0x7C3 },
+};
+
+/* per character: image of its name */
+static s16 D_80120644_gscode[8] = {
+    0xA95, 0xA94, 0xA93, 0xA92, 0xA91, 0xA90, 0xA8F, 0xA8E,
+};
+
+static u8 D_80120654_gscode = 30; /* slide step of the character menu */
+static u8 D_80120655_gscode = 0; /* CHOICE_IN etc. */
+static u8 D_80120656_gscode = 0; /* highlighted character, 0 to 7 */
+static u8 D_80120657_gscode = 1; /* bit 0: the character menu takes input */
+static u8 D_80120658_gscode = 0; /* animation of the highlighted character */
+
 /*
 ================
 GS_CharacterMenu

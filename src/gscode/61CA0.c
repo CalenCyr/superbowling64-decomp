@@ -4,6 +4,20 @@
 #include "libultra.h"
 #include "gscode/gscode.h"
 
+/* ===== Data ===== */
+
+/* images of a blinking marker */
+static s16 D_80120660_gscode[4] = {
+    0x943, 0x942, 0x941, 0x942,
+};
+
+static s32 gs_pakCheckFrames = 0; /* frame counter of the pak check */
+
+/* The unit's uninitialised state: file-scope statics, which the assembler allocates in .bss in definition order. */
+static u32 gs_pakCheckStep;     /* step of the pak check */
+static s32 gs_secondController; /* 1: a second controller is in play */
+static u8 gs_lastContStatus[2]; /* per port: controller status of the last frame */
+
 /*
 ================
 GS_StartPakCheck

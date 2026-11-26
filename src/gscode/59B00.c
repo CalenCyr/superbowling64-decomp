@@ -4,6 +4,34 @@
 #include "libultra.h"
 #include "gscode/gscode.h"
 
+/* ===== Data ===== */
+
+/* the three-choice menu; [5]: its title */
+static menuItem_t gs_subModeMenu[10] = {
+    { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 192, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 256, 8, 0xFF, SLIDE_NONE },
+    { -1, 0xADC, 52, 12, 0xFF, SLIDE_LEFT },
+    { 0, 0x9AD, 40, 56, 0xFF, SLIDE_LEFT },
+    { 1, 0x9B8, 184, 56, 0xFF, SLIDE_RIGHT },
+    { 2, 0x9CA, 112, 144, 0xFF, SLIDE_BOTTOM },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* per choice: images of its blink */
+static s16 gs_subModeBlink[3][6] = {
+    { 0x9AD, 0x9AC, 0x9AB, 0x9AA, 0x9A9, 0x9A8 },
+    { 0x9B8, 0x9B7, 0x9B5, 0x9B6, 0x9B5, 0x9B4 },
+    { 0x9CA, 0x9C9, 0x9C8, 0x9C7, 0x9C6, 0x9C5 },
+};
+
+static u8 gs_subModeSlide = 30; /* slide step of the three-choice menu */
+static u8 gs_subModeState = 0; /* CHOICE_IN etc. */
+static u8 gs_subModeCursor = 0; /* highlighted choice: 0 left, 1 right, 2 below */
+static u8 gs_subModeBlinkFrame = 0; /* blink frame, 0 to 29 */
+
 /*
 ================
 GS_SubModeMenu

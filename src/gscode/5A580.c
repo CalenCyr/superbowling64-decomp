@@ -4,6 +4,32 @@
 #include "libultra.h"
 #include "gscode/gscode.h"
 
+/* ===== Data ===== */
+
+/* the menu of one or two players; [5]: its title */
+static menuItem_t gs_playersMenu[9] = {
+    { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 192, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 256, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x863, 72, 12, 0xFF, SLIDE_LEFT },
+    { 0, 0x989, 40, 84, 0xFF, SLIDE_LEFT },
+    { 1, 0x9B3, 184, 84, 0xFF, SLIDE_RIGHT },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* per choice: images of its blink */
+static s16 gs_playersBlink[2][6] = {
+    { 0x989, 0x988, 0x987, 0x986, 0x985, 0x984 },
+    { 0x9B3, 0x9B2, 0x9B1, 0x9B0, 0x9AF, 0x9AE },
+};
+
+static u8 gs_playersSlide = 30; /* slide step of the menu of one or two players */
+static u8 gs_playersState = 0; /* CHOICE_IN etc. */
+static u8 gs_playersCursor = 0; /* highlighted choice: 0 one player, 1 two */
+static u8 gs_playersBlinkFrame = 0; /* blink frame, 0 to 29 */
+
 /*
 ================
 GS_PlayersMenu

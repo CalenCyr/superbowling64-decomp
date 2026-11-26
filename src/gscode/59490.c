@@ -4,6 +4,48 @@
 #include "libultra.h"
 #include "gscode/gscode.h"
 
+/* ===== Data ===== */
+
+/* the menu of the five game modes, its background; [5]: its title */
+static menuItem_t gs_modeMenu[12] = {
+    { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 192, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 256, 8, 0xFF, SLIDE_NONE },
+    { 0, 0xA45, 76, 12, 0xFF, SLIDE_LEFT },
+    { 4, 0x9A7, 112, 112, 0xFF, SLIDE_BOTTOM },
+    { 1, 0x97D, 56, 48, 0xFF, SLIDE_LEFT },
+    { 2, 0x98F, 168, 48, 0xFF, SLIDE_RIGHT },
+    { 3, 0x99B, 24, 152, 0xFF, SLIDE_LEFT },
+    { 5, 0x977, 200, 152, 0xFF, SLIDE_RIGHT },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* its choices, ids 1 to 5 */
+static menuItem_t gs_modeChoices[6] = {
+    { 4, 0x9A7, 112, 112, 0xFF, SLIDE_BOTTOM },
+    { 1, 0x97D, 56, 48, 0xFF, SLIDE_LEFT },
+    { 2, 0x98F, 168, 48, 0xFF, SLIDE_RIGHT },
+    { 3, 0x99B, 24, 152, 0xFF, SLIDE_LEFT },
+    { 5, 0x977, 200, 152, 0xFF, SLIDE_RIGHT },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* per item of gs_modeChoices: images of its blink */
+static s16 gs_modeBlink[5][6] = {
+    { 0x9A7, 0x9A6, 0x9A5, 0x9A4, 0x9A3, 0x9A2 },
+    { 0x97D, 0x97C, 0x97B, 0x97A, 0x979, 0x978 },
+    { 0x98F, 0x98E, 0x98D, 0x98C, 0x98B, 0x98A },
+    { 0x99B, 0x99A, 0x999, 0x998, 0x997, 0x996 },
+    { 0x977, 0x976, 0x975, 0x974, 0x973, 0x972 },
+};
+
+static u8 gs_modeSlide = 30; /* slide step of the menu of the five game modes */
+static u8 gs_modeState = 0; /* CHOICE_IN etc. */
+static u8 gs_modeCursor = 0; /* highlighted choice, 0 to 4 */
+static u8 gs_modeBlinkFrame = 0; /* blink frame, 0 to 29 */
+
 /*
 ================
 GS_ModeMenu

@@ -4,6 +4,34 @@
 #include "libultra.h"
 #include "gscode/gscode.h"
 
+/* ===== Data ===== */
+
+/* the second three-choice menu; [5]: its title */
+static menuItem_t gs_teamSizeMenu[10] = {
+    { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 192, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 256, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x863, 72, 12, 0xFF, SLIDE_LEFT },
+    { 0, 0x995, 40, 56, 0xFF, SLIDE_LEFT },
+    { 1, 0x983, 184, 56, 0xFF, SLIDE_RIGHT },
+    { 2, 0x9BE, 112, 144, 0xFF, SLIDE_BOTTOM },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* per choice: images of its blink */
+static s16 gs_teamSizeBlink[3][6] = {
+    { 0x995, 0x994, 0x993, 0x992, 0x991, 0x990 },
+    { 0x983, 0x982, 0x981, 0x980, 0x97F, 0x97E },
+    { 0x9BE, 0x9BD, 0x9BC, 0x9BB, 0x9BA, 0x9B9 },
+};
+
+static u8 gs_teamSizeSlide = 30; /* slide step of the second three-choice menu */
+static u8 gs_teamSizeState = 0; /* CHOICE_IN etc. */
+static u8 gs_teamSizeCursor = 0; /* highlighted choice: 0 left, 1 right, 2 below */
+static u8 gs_teamSizeBlinkFrame = 0; /* blink frame, 0 to 29 */
+
 /*
 ================
 GS_TeamSizeMenu

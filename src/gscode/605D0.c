@@ -5,6 +5,207 @@
 #include "gscode/gscode.h"
 #include "dbgtext.h"
 
+/* ===== Data ===== */
+
+/* the options screen; [5] its title, id 0 the cursor */
+static menuItem_t gs_optionsMenu[20] = {
+    { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 192, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 256, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x8DB, 100, 12, 0xFF, SLIDE_LEFT },
+    { -1, 0x8DC, 56, 64, 0xFF, SLIDE_BOTTOM },
+    { 0, 0x8F0, 73, 70, 0xFF, SLIDE_NONE },
+    { 10, 0x8DD, 184, 114, 0xFF, SLIDE_NONE },
+    { 11, 0x8DE, 175, 130, 0xFF, SLIDE_NONE },
+    { 1, 0x8E4, 176, 74, 0xFF, SLIDE_NONE },
+    { 2, 0x8E1, 180, 88, 0xFF, SLIDE_NONE },
+    { 3, 0x8EE, 216, 115, 0xFF, SLIDE_NONE },
+    { 4, 0x8EE, 228, 115, 0xFF, SLIDE_NONE },
+    { 8, 0x8DF, 189, 130, 0xFF, SLIDE_NONE },
+    { 7, 0x8DF, 202, 130, 0xFF, SLIDE_NONE },
+    { 6, 0x8DF, 215, 130, 0xFF, SLIDE_NONE },
+    { 5, 0x8DF, 228, 130, 0xFF, SLIDE_NONE },
+    { 12, 0x8E1, 180, 148, 0xFF, SLIDE_NONE },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* the credits script */
+static creditCmd_t gs_creditsScript[142] = {
+    { CREDIT_SHOW, 0, 0x971, 168, 18, 0, 255 },
+    { CREDIT_WAIT, 30, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 3, 0xAB4, 88, 64, 0, 0 },
+    { CREDIT_FADE, 3, 255, 20, 0, 0, 0 },
+    { CREDIT_SHOW, 1, 0xA9A, 56, 48, 0, 0 },
+    { CREDIT_FADE, 1, 255, 20, 0, 0, 0 },
+    { CREDIT_SHOW, 5, 0xAB1, 320, 88, 0, 0 },
+    { CREDIT_MOVE, 5, 96, 88, 20, 0, 0 },
+    { CREDIT_FADE, 5, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 6, 0xAB0, 320, 112, 0, 0 },
+    { CREDIT_MOVE, 6, 96, 112, 20, 0, 0 },
+    { CREDIT_FADE, 6, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 120, 0, 0, 0, 0, 0 },
+    { CREDIT_FADE, 5, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 6, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 1, 0, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 2, 0xAB2, 56, 48, 0, 0 },
+    { CREDIT_FADE, 2, 255, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 9, 0xAAF, 320, 88, 0, 0 },
+    { CREDIT_MOVE, 9, 96, 88, 20, 0, 0 },
+    { CREDIT_FADE, 9, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 10, 0xAAE, 320, 112, 0, 0 },
+    { CREDIT_MOVE, 10, 96, 112, 20, 0, 0 },
+    { CREDIT_FADE, 10, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 11, 0xAAD, 320, 136, 0, 0 },
+    { CREDIT_MOVE, 11, 96, 136, 20, 0, 0 },
+    { CREDIT_FADE, 11, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 120, 0, 0, 0, 0, 0 },
+    { CREDIT_FADE, 9, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 10, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 11, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 2, 0, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 1, 0xA97, 56, 48, 0, 0 },
+    { CREDIT_FADE, 1, 255, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 5, 0xAAC, 320, 88, 0, 0 },
+    { CREDIT_MOVE, 5, 96, 88, 20, 0, 0 },
+    { CREDIT_FADE, 5, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 6, 0xAAB, 320, 112, 0, 0 },
+    { CREDIT_MOVE, 6, 96, 112, 20, 0, 0 },
+    { CREDIT_FADE, 6, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 120, 0, 0, 0, 0, 0 },
+    { CREDIT_FADE, 5, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 6, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 1, 0, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 2, 0xA9C, 56, 48, 0, 0 },
+    { CREDIT_FADE, 2, 255, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 9, 0xAAA, 320, 88, 0, 0 },
+    { CREDIT_MOVE, 9, 96, 88, 20, 0, 0 },
+    { CREDIT_FADE, 9, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 120, 0, 0, 0, 0, 0 },
+    { CREDIT_FADE, 9, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 2, 0, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 1, 0xA99, 56, 48, 0, 0 },
+    { CREDIT_FADE, 1, 255, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 5, 0xAA9, 320, 88, 0, 0 },
+    { CREDIT_MOVE, 5, 96, 88, 20, 0, 0 },
+    { CREDIT_FADE, 5, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 6, 0xAA8, 320, 112, 0, 0 },
+    { CREDIT_MOVE, 6, 96, 112, 20, 0, 0 },
+    { CREDIT_FADE, 6, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 120, 0, 0, 0, 0, 0 },
+    { CREDIT_FADE, 5, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 6, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 1, 0, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 2, 0xA98, 56, 48, 0, 0 },
+    { CREDIT_FADE, 2, 255, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 9, 0xAA7, 320, 88, 0, 0 },
+    { CREDIT_MOVE, 9, 96, 88, 20, 0, 0 },
+    { CREDIT_FADE, 9, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 10, 0xAA6, 320, 112, 0, 0 },
+    { CREDIT_MOVE, 10, 96, 112, 20, 0, 0 },
+    { CREDIT_FADE, 10, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 120, 0, 0, 0, 0, 0 },
+    { CREDIT_FADE, 9, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 10, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 2, 0, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 1, 0xA96, 56, 48, 0, 0 },
+    { CREDIT_FADE, 1, 255, 60, 0, 0, 0 },
+    { CREDIT_FADE, 3, 0, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 4, 0xAB3, 88, 64, 0, 0 },
+    { CREDIT_FADE, 4, 255, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 5, 0xAA5, 320, 88, 0, 0 },
+    { CREDIT_MOVE, 5, 96, 88, 20, 0, 0 },
+    { CREDIT_FADE, 5, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 6, 0xAA4, 320, 112, 0, 0 },
+    { CREDIT_MOVE, 6, 96, 112, 20, 0, 0 },
+    { CREDIT_FADE, 6, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 7, 0xAA3, 320, 136, 0, 0 },
+    { CREDIT_MOVE, 7, 96, 136, 20, 0, 0 },
+    { CREDIT_FADE, 7, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 8, 0xAA2, 320, 160, 0, 0 },
+    { CREDIT_MOVE, 8, 96, 160, 20, 0, 0 },
+    { CREDIT_FADE, 8, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 120, 0, 0, 0, 0, 0 },
+    { CREDIT_FADE, 5, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 6, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 7, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 8, 0, 40, 0, 0, 0 },
+    { CREDIT_SHOW, 9, 0xAA1, 320, 88, 0, 0 },
+    { CREDIT_MOVE, 9, 96, 88, 20, 0, 0 },
+    { CREDIT_FADE, 9, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 10, 0xAA0, 320, 112, 0, 0 },
+    { CREDIT_MOVE, 10, 96, 112, 20, 0, 0 },
+    { CREDIT_FADE, 10, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 11, 0xA9F, 320, 136, 0, 0 },
+    { CREDIT_MOVE, 11, 96, 136, 20, 0, 0 },
+    { CREDIT_FADE, 11, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 20, 0, 0, 0, 0, 0 },
+    { CREDIT_SHOW, 12, 0xA9E, 320, 160, 0, 0 },
+    { CREDIT_MOVE, 12, 96, 160, 20, 0, 0 },
+    { CREDIT_FADE, 12, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 120, 0, 0, 0, 0, 0 },
+    { CREDIT_FADE, 9, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 10, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 11, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 12, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 1, 0, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 2, 0xA9B, 56, 48, 0, 0 },
+    { CREDIT_FADE, 2, 255, 60, 0, 0, 0 },
+    { CREDIT_SHOW, 5, 0xA9D, 320, 88, 0, 0 },
+    { CREDIT_MOVE, 5, 96, 88, 20, 0, 0 },
+    { CREDIT_FADE, 5, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 120, 0, 0, 0, 0, 0 },
+    { CREDIT_FADE, 2, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 4, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 5, 0, 40, 0, 0, 0 },
+    { CREDIT_FADE, 0, 0, 40, 0, 0, 0 },
+    { CREDIT_SHOW, 9, 0x88A, 104, 88, 0, 0 },
+    { CREDIT_FADE, 9, 255, 60, 0, 0, 0 },
+    { CREDIT_WAIT, 150, 0, 0, 0, 0, 0 },
+    { CREDIT_END, 0, 0, 0, 0, 0, 0 },
+};
+
+static u32 gs_soundTestFrames = 0; /* frames since the last sound test */
+
+/* per save_data.difficulty: its image */
+static s16 D_80120404_gscode[4] = {
+    0x8E4, 0x8E3, 0x8E2, 0x0,
+};
+
+/* per save_data.music and unk_7B: their image */
+static s16 D_8012040C_gscode[2] = {
+    0x8E0, 0x8E1,
+};
+
+/* image of each digit */
+static s16 D_80120410_gscode[10] = {
+    0x8EE, 0x8ED, 0x8EC, 0x8EB, 0x8EA, 0x8E9, 0x8E8, 0x8E7,
+    0x8E6, 0x8E5,
+};
+
+static u8 gs_optionsSlide = 30; /* slide step of the options screen */
+static u8 gs_optionsState = 0; /* 0 sliding in, 1 in place, 2 and 3 sliding out (3: backed out) */
+static u8 gs_optionsCursor = 0; /* OPTION_DIFFICULTY etc. */
+static u8 gs_soundTestSound = 0; /* sound of the sound test, 0 to NUM_SOUND_TESTS - 1 */
+static u8 gs_optionsPage = 0; /* 0 the options, 1 the records page, 2 the credits */
+
+/* The unit's uninitialised state: file-scope statics, which the assembler allocates in .bss in definition order. */
+static creditSprite_t gs_creditSprites[NUM_CREDIT_SPRITES];
+static u16 gs_creditsWait;      /* frames before the next credits command; 0xFFFF: the script ended */
+static u16 gs_creditsPos;       /* next command of the credits script */
+
 /* ===== GS_Options ===== */
 
 /*

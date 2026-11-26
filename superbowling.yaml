@@ -443,7 +443,19 @@ segments:
       - [0x605D0, c, gscode/605D0]
       - [0x61640, c, gscode/61640]
       - [0x61CA0, c, gscode/61CA0]
-      - [0x62130, data]
+      # .data of each unit, in link order, each padded to 16 (gs_classes, first, is 58F40's by its position)
+      - [0x62130, .data, gscode/58F40]     # gs_classes and the screen stack's depth
+      - [0x621A0, .data, gscode/59490]     # the menu of the five game modes
+      - [0x622A0, .data, gscode/59B00]     # the three-choice menu
+      - [0x62330, .data, gscode/5A020]     # the second three-choice menu
+      - [0x623C0, .data, gscode/5A580]     # the menu of one or two players
+      - [0x62440, .data, gscode/5A990]     # the two-choice menu
+      - [0x624C0, .data, gscode/5AD50]     # the player setup and the name entry
+      - [0x62940, .data, gscode/5E2B0]     # the character select and the scenes of the characters' models
+      - [0x664B0, .data, gscode/5EC00]     # the team select
+      - [0x66880, .data, gscode/605D0]     # the options screen and the credits script
+      - [0x67020, .data, gscode/61640]     # the character menu
+      - [0x67250, .data, gscode/61CA0]     # the pak check's marker and frame counter
       # .rodata of each unit, in unit order after all .data (jump tables and doubles, each unit's own)
       - [0x67260, .rodata, gscode/58F40]
       - [0x672A0, .rodata, gscode/59490]
@@ -451,7 +463,11 @@ segments:
       - [0x67310, .rodata, gscode/5E2B0]
       - [0x67320, .rodata, gscode/605D0]
       - [0x67360, .rodata, gscode/61640]
-      - { type: bss, vram: 0x80120780 }
+      - { type: .bss, vram: 0x80120780, name: gscode/58F40 }
+      - { type: bss, vram: 0x80120790, name: gscode/5AD50_5EC00 }   # asm: 0x80120799-0x801207B1 unreferenced; 8-aligned arrays
+      - { type: .bss, vram: 0x80120860, name: gscode/605D0 }
+      - { type: bss, vram: 0x80120A20, name: gscode/61640 }         # asm: D_80120A28_gscode sits 8-aligned, as KMC as put it
+      - { type: .bss, vram: 0x80120A60, name: gscode/61CA0 }
 
   - name: cacode
     type: code

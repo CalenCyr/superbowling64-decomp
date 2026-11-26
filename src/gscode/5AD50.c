@@ -7,6 +7,108 @@
 #include "dbgtext.h"
 #include "libc.h"
 
+/* ===== Data ===== */
+
+/* the player setup: [5] its title, ids 9-0x10 the players' names */
+static menuItem_t gs_setupMenu[31] = {
+    { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 192, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 256, 8, 0xFF, SLIDE_NONE },
+    { -1, 0xA59, 66, 13, 0xFF, SLIDE_LEFT },
+    { -1, 0x961, 22, 49, 0xFF, SLIDE_LEFT },
+    { 0, 0xA79, 30, 68, 0xFF, SLIDE_LEFT },
+    { 1, 0x0, 0, 68, 0xFF, SLIDE_BOTTOM },
+    { 2, 0x0, 0, 68, 0xFF, SLIDE_BOTTOM },
+    { 3, 0x0, 0, 68, 0xFF, SLIDE_BOTTOM },
+    { 4, 0x0, 0, 68, 0xFF, SLIDE_BOTTOM },
+    { 19, 0x88B, 162, 49, 0xFF, SLIDE_RIGHT },
+    { 20, 0x8A5, 265, 66, 0xFF, SLIDE_RIGHT },
+    { 21, 0xA6A, 265, 66, 0, SLIDE_RIGHT },
+    { 22, 0xA69, 265, 82, 0, SLIDE_RIGHT },
+    { 5, 0x8D9, 47, 102, 0xFF, SLIDE_LEFT },
+    { 9, 0x910, 47, 115, 0xFF, SLIDE_LEFT },
+    { 13, 0x902, 43, 129, 0xFF, SLIDE_LEFT },
+    { 6, 0x8D7, 109, 102, 0xFF, SLIDE_LEFT },
+    { 10, 0x910, 109, 115, 0xFF, SLIDE_LEFT },
+    { 14, 0x902, 105, 129, 0xFF, SLIDE_LEFT },
+    { 7, 0x8D5, 171, 102, 111, SLIDE_RIGHT },
+    { 11, 0x910, 171, 115, 111, SLIDE_RIGHT },
+    { 15, 0x902, 167, 129, 111, SLIDE_RIGHT },
+    { 8, 0x8D3, 233, 102, 111, SLIDE_RIGHT },
+    { 12, 0x910, 233, 115, 111, SLIDE_RIGHT },
+    { 16, 0x902, 229, 129, 111, SLIDE_RIGHT },
+    { 17, 0x875, 58, 188, 0xFF, SLIDE_BOTTOM },
+    { 18, 0xA6D, 164, 188, 0xFF, SLIDE_BOTTOM },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* the name entry: id 0x17 its background, 0x18 the character grid, 0x19 the cursor */
+static menuItem_t gs_nameEntryMenu[7] = {
+    { 23, 0x0, 0, 0, 0, SLIDE_NONE },
+    { 24, 0x0, 0, 0, 0, SLIDE_NONE },
+    { 25, 0x0, 0, 0, 0, SLIDE_NONE },
+    { 26, 0x0, 0, 0, 0, SLIDE_NONE },
+    { 27, 0x0, 0, 0, 0, SLIDE_NONE },
+    { 28, 0x0, 0, 0, 0, SLIDE_NONE },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* images of the Rumble Pak marker's blink */
+static s16 gs_rumbleBlink[4] = {
+    0x8A5, 0x8A4, 0x8A3, 0x8A4,
+};
+
+/* image of each digit of a handicap */
+static u16 gs_handicapDigits[10] = {
+    0x9DD, 0x9DC, 0x9DB, 0x9DA, 0x9D9, 0x9D8, 0x9D7, 0x9D6,
+    0x9D5, 0x9D4,
+};
+
+static s32 gs_nameEntryStep = 0; /* step of the name entry: 1 next player, 2 backed out, 5 done */
+
+/* the characters of the name entry: per set, case, row (5) and column (12) */
+static u16 gs_nameEntryChars[3 * 2 * 5 * 12] = {
+    52, 47, 43, 38, 35, 30, 25, 20, 15, 10, 5, 0,
+    53, 48, 44, 39, 87, 31, 26, 21, 16, 11, 6, 1,
+    54, 49, 87, 40, 36, 32, 27, 22, 17, 12, 7, 2,
+    55, 50, 45, 41, 87, 33, 28, 23, 18, 13, 8, 3,
+    56, 51, 46, 42, 37, 34, 29, 24, 19, 14, 9, 4,
+    87, 87, 87, 87, 87, 87, 82, 77, 72, 67, 62, 57,
+    87, 87, 87, 87, 87, 87, 83, 78, 73, 68, 63, 58,
+    87, 87, 87, 87, 87, 87, 84, 79, 74, 69, 64, 59,
+    87, 87, 87, 87, 87, 87, 85, 80, 75, 70, 65, 60,
+    87, 87, 87, 87, 87, 87, 86, 81, 76, 71, 66, 61,
+    140, 135, 131, 126, 123, 118, 113, 108, 103, 98, 93, 88,
+    141, 136, 132, 127, 87, 119, 114, 109, 104, 99, 94, 89,
+    142, 137, 87, 128, 124, 120, 115, 110, 105, 100, 95, 90,
+    143, 138, 133, 129, 87, 121, 116, 111, 106, 101, 96, 91,
+    144, 139, 134, 130, 125, 122, 117, 112, 107, 102, 97, 92,
+    87, 87, 87, 87, 87, 174, 170, 165, 160, 155, 150, 145,
+    87, 87, 87, 87, 87, 175, 171, 166, 161, 156, 151, 146,
+    87, 87, 87, 87, 87, 87, 172, 167, 162, 157, 152, 147,
+    87, 87, 87, 87, 87, 87, 173, 168, 163, 158, 153, 148,
+    87, 87, 87, 87, 87, 87, 87, 169, 164, 159, 154, 149,
+    176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187,
+    188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199,
+    200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211,
+    212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
+    224, 225, 226, 227, 228, 229, 230, 231, 232, 87, 87, 87,
+    240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251,
+    252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263,
+    264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275,
+    276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287,
+    288, 289, 290, 291, 292, 293, 294, 87, 87, 87, 87, 87,
+};
+
+static u8 gs_gridExitColumn = 4; /* column the cursor left the grid from */
+static s32 gs_clearRecordAnswer = 0; /* answer of the prompt to clear a team's record */
+static s32 gs_setupFrames = 0; /* frame counter of the player setup */
+static u8 gs_setupSlide = 30; /* slide step of the player setup */
+static u8 gs_setupState = 0; /* CHOICE_IN etc. */
+static u8 gs_cHeldFrames = 0; /* frames a C button is held */
+
 /*
 ================
 GS_DrawTintedImage

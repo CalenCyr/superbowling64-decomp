@@ -4,6 +4,147 @@
 #include "libultra.h"
 #include "gscode/gscode.h"
 
+/* ===== Data ===== */
+
+/* per character: scale of its model */
+static f32 D_8011F8C0_gscode[8] = {
+    1.0f, 1.0f, 1.0f, 1.2f, 1.2f, 0.7f, 1.1f, 1.0f,
+};
+
+/* per character: file of its model */
+static s16 D_8011F8E0_gscode[8] = {
+    0x462, 0x4E0, 0x6DC, 0x5BE, 0x13A, 0x2AA, 0x590, 0x238,
+};
+
+/* per character: file of its animation */
+static s16 D_8011F8F0_gscode[8] = {
+    0x7D8, 0x7DB, 0x7F9, 0x7F0, 0x7B3, 0x7C8, 0x7EA, 0x7C2,
+};
+
+/* the scene of the team select */
+static objParams_t D_8011F900_gscode[] = {
+    { 1.0f, 0.0f, { 2056.0f, 320.0f, 240.0f } },
+    { 0.0f, 10.0f, { 568.0f, 2032.0f, -320.0f, -50.0f, 300.0f, 1.0f } },
+    { 0.0f, 11.0f, { 568.0f, 2032.0f, -220.0f, -50.0f, 100.0f, 1.0f } },
+    { 0.0f, 12.0f, { 568.0f, 2032.0f, 220.0f, -50.0f, 100.0f, 1.0f } },
+    { 0.0f, 13.0f, { 568.0f, 2032.0f, 320.0f, -50.0f, 300.0f, 1.0f } },
+    { -2.0f, 0.0f },
+};
+
+/* the team select: ids 0-7 the characters, 8-11 the players' names, 12-15 the titles, 16-19 the players' cursors;
+   [5]: its title */
+static menuItem_t D_8011FA80_gscode[28] = {
+    { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 192, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 256, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x8A6, 32, 12, 0xFF, SLIDE_LEFT },
+    { -1, 0x8D2, 20, 48, 153, SLIDE_LEFT },
+    { 12, 0x8A9, 196, 48, 153, SLIDE_RIGHT },
+    { 13, 0x8D1, 40, 44, 153, SLIDE_LEFT },
+    { 14, 0x8A8, 120, 112, 153, SLIDE_RIGHT },
+    { 15, 0x8B7, 80, 164, 0xFF, SLIDE_BOTTOM },
+    { 16, 0x8AD, 130, 52, 0xFF, SLIDE_BOTTOM },
+    { 17, 0x8AC, 130, 68, 0xFF, SLIDE_BOTTOM },
+    { 18, 0x8AB, 130, 122, 0xFF, SLIDE_BOTTOM },
+    { 19, 0x8AA, 130, 138, 0xFF, SLIDE_BOTTOM },
+    { 0, 0x8C2, 32, 188, 0xFF, SLIDE_BOTTOM },
+    { 1, 0x8C5, 64, 188, 0xFF, SLIDE_BOTTOM },
+    { 2, 0x8BE, 96, 188, 0xFF, SLIDE_BOTTOM },
+    { 3, 0x8C3, 128, 188, 0xFF, SLIDE_BOTTOM },
+    { 4, 0x8BF, 160, 188, 0xFF, SLIDE_BOTTOM },
+    { 5, 0x8C4, 192, 188, 0xFF, SLIDE_BOTTOM },
+    { 6, 0x8C1, 224, 188, 0xFF, SLIDE_BOTTOM },
+    { 7, 0x8C0, 256, 188, 0xFF, SLIDE_BOTTOM },
+    { 8, 0x8C9, 32, 180, 0xFF, SLIDE_BOTTOM },
+    { 9, 0x8C8, 64, 180, 0xFF, SLIDE_BOTTOM },
+    { 10, 0x8C7, 96, 188, 0xFF, SLIDE_BOTTOM },
+    { 11, 0x8C6, 128, 188, 0xFF, SLIDE_BOTTOM },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* the players' character names: ids 24-27 and 28-31 */
+static menuItem_t D_8011FB98_gscode[9] = {
+    { 24, 0xA5D, 28, 132, 0xFF, SLIDE_NONE },
+    { 28, 0xA68, 28, 140, 0xFF, SLIDE_NONE },
+    { 25, 0xA5D, 28, 132, 0xFF, SLIDE_NONE },
+    { 29, 0xA68, 28, 140, 0xFF, SLIDE_NONE },
+    { 26, 0xA5D, 28, 132, 0xFF, SLIDE_NONE },
+    { 30, 0xA68, 28, 140, 0xFF, SLIDE_NONE },
+    { 27, 0xA5D, 28, 132, 0xFF, SLIDE_NONE },
+    { 31, 0xA68, 28, 140, 0xFF, SLIDE_NONE },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* per character: image of the second line of its name */
+static s16 D_8011FBF4_gscode[8] = {
+    0xA61, 0xA62, 0xA62, 0xA68, 0xA5F, 0xA5E, 0xA64, 0xA61,
+};
+
+/* per character: image of the first line of its name */
+static s16 D_8011FC04_gscode[8] = {
+    0xA5C, 0xA5D, 0xA5D, 0xA5C, 0xA5C, 0xA5C, 0xA5D, 0xA5C,
+};
+
+/* per character: its image once unlocked */
+static s16 D_8011FC14_gscode[8] = {
+    0x8C2, 0x8C5, 0x8BE, 0x8C3, 0x8BF, 0x8C4, 0x8C1, 0x8C0,
+};
+
+/* per character: x of a player's cursor on it */
+static s16 D_8011FC24_gscode[8] = {
+    146, 140, 149, 139, 139, 147, 140, 143,
+};
+
+/* per character: image of a player's cursor on it */
+static s16 D_8011FC34_gscode[8] = {
+    0x8B3, 0x8B6, 0x8AF, 0x8B4, 0x8B0, 0x8B5, 0x8B2, 0x8B1,
+};
+
+/* per bar of a character's figures: its colour */
+static u8 D_8011FC44_gscode[3][3] = {
+    { 255, 0, 0 },
+    { 0, 255, 0 },
+    { 0, 0, 255 },
+};
+
+/* per character: height of its three bars, to 40 */
+static u8 D_8011FC50_gscode[8][3] = {
+    { 32, 28, 32 },
+    { 28, 32, 32 },
+    { 24, 40, 32 },
+    { 20, 40, 16 },
+    { 32, 28, 20 },
+    { 40, 16, 40 },
+    { 24, 24, 20 },
+    { 28, 36, 28 },
+};
+
+/* per player: image of its name */
+static s16 D_8011FC68_gscode[4] = {
+    0x8C9, 0x8C8, 0x8C7, 0x8C6,
+};
+
+/* per player: image of its name, the computer playing */
+static s16 D_8011FC70_gscode[4] = {
+    0x8CD, 0x8CC, 0x8CB, 0x8CA,
+};
+
+/* per player: image of its name while it waits its turn */
+static s16 D_8011FC78_gscode[4] = {
+    0x8AD, 0x8AC, 0x8AB, 0x8AA,
+};
+
+static u8 D_8011FC80_gscode = 30; /* slide step of the team select */
+static u8 D_8011FC81_gscode = 0; /* CHOICE_IN etc.; 4: the name entry */
+static u8 D_8011FC82_gscode = 0; /* 0 choosing, 1 every team is done */
+
+/* per team: its player choosing; bit 7: the team is done */
+static u8 D_8011FC84_gscode[2] = {
+    0, 0,
+};
+
 /*
 ================
 GS_UnlockMask

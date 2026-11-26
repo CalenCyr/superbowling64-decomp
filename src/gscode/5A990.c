@@ -4,6 +4,32 @@
 #include "libultra.h"
 #include "gscode/gscode.h"
 
+/* ===== Data ===== */
+
+/* the two-choice menu; [5]: its title */
+static menuItem_t gs_twoChoiceMenu[9] = {
+    { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 192, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x85B, 256, 8, 0xFF, SLIDE_NONE },
+    { -1, 0x863, 72, 12, 0xFF, SLIDE_LEFT },
+    { 0, 0x9A1, 40, 84, 0xFF, SLIDE_LEFT },
+    { 1, 0x9C4, 184, 84, 0xFF, SLIDE_RIGHT },
+    { -1, MENU_END, 0, 0, 0xFF, SLIDE_NONE },
+};
+
+/* per choice: images of its blink */
+static s16 gs_twoChoiceBlink[2][6] = {
+    { 0x9A1, 0x9A0, 0x99F, 0x99E, 0x99D, 0x99C },
+    { 0x9C4, 0x9C3, 0x9C2, 0x9C1, 0x9C0, 0x9BF },
+};
+
+static u8 gs_twoChoiceSlide = 30; /* slide step of the two-choice menu */
+static u8 gs_twoChoiceState = 0; /* CHOICE_IN etc. */
+static u8 gs_twoChoiceCursor = 0; /* highlighted choice, 0 or 1 */
+static u8 gs_twoChoiceBlinkFrame = 0; /* blink frame, 0 to 29 */
+
 /*
 ================
 GS_TwoChoiceMenu

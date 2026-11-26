@@ -4,6 +4,31 @@
 #include "libultra.h"
 #include "gscode/gscode.h"
 
+/* ===== Data ===== */
+
+/* The classes of the overlay's scenes, by objParams_t.type: 0 and 10 scene objects, 1 and 11 cameras; the rest
+   unused. Units 5E2B0, 5EC00 and 61640 create their scenes with them. */
+objClass_t gs_classes[] = {
+    { Obj_CreateSceneObject, (objUpdateFunc_t)Obj_Draw },
+    { Cam_Create, (objUpdateFunc_t)Cam_UpdateAndAdvance },
+    { (objCreateFunc_t)GS_NullCreate, (objUpdateFunc_t)GS_NullHandler },
+    { (objCreateFunc_t)GS_NullCreate, (objUpdateFunc_t)GS_NullHandler },
+    { (objCreateFunc_t)GS_NullCreate, (objUpdateFunc_t)GS_NullHandler },
+    { (objCreateFunc_t)GS_NullCreate, (objUpdateFunc_t)GS_NullHandler },
+    { (objCreateFunc_t)GS_NullCreate, (objUpdateFunc_t)GS_NullHandler },
+    { (objCreateFunc_t)GS_NullCreate, (objUpdateFunc_t)GS_NullHandler },
+    { (objCreateFunc_t)GS_NullCreate, (objUpdateFunc_t)GS_NullHandler },
+    { (objCreateFunc_t)GS_NullCreate, (objUpdateFunc_t)GS_NullHandler },
+    { Obj_CreateSceneObject, (objUpdateFunc_t)Obj_AddToDrawList },
+    { Cam_Create, (objUpdateFunc_t)Cam_Update },
+};
+
+static s32 gs_screenDepth = 0; /* entries in gs_screenStack */
+
+/* The unit's uninitialised state: file-scope statics, which the assembler allocates in .bss in definition order. */
+static u8 gs_screen;            /* current screen */
+static u8 gs_screenStack[15];   /* screens to go back to, a stack (its size is unknown: up to the end of the unit's .bss) */
+
 /*
 ================
 GS_Init
