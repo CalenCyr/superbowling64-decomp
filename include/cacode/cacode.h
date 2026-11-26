@@ -39,25 +39,7 @@ extern Vtx ca_axes[4];                  /* the origin and the ends of the three 
 extern objParams_t ca_sceneParams[6];   /* the scene: three cameras, then three objects; or the host's sce.dat */
 extern u8 ca_clipAlpha;                 /* alpha of the frame drawn behind cameras 1 and 2 */
 
-extern frameSlot_t ca_frameCache[35];
-extern u8 ca_numSlots;                   /* slots in use */
-extern sceneObjectNode_t *ca_objects[3]; /* the scene's objects */
-extern sceneCameraNode_t *ca_cameras[3]; /* the scene's cameras */
-extern f32 ca_camera0Matrix[4][4];
-extern f32 ca_partRotations[30][300][3]; /* by model part, per frame: the part's rotation (radians) */
-
-/*
-The motion tables, saved to and loaded from the host's "motion.dat" in this order, followed by ca_clipFrameBase[1]
-and [2]. Cameras and objects 1 and 2 follow the tables of index 0 and 1; camera 0 has the one matrix
-ca_camera0Matrix. They lie contiguously after ca_partRotations, inside the overlay's bss (which main's loader
-clears up to 0x8013E890).
-*/
-extern f32 ca_objectMatrices[2][300][4][4]; /* per frame, for objects 1 and 2 */
-extern f32 ca_cameraAt[2][300][3];          /* per frame: the at of cameras 1 and 2 */
-extern f32 ca_cameraEye[2][300][3];         /* the eye */
-extern f32 ca_cameraUp[2][300][3];          /* the up point */
-extern f32 ca_keptRotation[3];              /* the rotation of the selected part, kept while frames are stepped */
-extern u8 *ca_bmpBuffer;                    /* buffer one BMP file is read into */
+extern u8 *ca_bmpBuffer;                /* buffer one BMP file is read into */
 
 /* ca_mode */
 #define CAMODE_ROTATE       0           /* the pad moves the camera, the object and the selected part */

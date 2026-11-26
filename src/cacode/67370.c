@@ -4,6 +4,33 @@
 #include "libultra.h"
 #include "cacode/cacode.h"
 
+/* ===== Bss ===== */
+
+static frameSlot_t ca_frameCache[35];
+static u8 ca_numSlots;                   /* slots in use */
+static sceneObjectNode_t *ca_objects[3]; /* the scene's objects */
+static sceneCameraNode_t *ca_cameras[3]; /* the scene's cameras */
+static f32 ca_camera0Matrix[4][4];
+static f32 ca_partRotations[30][300][3]; /* by model part, per frame: the part's rotation (radians) */
+
+/*
+The motion tables, saved to and loaded from the host's "motion.dat" in this order, followed by ca_clipFrameBase[1]
+and [2]. Cameras and objects 1 and 2 follow the tables of index 0 and 1; camera 0 has the one matrix
+ca_camera0Matrix. They lie contiguously after ca_partRotations, inside the overlay's bss.
+*/
+static f32 ca_objectMatrices[2][300][4][4]; /* per frame, for objects 1 and 2 */
+static f32 ca_cameraAt[2][300][3];          /* per frame: the at of cameras 1 and 2 */
+static f32 ca_cameraEye[2][300][3];         /* the eye */
+static f32 ca_cameraUp[2][300][3];          /* the up point */
+static f32 ca_keptRotation[3];              /* the rotation of the selected part, kept while frames are stepped */
+
+/*
+The unit's other uninitialised globals are file-scope statics, which the assembler allocates in .bss in definition
+order; ca_bmpBuffer is a common, which the linker places after the unit's .bss (padded to 16 bytes, so at
+0x8013E880 and not right after ca_keptRotation).
+*/
+u8 *ca_bmpBuffer;
+
 /*
 ================
 CA_DrawFrame
@@ -735,3 +762,33 @@ void CA_Frame( void ) {
     sprintf( str, "CAM=%d OBJ=%d FRAME=%d", ca_selected, ca_part, ca_frame );
     Txt_DrawString( &game_gfx, 84, 20, str );
 }
+
+/* ===== Data ===== */
+
+s32 ca_dpadHeld = 0;
+s32 ca_mode = CAMODE_ROTATE;
+s32 ca_selected = 0;
+s32 ca_part = 0;
+// volatile: as declared in cacode.h (CA_Frame reads it twice after each D-pad frame step)
+volatile s32 ca_frame = 0;
+s32 ca_clipFrameBase[3] = { 0, 0, 0 };
+
+/* The axes' vertices: the origin in white, then the ends of x (red), y (green) and z (yellow), 100 long. */
+Vtx ca_axes[4] = {
+    { { { 0, 0, 0 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0x7F } } },
+    { { { 100, 0, 0 }, 0, { 0, 0 }, { 0xFF, 0x00, 0x00, 0x7F } } },
+    { { { 0, 100, 0 }, 0, { 0, 0 }, { 0x00, 0xFF, 0x00, 0x7F } } },
+    { { { 0, 0, 100 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0x00, 0x7F } } },
+};
+
+/* The scene: cameras 0 to 2 (class 1), then objects 0 to 2 (class 0). */
+objParams_t ca_sceneParams[6] = {
+    { 1.0f, 0.0f, { 2057.0f, 320.0f, 240.0f } },
+    { 1.0f, 0.0f, { 2057.0f, 120.0f, 120.0f, 200.0f } },
+    { 1.0f, 0.0f, { 2057.0f, 120.0f, 120.0f, 200.0f, 120.0f } },
+    { 0.0f, 1.0f, { 1122.0f, 1983.0f, 0.0f, 0.0f, 0.0f, 1.0f } },
+    { 0.0f, 1.0f, { 1122.0f, 1983.0f, 0.0f, 0.0f, 0.0f, 2.0f } },
+    { 0.0f, 1.0f, { 1122.0f, 1983.0f, 0.0f, 0.0f, 0.0f, 4.0f } },
+};
+
+u8 ca_clipAlpha = 0xB4;

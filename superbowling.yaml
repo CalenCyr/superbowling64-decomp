@@ -462,11 +462,12 @@ segments:
     # bss: from the end of the file to 0x8013E890, the end main's loader (func_80026B44) clears to before it calls
     # func_801128F4; the last object is the BMP buffer pointer at 0x8013E880, after the motion tables
     bss_size: 0x29260
+    bss_contains_common: True   # ca_bmpBuffer is a common
     subsegments:
       - [0x67370, c, cacode/67370]
-      - [0x6A380, data]
+      - [0x6A380, .data, cacode/67370]     # the viewer's state, the axes' vertices and the scene
       - [0x6A570, .rodata, cacode/67370]   # file names, debug format strings and FP constants
-      - { type: bss, vram: 0x80115630 }
+      - { type: .bss, vram: 0x80115630, name: cacode/67370 }
 
   - name: pvcode
     type: code
