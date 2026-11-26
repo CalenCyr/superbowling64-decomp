@@ -111,9 +111,6 @@ projection, and the view (with the eye's light) or, while cam_manual is set, the
 rotation of the last view.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
-// change the register allocation, and a reused local is not counted as a match
 void Cam_Update( sceneCamera_t *cam ) {
     f32 *data;
     s32 i;
@@ -186,9 +183,6 @@ void Cam_Update( sceneCamera_t *cam ) {
         cam->dir[i] = cam->at[i] - cam->eye[i];
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/7250", Cam_Update);
-#endif
 
 /*
 ================

@@ -282,9 +282,6 @@ Mtx_RotateXYZ
 Rotates the axes of m by x, y and z radians.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with one float temporary for both shared products (marked R30
-// below); a reused local is not counted as a match
 void Mtx_RotateXYZ( f32 m[4][4], f32 x, f32 y, f32 z ) {
     f32 rot[3][3];
     f32 sx, cx, sy, cy, sz, cz;
@@ -309,9 +306,6 @@ void Mtx_RotateXYZ( f32 m[4][4], f32 x, f32 y, f32 z ) {
     rot[2][2] = cx * cy;
     Mtx_Rotate( m, rot );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/53B0", Mtx_RotateXYZ);
-#endif
 
 /*
 ================
@@ -320,12 +314,8 @@ Mtx_SetRotScaleTrans
 Sets m to a rotation by x, y and z radians, scaled by scale, then moved to (tx, ty, tz).
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: MATCH-PENDING (R17): byte-exact only with the unused local rot, which supplies retail's 0x28
-// bytes of unused frame; without it the frame is 0x50 instead of 0x78. Giving rot a job (built as in Mtx_RotateXYZ, then
-// m = rot * scale) keeps the dead stores to rot and gives 0x70; the body reads as Mtx_RotateXYZ's with rot left over.
-// The unused rot is an accepted leftover (R36), but the match also needs Mtx_RotateXYZ's one temporary t (R30); two differ.
 void Mtx_SetRotScaleTrans( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, f32 ty, f32 tz ) {
+    // R36: unused in the original: retail's frame keeps its 0x28 bytes untouched; the body is Mtx_RotateXYZ's, which builds rot
     f32 rot[3][3];
     f32 sx, cx, sy, cy, sz, cz;
     f32 t;      // RULE-EXCEPTION: R30, one temporary for both shared products, as in Mtx_RotateXYZ
@@ -355,9 +345,6 @@ void Mtx_SetRotScaleTrans( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, 
     m[3][2] = tz;
     m[3][3] = 1.0f;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/53B0", Mtx_SetRotScaleTrans);
-#endif
 
 /*
 ================
@@ -366,9 +353,6 @@ Mtx_Place
 Moves m by trans, then rotates it by rot (radians) and scales it by scale.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) as written, but at -O3 it inlines Mtx_RotateXYZ, which is parked, so it
-// can only be built from source together with that function
 void Mtx_Place( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale ) {
     Mtx_Translate( m, trans[0], trans[1], trans[2] );
     if ( rot[0] != 0.0 || rot[1] != 0.0 || rot[2] != 0.0 ) {
@@ -376,9 +360,6 @@ void Mtx_Place( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale ) {
     }
     Mtx_Scale( m, scale[0], scale[1], scale[2] );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/53B0", Mtx_Place);
-#endif
 
 /*
 ================
@@ -536,9 +517,6 @@ The create of the scene object class: loads the model and animation of params, s
 parts, places it, and lists it in obj_scene.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: exact (with -DNON_MATCHING) but at -O3 it inlines Mtx_SetRotScaleTrans, which is parked
-// (MATCH-PENDING R17), so it can only be built from source together with that function
 objNode_t *Obj_CreateSceneObject( objParams_t *params ) {
     fileType1_t *model;
     sceneObjectNode_t *node;
@@ -562,9 +540,6 @@ objNode_t *Obj_CreateSceneObject( objParams_t *params ) {
     obj_scene[(s32)params->priority] = obj;
     return &node->node;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/53B0", Obj_CreateSceneObject);
-#endif
 
 /*
 ================
