@@ -947,6 +947,8 @@ ga_throwCount at 0 through the lane's opening handlers, else through GA_SetTurnH
 // NON_MATCHING: stack frame only; retail's is 0x50 bytes, 0x20 more than this body needs (as GA_BodyMatrix:
 // as if a 32-byte local were declared and never used); every instruction else is the same. A 32-byte unused local
 // after pins (or two more u8[NUM_PINS]) gives the exact bytes; not adopted (R17) without evidence of what it was.
+// Also tried: an inline unpack-and-reset helper with its own pins, called from each mode branch: the expansions share
+// one temporary slot and cross-jump into one call pair, so the frame stays 0x30.
 void GA_StartTurn( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 pins[NUM_PINS];

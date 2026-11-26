@@ -17,6 +17,8 @@ Builds the placement matrix of a body: rotation rot (degrees), then scale, then 
 // matrices were declared and never used; every instruction else is the same. Two unused f32[4][4] locals,
 // or the same declared in an if ( 0 ) block, give the exact bytes here and in GA_TransformPoint (which
 // expands this function, frame included); neither is adopted (R17) without evidence of what they were.
+// Checked: GA_TransformPoint holds the 0x80 above its own mf, where an expanded inline's frame block goes; this body
+// calls no inline that could bring it, and no game code builds rotate, scale and translate through two temporaries.
 // Declared inline: GA_TransformPoint expands it.
 inline void GA_BodyMatrix( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale ) {
     guPositionF( mf, rot[0], rot[1], rot[2], scale, pos[0], pos[1], pos[2] );

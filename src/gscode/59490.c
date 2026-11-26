@@ -20,6 +20,8 @@ has slid out after a choice.
 // An unused 48-byte local gives retail's frame (not adopted, R17); no callee here is a same-unit inline whose frame
 // could carry it in. The players' reset is an ascending loop (as in GS_Init): gcc reverses it into retail's pointer
 // walk down from game_players[3]; written counting down, it indexes game_players without the pointer.
+// Also tried: cases 1 to 3 as calls to an inline taking the mode (game_mode = mode; state = CHOICE_TAKEN): same bytes,
+// frame unchanged (an inline's own frame is a temporary slot; it adds only for locals or variable-bound for loops).
 s32 GS_ModeMenu( void ) {
     s32 i;
     u8 choice;
