@@ -22,6 +22,13 @@ static s16 gridEd_cursorZ = 0;              /* the cursor's point along z */
 static u16 gridEd_paint = 1;                /* the mark Z with the D-pad paints */
 static u8 gridEd_heldFrames = 0;            /* frames the D-pad has been held, to 100; from 7 the cursor repeats */
 
+/* ===== State ===== */
+
+// volatile: retail loads it again, unused, right after each ++ and -- store, and re-reads and re-masks it before the switch
+static volatile u8 gridEd_page;     /* the page, GRIDEDIT_* */
+static Mtx gridEd_mtx;              /* identity, the model matrix of the grid */
+static u8 gridEd_marked[GRIDEDIT_POINTS];  /* per point: marked */
+
 /*
 ================
 GridEd_Frame

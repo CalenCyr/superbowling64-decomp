@@ -20,10 +20,6 @@
 #define GRIDEDIT_POINTS     2000        /* points of floorGrid_t.heights */
 
 extern u8 gridEd_active;            /* set: GridEd_Frame runs each frame; it clears it when done */
-// volatile: retail loads it again, unused, right after each ++ and -- store, and re-reads and re-masks it before the switch
-extern volatile u8 gridEd_page;     /* the page, GRIDEDIT_* */
-extern Mtx gridEd_mtx;              /* identity, the model matrix of the grid */
-extern u8 gridEd_marked[GRIDEDIT_POINTS];  /* per point: marked */
 
 void GridEd_Frame( void );
 
