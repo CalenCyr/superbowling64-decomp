@@ -35,6 +35,12 @@ Also record:
 - **Flags** (verified on five game functions): `-c -G0 -mips3 -mgp32 -mfp32 -O2`. `-O3` gave the same bytes on those
   (no static callees); switch a unit to `-O3` only on evidence of inlining. Plain `char` is signed: retail byte
   strings use `lbu`, so they are `u8`.
+  - KMC alignment: C units also pass `-Wa,-N` (Makefile `CFLAGS`), KMC as 2.6's `--force-n64align`. It raises the
+    alignment of every `.comm` object, global or `.local` (gcc emits file-scope statics and tentative definitions
+    this way), to at least 8 when its size is 16 to 1023 bytes and to at least 16 from 1024 bytes; it never lowers
+    an alignment, and `.data`, `.rodata` and `.lcomm` are unaffected. Without `-N` the assembler only warns
+    ("Variable %s would be aligned in KMC GCC"). So `.bss` moved into C lands where KMC put it: a gap before a
+    16-byte-or-larger object up to its 8 (or 16) boundary is this rule, not a placeholder.
   - Per-unit override: `src/libkmc/*.c` (KMC's C runtime) build with `-O` instead of `-O2` (Makefile). Evidence: its
     code is unscheduled; `rand` stores its state before computing the result and `func_80056690` loads its stack
     arguments in source order, which `-O2`'s scheduler reorders; every libkmc C function matches at `-O`.

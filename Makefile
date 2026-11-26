@@ -15,7 +15,7 @@ ASFLAGS  := -EB -march=vr4300 -mabi=32 -G0 -I include
 # KMC GCC 2.7.2; its driver runs KMC as 2.6, which the matching code needs (e.g. `move` -> addu).
 GCC_DIR  := tools/gcc_2.7.2
 CC       := COMPILER_PATH=$(GCC_DIR) $(GCC_DIR)/gcc -B$(GCC_DIR)/
-CFLAGS   := -c -G0 -mips3 -mgp32 -mfp32 -O2 -nostdinc -I include -I src -I lib/ultralib/include
+CFLAGS   := -c -G0 -mips3 -mgp32 -mfp32 -O2 -Wa,-N -nostdinc -I include -I src -I lib/ultralib/include
 # KMC's libkmc was built with -O, not the game's -O2: its code is unscheduled (rand stores its state before it
 # computes the result; -O2's scheduler moves the store last).
 $(BUILD)/src/libkmc/%.o: CFLAGS := $(subst -O2,-O,$(CFLAGS))
