@@ -18,6 +18,21 @@
 #define SAMPLES_IN_RAM      0x00000001  /* audio_sampleFlags: untagged samples are already in RAM */
 #define DMA_BUFFER_FRAMES   2           /* frames a buffer stays loaded after its last use */
 
+/* ===== State ===== */
+
+static dmaBuffer_t *audio_dmaUsed;  /* buffers in use, by startAddr */
+static dmaBuffer_t *audio_dmaFree;  /* free buffers */
+static dmaBuffer_t *audio_dmaBuffers;  /* every buffer */
+static OSIoMesg *audio_dmaRequests;  /* DMA requests, two per buffer */
+static OSMesg *audio_dmaMsgs;       /* audio_dmaQueue's messages */
+static s32 audio_dmaBufferSize;     /* bytes per buffer */
+static s32 audio_dmaCount;          /* DMAs started this frame */
+static OSMesgQueue audio_dmaQueue;  /* DMA completions */
+static OSPiHandle *audio_romHandle;  /* the cartridge ROM */
+static s32 D_800643CC;              /* unreferenced */
+static OSSched *audio_sched;        /* the scheduler, as Audio_SetScheduler set it */
+static audioClient_t *audio_client;  /* the audio thread's scheduler client */
+
 /*
 ================
 Audio_InitDmaCache

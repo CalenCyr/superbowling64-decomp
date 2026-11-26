@@ -16,17 +16,6 @@ extern N_ALSynth *synth_driver;     /* the synthesizer, as Snd_InitSynth set it 
 extern fxStorage_t synth_fxStorage;  /* the effect's delay, buffer and filter storage */
 
 /* audio manager: ROM sample cache and scheduler client (1A7A0.c) */
-extern dmaBuffer_t *audio_dmaUsed;  /* buffers in use, by startAddr */
-extern dmaBuffer_t *audio_dmaFree;  /* free buffers */
-extern dmaBuffer_t *audio_dmaBuffers;  /* every buffer */
-extern OSIoMesg *audio_dmaRequests;  /* DMA requests, two per buffer */
-extern OSMesg *audio_dmaMsgs;       /* audio_dmaQueue's messages */
-extern s32 audio_dmaBufferSize;     /* bytes per buffer */
-extern s32 audio_dmaCount;          /* DMAs started this frame */
-extern OSMesgQueue audio_dmaQueue;  /* DMA completions */
-extern OSPiHandle *audio_romHandle;  /* the cartridge ROM */
-extern OSSched *audio_sched;        /* the scheduler, as Audio_SetScheduler set it */
-extern audioClient_t *audio_client;  /* the audio thread's scheduler client */
 extern audioTaskFuncs_t *audio_taskFuncs;  /* the routines the audio thread uses, &audio_defaultTaskFuncs by default */
 
 /* audio manager: audio thread (1ADA0.c) */
