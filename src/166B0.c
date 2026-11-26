@@ -1649,6 +1649,9 @@ f32 Snd_Exp2( f32 x ) {
 // copy, but in both calls (retail copies only the digit); not it either: a nested Snd_Digit inline, (u8)/(s8)
 // casts on the digit, -'0' + digit, a digit local before or after the first conversion, the add's operands swapped.
 // Not it either: an inline assigning x in SEXT8's order (if/else), x = SEXT8( x ), a local copy of x in the inline.
+// Not it either: tune->value = digit + tune->value, tune->raw read in the call (no value local), value = digit
+// before the second call, bank->tunes[i] in place of tune, / 100.0f. Permuter (30 min, 235 -> 200): only noise
+// (a do-while(0) around the loop body, a wave base read into value).
 /*
 ================
 Snd_SignExtend8
