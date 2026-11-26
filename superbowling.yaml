@@ -95,7 +95,7 @@ segments:
       - [0x1B060, c]
       - [0x1B1A0, c]
       - [0x1B2D0, asm]
-      - [0x1C260, asm]
+      - [0x1C260, c]
       - [0x1C980, asm]
       - [0x1CB60, asm]
       - [0x1D550, c]

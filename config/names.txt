@@ -1511,3 +1511,12 @@ cont_pakPlugged	0x800693DE	invented: bit pattern of the ports with a pak (reques
 cont_rumbleFrames	0x8006940D	invented: frames left of each port's cont_rumble strength (Cont_Thread counts them down)
 cont_pollStatus	0x8005B191	invented: nonzero: Cont_Thread queries the controller status every frame (set while gscode checks the paks)
 N_ALSynth.outBuf	n_libaudio.h	invented: the output buffer func_80042A00 sets before each func_80042CF0 call, which saves the frame there
+N_PVoice.decState	n_libaudio.h	invented: the ADPCM state address func_80041434 puts in the decode command
+N_PVoice.loopState	n_libaudio.h	invented: func_800412A8 copies the wave table's loop state there; the set-loop command gives its address
+N_PVoice.loopStart	n_libaudio.h	invented: with loopEnd and loopCount, func_800412A8 copies them from the wave table's loop
+N_PVoice.table	n_libaudio.h	invented: the ALWaveTable func_800412A8 is given with N_FILTER_SET_WAVETABLE
+N_PVoice.bookSize	n_libaudio.h	invented: order * npredictors * 16 bytes, computed by func_800412A8
+N_PVoice.sample	n_libaudio.h	invented: func_800412A8 zeroes it with the table; func_80040E60 compares it against loopEnd
+N_PVoice.lastsam	n_libaudio.h	invented: the remainder of the 16-sample frame func_80040E60 carries
+N_PVoice.first	n_libaudio.h	invented: set on reset, cleared by func_80041434 after the first decode command
+N_PVoice.memin	n_libaudio.h	invented: the ROM address passed to the voice's DMA routine; starts at the table's base

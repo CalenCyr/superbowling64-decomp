@@ -28,7 +28,21 @@ typedef struct {
 typedef struct N_PVoice_s {
     /* 0x00 */ ALLink node;
     /* 0x08 */ N_ALVoice *vvoice;       /* the voice using it, NULL while free */
-    /* 0x0C */ u8 unk_0C[0x88 - 0x0C];
+    /* decoder (driven by func_80040E60 and func_800412A8) */
+    /* 0x0C */ ADPCM_STATE *decState;   /* the ADPCM decoder's state */
+    /* 0x10 */ ADPCM_STATE *loopState;  /* the decoder's state at the loop start, from the wave table's loop */
+    /* 0x14 */ u32 loopStart;           /* the wave table's loop, in samples; loopCount 0: none, ~0: forever */
+    /* 0x18 */ u32 loopEnd;
+    /* 0x1C */ u32 loopCount;
+    /* 0x20 */ ALWaveTable *table;      /* the wave table it plays, NULL: none */
+    /* 0x24 */ s32 bookSize;            /* bytes of the table's ADPCM codebook */
+    /* 0x28 */ ALDMAproc dma;           /* reads ROM: returns the RDRAM address of the bytes asked for */
+    /* 0x2C */ void *dmaState;
+    /* 0x30 */ u32 sample;              /* samples decoded since the start or the last loop */
+    /* 0x34 */ s32 lastsam;             /* samples of the last 16-sample ADPCM frame already used */
+    /* 0x38 */ s32 first;               /* TRUE: the next decode starts the table, from a reset decoder state */
+    /* 0x3C */ s32 memin;               /* the table's ROM address the next frames are read from */
+    /* 0x40 */ u8 unk_40[0x88 - 0x40];
     /* 0x88 */ s32 offset;              /* samples its updates wait: N_PVOICE_STEAL_DELAY while a stolen voice fades */
 } N_PVoice;
 
@@ -234,5 +248,43 @@ void func_80042C0C( N_PVoice *pv );    /* retires a physical voice until the end
 s32 func_80042C44( ALMicroTime t );    /* t in output samples, rounded */
 
 /* ===== end of the synthesizer frame and setup block ===== */
+
+/* ===== the decoder: unit 1C260 ===== */
+
+/* filter messages the decoder's handler func_800412A8 takes */
+#define N_FILTER_RESET          4       /* rewinds the decoder to the table's start */
+#define N_FILTER_SET_WAVETABLE  5       /* param: the ALWaveTable to play */
+
+/* flags of the ROM's ADPCM decode command */
+#define N_ADPCM_INIT            1       /* reset the decoder state first */
+#define N_ADPCM_LOOP            2       /* start from the loop state the set-loop command gave */
+
+#define N_ADPCM_FRAME_BYTES     9       /* bytes of one 16-sample ADPCM frame */
+
+/* the ROM's load command: the byte count and the DMEM address in w0 */
+#define n_aLoadBuffer( pkt, c, d, s )                                                       \
+{                                                                                           \
+    Acmd *_a = (Acmd *)pkt;                                                                 \
+                                                                                            \
+    _a->words.w0 = _SHIFTL( A_LOADBUFF, 24, 8 ) | _SHIFTL( c, 12, 12 ) | _SHIFTL( d, 0, 12 ); \
+    _a->words.w1 = (u32)( s );                                                              \
+}
+
+/*
+the ROM's ADPCM decode command: the state's address in w0; in w1 the flags, the output bytes, the input's
+alignment offset and the output's DMEM address
+*/
+#define n_aADPCMdec( pkt, s, f, c, a, d )                                                   \
+{                                                                                           \
+    Acmd *_a = (Acmd *)pkt;                                                                 \
+                                                                                            \
+    _a->words.w0 = _SHIFTL( A_ADPCM, 24, 8 ) | _SHIFTL( s, 0, 24 );                         \
+    _a->words.w1 = _SHIFTL( f, 28, 4 ) | _SHIFTL( c, 16, 12 ) | _SHIFTL( a, 12, 4 ) | _SHIFTL( d, 0, 12 ); \
+}
+
+void func_800412A8( N_PVoice *pv, s32 paramID, void *param );         /* the decoder's parameter handler */
+Acmd *func_80041434( Acmd *ptr, N_PVoice *pv, s32 tsam, s32 nbytes, s16 outp, s16 inp, s32 flags );
+
+/* ===== end of the decoder block ===== */
 
 #endif
