@@ -588,10 +588,6 @@ fall turned into a damped bounce (motion flag 2). Returns 1 when the body lands 
 bounces with spot, else 0. Gravity (1.0889) is then applied.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact, but only with the empty `else if` branch (R17): retail skips the in-air case with
-// `and` of the two booleans (spot2 in use, spot2 on the floor); `!( a && b ) && c`, a nested if and a named
-// flag all give `or` or a different body. The empty branch may stand for a compiled-out macro (debug print)
 s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 ceiling, f32 arg4 ) {
     vec3_t normal;
     f32 floor;
@@ -640,6 +636,7 @@ s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 cei
         }
         motion->flags |= 2;
     } else if ( spot2->radius != 0.0f && bottom2 == floor ) {
+        // RULE-EXCEPTION: R17, nothing to do while the second spot rests on the floor; retail tests this case and skips it
     } else if ( bottom != floor ) {
         if ( ( motion->flags >> 4 ) & 1 ) {
             spot->pos[1] += floor - bottom;
@@ -659,9 +656,6 @@ s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 cei
     motion->vel[1] -= 1.0889;
     return landed;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_KeepOnFloor);
-#endif
 
 /*
 ================

@@ -617,9 +617,6 @@ the team if every player has the game_playerDone flag set, else passes the turn 
 ================
 */
 // The turn pass is GA_NextTeamPlayer inlined (its inline is what puts the body here at -O2).
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with a `players` counter kept beside the index i (players++ first in
-// the flag-count loop, then flagged == players); it always equals i, so it only steers scheduling and is not counted
 s32 GA_TeamGameLoop( void ) {
     s32 team;
     s32 flagged;
@@ -643,9 +640,6 @@ s32 GA_TeamGameLoop( void ) {
     }
     return GA_StopViewHandlers( game_lastTeam );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", GA_TeamGameLoop);
-#endif
 
 /*
 ================
@@ -719,9 +713,6 @@ done, and ends the game for the team when every player has the game_playerDone f
 when the turn comes back to the first player). Then advances the frame when the lanes are done.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with a `players` counter kept beside the index i (players++ first in
-// the flag-count loop, then flagged == players); it always equals i, so it only steers scheduling and is not counted
 s32 GA_ParGameLoop( void ) {
     s32 team;
     s32 i;
@@ -756,9 +747,6 @@ s32 GA_ParGameLoop( void ) {
     }
     return GA_StopViewHandlers( game_lastTeam ) != 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3C570", GA_ParGameLoop);
-#endif
 
 /*
 ================

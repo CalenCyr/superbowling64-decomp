@@ -35,7 +35,8 @@ that names it):
                operation retail really performs, such as a tuned offset left at zero); padding members (`pad`, `_pad3`, `padding`, `filler`, `dummy`) without a
                `// pad: <evidence>` note naming the SDK or file format.
   R18 [match]  `asm`/`__asm`/`__asm__` outside `INCLUDE_ASM`, unless the function or macro is listed in
-               config/rules.txt as `asm-helper NAME` (counted, listed) or `original-asm NAME` (listed
+               config/rules.txt as `asm-helper NAME` (counted, listed) or `original-asm NAME` (listed; `rule-exception RULE FUNC`
+               turns that function's [match] findings of RULE into advisories, for a user-ruled exception
                apart, counted neither way).
 
 Advisory (never fail a match): R7 placeholder and address-like names, argN included (function, parameters, locals,
@@ -497,16 +498,21 @@ class Checker:
         return names
 
     def _read_config(self):
-        allow = {"asm-helper": set(), "original-asm": set()}
+        allow = {"asm-helper": set(), "original-asm": set(), "rule-exception": set()}
         if CONFIG.exists():
             for ln in CONFIG.read_text().splitlines():
                 ln = ln.split("#", 1)[0].split()
                 if len(ln) == 2 and ln[0] in allow:
                     allow[ln[0]].add(ln[1])
+                elif len(ln) == 3 and ln[0] == "rule-exception":
+                    allow["rule-exception"].add((ln[1], ln[2]))
         return allow
 
     # -- helpers
     def add(self, src, line, rule, tier, msg, func=None, charge=None):
+        # a user-ruled exception (config/rules.txt `rule-exception RULE FUNC`) keeps the finding, as an advisory
+        if tier == "match" and func is not None and (rule, func.name) in getattr(self, "allow", {}).get("rule-exception", ()):
+            tier, msg = "advisory", msg + " (rule-exception in config/rules.txt)"
         f = Finding(src.rel, line, rule, tier, msg, func.name if func else None)
         self.findings.append(f)
         if func is not None:

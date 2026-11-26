@@ -1147,12 +1147,6 @@ and voice restart (unless held), wave, pitch and FX mix. NOTE_REST, or a program
 note instead. A channel whose stream ended stops its voice.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
-// change the register allocation, and a reused local is not counted as a match. With cmd, length and transpose
-// locals, 6 lines differ: the command byte lands in v1 (retail a0) and the transpose copy in v0 (retail a0), i.e.
-// retail's byte shares one register with both. Also checked: wider/narrower types per local, *src read at each
-// use, Snd_SignExtend8-style inlines (s32/u8/u32 parameter) on the transpose expression; all worse or no change.
 void Snd_PlayNextNote( sndChannel_t *chan, s32 index ) {
     u8 *src;
     s32 note;
@@ -1267,9 +1261,6 @@ void Snd_PlayNextNote( sndChannel_t *chan, s32 index ) {
         n_alSynStopVoice( &snd_voices[index] );
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/166B0", Snd_PlayNextNote);
-#endif
 
 /*
 ================
