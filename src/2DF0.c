@@ -17,10 +17,8 @@ Cont_Init
 Sets up the controllers and the Rumble Paks of both ports.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: MATCH-PENDING (R17): byte-exact only with the unused local pads, which supplies retail's 0x18
-// bytes of unused frame; without it the frame is 0x18 instead of 0x30
 void Cont_Init( void ) {
+    // R36: unused in the original: retail's frame reserves 0x18 bytes no instruction touches
     OSContPad pads[MAXCONTROLLERS];
 
     osCreateMesgQueue( &cont_siQueue, &cont_siMsgs, 1 );
@@ -32,9 +30,6 @@ void Cont_Init( void ) {
     Rumble_Probe( 0 );
     Rumble_Probe( 1 );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/2DF0", Cont_Init);
-#endif
 
 /*
 ================
