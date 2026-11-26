@@ -58,7 +58,6 @@ extern OSMesgQueue audio_dmaQueue;  /* DMA completions */
 extern OSPiHandle *audio_romHandle;  /* the cartridge ROM */
 extern OSSched *audio_sched;        /* the scheduler, as Audio_SetScheduler set it */
 extern audioClient_t *audio_client;  /* the audio thread's scheduler client */
-extern audioTaskFuncs_t audio_defaultTaskFuncs;  /* Audio_ClientInit, Audio_ClientWaitFrame, Audio_ClientRunTask */
 extern audioTaskFuncs_t *audio_taskFuncs;  /* the routines the audio thread uses, &audio_defaultTaskFuncs by default */
 
 /* audio manager: audio thread (1ADA0.c) */
@@ -67,6 +66,5 @@ extern OSThread audio_thread;       /* the audio thread */
 extern u8 *audio_stack;             /* its stack */
 extern audioBuffer_t *audio_buffers;  /* NUM_AUDIO_BUFFERS output buffers */
 extern Acmd *audio_cmdList;         /* the frame's command list */
-extern audioBuffer_t *audio_lastBuffer;  /* the buffer the last task filled, for the AI next; NULL: none yet */
 
 #endif

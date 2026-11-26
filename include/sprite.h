@@ -29,8 +29,7 @@ typedef struct {
 
 extern Vtx draw_lineVtx[2][2];      /* the two ends of the line Draw_Line3D draws, by camera */
 extern Mtx draw_lineMtx;            /* identity, the model matrix of that line */
-extern u16 draw_palettes[2][4][256];  /* palette copies of Draw_ImageCopyPalette: four per frame buffer (sched_bufferIndex) */
-extern s32 draw_nextPalette;        /* the next of those four */
+extern u16 draw_palettes[2][4][256];  /* palette copies of Draw_ImageCopyPalette: four per frame buffer (sched_bufferIndex); the next is 7250's draw_nextPalette */
 
 void Draw_CiImage( s16 type, s16 x, s16 y, s16 width, s16 height, void *palette, void *pixels );
 void Draw_Image( u16 id, s16 x, s16 y );

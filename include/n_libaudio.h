@@ -362,7 +362,6 @@ typedef struct {
 /* n samples rounded to the nearest whole frame */
 #define N_ROUND_FRAMES(n)       ( ( ( n ) + N_FRAME_SAMPLES / 2 ) / N_FRAME_SAMPLES * N_FRAME_SAMPLES )
 
-extern s16 snd_panGains[128];         /* gains by pan and by effect mix, 0x7FFF down; index 127 - x for the other side */
 
 /* the ROM's envelope mixer command: like ultralib's aEnvMixer, with the right volume in w0 */
 #define n_aEnvMixer(pkt, f, v, s)                                                       \

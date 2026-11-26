@@ -56,3 +56,8 @@ u32 Snd_NextFrameSize( u32 queued ) {
     }
     return snd_frameSize;
 }
+
+/* ===== Data ===== */
+
+/* defined after the functions: a definition before the first one would drop the hazard nop KMC as gives it */
+s32 snd_frameSettled = 1;

@@ -10,6 +10,38 @@
 #include "functions.h"
 #include "variables.h"
 
+/* ===== Data ===== */
+
+s32 snd_fxSmallRoom[2 + 3 * 8] = {
+    3, 0xFA0,
+    0, 0x870, 0x2666, -0x2666, 0, 0, 0, 0,
+    0x2F8, 0x5F0, 0xCCC, -0xCCC, 0x3FFF, 0, 0, 0,
+    0, 0x960, 0x1388, 0, 0, 0, 0, 0x5000,
+};
+s32 snd_fxBigRoom[2 + 4 * 8] = {
+    4, 0xFA0,
+    0, 0xA50, 0x2666, -0x2666, 0, 0, 0, 0,
+    0x370, 0x870, 0xCCC, -0xCCC, 0x3FFF, 0, 0, 0,
+    0xA50, 0xE38, 0xCCC, -0xCCC, 0x3FFF, 0, 0, 0,
+    0, 0xEB0, 0x1F40, 0, 0, 0, 0, 0x5000,
+};
+s32 snd_fxEcho[2 + 1 * 8] = {
+    1, 0x1F40,
+    0, 0x1BF8, 0x2EE0, 0, 0x7FFF, 0, 0, 0,
+};
+s32 snd_fxChorus[2 + 1 * 8] = {
+    1, 0x320,
+    0, 0xC8, 0x4000, 0, 0x7FFF, 0x1DB0, 0x2BC, 0,
+};
+s32 snd_fxFlange[2 + 1 * 8] = {
+    1, 0x320,
+    0, 0xC8, 0, 0x5FFF, 0x7FFF, 0x17C, 0x1F4, 0,
+};
+s32 snd_fxDefault[2 + 1 * 8] = {
+    0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+};
+
 /*
 ================
 Synth_PullFxBus

@@ -2703,3 +2703,21 @@ u8 *Snd_CmdFixedLengthOff( sndChannel_t *chan, u8 *src ) {
     chan->fixedLength = 0;
     return src;
 }
+
+/* ===== Data ===== */
+
+/* The command handlers, by command - CMD_FIRST (0x80-0xAC); the last three slots are empty. */
+u8 *(*snd_commands[0x30])( sndChannel_t *chan, u8 *src ) = {
+    Snd_CmdEnd,             Snd_CmdProgram,         Snd_CmdPortamento,      Snd_CmdPortamentoOff,
+    Snd_CmdEnvelope,        Snd_CmdTempo,           Snd_CmdReleaseAfter,    Snd_CmdReleaseBefore,
+    Snd_CmdVibrato,         Snd_CmdVibratoInverted, Snd_CmdVibratoOff,      Snd_CmdFixedLength,
+    Snd_CmdExplicitLength,  Snd_CmdTranspose,       Snd_CmdTransposeOff,    Snd_CmdDetune,
+    Snd_CmdEnvelopeIndex,   Snd_CmdEnvRestartOff,   Snd_CmdEnvRestartOn,    Snd_CmdVoiceRestartOff,
+    Snd_CmdVoiceRestartOn,  Snd_CmdLoopStart,       Snd_CmdLoopEnd,         Snd_CmdTrill,
+    Snd_CmdTrillOff,        Snd_CmdNoteVelocity,    Snd_CmdNoteVelocityOff, Snd_CmdVelocity,
+    Snd_CmdPan,             Snd_CmdSkip2,           Snd_CmdDrumMap,         Snd_CmdDrumMapOff,
+    Snd_CmdSkip1,           Snd_CmdJump,            Snd_CmdFxMix,           Snd_CmdRandomTranspose,
+    Snd_CmdRandomVolume,    Snd_CmdRandomPan,       Snd_CmdVolume,          Snd_CmdPlaySe,
+    Snd_CmdBendRange,       Snd_CmdAutoPan,         Snd_CmdFxType,          Snd_CmdMarker,
+    Snd_CmdFixedLengthOff,
+};

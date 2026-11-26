@@ -282,7 +282,25 @@ segments:
       - [0x320F0, c, libkmc/matherr]
       # rspboot: the SDK's RSP boot microcode (a binary object), up to rspbootTextEnd
       - [0x32100, bin, rspboot]
+      # The microcode objects' .text (gspF3DEX2_Rej, gspF3DEX2, gspL3DEX2, aspMain), after rspboot's: linked
+      # last, as their .data at 0x3A7F0 follows libkmc's
       - [0x321D0, data]
+      # .data, in link order: the game's units, libultra's members, libkmc, then the microcode objects
+      - [0x364E0, data]          # shared globals; owners interleave (1060, 2DF0, 3D50, 12C70, ...): still asm
+      - [0x37590, .data, 7250]   # draw_rdpMode, draw_nextPalette
+      - [0x375A0, data]          # an unreferenced u8[2][24] (owner 7250, BEF0 or C650), then C650's: still asm
+      - [0x37D80, .data, 111A0]
+      - [0x37D90, .data, 12260]
+      - [0x37DD0, .data, 12C70]
+      - [0x37E40, .data, 13230]
+      - [0x37E80, data]          # 13490's (an unreferenced zero word after score_images) and game_replay: still asm
+      - [0x37F70, .data, 166B0]
+      - [0x38030, data]          # 19F50's presets (24 unreferenced zero words after one): still asm
+      - [0x38240, .data, 1ADA0]
+      - [0x38260, .data, 1B1A0]
+      - [0x38270, .data, 1B2D0]
+      - [0x38400, .data, 1B890]
+      - [0x38500, data]          # an unreferenced {0, -10.0f}, snd_globals, snd_synth (owner 1B890-1D550): still asm
       - [0x38520, lib, libgultra_rom, pimgr, .data]
       - [0x38550, lib, libgultra_rom, cartrominit, .data]
       - [0x38560, lib, libgultra_rom, piacs, .data]

@@ -20,8 +20,6 @@ typedef struct {
     /* 0x00036 */ u8 pixels[SCREENSHOT_HEIGHT][SCREENSHOT_WIDTH][3];  /* blue, green, red */
 } bmpFile_t;
 
-extern bmpHeader_t dbg_shotHeader;  /* the header in front of each screenshot's pixels */
-extern s16 dbg_shotNumber;          /* number of the next screenshot */
 
 void Dbg_ScreenShot( void );
 

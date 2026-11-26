@@ -20,11 +20,7 @@
 #define SE_CURSOR           0           /* a menu cursor moves */
 #define SE_DECIDE           1           /* a menu choice is taken */
 
-extern s32 sound_bgmBuffer;         /* the sound_bgmBuffers buffer of the last BGM loaded */
 extern u16 sound_bgm;               /* index of the current BGM, | BGM_STOPPED */
-extern u16 sound_bgmVolumes[];      /* BGM volume of each save_data.musicVolume setting */
-extern u8 sound_bgmIsMusic[];       /* nonzero: the BGM is skipped while save_data.music is 0 */
-extern s16 sound_bgmFiles[];        /* str file of each BGM */
 extern u8 sound_bgmBuffers[2][BGM_BUFFER_SIZE];  /* BGM sequence buffers, used in turn */
 extern OSMesgQueue sound_frameQueue;  /* Main_Thread sends to it every other retrace */
 extern OSMesgQueue sched_queue;     /* Main_Thread's: the SP, DP, PRENMI and retrace events and the audio task requests */
@@ -33,7 +29,6 @@ extern s32 sched_msgAudio;          /* the audio task request message: its code,
 extern u8 sound_heap[];             /* audio heap */
 extern OSTime sound_taskStart;      /* when the last audio task started */
 extern s32 sound_taskTime;          /* microseconds the last audio task took */
-extern audioTaskFuncs_t sound_taskFuncs;  /* func_80037BD8, Sound_WaitFrame, Sound_RunAudioTask */
 extern waveBank_t sound_bgmWaveBank;  /* the BGMPTR file (0x4E20 bytes): the default wave bank, samples in bgmwbk */
 extern waveBank_t sound_seWaveBank;  /* the SEPTR file (0x3A98 bytes): the SE wave bank, samples in sewbk */
 extern seTable_t sound_seTable;     /* the BFX file (0x1390 bytes): the default SE table */

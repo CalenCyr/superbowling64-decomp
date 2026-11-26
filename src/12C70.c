@@ -8,6 +8,23 @@
 #include "fat.h"
 #include "gamesnd.h"
 
+/* ===== Data ===== */
+
+static s32 sound_bgmBuffer = 0;             /* the sound_bgmBuffers buffer of the last BGM loaded */
+u64 sound_bgmId = 0;
+s32 sound_bgmDelay = 0;
+s32 sound_bgmStartVolume = 0;
+u16 sound_bgm = 0xFFFF;
+static u16 sound_bgmVolumes[5] = { 0x60, 0x70, 0x80, 0xA0, 0xC0 };  /* BGM volume of each save_data.musicVolume setting */
+static u8 sound_bgmIsMusic[20] = {          /* nonzero: the BGM is skipped while save_data.music is 0 */
+    0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0,
+};
+static s16 sound_bgmFiles[20] = {           /* str file of each BGM */
+    0x0B72, 0x0B71, 0x0B70, 0x0B6F, 0x0B6E, 0x0B6D, 0x0B6C, 0x0B6B, 0x0B6A, 0x0B69,
+    0x0B68, 0x0B67, 0x0B66, 0x0B65, 0x0B64, 0x0B63, 0x0B62, 0x0B61, 0x0B60, 0x0B5F,
+};
+static audioTaskFuncs_t sound_taskFuncs = { func_80037BD8, Sound_WaitFrame, Sound_RunAudioTask };
+
 /*
 ================
 Sound_PlaySe

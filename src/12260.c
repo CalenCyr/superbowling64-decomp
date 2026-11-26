@@ -10,6 +10,17 @@
 #include "sprite.h"
 #include "save.h"
 
+/* ===== Data ===== */
+
+static u8 save_step = 0;                   /* step of Save_SaveSettings */
+static f32 save_promptZoom[PROMPT_ZOOM_FRAMES] = {  /* scale of the prompt in each frame of its zoom: (n / 10)^2 */
+    0.01f, 0.04f, 0.09f, 0.16f, 0.25f, 0.36f, 0.49f, 0.64f, 0.81f, 1.0f,
+};
+s32 save_promptState = PROMPT_CLOSED;
+static s32 D_8005C9C0 = -1;                 /* unreferenced */
+static u8 save_cursorAlpha = 0x80;          /* alpha of the blinking cursor, 0x40 to 0x80 */
+static s8 save_cursorStep = -4;             /* added to save_cursorAlpha each frame; turned at either end */
+
 /*
 ================
 Save_ShowPrompt

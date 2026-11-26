@@ -12,6 +12,11 @@
 #include "input.h"
 #include "libc.h"
 
+/* ===== Data ===== */
+
+u8 draw_rdpMode = 0xFF;
+static s32 draw_nextPalette = 0;    /* the next of the four palette copies in draw_palettes */
+
 /*
 ================
 Cam_SetAmbient

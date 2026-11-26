@@ -8,6 +8,13 @@
 #include "functions.h"
 #include "variables.h"
 
+/* ===== Data ===== */
+
+/* the audio thread's routines, unless another table stands in */
+static audioTaskFuncs_t audio_defaultTaskFuncs = { Audio_ClientInit, Audio_ClientWaitFrame, Audio_ClientRunTask };
+audioTaskFuncs_t *audio_taskFuncs = &audio_defaultTaskFuncs;
+static audioBuffer_t *audio_lastBuffer = NULL;  /* the buffer the last task filled, for the AI next; NULL: none yet */
+
 #define AUDIO_THREAD_ID     3
 #define FRAME_QUEUE_PERCENT 15      /* AI queue kept ahead, in percent of a frame (Snd_InitFrameSizes) */
 

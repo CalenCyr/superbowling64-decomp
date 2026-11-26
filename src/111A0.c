@@ -13,6 +13,15 @@
 #include "dbgtext.h"
 #include "gridedit.h"
 
+/* ===== Data ===== */
+
+u8 gridEd_active = 0;
+static Vtx *gridEd_vtx = NULL;              /* a vertex per grid point, allocated on the first frame */
+static s16 gridEd_cursorX = 0;              /* the cursor's point along x */
+static s16 gridEd_cursorZ = 0;              /* the cursor's point along z */
+static u16 gridEd_paint = 1;                /* the mark Z with the D-pad paints */
+static u8 gridEd_heldFrames = 0;            /* frames the D-pad has been held, to 100; from 7 the cursor repeats */
+
 /*
 ================
 GridEd_Frame
