@@ -56,7 +56,7 @@ Also record:
     (doubles, jump tables) is a `[<rom>, .rodata, <seg>/<unit>]` subsegment after all units' `.data`; splat moves
     rodata used by one function into that function's asm, and the rest needs the `INCLUDE_RODATA` lines splat
     writes into a fresh C file (regenerate one in a scratch copy to see where they go).
-  - Data in C (done for mgcode, rscode): replace the asm `[<rom>, data]` subsegment with `[<rom>, .data, <seg>/<unit>]` and
+  - Data in C (done for mgcode, rscode, pvcode): replace the asm `[<rom>, data]` subsegment with `[<rom>, .data, <seg>/<unit>]` and
     the bss one with `{ type: .bss, vram: ..., name: <seg>/<unit> }`, set `bss_contains_common: True` on the
     segment (gcc's uninitialised globals are commons; splat then links `<unit>.o(.bss COMMON .scommon)`; the flag
     must be on the code segment, which overrides its subsegments'), and define every datum in the unit in address

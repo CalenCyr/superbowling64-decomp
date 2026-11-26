@@ -23,4 +23,7 @@ extern u64 pv_soundHandle; /* handle of the playing sound */
 extern objClass_t pv_classes[];       /* the classes of the overlay's scene */
 extern objParams_t pv_sceneObjects[]; /* the overlay's scene objects, unless read from the host */
 
+void PV_NullCreate( void );
+void PV_NullHandler( void );
+
 #endif
