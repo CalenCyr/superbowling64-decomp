@@ -220,7 +220,7 @@ typedef struct {
 extern N_ALGlobals *D_8005D110;     /* the n_audio globals, set once */
 extern N_ALSynth *D_8005D114;       /* &D_8005D110->drvr: the synthesizer every n_alSyn* call uses */
 
-Acmd *func_8003FED0( s32 sampleOffset, Acmd *cmdList );    /* main bus pull without an effect */
+Acmd *func_8003FED0( s32 sampleOffset, Acmd *cmdList );    /* the effect bus pull: clears its mix, pulls each physical voice */
 void func_8004035C( N_PVoice *pv, ALDMANew dma, ALHeap *hp );  /* sets up a physical voice's filters */
 Acmd *func_80041760( s32 sampleOffset, Acmd *cmdList );    /* main bus pull through the effect */
 Acmd *func_80042A00( Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen );   /* synthesizes one frame */
