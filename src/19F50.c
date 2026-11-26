@@ -8,6 +8,45 @@
 #include "functions.h"
 #include "variables.h"
 
+/* ===== Data ===== */
+
+/* effect presets: { sections, delay length, then per section: input, output, fbcoef, ffcoef, gain, chorus rate,
+   chorus depth, low-pass coefficient }, as 1B2D0's snd_fx* tables */
+static s32 D_8005CC30[2 + 3 * 8] = {        /* the small room */
+    3, 0xFA0,
+    0, 0x870, 0x2666, -0x2666, 0, 0, 0, 0,
+    0x2F8, 0x5F0, 0xCCC, -0xCCC, 0x3FFF, 0, 0, 0,
+    0, 0x960, 0x1388, 0, 0, 0, 0, 0x5000,
+};
+static s32 synth_defaultFx[2 + 4 * 8] = {   /* the default: the big room */
+    4, 0xFA0,
+    0, 0xA50, 0x2666, -0x2666, 0, 0, 0, 0,
+    0x370, 0x870, 0xCCC, -0xCCC, 0x3FFF, 0, 0, 0,
+    0xA50, 0xE38, 0xCCC, -0xCCC, 0x3FFF, 0, 0, 0,
+    0, 0xEB0, 0x1F40, 0, 0, 0, 0, 0x5000,
+};
+static s32 D_8005CD20[2 + 1 * 8] = {        /* the echo */
+    1, 0x1F40,
+    0, 0x1BF8, 0x2EE0, 0, 0x7FFF, 0, 0, 0,
+};
+static s32 D_8005CD48[2 + 1 * 8] = {        /* the chorus */
+    1, 0x320,
+    0, 0xC8, 0x4000, 0, 0x7FFF, 0x1DB0, 0x2BC, 0,
+};
+static s32 D_8005CD70[24] = { 0 };          /* unreferenced */
+static s32 D_8005CDD0[2 + 1 * 8] = {        /* the flange */
+    1, 0x320,
+    0, 0xC8, 0, 0x5FFF, 0x7FFF, 0x17C, 0x1F4, 0,
+};
+static s32 D_8005CDF8[2 + 1 * 8] = {        /* a delay without feedback or output */
+    1, 0x320,
+    0, 0xC8, 0, 0, 0, 0, 0, 0,
+};
+static s32 synth_numFxPresets = 6;          /* presets in synth_fxPresets */
+static s32 *synth_fxPresets[] = {           /* effect presets, NULL-terminated */
+    D_8005CDF8, D_8005CC30, synth_defaultFx, D_8005CD48, D_8005CDD0, D_8005CD20, NULL,
+};
+
 /*
 ================
 Synth_Init

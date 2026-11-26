@@ -46,16 +46,7 @@ typedef struct {
     /* 0x2000 */ u16 order[0x800];      /* the walls by decreasing weight */
 } mazeWork_t;                           /* size 0x3000 */
 
-extern u16 menu_slidePositions[MENU_SLIDE_STEPS];  /* position of a sliding item at each step, 0x1000: in place */
-extern u16 score_images[16];        /* image of each digit, then of the scoreboard's symbols */
-extern u16 score_digitImages[10];   /* image of each digit */
-extern u16 score_smallDigitImages[10];  /* image of each small digit */
-extern s16 score_playerIcons[];     /* icon of each player, then of the computer */
 extern s8 score_plateNumbers[];     /* number shown on each player's name plate; 0: none */
-extern u16 score_signImages[4];     /* Score_DrawCardFrame: sign of a score: negative, zero, positive */
-extern u16 score_parFrameImages[9];  /* Score_DrawParCard: image of each frame's number */
-extern u16 score_parFrameBoxes[6];  /* Score_DrawParCard: per row, the image of a frame's box */
-extern u16 score_parTotalBoxes[6];  /* Score_DrawParCard: per row, the image of the total's box */
 /* Score_SetRecordFigures: per kind of record (0: game_sessionRecords, 1: save_data), per character, the record's figures */
 extern f32 score_averages[3][4];    /* average score */
 extern f32 score_strikeRates[3][4];  /* strikes, percent of 12 a game */

@@ -293,9 +293,9 @@ segments:
       - [0x37D90, .data, 12260]
       - [0x37DD0, .data, 12C70]
       - [0x37E40, .data, 13230]
-      - [0x37E80, data]          # 13490's (an unreferenced zero word after score_images) and game_replay: still asm
+      - [0x37E80, .data, 13490]  # the sliding menus' and the scoreboard's image tables, game_replay
       - [0x37F70, .data, 166B0]
-      - [0x38030, data]          # 19F50's presets (24 unreferenced zero words after one): still asm
+      - [0x38030, .data, 19F50]  # the effect presets
       - [0x38240, .data, 1ADA0]
       - [0x38260, .data, 1B1A0]
       - [0x38270, .data, 1B2D0]

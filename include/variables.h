@@ -42,9 +42,6 @@ extern s32 snd_frameSettled;        /* 0 after a short or long frame, until the 
 /* audio manager: synthesizer and effect setup (19F50.c) */
 extern N_ALSynth *synth_driver;     /* the synthesizer, as Snd_InitSynth set it up */
 extern fxStorage_t synth_fxStorage;  /* the effect's delay, buffer and filter storage */
-extern s32 synth_defaultFx[];       /* effect preset: the default */
-extern s32 synth_numFxPresets;      /* presets in synth_fxPresets */
-extern s32 *synth_fxPresets[];      /* effect presets, NULL-terminated */
 
 /* audio manager: ROM sample cache and scheduler client (1A7A0.c) */
 extern dmaBuffer_t *audio_dmaUsed;  /* buffers in use, by startAddr */
