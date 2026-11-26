@@ -1114,11 +1114,7 @@ inline void GA_FillPalette( gaSprite_t *sprite, u16 color, u16 index ) {
     }
     dst = ( (unkImage_t *)cache_files[sprite->id].data )->palette;
     dst += sprite->first;
-    if ( index < sprite->first ) {
-        index = sprite->first;
-    } else if ( index > sprite->last ) {
-        index = sprite->last;
-    }
+    index = index < sprite->first ? sprite->first : ( index > sprite->last ? sprite->last : index );
     for ( i = sprite->first; i <= sprite->last; i++ ) {
         if ( color != 0 ) {
             if ( i == index ) {
@@ -1142,19 +1138,11 @@ GA_FillPaletteFraction
 GA_FillPalette at fraction t of the sprite's palette range.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: register colouring only: retail keeps the unclamped index in a3 and its u16 copy in t1; this
-// swaps them (tried: an index local, operand order, u16/u32/s32 offsets, the inline's local order and clamp
-// spelling, the inline's body written out with an index local; 22k permuter iterations from base 50 found
-// nothing lower)
 void GA_FillPaletteFraction( gaSprite_t *sprite, u16 color, f32 t ) {
     u16 count = sprite->last - sprite->first + 1;
 
     GA_FillPalette( sprite, color, sprite->first + (u32)( count * t ) );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_FillPaletteFraction);
-#endif
 
 /*
 ================
