@@ -9,16 +9,16 @@
 
 /*
 ================
-func_80041760
+Synth_PullMainBus
 
 The main bus's pull through the effect: pulls the effect bus, mixes its two channels into the left one and feeds
 that into the effect's delay buffer, runs each delay line and mixes its output into the right channel, then copies
 the right channel to the left.
 ================
 */
-Acmd *func_80041760( s32 sampleOffset, Acmd *cmdList ) {
+Acmd *Synth_PullMainBus( s32 sampleOffset, Acmd *cmdList ) {
     Acmd *ptr;
-    ALFx *fx = D_8005D114->auxBus->fx;
+    ALFx *fx = snd_synth->auxBus->fx;
     ALDelay *delay;
     s16 *inPos;
     s16 *outPos;
@@ -29,10 +29,10 @@ Acmd *func_80041760( s32 sampleOffset, Acmd *cmdList ) {
     s16 i;
     s16 outBuff = N_DMEM_AUX_R;   /* the effect's output: the effect bus's right channel */
 
-    ptr = func_8003FED0( sampleOffset, cmdList );
+    ptr = Synth_PullFxBus( sampleOffset, cmdList );
     aMix( ptr++, 0, N_FX_INPUT_GAIN, N_DMEM_AUX_L, N_DMEM_AUX_L );
     aMix( ptr++, 0, N_FX_RIGHT_GAIN, outBuff, N_DMEM_AUX_L );
-    ptr = func_80041F98( fx, fx->input, N_DMEM_AUX_L, ptr );
+    ptr = Synth_SaveDelay( fx, fx->input, N_DMEM_AUX_L, ptr );
     aClearBuffer( ptr++, outBuff, N_FRAME_SAMPLES << 1 );
 
     for ( i = 0; i < fx->section_count; i++ ) {
@@ -46,25 +46,25 @@ Acmd *func_80041760( s32 sampleOffset, Acmd *cmdList ) {
             lineBuff = spareBuff;
             spareBuff = swap;
         } else {
-            ptr = func_80041E70( fx, inPos, spareBuff, N_FRAME_SAMPLES, ptr );
+            ptr = Synth_LoadDelay( fx, inPos, spareBuff, N_FRAME_SAMPLES, ptr );
         }
-        ptr = func_80041C60( fx, delay, lineBuff, ptr );
+        ptr = Synth_ReadDelayLine( fx, delay, lineBuff, ptr );
 
         if ( delay->ffcoef ) {
             aMix( ptr++, 0, (u16)delay->ffcoef, spareBuff, lineBuff );
             if ( !delay->rs && !delay->lp ) {
-                ptr = func_80041F98( fx, outPos, lineBuff, ptr );
+                ptr = Synth_SaveDelay( fx, outPos, lineBuff, ptr );
             }
         }
         if ( delay->fbcoef ) {
             aMix( ptr++, 0, (u16)delay->fbcoef, lineBuff, spareBuff );
-            ptr = func_80041F98( fx, inPos, spareBuff, ptr );
+            ptr = Synth_SaveDelay( fx, inPos, spareBuff, ptr );
         }
         if ( delay->lp ) {
-            ptr = func_800420B0( delay->lp, lineBuff, ptr );
+            ptr = Synth_RunLowPass( delay->lp, lineBuff, ptr );
         }
         if ( !delay->rs ) {
-            ptr = func_80041F98( fx, outPos, lineBuff, ptr );
+            ptr = Synth_SaveDelay( fx, outPos, lineBuff, ptr );
         }
         if ( delay->gain ) {
             aMix( ptr++, 0, (u16)delay->gain, lineBuff, outBuff );
@@ -84,12 +84,12 @@ Acmd *func_80041760( s32 sampleOffset, Acmd *cmdList ) {
 
 /*
 ================
-func_80041A70
+Synth_FxParam
 
 The effect's parameter handler: paramID - 2 selects a delay line, eight parameters each; *param is the value.
 ================
 */
-s32 func_80041A70( void *filter, s32 paramID, void *param ) {
+s32 Synth_FxParam( void *filter, s32 paramID, void *param ) {
     ALFx *fx = filter;
     s32 which = ( paramID - 2 ) % 8;
     s32 line = ( paramID - 2 ) / 8;
@@ -112,7 +112,7 @@ s32 func_80041A70( void *filter, s32 paramID, void *param ) {
         fx->delay[line].gain = value;
         break;
     case 5:
-        fx->delay[line].rsinc = ( (f32)value / 1000 ) * N_FX_RANGE / D_8005D114->outputRate;
+        fx->delay[line].rsinc = ( (f32)value / 1000 ) * N_FX_RANGE / snd_synth->outputRate;
         break;
     case 6:
         fx->delay[line].rsgain = ( (f32)value / N_FX_CONVERT ) * ( fx->delay[line].output - fx->delay[line].input );
@@ -129,12 +129,12 @@ s32 func_80041A70( void *filter, s32 paramID, void *param ) {
 
 /*
 ================
-func_80041C60
+Synth_ReadDelayLine
 
 Reads one frame of delay line delay's output into buff: resampled by its modulation, if it has one.
 ================
 */
-Acmd *func_80041C60( ALFx *fx, ALDelay *delay, s32 buff, Acmd *p ) {
+Acmd *Synth_ReadDelayLine( ALFx *fx, ALDelay *delay, s32 buff, Acmd *p ) {
     s32 outCount = N_FRAME_SAMPLES;
     s32 inCount;
     s32 length;
@@ -157,7 +157,7 @@ Acmd *func_80041C60( ALFx *fx, ALDelay *delay, s32 buff, Acmd *p ) {
         inPos = &fx->input[delay->rsdelta - delay->output];
         misalign = ( (s32)inPos & 7 ) >> 1;
         inPos -= misalign;
-        p = func_80041E70( fx, inPos, N_FX_RESAMPLE_BUFFER, inCount + misalign, p );
+        p = Synth_LoadDelay( fx, inPos, N_FX_RESAMPLE_BUFFER, inCount + misalign, p );
 
         ratio = (s32)( pitch * N_UNITY_PITCH );
         page = buff >> 8;
@@ -166,20 +166,20 @@ Acmd *func_80041C60( ALFx *fx, ALDelay *delay, s32 buff, Acmd *p ) {
         delay->rs->first = FALSE;
         delay->rsdelta += inCount - outCount;
     } else {
-        p = func_80041E70( fx, &fx->input[-delay->output], buff, outCount, p );
+        p = Synth_LoadDelay( fx, &fx->input[-delay->output], buff, outCount, p );
     }
     return p;
 }
 
 /*
 ================
-func_80041E70
+Synth_LoadDelay
 
 Loads count samples of the effect's delay buffer from pos into buff, in two parts when they wrap around the
 buffer's end.
 ================
 */
-Acmd *func_80041E70( ALFx *fx, s16 *pos, s32 buff, s32 count, Acmd *p ) {
+Acmd *Synth_LoadDelay( ALFx *fx, s16 *pos, s32 buff, s32 count, Acmd *p ) {
     Acmd *ptr = p;
     s16 *bufEnd = &fx->base[fx->length];
     s16 *endPos;
@@ -203,13 +203,13 @@ Acmd *func_80041E70( ALFx *fx, s16 *pos, s32 buff, s32 count, Acmd *p ) {
 
 /*
 ================
-func_80041F98
+Synth_SaveDelay
 
 Saves one frame from buff into the effect's delay buffer at pos, in two parts when it wraps around the
 buffer's end.
 ================
 */
-Acmd *func_80041F98( ALFx *fx, s16 *pos, s32 buff, Acmd *p ) {
+Acmd *Synth_SaveDelay( ALFx *fx, s16 *pos, s32 buff, Acmd *p ) {
     Acmd *ptr = p;
     s16 *bufEnd = &fx->base[fx->length];
     s16 *endPos;
@@ -233,12 +233,12 @@ Acmd *func_80041F98( ALFx *fx, s16 *pos, s32 buff, Acmd *p ) {
 
 /*
 ================
-func_800420B0
+Synth_RunLowPass
 
 Runs low-pass lp over the frame in buff: loads its coefficients, then filters from its saved state.
 ================
 */
-Acmd *func_800420B0( ALLowPass *lp, s32 buff, Acmd *p ) {
+Acmd *Synth_RunLowPass( ALLowPass *lp, s32 buff, Acmd *p ) {
     Acmd *ptr = p;
     s32 page = buff >> 8;
 

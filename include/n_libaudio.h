@@ -29,7 +29,7 @@ typedef struct {
 typedef struct N_PVoice_s {
     /* 0x00 */ ALLink node;
     /* 0x08 */ N_ALVoice *vvoice;       /* the voice using it, NULL while free */
-    /* decoder (driven by func_80040E60 and func_800412A8) */
+    /* decoder (driven by Synth_DecodeSamples and Synth_DecoderParam) */
     /* 0x0C */ ADPCM_STATE *decState;   /* the ADPCM decoder's state */
     /* 0x10 */ ADPCM_STATE *loopState;  /* the decoder's state at the loop start, from the wave table's loop */
     /* 0x14 */ u32 loopStart;           /* the wave table's loop, in samples; loopCount 0: none, ~0: forever */
@@ -207,7 +207,7 @@ typedef struct {
     /* 0x3C */ s32 unk_3C;
     /* 0x40 */ s32 outputRate;          /* output sample rate */
     /* 0x44 */ s32 maxOutSamples;       /* the most samples the RSP makes at once */
-    /* 0x48 */ s16 *outBuf;          /* where the frame being made is saved: set per pass by func_80042A00 */
+    /* 0x48 */ s16 *outBuf;          /* where the frame being made is saved: set per pass by Synth_MakeFrame */
     /* 0x4C */ s32 unk_4C;
 } N_ALSynth;
 
@@ -217,17 +217,17 @@ typedef struct {
 
 #define AL_MAX_RSP_SAMPLES 184          /* N_ALSynth.maxOutSamples */
 
-extern N_ALGlobals *D_8005D110;     /* the n_audio globals, set once */
-extern N_ALSynth *D_8005D114;       /* &D_8005D110->drvr: the synthesizer every n_alSyn* call uses */
+extern N_ALGlobals *snd_globals;     /* the n_audio globals, set once */
+extern N_ALSynth *snd_synth;       /* &snd_globals->drvr: the synthesizer every n_alSyn* call uses */
 
-Acmd *func_8003FED0( s32 sampleOffset, Acmd *cmdList );    /* the effect bus pull: clears its mix, pulls each physical voice */
-void func_8004035C( N_PVoice *pv, ALDMANew dma, ALHeap *hp );  /* sets up a physical voice's filters */
-Acmd *func_80041760( s32 sampleOffset, Acmd *cmdList );    /* main bus pull through the effect */
-Acmd *func_80042A00( Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen );   /* synthesizes one frame */
+Acmd *Synth_PullFxBus( s32 sampleOffset, Acmd *cmdList );    /* the effect bus pull: clears its mix, pulls each physical voice */
+void Synth_InitPVoice( N_PVoice *pv, ALDMANew dma, ALHeap *hp );  /* sets up a physical voice's filters */
+Acmd *Synth_PullMainBus( s32 sampleOffset, Acmd *cmdList );    /* main bus pull through the effect */
+Acmd *Synth_MakeFrame( Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen );   /* synthesizes one frame */
 
-s32 func_80040A08( N_PVoice *pv, s32 paramID, void *param );   /* a physical voice's parameter handler */
-ALParam *func_80042B68( void );        /* takes an update off the free list, NULL: none left */
-s32 func_80042C94( ALMicroTime t );    /* t in output samples, rounded down to a multiple of 16 */
+s32 Synth_PVoiceParam( N_PVoice *pv, s32 paramID, void *param );   /* a physical voice's parameter handler */
+ALParam *Synth_AllocUpdate( void );        /* takes an update off the free list, NULL: none left */
+s32 Synth_FloorTime( ALMicroTime t );    /* t in output samples, rounded down to a multiple of 16 */
 
 void n_alSynAddPlayer( ALPlayer *client );
 void Synth_Destroy( void );
@@ -268,23 +268,23 @@ operands, and the save carries its byte count, in units of 16, beside the opcode
     _a->words.w1 = (u32)( s );                                                  \
 }
 
-void func_80042150( N_ALGlobals *g, ALSynConfig *c );  /* sets up the n_audio globals and the synthesizer, once */
-void func_80042194( void );            /* takes the synthesizer down and clears the n_audio globals */
-void func_80042790( ALSynConfig *c );
-Acmd *func_80042CF0( s32 sampleOffset, Acmd *cmdList );    /* the output: mix, interleave, save */
-ALFx *func_80042D40( s16 bus, ALSynConfig *c, ALHeap *hp );  /* creates the effect of bus bus */
-Acmd *func_80042D90( s32 sampleOffset, Acmd *cmdList );    /* pulls the main bus and mixes the effect bus in */
-void func_8003FF70( ALFx **fx, ALSynConfig *c, ALHeap *hp );   /* allocates and sets up the effect into *fx */
-void func_80042B94( ALParam *update ); /* puts an update back on the free list */
-void func_80042BAC( void );            /* moves the retired physical voices back to the free list */
-void func_80042C0C( N_PVoice *pv );    /* retires a physical voice until the end of the frame */
-s32 func_80042C44( ALMicroTime t );    /* t in output samples, rounded */
+void Synth_InitGlobals( N_ALGlobals *g, ALSynConfig *c );  /* sets up the n_audio globals and the synthesizer, once */
+void Synth_Teardown( void );            /* takes the synthesizer down and clears the n_audio globals */
+void Synth_BuildSynth( ALSynConfig *c );
+Acmd *Synth_PullOutput( s32 sampleOffset, Acmd *cmdList );    /* the output: mix, interleave, save */
+ALFx *Synth_NewFx( s16 bus, ALSynConfig *c, ALHeap *hp );  /* creates the effect of bus bus */
+Acmd *Synth_PullMix( s32 sampleOffset, Acmd *cmdList );    /* pulls the main bus and mixes the effect bus in */
+void Synth_BuildFx( ALFx **fx, ALSynConfig *c, ALHeap *hp );   /* allocates and sets up the effect into *fx */
+void Synth_FreeUpdate( ALParam *update ); /* puts an update back on the free list */
+void Synth_RecycleRetired( void );            /* moves the retired physical voices back to the free list */
+void Synth_RetirePVoice( N_PVoice *pv );    /* retires a physical voice until the end of the frame */
+s32 Synth_RoundTime( ALMicroTime t );    /* t in output samples, rounded */
 
 /* ===== end of the synthesizer frame and setup block ===== */
 
 /* ===== the decoder: unit 1C260 ===== */
 
-/* filter messages the decoder's handler func_800412A8 takes */
+/* filter messages the decoder's handler Synth_DecoderParam takes */
 #define N_FILTER_RESET          4       /* rewinds the decoder to the table's start */
 #define N_FILTER_SET_WAVETABLE  5       /* param: the ALWaveTable to play */
 
@@ -315,8 +315,8 @@ alignment offset and the output's DMEM address
     _a->words.w1 = _SHIFTL( f, 28, 4 ) | _SHIFTL( c, 16, 12 ) | _SHIFTL( a, 12, 4 ) | _SHIFTL( d, 0, 12 ); \
 }
 
-void func_800412A8( N_PVoice *pv, s32 paramID, void *param );         /* the decoder's parameter handler */
-Acmd *func_80041434( Acmd *ptr, N_PVoice *pv, s32 tsam, s32 nbytes, s16 outp, s16 inp, s32 flags );
+void Synth_DecoderParam( N_PVoice *pv, s32 paramID, void *param );         /* the decoder's parameter handler */
+Acmd *Synth_DecodeAdpcm( Acmd *ptr, N_PVoice *pv, s32 tsam, s32 nbytes, s16 outp, s16 inp, s32 flags );
 
 /* ===== end of the decoder block ===== */
 
@@ -362,7 +362,7 @@ typedef struct {
 /* n samples rounded to the nearest whole frame */
 #define N_ROUND_FRAMES(n)       ( ( ( n ) + N_FRAME_SAMPLES / 2 ) / N_FRAME_SAMPLES * N_FRAME_SAMPLES )
 
-extern s16 D_8005D000[128];         /* gains by pan and by effect mix, 0x7FFF down; index 127 - x for the other side */
+extern s16 snd_panGains[128];         /* gains by pan and by effect mix, 0x7FFF down; index 127 - x for the other side */
 
 /* the ROM's envelope mixer command: like ultralib's aEnvMixer, with the right volume in w0 */
 #define n_aEnvMixer(pkt, f, v, s)                                                       \
@@ -375,21 +375,21 @@ extern s16 D_8005D000[128];         /* gains by pan and by effect mix, 0x7FFF do
 
 /* the library's effect presets, by ALSynConfig.fxType: section count, buffer length, then per section the
 delay line, coefficients, modulation and low-pass (as Synth_SetupFx reads them) */
-extern s32 D_8005CE70[];            /* AL_FX_SMALLROOM */
-extern s32 D_8005CED8[];            /* AL_FX_BIGROOM */
-extern s32 D_8005CF60[];            /* AL_FX_ECHO */
-extern s32 D_8005CF88[];            /* AL_FX_CHORUS */
-extern s32 D_8005CFB0[];            /* AL_FX_FLANGE */
-extern s32 D_8005CFD8[];            /* any other fxType */
+extern s32 snd_fxSmallRoom[];            /* AL_FX_SMALLROOM */
+extern s32 snd_fxBigRoom[];            /* AL_FX_BIGROOM */
+extern s32 snd_fxEcho[];            /* AL_FX_ECHO */
+extern s32 snd_fxChorus[];            /* AL_FX_CHORUS */
+extern s32 snd_fxFlange[];            /* AL_FX_FLANGE */
+extern s32 snd_fxDefault[];            /* any other fxType */
 
-Acmd *func_80040490( void *filter, s32 sampleOffset, Acmd *p );        /* pulls one frame of a physical voice */
-Acmd *func_80040AAC( void *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p ); /* mixes one frame */
-s16 func_80040CCC( f64 vol, f64 tgt, s32 count, u16 *ratel );         /* the ramp step from vol to tgt */
-s16 func_80040E0C( s16 vol, s32 count, s16 ratem, u16 ratel );        /* the volume count samples into a ramp */
+Acmd *Synth_PullPVoice( void *filter, s32 sampleOffset, Acmd *p );        /* pulls one frame of a physical voice */
+Acmd *Synth_MixFrame( void *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p ); /* mixes one frame */
+s16 Synth_RampStep( f64 vol, f64 tgt, s32 count, u16 *ratel );         /* the ramp step from vol to tgt */
+s16 Synth_RampVolume( s16 vol, s32 count, s16 ratem, u16 ratel );        /* the volume count samples into a ramp */
 
-Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p );  /* decodes outCount samples to *outp */
-Acmd *func_80041580( N_PVoice *pv, s16 *outp, Acmd *p );              /* resamples one frame into *outp */
-s32 func_8004173C( N_PVoice *pv, s32 paramID, void *param );          /* the resampler's parameter handler */
+Acmd *Synth_DecodeSamples( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p );  /* decodes outCount samples to *outp */
+Acmd *Synth_ResampleFrame( N_PVoice *pv, s16 *outp, Acmd *p );              /* resamples one frame into *outp */
+s32 Synth_ResamplerParam( N_PVoice *pv, s32 paramID, void *param );          /* the resampler's parameter handler */
 
 /* ===== end 1B2D0, 1C980 ===== */
 
@@ -433,11 +433,11 @@ s32 func_8004173C( N_PVoice *pv, s32 paramID, void *param );          /* the res
 
 f32 _doModFunc( ALDelay *d, s32 count );    /* a modulated delay line's pitch offset for count samples */
 
-s32 func_80041A70( void *filter, s32 paramID, void *param );          /* the effect's parameter handler */
-Acmd *func_80041C60( ALFx *fx, ALDelay *delay, s32 buff, Acmd *p );        /* reads a delay line's output into buff */
-Acmd *func_80041E70( ALFx *fx, s16 *pos, s32 buff, s32 count, Acmd *p );  /* loads count samples of the delay buffer */
-Acmd *func_80041F98( ALFx *fx, s16 *pos, s32 buff, Acmd *p );     /* saves one frame into the delay buffer */
-Acmd *func_800420B0( ALLowPass *lp, s32 buff, Acmd *p );              /* runs a low-pass over buff */
+s32 Synth_FxParam( void *filter, s32 paramID, void *param );          /* the effect's parameter handler */
+Acmd *Synth_ReadDelayLine( ALFx *fx, ALDelay *delay, s32 buff, Acmd *p );        /* reads a delay line's output into buff */
+Acmd *Synth_LoadDelay( ALFx *fx, s16 *pos, s32 buff, s32 count, Acmd *p );  /* loads count samples of the delay buffer */
+Acmd *Synth_SaveDelay( ALFx *fx, s16 *pos, s32 buff, Acmd *p );     /* saves one frame into the delay buffer */
+Acmd *Synth_RunLowPass( ALLowPass *lp, s32 buff, Acmd *p );              /* runs a low-pass over buff */
 
 /* ===== end of the effect block ===== */
 

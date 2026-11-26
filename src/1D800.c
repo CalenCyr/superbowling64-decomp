@@ -14,11 +14,11 @@
 ================
 Synth_Destroy
 
-Takes the synthesizer down for func_80042194: drops every client player.
+Takes the synthesizer down for Synth_Teardown: drops every client player.
 ================
 */
 void Synth_Destroy( void ) {
-    D_8005D114->head = NULL;
+    snd_synth->head = NULL;
 }
 
 /*
@@ -32,16 +32,16 @@ void n_alSynSetFXMix( N_ALVoice *voice, u8 fxmix ) {
     ALParam *update;
 
     if ( voice->pvoice != NULL ) {
-        update = func_80042B68();
+        update = Synth_AllocUpdate();
         if ( update != NULL ) {
-            update->delta = D_8005D114->paramSamples + voice->pvoice->offset;
+            update->delta = snd_synth->paramSamples + voice->pvoice->offset;
             update->type = N_PARAM_SET_FXMIX;
             if ( fxmix > 127 ) {
                 fxmix = 127;
             }
             update->data.i = fxmix;
             update->next = NULL;
-            func_80040A08( voice->pvoice, AL_FILTER_ADD_UPDATE, update );
+            Synth_PVoiceParam( voice->pvoice, AL_FILTER_ADD_UPDATE, update );
         }
     }
 }

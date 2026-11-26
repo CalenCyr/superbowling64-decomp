@@ -22,8 +22,8 @@ void n_alSynAddPlayer( ALPlayer *client ) {
     OSIntMask mask;
 
     mask = osSetIntMask( OS_IM_NONE );
-    client->samplesLeft = D_8005D114->curSamples;
-    client->next = D_8005D114->head;
-    D_8005D114->head = client;
+    client->samplesLeft = snd_synth->curSamples;
+    client->next = snd_synth->head;
+    snd_synth->head = client;
     osSetIntMask( mask );
 }

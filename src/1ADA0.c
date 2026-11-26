@@ -80,7 +80,7 @@ void Audio_Thread( void *arg ) {
 
         buf = &audio_buffers[frame];
         buf->samples = Snd_NextFrameSize( queued );
-        cmdEnd = func_80042A00( audio_cmdList, &cmdLen, (s16 *)osVirtualToPhysical( buf->ptr ), buf->samples );
+        cmdEnd = Synth_MakeFrame( audio_cmdList, &cmdLen, (s16 *)osVirtualToPhysical( buf->ptr ), buf->samples );
         if ( cmdLen != 0 ) {
             task.cmdSize = ( cmdEnd - audio_cmdList ) * sizeof( Acmd );
             audio_taskFuncs->runTask( &task );

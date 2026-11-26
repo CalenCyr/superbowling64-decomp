@@ -9,13 +9,13 @@
 
 /*
 ================
-func_80040490
+Synth_PullPVoice
 
 Pulls one frame of the physical voice filter: mixes the samples up to each queued update due in this frame,
 applies the update, and mixes the rest of the frame.
 ================
 */
-Acmd *func_80040490( void *filter, s32 sampleOffset, Acmd *p ) {
+Acmd *Synth_PullPVoice( void *filter, s32 sampleOffset, Acmd *p ) {
     N_PVoice *pv = (N_PVoice *)filter;
     Acmd *ptr = p;
     s32 offset = sampleOffset;          /* the sample the next update falls on */
@@ -45,21 +45,21 @@ Acmd *func_80040490( void *filter, s32 sampleOffset, Acmd *p ) {
             if ( start->unityPitch ) {
                 pv->unityPitch = TRUE;
             }
-            func_800412A8( pv, N_FILTER_SET_WAVETABLE, start->wavetable );
+            Synth_DecoderParam( pv, N_FILTER_SET_WAVETABLE, start->wavetable );
             pv->motion = N_MOTION_PLAYING;
             pv->envFirst = TRUE;
             pv->envDelta = 0;
             pv->envLength = N_ROUND_FRAMES( start->envLength );
             pv->volume = ( start->volume * start->volume ) >> 15;
             pv->pan = start->pan;
-            pv->dryAmt = D_8005D000[start->fxMix];
-            pv->wetAmt = D_8005D000[127 - start->fxMix];
+            pv->dryAmt = snd_panGains[start->fxMix];
+            pv->wetAmt = snd_panGains[127 - start->fxMix];
             if ( start->envLength ) {
                 pv->volL = 1;
                 pv->volR = 1;
             } else {
-                pv->volL = ( pv->volume * D_8005D000[pv->pan] ) >> 15;
-                pv->volR = ( pv->volume * D_8005D000[127 - pv->pan] ) >> 15;
+                pv->volL = ( pv->volume * snd_panGains[pv->pan] ) >> 15;
+                pv->volR = ( pv->volume * snd_panGains[127 - pv->pan] ) >> 15;
             }
             pv->ratio = start->pitch;
             break;
@@ -67,16 +67,16 @@ Acmd *func_80040490( void *filter, s32 sampleOffset, Acmd *p ) {
         case N_PARAM_SET_VOLUME:
         case N_PARAM_SET_PAN:
         case N_PARAM_SET_FXMIX:
-            ptr = func_80040AAC( pv, &inp, &outp, samples, ptr );
+            ptr = Synth_MixFrame( pv, &inp, &outp, samples, ptr );
             if ( pv->envDelta >= pv->envLength ) {
-                pv->targetL = ( pv->volume * D_8005D000[pv->pan] ) >> 15;
-                pv->targetR = ( pv->volume * D_8005D000[127 - pv->pan] ) >> 15;
+                pv->targetL = ( pv->volume * snd_panGains[pv->pan] ) >> 15;
+                pv->targetR = ( pv->volume * snd_panGains[127 - pv->pan] ) >> 15;
                 pv->envDelta = pv->envLength;
                 pv->volL = pv->targetL;
                 pv->volR = pv->targetR;
             } else {
-                pv->volL = func_80040E0C( pv->volL, pv->envDelta, pv->rateL, pv->rateLFrac );
-                pv->volR = func_80040E0C( pv->volR, pv->envDelta, pv->rateR, pv->rateRFrac );
+                pv->volL = Synth_RampVolume( pv->volL, pv->envDelta, pv->rateL, pv->rateLFrac );
+                pv->volR = Synth_RampVolume( pv->volR, pv->envDelta, pv->rateR, pv->rateRFrac );
             }
             if ( pv->volL == 0 ) {
                 pv->volL = 1;
@@ -93,8 +93,8 @@ Acmd *func_80040490( void *filter, s32 sampleOffset, Acmd *p ) {
                 pv->envLength = N_ROUND_FRAMES( pv->ctrlList->moredata );
             }
             if ( pv->ctrlList->type == N_PARAM_SET_FXMIX ) {
-                pv->dryAmt = D_8005D000[pv->ctrlList->data.i];
-                pv->wetAmt = D_8005D000[127 - pv->ctrlList->data.i];
+                pv->dryAmt = snd_panGains[pv->ctrlList->data.i];
+                pv->wetAmt = snd_panGains[127 - pv->ctrlList->data.i];
             }
             pv->envFirst = TRUE;
             break;
@@ -104,39 +104,39 @@ Acmd *func_80040490( void *filter, s32 sampleOffset, Acmd *p ) {
             if ( update->unityPitch ) {
                 pv->unityPitch = TRUE;
             }
-            func_800412A8( pv, N_FILTER_SET_WAVETABLE, update->data.p );
+            Synth_DecoderParam( pv, N_FILTER_SET_WAVETABLE, update->data.p );
             pv->motion = N_MOTION_PLAYING;
             break;
 
         case N_PARAM_STOP_VOICE:
-            ptr = func_80040AAC( pv, &inp, &outp, samples, ptr );
-            func_80040A08( pv, N_FILTER_RESET, NULL );
+            ptr = Synth_MixFrame( pv, &inp, &outp, samples, ptr );
+            Synth_PVoiceParam( pv, N_FILTER_RESET, NULL );
             break;
 
         case N_PARAM_FREE_VOICE:
             update = pv->ctrlList;
             ( (N_PVoice *)update->data.p )->offset = 0;
-            func_80042C0C( update->data.p );
+            Synth_RetirePVoice( update->data.p );
             break;
 
         case N_PARAM_SET_PITCH:
-            ptr = func_80040AAC( pv, &inp, &outp, samples, ptr );
+            ptr = Synth_MixFrame( pv, &inp, &outp, samples, ptr );
             pv->ratio = pv->ctrlList->data.f;
             break;
 
         case N_PARAM_UNITY_PITCH:
-            ptr = func_80040AAC( pv, &inp, &outp, samples, ptr );
+            ptr = Synth_MixFrame( pv, &inp, &outp, samples, ptr );
             pv->unityPitch = TRUE;
             break;
 
         case N_PARAM_SET_WAVETABLE:
-            ptr = func_80040AAC( pv, &inp, &outp, samples, ptr );
-            func_800412A8( pv, N_FILTER_SET_WAVETABLE, pv->ctrlList->data.p );
+            ptr = Synth_MixFrame( pv, &inp, &outp, samples, ptr );
+            Synth_DecoderParam( pv, N_FILTER_SET_WAVETABLE, pv->ctrlList->data.p );
             break;
 
         default:
-            ptr = func_80040AAC( pv, &inp, &outp, samples, ptr );
-            func_80040A08( pv, pv->ctrlList->type, pv->ctrlList->data.p );
+            ptr = Synth_MixFrame( pv, &inp, &outp, samples, ptr );
+            Synth_PVoiceParam( pv, pv->ctrlList->type, pv->ctrlList->data.p );
             break;
         }
 
@@ -147,10 +147,10 @@ Acmd *func_80040490( void *filter, s32 sampleOffset, Acmd *p ) {
         if ( pv->ctrlList == NULL ) {
             pv->ctrlTail = NULL;
         }
-        func_80042B94( done );
+        Synth_FreeUpdate( done );
     }
 
-    ptr = func_80040AAC( pv, &inp, &outp, outCount, ptr );
+    ptr = Synth_MixFrame( pv, &inp, &outp, outCount, ptr );
     if ( pv->envDelta > pv->envLength ) {
         pv->envDelta = pv->envLength;
     }
@@ -159,13 +159,13 @@ Acmd *func_80040490( void *filter, s32 sampleOffset, Acmd *p ) {
 
 /*
 ================
-func_80040A08
+Synth_PVoiceParam
 
 A physical voice's parameter handler: queues updates, resets and starts the voice, and passes the rest on to the
 resampler's chain (the decoder).
 ================
 */
-s32 func_80040A08( N_PVoice *pv, s32 paramID, void *param ) {
+s32 Synth_PVoiceParam( N_PVoice *pv, s32 paramID, void *param ) {
     switch ( paramID ) {
     case AL_FILTER_ADD_UPDATE:
         if ( pv->ctrlTail != NULL ) {
@@ -183,13 +183,13 @@ s32 func_80040A08( N_PVoice *pv, s32 paramID, void *param ) {
         pv->rsDelta = 0.0f;
         pv->rsFirst = TRUE;
         pv->unityPitch = FALSE;
-        func_800412A8( pv, paramID, param );
+        Synth_DecoderParam( pv, paramID, param );
         break;
     case N_FILTER_START:
         pv->motion = N_MOTION_PLAYING;
         break;
     default:
-        func_800412A8( pv, paramID, param );
+        Synth_DecoderParam( pv, paramID, param );
         break;
     }
     return 0;
@@ -197,26 +197,26 @@ s32 func_80040A08( N_PVoice *pv, s32 paramID, void *param ) {
 
 /*
 ================
-func_80040AAC
+Synth_MixFrame
 
 Mixes one frame of the physical voice filter into the dry and wet mix: resamples it to *inp, sets the volume
 ramps when they changed, and runs the envelope mixer. outp is not used. Nothing is made unless pv plays and outCount is not 0.
 ================
 */
-Acmd *func_80040AAC( void *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p ) {
+Acmd *Synth_MixFrame( void *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p ) {
     Acmd *ptr = p;
     N_PVoice *pv = (N_PVoice *)filter;
 
     if ( pv->motion != N_MOTION_PLAYING || outCount == 0 ) {
         return ptr;
     }
-    ptr = func_80041580( pv, inp, ptr );
+    ptr = Synth_ResampleFrame( pv, inp, ptr );
     if ( pv->envFirst ) {
         pv->envFirst = FALSE;
-        pv->targetL = ( pv->volume * D_8005D000[pv->pan] ) >> 15;
-        pv->rateL = func_80040CCC( pv->volL, pv->targetL, pv->envLength, &pv->rateLFrac );
-        pv->targetR = ( pv->volume * D_8005D000[127 - pv->pan] ) >> 15;
-        pv->rateR = func_80040CCC( pv->volR, pv->targetR, pv->envLength, &pv->rateRFrac );
+        pv->targetL = ( pv->volume * snd_panGains[pv->pan] ) >> 15;
+        pv->rateL = Synth_RampStep( pv->volL, pv->targetL, pv->envLength, &pv->rateLFrac );
+        pv->targetR = ( pv->volume * snd_panGains[127 - pv->pan] ) >> 15;
+        pv->rateR = Synth_RampStep( pv->volR, pv->targetR, pv->envLength, &pv->rateRFrac );
         aSetVolume( ptr++, A_RATE, pv->targetL, pv->rateL, pv->rateLFrac );
         aSetVolume( ptr++, A_VOL | A_LEFT, pv->volL, pv->dryAmt, pv->wetAmt );
         aSetVolume( ptr++, A_VOL | A_RIGHT, pv->targetR, pv->rateR, pv->rateRFrac );
@@ -231,13 +231,13 @@ Acmd *func_80040AAC( void *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p ) 
 
 /*
 ================
-func_80040CCC
+Synth_RampStep
 
 Returns the whole part of the per-8-sample step that ramps a volume from vol to tgt over count samples, and puts
 its fraction in *ratel. With no count the step jumps all the way, up or down.
 ================
 */
-s16 func_80040CCC( f64 vol, f64 tgt, s32 count, u16 *ratel ) {
+s16 Synth_RampStep( f64 vol, f64 tgt, s32 count, u16 *ratel ) {
     s16 s;                              /* the whole part of the step */
     s16 c;                              /* the carry out of the borrowed fraction */
     f64 invn;
@@ -275,12 +275,12 @@ s16 func_80040CCC( f64 vol, f64 tgt, s32 count, u16 *ratel ) {
 
 /*
 ================
-func_80040E0C
+Synth_RampVolume
 
 Returns vol after count samples of the ramp with step ratem.ratel (per 8 samples).
 ================
 */
-s16 func_80040E0C( s16 vol, s32 count, s16 ratem, u16 ratel ) {
+s16 Synth_RampVolume( s16 vol, s32 count, s16 ratem, u16 ratel ) {
     count >>= 3;
     if ( count == 0 ) {
         return vol;

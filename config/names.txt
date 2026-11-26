@@ -1499,8 +1499,8 @@ offset	N_PVoice+0x88	invented: samples the physical voice's updates wait; n_alSy
 unityPitch	ALParam+0x0A	invented: n_alSynStartVoice copies the voice's unityPitch there
 N_PARAM_SET_PITCH, N_PARAM_SET_VOLUME, N_PARAM_SET_PAN, N_PARAM_START_VOICE, N_PARAM_STOP_VOICE, N_PARAM_SET_FXMIX	n_libaudio.h	invented: ALParam.type 7, 11, 12, 14, 15, 16 that n_alSynSetPitch, SetVol, SetPan, StartVoice, StopVoice and SetFXMix queue
 N_PVOICE_STEAL_DELAY, N_PVOICE_STEAL_FADE	n_libaudio.h	invented: 552 and 368 samples (three and two 184-sample frames) n_alSynAllocVoice uses on a stolen voice
-AL_FILTER_ADD_UPDATE	n_libaudio.h	invented: paramID 3, on which func_80040A08 appends the ALParam to the physical voice's queue
-Synth_Destroy	0x80042400	invented: the synthesizer's teardown func_80042194 calls before clearing the n_audio globals; empties the client list
+AL_FILTER_ADD_UPDATE	n_libaudio.h	invented: paramID 3, on which Synth_PVoiceParam appends the ALParam to the physical voice's queue
+Synth_Destroy	0x80042400	invented: the synthesizer's teardown Synth_Teardown calls before clearing the n_audio globals; empties the client list
 cont_pakPfs	0x80066B98	invented: the Controller Pak the controller thread's requests work on (osPfsInitPak)
 cont_noteCompany	0x8005C0C2	invented: company code of the game's Controller Pak note (requests 0 and 2)
 cont_noteGameCode	0x8005C0C4	invented: game code of the note ("NBWE")
@@ -1510,13 +1510,54 @@ cont_noteSize	0x8005C0DC	invented: bytes of the note (requests 0 and 5)
 cont_pakPlugged	0x800693DE	invented: bit pattern of the ports with a pak (request 8, osPfsIsPlug)
 cont_rumbleFrames	0x8006940D	invented: frames left of each port's cont_rumble strength (Cont_Thread counts them down)
 cont_pollStatus	0x8005B191	invented: nonzero: Cont_Thread queries the controller status every frame (set while gscode checks the paks)
-N_ALSynth.outBuf	n_libaudio.h	invented: the output buffer func_80042A00 sets before each func_80042CF0 call, which saves the frame there
-N_PVoice.decState	n_libaudio.h	invented: the ADPCM state address func_80041434 puts in the decode command
-N_PVoice.loopState	n_libaudio.h	invented: func_800412A8 copies the wave table's loop state there; the set-loop command gives its address
-N_PVoice.loopStart	n_libaudio.h	invented: with loopEnd and loopCount, func_800412A8 copies them from the wave table's loop
-N_PVoice.table	n_libaudio.h	invented: the ALWaveTable func_800412A8 is given with N_FILTER_SET_WAVETABLE
-N_PVoice.bookSize	n_libaudio.h	invented: order * npredictors * 16 bytes, computed by func_800412A8
-N_PVoice.sample	n_libaudio.h	invented: func_800412A8 zeroes it with the table; func_80040E60 compares it against loopEnd
-N_PVoice.lastsam	n_libaudio.h	invented: the remainder of the 16-sample frame func_80040E60 carries
-N_PVoice.first	n_libaudio.h	invented: set on reset, cleared by func_80041434 after the first decode command
+N_ALSynth.outBuf	n_libaudio.h	invented: the output buffer Synth_MakeFrame sets before each Synth_PullOutput call, which saves the frame there
+N_PVoice.decState	n_libaudio.h	invented: the ADPCM state address Synth_DecodeAdpcm puts in the decode command
+N_PVoice.loopState	n_libaudio.h	invented: Synth_DecoderParam copies the wave table's loop state there; the set-loop command gives its address
+N_PVoice.loopStart	n_libaudio.h	invented: with loopEnd and loopCount, Synth_DecoderParam copies them from the wave table's loop
+N_PVoice.table	n_libaudio.h	invented: the ALWaveTable Synth_DecoderParam is given with N_FILTER_SET_WAVETABLE
+N_PVoice.bookSize	n_libaudio.h	invented: order * npredictors * 16 bytes, computed by Synth_DecoderParam
+N_PVoice.sample	n_libaudio.h	invented: Synth_DecoderParam zeroes it with the table; Synth_DecodeSamples compares it against loopEnd
+N_PVoice.lastsam	n_libaudio.h	invented: the remainder of the 16-sample frame Synth_DecodeSamples carries
+N_PVoice.first	n_libaudio.h	invented: set on reset, cleared by Synth_DecodeAdpcm after the first decode command
 N_PVoice.memin	n_libaudio.h	invented: the ROM address passed to the voice's DMA routine; starts at the table's base
+Synth_PullFxBus	0x8003FED0	invented: the effect bus pull of the n_audio synthesizer (banner: clears its mix, pulls each physical voice)
+Synth_BuildFx	0x8003FF70	invented: allocates and sets up the effect from the config's fxType (banner)
+Synth_InitPVoice	0x8004035C	invented: sets up a physical voice's filters (banner)
+Synth_PullPVoice	0x80040490	invented: pulls one frame of a physical voice (banner)
+Synth_PVoiceParam	0x80040A08	invented: a physical voice's parameter handler (banner)
+Synth_MixFrame	0x80040AAC	invented: mixes one frame (banner)
+Synth_RampStep	0x80040CCC	invented: the per-8-sample step that ramps a volume (banner)
+Synth_RampVolume	0x80040E0C	invented: the volume count samples into a ramp (banner)
+Synth_DecodeSamples	0x80040E60	invented: decodes outCount samples to *outp (banner)
+Synth_DecoderParam	0x800412A8	invented: the decoder's parameter handler (banner)
+Synth_DecodeAdpcm	0x80041434	invented: adds the load and ADPCM decode commands (banner)
+Synth_ResampleFrame	0x80041580	invented: resamples one frame into *outp (banner)
+Synth_ResamplerParam	0x8004173C	invented: the resampler's parameter handler (banner)
+Synth_PullMainBus	0x80041760	invented: main bus pull through the effect (banner)
+Synth_FxParam	0x80041A70	invented: the effect's parameter handler (banner)
+Synth_ReadDelayLine	0x80041C60	invented: reads a delay line's output into a buffer (banner)
+Synth_LoadDelay	0x80041E70	invented: loads count samples of the delay buffer (banner)
+Synth_SaveDelay	0x80041F98	invented: saves one frame into the delay buffer (banner)
+Synth_RunLowPass	0x800420B0	invented: runs a low-pass over a buffer (banner)
+Synth_InitGlobals	0x80042150	invented: sets up the n_audio globals and the synthesizer once (banner)
+Synth_Teardown	0x80042194	invented: takes the synthesizer down and clears the globals (banner)
+Synth_BuildSynth	0x80042790	invented: builds the synthesizer from the config: buses, effect, free voices and updates (banner)
+Synth_MakeFrame	0x80042A00	invented: synthesizes one frame (banner)
+Synth_AllocUpdate	0x80042B68	invented: takes a parameter update off the free list (banner)
+Synth_FreeUpdate	0x80042B94	invented: puts an update back on the free list (banner)
+Synth_RecycleRetired	0x80042BAC	invented: moves retired physical voices back to the free list (banner)
+Synth_RetirePVoice	0x80042C0C	invented: retires a physical voice until the end of the frame (banner)
+Synth_RoundTime	0x80042C44	invented: a time in output samples, rounded (banner)
+Synth_FloorTime	0x80042C94	invented: a time in output samples, rounded down to a multiple of 16 (banner)
+Synth_PullOutput	0x80042CF0	invented: the output: mix, interleave, save (banner)
+Synth_NewFx	0x80042D40	invented: creates the effect of a bus (banner)
+Synth_PullMix	0x80042D90	invented: pulls the main bus and mixes the effect bus in (banner)
+snd_globals	0x8005D110	invented: the n_audio globals, set once (header comment)
+snd_synth	0x8005D114	invented: the synthesizer every n_alSyn* call uses (header comment)
+snd_panGains	0x8005D000	invented: gains by pan and by effect mix (header comment)
+snd_fxSmallRoom	0x8005CE70	invented: the AL_FX_SMALLROOM effect parameters (header comment)
+snd_fxBigRoom	0x8005CED8	invented: the AL_FX_BIGROOM effect parameters (header comment)
+snd_fxEcho	0x8005CF60	invented: the AL_FX_ECHO effect parameters (header comment)
+snd_fxChorus	0x8005CF88	invented: the AL_FX_CHORUS effect parameters (header comment)
+snd_fxFlange	0x8005CFB0	invented: the AL_FX_FLANGE effect parameters (header comment)
+snd_fxDefault	0x8005CFD8	invented: the effect parameters of any other fxType (header comment)

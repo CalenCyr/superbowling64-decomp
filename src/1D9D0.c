@@ -22,14 +22,14 @@ void n_alSynSetVol( N_ALVoice *voice, s16 volume, ALMicroTime t ) {
     ALParam *update;
 
     if ( voice->pvoice != NULL ) {
-        update = func_80042B68();
+        update = Synth_AllocUpdate();
         if ( update != NULL ) {
-            update->delta = D_8005D114->paramSamples + voice->pvoice->offset;
+            update->delta = snd_synth->paramSamples + voice->pvoice->offset;
             update->type = N_PARAM_SET_VOLUME;
             update->data.i = volume;
-            update->moredata = func_80042C94( t );
+            update->moredata = Synth_FloorTime( t );
             update->next = NULL;
-            func_80040A08( voice->pvoice, AL_FILTER_ADD_UPDATE, update );
+            Synth_PVoiceParam( voice->pvoice, AL_FILTER_ADD_UPDATE, update );
         }
     }
 }

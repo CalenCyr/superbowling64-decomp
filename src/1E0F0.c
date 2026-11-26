@@ -12,15 +12,15 @@
 
 /*
 ================
-func_80042CF0
+Synth_PullOutput
 
-Mixes the frame through func_80042D90, interleaves the two channels and saves them to the output buffer.
+Mixes the frame through Synth_PullMix, interleaves the two channels and saves them to the output buffer.
 ================
 */
-Acmd *func_80042CF0( s32 sampleOffset, Acmd *cmdList ) {
-    Acmd *ptr = func_80042D90( sampleOffset, cmdList );
+Acmd *Synth_PullOutput( s32 sampleOffset, Acmd *cmdList ) {
+    Acmd *ptr = Synth_PullMix( sampleOffset, cmdList );
 
     aInterleaveFrame( ptr++ );
-    aSaveFrame( ptr++, N_DMEM_FRAME_BYTES, D_8005D114->outBuf );
+    aSaveFrame( ptr++, N_DMEM_FRAME_BYTES, snd_synth->outBuf );
     return ptr;
 }

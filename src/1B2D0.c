@@ -12,31 +12,31 @@
 
 /*
 ================
-func_8003FED0
+Synth_PullFxBus
 
 The effect bus's pull: clears the dry and wet mix, then pulls one frame of each of the bus's physical voices.
 ================
 */
-Acmd *func_8003FED0( s32 sampleOffset, Acmd *cmdList ) {
-    N_ALAuxBus *bus = D_8005D114->auxBus;
+Acmd *Synth_PullFxBus( s32 sampleOffset, Acmd *cmdList ) {
+    N_ALAuxBus *bus = snd_synth->auxBus;
     N_PVoice **sources = bus->sources;
     s32 i;
 
     aClearBuffer( cmdList++, N_DMEM_AUX_L, N_DMEM_FRAME_BYTES );
     for ( i = 0; i < bus->sourceCount; i++ ) {
-        cmdList = func_80040490( sources[i], sampleOffset, cmdList );
+        cmdList = Synth_PullPVoice( sources[i], sampleOffset, cmdList );
     }
     return cmdList;
 }
 
 /*
 ================
-func_8003FF70
+Synth_BuildFx
 
 Creates the effect of c's fxType into *fx, with its delay lines, buffer, modulation and low-pass on hp.
 ================
 */
-void func_8003FF70( ALFx **fx, ALSynConfig *c, ALHeap *hp ) {
+void Synth_BuildFx( ALFx **fx, ALSynConfig *c, ALHeap *hp ) {
     ALFx *r;
     ALDelay *d;
     s32 *param;
@@ -49,25 +49,25 @@ void func_8003FF70( ALFx **fx, ALSynConfig *c, ALHeap *hp ) {
 
     switch ( c->fxType ) {
     case AL_FX_SMALLROOM:
-        param = D_8005CE70;
+        param = snd_fxSmallRoom;
         break;
     case AL_FX_BIGROOM:
-        param = D_8005CED8;
+        param = snd_fxBigRoom;
         break;
     case AL_FX_ECHO:
-        param = D_8005CF60;
+        param = snd_fxEcho;
         break;
     case AL_FX_CHORUS:
-        param = D_8005CF88;
+        param = snd_fxChorus;
         break;
     case AL_FX_FLANGE:
-        param = D_8005CFB0;
+        param = snd_fxFlange;
         break;
     case AL_FX_CUSTOM:
         param = c->params;
         break;
     default:
-        param = D_8005CFD8;
+        param = snd_fxDefault;
         break;
     }
 
@@ -119,12 +119,12 @@ void func_8003FF70( ALFx **fx, ALSynConfig *c, ALHeap *hp ) {
 
 /*
 ================
-func_8004035C
+Synth_InitPVoice
 
 Sets up pv's decoder, resampler and envelope mixer, with their states on hp and a DMA routine from dmaNew.
 ================
 */
-void func_8004035C( N_PVoice *pv, ALDMANew dmaNew, ALHeap *hp ) {
+void Synth_InitPVoice( N_PVoice *pv, ALDMANew dmaNew, ALHeap *hp ) {
     pv->decState = alHeapAlloc( hp, 1, sizeof( ADPCM_STATE ) );
     pv->loopState = alHeapAlloc( hp, 1, sizeof( ADPCM_STATE ) );
     pv->dma = dmaNew( &pv->dmaState );

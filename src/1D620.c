@@ -40,19 +40,19 @@ s32 n_alSynAllocVoice( N_ALVoice *voice, ALVoiceConfig *vc ) {
             voice->pvoice = pv;
 
             /* R36: unlike the stop below, this update is used without a check for none left */
-            update = func_80042B68();
-            update->delta = D_8005D114->paramSamples;
+            update = Synth_AllocUpdate();
+            update->delta = snd_synth->paramSamples;
             update->type = N_PARAM_SET_VOLUME;
             update->data.i = 0;
             update->moredata = N_PVOICE_STEAL_FADE;
-            func_80040A08( voice->pvoice, AL_FILTER_ADD_UPDATE, update );
+            Synth_PVoiceParam( voice->pvoice, AL_FILTER_ADD_UPDATE, update );
 
-            update = func_80042B68();
+            update = Synth_AllocUpdate();
             if ( update != NULL ) {
-                update->delta = D_8005D114->paramSamples + pv->offset;
+                update->delta = snd_synth->paramSamples + pv->offset;
                 update->type = N_PARAM_STOP_VOICE;
                 update->next = NULL;
-                func_80040A08( voice->pvoice, AL_FILTER_ADD_UPDATE, update );
+                Synth_PVoiceParam( voice->pvoice, AL_FILTER_ADD_UPDATE, update );
             }
         } else {
             pv->offset = 0;
@@ -77,13 +77,13 @@ s32 Synth_AllocPVoice( N_PVoice **pvoice, s16 priority ) {
     N_PVoice *pv;
     s32 stolen = FALSE;
 
-    if ( ( pv = (N_PVoice *)D_8005D114->pLameList.next ) != NULL
-        || ( pv = (N_PVoice *)D_8005D114->pFreeList.next ) != NULL ) {
+    if ( ( pv = (N_PVoice *)snd_synth->pLameList.next ) != NULL
+        || ( pv = (N_PVoice *)snd_synth->pFreeList.next ) != NULL ) {
         *pvoice = pv;
         alUnlink( &pv->node );
-        alLink( &pv->node, &D_8005D114->pAllocList );
+        alLink( &pv->node, &snd_synth->pAllocList );
     } else {
-        for ( pv = (N_PVoice *)D_8005D114->pAllocList.next; pv != NULL; pv = (N_PVoice *)pv->node.next ) {
+        for ( pv = (N_PVoice *)snd_synth->pAllocList.next; pv != NULL; pv = (N_PVoice *)pv->node.next ) {
             if ( pv->vvoice->priority <= priority && pv->offset == 0 ) {
                 *pvoice = pv;
                 priority = pv->vvoice->priority;

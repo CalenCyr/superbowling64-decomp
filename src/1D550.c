@@ -12,32 +12,32 @@
 
 /*
 ================
-func_80042150
+Synth_InitGlobals
 
 Sets up the n_audio globals in g and the synthesizer from c, once.
 ================
 */
-void func_80042150( N_ALGlobals *g, ALSynConfig *c ) {
-    if ( D_8005D110 == NULL ) {
-        D_8005D110 = g;
-        if ( D_8005D114 == NULL ) {
-            D_8005D114 = &D_8005D110->drvr;
-            func_80042790( c );
+void Synth_InitGlobals( N_ALGlobals *g, ALSynConfig *c ) {
+    if ( snd_globals == NULL ) {
+        snd_globals = g;
+        if ( snd_synth == NULL ) {
+            snd_synth = &snd_globals->drvr;
+            Synth_BuildSynth( c );
         }
     }
 }
 
 /*
 ================
-func_80042194
+Synth_Teardown
 
 Takes the synthesizer down and clears the n_audio globals.
 ================
 */
-void func_80042194( void ) {
-    if ( D_8005D110 != NULL ) {
+void Synth_Teardown( void ) {
+    if ( snd_globals != NULL ) {
         Synth_Destroy();
-        D_8005D110 = NULL;
-        D_8005D114 = NULL;
+        snd_globals = NULL;
+        snd_synth = NULL;
     }
 }

@@ -9,7 +9,7 @@
 
 /*
 ================
-func_80040E60
+Synth_DecodeSamples
 
 Adds the commands that decode outCount samples of the table to DMEM *outp, and advances *outp past the part
 of the first ADPCM frame already used. A loop the samples reach is decoded pass by pass from its start (each
@@ -21,7 +21,7 @@ pass moved to follow the last); samples past the table's end are cleared.
 // (one sll/sra before the loop); here combine folds inp to 0 (set once, so trusted everywhere). The rest
 // matches up to those. Not it: a second, dead inp = 0 (in the same block or the non-looped path).
 // Frame unchanged by inline helpers for the lead skip (void, pointer parameters) or the frame count (s32 return).
-Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
+Acmd *Synth_DecodeSamples( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
     Acmd *ptr = p;
     s32 looped;
     s32 nSam;
@@ -65,7 +65,7 @@ Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
     nbytes = nframes * N_ADPCM_FRAME_BYTES;
 
     if ( looped ) {
-        ptr = func_80041434( ptr, pv, tsam, nbytes, *outp, inp, pv->first );
+        ptr = Synth_DecodeAdpcm( ptr, pv, tsam, nbytes, *outp, inp, pv->first );
         if ( pv->lastsam ) {
             *outp += pv->lastsam << 1;
         } else {
@@ -92,7 +92,7 @@ Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
             }
             nframes = ( tsam + 15 ) >> 4;
             nbytes = nframes * N_ADPCM_FRAME_BYTES;
-            ptr = func_80041434( ptr, pv, tsam, nbytes, dmemOut, inp, pv->first | N_ADPCM_LOOP );
+            ptr = Synth_DecodeAdpcm( ptr, pv, tsam, nbytes, dmemOut, inp, pv->first | N_ADPCM_LOOP );
             aDMEMMove( ptr++, dmemOut + ( pv->lastsam << 1 ), op, nSam << 1 );
         }
 
@@ -115,7 +115,7 @@ Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
 
     if ( nOver - ( nOver & 0xF ) < outCount ) {
         decoded = TRUE;
-        ptr = func_80041434( ptr, pv, frameSam - nOver, nbytes, *outp, inp, pv->first );
+        ptr = Synth_DecodeAdpcm( ptr, pv, frameSam - nOver, nbytes, *outp, inp, pv->first );
         if ( pv->lastsam ) {
             *outp += pv->lastsam << 1;
         } else {
@@ -141,19 +141,19 @@ Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
     return ptr;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/1C260", func_80040E60);
+INCLUDE_ASM("asm/nonmatchings/1C260", Synth_DecodeSamples);
 #endif
 
 /*
 ================
-func_800412A8
+Synth_DecoderParam
 
 The decoder's parameter handler. N_FILTER_SET_WAVETABLE: plays the wave table param from its start, takes its
 codebook size and its loop (an ADPCM table's length is cut to whole frames). N_FILTER_RESET: rewinds to the
 table's start with the loop count restored.
 ================
 */
-void func_800412A8( N_PVoice *pv, s32 paramID, void *param ) {
+void Synth_DecoderParam( N_PVoice *pv, s32 paramID, void *param ) {
     switch ( paramID ) {
     case N_FILTER_SET_WAVETABLE:
         pv->table = (ALWaveTable *)param;
@@ -212,14 +212,14 @@ void func_800412A8( N_PVoice *pv, s32 paramID, void *param ) {
 
 /*
 ================
-func_80041434
+Synth_DecodeAdpcm
 
 Adds the commands that decode tsam samples to DMEM outp: loads nbytes of the table from memin to DMEM inp
 (rounded to whole 8-byte words from the aligned address the DMA returns), the loop state if flags asks for
 N_ADPCM_LOOP, and the decode itself. Returns the end of the commands.
 ================
 */
-Acmd *func_80041434( Acmd *ptr, N_PVoice *pv, s32 tsam, s32 nbytes, s16 outp, s16 inp, s32 flags ) {
+Acmd *Synth_DecodeAdpcm( Acmd *ptr, N_PVoice *pv, s32 tsam, s32 nbytes, s16 outp, s16 inp, s32 flags ) {
     s32 addr;
     s32 overFlow;
 

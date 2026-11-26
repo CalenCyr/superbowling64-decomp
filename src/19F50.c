@@ -16,11 +16,11 @@ Sets up the n_audio globals in g and the synthesizer from c, once.
 ================
 */
 void Synth_Init( N_ALGlobals *g, ALSynConfig *c ) {
-    if ( D_8005D110 == NULL ) {
-        D_8005D110 = g;
-        if ( D_8005D114 == NULL ) {
+    if ( snd_globals == NULL ) {
+        snd_globals = g;
+        if ( snd_synth == NULL ) {
             Synth_UseCustomFx( c );
-            D_8005D114 = synth_driver = &D_8005D110->drvr;
+            snd_synth = synth_driver = &snd_globals->drvr;
             Synth_Create( c );
         }
     }
@@ -43,54 +43,54 @@ void Synth_Create( ALSynConfig *c ) {
     ALParam *paramPtr;
 
     hp = c->heap;
-    D_8005D114->head = NULL;
-    D_8005D114->numPVoices = c->maxPVoices;
-    D_8005D114->curSamples = 0;
-    D_8005D114->paramSamples = 0;
-    D_8005D114->outputRate = c->outputRate;
-    D_8005D114->maxOutSamples = AL_MAX_RSP_SAMPLES;
-    D_8005D114->dma = (ALDMANew)c->dmaproc;
-    D_8005D114->unk_4C = 1;
-    D_8005D114->outBuf = NULL;
+    snd_synth->head = NULL;
+    snd_synth->numPVoices = c->maxPVoices;
+    snd_synth->curSamples = 0;
+    snd_synth->paramSamples = 0;
+    snd_synth->outputRate = c->outputRate;
+    snd_synth->maxOutSamples = AL_MAX_RSP_SAMPLES;
+    snd_synth->dma = (ALDMANew)c->dmaproc;
+    snd_synth->unk_4C = 1;
+    snd_synth->outBuf = NULL;
 
-    D_8005D114->auxBus = alHeapAlloc( hp, 1, sizeof( N_ALAuxBus ) );
-    D_8005D114->auxBus->sourceCount = 0;
-    D_8005D114->auxBus->maxSources = c->maxPVoices;
-    D_8005D114->auxBus->sources = alHeapAlloc( hp, c->maxPVoices, sizeof( N_PVoice * ) );
+    snd_synth->auxBus = alHeapAlloc( hp, 1, sizeof( N_ALAuxBus ) );
+    snd_synth->auxBus->sourceCount = 0;
+    snd_synth->auxBus->maxSources = c->maxPVoices;
+    snd_synth->auxBus->sources = alHeapAlloc( hp, c->maxPVoices, sizeof( N_PVoice * ) );
 
-    D_8005D114->mainBus = alHeapAlloc( hp, 1, sizeof( N_ALMainBus ) );
+    snd_synth->mainBus = alHeapAlloc( hp, 1, sizeof( N_ALMainBus ) );
     if ( c->fxType != AL_FX_NONE ) {
-        D_8005D114->auxBus->fx = Synth_CreateFx( 0, c, hp );
-        D_8005D114->mainBus->handler = func_80041760;
+        snd_synth->auxBus->fx = Synth_CreateFx( 0, c, hp );
+        snd_synth->mainBus->handler = Synth_PullMainBus;
     } else {
-        D_8005D114->mainBus->handler = func_8003FED0;
+        snd_synth->mainBus->handler = Synth_PullFxBus;
     }
 
-    D_8005D114->pFreeList.next = NULL;
-    D_8005D114->pFreeList.prev = NULL;
-    D_8005D114->pLameList.next = NULL;
-    D_8005D114->pLameList.prev = NULL;
-    D_8005D114->pAllocList.next = NULL;
-    D_8005D114->pAllocList.prev = NULL;
+    snd_synth->pFreeList.next = NULL;
+    snd_synth->pFreeList.prev = NULL;
+    snd_synth->pLameList.next = NULL;
+    snd_synth->pLameList.prev = NULL;
+    snd_synth->pAllocList.next = NULL;
+    snd_synth->pAllocList.prev = NULL;
 
     pvoices = alHeapAlloc( hp, c->maxPVoices, sizeof( N_PVoice ) );
     for ( i = 0; i < c->maxPVoices; i++ ) {
         pv = &pvoices[i];
-        alLink( &pv->node, &D_8005D114->pFreeList );
+        alLink( &pv->node, &snd_synth->pFreeList );
         pv->vvoice = NULL;
-        func_8004035C( pv, D_8005D114->dma, hp );
-        D_8005D114->auxBus->sources[D_8005D114->auxBus->sourceCount++] = pv;
+        Synth_InitPVoice( pv, snd_synth->dma, hp );
+        snd_synth->auxBus->sources[snd_synth->auxBus->sourceCount++] = pv;
     }
 
     params = alHeapAlloc( hp, c->maxUpdates, sizeof( ALParam ) );
-    D_8005D114->paramList = NULL;
+    snd_synth->paramList = NULL;
     for ( i = 0; i < c->maxUpdates; i++ ) {
         paramPtr = &params[i];
-        paramPtr->next = D_8005D114->paramList;
-        D_8005D114->paramList = paramPtr;
+        paramPtr->next = snd_synth->paramList;
+        snd_synth->paramList = paramPtr;
     }
 
-    D_8005D114->heap = hp;
+    snd_synth->heap = hp;
 }
 
 /*
@@ -101,8 +101,8 @@ Creates the effect of bus bus and returns it.
 ================
 */
 ALFx *Synth_CreateFx( s16 bus, ALSynConfig *c, ALHeap *hp ) {
-    Synth_AllocFx( &D_8005D114->auxBus->fxSlots[bus], c, hp );
-    return D_8005D114->auxBus->fxSlots[bus];
+    Synth_AllocFx( &snd_synth->auxBus->fxSlots[bus], c, hp );
+    return snd_synth->auxBus->fxSlots[bus];
 }
 
 /*
