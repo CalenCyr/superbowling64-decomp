@@ -393,4 +393,52 @@ s32 func_8004173C( N_PVoice *pv, s32 paramID, void *param );          /* the res
 
 /* ===== end 1B2D0, 1C980 ===== */
 
+/* ===== the effect: unit 1CB60 ===== */
+
+/* DMEM buffers the effect's delay lines are worked in, one frame each, swapped from line to line */
+#define N_FX_BUFFER_A           0x000
+#define N_FX_BUFFER_B           0x170
+#define N_FX_RESAMPLE_BUFFER    0x2E0   /* where a modulated line's input is loaded before resampling */
+
+/* gains of the effect's input mix: the effect bus's left channel scaled in place, then the right mixed in */
+#define N_FX_INPUT_GAIN         0xDA83
+#define N_FX_RIGHT_GAIN         0x5A82
+
+/* the ROM's save command: like n_aLoadBuffer */
+#define n_aSaveBuffer( pkt, c, d, s )                                                       \
+{                                                                                           \
+    Acmd *_a = (Acmd *)pkt;                                                                 \
+                                                                                            \
+    _a->words.w0 = _SHIFTL( A_SAVEBUFF, 24, 8 ) | _SHIFTL( c, 12, 12 ) | _SHIFTL( d, 0, 12 ); \
+    _a->words.w1 = (u32)( s );                                                              \
+}
+
+/* the ROM's resample command with an output buffer: its DMEM address's bits 8-9 in w1's low bits */
+#define n_aResampleOut( pkt, f, p, s, i, o )                                                \
+{                                                                                           \
+    Acmd *_a = (Acmd *)pkt;                                                                 \
+                                                                                            \
+    _a->words.w0 = _SHIFTL( A_RESAMPLE, 24, 8 ) | _SHIFTL( s, 0, 24 );                      \
+    _a->words.w1 = _SHIFTL( f, 30, 2 ) | _SHIFTL( p, 14, 16 ) | _SHIFTL( i, 2, 12 ) | _SHIFTL( ( o ) >> 8, 0, 2 ); \
+}
+
+/* the ROM's pole filter command: the buffer's DMEM page (address >> 8) beside the state's address in w1 */
+#define n_aPoleFilter( pkt, f, g, t, s )                                                    \
+{                                                                                           \
+    Acmd *_a = (Acmd *)pkt;                                                                 \
+                                                                                            \
+    _a->words.w0 = _SHIFTL( A_POLEF, 24, 8 ) | _SHIFTL( f, 16, 8 ) | _SHIFTL( g, 0, 16 );   \
+    _a->words.w1 = _SHIFTL( t, 24, 8 ) | _SHIFTL( s, 0, 24 );                              \
+}
+
+f32 _doModFunc( ALDelay *d, s32 count );    /* a modulated delay line's pitch offset for count samples */
+
+s32 func_80041A70( void *filter, s32 paramID, void *param );          /* the effect's parameter handler */
+Acmd *func_80041C60( ALFx *fx, ALDelay *delay, s32 buff, Acmd *p );        /* reads a delay line's output into buff */
+Acmd *func_80041E70( ALFx *fx, s16 *pos, s32 buff, s32 count, Acmd *p );  /* loads count samples of the delay buffer */
+Acmd *func_80041F98( ALFx *fx, s16 *pos, s32 buff, Acmd *p );     /* saves one frame into the delay buffer */
+Acmd *func_800420B0( ALLowPass *lp, s32 buff, Acmd *p );              /* runs a low-pass over buff */
+
+/* ===== end of the effect block ===== */
+
 #endif
