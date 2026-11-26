@@ -11,6 +11,7 @@ n_alSyn* take no ALSynth argument: n_audio has a single synthesizer.
 #include "libultra.h"
 
 struct N_PVoice_s;
+struct ALParam_s;
 
 /* n_audio voice: owned by the synthesizer once n_alSynAllocVoice has set it up */
 typedef struct {
@@ -42,9 +43,37 @@ typedef struct N_PVoice_s {
     /* 0x34 */ s32 lastsam;             /* samples of the last 16-sample ADPCM frame already used */
     /* 0x38 */ s32 first;               /* TRUE: the next decode starts the table, from a reset decoder state */
     /* 0x3C */ s32 memin;               /* the table's ROM address the next frames are read from */
-    /* 0x40 */ u8 unk_40[0x88 - 0x40];
+    /* resampler */
+    /* 0x40 */ RESAMPLE_STATE *rsState;
+    /* 0x44 */ f32 ratio;               /* pitch ratio, below N_MAX_RATIO */
+    /* 0x48 */ s32 unityPitch;          /* TRUE: no resampling, the decoded samples are moved as they are */
+    /* 0x4C */ f32 rsDelta;             /* fraction of a sample carried to the next frame */
+    /* 0x50 */ s32 rsFirst;             /* TRUE until the resampler's first frame */
+    /* envelope mixer */
+    /* 0x54 */ ENVMIX_STATE *emState;
+    /* 0x58 */ s16 pan;                 /* 0-127, indexes the gain table both ways */
+    /* 0x5A */ s16 volume;              /* the voice's volume squared, >> 15 */
+    /* 0x5C */ s16 volL;                /* left and right volume now */
+    /* 0x5E */ s16 volR;
+    /* 0x60 */ s16 dryAmt;              /* gains from the effect mix */
+    /* 0x62 */ s16 wetAmt;
+    /* 0x64 */ u16 rateLFrac;           /* per-8-sample ramp step: fraction, whole */
+    /* 0x66 */ s16 rateL;
+    /* 0x68 */ s16 targetL;             /* volume the ramp ends at */
+    /* 0x6A */ u16 rateRFrac;
+    /* 0x6C */ s16 rateR;
+    /* 0x6E */ s16 targetR;
+    /* 0x70 */ s32 envDelta;            /* samples into the volume ramp */
+    /* 0x74 */ s32 envLength;           /* samples the volume ramp lasts */
+    /* 0x78 */ s32 envFirst;            /* TRUE: the ramp changed, set the volumes again */
+    /* 0x7C */ struct ALParam_s *ctrlList;     /* queued updates, in time order */
+    /* 0x80 */ struct ALParam_s *ctrlTail;
+    /* 0x84 */ s32 motion;              /* N_MOTION_* */
     /* 0x88 */ s32 offset;              /* samples its updates wait: N_PVOICE_STEAL_DELAY while a stolen voice fades */
 } N_PVoice;
+
+#define N_MOTION_STOPPED        0       /* N_PVoice.motion */
+#define N_MOTION_PLAYING        1
 
 #define N_PVOICE_STEAL_DELAY    552     /* N_PVoice.offset of a stolen voice: three frames */
 #define N_PVOICE_STEAL_FADE     368     /* samples a stolen voice's volume ramps to 0 over: two frames */
@@ -286,5 +315,27 @@ void func_800412A8( N_PVoice *pv, s32 paramID, void *param );         /* the dec
 Acmd *func_80041434( Acmd *ptr, N_PVoice *pv, s32 tsam, s32 nbytes, s16 outp, s16 inp, s32 flags );
 
 /* ===== end of the decoder block ===== */
+
+/* ===== physical voice pull: 1B2D0, 1C980 ===== */
+
+#define N_FRAME_SAMPLES         184     /* samples a voice makes per pull */
+#define N_UNITY_PITCH           0x8000  /* the resample command's ratio for 1.0 */
+#define N_MAX_RATIO             1.99996 /* the highest pitch ratio the resampler takes */
+#define N_DECODE_BUFFER         0x170   /* DMEM where a voice's decoded samples start */
+
+/* the ROM's resample command: like ultralib's aResample, with the input's DMEM address in w1 */
+#define n_aResample(pkt, f, p, s, i)                                                    \
+{                                                                                       \
+    Acmd *_a = (Acmd *)pkt;                                                             \
+                                                                                        \
+    _a->words.w0 = _SHIFTL(A_RESAMPLE, 24, 8) | _SHIFTL(s, 0, 24);                      \
+    _a->words.w1 = _SHIFTL(f, 30, 2) | _SHIFTL(p, 14, 16) | _SHIFTL(i, 2, 12);         \
+}
+
+Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p );  /* decodes outCount samples to *outp */
+Acmd *func_80041580( N_PVoice *pv, s16 *outp, Acmd *p );              /* resamples one frame into *outp */
+s32 func_8004173C( N_PVoice *pv, s32 paramID, void *param );          /* the resampler's parameter handler */
+
+/* ===== end 1B2D0, 1C980 ===== */
 
 #endif
