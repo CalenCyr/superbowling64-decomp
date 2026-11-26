@@ -1486,4 +1486,4 @@ cont_noteSize = 0x8005C0DC;
 cont_pakPlugged = 0x800693DE;
 cont_rumbleFrames = 0x8006940D;
 cont_pollStatus = 0x8005B191;
-D_800603B8 = 0x800603B8; // size:0x8
+D_800603B8 = 0x800603B8; // size:0x8 align:0x8
