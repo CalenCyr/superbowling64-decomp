@@ -386,7 +386,7 @@ segments:
       - { type: .bss, vram: 0x80061A00, name: 4DC0 }
       - { type: .bss, vram: 0x80062A20, name: 51F0 }
       - { type: .bss, vram: 0x80062A70, name: 7250 }
-      - { type: .bss, vram: 0x80063AF0, name: 111A0 }
+      - { type: bss, vram: 0x80063AF0, name: 111A0 }   # asm: 0x80063B38-0x80063B40 unreferenced
       - { type: .bss, vram: 0x80064310, name: 12260 }
       - { type: .bss, vram: 0x80064320, name: 166B0 }
       - { type: bss, vram: 0x80064390, name: 1A7A0 }   # asm: 0x800643CC-0x800643D0 unreferenced
