@@ -21,6 +21,6 @@ Acmd *func_80042CF0( s32 sampleOffset, Acmd *cmdList ) {
     Acmd *ptr = func_80042D90( sampleOffset, cmdList );
 
     aInterleaveFrame( ptr++ );
-    aSaveFrame( ptr++, N_DMEM_FRAME_BYTES, D_8005D114->unk_48 );
+    aSaveFrame( ptr++, N_DMEM_FRAME_BYTES, D_8005D114->outBuf );
     return ptr;
 }

@@ -51,7 +51,7 @@ void Synth_Create( ALSynConfig *c ) {
     D_8005D114->maxOutSamples = AL_MAX_RSP_SAMPLES;
     D_8005D114->dma = (ALDMANew)c->dmaproc;
     D_8005D114->unk_4C = 1;
-    D_8005D114->unk_48 = 0;
+    D_8005D114->outBuf = NULL;
 
     D_8005D114->auxBus = alHeapAlloc( hp, 1, sizeof( N_ALAuxBus ) );
     D_8005D114->auxBus->sourceCount = 0;

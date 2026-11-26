@@ -160,7 +160,7 @@ typedef struct {
     /* 0x3C */ s32 unk_3C;
     /* 0x40 */ s32 outputRate;          /* output sample rate */
     /* 0x44 */ s32 maxOutSamples;       /* the most samples the RSP makes at once */
-    /* 0x48 */ s32 unk_48;
+    /* 0x48 */ s16 *outBuf;          /* where the frame being made is saved: set per pass by func_80042A00 */
     /* 0x4C */ s32 unk_4C;
 } N_ALSynth;
 
@@ -228,6 +228,10 @@ Acmd *func_80042CF0( s32 sampleOffset, Acmd *cmdList );    /* the output: mix, i
 ALFx *func_80042D40( s16 bus, ALSynConfig *c, ALHeap *hp );  /* creates the effect of bus bus */
 Acmd *func_80042D90( s32 sampleOffset, Acmd *cmdList );    /* pulls the main bus and mixes the effect bus in */
 void func_8003FF70( ALFx **fx, ALSynConfig *c, ALHeap *hp );   /* allocates and sets up the effect into *fx */
+void func_80042B94( ALParam *update ); /* puts an update back on the free list */
+void func_80042BAC( void );            /* moves the retired physical voices back to the free list */
+void func_80042C0C( N_PVoice *pv );    /* retires a physical voice until the end of the frame */
+s32 func_80042C44( ALMicroTime t );    /* t in output samples, rounded */
 
 /* ===== end of the synthesizer frame and setup block ===== */
 

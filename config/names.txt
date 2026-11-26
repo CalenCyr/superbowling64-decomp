@@ -1510,3 +1510,4 @@ cont_noteSize	0x8005C0DC	invented: bytes of the note (requests 0 and 5)
 cont_pakPlugged	0x800693DE	invented: bit pattern of the ports with a pak (request 8, osPfsIsPlug)
 cont_rumbleFrames	0x8006940D	invented: frames left of each port's cont_rumble strength (Cont_Thread counts them down)
 cont_pollStatus	0x8005B191	invented: nonzero: Cont_Thread queries the controller status every frame (set while gscode checks the paks)
+N_ALSynth.outBuf	n_libaudio.h	invented: the output buffer func_80042A00 sets before each func_80042CF0 call, which saves the frame there
