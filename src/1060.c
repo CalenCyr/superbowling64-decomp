@@ -11,6 +11,7 @@
 #include "filecache.h"
 #include "game.h"
 #include "gamesnd.h"
+#include "dbgshot.h"
 #include "ground.h"
 #include "sprite.h"
 #include "dbgtext.h"
@@ -157,7 +158,7 @@ void Main_Thread( void *arg ) {
     osStartThread( &boot_contThread );
     osCreateThread( &boot_gameThread, 5, Game_Thread, arg, &boot_gameStack[GAME_STACK_SIZE / sizeof( u64 )], 8 );
     osStartThread( &boot_gameThread );
-    func_80037CD0();
+    Sound_Init();
 
     for ( ;; ) {
         osRecvMesg( &sched_queue, &msg, OS_MESG_BLOCK );

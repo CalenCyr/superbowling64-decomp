@@ -1370,6 +1370,11 @@ sound_bgmBuffers	0x800EA440	invented: the two BGM sequence buffers, BGM_BUFFER_S
 dbg_shotHeader	0x8005CA40	invented: the BMP header Dbg_ScreenShot puts in front of a screenshot's pixels
 dbg_shotNumber	0x8005CA76	invented: number of the next screenshot, BW%3.3d.BMP (Dbg_ScreenShot)
 sound_heap	0x800ABD70	invented: the audio heap (written back before the audio task, 0x33800 bytes)
+Sound_Init	0x80037CD0	invented: loads the BGMPTR, SEPTR and BFX files and starts the sound driver
+sound_taskFuncs	0x8005CA34	invented: the audio task routines Sound_Init gives the audio thread
+sound_bgmWaveBank	0x800DF6C0	invented: the BGMPTR file, the default wave bank (samples in bgmwbk)
+sound_seWaveBank	0x800994D0	invented: the SEPTR file, the SE wave bank (samples in sewbk)
+sound_seTable	0x80066E40	invented: the BFX file, the default SE table
 sound_taskStart	0x80099450	invented: when the last audio task started (Sound_RunAudioTask)
 sound_taskTime	0x8005B0F0	invented: microseconds the last audio task took
 

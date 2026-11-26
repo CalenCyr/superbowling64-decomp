@@ -86,6 +86,7 @@ segments:
       - [0x111A0, c]
       - [0x12260, c]
       - [0x12C70, c]
+      - [0x13230, c]
       - [0x13490, c]
       - [0x166B0, c]
       - [0x19F50, c]
@@ -324,6 +325,7 @@ segments:
       - [0x3B830, .rodata, 111A0]
       - [0x3B8F0, .rodata, 12260]
       - [0x3B950, .rodata, 12C70]
+      - [0x3B974, .rodata, 13230]
       - [0x3B980, .rodata, 13490]  # 13490 .rodata: auto array initialisers
       - [0x3B990, .rodata, 166B0]
       - [0x3BA70, .rodata, 19F50]

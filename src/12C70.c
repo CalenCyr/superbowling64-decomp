@@ -1,4 +1,4 @@
-/* 12C70.c -- the game's use of the sound driver: SE, BGM files and the audio task; screenshots */
+/* 12C70.c -- the game's use of the sound driver: SE, BGM files and the audio task */
 
 #include "common.h"
 #include "libultra.h"
@@ -7,8 +7,6 @@
 #include "archive.h"
 #include "fat.h"
 #include "gamesnd.h"
-#include "hostio.h"
-#include "input.h"
 
 /*
 ================
@@ -153,47 +151,38 @@ void Sound_RunAudioTask( rspProgram_t *program ) {
     sound_taskTime = OS_CYCLES_TO_USEC( osGetTime() - sound_taskStart );
 }
 
-INCLUDE_ASM("asm/nonmatchings/12C70", func_80037CD0);
-
 /*
 ================
-Dbg_ScreenShot
+Sound_Init
 
-On an L press: writes the screen to the host as the next "BWnnn.BMP".
+Loads the BGM wave bank (BGMPTR), the SE wave bank (SEPTR) and the SE table (BFX), gives the audio thread this
+unit's task routines and starts the sound driver.
 ================
 */
-void Dbg_ScreenShot( void ) {
-    bmpFile_t *file;
-    u8 *dst;
-    s32 x;
-    s32 y;
-    u16 pixel;
-    s32 fb;
-    u8 name[0x10];
+void Sound_Init( void ) {
+    sndConfig_t config;
 
-    if ( cont_allPressed & L_TRIG ) {
-        file = (bmpFile_t *)sched_framebuffers[0];
-        dst = (u8 *)file;
-        file->header = dbg_shotHeader;
-        dst += sizeof( bmpHeader_t );
-        fb = 1;
-        for ( y = 0; y < SCREENSHOT_HEIGHT / 2; y++ ) {
-            for ( x = 0; x < SCREENSHOT_WIDTH; x++ ) {
-                pixel = sched_framebuffers[fb][y * SCREENSHOT_WIDTH + x];
-                sched_framebuffers[fb][y * SCREENSHOT_WIDTH + x] =
-                    sched_framebuffers[fb][( SCREENSHOT_HEIGHT - 1 - y ) * SCREENSHOT_WIDTH + x];
-                sched_framebuffers[fb][( SCREENSHOT_HEIGHT - 1 - y ) * SCREENSHOT_WIDTH + x] = pixel;
-            }
-        }
-        for ( y = 0; y < SCREENSHOT_HEIGHT; y++ ) {
-            for ( x = 0; x < SCREENSHOT_WIDTH; x++ ) {
-                *dst++ = ( sched_framebuffers[fb][y * SCREENSHOT_WIDTH + x] & 0x3E ) << 2;
-                *dst++ = ( sched_framebuffers[fb][y * SCREENSHOT_WIDTH + x] & 0x7C0 ) >> 3;
-                *dst++ = ( sched_framebuffers[fb][y * SCREENSHOT_WIDTH + x] & 0xF800 ) >> 8;
-            }
-        }
-        sprintf( name, "BW%3.3d.BMP", dbg_shotNumber++ );
-        Host_WriteFile( name, (u8 *)file, SCREENSHOT_FILE_SIZE );
-        cont_allPressed = 0;
-    }
+    FAT_ReadFile( "BGMPTR  SYS", &sound_bgmWaveBank, FAT_GetFileSize( "BGMPTR  SYS" ), 0 );
+    FAT_ReadFile( "SEPTR   SYS", &sound_seWaveBank, FAT_GetFileSize( "SEPTR   SYS" ), 0 );
+    FAT_ReadFile( "BFX     SYS", &sound_seTable, FAT_GetFileSize( "BFX     SYS" ), 0 );
+    config.unk_00 = 0;
+    config.numVoices = 32;
+    config.sched = NULL;
+    config.voicePriority = 18;
+    config.heapBase = sound_heap;
+    config.heapSize = 0x33800;
+    config.waveBank = &sound_bgmWaveBank;
+    config.seTable = &sound_seTable;
+    config.numMsgs = 64;
+    config.waveRomBase = (s32)bgmwbk_ROM_START;
+    config.outputRate = 22050;
+    config.maxUpdates = 0x200;
+    config.maxCmds = 0x2000;
+    config.ticksPerFrame = 2;
+    config.numDmaBuffers = 128;
+    config.dmaBufferSize = 0x180;
+    Audio_SetTaskFuncs( &sound_taskFuncs );
+    Snd_Init( &config );
+    Snd_LoadWaveBank( &sound_seWaveBank, (s32)sewbk_ROM_START );
+    Snd_SetSeWaveBank( &sound_seTable, &sound_seWaveBank );
 }
