@@ -128,13 +128,13 @@ void GA_StageFrame1( void ) {
         GA_SetPlayerObjectFlags( 1 );
     }
     GA_CountFrame();
-    if ( D_800DF595[0] == 1 && ( ga_frameCount & 1 ) ) {
-        Scene_StartPuff( 0x300, D_800E6560[0][0] + guRandom() % 20 - 10.0f,
-                       D_800E6560[0][1] - 10.0f + guRandom() % 20 - 10.0f, D_800E6560[0][2] + 10.0f );
+    if ( game_ballState[0] == 1 && ( ga_frameCount & 1 ) ) {
+        Scene_StartPuff( 0x300, game_ballPos[0][0] + guRandom() % 20 - 10.0f,
+                       game_ballPos[0][1] - 10.0f + guRandom() % 20 - 10.0f, game_ballPos[0][2] + 10.0f );
     }
-    if ( D_800DF595[1] == 1 && game_lastTeam == 1 && ( ga_frameCount & 1 ) ) {
-        Scene_StartPuff( 0x300, D_800E6560[1][0] + guRandom() % 20 - 10.0f,
-                       D_800E6560[1][1] - 10.0f + guRandom() % 20 - 10.0f, D_800E6560[1][2] + 10.0f );
+    if ( game_ballState[1] == 1 && game_lastTeam == 1 && ( ga_frameCount & 1 ) ) {
+        Scene_StartPuff( 0x300, game_ballPos[1][0] + guRandom() % 20 - 10.0f,
+                       game_ballPos[1][1] - 10.0f + guRandom() % 20 - 10.0f, game_ballPos[1][2] + 10.0f );
     }
 }
 
@@ -289,18 +289,18 @@ void GA_StageFrame6( void ) {
     ( (fileRefB_t *)cache_files[883].data )->scroll[0]--;
     GA_CountFrame();
     if ( game_lastTeam == 1 ) {
-        if ( D_800DF595[0] == 3 && ( ga_frameCount & 3 ) == 0 ) {
-            Scene_StartPuff( 0x301, D_800E6560[0][0] + guRandom() % 10 - 5.0f,
-                           D_800E6560[0][1] + 15.0f + guRandom() % 10 - 5.0f, D_800E6560[0][2] + 10.0f );
+        if ( game_ballState[0] == 3 && ( ga_frameCount & 3 ) == 0 ) {
+            Scene_StartPuff( 0x301, game_ballPos[0][0] + guRandom() % 10 - 5.0f,
+                           game_ballPos[0][1] + 15.0f + guRandom() % 10 - 5.0f, game_ballPos[0][2] + 10.0f );
         }
-        if ( D_800DF595[1] == 3 && ( ga_frameCount & 3 ) == 2 ) {
-            Scene_StartPuff( 0x301, D_800E6560[1][0] + guRandom() % 10 - 5.0f,
-                           D_800E6560[1][1] + 15.0f + guRandom() % 20 - 10.0f, D_800E6560[1][2] + 10.0f );
+        if ( game_ballState[1] == 3 && ( ga_frameCount & 3 ) == 2 ) {
+            Scene_StartPuff( 0x301, game_ballPos[1][0] + guRandom() % 10 - 5.0f,
+                           game_ballPos[1][1] + 15.0f + guRandom() % 20 - 10.0f, game_ballPos[1][2] + 10.0f );
         }
     } else {
-        if ( D_800DF595[0] == 3 && ( ga_frameCount & 1 ) == 0 ) {
-            Scene_StartPuff( 0x301, D_800E6560[0][0] + guRandom() % 10 - 5.0f,
-                           D_800E6560[0][1] + 15.0f + guRandom() % 10 - 5.0f, D_800E6560[0][2] + 10.0f );
+        if ( game_ballState[0] == 3 && ( ga_frameCount & 1 ) == 0 ) {
+            Scene_StartPuff( 0x301, game_ballPos[0][0] + guRandom() % 10 - 5.0f,
+                           game_ballPos[0][1] + 15.0f + guRandom() % 10 - 5.0f, game_ballPos[0][2] + 10.0f );
         }
     }
 }

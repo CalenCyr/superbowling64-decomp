@@ -47,7 +47,7 @@ void Sound_Stop( u64 id );
 void Sound_PlayBgm( s32 index );
 void Sound_StopBgm( void );
 void Sound_UpdateBgmVolume( void );
-void func_80037BD8( void );
+void Sound_AudioInit( void );
 void Sound_WaitFrame( void );
 void Sound_RunAudioTask( rspProgram_t *program );
 void Sound_Init( void );

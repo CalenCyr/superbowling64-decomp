@@ -130,8 +130,8 @@ void Obj_Frame( void ) {
     draw_rdpMode = DRAW2D_FILL;
     for ( i = 0; !( obj_params[i].type <= OBJ_PARAMS_END ); i++ ) {
         if ( obj_params[i].type == OBJ_PARAMS_SKIP ) {
-            Draw_ImageScaled( (u32)obj_params[i].priority, obj_params[i].unk_08[0], obj_params[i].unk_08[1],
-                              (u32)obj_params[i].unk_08[2], obj_params[i].unk_08[3], obj_params[i].unk_08[4] );
+            Draw_ImageScaled( (u32)obj_params[i].priority, obj_params[i].args[0], obj_params[i].args[1],
+                              (u32)obj_params[i].args[2], obj_params[i].args[3], obj_params[i].args[4] );
         }
     }
 }
@@ -515,21 +515,21 @@ objNode_t *Obj_CreateSceneObject( objParams_t *params ) {
     sceneObjectNode_t *node;
     sceneObject_t *obj;
 
-    model = Cache_GetFile( params->unk_08[0], FILE_TYPE1 );
+    model = Cache_GetFile( params->args[0], FILE_TYPE1 );
     node = Mem_Alloc( sizeof( sceneObjectNode_t ) - ( OBJ_MAX_JOINTS - model->numParts ) * sizeof( sceneObjJoint_t ) );
     obj = &node->obj;
     obj->model = model;
-    obj->anim = Cache_GetFile( params->unk_08[1], FILE_TYPE2 );
-    Mtx_SetRotScaleTrans( obj->mtx, params->unk_08[8] * DEG_TO_RAD, params->unk_08[9] * DEG_TO_RAD,
-                          params->unk_08[10] * DEG_TO_RAD, 1.0 - params->unk_08[11], params->unk_08[2],
-                          params->unk_08[3], params->unk_08[4] );
+    obj->anim = Cache_GetFile( params->args[1], FILE_TYPE2 );
+    Mtx_SetRotScaleTrans( obj->mtx, params->args[8] * DEG_TO_RAD, params->args[9] * DEG_TO_RAD,
+                          params->args[10] * DEG_TO_RAD, 1.0 - params->args[11], params->args[2],
+                          params->args[3], params->args[4] );
     obj->frame = 0;
-    obj->viewMask = (u32)params->unk_08[5];
-    obj->flags = (u32)params->unk_08[6];
-    if ( params->unk_08[13] != 0.0f ) {
+    obj->viewMask = (u32)params->args[5];
+    obj->flags = (u32)params->args[6];
+    if ( params->args[13] != 0.0f ) {
         obj->flags |= 0xC000;
     }
-    obj->unk_02 = (u32)params->unk_08[7];
+    obj->unk_02 = (u32)params->args[7];
     obj_scene[(s32)params->priority] = obj;
     return &node->node;
 }

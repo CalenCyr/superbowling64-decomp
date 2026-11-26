@@ -325,7 +325,7 @@ void GA_PlaceBody( gaBody_t *body, gaSpot_t *spot, sceneObject_t *obj, f32 offse
 ================
 GA_PublishBall
 
-Publishes the ball of the player's lane to main: its position, and in D_800DF595 its state (0: no ball,
+Publishes the ball of the player's lane to main: its position, and in game_ballState its state (0: no ball,
 1 or 2 (the lane in GA_InputGutter): motion[0].flags bit 1 set, 3: below -190).
 ================
 */
@@ -334,11 +334,11 @@ void GA_PublishBall( gaPlayer_t *pl ) {
     gaSpot_t *spot = &lane->spots[0];
     u8 state;
 
-    D_800E6560[pl->laneIndex][0] = lane->bodies[0].pos[0];
-    D_800E6560[pl->laneIndex][1] = lane->bodies[0].pos[1];
-    D_800E6560[pl->laneIndex][2] = lane->bodies[0].pos[2];
+    game_ballPos[pl->laneIndex][0] = lane->bodies[0].pos[0];
+    game_ballPos[pl->laneIndex][1] = lane->bodies[0].pos[1];
+    game_ballPos[pl->laneIndex][2] = lane->bodies[0].pos[2];
     if ( lane->bodies[0].standState == 0 ) {
-        D_800DF595[pl->laneIndex] = 0;
+        game_ballState[pl->laneIndex] = 0;
         return;
     }
     if ( ( lane->motion[0].flags >> 1 ) & 1 ) {
@@ -353,7 +353,7 @@ void GA_PublishBall( gaPlayer_t *pl ) {
     if ( spot->pos[1] <= -190.0f ) {
         state = 3;
     }
-    D_800DF595[pl->laneIndex] = state;
+    game_ballState[pl->laneIndex] = state;
 }
 
 /*

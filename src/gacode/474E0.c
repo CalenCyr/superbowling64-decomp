@@ -585,10 +585,10 @@ GA_KeepOnFloor
 Keeps a body's spot (and spot2, unless its radius is 0) inside the floor grid and on the floor: a spot
 that sank under the floor is lifted back onto it (unless GA_SlopeContact handles the contact) and its
 fall turned into a damped bounce (motion flag 2). Returns 1 when the body lands with spot, 2 when it
-bounces with spot, else 0. Gravity (1.0889) is then applied.
+bounces with spot, else 0. Gravity (1.0889) is then applied. floorHeight (the stage's) is not used.
 ================
 */
-s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 ceiling, f32 arg4 ) {
+s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 ceiling, f32 floorHeight ) {
     vec3_t normal;
     f32 floor;
     f32 bottom2;

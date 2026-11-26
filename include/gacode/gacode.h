@@ -26,8 +26,8 @@ MAIN (functions and globals of main units without a header yet, under their curr
 ==============================================================================
 */
 
-extern f32 D_800E6560[2][3];        /* per lane: position of the ball */
-extern u8 D_800DF595[2];            /* per lane: state of the ball (GA_PublishBall) */
+extern f32 game_ballPos[2][3];        /* per lane: position of the ball */
+extern u8 game_ballState[2];            /* per lane: state of the ball (GA_PublishBall) */
 
 /* Main's game setup (game_setup): only the members the overlay uses. Name invented. */
 typedef struct {
@@ -124,7 +124,7 @@ typedef struct {
 /* What gaCharacter_t.data points to. Name invented. */
 typedef struct {
     /* 0x00 */ s16 *fileIndices;            /* file indices */
-    /* 0x04 */ f32 unk_04;                  /* objParams_t.unk_08[4] of the player's scene object */
+    /* 0x04 */ f32 unk_04;                  /* objParams_t.args[4] of the player's scene object */
     /* 0x08 */ s8 ballJoint;                /* +-: a joint of the player's object */
     /* 0x09 */ u8 unk_09[0x03];
     /* 0x0C */ vec3_t ballOffset;           /* offset of the ball from that joint */
@@ -479,7 +479,7 @@ s32 GA_ApproachLimit( f32 *value, f32 *speed, f32 limit );
 s32 GA_CollideLane( s32 player, gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots, u8 lane );
 void GA_SettleBodies( gaBody_t *bodies, gaMotion_t *motion, gaSpot_t *spots );
 void GA_KeepInGrid( gaSpot_t *spot, gaSpot_t *spot2, gaMotion_t *motion, f32 ceiling );
-s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 ceiling, f32 arg4 );
+s32 GA_KeepOnFloor( gaMotion_t *motion, gaSpot_t *spot, gaSpot_t *spot2, f32 ceiling, f32 floorHeight );
 f32 GA_FloorHeight( f32 x, f32 z, vec3_t normal );
 s32 GA_SlopeContact( gaMotion_t *motion, gaSpot_t *spot, vec3_t normal );
 f32 GA_AimSpin( vec3_t pos, vec3_t vel, f32 x, f32 scale );

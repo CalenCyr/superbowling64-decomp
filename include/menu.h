@@ -59,7 +59,7 @@ void Menu_DrawItems( menuItem_t *items, u8 step );
 void Menu_DrawNamePlate( s32 player, u8 cpu, u16 *name, s16 x, s16 y );
 void Score_DrawTeamBoard( u8 mode, u8 all, s16 x, s16 y );
 void Score_DrawParCard( u8 kind, u8 all, s16 x, s16 y );
-void Score_DrawAllBoards( s32 arg0, s16 x, s16 y );
+void Score_DrawAllBoards( s32 unused, s16 x, s16 y );
 void Score_DrawPlayerBoard( s32 player, s16 x, s16 y );
 void Score_DrawRecordTable( u16 count, playerRecord_t *records, u8 kind, s16 x, s32 y );
 void Menu_DrawSmallNamePlate( s32 player, u8 cpu, u16 *name, u8 noIcon, s16 x, s16 y );

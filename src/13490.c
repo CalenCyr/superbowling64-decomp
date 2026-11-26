@@ -771,10 +771,10 @@ void Score_DrawTotal( s32 player, u8 duel, s16 x, s16 y ) {
 Score_DrawAllBoards
 
 Draws the scoreboard of every player at (x, y): the numbered heads of the ten frames, then per player its name
-plate and its ten frames, marking the frames already played.
+plate and its ten frames, marking the frames already played. unused is not read (0 from the game, 1 from the results).
 ================
 */
-void Score_DrawAllBoards( s32 arg0, s16 x, s16 y ) {
+void Score_DrawAllBoards( s32 unused, s16 x, s16 y ) {
     s32 i;
     s32 player;
     s16 frameX;

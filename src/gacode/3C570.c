@@ -62,9 +62,9 @@ void GA_Init( void ) {
     params = ga_stage->scene;
     for ( i = 0; i < game_numPlayers; i++, params++ ) {
         character = game_players[i] & 0xF;
-        params->unk_08[0] = ga_characterFiles[character][0];
-        params->unk_08[1] = ga_characterFiles[character][1];
-        params->unk_08[4] = ga_characterData[character].unk_04;
+        params->args[0] = ga_characterFiles[character][0];
+        params->args[1] = ga_characterFiles[character][1];
+        params->args[4] = ga_characterData[character].unk_04;
     }
     Obj_CreateAll( ga_classes, ga_stage->scene );
     if ( ga_stage->ambientSound >= 0 ) {

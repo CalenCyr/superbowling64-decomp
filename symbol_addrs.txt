@@ -618,7 +618,7 @@ ga_spinImages = 0x801236B0; // segment:gacode size:0x10
 ga_menuPages = 0x80123608; // segment:gacode size:0x78
 ga_characterFiles = 0x80123A14; // segment:gacode size:0x8C
 ga_characterData = 0x80123AA0; // segment:gacode size:0x140
-D_800E6560 = 0x800E6560; // size:0x18
+game_ballPos = 0x800E6560; // size:0x18
 audio_samplePiHandle = 0x800693D8; // size:0x4
 game_gamesWon = 0x800693DC; // size:0x2
 
@@ -1558,3 +1558,5 @@ cont_noteState = 0x80066C00; // size:0x20
 game_pinFrame = 0x80066C20; // size:0x4
 game_secondBallPins = 0x800F7C18; // size:0x60
 save_pakId = 0x800693E8; // size:0x20
+game_ballState = 0x800DF595; // size:0x3
+Sound_AudioInit = 0x80037BD8; // type:func

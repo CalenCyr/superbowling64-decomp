@@ -74,8 +74,8 @@ void Cam_ReadPathFrame( s16 file, s16 frame, f32 *eye, f32 *upPoint ) {
 ================
 Cam_Create
 
-Creates a camera from params: its path (unk_08[0]) with the starting eye, at and up point, its viewport size and
-target (unk_08[1] to unk_08[6]), the path's light and a grey one from the eye, and lists it in cam_cameras and,
+Creates a camera from params: its path (args[0]) with the starting eye, at and up point, its viewport size and
+target (args[1] to args[6]), the path's light and a grey one from the eye, and lists it in cam_cameras and,
 by priority, in obj_scene.
 ================
 */
@@ -86,19 +86,19 @@ objNode_t *Cam_Create( objParams_t *params ) {
 
     node = Mem_Alloc( sizeof( sceneCameraNode_t ) );
     cam = &node->cam;
-    cam->path = Cache_GetFile( params->unk_08[0], FILE_TYPE3 );
+    cam->path = Cache_GetFile( params->args[0], FILE_TYPE3 );
     for ( i = 0; i < 3; i++ ) {
         cam->at[i] = cam->path->at[i];
         cam->eye[i] = cam->path->eye[i];
         cam->upPoint[i] = cam->path->upPoint[i];
     }
     cam_cameras[cam_count++] = cam;
-    cam->width = params->unk_08[1];
-    cam->height = params->unk_08[2];
-    cam->left = params->unk_08[3];
-    cam->top = params->unk_08[4];
-    cam->targetObj = params->unk_08[5];
-    cam->targetJoint = params->unk_08[6];
+    cam->width = params->args[1];
+    cam->height = params->args[2];
+    cam->left = params->args[3];
+    cam->top = params->args[4];
+    cam->targetObj = params->args[5];
+    cam->targetJoint = params->args[6];
     for ( i = 0; i < 2; i++ ) {
         /* the path's Lights1 is the ambient and first light of the Lights2: one 0x18-byte copy */
         *(Lights1 *)&cam->lights[i] = *cam->path->light;

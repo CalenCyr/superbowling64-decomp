@@ -23,7 +23,7 @@ static s16 sound_bgmFiles[20] = {           /* str file of each BGM */
     0x0B72, 0x0B71, 0x0B70, 0x0B6F, 0x0B6E, 0x0B6D, 0x0B6C, 0x0B6B, 0x0B6A, 0x0B69,
     0x0B68, 0x0B67, 0x0B66, 0x0B65, 0x0B64, 0x0B63, 0x0B62, 0x0B61, 0x0B60, 0x0B5F,
 };
-static audioTaskFuncs_t sound_taskFuncs = { func_80037BD8, Sound_WaitFrame, Sound_RunAudioTask };
+static audioTaskFuncs_t sound_taskFuncs = { Sound_AudioInit, Sound_WaitFrame, Sound_RunAudioTask };
 
 /*
 ================
@@ -133,10 +133,10 @@ void Sound_UpdateBgmVolume( void ) {
 
 /*
 ================
-func_80037BD8
+Sound_AudioInit
 ================
 */
-void func_80037BD8( void ) {
+void Sound_AudioInit( void ) {
 }
 
 /*

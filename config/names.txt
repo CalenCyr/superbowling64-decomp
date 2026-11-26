@@ -1658,3 +1658,7 @@ mem_unused	0x80062A28	invented: word Mem_Reset clears; nothing reads it
 rs_modeArg	0x801142B4	invented: game_mode >> 6, the game mode's argument (RS_RankAndRecord)
 gs_pakCheckImages	0x80120660	invented: images GS_PakCheck cycles through by gs_pakCheckFrames
 game_scoresCleared	0x8005C164	invented: set to 1 by GA_ClearScores; nothing reads it
+game_ballPos	0x800E6560	invented: per lane: the ball's position, published by GA_PublishBall for main's scene effects
+game_ballState	0x800DF595	invented: per lane: the ball's state, published by GA_PublishBall (read by the stage effects)
+objParams_t.args	object.h	invented: class-specific arguments of the record (scene object: model, animation, position, view mask, flags; camera: path, viewport, target; image: x, y, alpha, scales)
+Sound_AudioInit	0x80037BD8	invented: the init callback of sound_taskFuncs (audioTaskFuncs_t.init); empty

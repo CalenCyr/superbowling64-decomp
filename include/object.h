@@ -9,14 +9,14 @@
 #include "filecache.h"
 
 #define OBJ_PARAMS_SKIP     2.0f        /* objParams_t.type: no object; Obj_Frame draws it as an image: priority is
-                                           its id, unk_08[0..4] its x, y, alpha and x and y scales */
+                                           its id, args[0..4] its x, y, alpha and x and y scales */
 #define OBJ_PARAMS_END      -1.0f       /* objParams_t.type: ends the records */
 
 /* Parameter record of one object, all floats; Obj_CreateAll reads them in an array. */
 typedef struct {
     /* 0x00 */ f32 type;            /* index into obj_classes */
     /* 0x04 */ f32 priority;
-    /* 0x08 */ f32 unk_08[14];
+    /* 0x08 */ f32 args[14];
 } objParams_t;                      /* size 0x40 */
 
 /* Header of every object; the list from obj_list is kept in priority order. */
