@@ -7,6 +7,10 @@
 #include "functions.h"
 #include "variables.h"
 
+/* ===== State ===== */
+
+static ALHeap snd_heap;
+
 /*
 ================
 Snd_InitHeap

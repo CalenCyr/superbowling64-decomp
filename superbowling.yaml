@@ -378,7 +378,14 @@ segments:
       - [0x3C1E0, .rodata, libkmc/asin]
       - [0x3C220, .rodata, libkmc/atan]
       - [0x3C280, .rodata, libkmc/sqrt]
-      - { type: bss, vram: 0x80060EA0 }
+      # .bss of the game units, in link order: file-scope statics, in definition order
+      - { type: bss, vram: 0x80060EA0 }    # 1060 to 111A0: asm
+      - { type: .bss, vram: 0x80064310, name: 12260 }
+      - { type: .bss, vram: 0x80064320, name: 166B0 }
+      - { type: bss, vram: 0x80064390, name: 1A7A0 }   # asm: 0x800643CC-0x800643D0 unreferenced
+      - { type: .bss, vram: 0x800643E0, name: 1ADA0 }
+      - { type: .bss, vram: 0x800645A0, name: 1B060 }
+      - { type: .bss, vram: 0x800645B0, name: 1B1A0 }
       - { type: lib, vram: 0x800645C0, name: libgultra_rom, object: pimgr, section: .bss }
       - { type: lib, vram: 0x80065790, name: libgultra_rom, object: piacs, section: .bss }
       - { type: lib, vram: 0x800657A0, name: libgultra_rom, object: sptask, section: .bss }

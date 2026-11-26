@@ -26,10 +26,8 @@
 
 
 extern u8 save_enabled;             /* saving is on */
-extern s32 save_contMsg;            /* message to and from the controller thread */
 extern u8 D_800693E8[0x20];          /* cont_pakPfs.id of the pak saving is enabled on */
 extern s32 save_promptState;        /* PROMPT_CLOSED etc. */
-extern s32 save_promptFrame;        /* frame of the zoom, or of a PROMPT_TIMED prompt */
 extern u16 save_promptChoice;       /* choice under the cursor */
 /* cursor rectangle of each choice, from the prompt's corner. Two entries each: the next bss objects
    (cont_held, scene_twoCycle, __osContLastCmd; unused bss after the heights) follow each; a three-choice

@@ -10,6 +10,13 @@
 #include "functions.h"
 #include "variables.h"
 
+/* ===== State ===== */
+
+static u32 snd_frameSize;           /* samples per audio frame, a multiple of AUDIO_FRAME_SAMPLES */
+static u32 snd_minFrameSize;        /* snd_frameSize - AUDIO_FRAME_SAMPLES */
+static u32 snd_maxFrameSize;        /* snd_frameSize + AUDIO_FRAME_SAMPLES */
+static u32 snd_extraSamples;        /* queued samples kept ahead of the AI */
+
 /*
 ================
 Snd_InitFrameSizes

@@ -10,6 +10,11 @@
 #include "sprite.h"
 #include "save.h"
 
+/* ===== State ===== */
+
+static s32 save_promptFrame;        /* frame of the zoom, or of a PROMPT_TIMED prompt */
+static s32 save_contMsg;            /* message to and from the controller thread */
+
 /* ===== Data ===== */
 
 static u8 save_step = 0;                   /* step of Save_SaveSettings */

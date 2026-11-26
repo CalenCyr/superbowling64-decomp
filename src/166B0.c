@@ -16,6 +16,32 @@
 #include "structs.h"
 #include "variables.h"
 
+/* ===== State ===== */
+
+static ALPlayer snd_player;
+static s32 snd_numChannels;         /* entries in snd_channels */
+static N_ALVoice *snd_voices;       /* one per channel from snd_voiceChannels on */
+static sndChannel_t *snd_channels;
+static sndChannel_t *snd_voiceChannels;  /* &snd_channels[NUM_MASTER_CHANNELS] */
+static s32 snd_tickRate;            /* ticks per second */
+static s32 snd_tickTime;            /* microseconds per tick */
+static u16 snd_seVolume;            /* volume scale of SE channels, 0x7FFF: 1 */
+static u16 snd_bgmVolume;           /* volume scale of BGM channels */
+static s32 snd_nextId;              /* id of the next started sound */
+static s32 snd_randomSeed;          /* Snd_Random shift register */
+static waveBank_t *snd_nextWaveBank;  /* wave bank of the next started channel, then NULL */
+static waveBank_t *snd_defaultWaveBank;  /* wave bank while snd_nextWaveBank is NULL */
+static s32 snd_seqFxEnabled;        /* 1: Snd_CmdFxType may change the effect */
+static s32 snd_fxType;              /* effect setting last given to Snd_SetFxType */
+static seTable_t *snd_seTable;      /* default SE table */
+static seTable_t *snd_nextSeTable;  /* used once, by the next Snd_PlaySe, instead of snd_seTable */
+static void (*snd_markerCallback)( s32 id, s32 value );  /* called by Snd_CmdMarker */
+/* ring buffer of snd_numMsgs messages: Snd_PostMessage writes at snd_msgWrite, Snd_PlayerHandler reads at snd_msgRead */
+static s32 snd_msgRead;
+static s32 snd_msgWrite;
+static s32 snd_numMsgs;
+static sndMsg_t *snd_msgs;
+
 /* The low byte of x as a signed value. */
 #define SEXT8( x ) ( ( ( x ) & 0x80 ) ? ( ( x ) & 0xFF ) - 0x100 : ( ( x ) & 0xFF ) )
 

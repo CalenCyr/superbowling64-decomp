@@ -8,6 +8,13 @@
 #include "functions.h"
 #include "variables.h"
 
+/* ===== State ===== */
+
+static OSThread audio_thread;       /* the audio thread */
+static u8 *audio_stack;             /* its stack */
+static audioBuffer_t *audio_buffers;  /* NUM_AUDIO_BUFFERS output buffers */
+static Acmd *audio_cmdList;         /* the frame's command list */
+
 /* ===== Data ===== */
 
 /* the audio thread's routines, unless another table stands in */
