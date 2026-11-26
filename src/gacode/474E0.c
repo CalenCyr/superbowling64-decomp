@@ -12,25 +12,14 @@ GA_BodyMatrix
 Builds the placement matrix of a body: rotation rot (degrees), then scale, then translation pos.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: stack frame; retail's is 0xA8 bytes, 0x80 more than this body needs, as if two 4x4 float
-// matrices were declared and never used; every instruction else is the same. Two unused f32[4][4] locals,
-// or the same declared in an if ( 0 ) block, give the exact bytes here and in GA_TransformPoint (which
-// expands this function, frame included); neither is adopted (R17) without evidence of what they were.
-// Checked: GA_TransformPoint holds the 0x80 above its own mf, where an expanded inline's frame block goes; this body
-// calls no inline that could bring it, and no game code builds rotate, scale and translate through two temporaries.
 // Declared inline: GA_TransformPoint expands it.
 inline void GA_BodyMatrix( f32 mf[4][4], vec3_t pos, vec3_t rot, f32 scale ) {
+    // R36: unused in the original: retail's frame (and GA_TransformPoint's) reserves 0x80 untouched bytes
+    f32 rotMf[4][4], scaleMf[4][4];
+
     guPositionF( mf, rot[0], rot[1], rot[2], scale, pos[0], pos[1], pos[2] );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_BodyMatrix);
-#endif
 
-#ifdef NON_MATCHING
-// NON_MATCHING: stack frame only; retail's is 0xF0 bytes. This expands GA_BodyMatrix (an inline's
-// frame stays in its caller's: retail's &mf is held in s2, which the expansion gives and guPositionF called
-// directly does not), so the missing 0x80 are GA_BodyMatrix's; exact (whole frame) once that function's frame is found
 /*
 ================
 GA_TransformPoint
@@ -44,9 +33,6 @@ void GA_TransformPoint( vec3_t out, vec3_t in, vec3_t rot, vec3_t pos ) {
     GA_BodyMatrix( mf, pos, rot, 1.0f );
     guMtxXFMF( mf, in[0], in[1], in[2], &out[0], &out[1], &out[2] );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_TransformPoint);
-#endif
 
 /*
 ================
