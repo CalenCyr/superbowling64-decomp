@@ -915,12 +915,12 @@ s32 GA_PickAimPin( vec3_t out, gaBody_t *bodies, gaSpot_t *spots, s32 side ) {
 
 /*
 ================
-func_801205A0_gacode
+GA_AimSpin
 ================
 */
-f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale ) {
+f32 GA_AimSpin( vec3_t pos, vec3_t vel, f32 x, f32 scale ) {
     f32 dx = x - pos[0];
-    f32 width = 730.0f - ga_stage->unk_08;
+    f32 width = 730.0f - ga_stage->hookStartZ;
     f32 dz;
     f32 vx;
     f32 vz;
@@ -933,7 +933,7 @@ f32 func_801205A0_gacode( vec3_t pos, vec3_t vel, f32 x, f32 scale ) {
     vz = scale * vel[2];
     vx = scale * vel[0];
     return ( vz * vz * 2 * dx - vx * 2 * vz * ( width + dz ) )
-         / ( width * width + width * 2 * dz + ga_stage->unk_10 * ( dz * dz ) ) * 15.0 / ga_stage->hook;
+         / ( width * width + width * 2 * dz + ga_stage->slide * ( dz * dz ) ) * 15.0 / ga_stage->hook;
 }
 
 /*
@@ -1503,17 +1503,17 @@ void GA_ClearScores( void ) {
         D_80066C00.unk_20[player] = 0;
     }
     ga_pinsDown = 0;
-    D_8012D651_gacode = 0;
+    ga_lastScorer = 0;
     D_8005C164 = 1;
 }
 
 /*
 ================
-func_80121FD0_gacode
+GA_ScoreThrow
 ================
 */
-void func_80121FD0_gacode( u8 player, u8 pinsHit ) {
-    D_8012D651_gacode = player;
+void GA_ScoreThrow( u8 player, u8 pinsHit ) {
+    ga_lastScorer = player;
     ga_pinsDown = pinsHit;
     switch ( game_throw[player] ) {
     case 0:

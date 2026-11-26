@@ -62,8 +62,8 @@ void GA_Init( void ) {
     params = ga_stage->scene;
     for ( i = 0; i < game_numPlayers; i++, params++ ) {
         character = game_players[i] & 0xF;
-        params->unk_08[0] = D_80123A14_gacode[character][0];
-        params->unk_08[1] = D_80123A14_gacode[character][1];
+        params->unk_08[0] = ga_characterFiles[character][0];
+        params->unk_08[1] = ga_characterFiles[character][1];
         params->unk_08[4] = ga_characterData[character].unk_04;
     }
     Obj_CreateAll( ga_classes, ga_stage->scene );
@@ -72,7 +72,7 @@ void GA_Init( void ) {
     } else {
         ga_sound = 0;
     }
-    GA_SetupLanes( game_lastTeam, ga_stage->unk_04, ( game_mode & 0xF ) == 3 );
+    GA_SetupLanes( game_lastTeam, ga_stage->laneOffset, ( game_mode & 0xF ) == 3 );
     GA_ClearScores();
     for ( i = 0; i < 2; i++ ) {
         game_gamesWon[i] = 0;
@@ -458,9 +458,9 @@ void GA_SetupStandardGame( void ) {
         ga_bgm = ga_stage->bgm;
         break;
     case 1:
-        GA_ShuffleOrder( D_800DF59C.unk_04, 25, 0 );
+        GA_ShuffleOrder( game_setup.frameSetups, 25, 0 );
         for ( i = 0; i < 9; i++ ) {
-            game_frameFlags[0][i] = D_80123950_gacode[D_800DF59C.unk_04[i]].unk_00;
+            game_frameFlags[0][i] = ga_parPinSets[game_setup.frameSetups[i]].par;
             game_splits[0] += game_frameFlags[0][i];
         }
         /* the arguments that share a state still have a case each (retail keeps one block per case) */
@@ -475,10 +475,10 @@ void GA_SetupStandardGame( void ) {
         ga_bgm = ga_stage->bgm;
         break;
     case 2:
-        GA_ShuffleOrder( &D_800DF59C.unk_04[0], 5, 0 );
-        GA_ShuffleOrder( &D_800DF59C.unk_04[3], 5, 5 );
-        GA_ShuffleOrder( &D_800DF59C.unk_04[6], 5, 10 );
-        D_800DF59C.unk_04[9] = 15;
+        GA_ShuffleOrder( &game_setup.frameSetups[0], 5, 0 );
+        GA_ShuffleOrder( &game_setup.frameSetups[3], 5, 5 );
+        GA_ShuffleOrder( &game_setup.frameSetups[6], 5, 10 );
+        game_setup.frameSetups[9] = 15;
         for ( i = 0; i < game_numPlayers; i++ ) {
             game_throw[i] = 5;
         }
@@ -505,13 +505,13 @@ void GA_StartMode( gaState_t state, gaPlayerFunc_t mode ) {
     ga_modeLoop = state;
     ga_gameMode = mode;
     if ( mode == GA_ScorePinEditor ) {
-        ga_endThrowFunc = func_80115D38_gacode;
+        ga_endThrowFunc = GA_EndThrowNextTurn;
     } else if ( mode == GA_ScorePar ) {
-        ga_endThrowFunc = func_80115CDC_gacode;
+        ga_endThrowFunc = GA_EndThrowFrame;
     } else if ( mode == GA_ScoreSetupGame ) {
-        ga_endThrowFunc = func_80115D38_gacode;
+        ga_endThrowFunc = GA_EndThrowNextTurn;
     } else if ( mode == GA_ScoreBattle ) {
-        ga_endThrowFunc = func_80115CDC_gacode;
+        ga_endThrowFunc = GA_EndThrowFrame;
     } else {
         ga_endThrowFunc = GA_EndTurn;
     }
@@ -632,7 +632,7 @@ s32 GA_TeamGameLoop( void ) {
                 flagged += game_playerDone[ga_teamPlayers[team][i]] != 0;
             }
             if ( flagged == players ) {
-                func_80115D70_gacode( ga_teamPlayers[team][0], 0 );
+                GA_ParkLane( ga_teamPlayers[team][0], 0 );
             } else {
                 GA_NextTeamPlayer( &ga_teamCurrent[team], ga_teamCurrent[team], team );
             }
@@ -697,7 +697,7 @@ s32 GA_PairGameLoop( void ) {
                 }
             }
             if ( done ) {
-                func_80115D70_gacode( ga_teamPlayers[team][ga_teamCurrent[team]], 0 );
+                GA_ParkLane( ga_teamPlayers[team][ga_teamCurrent[team]], 0 );
             }
         }
     }
@@ -732,9 +732,9 @@ s32 GA_ParGameLoop( void ) {
                 flagged += game_playerDone[ga_teamPlayers[team][i]] != 0;
             }
             if ( flagged == players ) {
-                func_80115D70_gacode( ga_teamPlayers[team][0], 0 );
+                GA_ParkLane( ga_teamPlayers[team][0], 0 );
             } else if ( ga_teamCurrent[team] == 0 ) {
-                func_80115D70_gacode( ga_teamPlayers[team][0], 1 );
+                GA_ParkLane( ga_teamPlayers[team][0], 1 );
             }
         }
     }
@@ -765,7 +765,7 @@ s32 GA_DuelLoop( void ) {
     for ( i = 0; i < 2; i++ ) {
         results[i] = GA_RunPlayer( i );
         if ( results[i] > 0 && game_playerDone[i] ) {
-            func_80115D70_gacode( i, 1 );
+            GA_ParkLane( i, 1 );
         }
     }
     if ( GA_StopViewHandlers( 1 ) ) {
@@ -804,7 +804,7 @@ s32 GA_DistanceLoop( void ) {
     for ( i = 0; i < 2; i++ ) {
         results[i] = GA_RunPlayer( i );
         if ( results[i] > 0 && game_playerDone[i] ) {
-            func_80115D70_gacode( i, 1 );
+            GA_ParkLane( i, 1 );
         }
     }
     if ( GA_StopViewHandlers( 1 ) ) {

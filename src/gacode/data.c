@@ -10,13 +10,13 @@
 
 /* ===== The spin gauge (GA_SetGaugeSprites) ===== */
 
-s16 D_80123690_gacode[16] = {
+s16 ga_spinImageIds[16] = {
     0x0AF2, 0x0AF1, 0x0AF0, 0x0AEF, 0x0AEE, 0x0AED, 0x0AED, 0x0000,
     0x0AEC, 0x0AEB, 0x0AEA, 0x0AE9, 0x0AE8, 0x0AE7, 0x0AE7, 0x0000,
 };
-gaImageList_t D_801236B0_gacode[2] = {
-    { { 0, 0 }, 0, 6, D_80123690_gacode },
-    { { 0, 0 }, 0, 6, D_80123690_gacode },
+gaImageList_t ga_spinImages[2] = {
+    { { 0, 0 }, 0, 6, ga_spinImageIds },
+    { { 0, 0 }, 0, 6, ga_spinImageIds },
 };
 
 /* ===== Splits (GA_IsSplit) ===== */
@@ -56,7 +56,7 @@ u16 ga_splits6[1 + 1] = {
 
 /* ===== Game modes, characters and stages ===== */
 
-gaPinSetup_t D_801237F0_gacode[16] = {
+gaPinSetup_t ga_setupPinSets[16] = {
     { 1, 0, 0x164, 0x0ACE },
     { 1, 0, 0x348, 0x0AD1 },
     { 1, 0, 0x104, 0x0ACF },
@@ -92,7 +92,7 @@ f32 ga_cpuThrows[16][4] = {
     { 15.42f, 0.0f, 16.4f, 4.68f },
     { 0.0f, -36.64f, 10.0f, 8.57f },
 };
-gaPinSetup_t D_80123950_gacode[25] = {
+gaPinSetup_t ga_parPinSets[25] = {
     { 1, 0, 0x226, 0x0000 },
     { 2, 0, 0x055, 0x0000 },
     { 2, 0, 0x20F, 0x0000 },
@@ -119,11 +119,11 @@ gaPinSetup_t D_80123950_gacode[25] = {
     { 1, 0, 0x10A, 0x0000 },
     { 1, 0, 0x3FF, 0x0000 },
 };
-f32 D_801239E8_gacode[11] = {
+f32 ga_ballMasses[11] = {
     23.5f, 23.6f, 23.7f, 23.8f, 23.9f, 24.0f,
     24.1f, 24.2f, 24.3f, 24.4f, 24.5f,
 };
-s16 D_80123A14_gacode[10][7] = {
+s16 ga_characterFiles[10][7] = {
     { 0x0462, 0x07D6, 0x07FE, 0x07D5, 0x07D7, 0x07FE, 0x07D9 },
     { 0x04E0, 0x07DF, 0x07DE, 0x07DD, 0x07E0, 0x07DA, 0x07E1 },
     { 0x06DC, 0x07FB, 0x07F7, 0x07F6, 0x07F8, 0x07F5, 0x07FA },
@@ -136,14 +136,14 @@ s16 D_80123A14_gacode[10][7] = {
     { 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 },
 };
 gaCharacterData_t ga_characterData[10] = {
-    { D_80123A14_gacode[0], 980.0f, 6, { 0 }, { 25.592f, -21.006f, -2.49f }, 61, 77, 100, { 100, 60, 120, 100, 60 } },
-    { D_80123A14_gacode[1], 980.0f, 12, { 0 }, { -22.56f, -14.2644f, 0.144f }, 60, 76, 100, { 135, 75, 140, 135, 120 } },
-    { D_80123A14_gacode[2], 980.0f, 10, { 0 }, { -24.0f, -16.0f, 0.0f }, 61, 77, 100, { 89, 170, 89, 120, 60 } },
-    { D_80123A14_gacode[3], 980.0f, 6, { 0 }, { 24.0f, -6.0f, 0.0f }, 65, 110, 130, { 120, 170, 100, 120, 110 } },
-    { D_80123A14_gacode[4], 980.0f, -14, { 0 }, { 21.0f, -71.0f, 0.0f }, 84, 101, 120, { 160, 170, 160, 150, 130 } },
-    { D_80123A14_gacode[5], 980.0f, 6, { 0 }, { 25.338f, -29.416f, 0.0f }, 63, 77, 110, { 140, 140, 130, 140, 130 } },
-    { D_80123A14_gacode[6], 980.0f, 9, { 0 }, { -24.0f, -9.0f, 0.0f }, 80, 100, 125, { 100, 120, 115, 80, 100 } },
-    { D_80123A14_gacode[7], 980.0f, 13, { 0 }, { 22.9f, -11.836f, 0.38596f }, 69, 83, 112, { 140, 140, 140, 140, 140 } },
+    { ga_characterFiles[0], 980.0f, 6, { 0 }, { 25.592f, -21.006f, -2.49f }, 61, 77, 100, { 100, 60, 120, 100, 60 } },
+    { ga_characterFiles[1], 980.0f, 12, { 0 }, { -22.56f, -14.2644f, 0.144f }, 60, 76, 100, { 135, 75, 140, 135, 120 } },
+    { ga_characterFiles[2], 980.0f, 10, { 0 }, { -24.0f, -16.0f, 0.0f }, 61, 77, 100, { 89, 170, 89, 120, 60 } },
+    { ga_characterFiles[3], 980.0f, 6, { 0 }, { 24.0f, -6.0f, 0.0f }, 65, 110, 130, { 120, 170, 100, 120, 110 } },
+    { ga_characterFiles[4], 980.0f, -14, { 0 }, { 21.0f, -71.0f, 0.0f }, 84, 101, 120, { 160, 170, 160, 150, 130 } },
+    { ga_characterFiles[5], 980.0f, 6, { 0 }, { 25.338f, -29.416f, 0.0f }, 63, 77, 110, { 140, 140, 130, 140, 130 } },
+    { ga_characterFiles[6], 980.0f, 9, { 0 }, { -24.0f, -9.0f, 0.0f }, 80, 100, 125, { 100, 120, 115, 80, 100 } },
+    { ga_characterFiles[7], 980.0f, 13, { 0 }, { 22.9f, -11.836f, 0.38596f }, 69, 83, 112, { 140, 140, 140, 140, 140 } },
     { 0 },
     { 0 },
 };
@@ -160,26 +160,26 @@ gaCharacter_t ga_characters[10] = {
     { 0 },
 };
 gaStage_t ga_stages[8] = {
-    { D_801240B0_gacode, 195.0f, -470.0f, 0.008206216f, 8.0f, 0.0f, 0x0B5C, 2, 69, { 0x0011, 0x0013, 0x0014, 0x0015, 0x0016, 0x0018, 0x0019, 0x001A, 0x0000 }, func_80122470_gacode },
-    { D_80125070_gacode, 256.0f, 730.0f, 0.008206216f, 8.0f, 0.0f, 0x0B5D, 7, -1, { 0x0011, 0x0013, 0x0014, 0x0015, 0x0016, 0x0018, 0x0019, 0x001A, 0x0000 }, func_801224F8_gacode },
+    { D_801240B0_gacode, 195.0f, -470.0f, 0.008206216f, 8.0f, 0.0f, 0x0B5C, 2, 69, { 0x0011, 0x0013, 0x0014, 0x0015, 0x0016, 0x0018, 0x0019, 0x001A, 0x0000 }, GA_StageFrame0 },
+    { D_80125070_gacode, 256.0f, 730.0f, 0.008206216f, 8.0f, 0.0f, 0x0B5D, 7, -1, { 0x0011, 0x0013, 0x0014, 0x0015, 0x0016, 0x0018, 0x0019, 0x001A, 0x0000 }, GA_StageFrame1 },
     { D_801268F0_gacode, 256.0f, -470.0f, 0.008206216f, 8.0f, 0.0f, 0x0B5C, 3, -1, { 0x0011, 0x0013, 0x0014, 0x0015, 0x0016, 0x0018, 0x0019, 0x001A, 0x0000 }, GA_AnimateTextures },
-    { D_80127470_gacode, 256.0f, 730.0f, 0.008206216f, 8.0f, 0.0f, 0x0B5C, 6, 68, { 0x0011, 0x001D, 0x0028, 0x0029, 0x002A, 0x002C, 0x002D, 0x002E, 0x0000 }, func_80122BD8_gacode },
-    { D_80128470_gacode, 256.0f, -1186.0f, 0.008206216f, 1.0f, 0.0f, 0x0B5E, 5, -1, { 0x001B, 0x001D, 0x001E, 0x001F, 0x0020, 0x0022, 0x0023, 0x0024, 0x0000 }, func_80122C60_gacode },
+    { D_80127470_gacode, 256.0f, 730.0f, 0.008206216f, 8.0f, 0.0f, 0x0B5C, 6, 68, { 0x0011, 0x001D, 0x0028, 0x0029, 0x002A, 0x002C, 0x002D, 0x002E, 0x0000 }, GA_StageFrame3 },
+    { D_80128470_gacode, 256.0f, -1186.0f, 0.008206216f, 1.0f, 0.0f, 0x0B5E, 5, -1, { 0x001B, 0x001D, 0x001E, 0x001F, 0x0020, 0x0022, 0x0023, 0x0024, 0x0000 }, GA_StageFrame4 },
     { D_80128FB0_gacode, 256.0f, -1186.0f, 0.008206216f, 1.0f, 0.0f, 0x0B5C, 8, -1, { 0x0011, 0x0013, 0x0014, 0x0015, 0x0016, 0x0018, 0x0019, 0x001A, 0x0000 }, GA_FlickerLight },
-    { D_80129DB0_gacode, 256.0f, 0.0f, 0.004484796f, 8.0f, -215.0f, 0x0B5B, 4, 71, { 0x0011, 0x001D, 0x0028, 0x0029, 0x002A, 0x002C, 0x002D, 0x002E, 0x0000 }, func_80123004_gacode },
-    { D_8012AE30_gacode, 256.0f, 0.0f, 0.004484796f, 8.0f, 0.0f, 0x0B5C, 9, -1, { 0x0011, 0x0013, 0x0014, 0x0015, 0x0016, 0x0018, 0x0019, 0x001A, 0x0000 }, func_801233A8_gacode },
+    { D_80129DB0_gacode, 256.0f, 0.0f, 0.004484796f, 8.0f, -215.0f, 0x0B5B, 4, 71, { 0x0011, 0x001D, 0x0028, 0x0029, 0x002A, 0x002C, 0x002D, 0x002E, 0x0000 }, GA_StageFrame6 },
+    { D_8012AE30_gacode, 256.0f, 0.0f, 0.004484796f, 8.0f, 0.0f, 0x0B5C, 9, -1, { 0x0011, 0x0013, 0x0014, 0x0015, 0x0016, 0x0018, 0x0019, 0x001A, 0x0000 }, GA_StageFrame7 },
 };
 objClass_t ga_classes[12] = {
     { Obj_CreateSceneObject, (objUpdateFunc_t)Obj_Draw },
     { Cam_Create, (objUpdateFunc_t)Cam_UpdateAndAdvance },
-    { (objCreateFunc_t)func_80114130_gacode, (objUpdateFunc_t)func_80114138_gacode },
-    { (objCreateFunc_t)func_80114130_gacode, (objUpdateFunc_t)func_80114138_gacode },
-    { (objCreateFunc_t)func_80114130_gacode, (objUpdateFunc_t)func_80114138_gacode },
-    { (objCreateFunc_t)func_80114130_gacode, (objUpdateFunc_t)func_80114138_gacode },
-    { (objCreateFunc_t)func_80114130_gacode, (objUpdateFunc_t)func_80114138_gacode },
-    { (objCreateFunc_t)func_80114130_gacode, (objUpdateFunc_t)func_80114138_gacode },
-    { (objCreateFunc_t)func_80114130_gacode, (objUpdateFunc_t)func_80114138_gacode },
-    { (objCreateFunc_t)func_80114130_gacode, (objUpdateFunc_t)func_80114138_gacode },
+    { (objCreateFunc_t)GA_NullCreate, (objUpdateFunc_t)GA_NullUpdate },
+    { (objCreateFunc_t)GA_NullCreate, (objUpdateFunc_t)GA_NullUpdate },
+    { (objCreateFunc_t)GA_NullCreate, (objUpdateFunc_t)GA_NullUpdate },
+    { (objCreateFunc_t)GA_NullCreate, (objUpdateFunc_t)GA_NullUpdate },
+    { (objCreateFunc_t)GA_NullCreate, (objUpdateFunc_t)GA_NullUpdate },
+    { (objCreateFunc_t)GA_NullCreate, (objUpdateFunc_t)GA_NullUpdate },
+    { (objCreateFunc_t)GA_NullCreate, (objUpdateFunc_t)GA_NullUpdate },
+    { (objCreateFunc_t)GA_NullCreate, (objUpdateFunc_t)GA_NullUpdate },
     { Obj_CreateSceneObject, (objUpdateFunc_t)Obj_AddToDrawList },
     { Cam_Create, (objUpdateFunc_t)Cam_Update },
 };
@@ -715,7 +715,7 @@ gaBody_t ga_initBodies[NUM_BODIES] = {
     { { 0 }, { 15.24f, 6.25f, -1175.1895f }, { 0.0f, 0.0f, 0.0f }, 1.0f, 1, 0 },
     { { 0 }, { 45.72f, 6.25f, -1175.1895f }, { 0.0f, 0.0f, 0.0f }, 1.0f, 1, 0 },
 };
-gaBody_t D_8012C110_gacode[3] = {
+gaBody_t ga_initialMarkers[3] = {
     { { 0 }, { 0.0f, 0.0f, 335.0f }, { 0.0f, 0.0f, 0.0f }, 1.0f, 0, 1 },
     { { 0 }, { 0.0f, 0.0f, 730.0f }, { 0.0f, 0.0f, 0.0f }, 1.0f, 0, 1 },
     { { 0 }, { 0.0f, 0.0f, -1096.0f }, { 0.0f, 0.0f, 0.0f }, 1.0f, 0, 1 },
@@ -764,7 +764,7 @@ gaSpot_t ga_initSpots[2][NUM_BODIES] = {
 vec3_t D_8012C758_gacode = { 0.0f, 24.0f, 0.0f };
 f32 ga_spinCameraAngle[2] = { 0.0f, 0.0f };
 vec3_t ga_freeCameraPos[2] = { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
-s16 D_8012C784_gacode[33] = {
+s16 ga_calloutImages[33] = {
     -1, 0x0862, 0x0860, 0x0A18, 0x090D, 0x0862, 0x085E, 0x0A6F,
     0x0855, 0x0B2B, 0x0B2A, 0x0B29, 0x0B28, 0x0B27, 0x0B26, 0x0B45,
     0x0B41, 0x0B3D, 0x0ADA, 0x0AD9, 0x0AD7, 0x0AD8, 0x0AD6, 0x0AD5,
@@ -772,7 +772,7 @@ s16 D_8012C784_gacode[33] = {
     -1,
 };
 u16 ga_editorPins = 0x03FF;
-u8 D_8012C7C8_gacode = 0;
+u8 ga_laneCameraStarted = 0;
 s16 ga_runSounds[20] = {
     91, 92, 93, 95, 95, 95, 95, 96, 96, 96, 96, 97, 112, /* by run */
     111, 114, 123, 123, 117, 118, 0,                     /* from PAR_SOUNDS: by score against par */
@@ -785,7 +785,7 @@ u16 ga_parChartPins[NUM_PINS][2] = {
     { 49, 99 }, { 38, 82 }, { 60, 82 }, { 26, 65 }, { 49, 65 },
     { 72, 65 }, { 16, 48 }, { 38, 48 }, { 60, 48 }, { 82, 48 },
 };
-u16 D_8012C848_gacode[8] = { 0x0A35, 0x0A34, 0x0A32, 0x0A2F, 0x0A31, 0x0A2E, 0x0A33, 0x0A30 };
+u16 ga_parStageImages[8] = { 0x0A35, 0x0A34, 0x0A32, 0x0A2F, 0x0A31, 0x0A2E, 0x0A33, 0x0A30 };
 u16 ga_pinPanelPins[NUM_PINS][2] = {
     { 40, 83 }, { 29, 66 }, { 51, 66 }, { 17, 49 }, { 40, 49 },
     { 63, 49 }, { 7, 32 }, { 29, 32 }, { 51, 32 }, { 73, 32 },

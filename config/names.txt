@@ -1584,3 +1584,68 @@ GA_EndGameOverTurns	0x80116170	invented: banner: ends the turns of players 0 and
 GA_TurnResetLane	0x801163A0	invented: banner: a turnFunc that passes which pins stand to GA_ResetLane
 GA_PanelFrame	0x8011AD5C	invented: banner: panelFunc handler running the mode's part of the frame, the pin diagram and the panel
 GA_PanelFade	0x8011B07C	invented: banner: panelFunc handler fading the lane's sprite and drawing the panel
+GA_NullCreate	0x80114130	invented: empty create handler of ga_classes slots 2 to 7
+GA_NullUpdate	0x80114138	invented: empty update handler of ga_classes slots 2 to 7
+GA_EndThrowFrame	0x80115CDC	invented: ga_endThrowFunc of the par and battle modes: starts the next turn when the frame is over, else resets the lane for the next ball
+GA_EndThrowNextTurn	0x80115D38	invented: ga_endThrowFunc of the pin editor and setup game: always starts the next turn
+GA_ParkLane	0x80115D70	invented: parks a lane: hides the pins, sets the idle turn handler and the parked input handler
+GA_TurnFirstBall	0x80116398	invented: turnFunc set by GA_StartTurn; the scorers test for it to know the first ball was thrown
+GA_TurnResetBall	0x80116414	invented: turnFunc set by GA_TurnResetLane and GA_ParkLane; the scorers test for it
+GA_ShowStandingPins	0x80116750	invented: shows the objects of the pins whose standState is 1
+GA_CheckGutter	0x801168D0	invented: ends the roll in the gutter when the ball is below the floor height past the lane's end
+GA_CheckBallStopped	0x80116998	invented: ends the roll when the ball's z velocity is no longer towards the pins
+GA_DrawCallout	0x8011B408	invented: panelFunc: draws the lane's callout image
+GA_DrawParkedPrompt	0x8011B564	invented: panelFunc of a parked lane: draws the blinking prompt image 0x891
+GA_DrawLaneShade	0x8011B5C8	invented: panelFunc: fills the lane's half of the screen with a blinking tint while the player's total is 0
+GA_CameraBehindAim	0x8011B974	invented: camera handler: behind the lane at the x of the aim
+GA_CameraBehindStance	0x8011BA00	invented: camera handler: behind the lane at the x of the stance
+GA_CameraTakeBall	0x8011BA8C	invented: camera handler: beside the player while taking the ball
+GA_CameraPinDeck	0x8011BC10	invented: camera handler: at the pin end of the lane, looking at the pins
+GA_CameraReaction	0x8011BCA8	invented: camera handler: in front of the player, for the reaction
+GA_CameraBehindLane	0x8011C0DC	invented: camera handler: behind the lane at the lane's x
+GA_AimSpin	0x801205A0	invented: spin that curves the ball from the stance onto the target (the debug text's TECH RO)
+GA_ScoreThrow	0x80121FD0	invented: records the pins down and scores the throw by game_throw
+GA_StageFrame0	0x80122470	invented: update handler of ga_stages[0]
+GA_StageFrame1	0x801224F8	invented: update handler of ga_stages[1]
+GA_StageFrame3	0x80122BD8	invented: update handler of ga_stages[3]
+GA_StageFrame4	0x80122C60	invented: update handler of ga_stages[4]
+GA_StageFrame6	0x80123004	invented: update handler of ga_stages[6]
+GA_StageFrame7	0x801233A8	invented: update handler of ga_stages[7]
+ga_spinImageIds	0x80123690	invented: image ids of the spin gauge, forward then reversed (GA_SetGaugeSprites)
+ga_spinImages	0x801236B0	invented: per lane: the list of the spin gauge's images (GA_SetGaugeSprites)
+ga_speedGauge	0x8012D240	invented: per lane: the palette sprite GA_SetGaugeSprites fades by the player's speed
+ga_spinGauge	0x8012CE10	invented: per lane: the palette sprite GA_SetGaugeSprites fades by the size of the spin
+ga_timingGauge	0x8012D8E0	invented: per lane: the palette sprite the timing and release panels fade
+ga_setupPinSets	0x801237F0	invented: pin sets of the setup game, by frame (GA_StartTurn)
+ga_parPinSets	0x80123950	invented: pin sets of the par game, by frame (GA_StartTurn)
+ga_ballMasses	0x801239E8	invented: mass of the ball by ballWeight
+ga_characterFiles	0x80123A14	invented: per character: its row of file indices (gaCharacterData_t.fileIndices)
+ga_calloutImages	0x8012C784	invented: image id of each lane callout (gaLane_t.callout); -1: none
+ga_laneCameraStarted	0x8012C7C8	invented: GA_UpdateLaneCamera has run GA_CameraLane for the pin deck camera
+ga_parStageImages	0x8012C848	invented: image id by game_stage (GA_DrawParFramePanel)
+ga_initialMarkers	0x8012C110	invented: initial gaLane_t.markers (GA_SetupLanes, GA_ResetLane)
+ga_lastScorer	0x8012D651	invented: player whose throw GA_ScoreThrow scored last; written only
+ga_animImages1663	0x8012C928	invented: image files for resource 1663's palette, by animation frame (GA_AnimateTextures)
+ga_animImages1664	0x8012C940	invented: image files for resource 1664's palette, by animation frame (GA_AnimateTextures)
+ga_animImages1496	0x8012C958	invented: image files for resource 1496's palette (GA_AnimateTextures)
+ga_animImages1528	0x8012C95C	invented: image files for resource 1528's palette (GA_AnimateTextures)
+ga_animImages1529	0x8012C960	invented: image files for resource 1529's palette (GA_AnimateTextures)
+ga_animImages1648	0x8012C964	invented: image files for resource 1648's palette (GA_AnimateTextures)
+ga_flickerImages1904	0x8012C978	invented: image files for resource 1904's palette by brightness step (GA_FlickerLight)
+ga_flickerImages1905	0x8012C980	invented: image files for resource 1905's palette by brightness step (GA_FlickerLight)
+ga_flickerImages1903	0x8012C988	invented: image files for resource 1903's palette by brightness step (GA_FlickerLight)
+ga_flickerImages1906	0x8012C990	invented: image files for resource 1906's palette by brightness step (GA_FlickerLight)
+gaCharacterData_t.timingStartFrame	gacode.h	invented: animation frame the approach ends and the timing window begins
+gaCharacterData_t.timingEndFrame	gacode.h	invented: last frame of the timing window; B commits early here
+gaCharacterData_t.releaseFrame	gacode.h	invented: animation frame the ball leaves the hand
+gaStage_t.laneOffset	gacode.h	invented: GA_SetupLanes's offset of lane 1
+gaStage_t.hookStartZ	gacode.h	invented: z the ball's hook begins at (GA_InputRoll, GA_AimSpin)
+gaStage_t.slide	gacode.h	invented: debug text label SL; scales the character's hook (GA_RollBallSpin), raised by 0.05 in GA_InputCountPins
+gaLaneAim_t.savedMarkerZ	gacode.h	invented: z of markerSpots[2] kept while GA_ResetLane replaces it
+gaLaneAim_t.push	gacode.h	invented: pending push of the distance game's marker, positive pushes it on, negative pulls it back
+gaLaneAim_t.pushRumbled	gacode.h	invented: the port was rumbled for the current push (GA_MoveAimMarker)
+gaPinSetup_t.par	gacode.h	invented: throws the frame is par for (GA_DrawParFramePanel, GA_DrawPinPanel)
+gaPinSetup_t.image	gacode.h	invented: image shown with the setup (GA_DrawPinPanel)
+unkImage_t.alpha	gacode.h	invented: byte GA_CountFrame sets from game_pulseAlpha
+gameSetup_t.frameSetups	gacode.h	invented: per frame, the index of its pin setup in ga_setupPinSets or ga_parPinSets
+game_setup	0x800DF59C	invented: main's game setup: the pin setup of each frame (frameSetups)

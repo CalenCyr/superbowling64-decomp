@@ -10,17 +10,17 @@
 static s32 ga_sceneryStarted = 0;
 static s32 ga_frameCount = 0;          /* frame counter */
 /* image files of GA_AnimateTextures's animated palettes, by animation frame */
-static u16 D_8012C928_gacode[11] = { 0x0932, 0x0933, 0x0936, 0x0936, 0x0935, 0x0934, 0x0932, 0x0933, 0x0932, 0x0933, 0x0932 };
-static u16 D_8012C940_gacode[11] = { 0x092E, 0x092F, 0x0931, 0x0930, 0x092E, 0x092E, 0x092E, 0x092F, 0x092E, 0x092F, 0x092E };
-static u16 D_8012C958_gacode[2] = { 0x0A89, 0x0A88 };
-static u16 D_8012C95C_gacode[2] = { 0x0A87, 0x0A86 };
-static u16 D_8012C960_gacode[2] = { 0x0A85, 0x0A84 };
-static u16 D_8012C964_gacode[9] = { 0x085A, 0x0859, 0x0858, 0x0857, 0x0856, 0x0857, 0x0856, 0x0857, 0x0856 };
+static u16 ga_animImages1663[11] = { 0x0932, 0x0933, 0x0936, 0x0936, 0x0935, 0x0934, 0x0932, 0x0933, 0x0932, 0x0933, 0x0932 };
+static u16 ga_animImages1664[11] = { 0x092E, 0x092F, 0x0931, 0x0930, 0x092E, 0x092E, 0x092E, 0x092F, 0x092E, 0x092F, 0x092E };
+static u16 ga_animImages1496[2] = { 0x0A89, 0x0A88 };
+static u16 ga_animImages1528[2] = { 0x0A87, 0x0A86 };
+static u16 ga_animImages1529[2] = { 0x0A85, 0x0A84 };
+static u16 ga_animImages1648[9] = { 0x085A, 0x0859, 0x0858, 0x0857, 0x0856, 0x0857, 0x0856, 0x0857, 0x0856 };
 /* image files of GA_FlickerLight's four palette slots, by brightness step */
-static u16 D_8012C978_gacode[4] = { 0x08F9, 0x08FA, 0x08FB, 0x08FC };
-static u16 D_8012C980_gacode[4] = { 0x08F1, 0x08F2, 0x08F3, 0x08F4 };
-static u16 D_8012C988_gacode[4] = { 0x084D, 0x084E, 0x084F, 0x0850 };
-static u16 D_8012C990_gacode[4] = { 0x08F5, 0x08F6, 0x08F7, 0x08F8 };
+static u16 ga_flickerImages1904[4] = { 0x08F9, 0x08FA, 0x08FB, 0x08FC };
+static u16 ga_flickerImages1905[4] = { 0x08F1, 0x08F2, 0x08F3, 0x08F4 };
+static u16 ga_flickerImages1903[4] = { 0x084D, 0x084E, 0x084F, 0x0850 };
+static u16 ga_flickerImages1906[4] = { 0x08F5, 0x08F6, 0x08F7, 0x08F8 };
 /* Unreferenced; 0x765 is in the range of the resource indices the unit patches (1905, 1906). */
 static u16 D_8012C998_gacode[2] = { 0x0000, 0x0765 };
 static u16 ga_flickerTimer = 1;         /* frames to the next flicker of GA_FlickerLight */
@@ -56,8 +56,8 @@ nothing calls (gcc 2.7 emits an extern inline function).
 inline void GA_CountFrame( void ) {
     ga_frameCount++;
     if ( ( game_mode & 0xF ) == 3 ) {
-        ( (unkImage_t *)cache_files[1673].data )->unk_07 = game_pulseAlpha;
-        ( (unkImage_t *)cache_files[1674].data )->unk_07 = game_pulseAlpha;
+        ( (unkImage_t *)cache_files[1673].data )->alpha = game_pulseAlpha;
+        ( (unkImage_t *)cache_files[1674].data )->alpha = game_pulseAlpha;
     }
 }
 
@@ -103,10 +103,10 @@ void GA_SetPlayerObjectFlags( s32 set ) {
 
 /*
 ================
-func_80122470_gacode
+GA_StageFrame0
 ================
 */
-void func_80122470_gacode( void ) {
+void GA_StageFrame0( void ) {
     if ( ga_sceneryStarted == 0 ) {
         ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 0 );
@@ -116,13 +116,13 @@ void func_80122470_gacode( void ) {
 
 /*
 ================
-func_801224F8_gacode
+GA_StageFrame1
 
-Like func_80122BD8_gacode, then on every other frame puts a 0x300 effect near each lane's ball while that
+Like GA_StageFrame3, then on every other frame puts a 0x300 effect near each lane's ball while that
 ball's state is 1 (the second lane only when game_lastTeam is 1).
 ================
 */
-void func_801224F8_gacode( void ) {
+void GA_StageFrame1( void ) {
     if ( ga_sceneryStarted == 0 ) {
         ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 1 );
@@ -158,30 +158,30 @@ void GA_AnimateTextures( void ) {
         ga_savedTexels[0] = ( (fileRefB_t *)cache_files[1523].data )->texels;
         ga_savedTexels[1] = ( (fileRefB_t *)cache_files[1524].data )->texels;
         for ( i = 0; i < 11; i++ ) {
-            Cache_GetFile( D_8012C928_gacode[i], FILE_RAW );
-            Cache_GetFile( D_8012C940_gacode[i], FILE_RAW );
+            Cache_GetFile( ga_animImages1663[i], FILE_RAW );
+            Cache_GetFile( ga_animImages1664[i], FILE_RAW );
         }
         for ( i = 0; i < 2; i++ ) {
-            Cache_GetFile( D_8012C958_gacode[i], FILE_RAW );
-            Cache_GetFile( D_8012C95C_gacode[i], FILE_RAW );
-            Cache_GetFile( D_8012C960_gacode[i], FILE_RAW );
+            Cache_GetFile( ga_animImages1496[i], FILE_RAW );
+            Cache_GetFile( ga_animImages1528[i], FILE_RAW );
+            Cache_GetFile( ga_animImages1529[i], FILE_RAW );
         }
         for ( i = 0; i < 9; i++ ) {
-            Cache_GetFile( D_8012C964_gacode[i], FILE_RAW );
+            Cache_GetFile( ga_animImages1648[i], FILE_RAW );
         }
     }
     ( (fileRefB_t *)cache_files[1648].data )->texels =
-        ( (unkImage_t *)cache_files[D_8012C964_gacode[sched_frameCount / 20 % 9]].data )->palette;
+        ( (unkImage_t *)cache_files[ga_animImages1648[sched_frameCount / 20 % 9]].data )->palette;
     ( (fileRefB_t *)cache_files[1528].data )->texels =
-        ( (unkImage_t *)cache_files[D_8012C95C_gacode[sched_frameCount / 64 & 1]].data )->palette;
+        ( (unkImage_t *)cache_files[ga_animImages1528[sched_frameCount / 64 & 1]].data )->palette;
     ( (fileRefB_t *)cache_files[1529].data )->texels =
-        ( (unkImage_t *)cache_files[D_8012C960_gacode[sched_frameCount / 64 & 1]].data )->palette;
+        ( (unkImage_t *)cache_files[ga_animImages1529[sched_frameCount / 64 & 1]].data )->palette;
     ( (fileRefB_t *)cache_files[1496].data )->texels =
-        ( (unkImage_t *)cache_files[D_8012C958_gacode[sched_frameCount / 2 & 1]].data )->palette;
+        ( (unkImage_t *)cache_files[ga_animImages1496[sched_frameCount / 2 & 1]].data )->palette;
     ( (fileRefB_t *)cache_files[1663].data )->texels =
-        ( (unkImage_t *)cache_files[D_8012C928_gacode[sched_frameCount / 20 % 11]].data )->palette;
+        ( (unkImage_t *)cache_files[ga_animImages1663[sched_frameCount / 20 % 11]].data )->palette;
     ( (fileRefB_t *)cache_files[1664].data )->texels =
-        ( (unkImage_t *)cache_files[D_8012C940_gacode[sched_frameCount / 20 % 11]].data )->palette;
+        ( (unkImage_t *)cache_files[ga_animImages1664[sched_frameCount / 20 % 11]].data )->palette;
     if ( sched_frameCount & 0x40 ) {
         ( (fileRefB_t *)cache_files[1523].data )->texels = ( (unkImage_t *)cache_files[2682].data )->palette;
         ( (fileRefB_t *)cache_files[1524].data )->texels = ( (unkImage_t *)cache_files[2698].data )->palette;
@@ -194,10 +194,10 @@ void GA_AnimateTextures( void ) {
 
 /*
 ================
-func_80122BD8_gacode
+GA_StageFrame3
 ================
 */
-void func_80122BD8_gacode( void ) {
+void GA_StageFrame3( void ) {
     if ( ga_sceneryStarted == 0 ) {
         ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 1 );
@@ -207,10 +207,10 @@ void func_80122BD8_gacode( void ) {
 
 /*
 ================
-func_80122C60_gacode
+GA_StageFrame4
 ================
 */
-void func_80122C60_gacode( void ) {
+void GA_StageFrame4( void ) {
     if ( ga_sceneryStarted == 0 ) {
         ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 0 );
@@ -237,10 +237,10 @@ void GA_FlickerLight( void ) {
         ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 1 );
         for ( i = 0; i < 4; i++ ) {
-            Cache_GetFile( D_8012C978_gacode[i], FILE_RAW );
-            Cache_GetFile( D_8012C980_gacode[i], FILE_RAW );
-            Cache_GetFile( D_8012C988_gacode[i], FILE_RAW );
-            Cache_GetFile( D_8012C990_gacode[i], FILE_RAW );
+            Cache_GetFile( ga_flickerImages1904[i], FILE_RAW );
+            Cache_GetFile( ga_flickerImages1905[i], FILE_RAW );
+            Cache_GetFile( ga_flickerImages1903[i], FILE_RAW );
+            Cache_GetFile( ga_flickerImages1906[i], FILE_RAW );
         }
     }
     if ( --ga_flickerTimer == 0 ) {
@@ -262,26 +262,26 @@ void GA_FlickerLight( void ) {
     Cam_SetAmbient( 1, color );
     step = ( level - 100 ) / 39;
     ( (fileRefB_t *)cache_files[1903].data )->texels =
-        ( (unkImage_t *)cache_files[D_8012C988_gacode[step]].data )->palette;
+        ( (unkImage_t *)cache_files[ga_flickerImages1903[step]].data )->palette;
     ( (fileRefB_t *)cache_files[1904].data )->texels =
-        ( (unkImage_t *)cache_files[D_8012C978_gacode[step]].data )->palette;
+        ( (unkImage_t *)cache_files[ga_flickerImages1904[step]].data )->palette;
     ( (fileRefB_t *)cache_files[1905].data )->texels =
-        ( (unkImage_t *)cache_files[D_8012C980_gacode[step]].data )->palette;
+        ( (unkImage_t *)cache_files[ga_flickerImages1905[step]].data )->palette;
     ( (fileRefB_t *)cache_files[1906].data )->texels =
-        ( (unkImage_t *)cache_files[D_8012C990_gacode[step]].data )->palette;
+        ( (unkImage_t *)cache_files[ga_flickerImages1906[step]].data )->palette;
     GA_CountFrame();
 }
 
 /*
 ================
-func_80123004_gacode
+GA_StageFrame6
 
 Scrolls the texture of resource 883 by one texel step in s, then puts 0x301 effects near each lane's ball
 while its state is 3: with two lanes on frames 0 (first lane) and 2 (second lane) of every four, with one lane
 on every other frame.
 ================
 */
-void func_80123004_gacode( void ) {
+void GA_StageFrame6( void ) {
     if ( ga_sceneryStarted == 0 ) {
         ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 1 );
@@ -307,10 +307,10 @@ void func_80123004_gacode( void ) {
 
 /*
 ================
-func_801233A8_gacode
+GA_StageFrame7
 ================
 */
-void func_801233A8_gacode( void ) {
+void GA_StageFrame7( void ) {
     if ( ga_sceneryStarted == 0 ) {
         ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 1 );
