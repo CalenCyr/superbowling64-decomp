@@ -131,6 +131,9 @@ result.
 // NON_MATCHING: register only: before the body loop retail loads pl->lane into a0 (this into v0); the
 // loops' pointer order (spot set and stepped first) was found by A/B, and indexed &pl->lane->bodies[i] or a
 // lane local miss the loop-invariant base; the permuter (target-only scoring, 1.3k iterations from 15) found nothing better.
+// The lane load is a block-local pseudo, so local-alloc picks the first free register (v0); retail's a0 needs a
+// hard-register preference this source lacks. Also no effect: &body[i]/&spot[i] on the two pointers, the
+// increments in the call or after it, a do-while; a 23k-iteration permuter run stayed at 15.
 // Also tried: the increments' order (i first, body first), the pointers set in the for's init, i as
 // s16/u8/u32, body declared before spot; body assigned before spot folds the lane load into body's s1.
 s32 GA_RunPlayer( s32 player ) {
@@ -3369,6 +3372,9 @@ modes that have one), and a value of the lane's current inputFunc step.
 // player s2, &game_gfx s3, row s4, lane s5); instructions, constants, relocations and schedule are the same
 // (the line counter stepped per line puts the TABLE row's increment after its sprintf, as retail). Tried: row
 // as u8/s16, lane as s32, the two locals' declaration order
+// Global-alloc priorities (log2(refs) * refs / live insns) here are player 0.15, &game_gfx 0.11, row 0.03, lane 0.02,
+// so retail's order needs row and lane with far more refs or shorter lives. No effect: lane u16/s16, row u32/u8,
+// row * 8 + 16, row = 16 with row * 8, lane read after row = 14, 144 * lane.
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;

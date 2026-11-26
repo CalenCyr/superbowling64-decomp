@@ -1619,6 +1619,9 @@ f32 Snd_Exp2( f32 x ) {
 // $f2 and reads the wave pointer into a0 (into v1 here). Also checked: Snd_SignExtend8 parameter types u8/s8/u16/s16/u32
 // and f32/s16 returns; a Snd_SetTune( tune, digit ) inline (its argument is evaluated before the first conversion,
 // retail evaluates the digit after it). Retail's copy lands the digit in the register that held tune->raw.
+// An inline that assigns its parameter (x &= 0xFF; if ( x & 0x80 ) x -= 0x100;) gives retail's length and the
+// copy, but in both calls (retail copies only the digit); not it either: a nested Snd_Digit inline, (u8)/(s8)
+// casts on the digit, -'0' + digit, a digit local before or after the first conversion, the add's operands swapped.
 /*
 ================
 Snd_SignExtend8
@@ -1909,6 +1912,9 @@ s32 Snd_StartSe( seTable_t *table, s32 index, s32 volume, s32 pan, s32 priority 
 // table (a loaded temporary) but not for base (hdr, a user variable). Not it: base arguments (u32)hdr, (int)hdr,
 // (s32)(u8 *)hdr, (s32)(void *)hdr, (s32)&hdr->unk_00, (s32)&hdr[0], (s32)(hdr + 0); a pointer walk or an entry
 // local in Snd_RelocateTable.
+// The .rtl dump shows why: integrate maps a parameter straight to a user-variable argument and copies only other
+// registers, so retail's base argument was a non-user register holding hdr. Also no effect: (s32)hdr + 0,
+// (s32)(seqHeader_t *)hdr, a const base parameter (with or without a base local), base + table[i].
 /*
 ================
 Snd_StartBgm
