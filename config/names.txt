@@ -1561,3 +1561,8 @@ snd_fxEcho	0x8005CF60	invented: the AL_FX_ECHO effect parameters (header comment
 snd_fxChorus	0x8005CF88	invented: the AL_FX_CHORUS effect parameters (header comment)
 snd_fxFlange	0x8005CFB0	invented: the AL_FX_FLANGE effect parameters (header comment)
 snd_fxDefault	0x8005CFD8	invented: the effect parameters of any other fxType (header comment)
+cont_rumblePhase	0x80066C24	invented: per port, accumulates cont_rumble << 5; the motor runs each time it passes RUMBLE_PERIOD
+cont_pakPort	0x800E4FC8	invented: the port whose pak CONT_REQ_INIT_PAK opens (include/input.h comment)
+cont_pakWrite	0x800E6578	invented: PFS_READ or PFS_WRITE for CONT_REQ_READ_WRITE_FILE (include/input.h comment)
+op_nextMode	0x8005C0E8	invented: the next mode: 0xA on entry, the overlay sets 0xFE or 0xFD (opcode.h comment)
+ca_clipFrameBase	0x80115374	invented: added to the frame number in the bitmap file name of each clip (CA_CacheFrame)

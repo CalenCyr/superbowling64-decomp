@@ -15,7 +15,7 @@
 #include "sprite.h"
 
 /* main (owner unit not identified yet) */
-extern u8 D_8005C0E8; /* the next mode: 0xA on entry; the overlay sets 0xFE or 0xFD */
+extern u8 op_nextMode; /* the next mode: 0xA on entry; the overlay sets 0xFE or 0xFD */
 
 extern u8 op_checkStep;      /* step of OP_CheckSettings */
 extern u16 op_charEntries[]; /* character code 0x10-0x94 -> entry (OP_ConvertPakChar) */

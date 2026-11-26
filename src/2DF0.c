@@ -46,7 +46,7 @@ void Rumble_Probe( s32 chan ) {
     } else {
         cont_hasRumble[chan] = FALSE;
     }
-    D_80066C24[chan] = 0;
+    cont_rumblePhase[chan] = 0;
     cont_rumble[chan] = 0;
 }
 
@@ -242,13 +242,13 @@ void Cont_Thread( void *arg ) {
                         motorOn[chan] = FALSE;
                     }
                 }
-                D_80066C24[chan] += cont_rumble[chan] << 5;
-                if ( D_80066C24[chan] >= RUMBLE_PERIOD ) {
+                cont_rumblePhase[chan] += cont_rumble[chan] << 5;
+                if ( cont_rumblePhase[chan] >= RUMBLE_PERIOD ) {
                     if ( !motorOn[chan] ) {
                         Rumble_Start( chan );
                         motorOn[chan] = TRUE;
                     }
-                    D_80066C24[chan] -= RUMBLE_PERIOD;
+                    cont_rumblePhase[chan] -= RUMBLE_PERIOD;
                 } else if ( motorOn[chan] ) {
                     Rumble_Stop( chan );
                     motorOn[chan] = FALSE;
@@ -276,11 +276,11 @@ void Cont_Thread( void *arg ) {
                 cont_result = osPfsFreeBlocks( &cont_pakPfs, &cont_freeBytes );
                 break;
             case CONT_REQ_READ_WRITE_FILE:
-                cont_result = osPfsReadWriteFile( &cont_pakPfs, cont_noteIndex, D_800E6578, 0, cont_noteSize,
+                cont_result = osPfsReadWriteFile( &cont_pakPfs, cont_noteIndex, cont_pakWrite, 0, cont_noteSize,
                                                   (u8 *)save_dataPtr );
                 break;
             case CONT_REQ_INIT_PAK:
-                cont_result = osPfsInitPak( &cont_siQueue, &cont_pakPfs, D_800E4FC8 );
+                cont_result = osPfsInitPak( &cont_siQueue, &cont_pakPfs, cont_pakPort );
                 break;
             case CONT_REQ_REPAIR_ID:
                 cont_result = osPfsRepairId( &cont_pakPfs );

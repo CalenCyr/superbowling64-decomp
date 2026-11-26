@@ -38,7 +38,7 @@ s32 OP_PakScreen( void ) {
     switch ( op_pakStep ) {
     case 0:
         op_pakMsg = CONT_REQ_INIT_PAK;
-        D_800E4FC8 = 0;
+        cont_pakPort = 0;
         osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
         osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
         if ( cont_result != 0 ) {

@@ -55,7 +55,7 @@ s32 OP_CheckSettings( void ) {
         break;
     case 5:
         op_contMsg = CONT_REQ_INIT_PAK;
-        D_800E4FC8 = 0;
+        cont_pakPort = 0;
         osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
         op_checkStep = 6;
         break;
@@ -117,7 +117,7 @@ s32 OP_CheckSettings( void ) {
         if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
             if ( cont_result == 0 ) {
                 op_contMsg = CONT_REQ_READ_WRITE_FILE;
-                D_800E6578 = 0;
+                cont_pakWrite = 0;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
                 op_checkStep = 35;
             } else {
@@ -155,7 +155,7 @@ s32 OP_CheckSettings( void ) {
                 checksum = (s32 *)save_dataPtr;
                 *checksum = Save_Checksum();
                 op_contMsg = CONT_REQ_READ_WRITE_FILE;
-                D_800E6578 = 1;
+                cont_pakWrite = 1;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
                 op_checkStep = 24;
             } else if ( cont_result == 7 || cont_result == 8 ) {

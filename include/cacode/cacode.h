@@ -33,7 +33,7 @@ extern s32 ca_selected;                 /* the selected camera and object (0 to 
 extern s32 ca_part;                     /* the selected model part */
 // volatile: CA_Frame reads it twice after each D-pad frame step, the first read unused
 extern volatile s32 ca_frame;           /* the frame shown */
-extern s32 D_80115374_cacode[3];        /* [0]: frames of the animation; [1], [2]: first BMP frame of clips 1, 2 */
+extern s32 ca_clipFrameBase[3];        /* [0]: frames of the animation; [1], [2]: first BMP frame of clips 1, 2 */
 extern Vtx ca_axes[4];                  /* the origin and the ends of the three axes, drawn as lines */
 
 extern objParams_t ca_sceneParams[6];   /* the scene: three cameras, then three objects; or the host's sce.dat */
@@ -47,7 +47,7 @@ extern f32 ca_camera0Matrix[4][4];
 extern f32 ca_partRotations[30][300][3]; /* by model part, per frame: the part's rotation (radians) */
 
 /*
-The motion tables, saved to and loaded from the host's "motion.dat" in this order, followed by D_80115374_cacode[1]
+The motion tables, saved to and loaded from the host's "motion.dat" in this order, followed by ca_clipFrameBase[1]
 and [2]. Cameras and objects 1 and 2 follow the tables of index 0 and 1; camera 0 has the one matrix
 ca_camera0Matrix. They lie contiguously after ca_partRotations, inside the overlay's bss (which main's loader
 clears up to 0x8013E890).

@@ -211,7 +211,7 @@ s32 Save_SaveSettings( void ) {
         break;
     case 3:
         save_contMsg = CONT_REQ_INIT_PAK;
-        D_800E4FC8 = 0;
+        cont_pakPort = 0;
         osSendMesg( &cont_requestQueue, &save_contMsg, OS_MESG_NOBLOCK );
         save_step = 4;
         break;
@@ -243,7 +243,7 @@ s32 Save_SaveSettings( void ) {
         */
         *(s32 *)bytes = sum;
         save_contMsg = CONT_REQ_READ_WRITE_FILE;
-        D_800E6578 = 1;
+        cont_pakWrite = 1;
         osSendMesg( &cont_requestQueue, &save_contMsg, OS_MESG_NOBLOCK );
         save_step = 6;
         break;

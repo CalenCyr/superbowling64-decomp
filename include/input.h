@@ -15,11 +15,11 @@ extern u8 cont_standardMask;        /* bit per port with a standard controller *
 extern OSContStatus cont_status[MAXCONTROLLERS];
 extern OSPfs cont_rumblePfs[NUM_PLAYERS];
 extern u8 cont_hasRumble[NUM_PLAYERS];   /* TRUE when the port has a Rumble Pak */
-extern s16 D_80066C24[NUM_PLAYERS];
+extern s16 cont_rumblePhase[NUM_PLAYERS];
 extern u8 cont_rumble[NUM_PLAYERS];     /* rumble strength: 4 to 6 from gacode's hits; RUMBLE_REPROBE */
 extern u8 cont_rumbleFrames[NUM_PLAYERS];   /* frames left of the cont_rumble strength */
 
-#define RUMBLE_PERIOD   0xE0        /* D_80066C24 accumulates cont_rumble << 5; the motor runs each time it passes this */
+#define RUMBLE_PERIOD   0xE0        /* cont_rumblePhase accumulates cont_rumble << 5; the motor runs each time it passes this */
 #define RUMBLE_REPROBE  8           /* cont_rumble value: look for the Rumble Pak again and stop it */
 
 /* per-port pad state, rebuilt each frame by Cont_ReadPads */
@@ -50,8 +50,8 @@ typedef enum {
     CONT_REQ_FIND_FILE,         /* find the game's note: cont_noteIndex */
     CONT_REQ_NUM_FILES,         /* cont_maxNotes, cont_usedNotes */
     CONT_REQ_FREE_BLOCKS,       /* cont_freeBytes */
-    CONT_REQ_READ_WRITE_FILE,   /* note cont_noteIndex to or from *save_dataPtr (D_800E6578: PFS_READ, PFS_WRITE) */
-    CONT_REQ_INIT_PAK,          /* open the pak of port D_800E4FC8 */
+    CONT_REQ_READ_WRITE_FILE,   /* note cont_noteIndex to or from *save_dataPtr (cont_pakWrite: PFS_READ, PFS_WRITE) */
+    CONT_REQ_INIT_PAK,          /* open the pak of port cont_pakPort */
     CONT_REQ_REPAIR_ID,
     CONT_REQ_IS_PLUG,           /* cont_pakPlugged */
     CONT_REQ_MOTOR_INIT,        /* look for a Rumble Pak on port 1 (into cont_rumblePfs[1]) */
@@ -61,7 +61,7 @@ typedef enum {
 extern OSMesgQueue cont_requestQueue;
 extern OSMesgQueue cont_replyQueue;
 extern s32 cont_result;             /* result of the last request */
-extern s32 D_800E4FC8;
+extern s32 cont_pakPort;
 extern s32 cont_noteIndex;          /* request 10: the note to read */
 /* Main's D_80066C00 (0x24 bytes). Name invented. */
 typedef struct {
@@ -78,7 +78,7 @@ extern u8 cont_deleteGameName[16];  /* game name */
 extern u8 cont_deleteExtName[4];    /* extension */
 extern u16 cont_deleteCompany;      /* company code */
 extern u32 cont_deleteGameCode;     /* game code */
-extern u8 D_800E6578;
+extern u8 cont_pakWrite;
 /* the game's Controller Pak note */
 extern OSPfs cont_pakPfs;           /* the pak the requests work on */
 extern u16 cont_noteCompany;        /* company code */

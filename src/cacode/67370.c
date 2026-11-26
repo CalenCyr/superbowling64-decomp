@@ -80,7 +80,7 @@ void CA_CacheFrame( s32 frame, s32 clip ) {
     }
 
     if ( cache_hostMode ) {
-        sprintf( name, "%1.1d - Frame %4.4d.bmp", clip, frame + D_80115374_cacode[clip] );
+        sprintf( name, "%1.1d - Frame %4.4d.bmp", clip, frame + ca_clipFrameBase[clip] );
         Host_LoadFile( name, ca_bmpBuffer, 54 + 320 * 240 * 2 );    /* the headers and the picture */
     } else {
         Str_ReadFile( 0xA58, ca_bmpBuffer );
@@ -144,7 +144,7 @@ void CA_Init( void ) {
         }
     }
     model = ca_objects[ca_selected]->obj.model;
-    D_80115374_cacode[0] = ca_objects[0]->obj.anim->numFrames;
+    ca_clipFrameBase[0] = ca_objects[0]->obj.anim->numFrames;
     for ( i = 0; i < 300; i++ ) {
         guMtxIdentF( ca_objectMatrices[0][i] );
         guMtxIdentF( ca_objectMatrices[1][i] );
@@ -290,9 +290,9 @@ void CA_InvertMatrix( float src[4][4], float dst[4][4] ) {
     }
 }
 
-/* the size of motion.dat: the motion tables, then D_80115374_cacode[1] and [2] */
+/* the size of motion.dat: the motion tables, then ca_clipFrameBase[1] and [2] */
 #define MOTION_FILE_SIZE    ( sizeof( ca_partRotations ) + sizeof( ca_objectMatrices ) + sizeof( ca_cameraAt ) \
-                              + sizeof( ca_cameraEye ) + sizeof( ca_cameraUp ) + 2 * sizeof( D_80115374_cacode[0] ) )
+                              + sizeof( ca_cameraEye ) + sizeof( ca_cameraUp ) + 2 * sizeof( ca_clipFrameBase[0] ) )
 #define STICK_DEAD          8           /* stick values within this of 0 are ignored */
 #define RAD_TO_DEG          57.2957795130823229
 
@@ -361,8 +361,8 @@ void CA_Frame( void ) {
             size += sizeof( ca_cameraEye );
             memcpy( ca_cameraUp, buf + size, sizeof( ca_cameraUp ) );
             size += sizeof( ca_cameraUp );
-            memcpy( &D_80115374_cacode[1], buf + size, 2 * sizeof( D_80115374_cacode[0] ) );
-            size += 2 * sizeof( D_80115374_cacode[0] );
+            memcpy( &ca_clipFrameBase[1], buf + size, 2 * sizeof( ca_clipFrameBase[0] ) );
+            size += 2 * sizeof( ca_clipFrameBase[0] );
             Mem_Free( buf );
         }
         if ( cont_allPressed & B_BUTTON ) {
@@ -378,8 +378,8 @@ void CA_Frame( void ) {
             size += sizeof( ca_cameraEye );
             memcpy( buf + size, ca_cameraUp, sizeof( ca_cameraUp ) );
             size += sizeof( ca_cameraUp );
-            memcpy( buf + size, &D_80115374_cacode[1], 2 * sizeof( D_80115374_cacode[0] ) );
-            size += 2 * sizeof( D_80115374_cacode[0] );
+            memcpy( buf + size, &ca_clipFrameBase[1], 2 * sizeof( ca_clipFrameBase[0] ) );
+            size += 2 * sizeof( ca_clipFrameBase[0] );
             Host_WriteFile( "motion.dat", buf, size );
             Mem_Free( buf );
         }
@@ -389,7 +389,7 @@ void CA_Frame( void ) {
         if ( ++ca_selected == 3 ) {
             ca_selected = 0;
         }
-        if ( ca_selected == 2 && D_80115374_cacode[2] < 0 ) {
+        if ( ca_selected == 2 && ca_clipFrameBase[2] < 0 ) {
             ca_selected = 0;
         }
         obj = &ca_objects[ca_selected]->obj;
@@ -453,7 +453,7 @@ void CA_Frame( void ) {
         if ( ( cont_allPressed & L_JPAD ) || ca_dpadHeld >= 7 ) {
             --ca_frame;
             if ( ca_frame < 0 ) {
-                ca_frame = D_80115374_cacode[0] - 1;
+                ca_frame = ca_clipFrameBase[0] - 1;
             }
             memcpy( ca_keptRotation, ca_partRotations[ca_part][ca_frame], sizeof( ca_keptRotation ) );
         }
@@ -462,7 +462,7 @@ void CA_Frame( void ) {
     if ( cont_allHeld & R_JPAD ) {
         if ( ( cont_allPressed & R_JPAD ) || ca_dpadHeld >= 7 ) {
             ++ca_frame;
-            if ( ca_frame >= D_80115374_cacode[0] ) {
+            if ( ca_frame >= ca_clipFrameBase[0] ) {
                 ca_frame = 0;
             }
             memcpy( ca_keptRotation, ca_partRotations[ca_part][ca_frame], sizeof( ca_keptRotation ) );
@@ -472,13 +472,13 @@ void CA_Frame( void ) {
 
     if ( cont_allPressed & U_JPAD ) {
         if ( cont_allHeld & Z_TRIG ) {
-            if ( ca_frame == D_80115374_cacode[0] - 1 ) {
+            if ( ca_frame == ca_clipFrameBase[0] - 1 ) {
                 i = 0;
             } else {
                 i = ca_frame + 1;
             }
         } else if ( ca_frame == 0 ) {
-            i = D_80115374_cacode[0] - 1;
+            i = ca_clipFrameBase[0] - 1;
         } else {
             i = ca_frame - 1;
         }
@@ -645,17 +645,17 @@ void CA_Frame( void ) {
     case CAMODE_IMAGE:
         if ( cont_allHeld & Z_TRIG ) {
             if ( cont_allHeld & A_BUTTON ) {
-                D_80115374_cacode[2]++;
+                ca_clipFrameBase[2]++;
             }
             if ( cont_allHeld & B_BUTTON ) {
-                D_80115374_cacode[2]--;
+                ca_clipFrameBase[2]--;
             }
         } else {
             if ( cont_allHeld & A_BUTTON ) {
-                D_80115374_cacode[1]++;
+                ca_clipFrameBase[1]++;
             }
             if ( cont_allHeld & B_BUTTON ) {
-                D_80115374_cacode[1]--;
+                ca_clipFrameBase[1]--;
             }
         }
         break;
@@ -728,7 +728,7 @@ void CA_Frame( void ) {
         break;
     case CAMODE_IMAGE:
         Txt_DrawString( &game_gfx, 20, 20, "IMAGE" );
-        sprintf( str, "IMG1=%d IMG2=%d", D_80115374_cacode[1], D_80115374_cacode[2] );
+        sprintf( str, "IMG1=%d IMG2=%d", ca_clipFrameBase[1], ca_clipFrameBase[2] );
         Txt_DrawString( &game_gfx, 84, 30, str );
         break;
     }

@@ -13,12 +13,12 @@ Entry of the overlay: in mode 0xA, Start held selects mode 0xFE, and no controll
 */
 void OP_Init( void ) {
     op_modeFrames = 0;
-    if ( D_8005C0E8 == 10 ) {
+    if ( op_nextMode == 10 ) {
         if ( cont_allHeld & START_BUTTON ) {
-            D_8005C0E8 = 0xFE;
+            op_nextMode = 0xFE;
         }
         if ( cont_noController == 1 ) {
-            D_8005C0E8 = 0xFD;
+            op_nextMode = 0xFD;
         }
     }
 }
@@ -35,7 +35,7 @@ OP_PakScreen's screens. Each logo and the title count frames in op_modeFrames, t
 s32 OP_Frame( void ) {
     s32 i;
 
-    switch ( D_8005C0E8 ) {
+    switch ( op_nextMode ) {
     case 10:
         Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
         Draw_Image( 0xB58, 0, 0 );
@@ -44,7 +44,7 @@ s32 OP_Frame( void ) {
             if ( game_fade == 0xFF ) {
                 game_fade = 0x107;
                 game_leaveState = 2;
-                D_8005C0E8 = 0;
+                op_nextMode = 0;
                 op_modeFrames = 0;
                 Sound_PlaySe( 0x43, 0 );
             }
@@ -58,7 +58,7 @@ s32 OP_Frame( void ) {
             if ( game_fade == 0xFF ) {
                 game_fade = 0x107;
                 game_leaveState = 2;
-                D_8005C0E8 = 1;
+                op_nextMode = 1;
                 op_modeFrames = 0;
             }
         }
@@ -117,7 +117,7 @@ s32 OP_Frame( void ) {
         }
         if ( ( cont_pressed[0] & START_BUTTON ) && !game_leaveState ) {
             Sound_PlaySe( 1, 0 );
-            D_8005C0E8 = 2;
+            op_nextMode = 2;
             op_modeFrames = 0;
         }
         break;
@@ -126,7 +126,7 @@ s32 OP_Frame( void ) {
         Draw_Image( 0xADD, 0, 0 );
         if ( !OP_CheckSettings() ) {
             game_leaveState = 1;
-            D_8005C0E8 = 3;
+            op_nextMode = 3;
         }
         break;
     case 3:
@@ -144,7 +144,7 @@ s32 OP_Frame( void ) {
         break;
     case 0xFE:
         if ( !OP_PakScreen() ) {
-            D_8005C0E8 = 10;
+            op_nextMode = 10;
         }
         break;
     }
