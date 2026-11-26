@@ -5,6 +5,14 @@
 #include "libc.h"
 #include "gacode/gacode.h"
 
+/* ===== Data ===== */
+
+/* per side: the pins (1 to 10) from the back row forward (GA_PickAimPin) */
+static u8 ga_pinRows[2][NUM_PINS] = {
+    { 10, 9, 7, 8, 6, 4, 3, 2, 5, 1 },
+    { 7, 8, 10, 9, 4, 6, 2, 3, 5, 1 },
+};
+
 /*
 ================
 GA_BodyMatrix

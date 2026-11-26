@@ -576,7 +576,7 @@ s32 GA_ScorePar( s32 player ) {
     s32 result;
 
     if ( ( pl->lane->frameOver = GA_CountParThrow( player, pl->lane->pinsDown == 10 ) ) != 0 ) {
-        GA_PlayLaneSound( pl->laneIndex, D_8012C7E6_gacode[game_frameScores[player][game_frame[player] - 1]] );
+        GA_PlayLaneSound( pl->laneIndex, ga_runSounds[PAR_SOUNDS + game_frameScores[player][game_frame[player] - 1]] );
         pl->lane->callout = game_frameScores[player][game_frame[player] - 1] + 0x1A;
         result = GA_ScoreResult( pl->lane->callout - 0x18 );
     } else {
@@ -2104,7 +2104,7 @@ void GA_DrawWeightSelector( gaPlayer_t *pl ) {
     x = pl->laneIndex == 0 ? 0x6C : 0xA4;
     y = 0xC8;
     Draw_Image( 0xAF7, x, y );
-    Draw_Image( D_8012C7F4_gacode[pl->ballWeight], x + 0x10, y );
+    Draw_Image( ga_panelImages.weights[pl->ballWeight], x + 0x10, y );
     Draw_Image( 0xAF5, x + 0x20, y );
     Score_DrawNumber( pl->ballWeight + 6, x - 6, 0xD9 );
     Draw_Image( 0xAF3, x + 0x10, 0xD8 );
@@ -2228,8 +2228,8 @@ void GA_DrawParFramePanel( s32 player, u8 lane ) {
     x = lane != 0 ? 0xB0 : 0x20;
     y = 0x30;
     Draw_Image( 0xA1D, x, y );
-    Draw_Image( ga_numberImages[ga_parFrame + 1], x + 0x48, 0x36 );
-    Draw_Image( ga_numberImages[game_frameFlags[0][ga_parFrame]], x + 0x48, 0x46 );
+    Draw_Image( ga_panelImages.numbers[ga_parFrame + 1], x + 0x48, 0x36 );
+    Draw_Image( ga_panelImages.numbers[game_frameFlags[0][ga_parFrame]], x + 0x48, 0x46 );
     GA_UnpackPinMask( pins, D_80123950_gacode[D_800DF59C.unk_04[ga_parFrame]].pins );
     for ( i = 0; i < NUM_PINS; i++ ) {
         if ( pins[i] == 1 ) {
@@ -2916,7 +2916,7 @@ void func_8011BA00_gacode( s32 player, sceneCamera_t *camera ) {
     camera->eye[2] = 1130.0f;
     camera->eye[0] = pl->character.stance[0] + pl->lane->offsetX;
     camera->eye[1] = 200.0f;
-    camera->at[2] = D_8012C158_gacode[0];
+    camera->at[2] = D_8012C110_gacode[0].pos[2];
     camera->at[0] = pl->character.stance[0] + pl->lane->offsetX;
     camera->at[1] = 0.0f;
     camera->upPoint[2] = camera->eye[2];

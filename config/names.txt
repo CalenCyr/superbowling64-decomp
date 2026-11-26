@@ -884,8 +884,10 @@ ga_splits5	0x801237BC	invented: the split leaves with 5 pins standing (GA_IsSpli
 ga_splits6	0x801237EC	invented: the split leaves with 6 pins standing (GA_IsSplit)
 ga_frameCount	0x8012C924	invented: frame counter (GA_CountFrame)
 ga_cpuThrows	0x80123850	invented: four throw values of a player the game plays, by character (GA_CpuSetup)
-ga_runSounds	0x8012C7CC	invented: sound ids by the player's run (GA_ScoreBattle)
-ga_numberImages	0x8012C80A	invented: image ids of the numbers 1 to 9
+ga_runSounds	0x8012C7CC	invented: sound ids by the player's run (GA_ScoreBattle), then by score against par (GA_ScorePar)
+ga_panelImages	0x8012C7F4	invented: image ids of the player panel: ball weights, then the numbers 1 to 9
+gaPanelImages_t	gacode/gacode.h	invented: type of ga_panelImages
+PAR_SOUNDS	gacode/gacode.h	invented: index of ga_runSounds' par sounds, read by score against par (GA_ScorePar)
 ga_parChartPins	0x8012C820	invented: x and y of each pin in the par game's pin chart
 ga_pinPanelPins	0x8012C858	invented: x and y of each pin in the pin panel
 ga_editorPinPos	0x8012C880	invented: x and y of each pin in the pin editor

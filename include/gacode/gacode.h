@@ -84,7 +84,7 @@ typedef struct {
     /* 0x00 */ vec3_t vel;              /* added to the body's spot each frame; the ball's is turned into its spin
                                            by GA_SetBallHeading */
     /* 0x0C */ vec3_t spin;             /* added to the body's rot each frame (degrees, kept within -180..180) */
-    /* 0x18 */ u8 unk_18[0x18];
+    /* 0x18 */ f32 unk_18[6];
     /* 0x30 */ f32 mass;                /* the ball's from D_801239E8_gacode, by gaPlayer_t.ballWeight */
     /* 0x34 */ u32 flags;
 } gaMotion_t;                           /* size 0x38 */
@@ -156,7 +156,7 @@ typedef struct {
     /* 0x44 */ f32 hook;                /* added to the rolling ball's motion[0].vel[0] each frame */
 } gaCharacter_t;                        /* size 0x48 */
 
-extern gaCharacter_t ga_characters[];
+extern gaCharacter_t ga_characters[10];   /* per character (the last two empty) */
 
 #define MAX_PLAYERS     4
 
@@ -209,22 +209,10 @@ typedef struct {
     /* 0x04 */ s16 *ids;
 } gaImageList_t;                        /* size 0x8 */
 
-extern gaImageList_t D_801236B0_gacode[2];
-extern u16 ga_lanePaletteImages[][4];      /* image files of GA_LoadLanePalettes, by its index */
-/* image files of GA_AnimateTextures's animated palettes, by animation frame */
-extern u16 D_8012C928_gacode[11];
-extern u16 D_8012C940_gacode[11];
-extern u16 D_8012C958_gacode[2];
-extern u16 D_8012C95C_gacode[2];
-extern u16 D_8012C960_gacode[2];
-extern u16 D_8012C964_gacode[9];
+/* image ids of the gauge's spin images: [0..7] for a forward spin, [8..15] for a reversed one */
+extern s16 D_80123690_gacode[16];
+extern gaImageList_t D_801236B0_gacode[2];   /* per lane; both list D_80123690_gacode */
 extern void *ga_savedTexels[2];      /* texels of resources 1523 and 1524, saved by GA_AnimateTextures */
-/* image files of GA_FlickerLight's four palette slots, by brightness step */
-extern u16 D_8012C978_gacode[4];
-extern u16 D_8012C980_gacode[4];
-extern u16 D_8012C988_gacode[4];
-extern u16 D_8012C990_gacode[4];
-extern u16 ga_flickerTimer;           /* frames to the next flicker of GA_FlickerLight */
 extern u16 ga_flickerSoundTimer;           /* frames to GA_FlickerLight's flicker sound */
 extern gaSprite_t D_8012D8E0_gacode[2];   /* per lane */
 extern gaSprite_t D_8012D240_gacode[2];   /* per lane (GA_SetupLanes) */
@@ -246,10 +234,6 @@ extern u16 ga_editorPins;              /* pins of GA_ScorePinEditor */
 typedef s32 (*gaPlayerFunc_t)( s32 player );
 
 extern s16 ga_blinkLevel;          /* blink level, 0 to 0x80 by 8 (GA_Frame) */
-extern s8 ga_blinkFalling;           /* 1: ga_blinkLevel falls, else it rises */
-extern u8 ga_gameDone;           /* what the main loop state returned: nonzero, the game is done */
-extern u8 ga_leaveGame;           /* what the pause menu's state returned: nonzero, leave the game */
-extern u8 ga_pinRows[2][NUM_PINS];  /* per side: the pins (1 to 10) from the back row forward (GA_PickAimPin) */
 /* By 2 to 6 standing pins (head pin down): a count, then that many sorted masks of the standing pins
    (bit 10 - n for pin n), the leaves GA_IsSplit accepts */
 extern u16 ga_splits2[1 + 23];
@@ -257,19 +241,22 @@ extern u16 ga_splits3[1 + 42];
 extern u16 ga_splits4[1 + 57];
 extern u16 ga_splits5[1 + 23];
 extern u16 ga_splits6[1 + 1];
-extern s32 ga_sceneryStarted;
-extern s32 ga_frameCount;          /* frame counter */
-extern f32 D_8012C158_gacode[];
-extern f32 ga_cpuThrows[][4];     /* unk_98, unk_9C, unk_2C, unk_30 of a player, by D_800DF59C.unk_04[] */
+extern f32 ga_cpuThrows[16][4];     /* unk_98, unk_9C, unk_2C, unk_30 of a player, by D_800DF59C.unk_04[] */
 extern s16 D_8012C784_gacode[];
 extern vec3_t D_8012C758_gacode;      /* (0, 24, 0) (GA_PhysicsStep) */
-extern s16 ga_runSounds[];      /* sound ids, by game_strikeRun[] up to 10 (GA_ScoreBattle) */
-/* by score against par; TODO identity: scores below par read before the label, so the table likely starts
-   earlier */
-extern s16 D_8012C7E6_gacode[];
+/* sound ids: by game_strikeRun[] up to 10 (GA_ScoreBattle), and from PAR_SOUNDS on by score against par
+   (GA_ScorePar) */
+extern s16 ga_runSounds[20];
+#define PAR_SOUNDS      13              /* ga_runSounds[PAR_SOUNDS + score against par] */
 extern f32 D_801239E8_gacode[11];      /* by gaPlayer_t.ballWeight */
-extern u16 D_8012C7F4_gacode[11];      /* image ids, by gaPlayer_t.ballWeight */
-extern u16 ga_numberImages[11];      /* image ids of the numbers 1 to 9, by number ([0] and [10] none) */
+
+/* Image ids of the player panel's numbers. Name invented. */
+typedef struct {
+    /* 0x00 */ u16 weights[11];         /* by gaPlayer_t.ballWeight */
+    /* 0x16 */ u16 numbers[11];         /* the numbers 1 to 9, by number ([0] and [10] none) */
+} gaPanelImages_t;                      /* size 0x2C */
+
+extern gaPanelImages_t ga_panelImages;
 extern u16 ga_parChartPins[NUM_PINS][2];  /* x and y of each pin in the pin chart (GA_DrawParFramePanel) */
 extern u16 D_8012C848_gacode[8];       /* image ids, by game_stage */
 extern u16 ga_pinPanelPins[NUM_PINS][2];  /* x and y of each pin in the pin panel (GA_DrawPinPanel) */
@@ -287,7 +274,16 @@ extern s16 ga_laneCamPaths[5];       /* path files of GA_CameraLane's camera */
 extern u8 ga_aimChannelOrders[3][3];     /* channel orders of GA_DrawAimLine's aim line colour */
 extern u16 ga_aimColorAngle;          /* angle of GA_DrawAimLine's colour cycle */
 extern u8 ga_aimChannelOrder;           /* channel order of GA_DrawAimLine's colour, mod 3 */
-extern gaStage_t ga_stages[];
+extern gaStage_t ga_stages[8];
+/* the stages' scenes (gaStage_t.scene) */
+extern objParams_t D_801240B0_gacode[63];
+extern objParams_t D_80125070_gacode[98];
+extern objParams_t D_801268F0_gacode[46];
+extern objParams_t D_80127470_gacode[64];
+extern objParams_t D_80128470_gacode[45];
+extern objParams_t D_80128FB0_gacode[56];
+extern objParams_t D_80129DB0_gacode[66];
+extern objParams_t D_8012AE30_gacode[59];
 extern gaStage_t *ga_stage;
 extern objClass_t ga_classes[12];   /* the classes of the game's scene */
 extern u8 ga_steerBall;             /* nonzero: Z steers the rolling ball by the stick (GA_InputRoll) */
@@ -315,8 +311,6 @@ typedef struct {
     /* 0x07 */ s8 parent;                  /* page the back item returns to; -1: the pause menu */
 } gaMenuPage_t;                              /* size 0x08 */
 
-extern gaMenuPage_t ga_menuPages[15];
-extern u8 ga_menuPage;           /* current page of ga_menuPages */
 extern u8 ga_pauseCursor;           /* pause menu: the item under the cursor (0 to 3) */
 extern u8 ga_bonusOwed[4];        /* per player (GA_ScoreThirdBall) */
 extern u16 ga_throwCount;
@@ -338,7 +332,6 @@ extern s16 ga_bgm;          /* BGM of the game (Sound_PlayBgm) */
 extern s64 ga_sound;           /* sound handle (Sound_PlaySe) */
 extern u8 ga_teamCurrent[2];         /* per team: index in ga_teamPlayers of the current player */
 extern s8 ga_teamPlayers[2][5];      /* per team: player numbers, -1 ends */
-extern u8 ga_pairNext[2];         /* per pair of players: the index the turn passes to next (GA_PairGameLoop) */
 
 /* unit 3C570 */
 s32 GA_PauseMenu( void );
@@ -516,8 +509,12 @@ void GA_DecideFrame( u8 frame );
 void GA_CountFrame( void );
 void GA_SetPlayerObjectFlags( s32 set );
 void func_80122470_gacode( void );
+void func_801224F8_gacode( void );
+void GA_AnimateTextures( void );
 void func_80122BD8_gacode( void );
 void func_80122C60_gacode( void );
+void GA_FlickerLight( void );
+void func_80123004_gacode( void );
 void func_801233A8_gacode( void );
 void GA_LoadLanePalettes( s32 lane, s32 alt, s32 index );
 

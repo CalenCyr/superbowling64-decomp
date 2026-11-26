@@ -5,6 +5,40 @@
 #include "ground.h"
 #include "gacode/gacode.h"
 
+/* ===== Data ===== */
+
+static s32 ga_sceneryStarted = 0;
+static s32 ga_frameCount = 0;          /* frame counter */
+/* image files of GA_AnimateTextures's animated palettes, by animation frame */
+static u16 D_8012C928_gacode[11] = { 0x0932, 0x0933, 0x0936, 0x0936, 0x0935, 0x0934, 0x0932, 0x0933, 0x0932, 0x0933, 0x0932 };
+static u16 D_8012C940_gacode[11] = { 0x092E, 0x092F, 0x0931, 0x0930, 0x092E, 0x092E, 0x092E, 0x092F, 0x092E, 0x092F, 0x092E };
+static u16 D_8012C958_gacode[2] = { 0x0A89, 0x0A88 };
+static u16 D_8012C95C_gacode[2] = { 0x0A87, 0x0A86 };
+static u16 D_8012C960_gacode[2] = { 0x0A85, 0x0A84 };
+static u16 D_8012C964_gacode[9] = { 0x085A, 0x0859, 0x0858, 0x0857, 0x0856, 0x0857, 0x0856, 0x0857, 0x0856 };
+/* image files of GA_FlickerLight's four palette slots, by brightness step */
+static u16 D_8012C978_gacode[4] = { 0x08F9, 0x08FA, 0x08FB, 0x08FC };
+static u16 D_8012C980_gacode[4] = { 0x08F1, 0x08F2, 0x08F3, 0x08F4 };
+static u16 D_8012C988_gacode[4] = { 0x084D, 0x084E, 0x084F, 0x0850 };
+static u16 D_8012C990_gacode[4] = { 0x08F5, 0x08F6, 0x08F7, 0x08F8 };
+/* Unreferenced; 0x765 is in the range of the resource indices the unit patches (1905, 1906). */
+static u16 D_8012C998_gacode[2] = { 0x0000, 0x0765 };
+static u16 ga_flickerTimer = 1;         /* frames to the next flicker of GA_FlickerLight */
+/* image files of GA_LoadLanePalettes, by its index */
+static u16 ga_lanePaletteImages[11][4] = {
+    { 0x0B55, 0x0B57, 0x0B56, 0x0B57 },
+    { 0x0B52, 0x0B54, 0x0B53, 0x0B54 },
+    { 0x0B4F, 0x0B51, 0x0B50, 0x0B51 },
+    { 0x0B4C, 0x0B4E, 0x0B4D, 0x0B4E },
+    { 0x0B46, 0x0B48, 0x0B47, 0x0B48 },
+    { 0x0B42, 0x0B44, 0x0B43, 0x0B44 },
+    { 0x0B3E, 0x0B40, 0x0B3F, 0x0B40 },
+    { 0x0B3A, 0x0B3C, 0x0B3B, 0x0B3C },
+    { 0x0B37, 0x0B39, 0x0B38, 0x0B39 },
+    { 0x0B34, 0x0B36, 0x0B35, 0x0B36 },
+    { 0x0B30, 0x0B32, 0x0B31, 0x0B32 },
+};
+
 /*
 ================
 GA_CountFrame

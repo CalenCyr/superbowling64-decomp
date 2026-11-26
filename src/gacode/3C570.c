@@ -7,6 +7,34 @@
 #include "input.h"
 #include "gacode/gacode.h"
 
+/* ===== Data ===== */
+
+s16 ga_blinkLevel = 0;
+static s8 ga_blinkFalling = 0;  /* 1: ga_blinkLevel falls, else it rises */
+static u8 ga_gameDone = 0;      /* what the main loop state returned: nonzero, the game is done */
+static u8 ga_leaveGame = 0;     /* what the pause menu's state returned: nonzero, leave the game */
+/* the pause menu's pages (GA_PageBrowser) */
+static gaMenuPage_t ga_menuPages[15] = {
+    { 0x6E, 0, 5, 0x970, 1, -1 },
+    { 0x66, -1, 0, 0x96F, 0, -1 },
+    { 0x4E, -1, 0, 0x96E, 0, -1 },
+    { 0x4E, 0, 3, 0x96D, 6, 0 },
+    { 0x8E, -1, 0, 0x965, 13, -1 },
+    { 0x5E, -1, 0, 0x963, 14, -1 },
+    { 0x3E, -1, 0, 0x96C, 9, -1 },
+    { 0x3E, -1, 0, 0x96A, 10, -1 },
+    { 0x7E, -1, 0, 0x967, 12, -1 },
+    { 0x76, -1, 0, 0x96B, 3, -1 },
+    { 0x76, -1, 0, 0x969, 11, -1 },
+    { 0x4E, -1, 0, 0x968, 3, -1 },
+    { 0x8E, -1, 0, 0x966, 3, -1 },
+    { 0x8E, -1, 0, 0x964, 0, -1 },
+    { 0x66, -1, 0, 0x962, 0, -1 },
+};
+static u8 ga_menuPage = 0;      /* current page of ga_menuPages */
+/* per pair of players: the index the turn passes to next (GA_PairGameLoop) */
+static u8 ga_pairNext[2] = { 1, 2 };
+
 /*
 ================
 GA_Init

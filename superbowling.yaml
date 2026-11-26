@@ -398,12 +398,16 @@ segments:
       - [0x3E350, c, gacode/3E350]
       - [0x474E0, c, gacode/474E0]
       - [0x4C560, c, gacode/4C560]
-      - [0x4D820, data]
+      - [0x4D820, .data, gacode/3C570]     # 3C570's state and the pause menu's pages
+      - [0x4D8B0, .data, gacode/data]      # the data-only unit: the interleaved tables of the four code units
+      - [0x56B20, .data, gacode/474E0]     # ga_pinRows
+      - [0x56B40, .data, gacode/4C560]     # the scenery's state and image tables
       # .rodata of each unit, in unit order after all .data (doubles and jump tables, each unit's own)
       - [0x56C20, .rodata, gacode/3C570]
       - [0x56C30, .rodata, gacode/3E350]
       - [0x56E80, .rodata, gacode/474E0]
       - [0x56FD0, .rodata, gacode/4C560]
+      # bss stays asm: its objects' gaps fit neither one C unit's definition order nor commons
       - { type: bss, vram: 0x8012CDD0 }
 
   - name: rscode

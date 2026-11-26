@@ -75,6 +75,8 @@ Also record:
     the types. gcc word-aligns every array and struct (opcode's `op_pakImages` at 0x801141CC after a `u16[0x85]`),
     so a 2-byte gap after an array is alignment; an unreferenced run with real contents inside a unit's range is
     a datum of that unit, defined under a placeholder name (opcode's two glyph strings at 0x80114254).
+    Data whose users interleave (gacode) goes into a data-only unit (`src/<seg>/data.c`, no functions, only a
+    `[<rom>, .data, <seg>/data]` subsegment), placed in link order where its run starts.
 - **Headers:** `include/common.h` (types, `INCLUDE_ASM`), `include/structs.h`, `include/variables.h`,
   `include/functions.h`. Each type and global is declared once there (R1, R2).
 - **libultra:** 2.0K `libgultra_rom`, linked from source. `lib/ultralib` is decompals' ultralib (git submodule
@@ -117,7 +119,7 @@ Also record:
   | main | 0x1060-0x3C2A0 | 0x80025C60 | 604 functions; BSS to 0x8010A080. No `SUBALIGN` (`subalign: null`): each object's sections keep their own alignment, as in the original link (KMC as gives `.text`/`.data`/`.bss` 2**4 and pads `.text` to 16; `.rodata` takes its contents' alignment, so 2DF0's `.rodata` follows 1060's at 0x80060388). Per-unit `.rodata` subsegments after the 3A7F0 data blob: 1060 (0x3B6C0), 2DF0 (0x3B788), 53B0, ... |
   | fat | 0x3C2A0-0x3C470 | 0x8010A080 | `BW64FAT` table: {name ptr, ROM start, ROM end, 0} |
   | knstatic | 0x3C470-0x3C570 | 0x8010A250 | `KNSTATICSYS` |
-  | gacode | 0x3C570-0x56FF0 | 0x80112350 | game overlay (`GACODE  SYS`): C units 3C570, 3E350, 474E0, 4C560; .data 0x4D820; .rodata 0x56C20 (per unit, confirmed by the gate); bss 0x8012CDD0-0x8012F350 (ends with the second lane) |
+  | gacode | 0x3C570-0x56FF0 | 0x80112350 | game overlay (`GACODE  SYS`): C units 3C570, 3E350, 474E0, 4C560 and the data-only unit `data`; .data 0x4D820 in C (3C570's state to 0x4D8B0, then `data`'s interleaved tables, then 474E0 at 0x56B20 and 4C560 at 0x56B40); .rodata 0x56C20 (per unit, confirmed by the gate); bss 0x8012CDD0-0x8012F350 still asm (ends with the second lane) |
   | rscode | 0x56FF0-0x58F40 | 0x80112350 | results overlay (`RSCODE  SYS`): C unit 56FF0; .data 0x58EF0; .rodata 0x58F30 (one auto array initialiser); bss 0x801142A0, 0x20 (the end 0x801142C0 is what main's loader `Game_Thread` clears to) |
   | gscode | 0x58F40-0x67370 | 0x80112350 | game-select overlay (`GSCODE  SYS`): 12 C units 58F40-61CA0; .data 0x62130, per unit and defined in C (`gs_classes`, first, is 58F40's by position; each unit's .data padded to 16); .rodata 0x67260 (per unit: 58F40, 59490, 5AD50, 5E2B0, 605D0, 61640); bss 0x80120780, 0x2F0 (the end 0x80120A70 is what main's loader `Game_Thread` clears to): 58F40's, 605D0's and 61CA0's in C, 5AD50/5EC00's (0x80120790) and 61640's (0x80120A20) in asm, since KMC's assembler put objects of 16 bytes or more at a multiple of 8 and 0x80120799-0x801207B1 is unreferenced |
   | cacode | 0x67370-0x6A650 | 0x80112350 | overlay (`CACODE  SYS`): C unit 67370 (text to 0x6A37C; no alignment padding between its six functions, and its rodata follows their order); .data 0x6A380; .rodata 0x6A570 (file names, debug format strings, doubles); bss 0x80115630, 0x29260 (the motion tables saved as "motion.dat"; the end 0x8013E890 is what main's loader `Game_Thread` clears to) |
