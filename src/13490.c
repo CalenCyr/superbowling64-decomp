@@ -398,6 +398,8 @@ player has finished the game.
 // Dumps (-dl/-dg): rowY (9 refs over 246 insns) loses to frame (10 over 238) and to the rowY + 9 temporary, which cse
 // substitutes for rowY at its one later use, so the temporary takes a2; retail's in-place s4 += 9 follows if rowY is
 // allocated first. No effect or worse: rowY declared in each branch (worse), rowY += 9 just before the call (worse).
+// Also worse: rowY + 9 written at the Score_DrawNumber calls, y itself stepped with y += 2, rowY = y with + 2 at
+// each use; rowY = y then rowY += 2 is the same. A 35-minute permuter run: 385 only through throw++/throw-- (noise).
 void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;

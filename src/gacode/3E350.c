@@ -138,6 +138,8 @@ result.
 // s16/u8/u32, body declared before spot; body assigned before spot folds the lane load into body's s1.
 // Dumps (-dl): the lane load (one block-local pseudo, live from the load to the copy into body) has no hard-register
 // suggestion and nothing else is live in v0/v1 there; retail's a0 needs a direct copy of it into a0 or a busy v0/v1.
+// No effect: the first loop as an inline helper taking (body, spot, pl), (pl, spot, body) or (pl, lane); a 35-minute
+// permuter run found nothing below 15.
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
@@ -3380,6 +3382,9 @@ modes that have one), and a value of the lane's current inputFunc step.
 // Permuter (20 min, target-only scoring): 110 -> 75 only through an aliasing pointer copy of pl.
 // Pass 0 of global-alloc prefers registers already used: retail's order also follows if player and &game_gfx
 // conflict with s2/s3 held by block-local pseudos that row and lane do not overlap; no such pseudo found yet.
+// -dg allocation order here: x/pl first, then player, &game_gfx, row, lane; retail needs row and lane ahead of
+// player and &game_gfx (both conflict with row). Worse: a Gfx ** local for &game_gfx, x as an s16 local, each line's
+// draw and row++ in a do-while(0). A 35-minute permuter run: 75 only through a duplicated final draw.
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;
