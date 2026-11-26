@@ -21,6 +21,8 @@ pass moved to follow the last); samples past the table's end are cleared.
 // (one sll/sra before the loop); here combine folds inp to 0 (set once, so trusted everywhere). The rest
 // matches up to those. Not it: a second, dead inp = 0 (in the same block or the non-looped path).
 // Frame unchanged by inline helpers for the lead skip (void, pointer parameters) or the frame count (s32 return).
+// The dumps: combine folds (s16)inp in all three calls through get_last_value (inp set once, REG_EQUAL 0); retail
+// folds the first and third only. Not it: a second inp = 0 at the loop body's start or end, or before the loop.
 Acmd *Synth_DecodeSamples( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
     Acmd *ptr = p;
     s32 looped;

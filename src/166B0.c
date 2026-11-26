@@ -1648,6 +1648,7 @@ f32 Snd_Exp2( f32 x ) {
 // An inline that assigns its parameter (x &= 0xFF; if ( x & 0x80 ) x -= 0x100;) gives retail's length and the
 // copy, but in both calls (retail copies only the digit); not it either: a nested Snd_Digit inline, (u8)/(s8)
 // casts on the digit, -'0' + digit, a digit local before or after the first conversion, the add's operands swapped.
+// Not it either: an inline assigning x in SEXT8's order (if/else), x = SEXT8( x ), a local copy of x in the inline.
 /*
 ================
 Snd_SignExtend8
