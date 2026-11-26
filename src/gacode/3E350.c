@@ -719,14 +719,14 @@ s32 GA_EndTurn( s32 player ) {
     frame = game_frame[player];
     if ( game_playerDone[player] != 0 ) {
         lane->turnFunc = GA_StartTurn;
-        D_80066C00.unk_20[player]++;
+        game_pinFrame[player]++;
         lane->frameOver = 0;
         return 1;
     }
     result = 0;
     if ( lane->frameOver != 0 ) {
         lane->turnFunc = GA_StartTurn;
-        D_80066C00.unk_20[player]++;
+        game_pinFrame[player]++;
         if ( frame != 9 ) {
             result = 1;
         } else if ( game_firstRolls[player][9] != -1 && game_secondRolls[player][9] != -1 ) {
@@ -1819,9 +1819,9 @@ s32 GA_InputCountPins( s32 player, s32 input, s16 stickX, s16 stickY ) {
             pl->lane->bodies[i].standState = 0;
             pl->lane->pinsHit++;
             if ( pl->lane->turnFunc == GA_TurnFirstBall ) {
-                D_800A3050[scorer][D_80066C00.unk_20[scorer]] |= 1 << ( 10 - i );
+                game_firstBallPins[scorer][game_pinFrame[scorer]] |= 1 << ( 10 - i );
             } else {
-                D_800F7C18[scorer][D_80066C00.unk_20[scorer]] |= 1 << ( 10 - i );
+                game_secondBallPins[scorer][game_pinFrame[scorer]] |= 1 << ( 10 - i );
             }
         }
         if ( pl->lane->bodies[i].standState == 0 ) {

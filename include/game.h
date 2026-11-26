@@ -19,7 +19,7 @@ extern u8 game_mode;                /* low nibble the game mode; bits 4-5 a sub-
 extern u8 game_numPlayers;          /* number of players */
 extern u8 game_lastTeam;            /* index of the last team */
 extern u8 game_stage;               /* the stage, index of ga_stages; a duel's opponent's character */
-extern u8 D_8005C164;               /* set to 1 by the game reset (GA_ClearScores) */
+extern u8 game_scoresCleared;               /* set to 1 by the game reset (GA_ClearScores) */
 extern u8 game_replay;              /* set when the results overlay plays again: gscode reopens team select */
 extern u8 game_gamesWon[2];         /* per lane: games won */
 extern u8 game_frame[4];            /* per player: current frame (10: the game is over) */
@@ -46,8 +46,9 @@ extern u16 game_splits[4];          /* per player: splits this game (GA_IsSplit,
 extern u16 game_strikes[4];         /* per player: strikes this game, counted up with game_strikeRun (GA_ScoreStandard) */
 extern u16 game_spares[4];          /* per player: spares this game, counted when a frame ends after a non-run turn */
 extern u8 game_strikeRun[4];        /* per player: strikes in a row (to 255), which the game modes read and reset (GA_ScoreBattle) */
-extern u16 D_800A3050[4][12];       /* per player and frame: a pin mask, bit 9 - n for pin n */
-extern u16 D_800F7C18[4][12];       /* per player and frame: a second pin mask, the same way */
+extern u16 game_firstBallPins[4][12];   /* per player and frame: the pins the first ball knocked down, bit 9 - n for pin n */
+extern u16 game_secondBallPins[4][12];  /* per player and frame: those of the second ball, the same way */
+extern u8 game_pinFrame[4];             /* per player: the frame the pin masks above are recorded in; the game's turns count it on */
 
 /* The lane's floor height grid: a file (the stage's gaStage_t.floorGridFile). Name invented. */
 typedef struct {

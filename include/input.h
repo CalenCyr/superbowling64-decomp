@@ -53,7 +53,7 @@ typedef enum {
     CONT_REQ_REPAIR_ID,
     CONT_REQ_IS_PLUG,           /* cont_pakPlugged */
     CONT_REQ_MOTOR_INIT,        /* look for a Rumble Pak on port 1 (into cont_rumblePfs[1]) */
-    CONT_REQ_FILE_STATE         /* the state of note cont_noteIndex: D_80066C00.note */
+    CONT_REQ_FILE_STATE         /* the state of note cont_noteIndex: cont_noteState */
 } contRequest_t;
 
 extern OSMesgQueue cont_requestQueue;
@@ -61,13 +61,7 @@ extern OSMesgQueue cont_replyQueue;
 extern s32 cont_result;             /* result of the last request */
 extern s32 cont_pakPort;
 extern s32 cont_noteIndex;          /* request 10: the note to read */
-/* Main's D_80066C00 (0x24 bytes). Name invented. */
-typedef struct {
-    /* 0x00 */ OSPfsState note;            /* request 10: the state of the note read */
-    /* 0x20 */ u8 unk_20[4];               /* per player: frames of the pin diagram's second page, 9 on */
-} unk80066C00_t;                        /* size 0x24 */
-
-extern unk80066C00_t D_80066C00;
+extern OSPfsState cont_noteState;   /* request 10: the state of the note read */
 extern s32 cont_maxNotes;           /* request 4: notes in all (with cont_usedNotes) */
 extern s32 cont_usedNotes;          /* request 4: notes used */
 extern s32 cont_freeBytes;          /* request 4: free bytes */

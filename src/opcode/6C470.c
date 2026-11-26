@@ -178,7 +178,7 @@ s32 OP_CheckSettings( void ) {
             osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             if ( cont_result == 0 ) {
                 save_enabled = 1;
-                memcpy( D_800693E8, cont_pakPfs.id, sizeof( D_800693E8 ) );
+                memcpy( save_pakId, cont_pakPfs.id, sizeof( save_pakId ) );
                 return FALSE;
             }
             op_checkStep = 27;
@@ -292,7 +292,7 @@ s32 OP_CheckSettings( void ) {
             osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_BLOCK );
             if ( cont_result == 0 && save_dataPtr->checksum == Save_Checksum() ) {
                 save_enabled = 1;
-                memcpy( D_800693E8, cont_pakPfs.id, sizeof( D_800693E8 ) );
+                memcpy( save_pakId, cont_pakPfs.id, sizeof( save_pakId ) );
                 return FALSE;
             }
             op_checkStep = 36;

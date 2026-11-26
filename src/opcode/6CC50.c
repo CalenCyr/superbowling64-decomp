@@ -124,11 +124,11 @@ s32 OP_PakScreen( void ) {
             if ( cont_result == 0 ) {
                 n = op_numNotes;
                 op_noteIndex[n] = i;
-                op_notePages[n] = ( D_80066C00.note.file_size + 0xFF ) >> 8;
+                op_notePages[n] = ( cont_noteState.file_size + 0xFF ) >> 8;
                 for ( j = 0; j < 16; j++ ) {
-                    op_noteNames[n].name[j] = OP_ConvertPakChar( D_80066C00.note.game_name[j] );
+                    op_noteNames[n].name[j] = OP_ConvertPakChar( cont_noteState.game_name[j] );
                 }
-                op_noteNames[op_numNotes].ext = OP_ConvertPakChar( D_80066C00.note.ext_name[0] );
+                op_noteNames[op_numNotes].ext = OP_ConvertPakChar( cont_noteState.ext_name[0] );
                 op_noteNames[op_numNotes].end = 0xFFFF;
                 op_numNotes++;
             } else if ( cont_result != 5 ) {
@@ -267,16 +267,16 @@ s32 OP_PakScreen( void ) {
                         if ( cont_result != 0 ) {
                             op_pakState = 3;
                         } else {
-                            memcpy( cont_deleteGameName, D_80066C00.note.game_name, 16 );
-                            memcpy( cont_deleteExtName, D_80066C00.note.ext_name, 4 );
+                            memcpy( cont_deleteGameName, cont_noteState.game_name, 16 );
+                            memcpy( cont_deleteExtName, cont_noteState.ext_name, 4 );
                             op_pakMsg = CONT_REQ_DELETE_FILE;
-                            cont_deleteCompany = D_80066C00.note.company_code;
-                            cont_deleteGameCode = D_80066C00.note.game_code;
+                            cont_deleteCompany = cont_noteState.company_code;
+                            cont_deleteGameCode = cont_noteState.game_code;
                             osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
                             osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
                             if ( cont_result == 0 ) {
                                 op_freeNotes++;
-                                op_freePages += ( D_80066C00.note.file_size + 0xFF ) >> 8;
+                                op_freePages += ( cont_noteState.file_size + 0xFF ) >> 8;
                                 for ( i = op_cursorLine + op_firstNote; i < op_numNotes - 1; i++ ) {
                                     op_noteIndex[i] = op_noteIndex[i + 1];
                                     op_notePages[i] = op_notePages[i + 1];

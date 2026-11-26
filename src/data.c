@@ -69,6 +69,6 @@ u8 game_mode = 0;
 u8 game_numPlayers = 1;
 u8 game_lastTeam = 0;
 u8 game_stage = 0;
-u8 D_8005C164 = 0;
+u8 game_scoresCleared = 0;
 static s32 D_8005C168[2] = { 0 };     /* unreferenced */
 static Lights1 D_8005C170 = gdSPDefLights1( 0x40, 0x40, 0x40, 0x80, 0x80, 0x80, -80, 80, 0 );  /* unreferenced */

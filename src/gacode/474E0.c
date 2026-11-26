@@ -1487,8 +1487,8 @@ void GA_ClearScores( void ) {
             game_frameScores[player][frame] = 0;
         }
         for ( frame = 0; frame < 12; frame++ ) {
-            D_800A3050[player][frame] = 0;
-            D_800F7C18[player][frame] = 0;
+            game_firstBallPins[player][frame] = 0;
+            game_secondBallPins[player][frame] = 0;
         }
         game_strikes[player] = 0;
         game_spares[player] = 0;
@@ -1500,11 +1500,11 @@ void GA_ClearScores( void ) {
         ga_bonusOwed[player] = 0;
         game_playerDone[player] = 0;
         game_strikeRun[player] = 0;
-        D_80066C00.unk_20[player] = 0;
+        game_pinFrame[player] = 0;
     }
     ga_pinsDown = 0;
     ga_lastScorer = 0;
-    D_8005C164 = 1;
+    game_scoresCleared = 1;
 }
 
 /*

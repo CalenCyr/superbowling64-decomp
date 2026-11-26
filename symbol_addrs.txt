@@ -629,7 +629,7 @@ game_strikeRun = 0x800A304C; // size:0x4
 game_strikes = 0x800DF6B4; // size:0x8
 
 // rscode: main's per-player pin masks (sound_nextBgm + 8 in the asm) and the overlay's pin positions
-D_800A3050 = 0x800A3050; // size:0x60
+game_firstBallPins = 0x800A3050; // size:0x60
 rs_menuChoice = 0x80114256; // segment:rscode size:0x1
 rs_pinPos = 0x80114258; // segment:rscode size:0x28
 game_duelScores = 0x8009D030; // size:0xC
@@ -1554,3 +1554,7 @@ GA_StageFrame3 = 0x80122BD8; // segment:gacode type:func
 GA_StageFrame4 = 0x80122C60; // segment:gacode type:func
 GA_StageFrame6 = 0x80123004; // segment:gacode type:func
 GA_StageFrame7 = 0x801233A8; // segment:gacode type:func
+cont_noteState = 0x80066C00; // size:0x20
+game_pinFrame = 0x80066C20; // size:0x4
+game_secondBallPins = 0x800F7C18; // size:0x60
+save_pakId = 0x800693E8; // size:0x20

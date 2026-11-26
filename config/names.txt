@@ -1649,3 +1649,12 @@ gaPinSetup_t.image	gacode.h	invented: image shown with the setup (GA_DrawPinPane
 unkImage_t.alpha	gacode.h	invented: byte GA_CountFrame sets from game_pulseAlpha
 gameSetup_t.frameSetups	gacode.h	invented: per frame, the index of its pin setup in ga_setupPinSets or ga_parPinSets
 game_setup	0x800DF59C	invented: main's game setup: the pin setup of each frame (frameSetups)
+cont_noteState	0x80066C00	invented: the OSPfsState Cont_Thread reads for CONT_REQ_FILE_STATE (was the first member of an invented struct)
+game_pinFrame	0x80066C20	invented: per player, the frame index into the pin masks (counted on by GA_EndTurn); was the second member of an invented struct
+game_firstBallPins	0x800A3050	invented: pin mask the first ball knocked down, per player and frame (GA_InputCountPins)
+game_secondBallPins	0x800F7C18	invented: pin mask the second ball knocked down, per player and frame (GA_InputCountPins)
+save_pakId	0x800693E8	invented: id of the pak that saving is enabled on, compared with cont_pakPfs.id (Save_SaveSettings, OP_CheckSettings)
+mem_unused	0x80062A28	invented: word Mem_Reset clears; nothing reads it
+rs_modeArg	0x801142B4	invented: game_mode >> 6, the game mode's argument (RS_RankAndRecord)
+gs_pakCheckImages	0x80120660	invented: images GS_PakCheck cycles through by gs_pakCheckFrames
+game_scoresCleared	0x8005C164	invented: set to 1 by GA_ClearScores; nothing reads it

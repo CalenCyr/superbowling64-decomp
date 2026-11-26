@@ -303,7 +303,7 @@ void Cont_Thread( void *arg ) {
                 cont_result = osMotorInit( &cont_siQueue, &cont_rumblePfs[1], 0 );
                 break;
             case CONT_REQ_FILE_STATE:
-                cont_result = osPfsFileState( &cont_pakPfs, cont_noteIndex, &D_80066C00.note );
+                cont_result = osPfsFileState( &cont_pakPfs, cont_noteIndex, &cont_noteState );
                 break;
             }
             // the reply message is the address of msg, a local of this thread

@@ -16,7 +16,7 @@ static u16 rs_dpadPressed;       /* D-pad presses this frame (0 once leaving) */
 static u8 rs_nextScene;          /* copied back to game_scene on leaving */
 static rsState_t rs_state;       /* current state */
 static rsState_t rs_returnState; /* state to return to */
-static u8 D_801142B4_rscode;     /* game_mode >> 6 */
+static u8 rs_modeArg;     /* game_mode >> 6 */
 
 /*
 ================
@@ -213,12 +213,12 @@ void RS_RankAndRecord( void ) {
     s32 i;
     s32 character;
 
-    D_801142B4_rscode = game_mode >> 6;
+    rs_modeArg = game_mode >> 6;
     for ( i = 0; i < game_numPlayers; i++ ) {
         scores[i] = game_frameScores[i][9];
     }
     RS_RankHighest( rs_ranks, game_numPlayers, scores, 0, 300 );
-    if ( !D_801142B4_rscode ) {
+    if ( !rs_modeArg ) {
         for ( i = 0; i < game_numPlayers; i++ ) {
             character = ( ( game_players[i] >> 4 ) & 7 ) - 1;
             if ( character >= 0 ) {
@@ -263,7 +263,7 @@ void RS_ScoreSheet( void ) {
     y += 0x18;
     switch ( rs_sheetPage ) {
     case 0:
-        Score_DrawTeamBoard( D_801142B4_rscode, 1, 0x18, y );
+        Score_DrawTeamBoard( rs_modeArg, 1, 0x18, y );
         break;
     case 1:
         RS_DrawPinDiagrams( 0x18, y );
@@ -272,7 +272,7 @@ void RS_ScoreSheet( void ) {
     y += 0x8C;
     RS_DrawChoices( rs_sheetPage, images, y, 0x50, 0x10 );
     y += 0x1C;
-    if ( !D_801142B4_rscode && empty != 4 ) {
+    if ( !rs_modeArg && empty != 4 ) {
         Draw_ImageScaled( 0xA82, 0x48, y, 0x60, 1.0f, 1.0f );
         Draw_ImageScaled( 0xA81, 0xA8, y, 0x60, 1.0f, 1.0f );
     }
@@ -281,7 +281,7 @@ void RS_ScoreSheet( void ) {
         rs_state = RS_Menu;
         rs_returnState = RS_ScoreSheet;
     }
-    if ( ( rs_dpadPressed & D_JPAD ) && !D_801142B4_rscode && empty != 4 ) {
+    if ( ( rs_dpadPressed & D_JPAD ) && !rs_modeArg && empty != 4 ) {
         Sound_PlaySe( SE_CURSOR, 0 );
         rs_state = RS_Records;
         rs_sheetPage += 2;
@@ -548,8 +548,8 @@ void RS_Idle( void ) {
 ================
 RS_DrawPinDiagram
 
-Draws the pin diagram of a player's frame at (x, y): image 0x89D for a pin of the first mask (D_800A3050),
-else 0x89C for a pin of the second (D_800F7C18). Declared inline: RS_DrawPinDiagrams repeats its body.
+Draws the pin diagram of a player's frame at (x, y): image 0x89D for a pin of the first mask (game_firstBallPins),
+else 0x89C for a pin of the second (game_secondBallPins). Declared inline: RS_DrawPinDiagrams repeats its body.
 ================
 */
 inline void RS_DrawPinDiagram( s32 player, u8 frame, s16 x, s16 y ) {
@@ -557,9 +557,9 @@ inline void RS_DrawPinDiagram( s32 player, u8 frame, s16 x, s16 y ) {
 
     Draw_Image( 0x899, x, y );
     for ( pin = 0; pin < 10; pin++ ) {
-        if ( ( D_800A3050[player][frame] >> ( 9 - pin ) ) & 1 ) {
+        if ( ( game_firstBallPins[player][frame] >> ( 9 - pin ) ) & 1 ) {
             Draw_Image( 0x89D, x + rs_pinPos[pin][0], y + rs_pinPos[pin][1] );
-        } else if ( ( D_800F7C18[player][frame] >> ( 9 - pin ) ) & 1 ) {
+        } else if ( ( game_secondBallPins[player][frame] >> ( 9 - pin ) ) & 1 ) {
             Draw_Image( 0x89C, x + rs_pinPos[pin][0], y + rs_pinPos[pin][1] );
         }
     }
@@ -590,19 +590,19 @@ void RS_DrawPinDiagrams( s16 x, s16 y ) {
         rs_pinPage = 0;
     }
     Draw_Image( rs_pinPage ? 0x89B : 0x89A, 0xF8, 0x18 );
-    if ( D_801142B4_rscode == 2 ) {
+    if ( rs_modeArg == 2 ) {
         Draw_Image( 0xA12, x, y - 3 );
     }
     Score_DrawHeaders( rs_pinPage, x + 0x2C, y );
     y += 9;
-    players = D_801142B4_rscode == 1 ? game_numPlayers >> 1 : game_numPlayers;
+    players = rs_modeArg == 1 ? game_numPlayers >> 1 : game_numPlayers;
     for ( player = 0; player < players; player++ ) {
         rowX = x;
-        if ( D_801142B4_rscode == 2 && player == 2 ) {
+        if ( rs_modeArg == 2 && player == 2 ) {
             Draw_Image( 0x9FB, rowX, y + 4 );
             y += 0x10;
         }
-        if ( D_801142B4_rscode == 1 ) {
+        if ( rs_modeArg == 1 ) {
             mate = ( player == 1 ) * 2;
             Menu_DrawSmallNamePlate( mate, game_players[mate] >> 7, game_playerNames[mate].chars, 0, rowX, y );
             Menu_DrawSmallNamePlate( mate | 1, game_players[mate + 1] >> 7, game_playerNames[mate + 1].chars, 0, rowX, y + 0x1C );
@@ -610,11 +610,11 @@ void RS_DrawPinDiagrams( s16 x, s16 y ) {
             Menu_DrawSmallNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, 0, rowX, y );
         }
         rowX += 0x2C;
-        if ( D_801142B4_rscode == 1 ) {
+        if ( rs_modeArg == 1 ) {
             y += 0xE;
         }
         frame = rs_pinPage ? 9 : 0;
-        end = rs_pinPage ? D_80066C00.unk_20[player] : 9;
+        end = rs_pinPage ? game_pinFrame[player] : 9;
         pageX = rowX;
         rowX += rs_pinPage ? 0x10 : 0;
         for ( ; frame < end; frame++ ) {
@@ -625,7 +625,7 @@ void RS_DrawPinDiagrams( s16 x, s16 y ) {
             rowX = pageX;
         }
         Draw_ImageScaled( rs_pinPage ? 0x84C : 0x84B, rowX, y + 4, rs_boxAlpha + 0x40, 1.0f, 1.0f );
-        y += D_801142B4_rscode == 1 ? 0x38 : 0x1C;
+        y += rs_modeArg == 1 ? 0x38 : 0x1C;
     }
 }
 

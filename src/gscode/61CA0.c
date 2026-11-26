@@ -7,7 +7,7 @@
 /* ===== Data ===== */
 
 /* images of a blinking marker */
-static s16 D_80120660_gscode[4] = {
+static s16 gs_pakCheckImages[4] = {
     0x943, 0x942, 0x941, 0x942,
 };
 
@@ -136,9 +136,9 @@ s32 GS_PakCheck( void ) {
             }
         }
         if ( cont_hasRumble[0] || ( gs_secondController == 1 && cont_hasRumble[1] ) ) {
-            Draw_Image( D_80120660_gscode[gs_pakCheckFrames % 4], 0xB0, 0x65 );
+            Draw_Image( gs_pakCheckImages[gs_pakCheckFrames % 4], 0xB0, 0x65 );
         } else {
-            Draw_Image( D_80120660_gscode[0], 0xB0, 0x65 );
+            Draw_Image( gs_pakCheckImages[0], 0xB0, 0x65 );
         }
         return 0;
     case 1:

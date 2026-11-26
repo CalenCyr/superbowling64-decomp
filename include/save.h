@@ -26,7 +26,7 @@
 
 
 extern u8 save_enabled;             /* saving is on */
-extern u8 D_800693E8[0x20];          /* cont_pakPfs.id of the pak saving is enabled on */
+extern u8 save_pakId[0x20];          /* cont_pakPfs.id of the pak saving is enabled on */
 extern s32 save_promptState;        /* PROMPT_CLOSED etc. */
 extern u16 save_promptChoice;       /* choice under the cursor */
 /* cursor rectangle of each choice, from the prompt's corner. Two entries each: the next bss objects

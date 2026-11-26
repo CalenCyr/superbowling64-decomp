@@ -13,7 +13,7 @@
 
 static HeapBlock *mem_first;        /* first block; the heap starts here */
 static u8 *mem_end;                 /* end of the heap */
-static s32 D_80062A28;              /* Mem_Reset clears it; nothing reads it */
+static s32 mem_unused;              /* Mem_Reset clears it; nothing reads it */
 static s32 D_80062A30[16];          /* unreferenced; KMC as aligns it to 8, past a 4-byte gap */
 
 /*
@@ -28,7 +28,7 @@ void Mem_Reset( HeapBlock *base, u8 *end ) {
         mem_first = base;
         mem_end = end;
     }
-    D_80062A28 = 0;
+    mem_unused = 0;
     mem_first->next = NULL;
     mem_first->size = sizeof( HeapBlock );
 }
