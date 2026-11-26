@@ -134,11 +134,9 @@ func_80041C60
 Reads one frame of delay line delay's output into buff: resampled by its modulation, if it has one.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: the logic and the command words match; retail keeps count, delay and ptr in s2, s3, s4 (here s4,
-// s2, s3), takes count - N_FRAME_SAMPLES into count's own register, and computes the resample's buff >> 8 first
 Acmd *func_80041C60( ALFx *fx, ALDelay *delay, s32 buff, Acmd *p ) {
-    s32 count = N_FRAME_SAMPLES;
+    s32 outCount = N_FRAME_SAMPLES;
+    s32 inCount;
     s32 length;
     f32 offset;
     f32 pitch;
@@ -146,33 +144,32 @@ Acmd *func_80041C60( ALFx *fx, ALDelay *delay, s32 buff, Acmd *p ) {
     s32 misalign;
     s16 *inPos;
     u16 ratio;
+    s32 page;
 
     if ( delay->rs ) {
         length = delay->output - delay->input;
-        offset = _doModFunc( delay, N_FRAME_SAMPLES ) / length;
+        offset = _doModFunc( delay, outCount ) / length;
         pitch = 1.0 - (s32)( offset * N_UNITY_PITCH ) / (f32)N_UNITY_PITCH;
-        inCountF = delay->rs->delta + pitch * count;
-        count = (s32)inCountF;
-        delay->rs->delta = inCountF - (f32)count;
+        inCountF = delay->rs->delta + pitch * outCount;
+        inCount = (s32)inCountF;
+        delay->rs->delta = inCountF - (f32)inCount;
 
         inPos = &fx->input[delay->rsdelta - delay->output];
         misalign = ( (s32)inPos & 7 ) >> 1;
         inPos -= misalign;
-        p = func_80041E70( fx, inPos, N_FX_RESAMPLE_BUFFER, count + misalign, p );
+        p = func_80041E70( fx, inPos, N_FX_RESAMPLE_BUFFER, inCount + misalign, p );
 
         ratio = (s32)( pitch * N_UNITY_PITCH );
+        page = buff >> 8;
         n_aResampleOut( p++, delay->rs->first, ratio, osVirtualToPhysical( delay->rs->state ),
-                        N_FX_RESAMPLE_BUFFER + ( misalign << 1 ), buff );
+                        N_FX_RESAMPLE_BUFFER + ( misalign << 1 ), page );
         delay->rs->first = FALSE;
-        delay->rsdelta = ( delay->rsdelta - N_FRAME_SAMPLES ) + count;
+        delay->rsdelta += inCount - outCount;
     } else {
-        p = func_80041E70( fx, &fx->input[-delay->output], buff, N_FRAME_SAMPLES, p );
+        p = func_80041E70( fx, &fx->input[-delay->output], buff, outCount, p );
     }
     return p;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/1CB60", func_80041C60);
-#endif
 
 /*
 ================

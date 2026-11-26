@@ -413,13 +413,13 @@ s32 func_8004173C( N_PVoice *pv, s32 paramID, void *param );          /* the res
     _a->words.w1 = (u32)( s );                                                              \
 }
 
-/* the ROM's resample command with an output buffer: its DMEM address's bits 8-9 in w1's low bits */
+/* the ROM's resample command with an output buffer: its DMEM page (address >> 8) in w1's low two bits */
 #define n_aResampleOut( pkt, f, p, s, i, o )                                                \
 {                                                                                           \
     Acmd *_a = (Acmd *)pkt;                                                                 \
                                                                                             \
     _a->words.w0 = _SHIFTL( A_RESAMPLE, 24, 8 ) | _SHIFTL( s, 0, 24 );                      \
-    _a->words.w1 = _SHIFTL( f, 30, 2 ) | _SHIFTL( p, 14, 16 ) | _SHIFTL( i, 2, 12 ) | _SHIFTL( ( o ) >> 8, 0, 2 ); \
+    _a->words.w1 = _SHIFTL( f, 30, 2 ) | _SHIFTL( p, 14, 16 ) | _SHIFTL( i, 2, 12 ) | _SHIFTL( o, 0, 2 );        \
 }
 
 /* the ROM's pole filter command: the buffer's DMEM page (address >> 8) beside the state's address in w1 */
