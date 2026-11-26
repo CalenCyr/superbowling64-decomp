@@ -11,6 +11,16 @@
 #define DPAD_BUTTONS        ( U_JPAD | L_JPAD | R_JPAD | D_JPAD )
 #define REPEAT_DELAY        10      /* frames a direction is held before it repeats */
 
+/* ===== Data ===== */
+
+u8 cont_standardMask = 0;
+u8 cont_pollStatus = 0;
+s32 cont_noController = 0;
+u8 game_cursorLocked = 0;
+static s32 D_8005B19C = 0;              /* unreferenced */
+static u16 cont_lastStickDpad[NUM_PLAYERS] = { 0 };  /* stick as D-pad bits, last frame */
+static s32 cont_holdFrames[NUM_PLAYERS] = { 0 };  /* frames a direction has been held */
+
 /*
 ================
 Cont_Init

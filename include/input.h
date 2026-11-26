@@ -30,9 +30,7 @@ extern u16 cont_held[NUM_PLAYERS];           /* buttons held */
 extern u16 cont_lastHeld[NUM_PLAYERS];       /* buttons held last frame */
 extern u16 cont_pressed[NUM_PLAYERS];        /* buttons pressed this frame */
 extern u16 cont_stickDpad[NUM_PLAYERS];      /* stick as D-pad bits */
-extern u16 cont_lastStickDpad[NUM_PLAYERS];  /* the same, last frame */
 extern u16 cont_dpadRepeat[NUM_PLAYERS];     /* D-pad presses, with auto-repeat */
-extern s32 cont_holdFrames[NUM_PLAYERS];     /* frames a direction has been held */
 extern s32 cont_noController;       /* set when port 1 has no controller */
 /* both ports merged: port 1's value, or port 2's when port 1's is 0 */
 extern u16 cont_allHeld;

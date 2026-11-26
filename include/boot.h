@@ -79,8 +79,6 @@ extern OSMesgQueue boot_piQueue;    /* PI manager commands */
 extern OSMesg boot_piMsgs[8];
 
 extern rspProgram_t *sched_audioProgram;
-extern s32 sched_rspBusy;           /* a task runs on the RSP */
-extern s32 sched_audioState;        /* 2: the audio task runs; 1: it waits for the graphics task to yield */
 extern u64 sound_bgmId;             /* sound id of the playing BGM, zero-extended; 0: none */
 extern s32 sound_bgmDelay;          /* frames until the BGM sound_nextBgm starts */
 extern s32 sound_bgmStartVolume;    /* volume it starts at; nonzero while it waits */
@@ -129,15 +127,11 @@ typedef struct {
 
 extern GfxFrame sched_gfxFrames[2];
 extern GfxFrame *sched_buildFrame;  /* the one of sched_gfxFrames the game thread builds */
-extern OSTask sched_gfxTask;        /* the graphics task */
 extern u64 D_800E5800[OS_YIELD_DATA_SIZE / sizeof( u64 )];  /* the graphics task's yield buffer */
 extern u64 D_800F7C90[SP_DRAM_STACK_SIZE64];  /* the graphics task's DRAM stack */
 /* the RDP's FIFO, 0x8000 bytes between the KNSTATICSYS file and the overlays (sched_gfxTask's output buffer) */
 #define SCHED_FIFO_START    ( (u64 *)0x8010A350 )
 #define SCHED_FIFO_END      ( (u64 *)0x80112350 )
-extern s32 sched_runList;           /* index in sched_gfxFrames of the list the RSP runs */
-extern s32 sched_listState[2];      /* state of each list of sched_gfxFrames: 0 building, 1 built, 2 running, 3 done */
-extern s32 sched_fbState[3];        /* state of each framebuffer of sched_framebuffers: 1 drawn, 4 shown */
 /* framebuffer to show next */
 // volatile: the scheduler (1060) reads it with lbu and a separate sign extension, and reloads it right after each store
 extern volatile s8 sched_nextFb;
@@ -145,11 +139,6 @@ extern volatile s8 sched_nextFb;
 // volatile: the scheduler (1060) reads it with lbu and a separate sign extension, and reloads it right after each store
 extern volatile s8 sched_shownFb;
 extern u8 sched_reset[2];           /* [0]: reset pressed; [1]: tasks stopped after it */
-extern s32 sched_yieldAsked;        /* the graphics task was asked to yield */
-extern s32 sched_building;          /* the game thread is building a list */
-extern s32 sched_gfxState;          /* graphics task state: 0 idle, 1 running, 2 yielded */
-extern s32 sched_retraces;          /* retraces since the last swap */
-extern s32 sched_swaps;             /* swaps this second */
 extern OSTime sched_gfxStartTime;   /* when the graphics task started */
 extern OSTime sched_drawStartTime;  /* when the game thread was told to draw */
 
@@ -164,11 +153,7 @@ extern u8 game_pulseAlpha;          /* pulses between 75 and 255 by game_pulseSt
 extern s16 game_cursorX;            /* a cursor's x, moved by the stick; 160 at boot */
 extern s16 game_cursorY;            /* its y; 120 at boot */
 extern u8 game_cursorSpeed;         /* row of game_cursorSpeeds the cursor moves by */
-extern u8 game_cursorSpeeds[3][4];  /* pixels a frame the cursor moves by, from the least to the most tilt */
 extern u8 game_cursorLocked;        /* when set, the cursor stays */
-extern u8 game_blankFrames;         /* blank frames drawn before the next scene loads */
-extern u8 game_loadedScene;         /* the scene loaded (game_scene); 0xFF at boot */
-extern u16 game_demoTitles[4];      /* per demo (game_demo): the image the demo shows its title by */
 extern Gfx D_8010A2C8[];            /* display lists of the KNSTATICSYS file each frame starts with */
 extern Gfx D_8010A2A0[];
 

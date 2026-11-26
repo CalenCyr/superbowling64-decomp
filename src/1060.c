@@ -20,6 +20,48 @@
 #define HEAP_START  0x80150000
 #define HEAP_END    0x8038F7FF
 
+/* ===== Data ===== */
+
+static u8 game_loadedScene = 0xFF;      /* the scene loaded (game_scene); 0xFF at boot */
+s32 sched_rspTime = 0;
+s32 sched_rdpTime = 0;
+s32 sched_cpuTime = 0;
+s32 sound_taskTime = 0;
+// volatile: as declared in input.h (Main_Thread reloads it right after its own store)
+volatile s32 sched_frameCount = 0;
+// volatile: as declared in boot.h (the scheduler reloads it after its own increment)
+volatile s32 sched_drawFb = 0;
+s32 sched_frameRate = 0;
+static s32 sched_rspBusy = 0;           /* a task runs on the RSP */
+static s32 sched_yieldAsked = 0;        /* the graphics task was asked to yield */
+static s32 sched_building = 0;          /* the game thread is building a list */
+static s32 sched_gfxState = 0;          /* graphics task state: 0 idle, 1 running, 2 yielded */
+static s32 sched_audioState = 0;        /* 2: the audio task runs; 1: it waits for the graphics task to yield */
+static s32 sched_fbState[3] = { 4, 4, 4 };  /* state of each framebuffer of sched_framebuffers: 1 drawn, 4 shown */
+static s32 sched_runList = 0;           /* index in sched_gfxFrames of the list the RSP runs */
+static s32 sched_listState[2] = { 3, 3 };  /* state of each list of sched_gfxFrames: 0 building, 1 built, 2 running, 3 done */
+static s32 sched_retraces = 0;          /* retraces since the last swap */
+static s32 sched_swaps = 0;             /* swaps this second */
+/* pixels a frame the cursor moves by, from the least to the most tilt */
+static u8 game_cursorSpeeds[3][4] = {
+    { 2, 4, 6, 8 },
+    { 3, 6, 9, 12 },
+    { 3, 8, 12, 16 },
+};
+/* the graphics task */
+static OSTask sched_gfxTask = { {
+    M_GFXTASK, OS_TASK_LOADABLE,
+    NULL, 0,                            /* ucode_boot, set per task */
+    NULL, SP_UCODE_SIZE,
+    NULL, SP_UCODE_DATA_SIZE,
+    D_800F7C90, SP_DRAM_STACK_SIZE8,
+    SCHED_FIFO_START, SCHED_FIFO_END,   /* the RDP's FIFO: output_buff_size is the buffer's end */
+    NULL, 0,                            /* data_ptr, set per task */
+    D_800E5800, OS_YIELD_DATA_SIZE,
+} };
+static u16 game_demoTitles[4] = { 0x0A72, 0x0A73, 0x0A74, 0x0A70 };  /* per demo (game_demo): the image the demo shows its title by */
+static u8 game_blankFrames = 0;         /* blank frames drawn before the next scene loads */
+
 /* ===== State ===== */
 
 static OSTask sched_audioTask;      /* the audio task Main_StartAudioTask runs */

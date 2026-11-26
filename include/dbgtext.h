@@ -9,8 +9,6 @@
 #define GLYPH_DIGIT0    0xF0        /* glyph index of '0' in the txt_glyphs font */
 #define GLYPH_END       0xFFFF      /* ends a glyph string */
 
-extern u16 txt_fontPalette[0x380];  /* palettes of the txt_font font, RGBA5551 */
-extern u8 txt_font[0x800];             /* 128x32 CI4 font, characters 0x20-0x5F in rows of 16 */
 extern u8 draw_rdpMode;             /* the RDP mode the last 2D drawing set up, DRAW2D_*; 0xFF: none */
 
 void Txt_SetupFont( Gfx **gdl, s32 palette );

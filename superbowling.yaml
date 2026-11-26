@@ -286,7 +286,10 @@ segments:
       # last, as their .data at 0x3A7F0 follows libkmc's
       - [0x321D0, data]
       # .data, in link order: the game's units, libultra's members, libkmc, then the microcode objects
-      - [0x364E0, .data, data]   # the data-only unit: the shared globals, whose owners interleave
+      - [0x364E0, .data, 1060]   # the scheduler's state, the graphics task, the demo titles
+      - [0x36590, .data, 2DF0]   # the controllers' state
+      - [0x365B0, .data, 3D50]   # the 8x8 font and its palettes
+      - [0x374B0, .data, data]   # the data-only unit: the shared globals, whose owners interleave
       - [0x37590, .data, 7250]   # draw_rdpMode, draw_nextPalette
       - [0x375A0, .data, BEF0]   # an unreferenced u8[2][24]: the first candidate in link order after 7250, whose .data ends 8 bytes earlier
       - [0x375D0, .data, C650]   # the texture sizes and the puffs' images, squares and colours
