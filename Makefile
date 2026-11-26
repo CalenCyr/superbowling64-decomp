@@ -57,8 +57,17 @@ $(BUILD)/%.o: %.bin
 $(LIBULTRA): FORCE
 	$(MAKE) -s --no-print-directory -C $(ULTRALIB) $(ULTRALIB_FLAGS) -j$(shell nproc)
 
-$(ELF): $(O_FILES) $(LIBULTRA) $(LD_SCRIPT)
-	$(LD) -T $(LD_SCRIPT) -T undefined_syms.txt -T undefined_syms_auto.txt -T undefined_funcs_auto.txt \
+# splat's undefined_*_auto.txt pin every symbol the asm references outside an asm-defined label to its retail
+# address, including symbols the C defines; a plain assignment would override the C definition, so the link takes
+# them as PROVIDE: an address applies only to a symbol no object defines (the C definition moves when code shifts).
+$(BUILD)/%_auto.ld: %_auto.txt
+	@mkdir -p $(dir $@)
+	sed -E 's/^([A-Za-z0-9_.$$]+) = (0x[0-9A-Fa-f]+);/PROVIDE(\1 = \2);/' $< > $@
+
+AUTO_SYMS := $(BUILD)/undefined_syms_auto.ld $(BUILD)/undefined_funcs_auto.ld
+
+$(ELF): $(O_FILES) $(LIBULTRA) $(LD_SCRIPT) $(AUTO_SYMS)
+	$(LD) -T $(LD_SCRIPT) -T undefined_syms.txt $(AUTO_SYMS:%=-T %) \
 		--no-check-sections -Map $(BUILD)/$(BASENAME).map -o $@ $(LIBULTRA)
 
 $(ROM): $(ELF)
