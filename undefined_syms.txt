@@ -1,3 +1,5 @@
 /* Symbols outside every splat segment. */
-/* rspboot's end: no storage of its own, the address of gspF3DEX2_Rej_fifoTextStart that follows it */
-rspbootTextEnd = 0x80056DD0;
+/* rspboot's bounds: the binary object's own (rspbootTextEnd has no storage of its own: it is the address of
+   gspF3DEX2_Rej_fifoTextStart that follows) */
+rspbootTextStart = _binary_assets_rspboot_bin_start;
+rspbootTextEnd = _binary_assets_rspboot_bin_end;

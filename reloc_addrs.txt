@@ -16,3 +16,107 @@ rom:0x00100C reloc:MIPS_LO16 symbol:main_BSS_SIZE
 // A common size for this stack is 0x2000, so try checking for the address 0x800672D0. Note the stack may have a different size.
 // rom:0x001030 reloc:MIPS_HI16 symbol:main_stack addend:0xXXXX
 // rom:0x001038 reloc:MIPS_LO16 symbol:main_stack addend:0xXXXX
+
+// Shiftability: references from functions still in asm to an interior address of a C-defined object, or to an
+// overlay's bss end, bound to the owning symbol (the linker's <seg>_BSS_END for the loader's clears) instead of
+// an absolute address. A function's lines go when it is matched in C.
+// Game_Thread: D_8005B137
+rom:0x002170 reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x3
+rom:0x002178 reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x3
+rom:0x0022CC reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x3
+rom:0x0022D4 reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x3
+rom:0x00230C reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x3
+rom:0x002314 reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x3
+rom:0x002468 reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x3
+rom:0x002470 reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x3
+// Game_Thread: D_8005B136
+rom:0x0021A0 reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x2
+rom:0x0021A8 reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x2
+rom:0x0022B0 reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x2
+rom:0x0022BC reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x2
+rom:0x00233C reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x2
+rom:0x002344 reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x2
+rom:0x00244C reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x2
+rom:0x002458 reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x2
+// Game_Thread: D_8005B135
+rom:0x0021D0 reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x1
+rom:0x0021D8 reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x1
+rom:0x00228C reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x1
+rom:0x002298 reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x1
+rom:0x00236C reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x1
+rom:0x002374 reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x1
+rom:0x002428 reloc:MIPS_HI16 symbol:game_cursorSpeeds addend:0x1
+rom:0x002434 reloc:MIPS_LO16 symbol:game_cursorSpeeds addend:0x1
+// Game_Thread: D_8012F350
+rom:0x002784 reloc:MIPS_HI16 symbol:gacode_BSS_END
+rom:0x002788 reloc:MIPS_LO16 symbol:gacode_BSS_END
+// Game_Thread: D_801142C0
+rom:0x0027FC reloc:MIPS_HI16 symbol:rscode_BSS_END
+rom:0x002800 reloc:MIPS_LO16 symbol:rscode_BSS_END
+// Game_Thread: D_80120A70
+rom:0x002870 reloc:MIPS_HI16 symbol:gscode_BSS_END
+rom:0x002874 reloc:MIPS_LO16 symbol:gscode_BSS_END
+// Game_Thread: D_8013E890
+rom:0x0028E0 reloc:MIPS_HI16 symbol:cacode_BSS_END
+rom:0x0028E4 reloc:MIPS_LO16 symbol:cacode_BSS_END
+// Game_Thread: D_80113790
+rom:0x002958 reloc:MIPS_HI16 symbol:pvcode_BSS_END
+rom:0x00295C reloc:MIPS_LO16 symbol:pvcode_BSS_END
+// Game_Thread: D_80113730
+rom:0x0029D0 reloc:MIPS_HI16 symbol:mgcode_BSS_END
+rom:0x0029D4 reloc:MIPS_LO16 symbol:mgcode_BSS_END
+// Game_Thread: D_80114600
+rom:0x002A48 reloc:MIPS_HI16 symbol:opcode_BSS_END
+rom:0x002A4C reloc:MIPS_LO16 symbol:opcode_BSS_END
+// Game_Thread: D_8005C0C1
+rom:0x002CB0 reloc:MIPS_HI16 symbol:game_fade addend:0x1
+rom:0x002CB4 reloc:MIPS_LO16 symbol:game_fade addend:0x1
+// GridEd_Frame: D_80100102
+rom:0x0112C0 reloc:MIPS_HI16 symbol:game_floorGrids addend:0x2
+rom:0x0112C4 reloc:MIPS_LO16 symbol:game_floorGrids addend:0x2
+rom:0x01154C reloc:MIPS_HI16 symbol:game_floorGrids addend:0x2
+rom:0x011550 reloc:MIPS_LO16 symbol:game_floorGrids addend:0x2
+rom:0x011564 reloc:MIPS_HI16 symbol:game_floorGrids addend:0x2
+rom:0x011568 reloc:MIPS_LO16 symbol:game_floorGrids addend:0x2
+rom:0x011698 reloc:MIPS_HI16 symbol:game_floorGrids addend:0x2
+rom:0x01169C reloc:MIPS_LO16 symbol:game_floorGrids addend:0x2
+rom:0x0118B8 reloc:MIPS_HI16 symbol:game_floorGrids addend:0x2
+rom:0x0118BC reloc:MIPS_LO16 symbol:game_floorGrids addend:0x2
+rom:0x011930 reloc:MIPS_HI16 symbol:game_floorGrids addend:0x2
+rom:0x011934 reloc:MIPS_LO16 symbol:game_floorGrids addend:0x2
+rom:0x011974 reloc:MIPS_HI16 symbol:game_floorGrids addend:0x2
+rom:0x011978 reloc:MIPS_LO16 symbol:game_floorGrids addend:0x2
+rom:0x011A38 reloc:MIPS_HI16 symbol:game_floorGrids addend:0x2
+rom:0x011A3C reloc:MIPS_LO16 symbol:game_floorGrids addend:0x2
+rom:0x011A8C reloc:MIPS_HI16 symbol:game_floorGrids addend:0x2
+rom:0x011A90 reloc:MIPS_LO16 symbol:game_floorGrids addend:0x2
+rom:0x011D9C reloc:MIPS_HI16 symbol:game_floorGrids addend:0x2
+rom:0x011DA0 reloc:MIPS_LO16 symbol:game_floorGrids addend:0x2
+// GridEd_Frame: D_80100106
+rom:0x011AE0 reloc:MIPS_HI16 symbol:game_floorGrids addend:0x6
+rom:0x011AE4 reloc:MIPS_LO16 symbol:game_floorGrids addend:0x6
+rom:0x011B14 reloc:MIPS_HI16 symbol:game_floorGrids addend:0x6
+rom:0x011B18 reloc:MIPS_LO16 symbol:game_floorGrids addend:0x6
+rom:0x011B88 reloc:MIPS_HI16 symbol:game_floorGrids addend:0x6
+rom:0x011B8C reloc:MIPS_LO16 symbol:game_floorGrids addend:0x6
+// GridEd_Frame: D_8010010A
+rom:0x011BE4 reloc:MIPS_HI16 symbol:game_floorGrids addend:0xA
+rom:0x011BE8 reloc:MIPS_LO16 symbol:game_floorGrids addend:0xA
+rom:0x011C0C reloc:MIPS_HI16 symbol:game_floorGrids addend:0xA
+rom:0x011C10 reloc:MIPS_LO16 symbol:game_floorGrids addend:0xA
+rom:0x011C78 reloc:MIPS_HI16 symbol:game_floorGrids addend:0xA
+rom:0x011C7C reloc:MIPS_LO16 symbol:game_floorGrids addend:0xA
+// Scene_DrawPuffs: D_8005C971
+rom:0x0110C8 reloc:MIPS_HI16 symbol:scene_puffColors addend:0x1
+rom:0x0110D0 reloc:MIPS_LO16 symbol:scene_puffColors addend:0x1
+// Scene_DrawPuffs: D_8005C972
+rom:0x0110D4 reloc:MIPS_HI16 symbol:scene_puffColors addend:0x2
+rom:0x0110DC reloc:MIPS_LO16 symbol:scene_puffColors addend:0x2
+// GS_PlayerSetup: D_800F7BEA
+rom:0x05DEEC reloc:MIPS_HI16 symbol:cont_status addend:0x2
+rom:0x05DEF4 reloc:MIPS_LO16 symbol:cont_status addend:0x2
+// GS_TeamSelect: D_8005C0D4
+rom:0x05FD84 reloc:MIPS_HI16 symbol:cont_noteGameName addend:0xC
+rom:0x05FD8C reloc:MIPS_LO16 symbol:cont_noteGameName addend:0xC
+rom:0x05FDDC reloc:MIPS_HI16 symbol:cont_noteGameName addend:0xC
+rom:0x05FDE4 reloc:MIPS_LO16 symbol:cont_noteGameName addend:0xC
