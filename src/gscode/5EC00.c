@@ -466,7 +466,7 @@ s32 GS_TeamSelect( void ) {
         D_8011FC80_gscode -= 2;
         if ( D_8011FC80_gscode == 0 ) {
             D_8011FC81_gscode = CHOICE_RUN;
-            func_80026B28();
+            Game_StartPulse();
             Obj_CreateAll( gs_classes, D_8011F900_gscode );
             cam_cameras[0]->path->flags |= 4;
             for ( i = 0; i < 4; i++ ) {

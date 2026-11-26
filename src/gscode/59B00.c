@@ -87,7 +87,7 @@ s32 GS_SubModeMenu( void ) {
         }
         if ( gs_subModeCursor != choice ) {
             gs_subModeBlinkFrame = 0;
-            func_80026B28();
+            Game_StartPulse();
             Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
     }
@@ -99,7 +99,7 @@ s32 GS_SubModeMenu( void ) {
         gs_subModeSlide -= 2;
         if ( gs_subModeSlide == 0 ) {
             gs_subModeState = CHOICE_RUN;
-            func_80026B28();
+            Game_StartPulse();
         }
         break;
     case CHOICE_TAKEN:

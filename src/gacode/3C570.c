@@ -108,9 +108,9 @@ void GA_Frame( void ) {
     Txt_LoadGlyphSheet( &game_gfx );
     Draw_FillRect( 0x9F, 0, 2, 0xF0, 0, 0, 0, 0xFF );
     if ( !D_8012D650_gacode && !cUpHeld ) {
-        func_80114FC4_gacode( ga_teamPlayers[0][ga_teamCurrent[0]] );
+        GA_RunPanelFunc( ga_teamPlayers[0][ga_teamCurrent[0]] );
         if ( game_lastTeam ) {
-            func_80114FC4_gacode( ga_teamPlayers[1][ga_teamCurrent[1]] );
+            GA_RunPanelFunc( ga_teamPlayers[1][ga_teamCurrent[1]] );
         } else {
             Draw_ImageScaled( 0x926, 0xD2, 0x10, (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
         }
@@ -389,7 +389,7 @@ void GA_SetupMode( void ) {
         ga_bgm = ga_stage->bgm;
         break;
     case 3:
-        GA_StartMode( func_80114024_gacode, GA_ScoreBattle );
+        GA_StartMode( GA_DistanceLoop, GA_ScoreBattle );
         ga_bgm = 17;
         break;
     case 2:
@@ -450,7 +450,7 @@ void func_80113384_gacode( void ) {
         GA_ShuffleOrder( &D_800DF59C.unk_04[6], 5, 10 );
         D_800DF59C.unk_04[9] = 15;
         for ( i = 0; i < game_numPlayers; i++ ) {
-            D_80068A50[i] = 5;
+            game_throw[i] = 5;
         }
         GA_StartMode( GA_TeamGameLoop, GA_ScoreSetupGame );
         ga_bgm = 11;
@@ -773,13 +773,13 @@ s32 GA_DuelLoop( void ) {
 
 /*
 ================
-func_80114024_gacode
+GA_DistanceLoop
 
 Main loop state of mode 3: updates both lanes, and ends the turn when both are done, on A or Z, or when
 both lanes return -1.
 ================
 */
-s32 func_80114024_gacode( void ) {
+s32 GA_DistanceLoop( void ) {
     s32 results[2];
     s32 i;
 

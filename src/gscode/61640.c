@@ -96,7 +96,7 @@ s32 GS_CharacterMenu( void ) {
         D_80120654_gscode -= 2;
         if ( D_80120654_gscode == 0 ) {
             D_80120655_gscode = CHOICE_RUN;
-            func_80026B28();
+            Game_StartPulse();
             Obj_CreateAll( gs_classes, D_801204EC_gscode );
             D_80120A20_gscode = 0xFFFF;
             cam_cameras[0]->path->flags |= 4;

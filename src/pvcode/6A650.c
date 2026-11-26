@@ -18,7 +18,7 @@ void PV_Init( void ) {
         Host_Sync();
     }
     if ( cache_hostMode ) {
-        func_8002A7EC( "sce.dat" );
+        Host_ReadFileToObjBuf( "sce.dat" );
         cache_hostFiles = 1;
         Obj_CreateAll( pv_classes, (objParams_t *)obj_hostFile );
     } else {

@@ -135,7 +135,7 @@ s32 GS_CharacterSelect( void ) {
         D_8011F8B8_gscode -= 2;
         if ( D_8011F8B8_gscode == 0 ) {
             D_8011F8B9_gscode = CHOICE_RUN;
-            func_80026B28();
+            Game_StartPulse();
         }
         break;
     case CHOICE_TAKEN:

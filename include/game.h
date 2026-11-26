@@ -38,7 +38,7 @@ extern u32 game_demo;               /* demo the opening overlay plays next, 0 to
 extern u8 game_demoCharacter;       /* counts the demos' characters */
 extern playerName_t game_defaultNames[8];  /* per character: its default name */
 extern playerName_t game_playerNames[];  /* per player: name */
-extern u8 D_80068A50[];             /* per player (Score_DrawPlayerBoard) */
+extern u8 game_throw[];             /* per player (Score_DrawPlayerBoard) */
 extern u8 game_playerDone[];        /* per player: set once the player's game is over (Score_DrawPlayerBoard) */
 extern u8 game_frameFlags[4][10];   /* per player and frame: flags; in the par game, [0] holds each frame's par (GA_CountParThrow) */
 extern u16 game_splits[4];          /* per player: splits this game (GA_IsSplit, by GA_ScoreStandard), summed into

@@ -178,8 +178,8 @@ extern Gfx D_8010A2A0[];
 void Boot_Thread( void *arg );
 void func_80025EBC( void );
 void Main_Thread( void *arg );
-void func_80026B10( void );
-void func_80026B28( void );
+void Rumble_StartBoth( void );
+void Game_StartPulse( void );
 
 
 #endif

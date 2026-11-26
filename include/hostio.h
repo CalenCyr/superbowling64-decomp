@@ -30,7 +30,7 @@ extern s32 host_fileSize;           /* bytes of the file Host_GetFileSize announ
 void Host_Send( u8 *buf, s32 len );
 void Host_Recv( u8 *buf, s32 len );
 s32 Host_Sync( void );
-void func_800295A0( u8 *name );
+void Host_RequestFile( u8 *name );
 s32 Host_GetFileSize( u8 *name );
 void Host_ReadFile( u8 *buf );
 s32 Host_LoadFile( u8 *name, u8 *buf, s32 size );

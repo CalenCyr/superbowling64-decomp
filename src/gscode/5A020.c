@@ -94,7 +94,7 @@ s32 GS_TeamSizeMenu( void ) {
         }
         if ( gs_teamSizeCursor != choice ) {
             gs_teamSizeBlinkFrame = 0;
-            func_80026B28();
+            Game_StartPulse();
             Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
     }
@@ -106,7 +106,7 @@ s32 GS_TeamSizeMenu( void ) {
         gs_teamSizeSlide -= 2;
         if ( gs_teamSizeSlide == 0 ) {
             gs_teamSizeState = CHOICE_RUN;
-            func_80026B28();
+            Game_StartPulse();
         }
         break;
     case CHOICE_TAKEN:

@@ -54,7 +54,7 @@ s32 GS_Options( void ) {
             if ( --gs_optionsCursor == 0xFF ) {
                 gs_optionsCursor = OPTION_EXIT;
             }
-            func_80026B28();
+            Game_StartPulse();
             Sound_PlaySe( 0, 0x80 );
         } else if ( gs_optionsPage == 0
                     && ( ( cont_allDpadRepeat & D_JPAD )
@@ -62,7 +62,7 @@ s32 GS_Options( void ) {
             if ( ++gs_optionsCursor == 8 ) {
                 gs_optionsCursor = 0;
             }
-            func_80026B28();
+            Game_StartPulse();
             Sound_PlaySe( 0, 0x80 );
         }
 
@@ -289,7 +289,7 @@ s32 GS_Options( void ) {
         gs_optionsSlide -= 2;
         if ( gs_optionsSlide == 0 ) {
             gs_optionsState = 1;
-            func_80026B28();
+            Game_StartPulse();
         }
         break;
     case 2:

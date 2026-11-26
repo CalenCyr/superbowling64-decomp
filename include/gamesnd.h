@@ -63,7 +63,7 @@ void Sound_PlayBgm( s32 index );
 void Sound_StopBgm( void );
 void Sound_UpdateBgmVolume( void );
 void func_80037BD8( void );
-void func_80037BE0( void );
+void Sound_WaitFrame( void );
 void Sound_RunAudioTask( UnkRspProgram *program );
 void func_80037CD0( void );
 void Dbg_ScreenShot( void );

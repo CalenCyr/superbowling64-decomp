@@ -291,21 +291,21 @@ void Main_Thread( void *arg ) {
 
 /*
 ================
-func_80026B10
+Rumble_StartBoth
 
 Sets cont_rumble of both ports to 8.
 ================
 */
-inline void func_80026B10( void ) {
+inline void Rumble_StartBoth( void ) {
     cont_rumble[0] = cont_rumble[1] = 8;
 }
 
 /*
 ================
-func_80026B28
+Game_StartPulse
 ================
 */
-inline void func_80026B28( void ) {
+inline void Game_StartPulse( void ) {
     game_pulseAlpha = 75;
     game_pulseStep = 12;
 }
@@ -326,11 +326,11 @@ CPU time of the frame.
 // and separate andi of game_scene before each switch need it volatile (game.h); otherwise only relocation
 // names differ (game_cursorY is retail's game_cursorX + 2). One local holds the counter, the file size and the
 // second switch's index, as retail's s2 does. An unused 16-byte local gives retail's frame (not adopted, R17);
-// the inlined func_80026B10 and func_80026B28 have no locals, so their frames add nothing.
+// the inlined Rumble_StartBoth and Game_StartPulse have no locals, so their frames add nothing.
 void Game_Thread( void *arg ) {
     s32 i;
 
-    func_80026B28();
+    Game_StartPulse();
     for ( i = 0; i < 3; i++ ) {
         osRecvMesg( &game_drawQueue, NULL, OS_MESG_BLOCK );
         sched_buildFrame = &sched_gfxFrames[sched_bufferIndex];
@@ -457,7 +457,7 @@ void Game_Thread( void *arg ) {
                 osInvalICache( gacode_VRAM, i );
                 osInvalDCache( gacode_VRAM, i );
                 FAT_ReadFile( "GACODE  SYS", gacode_VRAM, i, 0 );
-                func_80026B10();
+                Rumble_StartBoth();
                 GA_Init();
                 break;
             case SCENE_RSCODE:
@@ -466,7 +466,7 @@ void Game_Thread( void *arg ) {
                 osInvalICache( rscode_VRAM, i );
                 osInvalDCache( rscode_VRAM, i );
                 FAT_ReadFile( "RSCODE  SYS", rscode_VRAM, i, 0 );
-                func_80026B10();
+                Rumble_StartBoth();
                 RS_Init();
                 break;
             case SCENE_GSCODE:
@@ -475,7 +475,7 @@ void Game_Thread( void *arg ) {
                 osInvalICache( gscode_VRAM, i );
                 osInvalDCache( gscode_VRAM, i );
                 FAT_ReadFile( "GSCODE  SYS", gscode_VRAM, i, 0 );
-                func_80026B10();
+                Rumble_StartBoth();
                 GS_Init();
                 break;
             case SCENE_CACODE:
@@ -484,7 +484,7 @@ void Game_Thread( void *arg ) {
                 osInvalICache( cacode_VRAM, i );
                 osInvalDCache( cacode_VRAM, i );
                 FAT_ReadFile( "CACODE  SYS", cacode_VRAM, i, 0 );
-                func_80026B10();
+                Rumble_StartBoth();
                 CA_Init();
                 break;
             case SCENE_PVCODE:
@@ -493,7 +493,7 @@ void Game_Thread( void *arg ) {
                 osInvalICache( pvcode_VRAM, i );
                 osInvalDCache( pvcode_VRAM, i );
                 FAT_ReadFile( "PVCODE  SYS", pvcode_VRAM, i, 0 );
-                func_80026B10();
+                Rumble_StartBoth();
                 PV_Init();
                 break;
             case SCENE_MGCODE:
@@ -502,7 +502,7 @@ void Game_Thread( void *arg ) {
                 osInvalICache( mgcode_VRAM, i );
                 osInvalDCache( mgcode_VRAM, i );
                 FAT_ReadFile( "MGCODE  SYS", mgcode_VRAM, i, 0 );
-                func_80026B10();
+                Rumble_StartBoth();
                 MG_Init();
                 break;
             case SCENE_OPCODE:
@@ -511,7 +511,7 @@ void Game_Thread( void *arg ) {
                 osInvalICache( opcode_VRAM, i );
                 osInvalDCache( opcode_VRAM, i );
                 FAT_ReadFile( "OPCODE  SYS", opcode_VRAM, i, 0 );
-                func_80026B10();
+                Rumble_StartBoth();
                 OP_Init();
                 break;
             }

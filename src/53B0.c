@@ -120,12 +120,12 @@ void Obj_FreeAll( void ) {
 
 /*
 ================
-func_8002A724
+Str_ParseFloat
 
 Returns the decimal number str, with its fraction after a '.'.
 ================
 */
-f32 func_8002A724( u8 *str ) {
+f32 Str_ParseFloat( u8 *str ) {
     f32 whole;
     f32 fraction;
     u8 *point;
@@ -150,12 +150,12 @@ f32 func_8002A724( u8 *str ) {
 
 /*
 ================
-func_8002A7EC
+Host_ReadFileToObjBuf
 
 Reads host file name into obj_hostFile.
 ================
 */
-void func_8002A7EC( u8 *name ) {
+void Host_ReadFileToObjBuf( u8 *name ) {
     /* BUG: the read allows 0x8000 bytes, more than the buffer; a longer file overruns the bss after it */
     Host_LoadFile( name, obj_hostFile, 0x8000 );
 }

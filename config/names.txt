@@ -498,7 +498,7 @@ MAT_TEXGEN	include/filecache.h	invented: fileRefB_t.flags bit 4, sets G_TEXTURE_
 MAT_I4	include/filecache.h	invented: fileRefB_t.fmt values 0-4 (MAT_I4, MAT_CI4, MAT_CI8, MAT_RGBA16, MAT_I8), from the texture loads of Scene_Draw
 gaLaneAim_t	gacode.h	invented: 8-byte per-lane aiming state (two, ga_laneAim): a position, a counter within 999, the step reached
 gaMotion_t	gacode.h	invented: 0x38-byte motion of a lane body (gaLane_t.motion, 11 from 0x420; initial copy ga_initMotion): velocity, spin, flags; stepped by GA_PhysicsStep
-FABS	include/gacode/gacode.h	invented: float absolute value macro (0 - x), func_80119638_gacode
+FABS	include/gacode/gacode.h	invented: float absolute value macro (0 - x), GA_SetGaugeSprites
 floorGrid_t	include/game.h	invented: 0xFAC-byte file at game_floorGrids (point counts, spacing and origin along x and z, then s16 heights); GA_KeepInGrid clamps to its edges, GA_FloorHeight interpolates its heights
 GA_TogglePin	3E350.c	invented: the inline helper of GA_PinEditor that toggles a lane body's standing flag (standState) and returns the new state
 GRIDEDIT_EXIT, GRIDEDIT_LOAD, GRIDEDIT_SAVE, GRIDEDIT_SIZE, GRIDEDIT_STEP, GRIDEDIT_ORIGIN, GRIDEDIT_SELECT, GRIDEDIT_HEIGHT, GRIDEDIT_PAGES, GRIDEDIT_POINTS	include/gridedit.h	invented: the pages of the floor grid editor GridEd_Frame (from its page titles "EXIT", "FILE LOAD", "FILE SAVE", "MTX FORM", "MTX WH", "MTX OFS", "VTX SEL", "VTX Y"), and floorGrid_t.heights' 2000 points
@@ -1029,7 +1029,7 @@ gaLane_t.bounceSound	gacode.h	invented: sound of the ball's floor hits in GA_Phy
 gaLane_t.markerSpots	gacode.h	invented: spots of the markers; [0] and [1] follow the stick, [2] the aim (GA_InputAim, GA_InputStance)
 gaMotion_t.mass	gacode.h	invented: weight of the body in GA_Collide's momentum exchange; the ball's from D_801239E8_gacode by its weight
 gaBody_t.kind	gacode.h	invented: 0 the ball (sounds its hits, height 11.25), 1 a pin (tips and turns, height 6.25), 2 flat (height 0) (GA_PlaceBody)
-gaPlayer_t.ballWeight	gacode.h	invented: the ball's weight, 0 to 10 drawn as 6 to 16 (func_801194D0_gacode); picks the ball's mass and palette
+gaPlayer_t.ballWeight	gacode.h	invented: the ball's weight, 0 to 10 drawn as 6 to 16 (GA_DrawWeightSelector); picks the ball's mass and palette
 gaPlayer_t.homeMtx	gacode.h	invented: the player object's matrix at set-up, restored for each throw
 gaPlayer_t.releaseFrame	gacode.h	invented: the player object's animation frame when the throw was committed (GA_InputSetThrow)
 gaPlayer_t.cpuAim	gacode.h	invented: where GA_CpuInput moves the character's aim for a player the game plays (GA_CpuSetup)
@@ -1181,7 +1181,7 @@ sched_queue	0x80099428	invented: Main_Thread's queue: the SP, DP, PRENMI and ret
 sched_msgs	0x801000C0	invented: buffer of sched_queue
 sched_retraceQueue	0x800E57E8	invented: gets the retrace message each VI
 sched_retraceMsgs	0x8009D060	invented: buffer of sched_retraceQueue
-sound_frameQueue	0x800E6520	invented: Main_Thread sends to it every other retrace; func_80037BE0 waits on it
+sound_frameQueue	0x800E6520	invented: Main_Thread sends to it every other retrace; Sound_WaitFrame waits on it
 sound_frameMsgs	0x8009CF8C	invented: buffer of sound_frameQueue
 sound_doneQueue	0x8009D040	invented: where Main_Thread reports the audio task done
 sound_doneMsgs	0x800DF6A0	invented: buffer of sound_doneQueue
@@ -1345,7 +1345,7 @@ obj_classes	0x800E657C	invented: the object classes, by objParams_t.type (Obj_Cr
 obj_params	0x800A2FE0	invented: the records Obj_CreateAll creates objects from
 obj_paramsEnded	0x800A2FDC	invented: TRUE when the records ended with OBJ_PARAMS_END
 obj_frameStep	0x800F7BF8	invented: frames each update advances; 1 at start (Obj_ClearList)
-obj_hostFile	0x800F30E0	invented: buffer func_8002A7EC reads a host file into; pvcode creates objects from it
+obj_hostFile	0x800F30E0	invented: buffer Host_ReadFileToObjBuf reads a host file into; pvcode creates objects from it
 obj_scene	0x800EA120	invented: main's scene objects by priority (Cam_Create lists cameras in it)
 cam_count	0x80099480	invented: cameras in cam_cameras (cleared by Obj_ClearList)
 cam_cameras	0x8009CFA0	invented: the scene's cameras (Cam_Create); an object's viewMask has a bit for each
@@ -1438,3 +1438,32 @@ gaCharacterData_t.ballJoint	gacode.h	invented: joint of the player's object the 
 gaCharacterData_t.ballOffset	gacode.h	invented: offset of the ball from that joint
 gaCharacterData_t.reactionFrames	gacode.h	invented: frame of the reaction animation, indexed by gaLane_t.reaction
 gaLaneAim_t.step	gacode.h	invented: step reached, comment of the member
+Rumble_StartBoth	0x80026B10	invented: sets both ports' rumble request to 8 frames
+Game_StartPulse	0x80026B28	invented: restarts the pulse of game_pulseAlpha at 75 with step 12
+Sound_WaitFrame	0x80037BE0	invented: waits for the next message on sound_frameQueue
+Audio_SetTaskFuncs	0x8003C1FC	invented: sets the task routines the audio thread uses
+Host_RequestFile	0x800295A0	invented: sends host request 1 for a file name (Host_GetFileSize sends 2)
+Str_ParseFloat	0x8002A724	invented: parses a decimal number with a fraction after a '.'
+Host_ReadFileToObjBuf	0x8002A7EC	invented: reads a host file into obj_hostFile
+GA_RunPanelFunc	0x80114FC4	invented: runs the panelFunc handler of the player's lane
+GA_PanelNone	0x8011B400	invented: a panelFunc handler that does nothing
+GA_CameraNone	0x8011C650	invented: a cameraFunc handler that leaves the camera as it is
+GA_CameraStepView	0x8011BB44	invented: a cameraFunc handler: R and L step ballView
+GA_CameraSpin	0x8011C158	invented: camera handler: turns around the origin by ga_spinCameraAngle
+GA_CameraFollowBall	0x8011C468	invented: camera handler: follows the ball down the lane on ga_followCamPaths
+GA_CameraLane	0x8011C57C	invented: camera handler: looks down the lane on ga_laneCamPaths
+GA_CameraThrow	0x8011C254	invented: camera handler during the throw, on ga_throwCamPaths
+GA_SetCpuThrow	0x8011CEE4	invented: gives the player the values of its character's ga_cpuThrows row
+GA_DrawFramePanel	0x80119C50	invented: draws a player's frame panel on the lane's side
+GA_DrawPinPanel	0x80119DD8	invented: draws the pin panel of a player's frame
+GA_DrawAimPanel	0x80119F8C	invented: draws a player's aim panel on the lane's side
+GA_DrawWeightSelector	0x801194D0	invented: draws the ball weight selector
+GA_SetGaugeSprites	0x80119638	invented: sets the lane's two gauge sprites from speed and spin
+GA_DrawPlayerPanel	0x80119800	invented: draws a human player's panel on its lane's side
+GA_SteerCharacter	0x80116A64	invented: moves the character's speed and spin by the stick
+GA_StepAim	0x80116FF0	invented: steps the lane's aim to a step once x passes its mark
+GA_MoveAimMarker	0x80117124	invented: moves the lane's aim marker
+GA_DrawLeadPanel	0x8011B490	invented: shows the leading lane's image, else draws the lane's panel
+GA_DistanceLoop	0x80114024	invented: main loop state of mode 3, the distance mode
+ga_sceneryStarted	0x8012C920	invented: set by each scenery handler on its first frame, which sets the player objects' flags
+game_throw	0x80068A50	invented: per player: the throw in the frame (Score_DrawFrame's throw)

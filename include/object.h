@@ -39,7 +39,7 @@ extern s32 obj_paramsEnded;         /* TRUE when the records ended with OBJ_PARA
 extern s32 cam_count;               /* cameras in cam_cameras */
 extern s32 cam_manual;               /* set: Cam_Update applies the controller's zoom, pan and rotation */
 extern s32 obj_frameStep;           /* frames each update advances; 1 at start */
-extern u8 obj_hostFile[0x4B00];     /* func_8002A7EC reads a host file here (scene_texGen follows) */
+extern u8 obj_hostFile[0x4B00];     /* Host_ReadFileToObjBuf reads a host file here (scene_texGen follows) */
 
 /* Model commands Obj_ConvertModel converts: the opcode byte, then its arguments. */
 #define MDLCMD_END          0           /* end of the list */
@@ -119,8 +119,8 @@ void Obj_CreateAll( objClass_t *classes, objParams_t *params );
 void func_8002A2F0( void );
 void Obj_Free( objNode_t *obj );
 void Obj_FreeAll( void );
-f32 func_8002A724( u8 *str );
-void func_8002A7EC( u8 *name );
+f32 Str_ParseFloat( u8 *str );
+void Host_ReadFileToObjBuf( u8 *name );
 void Mtx_Translate( f32 m[4][4], f32 x, f32 y, f32 z );
 void Mtx_Scale( f32 m[4][4], f32 x, f32 y, f32 z );
 void Mtx_Rotate( f32 m[4][4], f32 rot[3][3] );

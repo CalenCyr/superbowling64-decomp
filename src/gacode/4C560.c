@@ -68,8 +68,8 @@ func_80122470_gacode
 ================
 */
 void func_80122470_gacode( void ) {
-    if ( D_8012C920_gacode == 0 ) {
-        D_8012C920_gacode = 1;
+    if ( ga_sceneryStarted == 0 ) {
+        ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 0 );
     }
     GA_CountFrame();
@@ -84,8 +84,8 @@ ball's state is 1 (the second lane only when game_lastTeam is 1).
 ================
 */
 void func_801224F8_gacode( void ) {
-    if ( D_8012C920_gacode == 0 ) {
-        D_8012C920_gacode = 1;
+    if ( ga_sceneryStarted == 0 ) {
+        ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 1 );
     }
     GA_CountFrame();
@@ -111,8 +111,8 @@ then points the palettes of seven resources at the images of the current frame o
 void GA_AnimateTextures( void ) {
     s32 i;
 
-    if ( D_8012C920_gacode == 0 ) {
-        D_8012C920_gacode = 1;
+    if ( ga_sceneryStarted == 0 ) {
+        ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 0 );
         Cache_GetFile( 2682, FILE_RAW );
         Cache_GetFile( 2698, FILE_RAW );
@@ -159,8 +159,8 @@ func_80122BD8_gacode
 ================
 */
 void func_80122BD8_gacode( void ) {
-    if ( D_8012C920_gacode == 0 ) {
-        D_8012C920_gacode = 1;
+    if ( ga_sceneryStarted == 0 ) {
+        ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 1 );
     }
     GA_CountFrame();
@@ -172,8 +172,8 @@ func_80122C60_gacode
 ================
 */
 void func_80122C60_gacode( void ) {
-    if ( D_8012C920_gacode == 0 ) {
-        D_8012C920_gacode = 1;
+    if ( ga_sceneryStarted == 0 ) {
+        ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 0 );
     }
     GA_CountFrame();
@@ -194,8 +194,8 @@ void GA_FlickerLight( void ) {
     u8 level;
     s32 step;              /* brightness step, 0 to 3 */
 
-    if ( D_8012C920_gacode == 0 ) {
-        D_8012C920_gacode = 1;
+    if ( ga_sceneryStarted == 0 ) {
+        ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 1 );
         for ( i = 0; i < 4; i++ ) {
             Cache_GetFile( D_8012C978_gacode[i], FILE_RAW );
@@ -243,8 +243,8 @@ on every other frame.
 ================
 */
 void func_80123004_gacode( void ) {
-    if ( D_8012C920_gacode == 0 ) {
-        D_8012C920_gacode = 1;
+    if ( ga_sceneryStarted == 0 ) {
+        ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 1 );
     }
     ( (fileRefB_t *)cache_files[883].data )->scroll[0]--;
@@ -272,8 +272,8 @@ func_801233A8_gacode
 ================
 */
 void func_801233A8_gacode( void ) {
-    if ( D_8012C920_gacode == 0 ) {
-        D_8012C920_gacode = 1;
+    if ( ga_sceneryStarted == 0 ) {
+        ga_sceneryStarted = 1;
         GA_SetPlayerObjectFlags( 1 );
     }
     GA_CountFrame();

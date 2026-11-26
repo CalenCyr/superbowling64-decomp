@@ -64,12 +64,12 @@ void strcpy( u8 *dst, const u8 *src ) {
 
 /*
 ================
-func_800295A0
+Host_RequestFile
 
 Sends request 1 for name.
 ================
 */
-void func_800295A0( u8 *name ) {
+void Host_RequestFile( u8 *name ) {
     host_packet.command = 1;
     strcpy( host_packet.name, name );
     Host_Send( (u8 *)&host_packet, sizeof( host_packet ) );

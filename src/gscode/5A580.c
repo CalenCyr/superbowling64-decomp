@@ -67,7 +67,7 @@ s32 GS_PlayersMenu( void ) {
         }
         if ( gs_playersCursor != choice ) {
             gs_playersBlinkFrame = 0;
-            func_80026B28();
+            Game_StartPulse();
             Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
     }
@@ -79,7 +79,7 @@ s32 GS_PlayersMenu( void ) {
         gs_playersSlide -= 2;
         if ( gs_playersSlide == 0 ) {
             gs_playersState = CHOICE_RUN;
-            func_80026B28();
+            Game_StartPulse();
         }
         break;
     case CHOICE_TAKEN:

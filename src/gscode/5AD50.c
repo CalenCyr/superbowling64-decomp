@@ -935,7 +935,7 @@ s32 GS_PlayerSetup( void ) {
         gs_setupSlide -= 2;
         if ( gs_setupSlide == 0 ) {
             gs_setupState = CHOICE_RUN;
-            func_80026B28();
+            Game_StartPulse();
             gs_rumbleStatus[1] = 0;
             gs_rumbleStatus[0] = 0;
         }

@@ -130,12 +130,12 @@ void func_80037BD8( void ) {
 
 /*
 ================
-func_80037BE0
+Sound_WaitFrame
 
 Waits for the next message on sound_frameQueue.
 ================
 */
-void func_80037BE0( void ) {
+void Sound_WaitFrame( void ) {
     OSMesg msg;
 
     osRecvMesg( &sound_frameQueue, &msg, OS_MESG_BLOCK );

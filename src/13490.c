@@ -588,10 +588,10 @@ void Score_DrawTeamBoard( u8 mode, u8 all, s16 x, s16 y ) {
             y += 10;
         }
         for ( frame = 0; frame < 9; frame++ ) {
-            Score_DrawFrame( i, frame, all ? 9 : game_frame[i], D_80068A50[i], game_playerDone[i], frameX, y );
+            Score_DrawFrame( i, frame, all ? 9 : game_frame[i], game_throw[i], game_playerDone[i], frameX, y );
             frameX += 20;
         }
-        Score_DrawFrame( i, 9, all ? 9 : game_frame[i], D_80068A50[i], game_playerDone[i], frameX, y );
+        Score_DrawFrame( i, 9, all ? 9 : game_frame[i], game_throw[i], game_playerDone[i], frameX, y );
         y += mode == 1 ? 40 : 20;
         if ( mode == 2 && i % 2 == 1 ) {
             Draw_Image( i == 1 ? 0xA13 : 0x9FC, 0xCC, y );
@@ -770,10 +770,10 @@ void Score_DrawPlayerBoard( s32 player, s16 x, s16 y ) {
     Menu_DrawNamePlate( player, game_players[player] >> 7, game_playerNames[player].chars, frameX, y );
     frameX += 0x38;
     for ( i = 0; i < 9; i++ ) {
-        Score_DrawFrame( player, i, 9, D_80068A50[player], game_playerDone[player], frameX, y );
+        Score_DrawFrame( player, i, 9, game_throw[player], game_playerDone[player], frameX, y );
         frameX += 20;
     }
-    Score_DrawFrame( player, 9, 9, D_80068A50[player], game_playerDone[player], frameX, y );
+    Score_DrawFrame( player, 9, 9, game_throw[player], game_playerDone[player], frameX, y );
 }
 
 /*

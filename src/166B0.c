@@ -885,12 +885,12 @@ waveBank_t *Snd_GetSeWaveBank( seTable_t *table ) {
 
 /*
 ================
-func_8003C1FC
+Audio_SetTaskFuncs
 
 Sets the task routines the audio thread uses (audio_defaultTaskFuncs by default).
 ================
 */
-void func_8003C1FC( audioTaskFuncs_t *funcs ) {
+void Audio_SetTaskFuncs( audioTaskFuncs_t *funcs ) {
     audio_taskFuncs = funcs;
 }
 

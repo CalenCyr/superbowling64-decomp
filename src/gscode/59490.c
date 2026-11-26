@@ -119,7 +119,7 @@ s32 GS_ModeMenu( void ) {
         }
         if ( gs_modeCursor != choice ) {
             gs_modeBlinkFrame = 0;
-            func_80026B28();
+            Game_StartPulse();
             Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
     }
@@ -131,7 +131,7 @@ s32 GS_ModeMenu( void ) {
         gs_modeSlide -= 2;
         if ( gs_modeSlide == 0 ) {
             gs_modeState = CHOICE_RUN;
-            func_80026B28();
+            Game_StartPulse();
             game_mode = 0;
             game_numPlayers = 1;
             for ( i = 0; i < 4; i++ ) {

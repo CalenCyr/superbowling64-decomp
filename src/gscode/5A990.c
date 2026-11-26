@@ -62,7 +62,7 @@ s32 GS_TwoChoiceMenu( void ) {
         }
         if ( gs_twoChoiceCursor != choice ) {
             gs_twoChoiceBlinkFrame = 0;
-            func_80026B28();
+            Game_StartPulse();
             Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
         }
     }
@@ -74,7 +74,7 @@ s32 GS_TwoChoiceMenu( void ) {
         gs_twoChoiceSlide -= 2;
         if ( gs_twoChoiceSlide == 0 ) {
             gs_twoChoiceState = CHOICE_RUN;
-            func_80026B28();
+            Game_StartPulse();
         }
         break;
     case CHOICE_TAKEN:
