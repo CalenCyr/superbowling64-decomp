@@ -56,7 +56,7 @@ Also record:
     (doubles, jump tables) is a `[<rom>, .rodata, <seg>/<unit>]` subsegment after all units' `.data`; splat moves
     rodata used by one function into that function's asm, and the rest needs the `INCLUDE_RODATA` lines splat
     writes into a fresh C file (regenerate one in a scratch copy to see where they go).
-  - Data in C (done for mgcode, rscode, pvcode, cacode, opcode): replace the asm `[<rom>, data]` subsegment with
+  - Data in C (done for mgcode, rscode, pvcode, cacode, opcode, gscode, gacode, part of main): replace the asm `[<rom>, data]` subsegment with
     `[<rom>, .data, <seg>/<unit>]` and the bss one with `{ type: .bss, vram: ..., name: <seg>/<unit> }`, set `bss_contains_common: True` on the
     segment (gcc's uninitialised globals are commons; splat then links `<unit>.o(.bss COMMON .scommon)`; the flag
     must be on the code segment, which overrides its subsegments'), and define every datum in the unit in address
@@ -77,6 +77,9 @@ Also record:
     a datum of that unit, defined under a placeholder name (opcode's two glyph strings at 0x80114254).
     Data whose users interleave (gacode) goes into a data-only unit (`src/<seg>/data.c`, no functions, only a
     `[<rom>, .data, <seg>/data]` subsegment), placed in link order where its run starts.
+    main: the same, per unit, with an asm `[<rom>, data]` blob for each run not yet in C. A unit with `NO_INCLUDE_ASM` defines its
+    data after its functions when a definition before the first one would drop that function's leading hazard nop (1B1A0);
+    166B0's command table follows the handlers it names.
 - **Headers:** `include/common.h` (types, `INCLUDE_ASM`), `include/structs.h`, `include/variables.h`,
   `include/functions.h`. Each type and global is declared once there (R1, R2).
 - **libultra:** 2.0K `libgultra_rom`, linked from source. `lib/ultralib` is decompals' ultralib (git submodule
@@ -116,7 +119,7 @@ Also record:
 
   | segment | ROM | VRAM | notes |
   |---|---|---|---|
-  | main | 0x1060-0x3C2A0 | 0x80025C60 | 604 functions; BSS to 0x8010A080. No `SUBALIGN` (`subalign: null`): each object's sections keep their own alignment, as in the original link (KMC as gives `.text`/`.data`/`.bss` 2**4 and pads `.text` to 16; `.rodata` takes its contents' alignment, so 2DF0's `.rodata` follows 1060's at 0x80060388). Per-unit `.rodata` subsegments after the 3A7F0 data blob: 1060 (0x3B6C0), 2DF0 (0x3B788), 53B0, ... |
+  | main | 0x1060-0x3C2A0 | 0x80025C60 | 604 functions; BSS to 0x8010A080. No `SUBALIGN` (`subalign: null`): each object's sections keep their own alignment, as in the original link (KMC as gives `.text`/`.data`/`.bss` 2**4 and pads `.text` to 16; `.rodata` takes its contents' alignment, so 2DF0's `.rodata` follows 1060's at 0x80060388). One link order for every section: game units, libultra members, libkmc, rspboot, then the four microcode objects (gspF3DEX2_Rej, gspF3DEX2, gspL3DEX2, aspMain). So the microcode's `.text` (0x321D0-0x364E0, a `data` blob) follows rspboot's, and the `.data` section opens at 0x364E0 with the game's: the units' `.data` 0x364E0-0x38520, then libultra's, libkmc's, and the microcode's `.data` (0x3A7F0-0x3B6C0, a `data` blob). Game `.data` in C, per unit: 7250, 111A0, 12260, 12C70, 13230, 166B0, 1ADA0, 1B1A0, 1B2D0, 1B890; still asm: 0x364E0-0x37590 (the shared globals; their owners interleave, a data-only unit's candidate), 0x375A0 (an unreferenced `u8[2][24]` of unknown owner, then C650's), 0x37E80 (13490's), 0x38030 (19F50's), 0x38500 (an unreferenced `{0, -10.0f}`, `snd_globals`, `snd_synth`). Bss: 0x80060EA0-0x800645C0 holds the game units' `.bss` (file-scope statics) in link order (1060, 2DF0, 3D50, 4890, 4DC0, 51F0, 7250, 111A0, 12260, 166B0, 1A7A0, 1ADA0, 1B060, 1B1A0), before libultra's `.bss`; 0x80066B30-0x8010A080, after libkmc `rand`'s, is `COMMON`: every unit's uninitialised globals, the game's and libultra's (`__osPiAccessQueue`, `__osContPifRam`), which the linker allocates after all `.bss` sections; both are still asm. Per-unit `.rodata` subsegments after the microcode's `.data`: 1060 (0x3B6C0), 2DF0 (0x3B788), 53B0, ... |
   | fat | 0x3C2A0-0x3C470 | 0x8010A080 | `BW64FAT` table: {name ptr, ROM start, ROM end, 0} |
   | knstatic | 0x3C470-0x3C570 | 0x8010A250 | `KNSTATICSYS` |
   | gacode | 0x3C570-0x56FF0 | 0x80112350 | game overlay (`GACODE  SYS`): C units 3C570, 3E350, 474E0, 4C560 and the data-only unit `data`; .data 0x4D820 in C (3C570's state to 0x4D8B0, then `data`'s interleaved tables, then 474E0 at 0x56B20 and 4C560 at 0x56B40); .rodata 0x56C20 (per unit, confirmed by the gate); bss 0x8012CDD0-0x8012F350 still asm (ends with the second lane) |
