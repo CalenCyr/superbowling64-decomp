@@ -7,6 +7,14 @@
 #include "functions.h"
 #include "variables.h"
 
+/* ===== Data ===== */
+
+/* unreferenced: 0, -10.0 and 0, the pattern of the three initialised statics of _loadOutputBuffer in ultralib's
+   reverb.c, whose counterpart here is Synth_ReadDelayLine; nothing reads them */
+static f32 D_8005D100 = 0.0f;
+static f32 D_8005D104 = -10.0f;
+static f32 D_8005D108 = 0.0f;
+
 /*
 ================
 Synth_PullMainBus

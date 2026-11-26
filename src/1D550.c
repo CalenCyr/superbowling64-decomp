@@ -10,6 +10,11 @@
 #include "functions.h"
 #include "variables.h"
 
+/* ===== Data ===== */
+
+N_ALGlobals *snd_globals = NULL;
+N_ALSynth *snd_synth = NULL;
+
 /*
 ================
 Synth_InitGlobals

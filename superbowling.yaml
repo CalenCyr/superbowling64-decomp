@@ -300,7 +300,8 @@ segments:
       - [0x38260, .data, 1B1A0]
       - [0x38270, .data, 1B2D0]
       - [0x38400, .data, 1B890]
-      - [0x38500, data]          # an unreferenced {0, -10.0f}, snd_globals, snd_synth (owner 1B890-1D550): still asm
+      - [0x38500, .data, 1CB60]  # three unreferenced f32 statics (0, -10.0, 0)
+      - [0x38510, .data, 1D550]  # snd_globals, snd_synth
       - [0x38520, lib, libgultra_rom, pimgr, .data]
       - [0x38550, lib, libgultra_rom, cartrominit, .data]
       - [0x38560, lib, libgultra_rom, piacs, .data]
