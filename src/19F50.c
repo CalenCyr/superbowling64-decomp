@@ -29,11 +29,11 @@ static s32 D_8005CD20[2 + 1 * 8] = {        /* the echo */
     1, 0x1F40,
     0, 0x1BF8, 0x2EE0, 0, 0x7FFF, 0, 0, 0,
 };
-static s32 D_8005CD48[2 + 1 * 8] = {        /* the chorus */
+/* sized as the big room, four sections; its one section is initialised and the rest is zero */
+static s32 D_8005CD48[2 + 4 * 8] = {        /* the chorus */
     1, 0x320,
     0, 0xC8, 0x4000, 0, 0x7FFF, 0x1DB0, 0x2BC, 0,
 };
-static s32 D_8005CD70[24] = { 0 };          /* unreferenced */
 static s32 D_8005CDD0[2 + 1 * 8] = {        /* the flange */
     1, 0x320,
     0, 0xC8, 0, 0x5FFF, 0x7FFF, 0x17C, 0x1F4, 0,
