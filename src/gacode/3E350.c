@@ -3385,6 +3385,7 @@ modes that have one), and a value of the lane's current inputFunc step.
 // -dg allocation order here: x/pl first, then player, &game_gfx, row, lane; retail needs row and lane ahead of
 // player and &game_gfx (both conflict with row). Worse: a Gfx ** local for &game_gfx, x as an s16 local, each line's
 // draw and row++ in a do-while(0). A 35-minute permuter run: 75 only through a duplicated final draw.
+// Named column/line coordinates do not fit: retail's last draw recomputes lane * 144 + 16 and (row + 2) * 8.
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;

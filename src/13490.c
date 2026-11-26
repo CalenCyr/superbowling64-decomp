@@ -400,6 +400,9 @@ player has finished the game.
 // allocated first. No effect or worse: rowY declared in each branch (worse), rowY += 9 just before the call (worse).
 // Also worse: rowY + 9 written at the Score_DrawNumber calls, y itself stepped with y += 2, rowY = y with + 2 at
 // each use; rowY = y then rowY += 2 is the same. A 35-minute permuter run: 385 only through throw++/throw-- (noise).
+// Dumps (-ds): cse rewrites the call argument's sign extension of rowY to the rowY + 9 temporary, so flow deletes
+// rowY's set; with the set kept, combine would add in place and rowY's extra refs would rank it above frame. No effect
+// or worse: rowY as u16, y as an s32 parameter (with rowY s16 or s32).
 void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;
