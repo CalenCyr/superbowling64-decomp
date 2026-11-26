@@ -34,13 +34,6 @@ extern s16 rs_messageFrames;     /* frames the current message has been shown */
 extern u8 rs_menuChoice;         /* choice of RS_Menu's menu */
 extern s16 rs_pinPos[10][2];     /* x and y of each pin in a frame's pin diagram */
 extern u8 rs_pinPage;            /* page of the pin diagrams: 0 frames 1-9, 1 the tenth on */
-extern u8 rs_ranks[4];           /* per player: rank by score, 1 the best */
-extern u16 rs_buttonsPressed;    /* buttons pressed this frame (0 once leaving) */
-extern u16 rs_dpadPressed;       /* D-pad presses this frame (0 once leaving) */
-extern u8 D_801142B4_rscode;     /* game_mode >> 6 */
-extern u8 rs_nextScene;          /* copied back to game_scene on leaving */
-extern rsState_t rs_state;       /* current state */
-extern rsState_t rs_returnState; /* state to return to */
 
 void RS_StartMode( void );
 void RS_StartMode0( void );

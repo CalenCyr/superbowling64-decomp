@@ -56,13 +56,16 @@ Also record:
     (doubles, jump tables) is a `[<rom>, .rodata, <seg>/<unit>]` subsegment after all units' `.data`; splat moves
     rodata used by one function into that function's asm, and the rest needs the `INCLUDE_RODATA` lines splat
     writes into a fresh C file (regenerate one in a scratch copy to see where they go).
-  - Data in C (done for mgcode): replace the asm `[<rom>, data]` subsegment with `[<rom>, .data, <seg>/<unit>]` and
+  - Data in C (done for mgcode, rscode): replace the asm `[<rom>, data]` subsegment with `[<rom>, .data, <seg>/<unit>]` and
     the bss one with `{ type: .bss, vram: ..., name: <seg>/<unit> }`, set `bss_contains_common: True` on the
     segment (gcc's uninitialised globals are commons; splat then links `<unit>.o(.bss COMMON .scommon)`; the flag
     must be on the code segment, which overrides its subsegments'), and define every datum in the unit in address
     order with its real type and initialiser (functions by name, cast to the member's function-pointer typedef
     where a handler's prototype differs). `rm -rf asm && make split && make gate` verifies it. Bss is accounted
-    for by real objects only: a range nothing references is never filled with invented storage. A data blob
+    for by real objects only: a range nothing references is never filled with invented storage. Commons are
+    placed in the linker's hash order, not in source order; when several bss objects sit in definition order with
+    their own alignment (rscode: the `u8[4]` `rs_ranks` right after a `u16`, at 0x801142A2), they are file-scope `static`s, which the assembler
+    allocates in `.bss` in that order (no `bss_contains_common` then). A data blob
     shared by several units needs its unit boundaries found first (one subsegment per unit, in link order).
 - **Headers:** `include/common.h` (types, `INCLUDE_ASM`), `include/structs.h`, `include/variables.h`,
   `include/functions.h`. Each type and global is declared once there (R1, R2).

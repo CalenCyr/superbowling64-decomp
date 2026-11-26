@@ -6,6 +6,19 @@
 #include "rscode/rscode.h"
 
 /*
+The overlay's uninitialised state, private to the unit. File-scope statics: the assembler allocates them in .bss
+in definition order with their own alignment (rs_ranks at 0x801142A2), which the retail layout shows; the
+linker's commons would be placed in its hash order.
+*/
+static u16 rs_buttonsPressed;    /* buttons pressed this frame (0 once leaving) */
+static u8 rs_ranks[4];           /* per player: rank by score, 1 the best */
+static u16 rs_dpadPressed;       /* D-pad presses this frame (0 once leaving) */
+static u8 rs_nextScene;          /* copied back to game_scene on leaving */
+static rsState_t rs_state;       /* current state */
+static rsState_t rs_returnState; /* state to return to */
+static u8 D_801142B4_rscode;     /* game_mode >> 6 */
+
+/*
 ================
 RS_Init
 
@@ -737,3 +750,23 @@ void RS_RankLowest( u8 *ranks, u8 count, s16 *values, s16 low, s16 high ) {
         ranks[i] = tally[values[i] + base - 1];
     }
 }
+
+/* ===== Data ===== */
+
+u8 rs_leaving = 0;
+u8 rs_sheetPage = 0;
+u8 rs_boxAlpha = 0;
+u8 rs_boxAlphaFalling = 0;
+s16 rs_messageFrames = 0;
+u8 rs_menuChoice = 0;
+
+/* The pins' offsets in a frame's pin diagram: the head pin at the bottom, the back row of four at the top. */
+s16 rs_pinPos[10][2] = {
+    { 9, 16 },
+    { 6, 11 }, { 12, 11 },
+    { 3, 6 }, { 9, 6 }, { 15, 6 },
+    { 0, 1 }, { 6, 1 }, { 12, 1 }, { 18, 1 },
+};
+
+u8 rs_pinPage = 0;
+
