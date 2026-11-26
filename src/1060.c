@@ -55,10 +55,10 @@ static OSTask sched_gfxTask = { {
     NULL, 0,                            /* ucode_boot, set per task */
     NULL, SP_UCODE_SIZE,
     NULL, SP_UCODE_DATA_SIZE,
-    D_800F7C90, SP_DRAM_STACK_SIZE8,
+    boot_dramStack, SP_DRAM_STACK_SIZE8,
     SCHED_FIFO_START, SCHED_FIFO_END,   /* the RDP's FIFO: output_buff_size is the buffer's end */
     NULL, 0,                            /* data_ptr, set per task */
-    D_800E5800, OS_YIELD_DATA_SIZE,
+    boot_yieldBuffer, OS_YIELD_DATA_SIZE,
 } };
 static u16 game_demoTitles[4] = { 0x0A72, 0x0A73, 0x0A74, 0x0A70 };  /* per demo (game_demo): the image the demo shows its title by */
 static u8 game_blankFrames = 0;         /* blank frames drawn before the next scene loads */

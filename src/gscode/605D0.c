@@ -180,17 +180,17 @@ static creditCmd_t gs_creditsScript[142] = {
 static u32 gs_soundTestFrames = 0; /* frames since the last sound test */
 
 /* per save_data.difficulty: its image */
-static s16 D_80120404_gscode[4] = {
+static s16 gs_difficultyImages[4] = {
     0x8E4, 0x8E3, 0x8E2, 0x0,
 };
 
 /* per save_data.music and unk_7B: their image */
-static s16 D_8012040C_gscode[2] = {
+static s16 gs_onOffImages[2] = {
     0x8E0, 0x8E1,
 };
 
 /* image of each digit */
-static s16 D_80120410_gscode[10] = {
+static s16 gs_digitImages[10] = {
     0x8EE, 0x8ED, 0x8EC, 0x8EB, 0x8EA, 0x8E9, 0x8E8, 0x8E7,
     0x8E6, 0x8E5,
 };
@@ -236,14 +236,14 @@ s32 GS_Options( void ) {
     if ( gs_optionsState == 1 && game_leaveState == 0 ) {
         Menu_SetItem( gs_optionsMenu, 10, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
         Menu_SetItem( gs_optionsMenu, 11, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
-        Menu_SetItem( gs_optionsMenu, 1, D_80120404_gscode[save_data.difficulty], MENU_NONE, MENU_NONE, 0xFF );
-        Menu_SetItem( gs_optionsMenu, 2, D_8012040C_gscode[save_data.music], MENU_NONE, MENU_NONE, 0xFF );
-        Menu_SetItem( gs_optionsMenu, 12, D_8012040C_gscode[save_data.rumble], MENU_NONE, MENU_NONE, 0xFF );
+        Menu_SetItem( gs_optionsMenu, 1, gs_difficultyImages[save_data.difficulty], MENU_NONE, MENU_NONE, 0xFF );
+        Menu_SetItem( gs_optionsMenu, 2, gs_onOffImages[save_data.music], MENU_NONE, MENU_NONE, 0xFF );
+        Menu_SetItem( gs_optionsMenu, 12, gs_onOffImages[save_data.rumble], MENU_NONE, MENU_NONE, 0xFF );
         if ( (u8)( gs_soundTestSound / 10 ) ) {
-            Menu_SetItem( gs_optionsMenu, 3, D_80120410_gscode[(u8)( gs_soundTestSound / 10 )], MENU_NONE,
+            Menu_SetItem( gs_optionsMenu, 3, gs_digitImages[(u8)( gs_soundTestSound / 10 )], MENU_NONE,
                            MENU_NONE, 0xFF );
         }
-        Menu_SetItem( gs_optionsMenu, 4, D_80120410_gscode[(u8)( gs_soundTestSound % 10 )], MENU_NONE,
+        Menu_SetItem( gs_optionsMenu, 4, gs_digitImages[(u8)( gs_soundTestSound % 10 )], MENU_NONE,
                        MENU_NONE, 0xFF );
         for ( i = 0; i < 4 - save_data.musicVolume; i++ ) {
             Menu_SetItem( gs_optionsMenu, i + 5, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );

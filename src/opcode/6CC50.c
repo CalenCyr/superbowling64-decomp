@@ -51,10 +51,10 @@ static opImage_t op_pakImages[] = {
 };
 
 /* Unreferenced: two glyph strings for Txt_DrawGlyphs, glyphs 0-15 and 16-31, each ended by 0xFFFF. */
-static u16 D_80114254_opcode[17] = {
+static u16 op_glyphsLow[17] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0xFFFF,
 };
-static u16 D_80114278_opcode[17] = {
+static u16 op_glyphsHigh[17] = {
     16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 0xFFFF,
 };
 

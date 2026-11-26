@@ -761,7 +761,7 @@ gaSpot_t ga_initSpots[2][NUM_BODIES] = {
         { { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, 5.5f, 0 },
     },
 };
-vec3_t D_8012C758_gacode = { 0.0f, 24.0f, 0.0f };
+vec3_t ga_spotOffset = { 0.0f, 24.0f, 0.0f };
 f32 ga_spinCameraAngle[2] = { 0.0f, 0.0f };
 vec3_t ga_freeCameraPos[2] = { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
 s16 ga_calloutImages[33] = {

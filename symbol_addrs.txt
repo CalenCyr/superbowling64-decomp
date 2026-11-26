@@ -654,8 +654,8 @@ op_charEntries = 0x801140C0; // segment:opcode size:0x10A
 // opcode: unit 6CC50's images of the Controller Pak screen (8-byte entries, ended by id -1), two unreferenced glyph
 // strings, and its list of the pak's notes
 op_pakImages = 0x801141CC; // segment:opcode size:0x88
-D_80114254_opcode = 0x80114254; // segment:opcode size:0x22
-D_80114278_opcode = 0x80114278; // segment:opcode size:0x22
+op_glyphsLow = 0x80114254; // segment:opcode size:0x22
+op_glyphsHigh = 0x80114278; // segment:opcode size:0x22
 op_noteNames = 0x801143B8; // segment:opcode size:0x240
 op_pakStep = 0x801142A2; // segment:opcode size:0x1
 op_promptChoice = 0x801142A3; // segment:opcode size:0x1
@@ -1582,3 +1582,9 @@ gs_leaveDelay = 0x801207B2; // segment:gscode
 gs_shownModels = 0x801207B4; // segment:gscode
 gs_teamModels = 0x801207C0; // segment:gscode
 gs_teamAnims = 0x801207E0; // segment:gscode
+ga_spotOffset = 0x8012C758; // segment:gacode
+gs_difficultyImages = 0x80120404; // segment:gscode
+gs_onOffImages = 0x8012040C; // segment:gscode
+gs_digitImages = 0x80120410; // segment:gscode
+boot_yieldBuffer = 0x800E5800; // size:0xC00
+boot_dramStack = 0x800F7C90; // size:0x400

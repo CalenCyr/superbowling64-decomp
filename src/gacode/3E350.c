@@ -242,7 +242,7 @@ void GA_PhysicsStep( s32 player, s32 port ) {
         if ( second->radius == 0.0f ) {
             continue;
         }
-        GA_TransformPoint( second->pos, D_8012C758_gacode, lane->bodies[i].rot, spots[i].pos );
+        GA_TransformPoint( second->pos, ga_spotOffset, lane->bodies[i].rot, spots[i].pos );
     }
     for ( i = 0; i < NUM_BODIES; i++ ) {
         if ( lane->bodies[i].standState == 0 ) {

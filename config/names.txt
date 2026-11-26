@@ -1735,3 +1735,16 @@ ga_stageScene4	0x80128470	invented: the scene of ga_stages[4]
 ga_stageScene5	0x80128FB0	invented: the scene of ga_stages[5]
 ga_stageScene6	0x80129DB0	invented: the scene of ga_stages[6]
 ga_stageScene7	0x8012AE30	invented: the scene of ga_stages[7]
+synth_smallRoomFx	0x8005CC30	invented: effect preset: the small room
+synth_echoFx	0x8005CD20	invented: effect preset: the echo
+synth_chorusFx	0x8005CD48	invented: effect preset: the chorus
+synth_flangeFx	0x8005CDD0	invented: effect preset: the flange
+synth_delayFx	0x8005CDF8	invented: effect preset: a delay without feedback or output
+boot_yieldBuffer	0x800E5800	invented: the graphics task's yield buffer
+boot_dramStack	0x800F7C90	invented: the graphics task's DRAM stack
+gs_difficultyImages	0x80120404	invented: image of each save_data.difficulty (options)
+gs_onOffImages	0x8012040C	invented: image of an on/off option (music, rumble)
+gs_digitImages	0x80120410	invented: image of each digit (options sound test)
+ga_spotOffset	0x8012C758	invented: offset (0, 24, 0) of a body's second spot in the body's frame (GA_PhysicsStep)
+op_glyphsLow	0x80114254	invented: unreferenced glyph string 0-15
+op_glyphsHigh	0x80114278	invented: unreferenced glyph string 16-31

@@ -241,7 +241,7 @@ extern u16 ga_splits5[1 + 23];
 extern u16 ga_splits6[1 + 1];
 extern f32 ga_cpuThrows[16][4];     /* unk_98, unk_9C, unk_2C, unk_30 of a player, by game_setup.unk_04[] */
 extern s16 ga_calloutImages[];
-extern vec3_t D_8012C758_gacode;      /* (0, 24, 0) (GA_PhysicsStep) */
+extern vec3_t ga_spotOffset;      /* (0, 24, 0) (GA_PhysicsStep) */
 /* sound ids: by game_strikeRun[] up to 10 (GA_ScoreBattle), and from PAR_SOUNDS on by score against par
    (GA_ScorePar) */
 extern s16 ga_runSounds[20];
