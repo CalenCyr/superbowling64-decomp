@@ -60,9 +60,19 @@ compiler_command = "env COMPILER_PATH=tools/gcc_2.7.2 tools/gcc_2.7.2/gcc -Btool
 assembler_command = "mips64-linux-gnu-as -EB -march=vr4300 -mabi=32 -G0 -I include"
 EOF
 
+# import.py preprocesses with the system `cpp`, which rejects gbi.h's `&##ucode##TextStart` paste in gSPLoadUcodeL
+# (KMC's cpp only warns; KMC's cpp can't take import.py's variadic -D macros). Put a `cpp` first on PATH that
+# searches a copy of PR/gbi.h with `&##` spelled `& ` first: the same tokens, and only the work copy sees it.
+shadow=$root/nonmatchings/.cpp-shadow
+mkdir -p "$shadow/PR" "$shadow/bin"
+sed 's/&##/\& /g' lib/ultralib/include/PR/gbi.h > "$shadow/PR/gbi.h"
+syscpp=$(PATH=$(printf '%s' "$PATH" | tr ':' '\n' | grep -vxF "$shadow/bin" | paste -sd:) command -v cpp)
+printf '#!/bin/sh\nexec %s -I %s "$@"\n' "$syscpp" "$shadow" > "$shadow/bin/cpp"
+chmod +x "$shadow/bin/cpp"
+
 # Take the work directory from import.py's own "Imported into <dir>" line: a listing diff picks the wrong one when
 # two imports run at the same time.
-out=$("$py" "$permuter/import.py" --no-prune --settings "$settings" "$c_file" "$asm_file")
+out=$(PATH=$shadow/bin:$PATH "$py" "$permuter/import.py" --no-prune --settings "$settings" "$c_file" "$asm_file")
 rm -f "$settings"
 echo "$out"
 dir=$(printf '%s\n' "$out" | sed -n 's/.*Imported into \(nonmatchings\/[^ ]*\).*/\1/p' | tail -1)
