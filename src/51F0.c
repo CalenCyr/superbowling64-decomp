@@ -9,6 +9,13 @@
 /* The block that starts where block ends. */
 #define BLOCK_END( block )  ( (HeapBlock *)( (u8 *)( block ) + ( block )->size ) )
 
+/* ===== State ===== */
+
+static HeapBlock *mem_first;        /* first block; the heap starts here */
+static u8 *mem_end;                 /* end of the heap */
+static s32 D_80062A28;              /* Mem_Reset clears it; nothing reads it */
+static s32 D_80062A2C[17];          /* unreferenced */
+
 /*
 ================
 Mem_Reset
