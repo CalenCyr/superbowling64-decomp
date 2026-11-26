@@ -137,6 +137,11 @@ typedef struct {
 extern GfxFrame sched_gfxFrames[2];
 extern GfxFrame *sched_buildFrame;  /* the one of sched_gfxFrames the game thread builds */
 extern OSTask sched_gfxTask;        /* the graphics task */
+extern u64 D_800E5800[OS_YIELD_DATA_SIZE / sizeof( u64 )];  /* the graphics task's yield buffer */
+extern u64 D_800F7C90[SP_DRAM_STACK_SIZE64];  /* the graphics task's DRAM stack */
+/* the RDP's FIFO, 0x8000 bytes between the KNSTATICSYS file and the overlays (sched_gfxTask's output buffer) */
+#define SCHED_FIFO_START    ( (u64 *)0x8010A350 )
+#define SCHED_FIFO_END      ( (u64 *)0x80112350 )
 extern s32 sched_runList;           /* index in sched_gfxFrames of the list the RSP runs */
 extern s32 sched_listState[2];      /* state of each list of sched_gfxFrames: 0 building, 1 built, 2 running, 3 done */
 extern s32 sched_fbState[3];        /* state of each framebuffer of sched_framebuffers: 1 drawn, 4 shown */
