@@ -57,16 +57,11 @@ resets the game setup to one player with no characters. Returns 0 while the menu
 has slid out after a choice.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: retail's frame is 0x60, this draft's 0x30 (0x30 bytes of unused stack, likely an inlined helper's locals); cases 1 to 3 of the first switch share one tail in retail. Banking it needs symbol_addrs entries gs_modeMenu size:0x78 and gs_modeBlink size:0x3C.
-// An unused 48-byte local gives retail's frame (not adopted, R17); no callee here is a same-unit inline whose frame
-// could carry it in. The players' reset is an ascending loop (as in GS_Init): gcc reverses it into retail's pointer
-// walk down from game_players[3]; written counting down, it indexes game_players without the pointer.
-// Also tried: cases 1 to 3 as calls to an inline taking the mode (game_mode = mode; state = CHOICE_TAKEN): same bytes,
-// frame unchanged (an inline's own frame is a temporary slot; it adds only for locals or variable-bound for loops).
 s32 GS_ModeMenu( void ) {
     s32 i;
     u8 choice;
+    // R36: unused in the original: retail's frame reserves 0x30 bytes no instruction touches (type unknown)
+    s32 unused[12];
 
     if ( gs_modeState == CHOICE_RUN && ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) ) {
         Sound_PlaySe( SE_DECIDE, 0 );
@@ -77,14 +72,14 @@ s32 GS_ModeMenu( void ) {
             break;
         case 1:
             game_mode = 1;
-            gs_modeState = CHOICE_TAKEN;
-            break;
+            goto taken;
         case 2:
             game_mode = 2;
-            gs_modeState = CHOICE_TAKEN;
-            break;
+            goto taken;
         case 3:
             game_mode = 3;
+        taken:
+            /* the three plain modes share this store; it is not repeated in each case */
             gs_modeState = CHOICE_TAKEN;
             break;
         case 4:
@@ -199,6 +194,3 @@ s32 GS_ModeMenu( void ) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gscode/59490", GS_ModeMenu);
-#endif
