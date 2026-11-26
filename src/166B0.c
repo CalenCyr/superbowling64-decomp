@@ -1679,8 +1679,8 @@ void Snd_RelocateWaveBank( void *data, s32 romBase ) {
         return;
     }
     bank->flags |= WAVEBANK_RELOCATED;
-    Snd_RelocateTable( (s32 *)&bank->tuneDigits, (s32)bank, 3 );
-    Snd_RelocateTable( (s32 *)bank->waves, (s32)bank, bank->numWaves );
+    Snd_RelocateTable( (s32 *)&bank->tuneDigits, bank, 3 );
+    Snd_RelocateTable( (s32 *)bank->waves, bank, bank->numWaves );
     for ( i = 0; i < bank->numWaves; i++ ) {
         tune = &bank->tunes[i];
         value = tune->raw;
@@ -1839,11 +1839,13 @@ s32 Snd_FindBgmChannel( seqHeader_t *hdr, s32 track ) {
 ================
 Snd_RelocateTable
 
-Adds base to every non-zero entry of a table of count offsets.
+Adds the address of data to every non-zero entry of a table of count offsets into it. Declared inline here, after
+Snd_RelocateWaveBank's out-of-line calls; Snd_StartBgm below holds its body.
 ================
 */
-void Snd_RelocateTable( s32 *table, s32 base, s32 count ) {
+inline void Snd_RelocateTable( s32 *table, void *data, s32 count ) {
     s32 i;
+    s32 base = (s32)data;
 
     for ( i = 0; i < count; i++ ) {
         if ( table[i] != 0 ) {
@@ -1930,38 +1932,29 @@ s32 Snd_StartSe( seTable_t *table, s32 index, s32 volume, s32 pan, s32 priority 
     return 0;
 }
 
-#ifdef NON_MATCHING
-// NON_MATCHING: registers: retail inlines Snd_RelocateTable (declaring it inline gives retail's 0x50 frame and loops), then keeps a separate base copy per relocation loop and swaps s1/s2.
-// Also checked: base parameter s32/u32/u8 */void */const, a base local (s32, u32 or a pointer) set from hdr, at the
-// top or in the if; the local shares one register across the loops instead of retail's per-loop copies.
-// Retail's per-loop copy (a1 = a2 = hdr) has the shape of gcc's inline parameter copy, which this draft gets for
-// table (a loaded temporary) but not for base (hdr, a user variable). Not it: base arguments (u32)hdr, (int)hdr,
-// (s32)(u8 *)hdr, (s32)(void *)hdr, (s32)&hdr->unk_00, (s32)&hdr[0], (s32)(hdr + 0); a pointer walk or an entry
-// local in Snd_RelocateTable.
-// The .rtl dump shows why: integrate maps a parameter straight to a user-variable argument and copies only other
-// registers, so retail's base argument was a non-user register holding hdr. Also no effect: (s32)hdr + 0,
-// (s32)(seqHeader_t *)hdr, a const base parameter (with or without a base local), base + table[i].
 /*
 ================
 Snd_StartBgm
 
-Relocates hdr once, then starts its master stream and each of its tracks on a channel, all paused and under one
-new sound id, which it returns.
+Relocates the BGM sequence data (a seqHeader_t) once, then starts its master stream and each of its tracks on a
+channel, all paused and under one new sound id, which it returns.
 ================
 */
-s32 Snd_StartBgm( seqHeader_t *hdr ) {
+s32 Snd_StartBgm( void *data ) {
+    seqHeader_t *hdr;
     s32 count;
     s32 id;
     s32 i;
     sndChannel_t *chan;
 
+    hdr = data;
     count = hdr->numTracks;
     if ( hdr->relocated == 0 ) {
         hdr->relocated = 1;
-        Snd_RelocateTable( (s32 *)&hdr->trackCmds, (s32)hdr, 7 );
-        Snd_RelocateTable( (s32 *)hdr->trackCmds, (s32)hdr, count );
-        Snd_RelocateTable( (s32 *)hdr->trackVolStreams, (s32)hdr, count );
-        Snd_RelocateTable( (s32 *)hdr->trackBendStreams, (s32)hdr, count );
+        Snd_RelocateTable( (s32 *)&hdr->trackCmds, data, 7 );
+        Snd_RelocateTable( (s32 *)hdr->trackCmds, data, count );
+        Snd_RelocateTable( (s32 *)hdr->trackVolStreams, data, count );
+        Snd_RelocateTable( (s32 *)hdr->trackBendStreams, data, count );
     }
     id = snd_nextId++;
     chan = &snd_channels[Snd_FindBgmChannel( hdr, TRACK_MASTER )];
@@ -1969,8 +1962,8 @@ s32 Snd_StartBgm( seqHeader_t *hdr ) {
     chan->noteVelocity = 1;
     chan->seq = hdr;
     chan->flags |= CHAN_PAUSED | CHAN_MASTER;
-    chan->id = id;
     chan->cmdPos = chan->cmdStart = hdr->masterCmds;
+    chan->id = id;
     for ( i = 0; i < count; i++ ) {
         if ( hdr->trackCmds[i] != NULL ) {
             chan = &snd_channels[Snd_FindBgmChannel( hdr, i )];
@@ -1980,16 +1973,13 @@ s32 Snd_StartBgm( seqHeader_t *hdr ) {
             chan->flags |= CHAN_PAUSED;
             chan->volStream = chan->volStreamStart = hdr->trackVolStreams[i];
             chan->bendStream = chan->bendStreamStart = hdr->trackBendStreams[i];
-            chan->id = id;
             chan->cmdPos = chan->cmdStart = hdr->trackCmds[i];
+            chan->id = id;
         }
     }
     snd_nextWaveBank = NULL;
     return id;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/166B0", Snd_StartBgm);
-#endif
 
 /*
 ================
