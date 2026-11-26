@@ -17,8 +17,8 @@ pass moved to follow the last); samples past the table's end are cleared.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: retail's frame is 16 bytes larger (0x20-0x2F unused) and keeps lead, nOver and decoded in
-// three more saved registers (s6, s3, fp); the logic and the command words match
+// NON_MATCHING: retail's frame is 16 bytes larger (0x20-0x2F unused), and its loop passes (s16)inp from s7:
+// combine folds inp to 0 here (one set, so its value is trusted everywhere); a second dead set doesn't help
 Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
     Acmd *ptr = p;
     s32 looped;
@@ -31,8 +31,9 @@ Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
     s32 dmemOut;
     s32 overFlow;
     s32 nOver;
+    s32 frameSam;                       /* the samples in the whole frames */
     s32 decoded = FALSE;
-    s32 inp = 0;
+    s32 inp;
 
     if ( outCount == 0 ) {
         return ptr;
@@ -40,6 +41,7 @@ Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
 
     aLoadADPCM( ptr++, pv->bookSize, K0_TO_PHYS( pv->table->waveInfo.adpcmWave.book->book ) );
 
+    inp = 0;
     looped = pv->loopEnd < outCount + pv->sample && pv->loopCount != 0;
     if ( looped ) {
         nSam = pv->loopEnd - pv->sample;
@@ -81,11 +83,8 @@ Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
                 pv->loopCount--;
             }
 
-            nSam = pv->loopEnd - pv->loopStart;
-            if ( outCount < nSam ) {
-                nSam = outCount;
-            }
-            tsam = nSam - ( 16 - pv->lastsam );
+            nSam = MIN( outCount, pv->loopEnd - pv->loopStart );
+            tsam = nSam - 16 + pv->lastsam;
             if ( tsam < 0 ) {
                 tsam = 0;
             }
@@ -98,42 +97,44 @@ Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
         pv->sample += outCount;
         pv->lastsam = ( outCount + pv->lastsam ) & 0xF;
         pv->memin += nframes * N_ADPCM_FRAME_BYTES;
-    } else {
-        overFlow = pv->memin + nbytes - ( (s32)pv->table->base + pv->table->len );
-        if ( overFlow < 0 ) {
-            overFlow = 0;
-        }
-        nOver = ( overFlow / N_ADPCM_FRAME_BYTES ) << 4;
-        if ( nframes * 16 + lead < nOver ) {
-            nOver = nframes * 16 + lead;
-        }
-        nbytes -= overFlow;
+        return ptr;
+    }
 
-        if ( nOver - ( nOver & 0xF ) < outCount ) {
-            decoded = TRUE;
-            ptr = func_80041434( ptr, pv, nframes * 16 - nOver, nbytes, *outp, inp, pv->first );
-            if ( pv->lastsam ) {
-                *outp += pv->lastsam << 1;
-            } else {
-                *outp += 32;
-            }
-            pv->sample += outCount;
-            pv->lastsam = ( outCount + pv->lastsam ) & 0xF;
-            pv->memin += nframes * N_ADPCM_FRAME_BYTES;
+    overFlow = pv->memin + nbytes - ( (s32)pv->table->base + pv->table->len );
+    if ( overFlow < 0 ) {
+        overFlow = 0;
+    }
+    nOver = ( overFlow / N_ADPCM_FRAME_BYTES ) << 4;
+    frameSam = nframes * 16;
+    if ( frameSam + lead < nOver ) {
+        nOver = frameSam + lead;
+    }
+    nbytes -= overFlow;
+
+    if ( nOver - ( nOver & 0xF ) < outCount ) {
+        decoded = TRUE;
+        ptr = func_80041434( ptr, pv, frameSam - nOver, nbytes, *outp, inp, pv->first );
+        if ( pv->lastsam ) {
+            *outp += pv->lastsam << 1;
         } else {
-            pv->lastsam = 0;
-            pv->memin += nframes * N_ADPCM_FRAME_BYTES;
+            *outp += 32;
         }
+        pv->sample += outCount;
+        pv->lastsam = ( outCount + pv->lastsam ) & 0xF;
+        pv->memin += nframes * N_ADPCM_FRAME_BYTES;
+    } else {
+        pv->lastsam = 0;
+        pv->memin += nframes * N_ADPCM_FRAME_BYTES;
+    }
 
-        if ( nOver != 0 ) {
-            pv->lastsam = 0;
-            if ( decoded ) {
-                op = ( lead + nframes * 16 - nOver ) << 1;
-            } else {
-                op = 0;
-            }
-            aClearBuffer( ptr++, op + *outp, nOver << 1 );
+    if ( nOver != 0 ) {
+        pv->lastsam = 0;
+        if ( decoded ) {
+            op = ( lead + frameSam - nOver ) << 1;
+        } else {
+            op = 0;
         }
+        aClearBuffer( ptr++, op + *outp, nOver << 1 );
     }
     return ptr;
 }
