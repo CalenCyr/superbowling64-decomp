@@ -424,7 +424,7 @@ gaCharacter_t	gacode.h	invented: 0x48-byte record of ga_characters, copied to th
 gaMenuPage_t	gacode.h	invented: 8-byte page of GA_PageBrowser's browser: image, cursor, back item, the pages its items open, the parent page
 gaPlayer_t	gacode.h	invented: 0xA0-byte player (four, ga_players): character, scene object, lane, controller port (-1: played by the game)
 gaState_t	gacode.h	invented: main-loop state function of the overlay (ga_state)
-gaPlayerFunc_t	gacode.h	invented: per-player handler (game mode ga_gameMode, D_8012D23C_gacode)
+gaPlayerFunc_t	gacode.h	invented: per-player handler (game mode ga_gameMode, ga_endThrowFunc)
 gaCharacterData_t	gacode.h	invented: what gaCharacter_t.unk_00 points to (a byte table indexed by gaLane_t.unk_B26)
 gaStage_t	gacode.h	invented: 0x34-byte stage configuration (ga_stages); its last member is a per-frame function (func_80122470_gacode ...)
 gaSprite_t	gacode.h	invented: sprite of a main resource with a 256-colour palette copy (GA_SetupSprite)
@@ -1078,7 +1078,7 @@ OPTION_MUSIC	gscode.h	invented: the options line of save_data.music
 OPTION_RUMBLE	gscode.h	invented: the options line of save_data.rumble
 GA_ScoreStandard	0x801151A0	invented: game mode of the duel, team and pair games: scores strikes (runs), spares and splits and sets the callout
 GA_ScorePar	0x801155BC	invented: game mode of the par game (GA_ParGameLoop): scores each frame against par
-gaCharacter_t.timingAngle	gacode.h	invented: the throw's timing as an angle (-pi/2 to pi/2, func_8011B1A0_gacode); its sine and cosine bend the release velocity (debug text 'FR SIN')
+gaCharacter_t.timingAngle	gacode.h	invented: the throw's timing as an angle (-pi/2 to pi/2, GA_PanelTiming); its sine and cosine bend the release velocity (debug text 'FR SIN')
 gaCharacter_t.hook	gacode.h	invented: sideways pull added to the rolling ball's motion[0].vel[0] each frame (GA_RollBall); from the stage, scaled by the spin at release
 sceneObject_t.floorHeight	object.h	invented: height of the floor under the object (GA_PlaceBody: the spot's y less the body's height), which func_8002B9CC draws at when flags & 0xC000; negative: none
 objNode_t.update	object.h	invented: function func_8002A2F0 calls each frame with the object after the header; objClass_t.update of its class
@@ -1100,7 +1100,7 @@ GA_InputRelease	0x80118524	invented: inputFunc handler at the release: sets the 
 GA_InputRoll	0x801187D0	invented: inputFunc handler while the ball rolls down the lane (debug text 'NOW Z'), then GA_InputCountPins
 GA_InputCountPins	0x801189C4	invented: inputFunc handler after the roll: counts the pins hit and down and asks the game mode for the result
 GA_InputReaction	0x80118CCC	invented: inputFunc handler: plays the character's reaction animation to its end (or A/Z after 30 frames)
-GA_InputEndThrow	0x80118D9C	invented: inputFunc handler: hides the player and ends the throw by the game mode's D_8012D23C_gacode handler
+GA_InputEndThrow	0x80118D9C	invented: inputFunc handler: hides the player and ends the throw by the game mode's ga_endThrowFunc handler
 GA_InputNextTurn	0x80118E04	invented: inputFunc handler: after the throw (40 frames with a callout) starts the next turn
 GA_InputGameOver	0x80118EA0	invented: inputFunc handler at a duel game's end (GA_EndDuelGame): holds the reaction animation's last frame, returns -1 there
 GA_InputParkedRestart	0x80118F08	invented: inputFunc handler of a lane parked until the lanes restart at GA_StartTurn (debug text ' WAIT... ')
@@ -1148,7 +1148,7 @@ boot_mainThread	0x80061290	invented: the main thread (Main_Thread)
 boot_mainStack	0x80061440	invented: stack of boot_mainThread
 boot_piQueue	0x801000E0	invented: command queue of the PI manager Boot_Thread starts
 boot_piMsgs	0x800693B8	invented: buffer of boot_piQueue
-boot_contThread	0x800617F0	invented: the controller thread (func_80028064)
+boot_contThread	0x800617F0	invented: the controller thread (Cont_Thread)
 boot_contStack	0x80068250	invented: stack of boot_contThread
 boot_gameThread	0x80061640	invented: the game thread (Game_Thread)
 boot_gameStack	0x800E8090	invented: stack of boot_gameThread
@@ -1163,14 +1163,14 @@ game_gfx	0x800F8094	invented: next command of the display list being built; ever
 save_data	0x8009D098	invented: the records and settings the game saves (saveData_t; Save_Checksum)
 save_dataPtr	0x801000B8	invented: points at save_data (set at boot); Save_Checksum and opcode's save check read through it
 game_sessionRecords	0x800E44E8	invented: per character: records since power-on (cleared at boot, not saved); RS_AddToRecord adds to them and to save_data.records
-sched_audioTask	0x80060EA0	invented: the audio OSTask func_80025EBC starts
-sched_audioProgram	0x80066B50	invented: the program func_80025EBC runs as the audio task, set by the sound unit (12C70)
+sched_audioTask	0x80060EA0	invented: the audio OSTask Main_StartAudioTask starts
+sched_audioProgram	0x80066B50	invented: the program Main_StartAudioTask runs as the audio task, set by the sound unit (12C70)
 sched_rspBusy	0x8005B100	invented: 1 while a task runs on the RSP (set on start, cleared on SP done); an audio request then makes the graphics task yield
 sched_audioState	0x8005B110	invented: 2 while the audio task runs, 1 while it waits for the graphics task to yield, 0 none (Main_Thread)
 sound_bgmId	0x8005C9D8	invented: sound id of the playing BGM (Snd_PlayBgm), 0: none (Sound_PlayBgm, Sound_StopBgm)
-sound_bgmDelay	0x8005C9E0	invented: frames until the loaded BGM starts (BGM_START_DELAY, counted down by func_80025EBC)
-sound_bgmStartVolume	0x8005C9E4	invented: volume the loaded BGM starts at; nonzero while a BGM waits to start (Sound_PlayBgm, func_80025EBC)
-sound_nextBgm	0x800A3048	invented: the sequence Sound_PlayBgm loaded, which func_80025EBC starts
+sound_bgmDelay	0x8005C9E0	invented: frames until the loaded BGM starts (BGM_START_DELAY, counted down by Main_StartAudioTask)
+sound_bgmStartVolume	0x8005C9E4	invented: volume the loaded BGM starts at; nonzero while a BGM waits to start (Sound_PlayBgm, Main_StartAudioTask)
+sound_nextBgm	0x800A3048	invented: the sequence Sound_PlayBgm loaded, which Main_StartAudioTask starts
 sched_msgRetrace	0x80069408	invented: the scheduler's message for a VI retrace, SCHED_MSG_RETRACE
 sched_msgSpDone	0x800E4558	invented: the scheduler's message for an RSP task done, SCHED_MSG_SP_DONE
 sched_msgDpDone	0x80066B90	invented: the scheduler's message for the RDP done, SCHED_MSG_DP_DONE
@@ -1185,7 +1185,7 @@ sound_frameQueue	0x800E6520	invented: Main_Thread sends to it every other retrac
 sound_frameMsgs	0x8009CF8C	invented: buffer of sound_frameQueue
 sound_doneQueue	0x8009D040	invented: where Main_Thread reports the audio task done
 sound_doneMsgs	0x800DF6A0	invented: buffer of sound_doneQueue
-cont_requestQueue	0x800E6690	invented: requests to the controller thread (func_80028064)
+cont_requestQueue	0x800E6690	invented: requests to the controller thread (Cont_Thread)
 cont_requestMsgs	0x80066C2C	invented: buffer of cont_requestQueue
 cont_replyQueue	0x800F8098	invented: the controller thread's replies
 cont_replyMsgs	0x8009D02C	invented: buffer of cont_replyQueue
@@ -1247,7 +1247,7 @@ sched_frameCount	0x8005B0F4	evidence: frame counter; Main_Thread increments it e
 cont_rumble	0x800DF680	invented: per port: rumble request in frames (8 from gscode's menus and Game_Thread, 4 to 6 from gacode's hits)
 cont_result	0x80066B8C	invented: result of the last request to the controller thread
 cont_noteIndex	0x800E6584	invented: request 10: the note to read
-cont_maxNotes	0x80066C28	evidence: request 4: func_80028064 passes it to osPfsNumFiles as max_files
+cont_maxNotes	0x80066C28	evidence: request 4: Cont_Thread passes it to osPfsNumFiles as max_files
 cont_usedNotes	0x800692D4	evidence: request 4: passed to osPfsNumFiles as files_used
 cont_freeBytes	0x8009944C	evidence: request 4: passed to osPfsFreeBlocks as leftoverBytes
 cont_deleteGameName	0x800F7C78	invented: request 1: game name of the note to delete
@@ -1467,3 +1467,17 @@ GA_DrawLeadPanel	0x8011B490	invented: shows the leading lane's image, else draws
 GA_DistanceLoop	0x80114024	invented: main loop state of mode 3, the distance mode
 ga_sceneryStarted	0x8012C920	invented: set by each scenery handler on its first frame, which sets the player objects' flags
 game_throw	0x80068A50	invented: per player: the throw in the frame (Score_DrawFrame's throw)
+Main_StartAudioTask	0x80025EBC	invented: starts the audio task on the RSP and counts down the BGM start delay
+Cont_Thread	0x80028064	invented: the controller thread, which answers the requests of input.h
+GA_PanelWeight	0x8011AB0C	invented: panelFunc handler that draws the ball weight selector
+GA_PanelTiming	0x8011B1A0	invented: panelFunc handler that sets the character's timingAngle
+GA_PanelRelease	0x8011B2E8	invented: panelFunc handler that fades the sprite by releaseFrame
+GA_CameraRaise	0x8011B8AC	invented: cameraFunc handler: the camera raised by cameraRaise
+GA_DrawModePanel	0x8011AA78	invented: draws the panel the game mode shows (pins, par frame or pin editor)
+GA_FreezePlayerObject	0x80114FFC	invented: while paused: steps the player's object back a frame and stops the lane's sound
+ga_pinsDown	0x8012D8DA	invented: pins the last ball knocked down, read by GA_Score*Ball
+ga_bonusOwed	0x8012CDE0	invented: per player: the bonus state (0 none, 1 spare, 2 strike, 3 two strikes, 4 to 6 past the ball)
+ga_endThrowFunc	0x8012D23C	invented: the game mode's handler that ends the throw
+ga_throwCount	0x8012D8D8	invented: counts throws; picks the camera paths by its remainder
+ga_paused	0x8012D650	invented: set while the pause menu shows (START)
+rspProgram_t	boot.h	invented: the task microcode, its data and its data pointer an audio task runs

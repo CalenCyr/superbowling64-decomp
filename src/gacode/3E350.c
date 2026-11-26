@@ -75,7 +75,7 @@ void GA_SetupLanes( u8 twoTeams, f32 offset, u8 distanceMode ) {
         ga_laneAim[i].step = 6;
         ga_laneAim[i].unk_07 = 0;
     }
-    D_8012D8D8_gacode = 0;
+    ga_throwCount = 0;
     for ( player = 0; player < MAX_PLAYERS; player++ ) {
         ga_players[player].obj = obj_scene[140 + player];
     }
@@ -114,7 +114,7 @@ void GA_SetupPlayer( s32 player, s32 port, u8 character, u8 lane ) {
     memmove( &pl->character, &ga_characters[character], sizeof( gaCharacter_t ) );
     pl->ballWeight = ga_characters[character].ballWeight;
     GA_StartTurn( player );
-    func_8011B8AC_gacode( player, pl->lane->camera );
+    GA_CameraRaise( player, pl->lane->camera );
 }
 
 /*
@@ -389,10 +389,10 @@ void GA_RunPanelFunc( s32 player ) {
 
 /*
 ================
-func_80114FFC_gacode
+GA_FreezePlayerObject
 ================
 */
-void func_80114FFC_gacode( s32 player ) {
+void GA_FreezePlayerObject( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     sceneObject_t *obj = pl->obj;
 
@@ -918,7 +918,7 @@ void func_80116170_gacode( s32 skip ) {
     if ( ga_lanes[0].inputFunc != GA_InputGameOver || ga_lanes[1].inputFunc != ga_lanes[0].inputFunc ) {
         return;
     }
-    D_8012D8D8_gacode = 0;
+    ga_throwCount = 0;
     if ( !skip ) {
         GA_ClearScores();
     }
@@ -940,7 +940,7 @@ void func_80116170_gacode( s32 skip ) {
 GA_StartTurn
 
 Sets up the pins of the player's lane for the game mode and frame, then starts the turn: with
-D_8012D8D8_gacode at 0 through the lane's opening handlers, else through GA_SetTurnHandlers.
+ga_throwCount at 0 through the lane's opening handlers, else through GA_SetTurnHandlers.
 ================
 */
 #ifdef NON_MATCHING
@@ -964,10 +964,10 @@ void GA_StartTurn( s32 player ) {
     GA_UnpackPinMask( pins, mask );
     GA_ResetLane( player, pins );
     pl->lane->turnFunc = func_80116398_gacode;
-    if ( D_8012D8D8_gacode == 0 ) {
+    if ( ga_throwCount == 0 ) {
         pl->lane->inputFunc = GA_InputWaitCamera;
         pl->lane->panelFunc = GA_PanelNone;
-        pl->lane->cameraFunc = func_8011B8AC_gacode;
+        pl->lane->cameraFunc = GA_CameraRaise;
     } else {
         GA_SetTurnHandlers( pl );
     }
@@ -1058,11 +1058,11 @@ void GA_ResetLane( s32 player, u8 *pins ) {
     body = lane->markers;
     spot = lane->markerSpots;
     for ( i = 0; i < 3; i++ ) {
-        if ( i == 2 && D_8012D8D8_gacode ) {
+        if ( i == 2 && ga_throwCount ) {
             ga_laneAim[pl->laneIndex].unk_00 = body[2].pos[2];
         }
         memmove( &body[i], &D_8012C110_gacode[i], sizeof( gaBody_t ) );
-        if ( i == 2 && D_8012D8D8_gacode ) {
+        if ( i == 2 && ga_throwCount ) {
             body[2].pos[2] = ga_laneAim[pl->laneIndex].unk_00;
         }
         spot[i].pos[0] = body[i].pos[0];
@@ -1070,7 +1070,7 @@ void GA_ResetLane( s32 player, u8 *pins ) {
         spot[i].pos[2] = body[i].pos[2];
     }
     lane->bodyObjs[0]->viewMask = 0;
-    lane->panelFunc = func_8011AB0C_gacode;
+    lane->panelFunc = GA_PanelWeight;
     lane->cameraFunc = func_8011B974_gacode;
     lane->callout = 0;
     lane->inputFunc = GA_InputBeginTurn;
@@ -1090,13 +1090,13 @@ Sets the handlers of a player's turn for the game mode.
 void GA_SetTurnHandlers( gaPlayer_t *pl ) {
     if ( ga_gameMode == GA_ScoreSetupGame || ga_gameMode == GA_ScorePar ) {
         pl->lane->inputFunc = GA_InputWaitStart;
-        pl->lane->panelFunc = func_8011AA78_gacode;
+        pl->lane->panelFunc = GA_DrawModePanel;
     } else if ( ga_gameMode == GA_ScorePinEditor ) {
         pl->lane->inputFunc = GA_InputIdle;
-        pl->lane->panelFunc = func_8011AA78_gacode;
+        pl->lane->panelFunc = GA_DrawModePanel;
     } else {
         pl->lane->inputFunc = GA_InputBeginTurn;
-        pl->lane->panelFunc = func_8011AB0C_gacode;
+        pl->lane->panelFunc = GA_PanelWeight;
     }
     pl->lane->cameraFunc = func_8011B974_gacode;
 }
@@ -1423,13 +1423,13 @@ s32 GA_InputWaitCamera( s32 player, s32 input, s16 stickX, s16 stickY ) {
     }
     if ( ga_gameMode == GA_ScoreSetupGame || ga_gameMode == GA_ScorePar ) {
         pl->lane->inputFunc = GA_InputWaitStart;
-        pl->lane->panelFunc = func_8011AA78_gacode;
+        pl->lane->panelFunc = GA_DrawModePanel;
     } else if ( ga_gameMode == GA_ScorePinEditor ) {
         pl->lane->inputFunc = GA_InputIdle;
-        pl->lane->panelFunc = func_8011AA78_gacode;
+        pl->lane->panelFunc = GA_DrawModePanel;
     } else {
         pl->lane->inputFunc = GA_InputBeginTurn;
-        pl->lane->panelFunc = func_8011AB0C_gacode;
+        pl->lane->panelFunc = GA_PanelWeight;
     }
     pl->lane->cameraFunc = func_8011B974_gacode;
     return 0;
@@ -1454,7 +1454,7 @@ s32 GA_InputWaitStart( s32 player, s32 input, s16 stickX, s16 stickY ) {
         pl->lane->timer = 0;
         GA_PlayLaneSound( pl->laneIndex, 1 );
         pl->lane->inputFunc = GA_InputBeginTurn;
-        pl->lane->panelFunc = func_8011AB0C_gacode;
+        pl->lane->panelFunc = GA_PanelWeight;
     }
     return 0;
 }
@@ -1634,7 +1634,7 @@ s32 GA_InputSetThrow( s32 player, s32 input, s16 stickX, s16 stickY ) {
         pl->lane->bodyObjs[0]->viewMask = pl->obj->viewMask = 0;
         pl->lane->markerObjs[0]->viewMask = pl->lane->markerObjs[1]->viewMask = pl->laneIndex != 0 ? 2 : 1;
         memmove( pl->obj->mtx, pl->homeMtx, sizeof( pl->homeMtx ) );
-        pl->lane->panelFunc = func_8011AB0C_gacode;
+        pl->lane->panelFunc = GA_PanelWeight;
         pl->lane->cameraFunc = func_8011BA00_gacode;
         pl->lane->inputFunc = GA_InputStance;
         return 0;
@@ -1655,7 +1655,7 @@ s32 GA_InputApproach( s32 player, s32 input, s16 stickX, s16 stickY ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( pl->obj->frame > pl->character.data->unk_18 ) {
-        pl->lane->panelFunc = func_8011B1A0_gacode;
+        pl->lane->panelFunc = GA_PanelTiming;
         pl->lane->inputFunc = GA_InputSwing;
         return 0;
     }
@@ -1681,7 +1681,7 @@ s32 GA_InputSwing( s32 player, s32 input, s16 stickX, s16 stickY ) {
          ( sinf( pl->character.timingAngle ) <= 0.5 && input == 1 ) ) {
         pl->releaseFrame = pl->obj->frame;
         pl->lane->inputFunc = GA_InputRelease;
-        pl->lane->panelFunc = func_8011B2E8_gacode;
+        pl->lane->panelFunc = GA_PanelRelease;
         return 0;
     }
     return 0;
@@ -1875,7 +1875,7 @@ s32 GA_InputReaction( s32 player, s32 input, s16 stickX, s16 stickY ) {
          || ( pl->lane->timer >= 30 && ( cont_pressed[pl->laneIndex] & ( A_BUTTON | Z_TRIG ) ) ) ) {
         pl->lane->timer = 0;
         pl->lane->cameraFunc = GA_CameraNone;
-        D_8012D8D8_gacode++;
+        ga_throwCount++;
         pl->lane->inputFunc = GA_InputEndThrow;
     }
     return 0;
@@ -1885,7 +1885,7 @@ s32 GA_InputReaction( s32 player, s32 input, s16 stickX, s16 stickY ) {
 ================
 GA_InputEndThrow
 
-Lane input handler: hides the player and ends the throw by the game mode's D_8012D23C_gacode handler.
+Lane input handler: hides the player and ends the throw by the game mode's ga_endThrowFunc handler.
 ================
 */
 s32 GA_InputEndThrow( s32 player, s32 input, s16 stickX, s16 stickY ) {
@@ -1895,7 +1895,7 @@ s32 GA_InputEndThrow( s32 player, s32 input, s16 stickX, s16 stickY ) {
     pl->obj->viewMask = 0;
     pl->lane->panelFunc = GA_PanelNone;
     pl->lane->cameraFunc = func_8011C0DC_gacode;
-    return D_8012D23C_gacode( player );
+    return ga_endThrowFunc( player );
 }
 
 /*
@@ -1921,8 +1921,8 @@ s32 GA_InputNextTurn( s32 player, s32 input, s16 stickX, s16 stickY ) {
         pl->lane->timer = 0;
     }
     pl->obj->frame = 0;
-    D_8012D8D8_gacode++;
-    return D_8012D23C_gacode( player );
+    ga_throwCount++;
+    return ga_endThrowFunc( player );
 }
 
 /*
@@ -2065,7 +2065,7 @@ void GA_DrawScorePanel( s32 player, u8 lane ) {
 GA_DrawPinDiagram
 
 Draws the pin diagram of the player's lane on its side of the screen: the frame (0x92A), then image 0x929 for
-each pin still standing. Declared inline: func_8011AB0C_gacode and func_8011AD5C_gacode repeat its body.
+each pin still standing. Declared inline: GA_PanelWeight and func_8011AD5C_gacode repeat its body.
 ================
 */
 inline void GA_DrawPinDiagram( gaPlayer_t *pl ) {
@@ -2526,7 +2526,7 @@ void GA_PinEditor( gaPlayer_t *pl ) {
         if ( !ga_editorOnPins ) {
             Sound_PlaySe( 1, 0 );
             pl->lane->inputFunc = GA_InputBeginTurn;
-            pl->lane->panelFunc = func_8011AB0C_gacode;
+            pl->lane->panelFunc = GA_PanelWeight;
         } else {
             Sound_PlaySe( 0xB, 0 );
             if ( GA_TogglePin( pl->lane->bodies, ga_editorCursor + 1 ) == 1 ) {
@@ -2567,12 +2567,12 @@ void GA_DrawAimLine( gaPlayer_t *pl ) {
 
 /*
 ================
-func_8011AA78_gacode
+GA_DrawModePanel
 
 Runs the part of the game mode's ending that belongs to the mode.
 ================
 */
-void func_8011AA78_gacode( s32 player ) {
+void GA_DrawModePanel( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( ga_gameMode == GA_ScoreSetupGame ) {
@@ -2586,13 +2586,13 @@ void func_8011AA78_gacode( s32 player ) {
 
 /*
 ================
-func_8011AB0C_gacode
+GA_PanelWeight
 
 panelFunc handler: runs the game mode's part of the frame, draws the lane's pin diagram and the player's
 ball weight selector.
 ================
 */
-void func_8011AB0C_gacode( s32 player ) {
+void GA_PanelWeight( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( ga_gameMode == GA_ScorePinEditor ) {
@@ -2666,13 +2666,13 @@ void func_8011B07C_gacode( s32 player ) {
 
 /*
 ================
-func_8011B1A0_gacode
+GA_PanelTiming
 
-panelFunc handler: as func_8011B2E8_gacode, by the player object's unk_48, and sets the character's timingAngle
+panelFunc handler: as GA_PanelRelease, by the player object's unk_48, and sets the character's timingAngle
 from the same fraction (-pi/2 to pi/2).
 ================
 */
-void func_8011B1A0_gacode( s32 player ) {
+void GA_PanelTiming( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     gaCharacterData_t *data = pl->character.data;
     s32 last = data->unk_19 - 1;
@@ -2693,13 +2693,13 @@ void func_8011B1A0_gacode( s32 player ) {
 
 /*
 ================
-func_8011B2E8_gacode
+GA_PanelRelease
 
 panelFunc handler: fades the lane's D_8012D8E0_gacode sprite by how far releaseFrame has come in the character's
 unk_18 to unk_19 range, and draws a human player's panel.
 ================
 */
-void func_8011B2E8_gacode( s32 player ) {
+void GA_PanelRelease( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     gaCharacterData_t *data = pl->character.data;
     s32 last = data->unk_19 - 1;
@@ -2865,12 +2865,12 @@ void GA_SetBallView( gaPlayer_t *pl, s32 view ) {
 
 /*
 ================
-func_8011B8AC_gacode
+GA_CameraRaise
 
 A cameraFunc handler: the camera of func_8011C0DC_gacode, raised by cameraRaise, which falls by 45 a frame to 0.
 ================
 */
-void func_8011B8AC_gacode( s32 player, sceneCamera_t *camera ) {
+void GA_CameraRaise( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
     camera->eye[2] = 960.0f;
@@ -3100,7 +3100,7 @@ GA_CameraThrow
 
 Camera handler during the throw: shows the ball and the player in both views, puts the eye on one of five
 paths (ga_throwCamPathsLate while the lane's inputFunc is GA_InputReaction or GA_InputGameOver, else
-ga_throwCamPaths; by D_8012D8D8_gacode) at the frame that follows the player's animation, and looks at the
+ga_throwCamPaths; by ga_throwCount) at the frame that follows the player's animation, and looks at the
 player object's second joint.
 ================
 */
@@ -3119,10 +3119,10 @@ void GA_CameraThrow( s32 player, sceneCamera_t *camera ) {
     }
     joint = 1;
     if ( pl->lane->inputFunc == GA_InputReaction || pl->lane->inputFunc == GA_InputGameOver ) {
-        file = ga_throwCamPathsLate[D_8012D8D8_gacode % 5];
+        file = ga_throwCamPathsLate[ga_throwCount % 5];
         frames = pl->character.data->reactionFrames[pl->lane->reaction];
     } else {
-        file = ga_throwCamPaths[D_8012D8D8_gacode % 5];
+        file = ga_throwCamPaths[ga_throwCount % 5];
         frames = pl->character.data->unk_1A;
     }
     frame = pl->obj->frame * 200 / frames;
@@ -3140,7 +3140,7 @@ void GA_CameraThrow( s32 player, sceneCamera_t *camera ) {
 ================
 GA_CameraFollowBall
 
-Camera handler: puts the eye on the ga_followCamPaths path (one of ten, by D_8012D8D8_gacode) at the frame that
+Camera handler: puts the eye on the ga_followCamPaths path (one of ten, by ga_throwCount) at the frame that
 follows the ball down the lane, looking at the ball.
 ================
 */
@@ -3150,7 +3150,7 @@ void GA_CameraFollowBall( s32 player, sceneCamera_t *camera ) {
 
     frame = ( 730.0f - lane->spots[0].pos[2] ) * 480.0f / 1780.0;
     frame = frame < 0 ? 0 : ( frame > 480 ? 480 : frame );
-    Cam_ReadPathFrame( ga_followCamPaths[D_8012D8D8_gacode % 10], frame, camera->eye, camera->upPoint );
+    Cam_ReadPathFrame( ga_followCamPaths[ga_throwCount % 10], frame, camera->eye, camera->upPoint );
     camera->at[2] = lane->bodies[0].pos[2];
     camera->at[0] = lane->bodies[0].pos[0];
     camera->at[1] = lane->bodies[0].pos[1];
@@ -3160,14 +3160,14 @@ void GA_CameraFollowBall( s32 player, sceneCamera_t *camera ) {
 ================
 GA_CameraLane
 
-Camera handler: puts the eye on frame D_8012D8D8_gacode % 5 of the ga_laneCamPaths paths, looking down the
+Camera handler: puts the eye on frame ga_throwCount % 5 of the ga_laneCamPaths paths, looking down the
 lane.
 ================
 */
 void GA_CameraLane( s32 player, sceneCamera_t *camera ) {
     gaPlayer_t *pl = &ga_players[player];
 
-    Cam_ReadPathFrame( ga_laneCamPaths[D_8012D8D8_gacode % 5], 0, camera->eye, camera->upPoint );
+    Cam_ReadPathFrame( ga_laneCamPaths[ga_throwCount % 5], 0, camera->eye, camera->upPoint );
     camera->at[2] = -1096.0f;
     camera->at[0] = pl->lane->offsetX;
     camera->at[1] = ga_stage->floorHeight;

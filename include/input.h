@@ -39,7 +39,7 @@ extern s8 cont_allStickY;
 extern s32 cont_demoMode;           /* a demo plays: Cont_ReadPads fakes its R presses */
 extern u32 cont_demoFrames;         /* frames left of the demo; Start cuts it to 40 */
 extern volatile s32 sched_frameCount;  /* frame counter (Main_Thread); volatile: it reloads it right after its own store */
-/* requests to the controller thread (func_80028064), and its replies */
+/* requests to the controller thread (Cont_Thread), and its replies */
 extern OSMesgQueue cont_requestQueue;
 extern OSMesgQueue cont_replyQueue;
 extern s32 cont_result;             /* result of the last request */
@@ -68,6 +68,6 @@ void Rumble_Start( s32 chan );
 void Rumble_Stop( s32 chan );
 void Cont_ReadPads( void );
 void Cont_FindStandard( void );
-void func_80028064( void *arg );
+void Cont_Thread( void *arg );
 
 #endif

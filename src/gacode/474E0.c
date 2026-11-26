@@ -1215,40 +1215,40 @@ void func_80120DD0_gacode( void ) {
 ================
 GA_ScoreFirstBall
 
-Scores the first ball of player's frame from the D_8012D8DA_gacode pins it knocked down, by
-D_8012CDE0_gacode (0 nothing owed, 1 a spare's bonus, 2 a strike's, 3 two strikes'): the scores owed
-are settled as far as this ball allows and D_8012CDE0_gacode takes its next state (4 to 6 past this
+Scores the first ball of player's frame from the ga_pinsDown pins it knocked down, by
+ga_bonusOwed (0 nothing owed, 1 a spare's bonus, 2 a strike's, 3 two strikes'): the scores owed
+are settled as far as this ball allows and ga_bonusOwed takes its next state (4 to 6 past this
 ball, as GA_ScoreSecondBall reads them). A strike before the tenth frame ends the frame.
 ================
 */
 void GA_ScoreFirstBall( u8 player ) {
-    if ( D_8012D8DA_gacode == 10 ) {
+    if ( ga_pinsDown == 10 ) {
         if ( game_frame[player] == 9 ) {
             game_firstRolls[player][game_frame[player]] = -1;
             game_frameScores[player][game_frame[player]] = -1;
-            switch ( D_8012CDE0_gacode[player] ) {
+            switch ( ga_bonusOwed[player] ) {
             case 0:
-                D_8012CDE0_gacode[player] = 5;
-                D_8012D8DA_gacode = 0;
+                ga_bonusOwed[player] = 5;
+                ga_pinsDown = 0;
                 game_throw[player] = 1;
                 break;
             case 1:
                 game_frameScores[player][game_frame[player] - 1] = game_frameScores[player][game_frame[player] - 2] + 20;
                 game_totals[player] = game_frameScores[player][game_frame[player] - 1];
-                D_8012CDE0_gacode[player] = 5;
-                D_8012D8DA_gacode = 0;
+                ga_bonusOwed[player] = 5;
+                ga_pinsDown = 0;
                 game_throw[player] = 1;
                 break;
             case 2:
-                D_8012CDE0_gacode[player] = 6;
-                D_8012D8DA_gacode = 0;
+                ga_bonusOwed[player] = 6;
+                ga_pinsDown = 0;
                 game_throw[player] = 1;
                 break;
             case 3:
                 game_frameScores[player][game_frame[player] - 2] = game_frameScores[player][game_frame[player] - 3] + 30;
                 game_totals[player] = game_frameScores[player][game_frame[player] - 2];
-                D_8012CDE0_gacode[player] = 6;
-                D_8012D8DA_gacode = 0;
+                ga_bonusOwed[player] = 6;
+                ga_pinsDown = 0;
                 game_throw[player] = 1;
                 break;
             }
@@ -1256,24 +1256,24 @@ void GA_ScoreFirstBall( u8 player ) {
             game_firstRolls[player][game_frame[player]] = -1;
             game_secondRolls[player][game_frame[player]] = -2;
             game_frameScores[player][game_frame[player]] = -1;
-            switch ( D_8012CDE0_gacode[player] ) {
+            switch ( ga_bonusOwed[player] ) {
             case 0:
-                D_8012CDE0_gacode[player] = 2;
-                D_8012D8DA_gacode = 0;
+                ga_bonusOwed[player] = 2;
+                ga_pinsDown = 0;
                 game_throw[player] = 0;
                 game_frame[player]++;
                 break;
             case 1:
                 game_frameScores[player][game_frame[player] - 1] = game_frameScores[player][game_frame[player] - 2] + 20;
                 game_totals[player] = game_frameScores[player][game_frame[player] - 1];
-                D_8012CDE0_gacode[player] = 2;
-                D_8012D8DA_gacode = 0;
+                ga_bonusOwed[player] = 2;
+                ga_pinsDown = 0;
                 game_throw[player] = 0;
                 game_frame[player]++;
                 break;
             case 2:
-                D_8012CDE0_gacode[player] = 3;
-                D_8012D8DA_gacode = 0;
+                ga_bonusOwed[player] = 3;
+                ga_pinsDown = 0;
                 game_throw[player] = 0;
                 game_frame[player]++;
                 break;
@@ -1284,32 +1284,32 @@ void GA_ScoreFirstBall( u8 player ) {
                     game_frameScores[player][game_frame[player] - 2] = game_frameScores[player][game_frame[player] - 3] + 30;
                 }
                 game_totals[player] = game_frameScores[player][game_frame[player] - 2];
-                D_8012CDE0_gacode[player] = 3;
-                D_8012D8DA_gacode = 0;
+                ga_bonusOwed[player] = 3;
+                ga_pinsDown = 0;
                 game_throw[player] = 0;
                 game_frame[player]++;
                 break;
             }
         }
     } else {
-        game_firstRolls[player][game_frame[player]] = D_8012D8DA_gacode;
-        switch ( D_8012CDE0_gacode[player] ) {
+        game_firstRolls[player][game_frame[player]] = ga_pinsDown;
+        switch ( ga_bonusOwed[player] ) {
         case 0:
-            D_8012CDE0_gacode[player] = 0;
-            D_8012D8DA_gacode = 0;
+            ga_bonusOwed[player] = 0;
+            ga_pinsDown = 0;
             game_throw[player] = 1;
             break;
         case 1:
             game_frameScores[player][game_frame[player] - 1] =
                 10 + game_firstRolls[player][game_frame[player]] + game_frameScores[player][game_frame[player] - 2];
             game_totals[player] = game_frameScores[player][game_frame[player] - 1];
-            D_8012CDE0_gacode[player] = 0;
-            D_8012D8DA_gacode = 0;
+            ga_bonusOwed[player] = 0;
+            ga_pinsDown = 0;
             game_throw[player] = 1;
             break;
         case 2:
-            D_8012CDE0_gacode[player] = 4;
-            D_8012D8DA_gacode = 0;
+            ga_bonusOwed[player] = 4;
+            ga_pinsDown = 0;
             game_throw[player] = 1;
             break;
         case 3:
@@ -1320,8 +1320,8 @@ void GA_ScoreFirstBall( u8 player ) {
                     20 + game_firstRolls[player][game_frame[player]] + game_frameScores[player][game_frame[player] - 3];
             }
             game_totals[player] = game_frameScores[player][game_frame[player] - 2];
-            D_8012CDE0_gacode[player] = 4;
-            D_8012D8DA_gacode = 0;
+            ga_bonusOwed[player] = 4;
+            ga_pinsDown = 0;
             game_throw[player] = 1;
             break;
         }
@@ -1332,26 +1332,26 @@ void GA_ScoreFirstBall( u8 player ) {
 ================
 GA_ScoreSecondBall
 
-Scores the second ball of player's frame from the D_8012D8DA_gacode pins it knocked down, by
-D_8012CDE0_gacode: after an open first ball (0, or 4 with a strike's bonus owed) a spare leaves a
+Scores the second ball of player's frame from the ga_pinsDown pins it knocked down, by
+ga_bonusOwed: after an open first ball (0, or 4 with a strike's bonus owed) a spare leaves a
 spare's bonus owed (1) and an open frame is scored; in the tenth frame after a strike (5, or 6 with a
 strike's bonus owed) a strike leaves 3, anything else 2, and the third ball follows.
 ================
 */
 void GA_ScoreSecondBall( u8 player ) {
-    if ( D_8012CDE0_gacode[player] == 0 || D_8012CDE0_gacode[player] == 4 ) {
-        if ( game_firstRolls[player][game_frame[player]] + D_8012D8DA_gacode == 10 ) {
+    if ( ga_bonusOwed[player] == 0 || ga_bonusOwed[player] == 4 ) {
+        if ( game_firstRolls[player][game_frame[player]] + ga_pinsDown == 10 ) {
             game_secondRolls[player][game_frame[player]] = -1;
             game_frameScores[player][game_frame[player]] = -1;
-            switch ( D_8012CDE0_gacode[player] ) {
+            switch ( ga_bonusOwed[player] ) {
             case 0:
                 if ( game_frame[player] == 9 ) {
-                    D_8012CDE0_gacode[player] = 1;
-                    D_8012D8DA_gacode = 0;
+                    ga_bonusOwed[player] = 1;
+                    ga_pinsDown = 0;
                     game_throw[player] = 2;
                 } else {
-                    D_8012CDE0_gacode[player] = 1;
-                    D_8012D8DA_gacode = 0;
+                    ga_bonusOwed[player] = 1;
+                    ga_pinsDown = 0;
                     game_throw[player] = 0;
                     game_frame[player]++;
                 }
@@ -1360,20 +1360,20 @@ void GA_ScoreSecondBall( u8 player ) {
                 game_frameScores[player][game_frame[player] - 1] = game_frameScores[player][game_frame[player] - 2] + 20;
                 game_totals[player] = game_frameScores[player][game_frame[player] - 1];
                 if ( game_frame[player] == 9 ) {
-                    D_8012CDE0_gacode[player] = 1;
-                    D_8012D8DA_gacode = 0;
+                    ga_bonusOwed[player] = 1;
+                    ga_pinsDown = 0;
                     game_throw[player] = 2;
                 } else {
-                    D_8012CDE0_gacode[player] = 1;
-                    D_8012D8DA_gacode = 0;
+                    ga_bonusOwed[player] = 1;
+                    ga_pinsDown = 0;
                     game_throw[player] = 0;
                     game_frame[player]++;
                 }
                 break;
             }
         } else {
-            game_secondRolls[player][game_frame[player]] = D_8012D8DA_gacode;
-            if ( D_8012CDE0_gacode[player] == 4 ) {
+            game_secondRolls[player][game_frame[player]] = ga_pinsDown;
+            if ( ga_bonusOwed[player] == 4 ) {
                 if ( game_frame[player] == 1 ) {
                     game_frameScores[player][game_frame[player] - 1] =
                         10 + game_firstRolls[player][game_frame[player]] + game_secondRolls[player][game_frame[player]];
@@ -1395,33 +1395,33 @@ void GA_ScoreSecondBall( u8 player ) {
                 game_playerDone[player] = 1;
                 game_throw[player]++;
             } else {
-                D_8012CDE0_gacode[player] = 0;
-                D_8012D8DA_gacode = 0;
+                ga_bonusOwed[player] = 0;
+                ga_pinsDown = 0;
                 game_throw[player] = 0;
                 game_frame[player]++;
             }
         }
     }
-    if ( D_8012CDE0_gacode[player] == 5 || D_8012CDE0_gacode[player] == 6 ) {
-        if ( D_8012D8DA_gacode == 10 ) {
+    if ( ga_bonusOwed[player] == 5 || ga_bonusOwed[player] == 6 ) {
+        if ( ga_pinsDown == 10 ) {
             game_secondRolls[player][game_frame[player]] = -1;
             game_frameScores[player][game_frame[player]] = -1;
-            if ( D_8012CDE0_gacode[player] == 6 ) {
+            if ( ga_bonusOwed[player] == 6 ) {
                 game_frameScores[player][game_frame[player] - 1] = game_frameScores[player][game_frame[player] - 2] + 30;
                 game_totals[player] = game_frameScores[player][game_frame[player] - 1];
             }
-            D_8012CDE0_gacode[player] = 3;
-            D_8012D8DA_gacode = 0;
+            ga_bonusOwed[player] = 3;
+            ga_pinsDown = 0;
             game_throw[player] = 2;
         } else {
-            game_secondRolls[player][game_frame[player]] = D_8012D8DA_gacode;
-            if ( D_8012CDE0_gacode[player] == 6 ) {
+            game_secondRolls[player][game_frame[player]] = ga_pinsDown;
+            if ( ga_bonusOwed[player] == 6 ) {
                 game_frameScores[player][game_frame[player] - 1] =
                     20 + game_secondRolls[player][game_frame[player]] + game_frameScores[player][game_frame[player] - 2];
                 game_totals[player] = game_frameScores[player][game_frame[player] - 1];
             }
-            D_8012CDE0_gacode[player] = 2;
-            D_8012D8DA_gacode = 0;
+            ga_bonusOwed[player] = 2;
+            ga_pinsDown = 0;
             game_throw[player] = 2;
         }
     }
@@ -1431,38 +1431,38 @@ void GA_ScoreSecondBall( u8 player ) {
 ================
 GA_ScoreThirdBall
 
-Scores the third ball of player's frame (D_80068A50_gacode 2) from the D_8012D8DA_gacode pins it knocked
-down, by D_8012CDE0_gacode: 1 and 3 add 10 or 20 to the previous score plus the third ball (a strike
+Scores the third ball of player's frame (D_80068A50_gacode 2) from the ga_pinsDown pins it knocked
+down, by ga_bonusOwed: 1 and 3 add 10 or 20 to the previous score plus the third ball (a strike
 counts 10 more), 2 adds 10 plus the second and third balls (20 when they make a spare). The third ball
 is stored in D_800994B8 (-1 for a strike or spare) and the player's game ends (game_playerDone).
 ================
 */
 void GA_ScoreThirdBall( u8 player ) {
-    if ( D_8012CDE0_gacode[player] == 1 || D_8012CDE0_gacode[player] == 3 ) {
-        if ( D_8012D8DA_gacode == 10 ) {
+    if ( ga_bonusOwed[player] == 1 || ga_bonusOwed[player] == 3 ) {
+        if ( ga_pinsDown == 10 ) {
             D_800994B8[player] = -1;
-            if ( D_8012CDE0_gacode[player] == 1 ) {
+            if ( ga_bonusOwed[player] == 1 ) {
                 game_frameScores[player][game_frame[player]] = game_frameScores[player][game_frame[player] - 1] + 20;
                 game_totals[player] = game_frameScores[player][game_frame[player]];
                 game_throw[player]++;
                 game_playerDone[player] = 1;
             }
-            if ( D_8012CDE0_gacode[player] == 3 ) {
+            if ( ga_bonusOwed[player] == 3 ) {
                 game_frameScores[player][game_frame[player]] = game_frameScores[player][game_frame[player] - 1] + 30;
                 game_totals[player] = game_frameScores[player][game_frame[player]];
                 game_throw[player]++;
                 game_playerDone[player] = 1;
             }
         } else {
-            D_800994B8[player] = D_8012D8DA_gacode;
-            if ( D_8012CDE0_gacode[player] == 1 ) {
+            D_800994B8[player] = ga_pinsDown;
+            if ( ga_bonusOwed[player] == 1 ) {
                 game_frameScores[player][game_frame[player]] =
                     10 + D_800994B8[player] + game_frameScores[player][game_frame[player] - 1];
                 game_totals[player] = game_frameScores[player][game_frame[player]];
                 game_throw[player]++;
                 game_playerDone[player] = 1;
             }
-            if ( D_8012CDE0_gacode[player] == 3 ) {
+            if ( ga_bonusOwed[player] == 3 ) {
                 game_frameScores[player][game_frame[player]] =
                     20 + D_800994B8[player] + game_frameScores[player][game_frame[player] - 1];
                 game_totals[player] = game_frameScores[player][game_frame[player]];
@@ -1471,15 +1471,15 @@ void GA_ScoreThirdBall( u8 player ) {
             }
         }
     }
-    if ( D_8012CDE0_gacode[player] == 2 ) {
-        if ( game_secondRolls[player][game_frame[player]] + D_8012D8DA_gacode == 10 ) {
+    if ( ga_bonusOwed[player] == 2 ) {
+        if ( game_secondRolls[player][game_frame[player]] + ga_pinsDown == 10 ) {
             D_800994B8[player] = -1;
             game_frameScores[player][game_frame[player]] = game_frameScores[player][game_frame[player] - 1] + 20;
             game_totals[player] = game_frameScores[player][game_frame[player]];
             game_throw[player]++;
             game_playerDone[player] = 1;
         } else {
-            D_800994B8[player] = D_8012D8DA_gacode;
+            D_800994B8[player] = ga_pinsDown;
             game_frameScores[player][game_frame[player]] =
                 10 + game_secondRolls[player][game_frame[player]] + D_800994B8[player] +
                 game_frameScores[player][game_frame[player] - 1];
@@ -1519,12 +1519,12 @@ void GA_ClearScores( void ) {
         D_800994B8[player] = 0;
         game_frame[player] = 0;
         game_throw[player] = 0;
-        D_8012CDE0_gacode[player] = 0;
+        ga_bonusOwed[player] = 0;
         game_playerDone[player] = 0;
         game_strikeRun[player] = 0;
         D_80066C00.unk_20[player] = 0;
     }
-    D_8012D8DA_gacode = 0;
+    ga_pinsDown = 0;
     D_8012D651_gacode = 0;
     D_8005C164 = 1;
 }
@@ -1536,7 +1536,7 @@ func_80121FD0_gacode
 */
 void func_80121FD0_gacode( u8 player, u8 pinsHit ) {
     D_8012D651_gacode = player;
-    D_8012D8DA_gacode = pinsHit;
+    ga_pinsDown = pinsHit;
     switch ( game_throw[player] ) {
     case 0:
         GA_ScoreFirstBall( player );

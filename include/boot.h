@@ -38,13 +38,13 @@ typedef struct {
     /* 0x7C */ u8 unk_7C[0x100 - 0x7C];
 } saveData_t;                               /* size 0x100; Save_Checksum sums bytes 0x04-0xFF */
 
-/* What func_80025EBC runs on the RSP; set through sched_audioProgram. Names invented. */
+/* What Main_StartAudioTask runs on the RSP; set through sched_audioProgram. Names invented. */
 typedef struct {
     /* 0x00 */ u64 *dataPtr;
     /* 0x04 */ u32 dataSize;
     /* 0x08 */ u64 *ucode;
     /* 0x0C */ u64 *ucodeData;
-} UnkRspProgram;
+} rspProgram_t;
 
 /*
 libultra's raw PI register access, which the SDK headers of 2.0K declare only in the library's internal
@@ -83,7 +83,7 @@ extern OSMesgQueue boot_piQueue;    /* PI manager commands */
 extern OSMesg boot_piMsgs[8];
 
 extern OSTask sched_audioTask;
-extern UnkRspProgram *sched_audioProgram;
+extern rspProgram_t *sched_audioProgram;
 extern s32 sched_rspBusy;           /* a task runs on the RSP */
 extern s32 sched_audioState;        /* 2: the audio task runs; 1: it waits for the graphics task to yield */
 extern u64 sound_bgmId;             /* sound id of the playing BGM, zero-extended; 0: none */
@@ -121,7 +121,7 @@ extern OSMesg game_drawMsgs[1];
 
 #define CONT_STACK_SIZE     0x800       /* bytes of stack of the controller thread */
 #define GAME_STACK_SIZE     0x2000      /* bytes of stack of the game thread */
-extern OSThread boot_contThread;    /* controller thread, func_80028064 */
+extern OSThread boot_contThread;    /* controller thread, Cont_Thread */
 extern u64 boot_contStack[CONT_STACK_SIZE / sizeof( u64 )];
 extern OSThread boot_gameThread;    /* game thread, Game_Thread */
 extern u64 boot_gameStack[GAME_STACK_SIZE / sizeof( u64 )];
@@ -176,7 +176,7 @@ extern Gfx D_8010A2C8[];            /* display lists of the KNSTATICSYS file eac
 extern Gfx D_8010A2A0[];
 
 void Boot_Thread( void *arg );
-void func_80025EBC( void );
+void Main_StartAudioTask( void );
 void Main_Thread( void *arg );
 void Rumble_StartBoth( void );
 void Game_StartPulse( void );

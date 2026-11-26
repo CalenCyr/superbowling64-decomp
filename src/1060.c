@@ -77,13 +77,13 @@ void Boot_Thread( void *arg ) {
 
 /*
 ================
-func_80025EBC
+Main_StartAudioTask
 
 Runs the sched_audioProgram program on the RSP as an audio task; then counts down sound_bgmDelay and starts sequence
 sound_bgmStartVolume when it reaches zero.
 ================
 */
-void func_80025EBC( void ) {
+void Main_StartAudioTask( void ) {
     sched_audioState = 2;
     sched_audioTask.t.type = M_AUDTASK;
     sched_audioTask.t.flags = 0;
@@ -153,7 +153,7 @@ void Main_Thread( void *arg ) {
     FAT_ReadFile( "KNSTATICSYS", boot_staticFile, FAT_GetFileSize( "KNSTATICSYS" ), 0 );
     Cont_Init();
     osContStartReadData( &cont_siQueue );
-    osCreateThread( &boot_contThread, 2, func_80028064, arg, &boot_contStack[CONT_STACK_SIZE / sizeof( u64 )], 0x11 );
+    osCreateThread( &boot_contThread, 2, Cont_Thread, arg, &boot_contStack[CONT_STACK_SIZE / sizeof( u64 )], 0x11 );
     osStartThread( &boot_contThread );
     osCreateThread( &boot_gameThread, 5, Game_Thread, arg, &boot_gameStack[GAME_STACK_SIZE / sizeof( u64 )], 8 );
     osStartThread( &boot_gameThread );
@@ -213,7 +213,7 @@ void Main_Thread( void *arg ) {
                         sched_gfxState = 2;
                     }
                 }
-                func_80025EBC();
+                Main_StartAudioTask();
             } else if ( sched_gfxState == 1 ) {
                 sched_rspTime = OS_CYCLES_TO_USEC( osGetTime() - sched_gfxStartTime );
             }
@@ -238,7 +238,7 @@ void Main_Thread( void *arg ) {
                     sched_audioState = 1;
                     continue;
                 }
-                func_80025EBC();
+                Main_StartAudioTask();
             }
             break;
         case SCHED_MSG_GFX:

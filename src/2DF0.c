@@ -211,4 +211,4 @@ void Cont_FindStandard( void ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/2DF0", func_80028064);
+INCLUDE_ASM("asm/nonmatchings/2DF0", Cont_Thread);

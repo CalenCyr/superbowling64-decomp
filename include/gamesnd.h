@@ -64,7 +64,7 @@ void Sound_StopBgm( void );
 void Sound_UpdateBgmVolume( void );
 void func_80037BD8( void );
 void Sound_WaitFrame( void );
-void Sound_RunAudioTask( UnkRspProgram *program );
+void Sound_RunAudioTask( rspProgram_t *program );
 void func_80037CD0( void );
 void Dbg_ScreenShot( void );
 

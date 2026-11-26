@@ -148,7 +148,7 @@ Sound_RunAudioTask
 Runs program as the audio task and waits for it; sound_taskTime gets the time it took.
 ================
 */
-void Sound_RunAudioTask( UnkRspProgram *program ) {
+void Sound_RunAudioTask( rspProgram_t *program ) {
     sound_taskStart = osGetTime();
     sched_audioProgram = program;
     osWritebackDCache( sound_heap, 0x33800 );

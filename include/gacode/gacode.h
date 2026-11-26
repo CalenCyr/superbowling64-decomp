@@ -117,7 +117,7 @@ typedef struct {
     /* 0xB25 */ u8 callout;                 /* image shown over the lane, index into D_8012C784_gacode; 0: none */
     /* 0xB26 */ u8 reaction;                /* the character's reaction animation (files[reaction + 2]) */
     /* 0xB27 */ u8 unk_B27;
-    /* 0xB28 */ f32 cameraRaise;            /* camera height offset of func_8011B8AC_gacode */
+    /* 0xB28 */ f32 cameraRaise;            /* camera height offset of GA_CameraRaise */
     /* 0xB2C */ s16 bounceSound;            /* of the ball's floor hits: gaStage_t.sounds[0], [1] for a curving throw */
     /* 0xB2E */ u8 unk_B2E[2];
 } gaLane_t;                             /* size 0xB30 */
@@ -152,7 +152,7 @@ typedef struct {
     /* 0x20 */ vec3_t stance;           /* where the player stands (GA_InputStance) */
     /* 0x2C */ f32 speed;               /* of the ball at release, between the limits */
     /* 0x30 */ f32 spin;                /* of the ball at release (motion[0].spin[1]) */
-    /* 0x34 */ f32 timingAngle;         /* the throw's timing, -pi/2 to pi/2 (func_8011B1A0_gacode); 0 is straight */
+    /* 0x34 */ f32 timingAngle;         /* the throw's timing, -pi/2 to pi/2 (GA_PanelTiming); 0 is straight */
     /* 0x38 */ vec3_t direction;        /* GA_VecDirection of stance and aim */
     /* 0x44 */ f32 hook;                /* added to the rolling ball's motion[0].vel[0] each frame */
 } gaCharacter_t;                        /* size 0x48 */
@@ -243,7 +243,7 @@ extern gaPinSetup_t D_801237F0_gacode[];   /* for GA_ScoreSetupGame, by D_800DF5
 extern gaPinSetup_t D_80123950_gacode[];   /* for GA_ScorePar, by D_800DF59C.unk_04[] */
 extern u16 ga_editorPins;              /* pins of GA_ScorePinEditor */
 
-/* Handler of a player: the game mode (ga_gameMode) or what starts a turn (D_8012D23C_gacode). */
+/* Handler of a player: the game mode (ga_gameMode) or what starts a turn (ga_endThrowFunc). */
 typedef s32 (*gaPlayerFunc_t)( s32 player );
 
 extern s16 ga_blinkLevel;          /* blink level, 0 to 0x80 by 8 (GA_Frame) */
@@ -305,7 +305,7 @@ typedef struct {
 extern gaLaneAim_t ga_laneAim[2];
 extern gaPlayer_t ga_players[MAX_PLAYERS];
 extern u8 D_8012D651_gacode;
-extern u8 D_8012D650_gacode;
+extern u8 ga_paused;
 /* A page of the pause menu's page browser (ga_menuPages, GA_PageBrowser). Name invented. */
 typedef struct {
     /* 0x00 */ u16 backY;                  /* y of the back item, from the page's top */
@@ -319,9 +319,9 @@ typedef struct {
 extern gaMenuPage_t ga_menuPages[15];
 extern u8 ga_menuPage;           /* current page of ga_menuPages */
 extern u8 ga_pauseCursor;           /* pause menu: the item under the cursor (0 to 3) */
-extern u8 D_8012CDE0_gacode[4];        /* per player (GA_ScoreThirdBall) */
-extern u16 D_8012D8D8_gacode;
-extern u8 D_8012D8DA_gacode;
+extern u8 ga_bonusOwed[4];        /* per player (GA_ScoreThirdBall) */
+extern u16 ga_throwCount;
+extern u8 ga_pinsDown;
 extern gaLane_t ga_lanes[2];
 extern gaBody_t ga_initBodies[NUM_BODIES];     /* initial bodies of a lane (GA_ResetLane) */
 extern gaMotion_t ga_initMotion[NUM_BODIES];   /* initial gaLane_t.motion */
@@ -333,7 +333,7 @@ typedef s32 (*gaState_t)( void );
 
 extern gaState_t ga_state;     /* current state */
 extern gaPlayerFunc_t ga_gameMode;  /* game mode */
-extern gaPlayerFunc_t D_8012D23C_gacode;
+extern gaPlayerFunc_t ga_endThrowFunc;
 extern gaState_t ga_modeLoop;     /* main loop state of the game mode (GA_StartMode) */
 extern s16 ga_bgm;          /* BGM of the game (Sound_PlayBgm) */
 extern s64 ga_sound;           /* sound handle (Sound_PlaySe) */
@@ -376,7 +376,7 @@ void GA_PublishBall( gaPlayer_t *pl );
 s32 func_80115ED4_gacode( u8 twoLanes );
 void GA_PlaceBody( gaBody_t *body, gaSpot_t *spot, sceneObject_t *obj, f32 offset );
 void GA_RunPanelFunc( s32 player );
-void func_80114FFC_gacode( s32 player );
+void GA_FreezePlayerObject( s32 player );
 s32 GA_ScorePinEditor( s32 player );
 s32 func_80115CDC_gacode( s32 player );
 s32 func_80115D38_gacode( s32 player );
@@ -434,21 +434,21 @@ void GA_DrawPinPanel( s32 player, u8 lane );
 void GA_DrawAimPanel( s32 player, u8 lane );
 void GA_PinEditor( gaPlayer_t *pl );
 void GA_DrawAimLine( gaPlayer_t *pl );
-void func_8011AA78_gacode( s32 player );
+void GA_DrawModePanel( s32 player );
 void GA_DrawWeightSelector( gaPlayer_t *pl );
 void GA_SetGaugeSprites( gaPlayer_t *pl );
 void GA_DrawPlayerPanel( s32 player, u8 full );
-void func_8011AB0C_gacode( s32 player );
+void GA_PanelWeight( s32 player );
 void func_8011AD5C_gacode( s32 player );
 void func_8011B07C_gacode( s32 player );
-void func_8011B1A0_gacode( s32 player );
-void func_8011B2E8_gacode( s32 player );
+void GA_PanelTiming( s32 player );
+void GA_PanelRelease( s32 player );
 void GA_PanelNone( s32 player );
 void func_8011B408_gacode( s32 player );
 void func_8011B564_gacode( s32 player );
 void func_8011B5C8_gacode( s32 lane );
 void GA_SetBallView( gaPlayer_t *pl, s32 view );
-void func_8011B8AC_gacode( s32 player, sceneCamera_t *camera );
+void GA_CameraRaise( s32 player, sceneCamera_t *camera );
 void func_8011B974_gacode( s32 player, sceneCamera_t *camera );
 void func_8011BA00_gacode( s32 player, sceneCamera_t *camera );
 void GA_CameraStepView( s32 player, sceneCamera_t *camera );

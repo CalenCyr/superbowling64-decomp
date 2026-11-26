@@ -24,7 +24,7 @@ void GA_Init( void ) {
     Sound_PlaySe( 0x36, 0 );
     ga_teamCurrent[0] = ga_teamCurrent[1] = 0;
     ga_stage = &ga_stages[game_stage];
-    D_8012D650_gacode = 0;
+    ga_paused = 0;
     ga_parFrame = 0;
     ga_pauseCursor = 0;
     ga_state = GA_PauseMenu;
@@ -78,15 +78,15 @@ void GA_Frame( void ) {
         if ( ga_gameDone ) {
             Sound_PlaySe( 0x7F, 0 );
             game_leaveState = 1;
-        } else if ( D_8012D650_gacode && ga_leaveGame ) {
+        } else if ( ga_paused && ga_leaveGame ) {
             Sound_PlaySe( 0x32, 0 );
             game_replay = 0;
             game_leaveState = 1;
         }
-        if ( !D_8012D650_gacode ) {
+        if ( !ga_paused ) {
             if ( cont_allPressed & START_BUTTON ) {
                 Sound_PlaySe( 6, 0 );
-                D_8012D650_gacode = 1;
+                ga_paused = 1;
                 cont_rumble[0] = cont_rumble[1] = 8;
                 D_8006940D[0] = D_8006940D[1] = 0;
             }
@@ -97,7 +97,7 @@ void GA_Frame( void ) {
             }
         }
     }
-    if ( !D_8012D650_gacode ) {
+    if ( !ga_paused ) {
         ga_pauseCursor = 0;
     }
     ga_stage->update();
@@ -107,7 +107,7 @@ void GA_Frame( void ) {
     }
     Txt_LoadGlyphSheet( &game_gfx );
     Draw_FillRect( 0x9F, 0, 2, 0xF0, 0, 0, 0, 0xFF );
-    if ( !D_8012D650_gacode && !cUpHeld ) {
+    if ( !ga_paused && !cUpHeld ) {
         GA_RunPanelFunc( ga_teamPlayers[0][ga_teamCurrent[0]] );
         if ( game_lastTeam ) {
             GA_RunPanelFunc( ga_teamPlayers[1][ga_teamCurrent[1]] );
@@ -115,17 +115,17 @@ void GA_Frame( void ) {
             Draw_ImageScaled( 0x926, 0xD2, 0x10, (u8)ga_blinkLevel + 0x40, 1.0f, 1.0f );
         }
     }
-    if ( !D_8012D650_gacode && !cUpHeld ) {
+    if ( !ga_paused && !cUpHeld ) {
         ga_gameDone = ga_modeLoop();
         if ( !game_lastTeam ) {
             GA_UpdateLaneCamera( ga_teamPlayers[0][ga_teamCurrent[0]] );
         }
     } else {
         for ( team = 0; team <= game_lastTeam; team++ ) {
-            func_80114FFC_gacode( ga_teamPlayers[team][ga_teamCurrent[team]] );
+            GA_FreezePlayerObject( ga_teamPlayers[team][ga_teamCurrent[team]] );
         }
     }
-    if ( D_8012D650_gacode ) {
+    if ( ga_paused ) {
         Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x10, 0x10, 0x10, 0x80 );
         ga_leaveGame = ga_state();
     }
@@ -160,7 +160,7 @@ void func_80112A74_gacode( void ) {
 
     GA_StopLaneSound( &ga_sound );
     for ( team = 0; team <= game_lastTeam; team++ ) {
-        func_80114FFC_gacode( ga_teamPlayers[team][ga_teamCurrent[team]] );
+        GA_FreezePlayerObject( ga_teamPlayers[team][ga_teamCurrent[team]] );
     }
 }
 
@@ -200,7 +200,7 @@ s32 GA_PauseMenu( void ) {
     if ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) {
         switch ( ga_pauseCursor ) {
         case 0:
-            D_8012D650_gacode = 0;
+            ga_paused = 0;
             Sound_PlaySe( 1, 0 );
             break;
         case 1:
@@ -221,7 +221,7 @@ s32 GA_PauseMenu( void ) {
             break;
         }
     } else if ( cont_allPressed & B_BUTTON ) {
-        D_8012D650_gacode = 0;
+        ga_paused = 0;
         Sound_PlaySe( 2, 0 );
     }
     return 0;
@@ -475,15 +475,15 @@ void GA_StartMode( gaState_t state, gaPlayerFunc_t mode ) {
     ga_modeLoop = state;
     ga_gameMode = mode;
     if ( mode == GA_ScorePinEditor ) {
-        D_8012D23C_gacode = func_80115D38_gacode;
+        ga_endThrowFunc = func_80115D38_gacode;
     } else if ( mode == GA_ScorePar ) {
-        D_8012D23C_gacode = func_80115CDC_gacode;
+        ga_endThrowFunc = func_80115CDC_gacode;
     } else if ( mode == GA_ScoreSetupGame ) {
-        D_8012D23C_gacode = func_80115D38_gacode;
+        ga_endThrowFunc = func_80115D38_gacode;
     } else if ( mode == GA_ScoreBattle ) {
-        D_8012D23C_gacode = func_80115CDC_gacode;
+        ga_endThrowFunc = func_80115CDC_gacode;
     } else {
-        D_8012D23C_gacode = GA_EndTurn;
+        ga_endThrowFunc = GA_EndTurn;
     }
     for ( player = 0; player < game_numPlayers; player++ ) {
         /* team stays unset with one player (or more than four); game_lastTeam is then 0 */
