@@ -20,6 +20,17 @@
 #define HEAP_START  0x80150000
 #define HEAP_END    0x8038F7FF
 
+/* ===== State ===== */
+
+static OSTask sched_audioTask;      /* the audio task Main_StartAudioTask runs */
+static OSThread boot_bootThread;    /* boot thread: starts the managers, then idles */
+static u64 boot_bootStack[BOOT_STACK_SIZE / sizeof( u64 )];
+static OSThread boot_mainThread;    /* main thread, Main_Thread */
+static u64 boot_mainStack[BOOT_STACK_SIZE / sizeof( u64 )];
+static OSThread boot_gameThread;    /* game thread, Game_Thread */
+static OSThread boot_contThread;    /* controller thread, Cont_Thread */
+static s8 game_pulseStep;           /* +12 or -12 */
+
 /*
 ================
 main

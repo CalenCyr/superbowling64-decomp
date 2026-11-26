@@ -75,14 +75,9 @@ extern saveData_t save_data;
 extern saveData_t *save_dataPtr;    /* &save_data */
 extern playerRecord_t game_sessionRecords[4];  /* per character: records since power-on, not saved */
 
-extern OSThread boot_bootThread;    /* boot thread: starts the managers, then idles */
-extern u64 boot_bootStack[BOOT_STACK_SIZE / sizeof( u64 )];
-extern OSThread boot_mainThread;    /* main thread, Main_Thread */
-extern u64 boot_mainStack[BOOT_STACK_SIZE / sizeof( u64 )];
 extern OSMesgQueue boot_piQueue;    /* PI manager commands */
 extern OSMesg boot_piMsgs[8];
 
-extern OSTask sched_audioTask;
 extern rspProgram_t *sched_audioProgram;
 extern s32 sched_rspBusy;           /* a task runs on the RSP */
 extern s32 sched_audioState;        /* 2: the audio task runs; 1: it waits for the graphics task to yield */
@@ -121,9 +116,7 @@ extern OSMesg game_drawMsgs[1];
 
 #define CONT_STACK_SIZE     0x800       /* bytes of stack of the controller thread */
 #define GAME_STACK_SIZE     0x2000      /* bytes of stack of the game thread */
-extern OSThread boot_contThread;    /* controller thread, Cont_Thread */
 extern u64 boot_contStack[CONT_STACK_SIZE / sizeof( u64 )];
-extern OSThread boot_gameThread;    /* game thread, Game_Thread */
 extern u64 boot_gameStack[GAME_STACK_SIZE / sizeof( u64 )];
 
 /* A display list the game thread builds, two of them used in turn. */
@@ -168,7 +161,6 @@ void Game_Thread( void *arg );
 #define CURSOR_MIN_Y        16
 #define CURSOR_MAX_Y        227
 extern u8 game_pulseAlpha;          /* pulses between 75 and 255 by game_pulseStep a frame */
-extern s8 game_pulseStep;           /* +12 or -12 */
 extern s16 game_cursorX;            /* a cursor's x, moved by the stick; 160 at boot */
 extern s16 game_cursorY;            /* its y; 120 at boot */
 extern u8 game_cursorSpeed;         /* row of game_cursorSpeeds the cursor moves by */

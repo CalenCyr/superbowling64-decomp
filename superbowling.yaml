@@ -379,7 +379,8 @@ segments:
       - [0x3C220, .rodata, libkmc/atan]
       - [0x3C280, .rodata, libkmc/sqrt]
       # .bss of the game units, in link order: file-scope statics, in definition order
-      - { type: bss, vram: 0x80060EA0 }    # 1060 and 2DF0: asm (1060's unreferenced words; cont_siEvent's size unknown)
+      - { type: .bss, vram: 0x80060EA0, name: 1060 }
+      - { type: bss, vram: 0x800619B0, name: 2DF0 }    # asm: cont_siEvent's size unknown
       - { type: .bss, vram: 0x800619E0, name: 3D50 }
       - { type: .bss, vram: 0x800619F0, name: 4890 }
       - { type: .bss, vram: 0x80061A00, name: 4DC0 }
