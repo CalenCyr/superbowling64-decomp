@@ -68,11 +68,10 @@ Stops the BGM and loads BGM index into the other buffer; it starts BGM_START_DEL
 settings skip it.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: stack frame; retail's is 0x30 bytes, 0x10 more than this needs, as if from an unused 16-byte local; the code is exact.
-// An unused 16-byte local gives the exact bytes (not adopted, R17); a dead call with 6 to 8 argument words would
-// too (gcc 2.7.2 keeps outgoing-argument space for calls it deletes), but this unit has none to point to.
 void Sound_PlayBgm( s32 index ) {
+    // R36: unused in the original: retail's frame reserves 16 bytes no instruction touches
+    char fileName[16];
+
     if ( sound_bgmId != 0 ) {
         Snd_Stop( sound_bgmId, 5 );
     }
@@ -88,9 +87,6 @@ void Sound_PlayBgm( s32 index ) {
         sound_bgm = index | BGM_STOPPED;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/12C70", Sound_PlayBgm);
-#endif
 
 /*
 ================
