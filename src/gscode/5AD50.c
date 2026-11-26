@@ -109,6 +109,17 @@ static u8 gs_setupSlide = 30; /* slide step of the player setup */
 static u8 gs_setupState = 0; /* CHOICE_IN etc. */
 static u8 gs_cHeldFrames = 0; /* frames a C button is held */
 
+/* ===== State ===== */
+
+static u8 gs_teamPromptChoice;                /* choice of the team prompt: 0 keep the name, 1 clear the record */
+static u8 gs_rumbleStatus[2];                 /* per port: controller status the Rumble Pak check compares with */
+static u8 gs_namePlayer;                      /* player whose name is entered */
+static s8 gs_nameCursorX;                     /* column of the cursor; on the row below the grid, 4 to 6 the sets, 7 the end */
+static s8 gs_nameCursorY;                     /* row of the cursor, 0 to 4; -1: the row below the grid */
+static u8 gs_nameCharSet;                     /* character set, 0 to 2 */
+static u8 gs_nameCharCase;                    /* case of the character set, 0 or 1 */
+static u8 gs_nameLength;                      /* characters entered of the name, 0 to 5 */
+
 /*
 ================
 GS_DrawTintedImage

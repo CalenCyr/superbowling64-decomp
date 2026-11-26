@@ -77,6 +77,12 @@ static u8 D_80120656_gscode = 0; /* highlighted character, 0 to 7 */
 static u8 D_80120657_gscode = 1; /* bit 0: the character menu takes input */
 static u8 D_80120658_gscode = 0; /* animation of the highlighted character */
 
+/* ===== State ===== */
+
+static u16 D_80120A20_gscode;               /* character whose model is shown; 0xFFFF: none */
+static fileType1_t *D_80120A28_gscode[8];   /* per character: its loaded model */
+static u16 D_80120A48_gscode[8];            /* per character: file of its loaded animation */
+
 /*
 ================
 GS_CharacterMenu

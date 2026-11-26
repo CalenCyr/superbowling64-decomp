@@ -45,36 +45,6 @@ OVERLAY
 /* defined in unit 58F40 by its position, first in the overlay's .data; used by units 5E2B0, 5EC00 and 61640 */
 extern objClass_t gs_classes[];               /* the classes of the character menu's scene */
 
-/* The bss of units 5AD50 and 5EC00 (0x80120790-0x80120860) and of unit 61640 (0x80120A20-0x80120A60) stays in asm
- * (asm/data/gscode): KMC GCC's assembler put objects of 16 bytes or more at a multiple of 8 (D_801207C0_gscode,
- * D_80120828_gscode, D_80120A28_gscode), which this assembler does not, and nothing references 0x80120799-0x801207B1,
- * between 5AD50's last object and 5EC00's first. */
-
-/* the player setup and the name entry (unit 5AD50) */
-extern u8 gs_teamPromptChoice;                /* choice of the team prompt: 0 keep the name, 1 clear the record */
-extern u8 gs_rumbleStatus[2];                 /* per port: controller status the Rumble Pak check compares with */
-extern u8 gs_namePlayer;                      /* player whose name is entered */
-extern s8 gs_nameCursorX;                     /* column of the cursor; on the row below the grid, 4 to 6 the sets, 7 the end */
-extern s8 gs_nameCursorY;                     /* row of the cursor, 0 to 4; -1: the row below the grid */
-extern u8 gs_nameCharSet;                     /* character set, 0 to 2 */
-extern u8 gs_nameCharCase;                    /* case of the character set, 0 or 1 */
-extern u8 gs_nameLength;                      /* characters entered of the name, 0 to 5 */
-
-/* the team select (unit 5EC00): each team's players take characters in turn */
-extern u8 D_801207B2_gscode;              /* frames before the team select leaves, once every team is done */
-extern u16 D_801207B4_gscode[4];          /* per player: character whose model is shown; 0xFFFF: none */
-extern fileType1_t *D_801207C0_gscode[8]; /* per character: its loaded model */
-extern fileType2_t *D_801207E0_gscode[8];         /* per character: its loaded animation */
-extern s16 D_80120800_gscode[4][3];       /* per player: position of its model */
-extern u8 D_80120818_gscode[4][3];        /* per player: heights of its bars, growing to the character's */
-extern s16 D_80120828_gscode[4][3];       /* per player: x of its bars */
-extern s16 D_80120840_gscode[4][3];       /* per player: y of the bottom of its bars */
-
-/* the character menu (unit 61640) */
-extern u16 D_80120A20_gscode;                 /* character whose model is shown; 0xFFFF: none */
-extern fileType1_t *D_80120A28_gscode[8];     /* per character: its loaded model */
-extern u16 D_80120A48_gscode[8];              /* per character: file of its loaded animation */
-
 /* gs_optionsCursor: line of the options screen */
 #define OPTION_DIFFICULTY   0           /* save_data.difficulty, 0 to 2 */
 #define OPTION_MUSIC        1           /* save_data.music, 0 or 1 */

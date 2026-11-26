@@ -505,9 +505,10 @@ segments:
       - [0x67320, .rodata, gscode/605D0]
       - [0x67360, .rodata, gscode/61640]
       - { type: .bss, vram: 0x80120780, name: gscode/58F40 }
-      - { type: bss, vram: 0x80120790, name: gscode/5AD50_5EC00 }   # asm: 0x80120799-0x801207B1 unreferenced; 8-aligned arrays
+      - { type: .bss, vram: 0x80120790, name: gscode/5AD50 }
+      - { type: .bss, vram: 0x801207A0, name: gscode/5EC00 }
       - { type: .bss, vram: 0x80120860, name: gscode/605D0 }
-      - { type: bss, vram: 0x80120A20, name: gscode/61640 }         # asm: D_80120A28_gscode sits 8-aligned, as KMC as put it
+      - { type: .bss, vram: 0x80120A20, name: gscode/61640 }
       - { type: .bss, vram: 0x80120A60, name: gscode/61CA0 }
 
   - name: cacode
