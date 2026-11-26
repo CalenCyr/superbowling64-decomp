@@ -229,8 +229,6 @@ Acmd *func_80040AAC( void *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p ) 
     return ptr;
 }
 
-#ifdef NON_MATCHING
-// NON_MATCHING: FP register choice from the first product on (f0/f2 swapped) and the order of s + c - 1
 /*
 ================
 func_80040CCC
@@ -240,10 +238,12 @@ its fraction in *ratel. With no count the step jumps all the way, up or down.
 ================
 */
 s16 func_80040CCC( f64 vol, f64 tgt, s32 count, u16 *ratel ) {
-    s16 s;
-    s16 c;
+    s16 s;                              /* the whole part of the step */
+    s16 c;                              /* the carry out of the borrowed fraction */
     f64 invn;
-    f64 a;
+    f64 step;                           /* the step per 8 samples */
+    f64 frac;                           /* its fraction, plus the one borrowed from s */
+    f64 low;                            /* the fraction in 16 bits */
 
     if ( count == 0 ) {
         if ( tgt >= vol ) {
@@ -261,18 +261,17 @@ s16 func_80040CCC( f64 vol, f64 tgt, s32 count, u16 *ratel ) {
     if ( vol <= 0.0 ) {
         vol = 1.0;
     }
-    a = ( tgt - vol ) * invn * 8.0;
-    s = (s16)a;
-    a = ( a - s ) + 1.0;
-    c = (s16)a;
-    a = ( a - c ) * 65535.0;
-    s += c - 1;
-    *ratel = (u16)a;
+    step = ( tgt - vol ) * invn * 8.0;
+    s = (s16)step;
+    /* borrow one so the fraction is positive, and give back its carry */
+    frac = ( step - s ) + 1.0;
+    s--;
+    c = (s16)frac;
+    low = ( frac - c ) * 65535.0;
+    s += c;
+    *ratel = (u16)low;
     return s;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/1B890", func_80040CCC);
-#endif
 
 /*
 ================
