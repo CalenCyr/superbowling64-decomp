@@ -212,8 +212,6 @@ typedef struct {
 /* image ids of the gauge's spin images: [0..7] for a forward spin, [8..15] for a reversed one */
 extern s16 D_80123690_gacode[16];
 extern gaImageList_t D_801236B0_gacode[2];   /* per lane; both list D_80123690_gacode */
-extern void *ga_savedTexels[2];      /* texels of resources 1523 and 1524, saved by GA_AnimateTextures */
-extern u16 ga_flickerSoundTimer;           /* frames to GA_FlickerLight's flicker sound */
 extern gaSprite_t D_8012D8E0_gacode[2];   /* per lane */
 extern gaSprite_t D_8012D240_gacode[2];   /* per lane (GA_SetupLanes) */
 extern gaSprite_t D_8012CE10_gacode[2];   /* per lane (GA_SetupLanes) */

@@ -39,6 +39,11 @@ static u16 ga_lanePaletteImages[11][4] = {
     { 0x0B30, 0x0B32, 0x0B31, 0x0B32 },
 };
 
+/* The unit's uninitialised state: file-scope statics, which the assembler allocates in .bss in definition order
+   (0x8012CDD0, padded to 16; the overlay's commons follow). */
+static void *ga_savedTexels[2];         /* texels of resources 1523 and 1524, saved by GA_AnimateTextures */
+static u16 ga_flickerSoundTimer;        /* frames to GA_FlickerLight's flicker sound */
+
 /*
 ================
 GA_CountFrame

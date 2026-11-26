@@ -444,8 +444,9 @@ segments:
       - [0x56C30, .rodata, gacode/3E350]
       - [0x56E80, .rodata, gacode/474E0]
       - [0x56FD0, .rodata, gacode/4C560]
-      # bss stays asm: its objects' gaps fit neither one C unit's definition order nor commons
-      - { type: bss, vram: 0x8012CDD0 }
+      # bss: 4C560's statics (the only unit with any), padded to 16, then the overlay's commons, still asm
+      - { type: .bss, vram: 0x8012CDD0, name: gacode/4C560 }
+      - { type: bss, vram: 0x8012CDE0 }
 
   - name: rscode
     type: code
