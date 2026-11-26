@@ -14,6 +14,9 @@ typedef struct HeapBlock_s {
     /* 0x04 */ u32 size;                /* bytes from this header to the end of the block, header included */
 } HeapBlock;
 
+extern HeapBlock *mem_first;            /* first block; the heap starts here */
+extern u8 *mem_end;                     /* end of the heap */
+extern s32 D_80062A28;
 extern s32 mem_lastFree;                /* bytes left after the last block */
 
 void Mem_Reset( HeapBlock *base, u8 *end );
