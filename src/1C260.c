@@ -17,8 +17,9 @@ pass moved to follow the last); samples past the table's end are cleared.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: retail's frame is 16 bytes larger (0x20-0x2F unused), and its loop passes (s16)inp from s7:
-// combine folds inp to 0 here (one set, so its value is trusted everywhere); a second dead set doesn't help
+// NON_MATCHING: retail's frame is 16 bytes larger (0x20-0x2F unused) and its loop passes (s16)inp from s7
+// (one sll/sra before the loop); here combine folds inp to 0 (set once, so trusted everywhere). The rest
+// matches up to those. Not it: a second, dead inp = 0 (in the same block or the non-looped path).
 Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
     Acmd *ptr = p;
     s32 looped;
@@ -71,8 +72,8 @@ Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
         }
 
         pv->lastsam = pv->loopStart & 0xF;
-        pv->sample = pv->loopStart;
         pv->memin = (s32)pv->table->base + N_ADPCM_FRAME_BYTES * ( ( pv->loopStart >> 4 ) + 1 );
+        pv->sample = pv->loopStart;
 
         op = *outp;
         while ( nSam < outCount ) {
@@ -94,8 +95,8 @@ Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
             aDMEMMove( ptr++, dmemOut + ( pv->lastsam << 1 ), op, nSam << 1 );
         }
 
-        pv->sample += outCount;
         pv->lastsam = ( outCount + pv->lastsam ) & 0xF;
+        pv->sample += outCount;
         pv->memin += nframes * N_ADPCM_FRAME_BYTES;
         return ptr;
     }
