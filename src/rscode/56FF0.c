@@ -383,6 +383,9 @@ leaves when player 1 won (setting the bit of game_stage in save_data.unlocks), e
 // The zero extension fits a call with no prototype in scope; the project keeps every call prototyped, so it stays
 // parked.
 // Permuter clue (795 -> 105): 0x40 held in a separate short temporary set before the first loop; a split step only.
+// Not the call's declaration: a K&R Menu_DrawNamePlate (no parameter list), a u16 x parameter, and a u16 x local each
+// leave `li a3,64` (x folded) unchanged, and the K&R form breaks the gacode callers. Retail keeps 0x40 in s0 at the
+// loop top and converts it (sll/srl) at the call, so x is not a known constant there: look for what hides it from cse.
 void RS_DuelResults( void ) {
     u16 images[3] = { 0x874, 0x873, 0x872 };
     s16 x;
