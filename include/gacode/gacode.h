@@ -27,7 +27,6 @@ MAIN (functions and globals of main units without a header yet, under their curr
 */
 
 extern f32 D_800E6560[2][3];        /* per lane: position of the ball */
-extern u8 D_8006940D[NUM_PLAYERS];   /* per port (unit 2DF0) */
 extern u8 D_800DF595[2];            /* per lane: state of the ball (GA_PublishBall) */
 
 /* Main's game setup (D_800DF59C): only the members the overlay uses. Name invented. */

@@ -229,7 +229,7 @@ s32 GS_PlayerSetup( void ) {
     s32 team;
     s32 human;
 
-    D_8005B191 = 1;
+    cont_pollStatus = 1;
     Cont_FindStandard();
     Menu_SetItem( gs_setupMenu, 1, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     Menu_SetItem( gs_setupMenu, 2, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
@@ -945,7 +945,7 @@ s32 GS_PlayerSetup( void ) {
         gs_setupMenu[5].slide = SLIDE_RIGHT;
         gs_setupSlide += 2;
         if ( gs_setupSlide == 30 ) {
-            D_8005B191 = 0;
+            cont_pollStatus = 0;
             if ( gs_setupState == CHOICE_TAKEN ) {
                 gs_setupState = CHOICE_IN;
                 return 1;

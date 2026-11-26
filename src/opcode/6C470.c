@@ -31,7 +31,7 @@ s32 OP_CheckSettings( void ) {
     Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
     switch ( op_checkStep ) {
     case 0:
-        op_contMsg = 9;
+        op_contMsg = CONT_REQ_MOTOR_INIT;
         osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
         op_checkStep = 1;
         break;
@@ -54,7 +54,7 @@ s32 OP_CheckSettings( void ) {
     case 4:
         break;
     case 5:
-        op_contMsg = 6;
+        op_contMsg = CONT_REQ_INIT_PAK;
         D_800E4FC8 = 0;
         osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
         op_checkStep = 6;
@@ -62,7 +62,7 @@ s32 OP_CheckSettings( void ) {
     case 6:
         if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
             if ( cont_result == 0 ) {
-                op_contMsg = 2;
+                op_contMsg = CONT_REQ_FIND_FILE;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
                 op_checkStep = 20;
             } else if ( cont_result == 10 ) {
@@ -116,7 +116,7 @@ s32 OP_CheckSettings( void ) {
     case 20:
         if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&op_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
             if ( cont_result == 0 ) {
-                op_contMsg = 5;
+                op_contMsg = CONT_REQ_READ_WRITE_FILE;
                 D_800E6578 = 0;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
                 op_checkStep = 35;
@@ -136,7 +136,7 @@ s32 OP_CheckSettings( void ) {
         save_choiceY[1] = 0x44;
         if ( Save_ShowPrompt( 0x94F, PROMPT_CHOICE2_H ) ) {
             if ( save_promptChoice == 0 ) {
-                op_contMsg = 0;
+                op_contMsg = CONT_REQ_ALLOCATE_FILE;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
                 op_checkStep = 22;
             }
@@ -154,7 +154,7 @@ s32 OP_CheckSettings( void ) {
                    stores below */
                 checksum = (s32 *)save_dataPtr;
                 *checksum = Save_Checksum();
-                op_contMsg = 5;
+                op_contMsg = CONT_REQ_READ_WRITE_FILE;
                 D_800E6578 = 1;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
                 op_checkStep = 24;
@@ -224,7 +224,7 @@ s32 OP_CheckSettings( void ) {
             if ( save_promptChoice == 0 ) {
                 op_checkStep = 26;
                 save_promptChoice = 0;
-                op_contMsg = 7;
+                op_contMsg = CONT_REQ_REPAIR_ID;
                 osSendMesg( &cont_requestQueue, &op_contMsg, OS_MESG_NOBLOCK );
             }
             if ( save_promptChoice == 1 ) {

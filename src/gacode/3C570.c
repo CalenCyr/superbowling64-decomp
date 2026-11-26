@@ -88,12 +88,12 @@ void GA_Frame( void ) {
                 Sound_PlaySe( 6, 0 );
                 ga_paused = 1;
                 cont_rumble[0] = cont_rumble[1] = 8;
-                D_8006940D[0] = D_8006940D[1] = 0;
+                cont_rumbleFrames[0] = cont_rumbleFrames[1] = 0;
             }
             if ( ( game_mode & 0xF ) != 2 && ( ( cont_held[0] | cont_held[1] ) & U_CBUTTONS ) ) {
                 cUpHeld = TRUE;
                 cont_rumble[0] = cont_rumble[1] = 8;
-                D_8006940D[0] = D_8006940D[1] = 0;
+                cont_rumbleFrames[0] = cont_rumbleFrames[1] = 0;
             }
         }
     }

@@ -1501,3 +1501,12 @@ N_PARAM_SET_PITCH, N_PARAM_SET_VOLUME, N_PARAM_SET_PAN, N_PARAM_START_VOICE, N_P
 N_PVOICE_STEAL_DELAY, N_PVOICE_STEAL_FADE	n_libaudio.h	invented: 552 and 368 samples (three and two 184-sample frames) n_alSynAllocVoice uses on a stolen voice
 AL_FILTER_ADD_UPDATE	n_libaudio.h	invented: paramID 3, on which func_80040A08 appends the ALParam to the physical voice's queue
 Synth_Destroy	0x80042400	invented: the synthesizer's teardown func_80042194 calls before clearing the n_audio globals; empties the client list
+cont_pakPfs	0x80066B98	invented: the Controller Pak the controller thread's requests work on (osPfsInitPak)
+cont_noteCompany	0x8005C0C2	invented: company code of the game's Controller Pak note (requests 0 and 2)
+cont_noteGameCode	0x8005C0C4	invented: game code of the note ("NBWE")
+cont_noteGameName	0x8005C0C8	invented: game name of the note
+cont_noteExtName	0x8005C0D8	invented: extension of the note
+cont_noteSize	0x8005C0DC	invented: bytes of the note (requests 0 and 5)
+cont_pakPlugged	0x800693DE	invented: bit pattern of the ports with a pak (request 8, osPfsIsPlug)
+cont_rumbleFrames	0x8006940D	invented: frames left of each port's cont_rumble strength (Cont_Thread counts them down)
+cont_pollStatus	0x8005B191	invented: nonzero: Cont_Thread queries the controller status every frame (set while gscode checks the paks)

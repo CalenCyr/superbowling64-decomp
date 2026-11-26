@@ -37,7 +37,7 @@ s32 OP_PakScreen( void ) {
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     switch ( op_pakStep ) {
     case 0:
-        op_pakMsg = 6;
+        op_pakMsg = CONT_REQ_INIT_PAK;
         D_800E4FC8 = 0;
         osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
         osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
@@ -46,7 +46,7 @@ s32 OP_PakScreen( void ) {
         }
         op_numNotes = 0;
         for ( i = 0; i < PAK_MAX_NOTES; i++ ) {
-            op_pakMsg = 10;
+            op_pakMsg = CONT_REQ_FILE_STATE;
             cont_noteIndex = i;
             osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
             osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
@@ -64,13 +64,13 @@ s32 OP_PakScreen( void ) {
                 return FALSE;
             }
         }
-        op_pakMsg = 3;
+        op_pakMsg = CONT_REQ_NUM_FILES;
         osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
         osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
         if ( cont_result != 0 ) {
             return FALSE;
         }
-        op_pakMsg = 4;
+        op_pakMsg = CONT_REQ_FREE_BLOCKS;
         op_freeNotes = cont_maxNotes - cont_usedNotes;
         osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
         osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
@@ -189,7 +189,7 @@ s32 OP_PakScreen( void ) {
                 if ( Save_ShowPrompt( 0x94B, PROMPT_CHOICE2_H ) ) {
                     if ( save_promptChoice == 0 ) {
                         Sound_PlaySe( 8, 0 );
-                        op_pakMsg = 10;
+                        op_pakMsg = CONT_REQ_FILE_STATE;
                         cont_noteIndex = op_noteIndex[op_firstNote + op_cursorLine];
                         osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );
                         osRecvMesg( &cont_replyQueue, (OSMesg *)&op_pakMsg, OS_MESG_BLOCK );
@@ -198,7 +198,7 @@ s32 OP_PakScreen( void ) {
                         } else {
                             memcpy( cont_deleteGameName, D_80066C00.note.game_name, 16 );
                             memcpy( cont_deleteExtName, D_80066C00.note.ext_name, 4 );
-                            op_pakMsg = 1;
+                            op_pakMsg = CONT_REQ_DELETE_FILE;
                             cont_deleteCompany = D_80066C00.note.company_code;
                             cont_deleteGameCode = D_80066C00.note.game_code;
                             osSendMesg( &cont_requestQueue, &op_pakMsg, OS_MESG_NOBLOCK );

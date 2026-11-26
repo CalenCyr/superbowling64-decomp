@@ -190,7 +190,7 @@ s32 Save_SaveSettings( void ) {
     Draw_FillRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, 0, 0x80 );
     switch ( save_step ) {
     case 0:
-        save_contMsg = 9;
+        save_contMsg = CONT_REQ_MOTOR_INIT;
         osSendMesg( &cont_requestQueue, &save_contMsg, OS_MESG_NOBLOCK );
         save_step = 1;
         break;
@@ -210,7 +210,7 @@ s32 Save_SaveSettings( void ) {
         }
         break;
     case 3:
-        save_contMsg = 6;
+        save_contMsg = CONT_REQ_INIT_PAK;
         D_800E4FC8 = 0;
         osSendMesg( &cont_requestQueue, &save_contMsg, OS_MESG_NOBLOCK );
         save_step = 4;
@@ -242,7 +242,7 @@ s32 Save_SaveSettings( void ) {
         global stores below (MEM_IN_STRUCT_P), and retail keeps it first.
         */
         *(s32 *)bytes = sum;
-        save_contMsg = 5;
+        save_contMsg = CONT_REQ_READ_WRITE_FILE;
         D_800E6578 = 1;
         osSendMesg( &cont_requestQueue, &save_contMsg, OS_MESG_NOBLOCK );
         save_step = 6;

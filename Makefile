@@ -101,4 +101,4 @@ diff: all
 	python3 tools/fdiff.py $(BUILD)/$(UNIT).o $(FUNC)
 
 # Per-unit optimisation: these units inline their own earlier functions at their call sites (-O3 in gcc 2.7.2).
-$(BUILD)/src/3AD0.o $(BUILD)/src/4890.o $(BUILD)/src/4DC0.o $(BUILD)/src/53B0.o $(BUILD)/src/gscode/58F40.o $(BUILD)/src/gscode/5EC00.o $(BUILD)/src/opcode/6CC50.o: CFLAGS += -O3
+$(BUILD)/src/2DF0.o $(BUILD)/src/3AD0.o $(BUILD)/src/4890.o $(BUILD)/src/4DC0.o $(BUILD)/src/53B0.o $(BUILD)/src/gscode/58F40.o $(BUILD)/src/gscode/5EC00.o $(BUILD)/src/opcode/6CC50.o: CFLAGS += -O3

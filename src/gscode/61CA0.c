@@ -62,7 +62,7 @@ Frame of the pak check, over a dimmed screen; returns 1 when it is over.
 s32 GS_PakCheck( void ) {
     s32 i;
 
-    D_8005B191 = 1;
+    cont_pollStatus = 1;
     gs_secondController = 0;
     if ( game_lastTeam == 1 ) {
         switch ( game_numPlayers ) {
@@ -133,7 +133,7 @@ s32 GS_PakCheck( void ) {
         }
         return 0;
     case 2:
-        D_8005B191 = 0;
+        cont_pollStatus = 0;
         return 1;
     }
     return 0;

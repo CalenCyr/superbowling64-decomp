@@ -261,20 +261,20 @@ void GA_PhysicsStep( s32 player, s32 port ) {
                 } else {
                     cont_rumble[port] = 4;
                 }
-                D_8006940D[port] = 10;
+                cont_rumbleFrames[port] = 10;
             }
         }
         if ( ( ( motion[i].flags >> 2 ) & 1 ) || ( ( motion[i].flags >> 6 ) & 1 ) ) {
             GA_PlayLaneSound( pl->laneIndex, spots[i].pos[1] <= -190.0f ? 0x4C : 0x2F );
             if ( port >= 0 && ( ( motion[i].flags >> 6 ) & 1 ) ) {
                 cont_rumble[port] = 5;
-                D_8006940D[port] = 10;
+                cont_rumbleFrames[port] = 10;
             }
         }
     }
     if ( GA_CollideLane( player, lane->bodies, motion, spots, pl->laneIndex ) && port >= 0 ) {
         cont_rumble[port] = 5;
-        D_8006940D[port] = 15;
+        cont_rumbleFrames[port] = 15;
     }
     GA_SettleBodies( lane->bodies, motion, spots );
 }
@@ -1074,7 +1074,7 @@ void GA_ResetLane( s32 player, u8 *pins ) {
     lane->inputFunc = GA_InputBeginTurn;
     if ( pl->port >= 0 ) {
         cont_rumble[pl->port] = 8;
-        D_8006940D[pl->port] = 0;
+        cont_rumbleFrames[pl->port] = 0;
     }
 }
 
@@ -1312,7 +1312,7 @@ inline s32 GA_StepAim( s32 lane, s8 port, f32 x, u8 step ) {
             GA_PlayLaneSound( lane, seIds[step - 1] );
             if ( port >= 0 ) {
                 cont_rumble[port] = 8 - step;
-                D_8006940D[port] = 10;
+                cont_rumbleFrames[port] = 10;
             }
             ga_laneAim[lane].step = step;
             return 1;
@@ -1346,7 +1346,7 @@ s32 GA_MoveAimMarker( s32 player, gaPlayer_t *pl ) {
                 ga_laneAim[player].unk_07 = 1;
                 if ( pl->port >= 0 ) {
                     cont_rumble[pl->port] = 3;
-                    D_8006940D[pl->port] = ga_laneAim[player].unk_04;
+                    cont_rumbleFrames[pl->port] = ga_laneAim[player].unk_04;
                 }
             }
             ga_laneAim[player].unk_04--;
@@ -1374,7 +1374,7 @@ s32 GA_MoveAimMarker( s32 player, gaPlayer_t *pl ) {
                     GA_PlayLaneSound( player, 0x6A );
                     if ( pl->port >= 0 ) {
                         cont_rumble[pl->port] = 7;
-                        D_8006940D[pl->port] = 20;
+                        cont_rumbleFrames[pl->port] = 20;
                     }
                 }
                 GA_StopLaneSound( &ga_lanes[i].soundHandle );
@@ -1594,7 +1594,7 @@ s32 GA_InputTakeBall( s32 player, s32 input, s16 stickX, s16 stickY ) {
     pl->lane->bodyObjs[0]->viewMask = pl->obj->viewMask = pl->laneIndex != 0 ? 2 : 1;
     if ( pl->port >= 0 ) {
         cont_rumble[pl->port] = 8;
-        D_8006940D[pl->port] = 0;
+        cont_rumbleFrames[pl->port] = 0;
     }
     pl->lane->cameraFunc = func_8011BA8C_gacode;
     if ( pl->lane->markerObjs[2]->viewMask != 0 ) {

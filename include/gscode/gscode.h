@@ -25,7 +25,6 @@ MAIN (functions and globals of main units without a header yet, under their curr
 ==============================================================================
 */
 
-extern u8 D_8005B191;               /* set while the overlay checks the controller paks */
 
 
 /*

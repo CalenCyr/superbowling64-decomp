@@ -16,7 +16,11 @@ extern OSContStatus cont_status[MAXCONTROLLERS];
 extern OSPfs cont_rumblePfs[NUM_PLAYERS];
 extern u8 cont_hasRumble[NUM_PLAYERS];   /* TRUE when the port has a Rumble Pak */
 extern s16 D_80066C24[NUM_PLAYERS];
-extern u8 cont_rumble[NUM_PLAYERS];     /* rumble request: frames, 8 from the menus, 4 to 6 from gacode's hits */
+extern u8 cont_rumble[NUM_PLAYERS];     /* rumble strength: 4 to 6 from gacode's hits; RUMBLE_REPROBE */
+extern u8 cont_rumbleFrames[NUM_PLAYERS];   /* frames left of the cont_rumble strength */
+
+#define RUMBLE_PERIOD   0xE0        /* D_80066C24 accumulates cont_rumble << 5; the motor runs each time it passes this */
+#define RUMBLE_REPROBE  8           /* cont_rumble value: look for the Rumble Pak again and stop it */
 
 /* per-port pad state, rebuilt each frame by Cont_ReadPads */
 extern OSContPad cont_pads[MAXCONTROLLERS];
@@ -39,7 +43,21 @@ extern s8 cont_allStickY;
 extern s32 cont_demoMode;           /* a demo plays: Cont_ReadPads fakes its R presses */
 extern u32 cont_demoFrames;         /* frames left of the demo; Start cuts it to 40 */
 extern volatile s32 sched_frameCount;  /* frame counter (Main_Thread); volatile: it reloads it right after its own store */
-/* requests to the controller thread (Cont_Thread), and its replies */
+/* requests to the controller thread (Cont_Thread), and its replies: the message points to the request code */
+typedef enum {
+    CONT_REQ_ALLOCATE_FILE,     /* allocate the game's note */
+    CONT_REQ_DELETE_FILE,       /* delete the cont_delete* note */
+    CONT_REQ_FIND_FILE,         /* find the game's note: cont_noteIndex */
+    CONT_REQ_NUM_FILES,         /* cont_maxNotes, cont_usedNotes */
+    CONT_REQ_FREE_BLOCKS,       /* cont_freeBytes */
+    CONT_REQ_READ_WRITE_FILE,   /* note cont_noteIndex to or from *save_dataPtr (D_800E6578: PFS_READ, PFS_WRITE) */
+    CONT_REQ_INIT_PAK,          /* open the pak of port D_800E4FC8 */
+    CONT_REQ_REPAIR_ID,
+    CONT_REQ_IS_PLUG,           /* cont_pakPlugged */
+    CONT_REQ_MOTOR_INIT,        /* look for a Rumble Pak on port 1 (into cont_rumblePfs[1]) */
+    CONT_REQ_FILE_STATE         /* the state of note cont_noteIndex: D_80066C00.note */
+} contRequest_t;
+
 extern OSMesgQueue cont_requestQueue;
 extern OSMesgQueue cont_replyQueue;
 extern s32 cont_result;             /* result of the last request */
@@ -61,6 +79,15 @@ extern u8 cont_deleteExtName[4];    /* extension */
 extern u16 cont_deleteCompany;      /* company code */
 extern u32 cont_deleteGameCode;     /* game code */
 extern u8 D_800E6578;
+/* the game's Controller Pak note */
+extern OSPfs cont_pakPfs;           /* the pak the requests work on */
+extern u16 cont_noteCompany;        /* company code */
+extern u32 cont_noteGameCode;       /* game code, "NBWE" */
+extern u8 cont_noteGameName[16];    /* game name */
+extern u8 cont_noteExtName[4];      /* extension */
+extern s32 cont_noteSize;           /* bytes */
+extern u8 cont_pakPlugged;          /* bit per port with a pak (CONT_REQ_IS_PLUG) */
+extern u8 cont_pollStatus;          /* nonzero: Cont_Thread queries the controller status every frame */
 
 void Cont_Init( void );
 void Rumble_Probe( s32 chan );
