@@ -26,6 +26,14 @@ curl -L https://github.com/decompals/mips-gcc-2.7.2/releases/download/v0.1/gcc-2
 curl -L https://github.com/decompals/mips-binutils-2.6/releases/download/v0.3/binutils-2.6-linux.tar.gz | tar xz -C tools/gcc_2.7.2
 ```
 
+For `make report` and the TUI diff, also fetch objdiff-cli (as CI does):
+
+```sh
+mkdir -p tools/objdiff
+curl -fsSL -o tools/objdiff/objdiff-cli https://github.com/encounter/objdiff/releases/download/v3.8.2/objdiff-cli-linux-x86_64
+chmod +x tools/objdiff/objdiff-cli
+```
+
 The C units are compiled by the KMC `gcc` driver, which runs KMC `as` 2.6 on both the compiled code and the
 assembly that `INCLUDE_ASM` pulls in; the matching code depends on it (for example, KMC `as` expands `move` to
 `addu` where modern GAS uses `or`). Asm-only units, the binary assets and the link use the system binutils.
