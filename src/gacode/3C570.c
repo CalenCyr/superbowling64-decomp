@@ -2,6 +2,8 @@
 
 #include "common.h"
 #include "libultra.h"
+#include "dbgtext.h"
+#include "archive.h"
 #include "input.h"
 #include "gacode/gacode.h"
 

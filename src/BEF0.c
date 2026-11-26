@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "libultra.h"
+#include "object.h"
 #include "archive.h"
 #include "filecache.h"
 #include "heap.h"

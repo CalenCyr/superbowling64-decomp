@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "libultra.h"
+#include "dbgtext.h"
 #include "rscode/rscode.h"
 
 /*

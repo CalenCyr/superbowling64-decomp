@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "libultra.h"
+#include "libc.h"
 #include "boot.h"
 #include "dbgtext.h"
 #include "filecache.h"
