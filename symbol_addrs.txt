@@ -554,7 +554,7 @@ snd_numMsgs = 0x8006437C; // size:0x4
 snd_msgs = 0x80064380; // size:0x4
 snd_commands = 0x8005CB70;
 
-// n_audio (SDK) synthesizer functions, still asm; named from their AL_FILTER_* event types
+// n_audio (SDK) synthesizer functions; named from their AL_FILTER_* event types
 n_alSynAddPlayer = 0x800421D0; // type:func
 n_alSynAllocVoice = 0x80042220; // type:func
 Synth_AllocPVoice = 0x80042338; // type:func
