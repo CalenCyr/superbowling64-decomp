@@ -269,6 +269,7 @@ Sets m to a rotation by x, y and z radians, scaled by scale, then moved to (tx, 
 // NON_MATCHING: MATCH-PENDING (R17): byte-exact only with the unused local rot, which supplies retail's 0x28
 // bytes of unused frame; without it the frame is 0x50 instead of 0x78. Giving rot a job (built as in Mtx_RotateXYZ, then
 // m = rot * scale) keeps the dead stores to rot and gives 0x70; the body reads as Mtx_RotateXYZ's with rot left over.
+// The unused rot is an accepted leftover (R36), but the match also needs Mtx_RotateXYZ's one temporary t (R30); two differ.
 void Mtx_SetRotScaleTrans( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, f32 ty, f32 tz ) {
     f32 rot[3][3];
     f32 sx, cx, sy, cy, sz, cz;
