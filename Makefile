@@ -33,7 +33,7 @@ C_FILES   := $(shell find src -name '*.c' 2>/dev/null)
 BIN_FILES := $(shell find assets -name '*.bin' 2>/dev/null)
 O_FILES   := $(S_FILES:%.s=$(BUILD)/%.o) $(C_FILES:%.c=$(BUILD)/%.o) $(BIN_FILES:%.bin=$(BUILD)/%.o)
 
-.PHONY: all split gate clean expected report diff rules rules-test rename-test FORCE
+.PHONY: all split gate clean expected report diff rules rules-test rename-test shift-test FORCE
 
 OBJDIFF  := tools/objdiff/objdiff-cli
 
@@ -93,6 +93,14 @@ report: all objdiff.json
 	$(OBJDIFF) report generate -o report.json
 	-python3 tools/rules.py --no-advisory --report report.json --json $(BUILD)/rules.json > /dev/null
 	python3 tools/progress.py report.json --rules $(BUILD)/rules.json
+
+# Shiftability: relink the built objects with SHIFT bytes inserted after AFTER (default: main's first C unit's
+# .text) into build/shift/, and check that every reference moved with its target (tools/shift_test.py). Opt-in; the
+# normal build and the gate are untouched. make shift-test [SHIFT=0x40] [AFTER='build/src/1060.o(.text)']
+SHIFT ?= 0x40
+AFTER ?= build/src/1060.o(.text)
+shift-test: all
+	python3 tools/shift_test.py --shift $(SHIFT) --after '$(AFTER)'
 
 # Rule checker: make rules [UNIT=src/<unit>] (all src/**/*.c by default); exits non-zero on [match] findings.
 rules:
