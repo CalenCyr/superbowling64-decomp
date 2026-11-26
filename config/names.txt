@@ -1566,3 +1566,19 @@ cont_pakPort	0x800E4FC8	invented: the port whose pak CONT_REQ_INIT_PAK opens (in
 cont_pakWrite	0x800E6578	invented: PFS_READ or PFS_WRITE for CONT_REQ_READ_WRITE_FILE (include/input.h comment)
 op_nextMode	0x8005C0E8	invented: the next mode: 0xA on entry, the overlay sets 0xFE or 0xFD (opcode.h comment)
 ca_clipFrameBase	0x80115374	invented: added to the frame number in the bitmap file name of each clip (CA_CacheFrame)
+GA_FreezeScene	0x80112A74	invented: stops the lane sound and freezes each team's current player object
+GA_PauseScoreboard	0x80112D94	invented: pause menu item 1 in modes other than 2: draws the score boards until a button returns to GA_PauseMenu
+GA_DrawScoreboard	0x80112E04	invented: draws the score boards of the game mode (distance panels, or the team boards)
+GA_PauseQuitPrompt	0x80113210	invented: pause menu item 3: Menu_TwoChoicePrompt, yes goes on to saving, no back to GA_PauseMenu
+GA_PauseSaveSettings	0x80113270	invented: runs Save_SaveSettings until it finishes
+GA_PauseQuitDone	0x801132A8	invented: the state after saving: does nothing
+GA_SetupStandardGame	0x80113384	invented: banner: sets up the game of mode 0 by sub-mode
+GA_RunFirstPlayer	0x80114108	invented: runs player 0 only
+GA_ResetViews	0x80115054	invented: banner: resets the camera, the ball views and the scene objects
+GA_IsParkedRestart	0x80115DF4	invented: true when the lane's inputFunc is GA_InputParkedRestart
+GA_StopViewHandlers	0x80115E24	invented: banner: stops panelFunc and cameraFunc when every lane's player is done
+GA_StopPanelHandlers	0x80115ED4	invented: banner: stops panelFunc when every lane's player is done or parked
+GA_EndGameOverTurns	0x80116170	invented: banner: ends the turns of players 0 and 1 once both lanes wait in GA_InputGameOver
+GA_TurnResetLane	0x801163A0	invented: banner: a turnFunc that passes which pins stand to GA_ResetLane
+GA_PanelFrame	0x8011AD5C	invented: banner: panelFunc handler running the mode's part of the frame, the pin diagram and the panel
+GA_PanelFade	0x8011B07C	invented: banner: panelFunc handler fading the lane's sprite and drawing the panel

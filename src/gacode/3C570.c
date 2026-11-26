@@ -62,7 +62,7 @@ GA_Frame
 
 The overlay's frame: leaves once main has faded out after a request, requests leaving when the game mode
 is done or the pause menu quits, opens the pause menu on Start and, while C-up is held (not in mode 2),
-func_80112E04_gacode's view, runs the stage and the players, draws them, runs the main loop state (or, paused, the pause menu's state), and steps the
+GA_DrawScoreboard's view, runs the stage and the players, draws them, runs the main loop state (or, paused, the pause menu's state), and steps the
 blink of ga_blinkLevel between 0 and 0x80.
 ================
 */
@@ -132,7 +132,7 @@ void GA_Frame( void ) {
         ga_leaveGame = ga_state();
     }
     if ( cUpHeld ) {
-        func_80112E04_gacode();
+        GA_DrawScoreboard();
     }
     if ( ga_blinkFalling == 1 ) {
         ga_blinkLevel -= 8;
@@ -154,10 +154,10 @@ void GA_Frame( void ) {
 
 /*
 ================
-func_80112A74_gacode
+GA_FreezeScene
 ================
 */
-void func_80112A74_gacode( void ) {
+void GA_FreezeScene( void ) {
     s32 team;
 
     GA_StopLaneSound( &ga_sound );
@@ -206,7 +206,7 @@ s32 GA_PauseMenu( void ) {
             Sound_PlaySe( 1, 0 );
             break;
         case 1:
-            ga_state = isMode2 ? GA_PageBrowser : func_80112D94_gacode;
+            ga_state = isMode2 ? GA_PageBrowser : GA_PauseScoreboard;
             Sound_PlaySe( 1, 0 );
             break;
         case 2:
@@ -218,7 +218,7 @@ s32 GA_PauseMenu( void ) {
             }
             break;
         case 3:
-            ga_state = func_80113210_gacode;
+            ga_state = GA_PauseQuitPrompt;
             Sound_PlaySe( 1, 0 );
             break;
         }
@@ -231,12 +231,12 @@ s32 GA_PauseMenu( void ) {
 
 /*
 ================
-func_80112D94_gacode
+GA_PauseScoreboard
 ================
 */
-s32 func_80112D94_gacode( void ) {
+s32 GA_PauseScoreboard( void ) {
     Draw_ImageScaled( 0x89E, 0x50, 0x40, 0x40, 1.0f, 1.0f );
-    func_80112E04_gacode();
+    GA_DrawScoreboard();
     if ( cont_allPressed & ( A_BUTTON | B_BUTTON | Z_TRIG ) ) {
         Sound_PlaySe( 11, 0 );
         ga_state = GA_PauseMenu;
@@ -246,10 +246,10 @@ s32 func_80112D94_gacode( void ) {
 
 /*
 ================
-func_80112E04_gacode
+GA_DrawScoreboard
 ================
 */
-void func_80112E04_gacode( void ) {
+void GA_DrawScoreboard( void ) {
     if ( ( game_mode & 0xF ) == 3 ) {
         GA_DrawDistancePanels();
         return;
@@ -337,13 +337,13 @@ s32 GA_PageBrowser( void ) {
 
 /*
 ================
-func_80113210_gacode
+GA_PauseQuitPrompt
 ================
 */
-s32 func_80113210_gacode( void ) {
+s32 GA_PauseQuitPrompt( void ) {
     switch ( Menu_TwoChoicePrompt() ) {
     case 1:
-        ga_state = func_80113270_gacode;
+        ga_state = GA_PauseSaveSettings;
         break;
     case 2:
         ga_state = GA_PauseMenu;
@@ -354,23 +354,23 @@ s32 func_80113210_gacode( void ) {
 
 /*
 ================
-func_80113270_gacode
+GA_PauseSaveSettings
 ================
 */
-s32 func_80113270_gacode( void ) {
+s32 GA_PauseSaveSettings( void ) {
     if ( Save_SaveSettings() ) {
         return 0;
     }
-    ga_state = func_801132A8_gacode;
+    ga_state = GA_PauseQuitDone;
     return 1;
 }
 
 /*
 ================
-func_801132A8_gacode
+GA_PauseQuitDone
 ================
 */
-s32 func_801132A8_gacode( void ) {
+s32 GA_PauseQuitDone( void ) {
     return 0;
 }
 
@@ -384,7 +384,7 @@ Sets up the game for the mode in the low nibble of game_mode, with its BGM.
 void GA_SetupMode( void ) {
     switch ( game_mode & 0xF ) {
     case 0:
-        func_80113384_gacode();
+        GA_SetupStandardGame();
         break;
     case 1:
         GA_StartMode( GA_DuelLoop, GA_ScoreStandard );
@@ -395,7 +395,7 @@ void GA_SetupMode( void ) {
         ga_bgm = 17;
         break;
     case 2:
-        GA_StartMode( func_80114108_gacode, GA_ScorePinEditor );
+        GA_StartMode( GA_RunFirstPlayer, GA_ScorePinEditor );
         ga_bgm = 16;
         break;
     }
@@ -404,13 +404,13 @@ void GA_SetupMode( void ) {
 
 /*
 ================
-func_80113384_gacode
+GA_SetupStandardGame
 
 Sets up the game of mode 0 by its sub-mode (bits 4-5 of game_mode): its main loop state and handler, the
 frames' setups (the par game also sums its pars into game_splits[0]) and the BGM.
 ================
 */
-void func_80113384_gacode( void ) {
+void GA_SetupStandardGame( void ) {
     s32 i;
 
     switch ( ( game_mode >> 4 ) & 3 ) {
@@ -502,7 +502,7 @@ void GA_StartMode( gaState_t state, gaPlayerFunc_t mode ) {
         GA_SetupPlayer( player, ( game_players[player] >> 7 ) ? -1 : lane, game_players[player] & 0xF, lane );
     }
     if ( !game_lastTeam ) {
-        func_80115054_gacode();
+        GA_ResetViews();
     }
 }
 
@@ -613,7 +613,7 @@ s32 GA_TeamGameLoop( void ) {
             }
         }
     }
-    return func_80115E24_gacode( game_lastTeam );
+    return GA_StopViewHandlers( game_lastTeam );
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", GA_TeamGameLoop);
@@ -679,7 +679,7 @@ s32 GA_PairGameLoop( void ) {
             }
         }
     }
-    return func_80115E24_gacode( game_lastTeam );
+    return GA_StopViewHandlers( game_lastTeam );
 }
 
 /*
@@ -720,13 +720,13 @@ s32 GA_ParGameLoop( void ) {
         }
     }
     showFrame = ( game_mode >> 6 ) == 1;
-    if ( ga_parFrame < 9 && func_80115ED4_gacode( game_lastTeam ) ) {
+    if ( ga_parFrame < 9 && GA_StopPanelHandlers( game_lastTeam ) ) {
         if ( showFrame ) {
             GA_DecideFrame( ga_parFrame );
         }
         ga_parFrame++;
     }
-    return func_80115E24_gacode( game_lastTeam ) != 0;
+    return GA_StopViewHandlers( game_lastTeam ) != 0;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/gacode/3C570", GA_ParGameLoop);
@@ -752,10 +752,10 @@ s32 GA_DuelLoop( void ) {
             func_80115D70_gacode( i, 1 );
         }
     }
-    if ( func_80115E24_gacode( 1 ) ) {
+    if ( GA_StopViewHandlers( 1 ) ) {
         return 1;
     }
-    if ( func_80115DF4_gacode( 0 ) && func_80115DF4_gacode( 1 ) ) {
+    if ( GA_IsParkedRestart( 0 ) && GA_IsParkedRestart( 1 ) ) {
         winner = GA_EndDuelGame();
         if ( winner >= 0 ) {
             game_gamesWon[winner]++;
@@ -765,9 +765,9 @@ s32 GA_DuelLoop( void ) {
     if ( ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) && results[0] + results[1] == -2 ) {
         Sound_PlaySe( SE_DECIDE, 0 );
         if ( game_gamesWon[0] == 2 || game_gamesWon[1] == 2 ) {
-            func_80116170_gacode( 1 );
+            GA_EndGameOverTurns( 1 );
         } else {
-            func_80116170_gacode( 0 );
+            GA_EndGameOverTurns( 0 );
         }
     }
     return 0;
@@ -791,25 +791,25 @@ s32 GA_DistanceLoop( void ) {
             func_80115D70_gacode( i, 1 );
         }
     }
-    if ( func_80115E24_gacode( 1 ) ) {
+    if ( GA_StopViewHandlers( 1 ) ) {
         return 1;
     }
-    if ( func_80115DF4_gacode( 0 ) && func_80115DF4_gacode( 1 ) ) {
+    if ( GA_IsParkedRestart( 0 ) && GA_IsParkedRestart( 1 ) ) {
         GA_EndDuelGame();
         return 0;
     }
     if ( ( cont_allPressed & ( A_BUTTON | Z_TRIG ) ) || results[0] + results[1] == -2 ) {
-        func_80116170_gacode( 1 );
+        GA_EndGameOverTurns( 1 );
     }
     return 0;
 }
 
 /*
 ================
-func_80114108_gacode
+GA_RunFirstPlayer
 ================
 */
-s32 func_80114108_gacode( void ) {
+s32 GA_RunFirstPlayer( void ) {
     GA_RunPlayer( 0 );
     return 0;
 }

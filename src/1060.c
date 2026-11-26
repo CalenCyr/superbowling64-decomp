@@ -552,7 +552,7 @@ void Game_Thread( void *arg ) {
             if ( --cont_demoFrames < 40 ) {
                 game_leaveState = 1;
                 if ( game_fade >= 248 ) {
-                    func_80112A74_gacode();
+                    GA_FreezeScene();
                     game_leaveState = 2;
                     game_fade = 263;
                     game_scene = SCENE_OPCODE;

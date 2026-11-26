@@ -407,12 +407,12 @@ void GA_FreezePlayerObject( s32 player ) {
 
 /*
 ================
-func_80115054_gacode
+GA_ResetViews
 
 Sets the camera's unk_24 to -1, clears the players' ballView and hides scene objects 120 to 133 and 141.
 ================
 */
-void func_80115054_gacode( void ) {
+void GA_ResetViews( void ) {
     gaPlayer_t *pl;
     s32 player;
     s32 i;
@@ -729,7 +729,7 @@ s32 GA_EndTurn( s32 player ) {
             result = 1;
         }
     } else {
-        lane->turnFunc = func_801163A0_gacode;
+        lane->turnFunc = GA_TurnResetLane;
     }
     if ( result == 0 && ( game_mode >> 6 ) == 1 ) {
         result = -1;
@@ -750,7 +750,7 @@ s32 func_80115CDC_gacode( s32 player ) {
         pl->lane->turnFunc = GA_StartTurn;
         return 1;
     }
-    pl->lane->turnFunc = func_801163A0_gacode;
+    pl->lane->turnFunc = GA_TurnResetLane;
     pl->lane->frameOver = 0;
     return 0;
 }
@@ -792,21 +792,21 @@ void func_80115D70_gacode( s32 player, u8 restart ) {
 
 /*
 ================
-func_80115DF4_gacode
+GA_IsParkedRestart
 ================
 */
-s32 func_80115DF4_gacode( s32 player ) {
+s32 GA_IsParkedRestart( s32 player ) {
     return ga_players[player].lane->inputFunc == GA_InputParkedRestart;
 }
 
 /*
 ================
-func_80115E24_gacode
+GA_StopViewHandlers
 
 When the players of every lane are done (inputFunc parked), stops their panelFunc and cameraFunc handlers too.
 ================
 */
-s32 func_80115E24_gacode( u8 twoLanes ) {
+s32 GA_StopViewHandlers( u8 twoLanes ) {
     if ( twoLanes ) {
         if ( ga_lanes[0].inputFunc != GA_InputParked ) {
             return 0;
@@ -830,13 +830,13 @@ s32 func_80115E24_gacode( u8 twoLanes ) {
 
 /*
 ================
-func_80115ED4_gacode
+GA_StopPanelHandlers
 
 When the players of every lane are done, or wait in GA_InputParkedRestart (whose lanes then restart at
 GA_StartTurn), stops their panelFunc handlers; returns 1 then.
 ================
 */
-s32 func_80115ED4_gacode( u8 twoLanes ) {
+s32 GA_StopPanelHandlers( u8 twoLanes ) {
     if ( twoLanes ) {
         if ( ga_lanes[0].inputFunc == GA_InputParked && ga_lanes[1].inputFunc == ga_lanes[0].inputFunc ) {
             ga_lanes[1].panelFunc = GA_PanelNone;
@@ -908,13 +908,13 @@ s32 GA_EndDuelGame( void ) {
 
 /*
 ================
-func_80116170_gacode
+GA_EndGameOverTurns
 
 Once both lanes wait in GA_InputGameOver, ends the turn of players 0 and 1: with skip set, parks
 their lanes' input; else first runs GA_ClearScores and sets the lanes' view handlers.
 ================
 */
-void func_80116170_gacode( s32 skip ) {
+void GA_EndGameOverTurns( s32 skip ) {
     gaPlayer_t *pl;
     s32 i;
 
@@ -986,12 +986,12 @@ void func_80116398_gacode( s32 player ) {
 
 /*
 ================
-func_801163A0_gacode
+GA_TurnResetLane
 
 A turnFunc handler: passes which pins stand to GA_ResetLane, then idles.
 ================
 */
-void func_801163A0_gacode( s32 player ) {
+void GA_TurnResetLane( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 pins[NUM_PINS];
     gaBody_t *body = &pl->lane->bodies[1];
@@ -1598,10 +1598,10 @@ s32 GA_InputTakeBall( s32 player, s32 input, s16 stickX, s16 stickY ) {
     }
     pl->lane->cameraFunc = func_8011BA8C_gacode;
     if ( pl->lane->markerObjs[2]->viewMask != 0 ) {
-        pl->lane->panelFunc = func_8011B07C_gacode;
+        pl->lane->panelFunc = GA_PanelFade;
         pl->lane->inputFunc = GA_InputApproach;
     } else {
-        pl->lane->panelFunc = func_8011AD5C_gacode;
+        pl->lane->panelFunc = GA_PanelFrame;
         pl->lane->inputFunc = GA_InputSetThrow;
     }
     return 0;
@@ -1622,7 +1622,7 @@ s32 GA_InputSetThrow( s32 player, s32 input, s16 stickX, s16 stickY ) {
     pl->obj->frame = 0;
     if ( input == 1 ) {
         GA_PlayLaneSound( pl->laneIndex, 0xB );
-        pl->lane->panelFunc = func_8011B07C_gacode;
+        pl->lane->panelFunc = GA_PanelFade;
         pl->lane->inputFunc = GA_InputApproach;
         return 0;
     }
@@ -2063,7 +2063,7 @@ void GA_DrawScorePanel( s32 player, u8 lane ) {
 GA_DrawPinDiagram
 
 Draws the pin diagram of the player's lane on its side of the screen: the frame (0x92A), then image 0x929 for
-each pin still standing. Declared inline: GA_PanelWeight and func_8011AD5C_gacode repeat its body.
+each pin still standing. Declared inline: GA_PanelWeight and GA_PanelFrame repeat its body.
 ================
 */
 inline void GA_DrawPinDiagram( gaPlayer_t *pl ) {
@@ -2154,7 +2154,7 @@ void GA_SetGaugeSprites( gaPlayer_t *pl ) {
 GA_DrawPlayerPanel
 
 Draws a human player's panel on its lane's side: the frame, its second part when full is set, and the
-current image of the lane's D_801236B0_gacode list. Declared inline: func_8011AD5C_gacode repeats its body
+current image of the lane's D_801236B0_gacode list. Declared inline: GA_PanelFrame repeats its body
 with full set.
 ================
 */
@@ -2610,14 +2610,14 @@ void GA_PanelWeight( s32 player ) {
 
 /*
 ================
-func_8011AD5C_gacode
+GA_PanelFrame
 
 panelFunc handler: runs the game mode's part of the frame (none for GA_ScorePinEditor), draws the lane's pin
 diagram, runs GA_SetGaugeSprites, clears the lane's D_8012D8E0_gacode sprite and draws a human player's
 full panel.
 ================
 */
-void func_8011AD5C_gacode( s32 player ) {
+void GA_PanelFrame( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
 
     if ( ga_gameMode != GA_ScorePinEditor ) {
@@ -2639,13 +2639,13 @@ void func_8011AD5C_gacode( s32 player ) {
 
 /*
 ================
-func_8011B07C_gacode
+GA_PanelFade
 
 panelFunc handler: runs GA_SetGaugeSprites, fades the lane's D_8012D8E0_gacode sprite by the player object's
 unk_48 against the character's unk_18, and draws a human player's full panel.
 ================
 */
-void func_8011B07C_gacode( s32 player ) {
+void GA_PanelFade( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 x;
 
