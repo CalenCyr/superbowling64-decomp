@@ -104,7 +104,7 @@ segments:
       - [0x1D8B0, c]
       - [0x1D940, c]
       - [0x1D9D0, c]
-      - [0x1DA80, asm]
+      - [0x1DA80, c]
       - [0x1DB10, asm]
       - [0x1DB90, asm]
       - [0x1E0F0, asm]
