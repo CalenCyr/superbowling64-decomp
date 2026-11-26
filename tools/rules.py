@@ -481,8 +481,20 @@ class Checker:
                         if nt:
                             self.known_types.add(nt.text)
         self.units = [Unit(s, self.known_types) for s in sources]
+        self.sdk_names = self._sdk_names()
         self.findings = []
         self.global_findings = {}   # identifier -> [Finding] charged to functions naming it
+
+    @staticmethod
+    def _sdk_names():
+        """Identifiers fixed outside the project: ultralib's headers, the n_audio and libc declarations, `main`."""
+        names = {"main"}
+        heads = list((ROOT / "lib" / "ultralib" / "include").rglob("*.h"))
+        heads += [ROOT / "include" / "n_libaudio.h", ROOT / "include" / "libc.h"]
+        for h in heads:
+            if h.exists():
+                names.update(re.findall(r"[A-Za-z_]\w*", h.read_text(errors="replace")))
+        return names
 
     def _read_config(self):
         allow = {"asm-helper": set(), "original-asm": set()}
@@ -1046,10 +1058,11 @@ class Checker:
                      "banner", func=fn)
         # R8 style: function name, locals, params
         bad = []
-        if not placeholder(fn.name) and not FUNC_STYLE_RE.match(fn.name):
+        if (not placeholder(fn.name) and not FUNC_STYLE_RE.match(fn.name)
+                and fn.name not in self.sdk_names):
             bad.append(f"function '{fn.name}' (Prefix_VerbNoun)")
         for n in fn.params + [x[0] for x in fn.locals]:
-            if not placeholder(n) and not LOWER_CAMEL_RE.match(n):
+            if not placeholder(n) and not LOWER_CAMEL_RE.match(n) and n not in self.sdk_names:
                 bad.append(f"'{n}' (lowerCamel)")
         if bad:
             self.add(src, fn.line, "R8", "advisory", "naming style: " + ", ".join(bad), func=fn)

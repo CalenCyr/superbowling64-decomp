@@ -59,8 +59,22 @@ def check_placeholders():
     return bool(errors)
 
 
+def check_sdk_names():
+    """R8 leaves SDK-fixed identifiers alone: ultralib types, the C runtime's `main`."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import rules
+    names = rules.Checker._sdk_names()
+    errors = [f"{n!r} should be an SDK name" for n in ("main", "ALSynConfig", "ALHeap", "OSSched") if n not in names]
+    errors += [f"{n!r} should not be an SDK name" for n in ("Synth_Init", "Obj_Free") if n in names]
+    print(f"{'FAIL' if errors else 'ok':4} sdk names: {len(errors)} wrong")
+    for e in errors:
+        print(f"     {e}")
+    return bool(errors)
+
+
 def main():
     bad = check_placeholders()
+    bad += check_sdk_names()
     for fx in sorted(HERE.glob("*.c")):
         errors, nw, npend = run(fx)
         status = "FAIL" if errors else "ok"
