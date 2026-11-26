@@ -120,3 +120,35 @@ rom:0x05FD84 reloc:MIPS_HI16 symbol:cont_noteGameName addend:0xC
 rom:0x05FD8C reloc:MIPS_LO16 symbol:cont_noteGameName addend:0xC
 rom:0x05FDDC reloc:MIPS_HI16 symbol:cont_noteGameName addend:0xC
 rom:0x05FDE4 reloc:MIPS_LO16 symbol:cont_noteGameName addend:0xC
+
+// The BW64FAT file table (fat_table): each file's ROM start and end, as the linker's bounds of its segment
+rom:0x03C2AC reloc:MIPS_32 symbol:gacode_ROM_START
+rom:0x03C2B0 reloc:MIPS_32 symbol:gacode_ROM_END
+rom:0x03C2BC reloc:MIPS_32 symbol:rscode_ROM_START
+rom:0x03C2C0 reloc:MIPS_32 symbol:rscode_ROM_END
+rom:0x03C2CC reloc:MIPS_32 symbol:gscode_ROM_START
+rom:0x03C2D0 reloc:MIPS_32 symbol:gscode_ROM_END
+rom:0x03C2DC reloc:MIPS_32 symbol:cacode_ROM_START
+rom:0x03C2E0 reloc:MIPS_32 symbol:cacode_ROM_END
+rom:0x03C2EC reloc:MIPS_32 symbol:pvcode_ROM_START
+rom:0x03C2F0 reloc:MIPS_32 symbol:pvcode_ROM_END
+rom:0x03C2FC reloc:MIPS_32 symbol:mgcode_ROM_START
+rom:0x03C300 reloc:MIPS_32 symbol:mgcode_ROM_END
+rom:0x03C30C reloc:MIPS_32 symbol:opcode_ROM_START
+rom:0x03C310 reloc:MIPS_32 symbol:opcode_ROM_END
+rom:0x03C31C reloc:MIPS_32 symbol:knstatic_ROM_START
+rom:0x03C320 reloc:MIPS_32 symbol:knstatic_ROM_END
+rom:0x03C32C reloc:MIPS_32 symbol:idx_ROM_START
+rom:0x03C330 reloc:MIPS_32 symbol:idx_ROM_END
+rom:0x03C33C reloc:MIPS_32 symbol:str_ROM_START
+rom:0x03C340 reloc:MIPS_32 symbol:str_ROM_END
+rom:0x03C34C reloc:MIPS_32 symbol:bgmwbk_ROM_START
+rom:0x03C350 reloc:MIPS_32 symbol:bgmwbk_ROM_END
+rom:0x03C35C reloc:MIPS_32 symbol:bgmptr_ROM_START
+rom:0x03C360 reloc:MIPS_32 symbol:bgmptr_ROM_END
+rom:0x03C36C reloc:MIPS_32 symbol:sewbk_ROM_START
+rom:0x03C370 reloc:MIPS_32 symbol:sewbk_ROM_END
+rom:0x03C37C reloc:MIPS_32 symbol:septr_ROM_START
+rom:0x03C380 reloc:MIPS_32 symbol:septr_ROM_END
+rom:0x03C38C reloc:MIPS_32 symbol:bfx_ROM_START
+rom:0x03C390 reloc:MIPS_32 symbol:bfx_ROM_END
