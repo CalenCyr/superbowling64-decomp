@@ -125,10 +125,6 @@ void Synth_AllocFx( ALFx **fx, ALSynConfig *c, ALHeap *hp ) {
     Synth_SetupFx( c->params );
 }
 
-/* modulation rate range, and hundredths of a cent per natural-log unit of pitch ratio (120000 / ln 2) */
-#define RANGE   2.0
-#define CONVERT 173123.404906676
-
 /*
 ================
 Synth_SetupFx
@@ -164,8 +160,8 @@ void Synth_SetupFx( s32 *param ) {
         d->gain = param[j++];
 
         if ( param[j] ) {
-            d->rsinc = ( ( (f32)param[j++] / 1000 ) * RANGE ) / synth_driver->outputRate;
-            d->rsgain = ( (f32)param[j++] / CONVERT ) * ( d->output - d->input );
+            d->rsinc = ( ( (f32)param[j++] / 1000 ) * N_FX_RANGE ) / synth_driver->outputRate;
+            d->rsgain = ( (f32)param[j++] / N_FX_CONVERT ) * ( d->output - d->input );
             d->rsval = 1.0;
             d->rsdelta = 0.0;
             d->rs = synth_fxStorage.resampler;

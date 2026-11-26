@@ -163,6 +163,10 @@ typedef struct {
 #define AL_FILTER_SET_SOURCE    1
 #define AL_FILTER_ADD_UPDATE    3       /* param: an ALParam to append to the physical voice's queue */
 
+/* modulation rate range, and hundredths of a cent per natural-log unit of pitch ratio (120000 / ln 2) */
+#define N_FX_RANGE      2.0
+#define N_FX_CONVERT    173123.404906676
+
 s32 alFxParam( void *filter, s32 paramID, void *param );
 s32 alFxParamHdl( void *filter, s32 paramID, void *param );
 void _init_lpfilter( ALLowPass *lp );
@@ -318,7 +322,7 @@ Acmd *func_80041434( Acmd *ptr, N_PVoice *pv, s32 tsam, s32 nbytes, s16 outp, s1
 
 /* ===== physical voice pull: 1B2D0, 1C980 ===== */
 
-#define N_FRAME_SAMPLES         184     /* samples a voice makes per pull */
+#define N_FRAME_SAMPLES         AL_MAX_RSP_SAMPLES  /* samples a voice makes per pull */
 #define N_UNITY_PITCH           0x8000  /* the resample command's ratio for 1.0 */
 #define N_MAX_RATIO             1.99996 /* the highest pitch ratio the resampler takes */
 #define N_DECODE_BUFFER         0x170   /* DMEM where a voice's decoded samples start */
@@ -358,8 +362,6 @@ typedef struct {
 /* n samples rounded to the nearest whole frame */
 #define N_ROUND_FRAMES(n)       ( ( ( n ) + N_FRAME_SAMPLES / 2 ) / N_FRAME_SAMPLES * N_FRAME_SAMPLES )
 
-#define N_MIX_BUFFER            0x7C0   /* DMEM of the effect bus's dry and wet mix */
-
 extern s16 D_8005D000[128];         /* gains by pan and by effect mix, 0x7FFF down; index 127 - x for the other side */
 
 /* the ROM's envelope mixer command: like ultralib's aEnvMixer, with the right volume in w0 */
@@ -370,6 +372,15 @@ extern s16 D_8005D000[128];         /* gains by pan and by effect mix, 0x7FFF do
     _a->words.w0 = _SHIFTL(A_ENVMIXER, 24, 8) | _SHIFTL(f, 16, 8) | _SHIFTL(v, 0, 16);  \
     _a->words.w1 = (unsigned int)(s);                                                   \
 }
+
+/* the library's effect presets, by ALSynConfig.fxType: section count, buffer length, then per section the
+delay line, coefficients, modulation and low-pass (as Synth_SetupFx reads them) */
+extern s32 D_8005CE70[];            /* AL_FX_SMALLROOM */
+extern s32 D_8005CED8[];            /* AL_FX_BIGROOM */
+extern s32 D_8005CF60[];            /* AL_FX_ECHO */
+extern s32 D_8005CF88[];            /* AL_FX_CHORUS */
+extern s32 D_8005CFB0[];            /* AL_FX_FLANGE */
+extern s32 D_8005CFD8[];            /* any other fxType */
 
 Acmd *func_80040490( N_PVoice *pv, s32 sampleOffset, Acmd *p );       /* pulls one frame of a physical voice */
 Acmd *func_80040AAC( N_PVoice *pv, s16 *inp, s16 *outp, s32 outCount, Acmd *p ); /* mixes one frame */
