@@ -29,10 +29,12 @@ typedef struct {
 } fileType1Ref_t;
 
 typedef struct {
-    /* 0x00 */ u8 unk_00[0x04];
+    /* 0x00 */ u32 flags;           /* bits 0-2: the surface type its meshes are drawn with (scene_addSurface) */
     /* 0x04 */ s32 parent;          /* the parent part, whose joint cacode divides out */
     /* 0x08 */ f32 rot[3];          /* rotation (radians); cacode's viewer copies it per frame */
-    /* 0x14 */ u8 unk_14[0x1A];
+    /* 0x14 */ f32 trans[3];        /* the joint's place in its parent, without animation */
+    /* 0x20 */ f32 scale[3];
+    /* 0x2C */ u16 layer;           /* bits 0-3: the layer of buckets its meshes go in (scene_addLayer) */
     /* 0x2E */ s16 numRefs;
     /* 0x30 */ fileType1Ref_t refs[1];   /* numRefs entries */
 } fileType1Part_t;
@@ -98,17 +100,24 @@ typedef struct {
     /* 0x38 */ void *texels2;       /* MAT_TEXTURE2: loaded into tile 1 */
 } fileRefB_t;
 
-/* Animation of a model (FILE_TYPE2): per frame, the floats its joints' masks select. */
-#define FILE3_FOG           1           /* fileType3_t.flags: fog from fogNear to fogFar in fogColor */
+/*
+Animation of a model (FILE_TYPE2): per frame, the floats its joints' masks select. A joint's mask has a bit per
+component, from bit 8 down: translation x, y, z, rotation x, y, z, scale x, y, z; a clear bit takes the component
+from the base pose, or else from the model's part.
+*/
+#define ANIM_BASE_POSE      0x8000      /* masks[0]: data starts with a base pose, 9 floats per joint */
+#define ANIM_MASK_FIRST     0x100       /* the mask bit of the first component */
 
 typedef struct {
     /* 0x00 */ u32 numFrames;
     /* 0x04 */ u8 unk_04[0x04];
-    /* 0x08 */ u32 unk_08;
+    /* 0x08 */ u32 numJoints;       /* of the base pose */
     /* 0x0C */ u32 frameSize;       /* floats per frame */
-    /* 0x10 */ u16 *unk_10;
-    /* 0x14 */ f32 *unk_14;
+    /* 0x10 */ u16 *masks;          /* per joint */
+    /* 0x14 */ f32 *data;           /* the base pose (ANIM_BASE_POSE), then the frames */
 } fileType2_t;
+
+#define FILE3_FOG           1           /* fileType3_t.flags: fog from fogNear to fogFar in fogColor */
 
 /* Camera path (FILE_TYPE3): per frame, the floats its masks select (bit 4 >> i for component i). */
 typedef struct {

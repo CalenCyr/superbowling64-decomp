@@ -8,7 +8,8 @@
 #include "libultra.h"
 #include "filecache.h"
 
-#define OBJ_PARAMS_SKIP     2.0f        /* objParams_t.type: no object */
+#define OBJ_PARAMS_SKIP     2.0f        /* objParams_t.type: no object; Obj_Frame draws it as an image: priority is
+                                           its id, unk_08[0..4] its x, y, alpha and x and y scales */
 #define OBJ_PARAMS_END      -1.0f       /* objParams_t.type: ends the records */
 
 /* Parameter record of one object, all floats; Obj_CreateAll reads them in an array. */
@@ -21,7 +22,7 @@ typedef struct {
 /* Header of every object; the list from obj_list is kept in priority order. */
 typedef struct objNode_s {
     /* 0x00 */ void (*update)( void *obj ); /* objClass_t.update of its class; called each frame with the object
-                                           after this header (func_8002A2F0) */
+                                           after this header (Obj_Frame) */
     /* 0x04 */ u32 priority;
     /* 0x08 */ u32 type;
     /* 0x0C */ struct objNode_s *next;
@@ -54,19 +55,22 @@ typedef struct {
     /* 0x0C0 */ Mtx mirrorL[2];         /* by sched_bufferIndex: mtx with its translation mirrored */
 } sceneObjJoint_t;                         /* size 0x140 */
 
+#define OBJ_MAX_JOINTS      100
+
 /* Object of the scene engine (obj_scene holds pointers to them). */
 typedef struct {
     /* 0x00 */ u16 flags;
-    /* 0x02 */ u8 unk_02[2];
+    /* 0x02 */ u16 unk_02;              /* set from its parameter record (Obj_CreateSceneObject) */
     /* 0x04 */ f32 mtx[4][4];           /* placement */
-    /* 0x44 */ f32 floorHeight;         /* drawn at by func_8002B9CC when flags & 0xC000; negative: none */
+    /* 0x44 */ f32 floorHeight;         /* drawn at by Obj_AddToDrawList when flags & 0xC000; negative: none */
     /* 0x48 */ u16 frame;               /* of the animation */
     /* 0x4A */ u8 viewMask;             /* 0: not drawn */
     /* 0x4B */ u8 unk_4B;
     /* 0x4C */ fileType1_t *model;      /* a loaded FILE_TYPE1 file (Cache_GetFile) */
-    /* 0x50 */ s32 *anim;               /* a loaded file (Cache_GetFile); its first word is its frame count */
+    /* 0x50 */ fileType2_t *anim;       /* a loaded FILE_TYPE2 file (Cache_GetFile) */
     /* 0x54 */ u8 unk_54[0x04];
-    /* 0x58 */ sceneObjJoint_t joints[2];  /* one per joint of the model (at least two) */
+    /* 0x58 */ sceneObjJoint_t joints[OBJ_MAX_JOINTS];  /* one per part of the model; Obj_CreateSceneObject allocates
+                                           only those */
 } sceneObject_t;
 
 /*
@@ -100,7 +104,7 @@ typedef struct {
 extern sceneCamera_t *cam_cameras[];
 extern u16 cam_perspNorm;           /* perspNorm of the cameras' projections (guPerspective) */
 
-/* What the classes func_8002B610 and Cam_Create create: the list header, then the scene object or camera. */
+/* What the classes Obj_CreateSceneObject and Cam_Create create: the list header, then the scene object or camera. */
 typedef struct {
     /* 0x00 */ objNode_t node;
     /* 0x10 */ sceneObject_t obj;
@@ -113,10 +117,12 @@ typedef struct {
 extern void *obj_scene[];           /* main's scene objects, of several kinds: cameras (sceneCamera_t, Cam_Create)
                                         and scene objects (sceneObject_t) */
 
+#define DEG_TO_RAD          ( 3.14159265358979323846 / 180.0 )
+
 void Obj_ClearList( void );
 void Obj_Create( objParams_t *params );
 void Obj_CreateAll( objClass_t *classes, objParams_t *params );
-void func_8002A2F0( void );
+void Obj_Frame( void );
 void Obj_Free( objNode_t *obj );
 void Obj_FreeAll( void );
 f32 Str_ParseFloat( u8 *str );
@@ -129,8 +135,8 @@ void Mtx_SetRotScaleTrans( f32 m[4][4], f32 x, f32 y, f32 z, f32 scale, f32 tx, 
 void Mtx_Place( f32 m[4][4], f32 *trans, f32 *rot, f32 *scale );
 void Obj_MakeMatrix( sceneObject_t *obj );
 void Obj_ConvertModel( Gfx *gfx );
-objNode_t *func_8002B610( objParams_t *params );
-void func_8002B9CC( sceneObject_t *obj );
+objNode_t *Obj_CreateSceneObject( objParams_t *params );
+void Obj_AddToDrawList( sceneObject_t *obj );
 void Obj_Draw( sceneObject_t *obj );
 
 /* the cameras (unit 7250) */

@@ -101,7 +101,7 @@ void GA_Frame( void ) {
         ga_pauseCursor = 0;
     }
     ga_stage->update();
-    func_8002A2F0();
+    Obj_Frame();
     for ( team = 0; team <= game_lastTeam; team++ ) {
         GA_HoldBall( ga_teamPlayers[team][ga_teamCurrent[team]] );
     }

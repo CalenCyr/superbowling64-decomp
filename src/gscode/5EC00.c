@@ -433,7 +433,7 @@ s32 GS_TeamSelect( void ) {
                 ( (sceneObject_t *)obj_scene[10 + i] )->viewMask = 0;
             }
         }
-        func_8002A2F0();
+        Obj_Frame();
         for ( i = 0; i < game_numPlayers; i++ ) {
             if ( shown[i] ) {
                 character = game_players[i] & 0xF;

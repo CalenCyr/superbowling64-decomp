@@ -98,8 +98,8 @@ void *Cache_GetFile( s16 index, s16 type ) {
         break;
     case FILE_TYPE2:
         file2 = cache_files[index].data;
-        file2->unk_10 = FILE_RELOC( file2, file2->unk_10 );
-        file2->unk_14 = FILE_RELOC( file2, file2->unk_14 );
+        file2->masks = FILE_RELOC( file2, file2->masks );
+        file2->data = FILE_RELOC( file2, file2->data );
         break;
     case FILE_TYPE3:
         file3 = cache_files[index].data;

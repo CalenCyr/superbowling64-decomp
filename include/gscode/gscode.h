@@ -158,7 +158,7 @@ extern u8 D_8011FC84_gscode[2];           /* per team: its player choosing; bit 
 extern u8 D_801207B2_gscode;              /* frames before the team select leaves, once every team is done */
 extern u16 D_801207B4_gscode[4];          /* per player: character whose model is shown; 0xFFFF: none */
 extern fileType1_t *D_801207C0_gscode[8]; /* per character: its loaded model */
-extern s32 *D_801207E0_gscode[8];         /* per character: its loaded animation */
+extern fileType2_t *D_801207E0_gscode[8];         /* per character: its loaded animation */
 extern s16 D_80120800_gscode[4][3];       /* per player: position of its model */
 extern u8 D_80120818_gscode[4][3];        /* per player: heights of its bars, growing to the character's */
 extern s16 D_80120828_gscode[4][3];       /* per player: x of its bars */

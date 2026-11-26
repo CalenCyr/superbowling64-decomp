@@ -37,7 +37,7 @@ right plays the sound up and down pick and left stops it; then prints the frame'
 void PV_Frame( void ) {
     u8 text[0x50];
 
-    func_8002A2F0();
+    Obj_Frame();
     if ( gridEd_active ) {
         GridEd_Frame();
     }

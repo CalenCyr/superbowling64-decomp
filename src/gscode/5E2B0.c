@@ -124,7 +124,7 @@ s32 GS_CharacterSelect( void ) {
         cam_cameras[0]->upPoint[2] = cam_cameras[0]->eye[2];
         cam_cameras[0]->upPoint[0] = cam_cameras[0]->eye[0];
         cam_cameras[0]->upPoint[1] = -100.0f;
-        func_8002A2F0();
+        Obj_Frame();
     }
 
     Menu_DrawItems( D_8011BDF0_gscode, D_8011F8B8_gscode );

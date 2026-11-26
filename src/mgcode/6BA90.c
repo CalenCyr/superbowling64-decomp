@@ -31,7 +31,7 @@ void MG_Frame( void ) {
         Maze_Build( MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
         Maze_Draw( 0x90F, MG_MAZE_SIZE, MG_MAZE_SIZE, mg_maze );
     }
-    func_8002A2F0();
+    Obj_Frame();
     if ( obj_paramsEnded ) {
         Txt_LoadFont( &game_gfx );
         Txt_SetupFont( &game_gfx, 0 );

@@ -134,17 +134,17 @@ void CA_Init( void ) {
         cache_hostFiles = 1;
         for ( i = 0; i < 3; i++ ) {
             ca_cameras[i] = (sceneCameraNode_t *)Cam_Create( &ca_sceneParams[i] );
-            ca_objects[i] = (sceneObjectNode_t *)func_8002B610( &ca_sceneParams[i + 3] );
+            ca_objects[i] = (sceneObjectNode_t *)Obj_CreateSceneObject( &ca_sceneParams[i + 3] );
         }
         cache_hostFiles = 0;
     } else {
         for ( i = 0; i < 3; i++ ) {
             ca_cameras[i] = (sceneCameraNode_t *)Cam_Create( &ca_sceneParams[i] );
-            ca_objects[i] = (sceneObjectNode_t *)func_8002B610( &ca_sceneParams[i + 3] );
+            ca_objects[i] = (sceneObjectNode_t *)Obj_CreateSceneObject( &ca_sceneParams[i + 3] );
         }
     }
     model = ca_objects[ca_selected]->obj.model;
-    D_80115374_cacode[0] = ca_objects[0]->obj.anim[0];
+    D_80115374_cacode[0] = ca_objects[0]->obj.anim->numFrames;
     for ( i = 0; i < 300; i++ ) {
         guMtxIdentF( ca_objectMatrices[0][i] );
         guMtxIdentF( ca_objectMatrices[1][i] );
@@ -534,7 +534,7 @@ void CA_Frame( void ) {
     Scene_InitPuffs();
     for ( i = 0; i < 3; i++ ) {
         Cam_Update( &ca_cameras[i]->cam );
-        func_8002B9CC( &ca_objects[i]->obj );
+        Obj_AddToDrawList( &ca_objects[i]->obj );
     }
     Scene_Draw();
 

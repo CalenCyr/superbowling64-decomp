@@ -465,9 +465,9 @@ SCORE_IMAGE_*, ROLL_STRIKE, ROLL_SPARE	menu.h	invented: indices of score_images 
 Menu_SlidePos	13490.c	invented: the inline position calculation of Menu_DrawItems's slides
 # main scene engine types (object.h, filecache.h, ground.h)
 sceneObject_t	object.h	invented: scene object (body after the objNode_t header; obj_scene holds pointers); matrix 0x04, frame 0x48, viewMask 0x4A, model 0x4C, anim 0x50, joints from 0x58; gacode.h's sceneObj_t is a partial copy
-sceneObjJoint_t	object.h	invented: 0x140-byte joint: float matrix, then Mtx[2] and mirrored Mtx[2] by sched_bufferIndex (func_8002AF20, func_8002B9CC)
+sceneObjJoint_t	object.h	invented: 0x140-byte joint: float matrix, then Mtx[2] and mirrored Mtx[2] by sched_bufferIndex (Obj_PoseJoints, Obj_AddToDrawList)
 sceneCamera_t	object.h	invented: 0x248-byte camera (cam_cameras); eye/at/up are the guLookAtReflectF arguments of func_8002C324, path a FILE_TYPE3 file
-sceneObjectNode_t	object.h	invented: what func_8002B610 creates: the objNode_t header, then a sceneObject_t (cacode reads model at 0x5C and anim at 0x60 through it)
+sceneObjectNode_t	object.h	invented: what Obj_CreateSceneObject creates: the objNode_t header, then a sceneObject_t (cacode reads model at 0x5C and anim at 0x60 through it)
 sceneCameraNode_t	object.h	invented: what func_8002BFD8 creates: the objNode_t header, then a sceneCamera_t (it lists node + 0x10 in cam_cameras)
 puff_t	ground.h	invented: 12-byte camera-facing square (scene_puffs, 50): flags, life, alpha, size and their steps (Scene_StartPuff starts one, Scene_DrawPuffs ages and draws them)
 
@@ -972,6 +972,14 @@ Mtx_Place	0x8002AC84	invented: moves a matrix by a translation, then rotates and
 Obj_MakeMatrix	0x8002AEBC	invented: makes an object's drawn matrix from its placement
 Obj_ConvertModel	0x8002B380	invented: converts model commands in place into the display list they stand for
 Obj_Draw	0x8002BE00	invented: draws an object and advances its animation
+Obj_Frame	0x8002A2F0	invented: runs a frame of the object list: the manual-camera keys, every object's update, the scene draw and the image records
+Obj_PoseJoints	0x8002AF20	invented: sets each joint matrix of an object from its parent and the animation frame, then makes the drawn matrices
+Obj_CreateSceneObject	0x8002B610	invented: the create of the scene object class: loads model and animation, sizes, places and lists the object in obj_scene
+Obj_AddToDrawList	0x8002B9CC	invented: poses an object and adds its parts, mirror images and shadow to the draw list (Scene_AddToDrawList)
+fileType2_t.numJoints, fileType2_t.masks, fileType2_t.data, ANIM_BASE_POSE, ANIM_MASK_FIRST	filecache.h	invented: Obj_PoseJoints reads masks per joint (bits from 8 down select frame floats) and a base pose of numJoints * 9 floats at data when masks[0] & 0x8000
+fileType1Part_t.flags, fileType1Part_t.trans, fileType1Part_t.scale, fileType1Part_t.layer	filecache.h	invented: Obj_AddToDrawList takes the surface from flags & 7 and the layer from layer & 0xF; Obj_PoseJoints passes trans (0x14), rot and scale (0x20) to Mtx_Place
+OBJ_MAX_JOINTS	object.h	invented: Obj_CreateSceneObject allocates 0x7D68 less (100 - numParts) joints, so sceneObject_t holds 100
+DEG_TO_RAD	object.h	invented: Obj_CreateSceneObject multiplies the record's rotation by pi / 180 (double 0x3F91DF46A2529D39)
 GridEd_Frame	0x80035DA0	invented: the frame of the floor grid editor
 Scene_InsertEntry	C650.c	invented: the inline helper of Scene_AddToDrawList that adds an entry to a draw-list bucket in key order
 
@@ -1080,8 +1088,8 @@ GA_ScoreStandard	0x801151A0	invented: game mode of the duel, team and pair games
 GA_ScorePar	0x801155BC	invented: game mode of the par game (GA_ParGameLoop): scores each frame against par
 gaCharacter_t.timingAngle	gacode.h	invented: the throw's timing as an angle (-pi/2 to pi/2, GA_PanelTiming); its sine and cosine bend the release velocity (debug text 'FR SIN')
 gaCharacter_t.hook	gacode.h	invented: sideways pull added to the rolling ball's motion[0].vel[0] each frame (GA_RollBall); from the stage, scaled by the spin at release
-sceneObject_t.floorHeight	object.h	invented: height of the floor under the object (GA_PlaceBody: the spot's y less the body's height), which func_8002B9CC draws at when flags & 0xC000; negative: none
-objNode_t.update	object.h	invented: function func_8002A2F0 calls each frame with the object after the header; objClass_t.update of its class
+sceneObject_t.floorHeight	object.h	invented: height of the floor under the object (GA_PlaceBody: the spot's y less the body's height), which Obj_AddToDrawList draws at when flags & 0xC000; negative: none
+objNode_t.update	object.h	invented: function Obj_Frame calls each frame with the object after the header; objClass_t.update of its class
 objClass_t.update	object.h	invented: the class's per-frame function (ga_classes: Obj_Draw, Cam_Update, ...), copied into objNode_t.update
 GA_ScoreSetupGame	0x801156D8	invented: game mode of mode 0's sub-mode 2 (GA_TeamGameLoop over D_801237F0_gacode's pin setups): ends the frame by GA_EndFrame, the game after frame 10
 GA_ScorePinEditor	0x801157F8	invented: game mode of mode 2, the pin editor (ga_editorPins): every throw ends the frame, with no callout

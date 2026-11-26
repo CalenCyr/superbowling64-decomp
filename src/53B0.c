@@ -8,6 +8,12 @@
 #include "object.h"
 #include "ground.h"
 #include "boot.h"
+#include "filecache.h"
+#include "input.h"
+#include "game.h"
+#include "overlay.h"
+#include "sprite.h"
+#include "dbgtext.h"
 
 /*
 ================
@@ -74,7 +80,56 @@ void Obj_CreateAll( objClass_t *classes, objParams_t *params ) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002A2F0);
+/*
+================
+Obj_Frame
+
+Runs a frame of the object list: in the pvcode scene, C-down and C-up switch the cameras to manual and back, and
+while manual the animations step only with C-right (forward) and C-left (back). Then updates every object, draws
+the scene, and draws the images of the records of type OBJ_PARAMS_SKIP over it.
+================
+*/
+void Obj_Frame( void ) {
+    objNode_t *obj;
+    s32 i;
+
+    if ( cam_manual == FALSE && ( cont_allPressed & D_CBUTTONS ) && game_scene == SCENE_PVCODE ) {
+        cam_manual = TRUE;
+        obj_frameStep = 0;
+    }
+    if ( cam_manual == TRUE && ( cont_allPressed & U_CBUTTONS ) && game_scene == SCENE_PVCODE ) {
+        cam_manual = FALSE;
+        obj_frameStep = 1;
+    }
+    obj_frameStep = 1;
+    if ( cam_manual == TRUE ) {
+        obj_frameStep = 0;
+        if ( cont_allHeld & R_CBUTTONS ) {
+            obj_frameStep = 1;
+        }
+        if ( cont_allHeld & L_CBUTTONS ) {
+            obj_frameStep = -1;
+        }
+    }
+    Scene_ClearDrawList();
+    for ( obj = &obj_list; obj->next != NULL; obj = obj->next ) {
+        obj->next->update( obj->next + 1 );
+    }
+    Scene_Draw();
+    Scene_DrawPuffs();
+    Scene_BeginFrame();
+    gDPSetAlphaCompare( game_gfx++, G_AC_THRESHOLD );
+    gDPSetTexturePersp( game_gfx++, G_TP_NONE );
+    gDPSetTextureLUT( game_gfx++, G_TT_RGBA16 );
+    gDPSetPrimColor( game_gfx++, 0, 0, 255, 255, 255, 255 );
+    draw_rdpMode = DRAW2D_FILL;
+    for ( i = 0; !( obj_params[i].type <= OBJ_PARAMS_END ); i++ ) {
+        if ( obj_params[i].type == OBJ_PARAMS_SKIP ) {
+            Draw_ImageScaled( (u32)obj_params[i].priority, obj_params[i].unk_08[0], obj_params[i].unk_08[1],
+                              (u32)obj_params[i].unk_08[2], obj_params[i].unk_08[3], obj_params[i].unk_08[4] );
+        }
+    }
+}
 
 /*
 ================
@@ -343,7 +398,102 @@ void Obj_MakeMatrix( sceneObject_t *obj ) {
 INCLUDE_ASM("asm/nonmatchings/53B0", Obj_MakeMatrix);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002AF20);
+/*
+================
+Obj_PoseJoints
+
+Sets the joint matrices of obj for its frame: each joint is its parent's matrix (the object's for a root), moved,
+rotated and scaled by the components its animation mask selects from the frame, the others from the base pose or
+the model's part. Makes the drawn matrices, and with flags & 0xC000 the mirrored ones.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: MATCH-PENDING (R2): exact only with sched_bufferIndex declared a plain s8 (lb), as for
+// Obj_MakeMatrix; boot.h declares it volatile, which loads it with lbu and a sign extension
+void Obj_PoseJoints( sceneObject_t *obj ) {
+    fileType1_t *model;
+    fileType2_t *anim;
+    f32 *base;
+    f32 *values;
+    s32 hasBase;
+    u32 j;
+    s32 i;
+    u32 mask;
+    f32 trans[3];
+    f32 rot[3];
+    f32 scale[3];
+
+    anim = obj->anim;
+    model = obj->model;
+    if ( anim->masks[0] & ANIM_BASE_POSE ) {
+        hasBase = TRUE;
+        base = anim->data;
+        values = base + anim->frameSize * obj->frame + anim->numJoints * 9;
+    } else {
+        hasBase = FALSE;
+        values = anim->data + anim->frameSize * obj->frame;
+    }
+    for ( j = 0; j < model->numParts; j++ ) {
+        if ( model->parts[j]->parent != -1 ) {
+            memcpy( obj->joints[j].mtx, obj->joints[model->parts[j]->parent].mtx, sizeof( obj->mtx ) );
+        } else {
+            memcpy( obj->joints[j].mtx, obj->mtx, sizeof( obj->mtx ) );
+        }
+        if ( anim->masks[j] == 0 ) {
+            if ( hasBase ) {
+                Mtx_Place( obj->joints[j].mtx, &base[j * 9], &base[j * 9 + 3], &base[j * 9 + 6] );
+            } else {
+                Mtx_Place( obj->joints[j].mtx, model->parts[j]->trans, model->parts[j]->rot, model->parts[j]->scale );
+            }
+        } else {
+            mask = anim->masks[j];
+            for ( i = 0; i < 3; i++ ) {
+                if ( mask & ANIM_MASK_FIRST ) {
+                    trans[i] = *values++;
+                } else if ( hasBase ) {
+                    trans[i] = base[j * 9 + i];
+                } else {
+                    trans[i] = model->parts[j]->trans[i];
+                }
+                mask <<= 1;
+            }
+            for ( i = 0; i < 3; i++ ) {
+                if ( mask & ANIM_MASK_FIRST ) {
+                    rot[i] = *values++;
+                } else if ( hasBase ) {
+                    rot[i] = base[j * 9 + 3 + i];
+                } else {
+                    rot[i] = model->parts[j]->rot[i];
+                }
+                mask <<= 1;
+            }
+            for ( i = 0; i < 3; i++ ) {
+                if ( mask & ANIM_MASK_FIRST ) {
+                    scale[i] = *values++;
+                } else if ( hasBase ) {
+                    scale[i] = base[j * 9 + 6 + i];
+                } else {
+                    scale[i] = model->parts[j]->scale[i];
+                }
+                mask <<= 1;
+            }
+            Mtx_Place( obj->joints[j].mtx, trans, rot, scale );
+        }
+        guMtxF2L( obj->joints[j].mtx, &obj->joints[j].mtxL[sched_bufferIndex] );
+        if ( obj->flags & 0xC000 ) {
+            for ( i = 0; i < 4; i++ ) {
+                obj->joints[j].mtx[i][1] = -obj->joints[j].mtx[i][1];
+            }
+            guMtxF2L( obj->joints[j].mtx, &obj->joints[j].mirrorL[sched_bufferIndex] );
+            for ( i = 0; i < 4; i++ ) {
+                obj->joints[j].mtx[i][1] = -obj->joints[j].mtx[i][1];
+            }
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/53B0", Obj_PoseJoints);
+#endif
 
 /*
 ================
@@ -378,9 +528,151 @@ void Obj_ConvertModel( Gfx *gfx ) {
     } while ( end != -1 );
 }
 
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002B610);
+/*
+================
+Obj_CreateSceneObject
 
-INCLUDE_ASM("asm/nonmatchings/53B0", func_8002B9CC);
+The create of the scene object class: loads the model and animation of params, sizes the object for the model's
+parts, places it, and lists it in obj_scene.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: exact (with -DNON_MATCHING) but at -O3 it inlines Mtx_SetRotScaleTrans, which is parked
+// (MATCH-PENDING R17), so it can only be built from source together with that function
+objNode_t *Obj_CreateSceneObject( objParams_t *params ) {
+    fileType1_t *model;
+    sceneObjectNode_t *node;
+    sceneObject_t *obj;
+
+    model = Cache_GetFile( params->unk_08[0], FILE_TYPE1 );
+    node = Mem_Alloc( sizeof( sceneObjectNode_t ) - ( OBJ_MAX_JOINTS - model->numParts ) * sizeof( sceneObjJoint_t ) );
+    obj = &node->obj;
+    obj->model = model;
+    obj->anim = Cache_GetFile( params->unk_08[1], FILE_TYPE2 );
+    Mtx_SetRotScaleTrans( obj->mtx, params->unk_08[8] * DEG_TO_RAD, params->unk_08[9] * DEG_TO_RAD,
+                          params->unk_08[10] * DEG_TO_RAD, 1.0 - params->unk_08[11], params->unk_08[2],
+                          params->unk_08[3], params->unk_08[4] );
+    obj->frame = 0;
+    obj->viewMask = (u32)params->unk_08[5];
+    obj->flags = (u32)params->unk_08[6];
+    if ( params->unk_08[13] != 0.0f ) {
+        obj->flags |= 0xC000;
+    }
+    obj->unk_02 = (u32)params->unk_08[7];
+    obj_scene[(s32)params->priority] = obj;
+    return &node->node;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/53B0", Obj_CreateSceneObject);
+#endif
+
+/*
+================
+Obj_AddToDrawList
+
+Poses obj and adds its parts to the draw list, for the cameras of its viewMask that face it (all of them while the
+cameras are manual, or for an object of another microcode); with flags & 0xC000 and a floor height, adds their
+mirror images too, and with flags & 0x3000 its shadow, on the joint flags & 0xE00 picks.
+================
+*/
+#ifdef NON_MATCHING
+// NON_MATCHING: MATCH-PENDING (R2): exact only with sched_bufferIndex declared a plain s8 (lb), as for
+// Obj_MakeMatrix; boot.h declares it volatile, which loads it with lbu and a sign extension
+void Obj_AddToDrawList( sceneObject_t *obj ) {
+    fileType1_t *model;
+    fileType1Part_t *part;
+    fileRefB_t *material;
+    sceneCamera_t *cam;
+    u8 viewMask;
+    u32 i;
+    u32 j;
+    s32 k;
+    Mtx *shadowMtx;
+    f32 mtx[4][4];      // R36: unused in the original: retail's frame (0xA0) holds 0x40 bytes of locals below its
+                        // two spill slots that no instruction addresses
+
+    model = obj->model;
+    Obj_PoseJoints( obj );
+    viewMask = obj->viewMask;
+    scene_addUcode = obj->flags & 3;
+    if ( scene_addUcode == 0 && cam_manual == FALSE ) {
+        for ( i = 0; i < cam_count; i++ ) {
+            if ( ( viewMask >> i ) & 1 ) {
+                cam = cam_cameras[i];
+                if ( cam->dir[0] * ( obj->mtx[3][0] - cam->eye[0] ) + cam->dir[1] * ( obj->mtx[3][1] - cam->eye[1] )
+                     + cam->dir[2] * ( obj->mtx[3][2] - cam->eye[2] ) < 0.0f ) {
+                    viewMask &= ~( 1 << i );
+                }
+            }
+        }
+    }
+    if ( viewMask == 0 ) {
+        return;
+    }
+    for ( j = 0; j < model->numParts; j++ ) {
+        part = model->parts[j];
+        scene_addSurface = part->flags & 7;
+        for ( k = 0; k < part->numRefs; k++ ) {
+            material = cache_files[part->refs[k].material].data;
+            scene_viewMask = viewMask;
+            scene_addLayer = part->layer & 0xF;
+            if ( scene_addLayer < 2 ) {
+                scene_addNoZBuffer = FALSE;
+                scene_addTwoCycle = TRUE;
+            } else {
+                scene_addNoZBuffer = TRUE;
+                scene_addTwoCycle = FALSE;
+            }
+            scene_addCullBack = TRUE;
+            scene_addByMaterial = material->flags & MAT_TEXTURE;
+            scene_addMesh = part->refs[k].mesh;
+            scene_addMaterial = part->refs[k].material;
+            scene_addMatrix = &obj->joints[j].mtxL[sched_bufferIndex];
+            Scene_AddToDrawList();
+            if ( ( obj->flags & 0xC000 ) && obj->floorHeight >= 0.0f ) {
+                scene_viewMask &= obj->flags >> 14;
+                scene_addLayer = 3;
+                scene_addNoZBuffer = TRUE;
+                scene_addTwoCycle = FALSE;
+                scene_addCullBack = FALSE;
+                scene_addMatrix = &obj->joints[j].mirrorL[sched_bufferIndex];
+                Scene_AddToDrawList();
+            }
+        }
+    }
+    if ( obj->flags & 0x3000 ) {
+        Cache_GetFile( 0x6E1, FILE_TYPE1 );
+        scene_addSurface = 2;
+        scene_addLayer = 0;
+        scene_addNoZBuffer = FALSE;
+        scene_addTwoCycle = TRUE;
+        scene_addMaterial = 0x6E0;
+        scene_addByMaterial = TRUE;
+        scene_addMesh = ( obj->flags >> 12 ) | 0x6DC;
+        switch ( obj->flags & 0xE00 ) {
+        case 0x400:
+            shadowMtx = &obj->joints[20].mtxL[sched_bufferIndex];
+            break;
+        case 0x800:
+            shadowMtx = &obj->joints[17].mtxL[sched_bufferIndex];
+            break;
+        case 0xC00:
+            shadowMtx = &obj->joints[24].mtxL[sched_bufferIndex];
+            break;
+        case 0xE00:
+            shadowMtx = &obj->joints[15].mtxL[sched_bufferIndex];
+            break;
+        default:
+            shadowMtx = &obj->joints[0].mtxL[sched_bufferIndex];
+            break;
+        }
+        scene_addMatrix = shadowMtx;
+        Scene_AddToDrawList();
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/53B0", Obj_AddToDrawList);
+#endif
 
 /*
 ================
@@ -390,9 +682,9 @@ Draws obj, and advances its animation, from the start after its last frame.
 ================
 */
 void Obj_Draw( sceneObject_t *obj ) {
-    func_8002B9CC( obj );
+    Obj_AddToDrawList( obj );
     obj->frame += obj_frameStep;
-    if ( obj->frame == obj->anim[0] ) {
+    if ( obj->frame == obj->anim->numFrames ) {
         obj->frame = 0;
     }
 }

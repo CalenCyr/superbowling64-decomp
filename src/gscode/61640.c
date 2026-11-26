@@ -88,7 +88,7 @@ s32 GS_CharacterMenu( void ) {
         Mtx_SetRotScaleTrans( ( (sceneObject_t *)obj_scene[10] )->mtx, 0.0f, 0.0f, 0.0f,
                        D_801205AC_gscode[D_80120656_gscode] * 1.2, -100.0f, -100.0f, 300.0f );
     draw:
-        func_8002A2F0();
+        Obj_Frame();
     }
 
     switch ( D_80120655_gscode ) {
