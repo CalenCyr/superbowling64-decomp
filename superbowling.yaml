@@ -288,7 +288,8 @@ segments:
       # .data, in link order: the game's units, libultra's members, libkmc, then the microcode objects
       - [0x364E0, data]          # shared globals; owners interleave (1060, 2DF0, 3D50, 12C70, ...): still asm
       - [0x37590, .data, 7250]   # draw_rdpMode, draw_nextPalette
-      - [0x375A0, data]          # an unreferenced u8[2][24] (owner 7250, BEF0 or C650), then C650's: still asm
+      - [0x375A0, .data, BEF0]   # an unreferenced u8[2][24]: the first candidate in link order after 7250, whose .data ends 8 bytes earlier
+      - [0x375D0, .data, C650]   # the texture sizes and the puffs' images, squares and colours
       - [0x37D80, .data, 111A0]
       - [0x37D90, .data, 12260]
       - [0x37DD0, .data, 12C70]

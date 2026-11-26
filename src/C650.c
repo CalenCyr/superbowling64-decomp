@@ -9,6 +9,22 @@
 #include "object.h"
 #include "sprite.h"
 
+/* ===== Data ===== */
+
+static u16 scene_powersOfTwo[9] = { 2, 4, 8, 16, 32, 64, 128, 256, 512 };
+static u16 scene_puffImages[2] = { 0x093E, 0x093E };  /* image files of the two kinds of puff */
+static s32 D_8005C1E8[2] = { 0 };           /* unreferenced */
+static Vtx scene_puffSquares[NUM_PUFF_SIZES * 4] = {  /* squares of four vertices, by size; Scene_InitPuffs fills all but the first */
+    { { { -1, 1, 0 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 1, 1, 0 }, 0, { 0x1000, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { -1, -1, 0 }, 0, { 0, 0x1000 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 1, -1, 0 }, 0, { 0x1000, 0x1000 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+};
+static u8 scene_puffColors[2][3] = {        /* rgb of the two kinds of puff */
+    { 0x80, 0x80, 0x80 },
+    { 0xFF, 0xFF, 0xFF },
+};
+
 /*
  * gDPLoadMultiBlock with the render tile at tmem 0: only the load tile takes tmem, so the render tile samples
  * whatever lies at the start of tmem.
