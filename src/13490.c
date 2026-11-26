@@ -395,6 +395,9 @@ player has finished the game.
 // roll, a duplicated if/else), no source clue.
 // A further 20-minute run reached 275 only by holding -2 in a local shared with the foul test (left unset on one
 // path). No effect: roll = pins then the -1 test, pins != -1 first, rowY = y before the first Draw_Image.
+// Dumps (-dl/-dg): rowY (9 refs over 246 insns) loses to frame (10 over 238) and to the rowY + 9 temporary, which cse
+// substitutes for rowY at its one later use, so the temporary takes a2; retail's in-place s4 += 9 follows if rowY is
+// allocated first. No effect or worse: rowY declared in each branch (worse), rowY += 9 just before the call (worse).
 void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;

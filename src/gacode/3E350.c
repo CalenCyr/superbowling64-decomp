@@ -136,6 +136,8 @@ result.
 // increments in the call or after it, a do-while; a 23k-iteration permuter run stayed at 15.
 // Also tried: the increments' order (i first, body first), the pointers set in the for's init, i as
 // s16/u8/u32, body declared before spot; body assigned before spot folds the lane load into body's s1.
+// Dumps (-dl): the lane load (one block-local pseudo, live from the load to the copy into body) has no hard-register
+// suggestion and nothing else is live in v0/v1 there; retail's a0 needs a direct copy of it into a0 or a busy v0/v1.
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
