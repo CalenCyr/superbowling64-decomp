@@ -28,8 +28,7 @@
 extern u8 save_enabled;             /* saving is on */
 extern u8 save_step;                /* step of Save_SaveSettings */
 extern s32 save_contMsg;            /* message to and from the controller thread */
-extern u8 D_800693E8[0x20];
-extern u8 D_80066BA4[0x20];
+extern u8 D_800693E8[0x20];          /* cont_pakPfs.id of the pak saving is enabled on */
 extern s32 save_promptState;        /* PROMPT_CLOSED etc. */
 extern s32 save_promptFrame;        /* frame of the zoom, or of a PROMPT_TIMED prompt */
 extern f32 save_promptZoom[PROMPT_ZOOM_FRAMES];  /* scale of the prompt in each frame of its zoom */

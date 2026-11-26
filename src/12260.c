@@ -218,7 +218,7 @@ s32 Save_SaveSettings( void ) {
     case 4:
         if ( osRecvMesg( &cont_replyQueue, (OSMesg *)&save_contMsg, OS_MESG_NOBLOCK ) != -1 ) {
             if ( cont_result == 0 ) {
-                if ( memcmp( D_800693E8, D_80066BA4, sizeof( D_800693E8 ) ) == 0 ) {
+                if ( memcmp( D_800693E8, cont_pakPfs.id, sizeof( D_800693E8 ) ) == 0 ) {
                     save_step = 5;
                 } else {
                     save_step = 8;
