@@ -2,7 +2,8 @@
 #   asm-helper NAME     an inline-asm function or macro the evidence shows the original had (R18); its
 #                       callers still count as matched, and are listed
 #   original-asm NAME   a function the evidence shows was written in assembly: ORIGINAL-ASM, counted neither way
-#   rule-exception RULE FUNC   a user-ruled exception: FUNC's [match] findings of RULE become advisories (the
+#   rule-exception RULE NAME   a user-ruled exception: [match] findings of RULE in function NAME, or at file scope
+#                       about global NAME, become advisories (the
 #                       code carries a RULE-EXCEPTION comment with the reason)
 # KMC libkmc's hand-written long long helpers (src/libkmc/llmath.c): $t9 scratch, `xor r,r,r` clears, $ra saved in
 # $t5, results in non-ABI registers (quotient v0:v1 with remainder a0:a1 or t1), a branch from __divdi3 into
@@ -20,3 +21,5 @@ original-asm __floatdidf
 
 # GA_KeepOnFloor: retail skips the in-air case with an empty `else if` (user ruling 2026-11-26)
 rule-exception R17 GA_KeepOnFloor
+# 53B0 declares sched_bufferIndex without volatile (lb), apart from sched.h's volatile declaration (user ruling 2026-11-26)
+rule-exception R2 sched_bufferIndex

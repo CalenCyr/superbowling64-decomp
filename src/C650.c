@@ -4,6 +4,7 @@
 #include "libultra.h"
 #include "libc.h"
 #include "boot.h"
+#include "sched.h"
 #include "ground.h"
 #include "filecache.h"
 #include "object.h"

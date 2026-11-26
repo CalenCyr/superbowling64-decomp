@@ -3,6 +3,7 @@
 #include "common.h"
 #include "libultra.h"
 #include "cacode/cacode.h"
+#include "sched.h"
 
 /* ===== Bss ===== */
 

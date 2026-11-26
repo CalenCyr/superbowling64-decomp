@@ -12,6 +12,11 @@
 #include "input.h"
 #include "game.h"
 #include "overlay.h"
+
+// RULE-EXCEPTION: R2, this unit reads the scheduler's buffer index with a plain lb where units 1060, 7250 and C650
+// need the volatile declaration in sched.h (lbu and a separate sign extension): the original's unit had its own
+// non-volatile declaration (user ruling)
+extern s8 sched_bufferIndex;
 #include "sprite.h"
 #include "dbgtext.h"
 
@@ -368,16 +373,10 @@ Obj_MakeMatrix
 Makes the drawn matrix of obj from its placement.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: MATCH-PENDING (R2): exact only with sched_bufferIndex declared a plain s8 (lb); boot.h declares it
-// volatile, as units 1060, 7250 and C650 read it, which loads it with lbu and a sign extension
 void Obj_MakeMatrix( sceneObject_t *obj ) {
     Mtx_Scale( obj->mtx, 1.0f, 1.0f, 1.0f );
     guMtxF2L( obj->mtx, &obj->joints[0].mtxL[sched_bufferIndex] );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/53B0", Obj_MakeMatrix);
-#endif
 
 /*
 ================
@@ -388,9 +387,6 @@ rotated and scaled by the components its animation mask selects from the frame, 
 the model's part. Makes the drawn matrices, and with flags & 0xC000 the mirrored ones.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: MATCH-PENDING (R2): exact only with sched_bufferIndex declared a plain s8 (lb), as for
-// Obj_MakeMatrix; boot.h declares it volatile, which loads it with lbu and a sign extension
 void Obj_PoseJoints( sceneObject_t *obj ) {
     fileType1_t *model;
     fileType2_t *anim;
@@ -472,9 +468,6 @@ void Obj_PoseJoints( sceneObject_t *obj ) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/53B0", Obj_PoseJoints);
-#endif
 
 /*
 ================
@@ -550,9 +543,6 @@ cameras are manual, or for an object of another microcode); with flags & 0xC000 
 mirror images too, and with flags & 0x3000 its shadow, on the joint flags & 0xE00 picks.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: MATCH-PENDING (R2): exact only with sched_bufferIndex declared a plain s8 (lb), as for
-// Obj_MakeMatrix; boot.h declares it volatile, which loads it with lbu and a sign extension
 void Obj_AddToDrawList( sceneObject_t *obj ) {
     fileType1_t *model;
     fileType1Part_t *part;
@@ -645,9 +635,6 @@ void Obj_AddToDrawList( sceneObject_t *obj ) {
         Scene_AddToDrawList();
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/53B0", Obj_AddToDrawList);
-#endif
 
 /*
 ================

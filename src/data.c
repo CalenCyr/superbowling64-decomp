@@ -6,6 +6,7 @@
 #include "common.h"
 #include "libultra.h"
 #include "boot.h"
+#include "sched.h"
 #include "dbgtext.h"
 #include "filecache.h"
 #include "game.h"

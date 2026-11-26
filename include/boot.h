@@ -67,9 +67,7 @@ extern s32 sched_rspTime;           /* RSP time of the last frame (mgcode's mete
 extern s32 sched_rdpTime;           /* RDP time of the last frame (shown as RDP) */
 extern s32 sched_cpuTime;           /* CPU time of the last frame (shown as CPU) */
 extern s32 sched_frameRate;         /* frame rate (shown as FRATE) */
-/* 0 or 1: which of the double-buffered display lists and matrices is built */
-// volatile: units 1060, 7250 and C650 read it with lbu and a separate sign extension, once per use (53B0 alone uses lb)
-extern volatile s8 sched_bufferIndex;
+/* sched_bufferIndex: declared in sched.h (unit 53B0 has its own, non-volatile view) */
 extern Gfx *game_gfx;               /* next command of the display list being built */
 extern saveData_t save_data;
 extern saveData_t *save_dataPtr;    /* &save_data */

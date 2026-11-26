@@ -3,6 +3,7 @@
 #include "common.h"
 #include "libultra.h"
 #include "boot.h"
+#include "sched.h"
 #include "heap.h"
 #include "input.h"
 #include "libc.h"
