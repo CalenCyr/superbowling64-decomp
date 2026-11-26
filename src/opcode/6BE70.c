@@ -4,6 +4,9 @@
 #include "libultra.h"
 #include "opcode/opcode.h"
 
+/* The unit's uninitialised state (it has no .data). */
+static u16 op_modeFrames; /* frames in the current mode */
+
 /*
 ================
 OP_Init

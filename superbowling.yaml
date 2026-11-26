@@ -512,9 +512,12 @@ segments:
       - [0x6BE70, c, opcode/6BE70]
       - [0x6C470, c, opcode/6C470]
       - [0x6CC50, c, opcode/6CC50]
-      - [0x6DBD0, data]
-      - [0x6DDD0, .rodata, opcode/6C470]   # func_80112958_opcode's jump table
-      - { type: bss, vram: 0x80114350 }
+      - [0x6DBD0, .data, opcode/6C470]     # OP_CheckSettings's step (6BE70 has no .data)
+      - [0x6DBE0, .data, opcode/6CC50]     # the character table, the Controller Pak screen's images and state
+      - [0x6DDD0, .rodata, opcode/6C470]   # OP_CheckSettings's jump table
+      - { type: .bss, vram: 0x80114350, name: opcode/6BE70 }
+      - { type: .bss, vram: 0x80114360, name: opcode/6C470 }
+      - { type: .bss, vram: 0x80114370, name: opcode/6CC50 }
 
   - name: idx
     type: bin

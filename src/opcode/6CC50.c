@@ -6,6 +6,77 @@
 #include "save.h"
 #include "opcode/opcode.h"
 
+/* ===== Data ===== */
+
+/* Entry of each character code 0x10-0x94 (OP_ConvertPakChar). */
+static u16 op_charEntries[0x85] = {
+    0x00F0, 0x00F1, 0x00F2, 0x00F3, 0x00F4, 0x00F5, 0x00F6, 0x00F7,
+    0x00F8, 0x00F9, 0x00B0, 0x00B1, 0x00B2, 0x00B3, 0x00B4, 0x00B5,
+    0x00B6, 0x00B7, 0x00B8, 0x00B9, 0x00BA, 0x00BB, 0x00BC, 0x00BD,
+    0x00BE, 0x00BF, 0x00C0, 0x00C1, 0x00C2, 0x00C3, 0x00C4, 0x00C5,
+    0x00C6, 0x00C7, 0x00C8, 0x00C9, 0x010E, 0x00FA, 0x010D, 0x0106,
+    0x0116, 0x0114, 0x00E4, 0x0115, 0x00E5, 0x0123, 0x00E7, 0x0118,
+    0x010F, 0x010A, 0x00AC, 0x00AE, 0x00AF, 0x008C, 0x008D, 0x008E,
+    0x008F, 0x0090, 0x0088, 0x0089, 0x008A, 0x008B, 0x0086, 0x0087,
+    0x0058, 0x0059, 0x005A, 0x005B, 0x005C, 0x005D, 0x005E, 0x005F,
+    0x0060, 0x0061, 0x0062, 0x0063, 0x0064, 0x0065, 0x0066, 0x0067,
+    0x0068, 0x0069, 0x006A, 0x006B, 0x006C, 0x006D, 0x006E, 0x006F,
+    0x0070, 0x0071, 0x0072, 0x0073, 0x0074, 0x0075, 0x0076, 0x0077,
+    0x0078, 0x0079, 0x007A, 0x007B, 0x007C, 0x007D, 0x007E, 0x007F,
+    0x0080, 0x0081, 0x0082, 0x0083, 0x0091, 0x0092, 0x0093, 0x0094,
+    0x0095, 0x0096, 0x0097, 0x0098, 0x0099, 0x009A, 0x009B, 0x009C,
+    0x009D, 0x009E, 0x009F, 0x00A0, 0x00A1, 0x00A2, 0x00A3, 0x00A4,
+    0x00A5, 0x00A6, 0x00A7, 0x00A8, 0x00A9,
+};
+
+/* The images of the Controller Pak screen, ended by an id of -1. */
+static opImage_t op_pakImages[] = {
+    { 0x880, 64, 192, 0xFF },
+    { 0x878, 176, 192, 0xFF },
+    { 0x85B, 0, 8, 0xFF },
+    { 0x85B, 64, 8, 0xFF },
+    { 0x85B, 128, 8, 0xFF },
+    { 0x85B, 192, 8, 0xFF },
+    { 0x85B, 256, 8, 0xFF },
+    { 0x927, 36, 56, 0xC8 },
+    { 0x928, 36, 72, 0xC8 },
+    { 0x928, 36, 90, 0xC8 },
+    { 0x928, 36, 108, 0xC8 },
+    { 0x928, 36, 126, 0xC8 },
+    { 0x928, 36, 144, 0xC8 },
+    { 0x901, 40, 168, 0xC8 },
+    { 0x900, 178, 168, 0xC8 },
+    { 0x8A2, 32, 12, 0xFF },
+    { -1, 0, 0, 0xFF },
+};
+
+/* Unreferenced: two glyph strings for Txt_DrawGlyphs, glyphs 0-15 and 16-31, each ended by 0xFFFF. */
+static u16 D_80114254_opcode[17] = {
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0xFFFF,
+};
+static u16 D_80114278_opcode[17] = {
+    16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 0xFFFF,
+};
+
+static u16 op_cursorImages[3] = { 0xAE0, 0xADF, 0xADE }; /* cursor images, a frame each */
+static u8 op_pakStep = 0;                                  /* step of OP_PakScreen */
+static u8 op_promptChoice = 1;                             /* choice of the first prompt */
+static u8 op_cursorLine = 0;                               /* line of the cursor */
+static u8 op_pakState = 0;                                 /* state of the screen */
+
+/*
+The unit's uninitialised state. File-scope statics: the assembler allocates them in .bss in definition order
+with their own alignment, which the retail layout shows.
+*/
+static s32 op_pakMsg;                   /* OP_PakScreen's message to and from the controller thread */
+static u16 op_numNotes;                 /* notes listed */
+static u16 op_firstNote;                /* first note shown */
+static u16 op_noteIndex[PAK_MAX_NOTES]; /* per note listed: its index on the pak */
+static u16 op_notePages[PAK_MAX_NOTES]; /* per note listed: its pages */
+static opNoteName_t op_noteNames[PAK_MAX_NOTES];
+static s32 op_freeNotes;                /* free notes */
+static s32 op_freePages;                /* free pages */
+
 /*
 ================
 OP_ConvertPakChar

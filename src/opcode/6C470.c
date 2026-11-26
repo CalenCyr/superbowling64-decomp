@@ -6,6 +6,9 @@
 #include "save.h"
 #include "opcode/opcode.h"
 
+static u8 op_checkStep = 0; /* step of OP_CheckSettings */
+static s32 op_contMsg;      /* message to and from the controller thread */
+
 /*
 ================
 OP_Null

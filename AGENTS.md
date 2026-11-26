@@ -56,7 +56,7 @@ Also record:
     (doubles, jump tables) is a `[<rom>, .rodata, <seg>/<unit>]` subsegment after all units' `.data`; splat moves
     rodata used by one function into that function's asm, and the rest needs the `INCLUDE_RODATA` lines splat
     writes into a fresh C file (regenerate one in a scratch copy to see where they go).
-  - Data in C (done for mgcode, rscode, pvcode, cacode): replace the asm `[<rom>, data]` subsegment with
+  - Data in C (done for mgcode, rscode, pvcode, cacode, opcode): replace the asm `[<rom>, data]` subsegment with
     `[<rom>, .data, <seg>/<unit>]` and the bss one with `{ type: .bss, vram: ..., name: <seg>/<unit> }`, set `bss_contains_common: True` on the
     segment (gcc's uninitialised globals are commons; splat then links `<unit>.o(.bss COMMON .scommon)`; the flag
     must be on the code segment, which overrides its subsegments'), and define every datum in the unit in address
@@ -66,8 +66,15 @@ Also record:
     placed in the linker's hash order, not in source order; when bss objects sit in definition order with their own
     alignment (rscode: the `u8[4]` `rs_ranks` right after a `u16`, at 0x801142A2), they are file-scope `static`s,
     which the assembler allocates in `.bss` in that order (no `bss_contains_common` then). KMC as pads `.bss` to 16
-    bytes and the unit's commons follow it (cacode's `ca_bmpBuffer` at 0x8013E880, 4 bytes after its statics). A
-    data blob shared by several units needs its unit boundaries found first (one subsegment per unit, in link order).
+    bytes and the unit's commons follow it (cacode's `ca_bmpBuffer` at 0x8013E880, 4 bytes after its statics).
+    Several units (opcode): the linker lays out each unit's `.data` and `.bss` in link order, each padded to 16, so
+    assign every datum to the unit whose code references it, check that the owners are contiguous in link order and
+    that the 16-byte gaps fall at their boundaries, then give each unit with data its own subsegment
+    (`[<rom>, .data, <seg>/<unit>]`, `{ type: .bss, vram: ..., name: <seg>/<unit> }`; a unit with none gets none,
+    as opcode's 6BE70 has no `.data`). A datum only one unit uses is a file-scope `static` there; the header keeps
+    the types. gcc word-aligns every array and struct (opcode's `op_pakImages` at 0x801141CC after a `u16[0x85]`),
+    so a 2-byte gap after an array is alignment; an unreferenced run with real contents inside a unit's range is
+    a datum of that unit, defined under a placeholder name (opcode's two glyph strings at 0x80114254).
 - **Headers:** `include/common.h` (types, `INCLUDE_ASM`), `include/structs.h`, `include/variables.h`,
   `include/functions.h`. Each type and global is declared once there (R1, R2).
 - **libultra:** 2.0K `libgultra_rom`, linked from source. `lib/ultralib` is decompals' ultralib (git submodule
@@ -116,7 +123,7 @@ Also record:
   | cacode | 0x67370-0x6A650 | 0x80112350 | overlay (`CACODE  SYS`): C unit 67370 (text to 0x6A37C; no alignment padding between its six functions, and its rodata follows their order); .data 0x6A380; .rodata 0x6A570 (file names, debug format strings, doubles); bss 0x80115630, 0x29260 (the motion tables saved as "motion.dat"; the end 0x8013E890 is what main's loader `Game_Thread` clears to) |
   | pvcode | 0x6A650-0x6BA90 | 0x80112350 | overlay (`PVCODE  SYS`): C units 6A650, 6A940 (the scene's two empty class handlers; text to 0x6A950); .data 0x6A950; .rodata 0x6BA40 (a file name and debug format strings); no bss (the file end 0x80113790 is what main's loader `Game_Thread` clears to) |
   | mgcode | 0x6BA90-0x6BE70 | 0x80112350 | overlay (`MGCODE  SYS`): C unit 6BA90 (text to 0x6BC88); .data 0x6BC90; .rodata 0x6BE30 (debug format strings); bss 0x80112730, 0x1000 (a 21 x 21 maze grid, the rest unreferenced; the end 0x80113730 is what main's loader `Game_Thread` clears to) |
-  | opcode | 0x6BE70-0x6DE70 | 0x80112350 | overlay (`OPCODE  SYS`): C units 6BE70, 6C470, 6CC50 (text to 0x6DBC8); .data 0x6DBD0; .rodata 0x6DDD0 (6C470's jump table); bss 0x80114350, 0x2B0 (the end 0x80114600 is what main's loader `Game_Thread` clears to) |
+  | opcode | 0x6BE70-0x6DE70 | 0x80112350 | overlay (`OPCODE  SYS`): C units 6BE70, 6C470, 6CC50 (text to 0x6DBC8); .data 0x6DBD0 (6C470), 0x6DBE0 (6CC50); .rodata 0x6DDD0 (6C470's jump table); bss 0x80114350 (6BE70), 0x80114360 (6C470), 0x80114370 (6CC50), 0x2B0 in all (the end 0x80114600 is what main's loader `Game_Thread` clears to) |
   | idx, str, bgmptr, bgmwbk, septr, sewbk, bfx | 0x6DE70-0x656CD0 | - | asset files (bin) |
 - **Toolchain:** compiler and linker version and build, flags, per-unit flag overrides.
 - **Annotations:** the address marker format (for example `// FUNCTION: <MODULE> 0x...`), the stub marker and
