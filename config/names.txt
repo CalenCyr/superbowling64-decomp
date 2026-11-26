@@ -558,7 +558,7 @@ MG_NullCreate	0x80112538	invented: empty function in the create slot of the scen
 MG_NullHandler	0x80112540	invented: empty function in the second slot of the scene's classes (objClass_t.unk_04)
 mg_classes	0x80112550	invented: the classes of the overlay's scene (objClass_t array)
 mg_sceneObjects	0x801125B0	invented: the overlay's scene objects
-mg_maze	0x80112730	invented: the maze grid, walls and cells, built by Maze_Build and drawn by Maze_Draw
+mg_maze	0x80112730	invented: the maze grid, walls and cells, built by Maze_Build and drawn by Maze_Draw; a 0x1000-byte buffer (the overlay's whole bss)
 OP_Init	0x80112350	invented: the overlay's init, run once after main loads it (overlay.h)
 OP_Frame	0x801123A8	invented: the overlay's per-frame function (overlay.h); runs the opening's modes
 OP_Null	0x80112950	invented: does nothing; nothing calls it

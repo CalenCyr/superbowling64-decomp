@@ -28,9 +28,12 @@ typedef struct objNode_s {
     /* 0x0C */ struct objNode_s *next;
 } objNode_t;
 
+typedef objNode_t *(*objCreateFunc_t)( objParams_t *params );
+typedef void (*objUpdateFunc_t)( void *obj );
+
 typedef struct {
-    /* 0x00 */ objNode_t *(*create)( objParams_t *params );
-    /* 0x04 */ void (*update)( void *obj ); /* each frame (Obj_Draw, Cam_Update, ...) */
+    /* 0x00 */ objCreateFunc_t create;
+    /* 0x04 */ objUpdateFunc_t update;  /* each frame (Obj_Draw, Cam_Update, ...) */
 } objClass_t;
 
 extern objNode_t obj_list;          /* list head */
