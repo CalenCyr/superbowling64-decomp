@@ -332,6 +332,50 @@ Acmd *func_80041434( Acmd *ptr, N_PVoice *pv, s32 tsam, s32 nbytes, s16 outp, s1
     _a->words.w1 = _SHIFTL(f, 30, 2) | _SHIFTL(p, 14, 16) | _SHIFTL(i, 2, 12);         \
 }
 
+/* filter message a physical voice's handler takes, beside AL_FILTER_ADD_UPDATE, N_FILTER_RESET and N_FILTER_SET_WAVETABLE */
+#define N_FILTER_START          9       /* starts the voice playing */
+
+/* ALParam.type values only the physical voice's pull handles (beside the N_PARAM_* above) */
+#define N_PARAM_FREE_VOICE      0       /* data: the physical voice to free */
+#define N_PARAM_SET_WAVETABLE   5       /* data: the wave table, passed to the decoder */
+#define N_PARAM_UNITY_PITCH     8       /* plays at unity pitch from now on */
+#define N_PARAM_START_VOICE_ALT 13      /* an N_ALStartParamAlt: starts with volume, pan and mix set */
+
+/* the N_PARAM_START_VOICE_ALT update; 0x1C bytes */
+typedef struct {
+    /* 0x00 */ struct ALParam_s *next;
+    /* 0x04 */ s32 delta;
+    /* 0x08 */ s16 type;                /* N_PARAM_START_VOICE_ALT */
+    /* 0x0A */ s16 unityPitch;
+    /* 0x0C */ f32 pitch;
+    /* 0x10 */ s16 volume;
+    /* 0x12 */ u8 pan;
+    /* 0x13 */ u8 fxMix;
+    /* 0x14 */ s32 envLength;           /* samples the volume ramps over, 0: none */
+    /* 0x18 */ ALWaveTable *wavetable;
+} N_ALStartParamAlt;
+
+/* n samples rounded to the nearest whole frame */
+#define N_ROUND_FRAMES(n)       ( ( ( n ) + N_FRAME_SAMPLES / 2 ) / N_FRAME_SAMPLES * N_FRAME_SAMPLES )
+
+#define N_MIX_BUFFER            0x7C0   /* DMEM of the effect bus's dry and wet mix */
+
+extern s16 D_8005D000[128];         /* gains by pan and by effect mix, 0x7FFF down; index 127 - x for the other side */
+
+/* the ROM's envelope mixer command: like ultralib's aEnvMixer, with the right volume in w0 */
+#define n_aEnvMixer(pkt, f, v, s)                                                       \
+{                                                                                       \
+    Acmd *_a = (Acmd *)pkt;                                                             \
+                                                                                        \
+    _a->words.w0 = _SHIFTL(A_ENVMIXER, 24, 8) | _SHIFTL(f, 16, 8) | _SHIFTL(v, 0, 16);  \
+    _a->words.w1 = (unsigned int)(s);                                                   \
+}
+
+Acmd *func_80040490( N_PVoice *pv, s32 sampleOffset, Acmd *p );       /* pulls one frame of a physical voice */
+Acmd *func_80040AAC( N_PVoice *pv, s16 *inp, s16 *outp, s32 outCount, Acmd *p ); /* mixes one frame */
+s16 func_80040CCC( f64 vol, f64 tgt, s32 count, u16 *ratel );         /* the ramp step from vol to tgt */
+s16 func_80040E0C( s16 vol, s32 count, s16 ratem, u16 ratel );        /* the volume count samples into a ramp */
+
 Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p );  /* decodes outCount samples to *outp */
 Acmd *func_80041580( N_PVoice *pv, s16 *outp, Acmd *p );              /* resamples one frame into *outp */
 s32 func_8004173C( N_PVoice *pv, s32 paramID, void *param );          /* the resampler's parameter handler */
