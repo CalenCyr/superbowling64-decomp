@@ -75,7 +75,7 @@ scheduler.
 All seven code overlays are linked at `0x80112350`; only one is in memory at a time. `main` finds each overlay
 file by its 8.3 name in the `BW64FAT` table (`FAT_GetFileSize`, `FAT_ReadFile` in `src/3AD0.c`: an 11-character
 name, ROM start and end per entry, DMA in 0x2000-byte chunks). The overlay symbols carry a `_<segment>` suffix
-(`func_80116398_gacode`), since the overlays share addresses.
+(`GA_TurnFirstBall`), since the overlays share addresses.
 
 `game_scene` picks the overlay (`SCENE_*` in `include/overlay.h`); it starts at `SCENE_OPCODE`.
 
