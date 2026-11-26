@@ -193,4 +193,42 @@ void n_alSynSetVol( N_ALVoice *voice, s16 volume, ALMicroTime t );
 void n_alSynStartVoice( N_ALVoice *voice, ALWaveTable *table );
 void n_alSynStopVoice( N_ALVoice *voice );
 
+/* ===== synthesizer frame and setup (units 1D550, 1DB90, 1E0F0, 1E140) ===== */
+
+/* DMEM buffers of one frame's output: AL_MAX_RSP_SAMPLES samples each */
+#define N_DMEM_MAIN_L           0x4E0   /* the main bus, left */
+#define N_DMEM_MAIN_R           0x650   /* the main bus, right */
+#define N_DMEM_AUX_L            0x7C0   /* the effect bus, left */
+#define N_DMEM_AUX_R            0x930   /* the effect bus, right */
+#define N_DMEM_FRAME_BYTES      ( 2 * AL_MAX_RSP_SAMPLES * sizeof( s16 ) )  /* one channel pair */
+
+/*
+The output commands as n_audio's microcode takes them (the ROM's command words): the interleave has no
+operands, and the save carries its byte count, in units of 16, beside the opcode.
+*/
+#define aInterleaveFrame( pkt )                                                 \
+{                                                                               \
+    Acmd *_a = (Acmd *)pkt;                                                     \
+                                                                                \
+    _a->words.w0 = _SHIFTL( A_INTERLEAVE, 24, 8 );                              \
+}
+
+#define aSaveFrame( pkt, c, s )                                                 \
+{                                                                               \
+    Acmd *_a = (Acmd *)pkt;                                                     \
+                                                                                \
+    _a->words.w0 = _SHIFTL( A_SAVEBUFF, 24, 8 ) | _SHIFTL( ( c ) >> 4, 16, 8 ); \
+    _a->words.w1 = (u32)( s );                                                  \
+}
+
+void func_80042150( N_ALGlobals *g, ALSynConfig *c );  /* sets up the n_audio globals and the synthesizer, once */
+void func_80042194( void );            /* takes the synthesizer down and clears the n_audio globals */
+void func_80042790( ALSynConfig *c );
+Acmd *func_80042CF0( s32 sampleOffset, Acmd *cmdList );    /* the output: mix, interleave, save */
+ALFx *func_80042D40( s16 bus, ALSynConfig *c, ALHeap *hp );  /* creates the effect of bus bus */
+Acmd *func_80042D90( s32 sampleOffset, Acmd *cmdList );    /* pulls the main bus and mixes the effect bus in */
+void func_8003FF70( ALFx **fx, ALSynConfig *c, ALHeap *hp );   /* allocates and sets up the effect into *fx */
+
+/* ===== end of the synthesizer frame and setup block ===== */
+
 #endif
