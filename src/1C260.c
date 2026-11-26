@@ -20,6 +20,7 @@ pass moved to follow the last); samples past the table's end are cleared.
 // NON_MATCHING: retail's frame is 16 bytes larger (0x20-0x2F unused) and its loop passes (s16)inp from s7
 // (one sll/sra before the loop); here combine folds inp to 0 (set once, so trusted everywhere). The rest
 // matches up to those. Not it: a second, dead inp = 0 (in the same block or the non-looped path).
+// Frame unchanged by inline helpers for the lead skip (void, pointer parameters) or the frame count (s32 return).
 Acmd *func_80040E60( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
     Acmd *ptr = p;
     s32 looped;

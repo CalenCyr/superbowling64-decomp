@@ -3376,6 +3376,8 @@ modes that have one), and a value of the lane's current inputFunc step.
 // so retail's order needs row and lane with far more refs or shorter lives. No effect: lane u16/s16, row u32/u8,
 // row * 8 + 16, row = 16 with row * 8, lane read after row = 14, 144 * lane.
 // Permuter (20 min, target-only scoring): 110 -> 75 only through an aliasing pointer copy of pl.
+// Pass 0 of global-alloc prefers registers already used: retail's order also follows if player and &game_gfx
+// conflict with s2/s3 held by block-local pseudos that row and lane do not overlap; no such pseudo found yet.
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;
