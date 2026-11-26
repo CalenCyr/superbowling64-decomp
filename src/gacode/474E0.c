@@ -1409,7 +1409,7 @@ void GA_ScoreSecondBall( u8 player ) {
 ================
 GA_ScoreThirdBall
 
-Scores the third ball of player's frame (D_80068A50_gacode 2) from the ga_pinsDown pins it knocked
+Scores the third ball of player's frame (game_throw 2) from the ga_pinsDown pins it knocked
 down, by ga_bonusOwed: 1 and 3 add 10 or 20 to the previous score plus the third ball (a strike
 counts 10 more), 2 adds 10 plus the second and third balls (20 when they make a spare). The third ball
 is stored in D_800994B8 (-1 for a strike or spare) and the player's game ends (game_playerDone).

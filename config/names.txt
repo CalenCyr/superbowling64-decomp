@@ -1699,3 +1699,39 @@ gs_menuAnim	0x80120658	invented: animation of the highlighted character
 gs_shownModel	0x80120A20	invented: character whose model is shown; 0xFFFF: none
 gs_models	0x80120A28	invented: per character: its loaded model
 gs_loadedAnims	0x80120A48	invented: per character: file of its loaded animation
+gs_teamModelScales	0x8011F8C0	invented: per-character scale of its model on the team select
+gs_teamModelFiles	0x8011F8E0	invented: per-character file of its model on the team select
+gs_teamAnimFiles	0x8011F8F0	invented: per-character file of its animation on the team select
+gs_teamScene	0x8011F900	invented: the scene of the team select
+gs_teamItems	0x8011FA80	invented: menu items of the team select
+gs_teamNameItems	0x8011FB98	invented: the players' character-name items of the team select
+gs_nameLine2Images	0x8011FBF4	invented: per-character image of the second line of its name
+gs_nameLine1Images	0x8011FC04	invented: per-character image of the first line of its name
+gs_teamPortraits	0x8011FC14	invented: per-character image once unlocked (team select)
+gs_cursorX	0x8011FC24	invented: per-character x of a player's cursor on it
+gs_cursorImages	0x8011FC34	invented: per-character image of a player's cursor on it
+gs_barColors	0x8011FC44	invented: colour of each bar of a character's figures
+gs_barHeights	0x8011FC50	invented: per-character height of its three bars
+gs_playerNameImages	0x8011FC68	invented: per-player image of its name
+gs_cpuNameImages	0x8011FC70	invented: per-player image of its name, the computer playing
+gs_waitNameImages	0x8011FC78	invented: per-player image of its name while it waits its turn
+gs_teamSlideStep	0x8011FC80	invented: slide step of the team select
+gs_teamChoice	0x8011FC81	invented: state of the team select (CHOICE_IN, CHOICE_RUN, ...)
+gs_teamPhase	0x8011FC82	invented: team select phase: 0 choosing, 1 every team is done
+gs_teamPlayer	0x8011FC84	invented: per-team index of the player choosing; bit 7: the team is done
+gs_leaveDelay	0x801207B2	invented: frames before the team select leaves once every team is done
+gs_shownModels	0x801207B4	invented: per-player character whose model is shown
+gs_teamModels	0x801207C0	invented: per-character loaded model of the team select
+gs_teamAnims	0x801207E0	invented: per-character loaded animation of the team select
+gs_modelPos	0x80120800	invented: per-player position of its model
+gs_barLevels	0x80120818	invented: per-player current heights of its bars, growing to the character's
+gs_barX	0x80120828	invented: per-player x of its bars
+gs_barY	0x80120840	invented: per-player y of the bottom of its bars
+ga_stageScene0	0x801240B0	invented: the scene of ga_stages[0]
+ga_stageScene1	0x80125070	invented: the scene of ga_stages[1]
+ga_stageScene2	0x801268F0	invented: the scene of ga_stages[2]
+ga_stageScene3	0x80127470	invented: the scene of ga_stages[3]
+ga_stageScene4	0x80128470	invented: the scene of ga_stages[4]
+ga_stageScene5	0x80128FB0	invented: the scene of ga_stages[5]
+ga_stageScene6	0x80129DB0	invented: the scene of ga_stages[6]
+ga_stageScene7	0x8012AE30	invented: the scene of ga_stages[7]

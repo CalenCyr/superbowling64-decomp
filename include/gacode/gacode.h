@@ -274,14 +274,14 @@ extern u16 ga_aimColorAngle;          /* angle of GA_DrawAimLine's colour cycle 
 extern u8 ga_aimChannelOrder;           /* channel order of GA_DrawAimLine's colour, mod 3 */
 extern gaStage_t ga_stages[8];
 /* the stages' scenes (gaStage_t.scene) */
-extern objParams_t D_801240B0_gacode[63];
-extern objParams_t D_80125070_gacode[98];
-extern objParams_t D_801268F0_gacode[46];
-extern objParams_t D_80127470_gacode[64];
-extern objParams_t D_80128470_gacode[45];
-extern objParams_t D_80128FB0_gacode[56];
-extern objParams_t D_80129DB0_gacode[66];
-extern objParams_t D_8012AE30_gacode[59];
+extern objParams_t ga_stageScene0[63];
+extern objParams_t ga_stageScene1[98];
+extern objParams_t ga_stageScene2[46];
+extern objParams_t ga_stageScene3[64];
+extern objParams_t ga_stageScene4[45];
+extern objParams_t ga_stageScene5[56];
+extern objParams_t ga_stageScene6[66];
+extern objParams_t ga_stageScene7[59];
 extern gaStage_t *ga_stage;
 extern objClass_t ga_classes[12];   /* the classes of the game's scene */
 extern u8 ga_steerBall;             /* nonzero: Z steers the rolling ball by the stick (GA_InputRoll) */

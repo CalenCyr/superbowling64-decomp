@@ -7,22 +7,22 @@
 /* ===== Data ===== */
 
 /* per character: scale of its model */
-static f32 D_8011F8C0_gscode[8] = {
+static f32 gs_teamModelScales[8] = {
     1.0f, 1.0f, 1.0f, 1.2f, 1.2f, 0.7f, 1.1f, 1.0f,
 };
 
 /* per character: file of its model */
-static s16 D_8011F8E0_gscode[8] = {
+static s16 gs_teamModelFiles[8] = {
     0x462, 0x4E0, 0x6DC, 0x5BE, 0x13A, 0x2AA, 0x590, 0x238,
 };
 
 /* per character: file of its animation */
-static s16 D_8011F8F0_gscode[8] = {
+static s16 gs_teamAnimFiles[8] = {
     0x7D8, 0x7DB, 0x7F9, 0x7F0, 0x7B3, 0x7C8, 0x7EA, 0x7C2,
 };
 
 /* the scene of the team select */
-static objParams_t D_8011F900_gscode[] = {
+static objParams_t gs_teamScene[] = {
     { 1.0f, 0.0f, { 2056.0f, 320.0f, 240.0f } },
     { 0.0f, 10.0f, { 568.0f, 2032.0f, -320.0f, -50.0f, 300.0f, 1.0f } },
     { 0.0f, 11.0f, { 568.0f, 2032.0f, -220.0f, -50.0f, 100.0f, 1.0f } },
@@ -33,7 +33,7 @@ static objParams_t D_8011F900_gscode[] = {
 
 /* the team select: ids 0-7 the characters, 8-11 the players' names, 12-15 the titles, 16-19 the players' cursors;
    [5]: its title */
-static menuItem_t D_8011FA80_gscode[28] = {
+static menuItem_t gs_teamItems[28] = {
     { -1, 0x85B, 0, 8, 0xFF, SLIDE_NONE },
     { -1, 0x85B, 64, 8, 0xFF, SLIDE_NONE },
     { -1, 0x85B, 128, 8, 0xFF, SLIDE_NONE },
@@ -65,7 +65,7 @@ static menuItem_t D_8011FA80_gscode[28] = {
 };
 
 /* the players' character names: ids 24-27 and 28-31 */
-static menuItem_t D_8011FB98_gscode[9] = {
+static menuItem_t gs_teamNameItems[9] = {
     { 24, 0xA5D, 28, 132, 0xFF, SLIDE_NONE },
     { 28, 0xA68, 28, 140, 0xFF, SLIDE_NONE },
     { 25, 0xA5D, 28, 132, 0xFF, SLIDE_NONE },
@@ -78,39 +78,39 @@ static menuItem_t D_8011FB98_gscode[9] = {
 };
 
 /* per character: image of the second line of its name */
-static s16 D_8011FBF4_gscode[8] = {
+static s16 gs_nameLine2Images[8] = {
     0xA61, 0xA62, 0xA62, 0xA68, 0xA5F, 0xA5E, 0xA64, 0xA61,
 };
 
 /* per character: image of the first line of its name */
-static s16 D_8011FC04_gscode[8] = {
+static s16 gs_nameLine1Images[8] = {
     0xA5C, 0xA5D, 0xA5D, 0xA5C, 0xA5C, 0xA5C, 0xA5D, 0xA5C,
 };
 
 /* per character: its image once unlocked */
-static s16 D_8011FC14_gscode[8] = {
+static s16 gs_teamPortraits[8] = {
     0x8C2, 0x8C5, 0x8BE, 0x8C3, 0x8BF, 0x8C4, 0x8C1, 0x8C0,
 };
 
 /* per character: x of a player's cursor on it */
-static s16 D_8011FC24_gscode[8] = {
+static s16 gs_cursorX[8] = {
     146, 140, 149, 139, 139, 147, 140, 143,
 };
 
 /* per character: image of a player's cursor on it */
-static s16 D_8011FC34_gscode[8] = {
+static s16 gs_cursorImages[8] = {
     0x8B3, 0x8B6, 0x8AF, 0x8B4, 0x8B0, 0x8B5, 0x8B2, 0x8B1,
 };
 
 /* per bar of a character's figures: its colour */
-static u8 D_8011FC44_gscode[3][3] = {
+static u8 gs_barColors[3][3] = {
     { 255, 0, 0 },
     { 0, 255, 0 },
     { 0, 0, 255 },
 };
 
 /* per character: height of its three bars, to 40 */
-static u8 D_8011FC50_gscode[8][3] = {
+static u8 gs_barHeights[8][3] = {
     { 32, 28, 32 },
     { 28, 32, 32 },
     { 24, 40, 32 },
@@ -122,40 +122,40 @@ static u8 D_8011FC50_gscode[8][3] = {
 };
 
 /* per player: image of its name */
-static s16 D_8011FC68_gscode[4] = {
+static s16 gs_playerNameImages[4] = {
     0x8C9, 0x8C8, 0x8C7, 0x8C6,
 };
 
 /* per player: image of its name, the computer playing */
-static s16 D_8011FC70_gscode[4] = {
+static s16 gs_cpuNameImages[4] = {
     0x8CD, 0x8CC, 0x8CB, 0x8CA,
 };
 
 /* per player: image of its name while it waits its turn */
-static s16 D_8011FC78_gscode[4] = {
+static s16 gs_waitNameImages[4] = {
     0x8AD, 0x8AC, 0x8AB, 0x8AA,
 };
 
-static u8 D_8011FC80_gscode = 30; /* slide step of the team select */
-static u8 D_8011FC81_gscode = 0; /* CHOICE_IN etc.; 4: the name entry */
-static u8 D_8011FC82_gscode = 0; /* 0 choosing, 1 every team is done */
+static u8 gs_teamSlideStep = 30; /* slide step of the team select */
+static u8 gs_teamChoice = 0; /* CHOICE_IN etc.; 4: the name entry */
+static u8 gs_teamPhase = 0; /* 0 choosing, 1 every team is done */
 
 /* per team: its player choosing; bit 7: the team is done */
-static u8 D_8011FC84_gscode[2] = {
+static u8 gs_teamPlayer[2] = {
     0, 0,
 };
 
 /* ===== State ===== */
 
 static u8 D_801207A0_gscode[18];          /* unreferenced; it may instead end 5AD50's or 5E2B0's bss: nothing tells */
-static u8 D_801207B2_gscode;              /* frames before the team select leaves, once every team is done */
-static u16 D_801207B4_gscode[4];          /* per player: character whose model is shown; 0xFFFF: none */
-static fileType1_t *D_801207C0_gscode[8]; /* per character: its loaded model */
-static fileType2_t *D_801207E0_gscode[8]; /* per character: its loaded animation */
-static s16 D_80120800_gscode[4][3];       /* per player: position of its model */
-static u8 D_80120818_gscode[4][3];        /* per player: heights of its bars, growing to the character's */
-static s16 D_80120828_gscode[4][3];       /* per player: x of its bars */
-static s16 D_80120840_gscode[4][3];       /* per player: y of the bottom of its bars */
+static u8 gs_leaveDelay;              /* frames before the team select leaves, once every team is done */
+static u16 gs_shownModels[4];          /* per player: character whose model is shown; 0xFFFF: none */
+static fileType1_t *gs_teamModels[8]; /* per character: its loaded model */
+static fileType2_t *gs_teamAnims[8]; /* per character: its loaded animation */
+static s16 gs_modelPos[4][3];       /* per player: position of its model */
+static u8 gs_barLevels[4][3];        /* per player: heights of its bars, growing to the character's */
+static s16 gs_barX[4][3];       /* per player: x of its bars */
+static s16 gs_barY[4][3];       /* per player: y of the bottom of its bars */
 
 /*
 ================
@@ -210,41 +210,41 @@ s32 GS_TeamSelect( void ) {
         for ( i = 0; i < game_numPlayers; i++ ) {
             slots[0][i] = i;
         }
-        Menu_SetItem( D_8011FA80_gscode, 12, 0x8CF, MENU_NONE, MENU_NONE, MENU_NONE );
-        Menu_SetItem( D_8011FA80_gscode, 13, 0x8D0, 0x78, 0x30, MENU_NONE );
-        Menu_SetItem( D_8011FA80_gscode, 14, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
-        Menu_SetItem( D_8011FA80_gscode, 15, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+        Menu_SetItem( gs_teamItems, 12, 0x8CF, MENU_NONE, MENU_NONE, MENU_NONE );
+        Menu_SetItem( gs_teamItems, 13, 0x8D0, 0x78, 0x30, MENU_NONE );
+        Menu_SetItem( gs_teamItems, 14, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+        Menu_SetItem( gs_teamItems, 15, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
         switch ( game_numPlayers ) {
         case 1:
-            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x5A, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
-            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
-            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( gs_teamItems, 16, MENU_NONE, MENU_NONE, 0x5A, 0xFF );
+            Menu_SetItem( gs_teamItems, 17, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( gs_teamItems, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( gs_teamItems, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
             break;
         case 2:
-            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x46, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x6E, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
-            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( gs_teamItems, 16, MENU_NONE, MENU_NONE, 0x46, 0xFF );
+            Menu_SetItem( gs_teamItems, 17, MENU_NONE, MENU_NONE, 0x6E, 0xFF );
+            Menu_SetItem( gs_teamItems, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( gs_teamItems, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
             break;
         case 3:
-            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x50, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x64, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( gs_teamItems, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
+            Menu_SetItem( gs_teamItems, 17, MENU_NONE, MENU_NONE, 0x50, 0xFF );
+            Menu_SetItem( gs_teamItems, 18, MENU_NONE, MENU_NONE, 0x64, 0xFF );
+            Menu_SetItem( gs_teamItems, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
             break;
         case 4:
-            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x50, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x64, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, 0x78, 0xFF );
+            Menu_SetItem( gs_teamItems, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
+            Menu_SetItem( gs_teamItems, 17, MENU_NONE, MENU_NONE, 0x50, 0xFF );
+            Menu_SetItem( gs_teamItems, 18, MENU_NONE, MENU_NONE, 0x64, 0xFF );
+            Menu_SetItem( gs_teamItems, 19, MENU_NONE, MENU_NONE, 0x78, 0xFF );
             break;
         }
     } else {
-        Menu_SetItem( D_8011FA80_gscode, 12, 0x8A9, MENU_NONE, MENU_NONE, MENU_NONE );
-        Menu_SetItem( D_8011FA80_gscode, 13, 0x8D1, 0x28, 0x2C, MENU_NONE );
-        Menu_SetItem( D_8011FA80_gscode, 14, 0x8A8, MENU_NONE, MENU_NONE, 0x99 );
-        Menu_SetItem( D_8011FA80_gscode, 15, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
+        Menu_SetItem( gs_teamItems, 12, 0x8A9, MENU_NONE, MENU_NONE, MENU_NONE );
+        Menu_SetItem( gs_teamItems, 13, 0x8D1, 0x28, 0x2C, MENU_NONE );
+        Menu_SetItem( gs_teamItems, 14, 0x8A8, MENU_NONE, MENU_NONE, 0x99 );
+        Menu_SetItem( gs_teamItems, 15, MENU_NONE, MENU_NONE, MENU_NONE, 0xFF );
         switch ( game_numPlayers ) {
         case 2:
             if ( ( game_mode & 0xF ) != 1 ) {
@@ -257,14 +257,14 @@ s32 GS_TeamSelect( void ) {
             } else {
                 slots[0][0] = 0;
                 slots[0][1] = 1;
-                if ( D_8011FC84_gscode[0] ) {
+                if ( gs_teamPlayer[0] ) {
                     unlocked = GS_UnlockMask( save_data.unlocks );
                 }
             }
-            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x82, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
-            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( gs_teamItems, 16, MENU_NONE, MENU_NONE, 0x3C, 0xFF );
+            Menu_SetItem( gs_teamItems, 17, MENU_NONE, MENU_NONE, 0x82, 0xFF );
+            Menu_SetItem( gs_teamItems, 18, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( gs_teamItems, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
             break;
         case 3:
             slots[0][0] = 0;
@@ -274,10 +274,10 @@ s32 GS_TeamSelect( void ) {
             } else {
                 slots[0][2] = 2;
             }
-            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x34, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x44, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x82, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+            Menu_SetItem( gs_teamItems, 16, MENU_NONE, MENU_NONE, 0x34, 0xFF );
+            Menu_SetItem( gs_teamItems, 17, MENU_NONE, MENU_NONE, 0x44, 0xFF );
+            Menu_SetItem( gs_teamItems, 18, MENU_NONE, MENU_NONE, 0x82, 0xFF );
+            Menu_SetItem( gs_teamItems, 19, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
             break;
         case 4:
             slots[0][0] = 0;
@@ -289,128 +289,128 @@ s32 GS_TeamSelect( void ) {
                 slots[0][2] = 2;
                 slots[0][3] = 3;
             }
-            Menu_SetItem( D_8011FA80_gscode, 16, MENU_NONE, MENU_NONE, 0x34, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 17, MENU_NONE, MENU_NONE, 0x44, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 18, MENU_NONE, MENU_NONE, 0x7A, 0xFF );
-            Menu_SetItem( D_8011FA80_gscode, 19, MENU_NONE, MENU_NONE, 0x8A, 0xFF );
+            Menu_SetItem( gs_teamItems, 16, MENU_NONE, MENU_NONE, 0x34, 0xFF );
+            Menu_SetItem( gs_teamItems, 17, MENU_NONE, MENU_NONE, 0x44, 0xFF );
+            Menu_SetItem( gs_teamItems, 18, MENU_NONE, MENU_NONE, 0x7A, 0xFF );
+            Menu_SetItem( gs_teamItems, 19, MENU_NONE, MENU_NONE, 0x8A, 0xFF );
             break;
         }
     }
 
     switch ( game_numPlayers ) {
     case 1:
-        D_80120828_gscode[0][0] = 0x38;
-        D_80120840_gscode[0][0] = 0x7A;
-        D_80120828_gscode[0][1] = 0x40;
-        D_80120840_gscode[0][1] = 0x77;
-        D_80120828_gscode[0][2] = 0x48;
-        D_80120840_gscode[0][2] = 0x74;
-        D_80120800_gscode[0][0] = -290;
-        D_80120800_gscode[0][1] = -50;
-        D_80120800_gscode[0][2] = 200;
+        gs_barX[0][0] = 0x38;
+        gs_barY[0][0] = 0x7A;
+        gs_barX[0][1] = 0x40;
+        gs_barY[0][1] = 0x77;
+        gs_barX[0][2] = 0x48;
+        gs_barY[0][2] = 0x74;
+        gs_modelPos[0][0] = -290;
+        gs_modelPos[0][1] = -50;
+        gs_modelPos[0][2] = 200;
         break;
     case 2:
-        D_80120828_gscode[0][0] = 0x38;
-        D_80120840_gscode[0][0] = 0x7A;
-        D_80120828_gscode[0][1] = 0x40;
-        D_80120840_gscode[0][1] = 0x77;
-        D_80120828_gscode[0][2] = 0x48;
-        D_80120840_gscode[0][2] = 0x74;
-        D_80120828_gscode[1][0] = 0xF0;
-        D_80120840_gscode[1][0] = 0x74;
-        D_80120828_gscode[1][1] = 0xF8;
-        D_80120840_gscode[1][1] = 0x77;
-        D_80120828_gscode[1][2] = 0x100;
-        D_80120840_gscode[1][2] = 0x7A;
-        D_80120800_gscode[0][0] = -290;
-        D_80120800_gscode[0][1] = -50;
-        D_80120800_gscode[0][2] = 200;
-        D_80120800_gscode[1][0] = 290;
-        D_80120800_gscode[1][1] = -50;
-        D_80120800_gscode[1][2] = 200;
+        gs_barX[0][0] = 0x38;
+        gs_barY[0][0] = 0x7A;
+        gs_barX[0][1] = 0x40;
+        gs_barY[0][1] = 0x77;
+        gs_barX[0][2] = 0x48;
+        gs_barY[0][2] = 0x74;
+        gs_barX[1][0] = 0xF0;
+        gs_barY[1][0] = 0x74;
+        gs_barX[1][1] = 0xF8;
+        gs_barY[1][1] = 0x77;
+        gs_barX[1][2] = 0x100;
+        gs_barY[1][2] = 0x7A;
+        gs_modelPos[0][0] = -290;
+        gs_modelPos[0][1] = -50;
+        gs_modelPos[0][2] = 200;
+        gs_modelPos[1][0] = 290;
+        gs_modelPos[1][1] = -50;
+        gs_modelPos[1][2] = 200;
         break;
     case 3:
-        D_80120828_gscode[0][0] = 0x20;
-        D_80120840_gscode[0][0] = 0x82;
-        D_80120828_gscode[0][1] = 0x28;
-        D_80120840_gscode[0][1] = 0x7F;
-        D_80120828_gscode[0][2] = 0x30;
-        D_80120840_gscode[0][2] = 0x7C;
-        D_80120828_gscode[1][0] = 0x50;
-        D_80120840_gscode[1][0] = 0x72;
-        D_80120828_gscode[1][1] = 0x58;
-        D_80120840_gscode[1][1] = 0x6F;
-        D_80120828_gscode[1][2] = 0x60;
-        D_80120840_gscode[1][2] = 0x6C;
-        D_80120828_gscode[2][0] = 0xF0;
-        D_80120840_gscode[2][0] = 0x74;
-        D_80120828_gscode[2][1] = 0xF8;
-        D_80120840_gscode[2][1] = 0x77;
-        D_80120828_gscode[2][2] = 0x100;
-        D_80120840_gscode[2][2] = 0x7A;
-        D_80120800_gscode[0][0] = -320;
-        D_80120800_gscode[0][1] = -50;
-        D_80120800_gscode[0][2] = 300;
-        D_80120800_gscode[1][0] = -220;
-        D_80120800_gscode[1][1] = -50;
-        D_80120800_gscode[1][2] = 100;
-        D_80120800_gscode[2][0] = 290;
-        D_80120800_gscode[2][1] = -50;
-        D_80120800_gscode[2][2] = 200;
+        gs_barX[0][0] = 0x20;
+        gs_barY[0][0] = 0x82;
+        gs_barX[0][1] = 0x28;
+        gs_barY[0][1] = 0x7F;
+        gs_barX[0][2] = 0x30;
+        gs_barY[0][2] = 0x7C;
+        gs_barX[1][0] = 0x50;
+        gs_barY[1][0] = 0x72;
+        gs_barX[1][1] = 0x58;
+        gs_barY[1][1] = 0x6F;
+        gs_barX[1][2] = 0x60;
+        gs_barY[1][2] = 0x6C;
+        gs_barX[2][0] = 0xF0;
+        gs_barY[2][0] = 0x74;
+        gs_barX[2][1] = 0xF8;
+        gs_barY[2][1] = 0x77;
+        gs_barX[2][2] = 0x100;
+        gs_barY[2][2] = 0x7A;
+        gs_modelPos[0][0] = -320;
+        gs_modelPos[0][1] = -50;
+        gs_modelPos[0][2] = 300;
+        gs_modelPos[1][0] = -220;
+        gs_modelPos[1][1] = -50;
+        gs_modelPos[1][2] = 100;
+        gs_modelPos[2][0] = 290;
+        gs_modelPos[2][1] = -50;
+        gs_modelPos[2][2] = 200;
         break;
     case 4:
-        D_80120828_gscode[0][0] = 0x20;
-        D_80120840_gscode[0][0] = 0x82;
-        D_80120828_gscode[0][1] = 0x28;
-        D_80120840_gscode[0][1] = 0x7F;
-        D_80120828_gscode[0][2] = 0x30;
-        D_80120840_gscode[0][2] = 0x7C;
-        D_80120828_gscode[1][0] = 0x50;
-        D_80120840_gscode[1][0] = 0x72;
-        D_80120828_gscode[1][1] = 0x58;
-        D_80120840_gscode[1][1] = 0x6F;
-        D_80120828_gscode[1][2] = 0x60;
-        D_80120840_gscode[1][2] = 0x6C;
-        D_80120828_gscode[2][0] = 0xD8;
-        D_80120840_gscode[2][0] = 0x6C;
-        D_80120828_gscode[2][1] = 0xE0;
-        D_80120840_gscode[2][1] = 0x6F;
-        D_80120828_gscode[2][2] = 0xE8;
-        D_80120840_gscode[2][2] = 0x72;
-        D_80120828_gscode[3][0] = 0x108;
-        D_80120840_gscode[3][0] = 0x7C;
-        D_80120828_gscode[3][1] = 0x110;
-        D_80120840_gscode[3][1] = 0x7F;
-        D_80120828_gscode[3][2] = 0x118;
-        D_80120840_gscode[3][2] = 0x82;
-        D_80120800_gscode[0][0] = -320;
-        D_80120800_gscode[0][1] = -50;
-        D_80120800_gscode[0][2] = 300;
-        D_80120800_gscode[1][0] = -220;
-        D_80120800_gscode[1][1] = -50;
-        D_80120800_gscode[1][2] = 100;
-        D_80120800_gscode[2][0] = 220;
-        D_80120800_gscode[2][1] = -50;
-        D_80120800_gscode[2][2] = 100;
-        D_80120800_gscode[3][0] = 320;
-        D_80120800_gscode[3][1] = -50;
-        D_80120800_gscode[3][2] = 300;
+        gs_barX[0][0] = 0x20;
+        gs_barY[0][0] = 0x82;
+        gs_barX[0][1] = 0x28;
+        gs_barY[0][1] = 0x7F;
+        gs_barX[0][2] = 0x30;
+        gs_barY[0][2] = 0x7C;
+        gs_barX[1][0] = 0x50;
+        gs_barY[1][0] = 0x72;
+        gs_barX[1][1] = 0x58;
+        gs_barY[1][1] = 0x6F;
+        gs_barX[1][2] = 0x60;
+        gs_barY[1][2] = 0x6C;
+        gs_barX[2][0] = 0xD8;
+        gs_barY[2][0] = 0x6C;
+        gs_barX[2][1] = 0xE0;
+        gs_barY[2][1] = 0x6F;
+        gs_barX[2][2] = 0xE8;
+        gs_barY[2][2] = 0x72;
+        gs_barX[3][0] = 0x108;
+        gs_barY[3][0] = 0x7C;
+        gs_barX[3][1] = 0x110;
+        gs_barY[3][1] = 0x7F;
+        gs_barX[3][2] = 0x118;
+        gs_barY[3][2] = 0x82;
+        gs_modelPos[0][0] = -320;
+        gs_modelPos[0][1] = -50;
+        gs_modelPos[0][2] = 300;
+        gs_modelPos[1][0] = -220;
+        gs_modelPos[1][1] = -50;
+        gs_modelPos[1][2] = 100;
+        gs_modelPos[2][0] = 220;
+        gs_modelPos[2][1] = -50;
+        gs_modelPos[2][2] = 100;
+        gs_modelPos[3][0] = 320;
+        gs_modelPos[3][1] = -50;
+        gs_modelPos[3][2] = 300;
         break;
     }
 
-    if ( D_8011FC81_gscode == CHOICE_RUN ) {
-        switch ( D_8011FC82_gscode ) {
+    if ( gs_teamChoice == CHOICE_RUN ) {
+        switch ( gs_teamPhase ) {
         case 0:
             for ( i = 0; i < 2; i++ ) {
-                if ( !( D_8011FC84_gscode[i] & 0x80 ) ) {
-                    player = slots[i][D_8011FC84_gscode[i]];
+                if ( !( gs_teamPlayer[i] & 0x80 ) ) {
+                    player = slots[i][gs_teamPlayer[i]];
                     if ( player != 0xFF ) {
                     // RULE-EXCEPTION: R30, the character cursor shares j's register: retail allocates repeat and
                     // pad ahead of it, which a separate local reverses
                     j = game_players[player] & 0xF;
-                    Menu_SetItem( D_8011FA80_gscode, player + 16, MENU_NONE, MENU_NONE, MENU_NONE, game_pulseAlpha );
+                    Menu_SetItem( gs_teamItems, player + 16, MENU_NONE, MENU_NONE, MENU_NONE, game_pulseAlpha );
 
-                    if ( D_8011FC84_gscode[1] == 0x80 ) {
+                    if ( gs_teamPlayer[1] == 0x80 ) {
                         repeat = cont_allDpadRepeat;
                     } else {
                         repeat = cont_dpadRepeat[i];
@@ -422,8 +422,8 @@ s32 GS_TeamSelect( void ) {
                                 j = 7;
                             }
                         } while ( !( ( unlocked >> j ) & 1 ) );
-                        game_players[slots[i][D_8011FC84_gscode[i]]] =
-                            ( game_players[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | j;
+                        game_players[slots[i][gs_teamPlayer[i]]] =
+                            ( game_players[slots[i][gs_teamPlayer[i]]] & 0xF0 ) | j;
                         Sound_PlaySe( SE_CURSOR, 0 );
                     }
                     if ( repeat & R_JPAD ) {
@@ -433,20 +433,20 @@ s32 GS_TeamSelect( void ) {
                                 j = 0;
                             }
                         } while ( !( ( unlocked >> j ) & 1 ) );
-                        game_players[slots[i][D_8011FC84_gscode[i]]] =
-                            ( game_players[slots[i][D_8011FC84_gscode[i]]] & 0xF0 ) | j;
+                        game_players[slots[i][gs_teamPlayer[i]]] =
+                            ( game_players[slots[i][gs_teamPlayer[i]]] & 0xF0 ) | j;
                         Sound_PlaySe( SE_CURSOR, 0 );
                     }
 
-                    if ( D_8011FC84_gscode[1] == 0x80 ) {
+                    if ( gs_teamPlayer[1] == 0x80 ) {
                         pad = cont_allPressed;
                     } else {
                         pad = cont_pressed[i];
                     }
                     if ( pad & ( A_BUTTON | Z_TRIG ) ) {
                         Sound_PlaySe( SE_DECIDE, 0 );
-                        D_8011FC84_gscode[i]++;
-                        if ( ( game_mode & 0xF ) == 1 && D_8011FC84_gscode[i] == 1 ) {
+                        gs_teamPlayer[i]++;
+                        if ( ( game_mode & 0xF ) == 1 && gs_teamPlayer[i] == 1 ) {
                             game_players[1] = ( game_players[1] & 0xF0 ) | 1;
                             unlocked = GS_UnlockMask( save_data.unlocks );
                             /* BUG: this reuses the team loop's counter, so the team loop goes on from the character
@@ -461,51 +461,51 @@ s32 GS_TeamSelect( void ) {
                     }
                     if ( pad & B_BUTTON ) {
                         if ( game_replay ) {
-                            if ( D_8011FC84_gscode[i] ) {
+                            if ( gs_teamPlayer[i] ) {
                                 Sound_PlaySe( 2, 0 );
-                                D_8011FC84_gscode[i]--;
+                                gs_teamPlayer[i]--;
                             }
                         } else {
                             Sound_PlaySe( 2, 0 );
-                            if ( D_8011FC84_gscode[i] == 0 ) {
-                                D_8011FC81_gscode = CHOICE_BACK;
+                            if ( gs_teamPlayer[i] == 0 ) {
+                                gs_teamChoice = CHOICE_BACK;
                                 break;
                             }
-                            D_8011FC84_gscode[i]--;
+                            gs_teamPlayer[i]--;
                         }
                     }
                     } else {
-                        D_8011FC84_gscode[i] |= 0x80;
+                        gs_teamPlayer[i] |= 0x80;
                     }
                 } else {
-                    if ( D_8011FC84_gscode[1] == 0x80 ) {
+                    if ( gs_teamPlayer[1] == 0x80 ) {
                         pad = cont_allPressed;
                     } else {
                         pad = cont_pressed[i];
                     }
-                    if ( ( pad & B_BUTTON ) && ( D_8011FC84_gscode[i] & 0x7F ) ) {
+                    if ( ( pad & B_BUTTON ) && ( gs_teamPlayer[i] & 0x7F ) ) {
                         Sound_PlaySe( 2, 0 );
-                        D_8011FC84_gscode[i] = ( D_8011FC84_gscode[i] & 0x7F ) - 1;
+                        gs_teamPlayer[i] = ( gs_teamPlayer[i] & 0x7F ) - 1;
                     }
                 }
             }
-            if ( ( D_8011FC84_gscode[0] & 0x80 ) && ( D_8011FC84_gscode[1] & 0x80 ) ) {
-                D_8011FC82_gscode = 1;
-                D_801207B2_gscode = 5;
+            if ( ( gs_teamPlayer[0] & 0x80 ) && ( gs_teamPlayer[1] & 0x80 ) ) {
+                gs_teamPhase = 1;
+                gs_leaveDelay = 5;
             }
             break;
         case 1:
-            if ( --D_801207B2_gscode == 0 ) {
+            if ( --gs_leaveDelay == 0 ) {
                 if ( ( game_mode & 0xF ) == 1 ) {
                     if ( save_data.rumble ) {
                         GS_StartPakCheck();
-                        D_8011FC81_gscode = 4;
+                        gs_teamChoice = 4;
                     } else {
                         game_leaveState = 1;
-                        D_8011FC81_gscode = CHOICE_TAKEN;
+                        gs_teamChoice = CHOICE_TAKEN;
                     }
                 } else {
-                    D_8011FC81_gscode = CHOICE_TAKEN;
+                    gs_teamChoice = CHOICE_TAKEN;
                 }
                 for ( i = 0; i < game_numPlayers; i++ ) {
                     if ( ( game_players[i] >> 7 ) || !( ( game_players[i] >> 4 ) & 7 ) ) {
@@ -519,7 +519,7 @@ s32 GS_TeamSelect( void ) {
 
     memset( shown, 0, sizeof( shown ) );
     for ( i = 0; i < 2; i++ ) {
-        for ( j = 0; j <= ( D_8011FC84_gscode[i] & 0x7F ); j++ ) {
+        for ( j = 0; j <= ( gs_teamPlayer[i] & 0x7F ); j++ ) {
             if ( slots[i][j] != 0xFF ) {
                 shown[slots[i][j]] = 1;
             }
@@ -527,57 +527,57 @@ s32 GS_TeamSelect( void ) {
     }
 
     for ( i = 0; i < 4; i++ ) {
-        Menu_SetItem( D_8011FA80_gscode, i + 8, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+        Menu_SetItem( gs_teamItems, i + 8, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     }
     for ( i = 0; i < 8; i++ ) {
-        Menu_SetItem( D_8011FB98_gscode, i + 24, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
+        Menu_SetItem( gs_teamNameItems, i + 24, MENU_NONE, MENU_NONE, MENU_NONE, 0 );
     }
     for ( i = 0; i < game_numPlayers; i++ ) {
         if ( shown[i] ) {
             if ( !( game_players[i] >> 7 ) ) {
-                Menu_SetItem( D_8011FA80_gscode, i + 8, D_8011FC68_gscode[i], ( game_players[i] & 0xF ) * 32 + 32,
+                Menu_SetItem( gs_teamItems, i + 8, gs_playerNameImages[i], ( game_players[i] & 0xF ) * 32 + 32,
                                MENU_NONE, 0xFF );
             } else {
-                Menu_SetItem( D_8011FA80_gscode, i + 8, D_8011FC70_gscode[i], ( game_players[i] & 0xF ) * 32 + 32,
+                Menu_SetItem( gs_teamItems, i + 8, gs_cpuNameImages[i], ( game_players[i] & 0xF ) * 32 + 32,
                                MENU_NONE, 0xFF );
             }
-            Menu_SetItem( D_8011FA80_gscode, i + 16, D_8011FC34_gscode[game_players[i] & 0xF],
-                           D_8011FC24_gscode[game_players[i] & 0xF], MENU_NONE, MENU_NONE );
+            Menu_SetItem( gs_teamItems, i + 16, gs_cursorImages[game_players[i] & 0xF],
+                           gs_cursorX[game_players[i] & 0xF], MENU_NONE, MENU_NONE );
         } else {
-            Menu_SetItem( D_8011FA80_gscode, i + 16, D_8011FC78_gscode[i], 0x82, MENU_NONE, MENU_NONE );
+            Menu_SetItem( gs_teamItems, i + 16, gs_waitNameImages[i], 0x82, MENU_NONE, MENU_NONE );
         }
     }
     for ( i = 0; i < 8; i++ ) {
         if ( ( unlocked >> i ) & 1 ) {
-            Menu_SetItem( D_8011FA80_gscode, i, D_8011FC14_gscode[i], MENU_NONE, MENU_NONE, MENU_NONE );
+            Menu_SetItem( gs_teamItems, i, gs_teamPortraits[i], MENU_NONE, MENU_NONE, MENU_NONE );
         } else {
-            Menu_SetItem( D_8011FA80_gscode, i, 0x8BC, MENU_NONE, MENU_NONE, MENU_NONE );
+            Menu_SetItem( gs_teamItems, i, 0x8BC, MENU_NONE, MENU_NONE, MENU_NONE );
         }
     }
     Draw_ClearScreen( 0xE0, 0xE0, 0xE0 );
     Draw_Image( 0xA58, 0, 0 );
-    Menu_DrawItems( D_8011FA80_gscode, D_8011FC80_gscode );
+    Menu_DrawItems( gs_teamItems, gs_teamSlideStep );
     /* an empty loop: retail still counts it out */
     for ( i = 0; i < 4; i++ ) {
     }
 
-    if ( D_8011FC81_gscode == CHOICE_RUN ) {
+    if ( gs_teamChoice == CHOICE_RUN ) {
         for ( i = 0; i < 4; i++ ) {
             if ( i < game_numPlayers ) {
                 character = game_players[i] & 0xF;
                 if ( shown[i] ) {
                     ( (sceneObject_t *)obj_scene[10 + i] )->viewMask = 1;
-                    if ( D_801207B4_gscode[i] != character ) {
-                        D_801207B4_gscode[i] = character;
+                    if ( gs_shownModels[i] != character ) {
+                        gs_shownModels[i] = character;
                         ( (sceneObject_t *)obj_scene[10 + i] )->frame = 0;
-                        ( (sceneObject_t *)obj_scene[10 + i] )->model = D_801207C0_gscode[character];
-                        ( (sceneObject_t *)obj_scene[10 + i] )->anim = D_801207E0_gscode[character];
+                        ( (sceneObject_t *)obj_scene[10 + i] )->model = gs_teamModels[character];
+                        ( (sceneObject_t *)obj_scene[10 + i] )->anim = gs_teamAnims[character];
                         if ( character == 6 ) {
-                            D_80120800_gscode[i][1] += 40;
+                            gs_modelPos[i][1] += 40;
                         }
                         Mtx_SetRotScaleTrans( ( (sceneObject_t *)obj_scene[10 + i] )->mtx, 0.0f, 0.0f, 0.0f,
-                                       D_8011F8C0_gscode[character], D_80120800_gscode[i][0], D_80120800_gscode[i][1],
-                                       D_80120800_gscode[i][2] );
+                                       gs_teamModelScales[character], gs_modelPos[i][0], gs_modelPos[i][1],
+                                       gs_modelPos[i][2] );
                     }
                 } else {
                     ( (sceneObject_t *)obj_scene[10 + i] )->viewMask = 0;
@@ -591,58 +591,58 @@ s32 GS_TeamSelect( void ) {
             if ( shown[i] ) {
                 character = game_players[i] & 0xF;
                 for ( j = 0; j < 3; j++ ) {
-                    if ( D_80120818_gscode[i][j] < D_8011FC50_gscode[character][j] ) {
-                        D_80120818_gscode[i][j]++;
+                    if ( gs_barLevels[i][j] < gs_barHeights[character][j] ) {
+                        gs_barLevels[i][j]++;
                     }
-                    if ( D_80120818_gscode[i][j] > D_8011FC50_gscode[character][j] ) {
-                        D_80120818_gscode[i][j]--;
+                    if ( gs_barLevels[i][j] > gs_barHeights[character][j] ) {
+                        gs_barLevels[i][j]--;
                     }
-                    Draw_FillRect( D_80120828_gscode[i][j], D_80120840_gscode[i][j], 3, 40 - D_80120818_gscode[i][j],
+                    Draw_FillRect( gs_barX[i][j], gs_barY[i][j], 3, 40 - gs_barLevels[i][j],
                                    0xB0, 0xB0, 0xB0, 0xC0 );
-                    Draw_FillRect( D_80120828_gscode[i][j], D_80120840_gscode[i][j] - ( D_80120818_gscode[i][j] - 40 ),
-                                   3, D_80120818_gscode[i][j], D_8011FC44_gscode[j][0], D_8011FC44_gscode[j][1],
-                                   D_8011FC44_gscode[j][2], 0xC0 );
+                    Draw_FillRect( gs_barX[i][j], gs_barY[i][j] - ( gs_barLevels[i][j] - 40 ),
+                                   3, gs_barLevels[i][j], gs_barColors[j][0], gs_barColors[j][1],
+                                   gs_barColors[j][2], 0xC0 );
                 }
-                Menu_SetItem( D_8011FB98_gscode, i + 24, D_8011FC04_gscode[character], D_80120828_gscode[i][0] - 16,
-                               D_80120840_gscode[i][0] + 18, game_pulseAlpha );
-                Menu_SetItem( D_8011FB98_gscode, i + 28, D_8011FBF4_gscode[character], D_80120828_gscode[i][0] - 16,
-                               D_80120840_gscode[i][0] + 26, game_pulseAlpha );
+                Menu_SetItem( gs_teamNameItems, i + 24, gs_nameLine1Images[character], gs_barX[i][0] - 16,
+                               gs_barY[i][0] + 18, game_pulseAlpha );
+                Menu_SetItem( gs_teamNameItems, i + 28, gs_nameLine2Images[character], gs_barX[i][0] - 16,
+                               gs_barY[i][0] + 26, game_pulseAlpha );
             }
         }
     }
 
-    Menu_DrawItems( D_8011FB98_gscode, D_8011FC80_gscode );
+    Menu_DrawItems( gs_teamNameItems, gs_teamSlideStep );
 
-    switch ( D_8011FC81_gscode ) {
+    switch ( gs_teamChoice ) {
     case CHOICE_IN:
-        D_8011FA80_gscode[5].slide = SLIDE_LEFT;
-        D_8011FC80_gscode -= 2;
-        if ( D_8011FC80_gscode == 0 ) {
-            D_8011FC81_gscode = CHOICE_RUN;
+        gs_teamItems[5].slide = SLIDE_LEFT;
+        gs_teamSlideStep -= 2;
+        if ( gs_teamSlideStep == 0 ) {
+            gs_teamChoice = CHOICE_RUN;
             Game_StartPulse();
-            Obj_CreateAll( gs_classes, D_8011F900_gscode );
+            Obj_CreateAll( gs_classes, gs_teamScene );
             cam_cameras[0]->path->flags |= 4;
             for ( i = 0; i < 4; i++ ) {
-                D_801207B4_gscode[i] = 0xFFFF;
+                gs_shownModels[i] = 0xFFFF;
                 for ( j = 0; j < 3; j++ ) {
-                    D_80120818_gscode[i][j] = 0;
+                    gs_barLevels[i][j] = 0;
                 }
             }
-        } else if ( D_8011FC80_gscode == 28 ) {
+        } else if ( gs_teamSlideStep == 28 ) {
             for ( i = 0; i < 8; i++ ) {
-                D_801207C0_gscode[i] = Cache_GetFile( D_8011F8E0_gscode[i], FILE_TYPE1 );
-                D_801207E0_gscode[i] = Cache_GetFile( D_8011F8F0_gscode[i], 2 );
+                gs_teamModels[i] = Cache_GetFile( gs_teamModelFiles[i], FILE_TYPE1 );
+                gs_teamAnims[i] = Cache_GetFile( gs_teamAnimFiles[i], 2 );
             }
         }
         break;
     case CHOICE_TAKEN:
     case CHOICE_BACK:
-        D_8011FA80_gscode[5].slide = SLIDE_RIGHT;
-        D_8011FC80_gscode += 2;
-        if ( D_8011FC80_gscode == 30 ) {
+        gs_teamItems[5].slide = SLIDE_RIGHT;
+        gs_teamSlideStep += 2;
+        if ( gs_teamSlideStep == 30 ) {
             if ( game_leaveState == 1 ) {
                 if ( game_fade != 0xFF ) {
-                    D_8011FC80_gscode = 28;
+                    gs_teamSlideStep = 28;
                     return 0;
                 }
                 game_leaveState = 2;
@@ -652,21 +652,21 @@ s32 GS_TeamSelect( void ) {
                 shown[i] = 0;
             }
             Obj_FreeAll();
-            D_8011FC82_gscode = 0;
+            gs_teamPhase = 0;
             Cache_FreeBelow( 0x825 );
-            D_8011FC84_gscode[0] = D_8011FC84_gscode[1] = 0;
-            if ( D_8011FC81_gscode == CHOICE_TAKEN ) {
-                D_8011FC81_gscode = CHOICE_IN;
+            gs_teamPlayer[0] = gs_teamPlayer[1] = 0;
+            if ( gs_teamChoice == CHOICE_TAKEN ) {
+                gs_teamChoice = CHOICE_IN;
                 return 1;
             }
-            D_8011FC81_gscode = CHOICE_IN;
+            gs_teamChoice = CHOICE_IN;
             return 2;
         }
         break;
     case 4:
         if ( GS_PakCheck() ) {
             game_leaveState = 1;
-            D_8011FC81_gscode = CHOICE_TAKEN;
+            gs_teamChoice = CHOICE_TAKEN;
         }
         break;
     }
