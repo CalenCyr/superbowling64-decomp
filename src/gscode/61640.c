@@ -93,12 +93,8 @@ unlocked characters, A or Z plays its next animation and B backs out. Returns 0 
 it has slid out, 1 when a character was taken and 2 for backing out.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: retail loads the argument of both Cache_Release calls with lhu (passed unconverted, as with no
-// prototype in scope); the s16 prototype makes it lh. Every other instruction is the same.
 s32 GS_CharacterMenu( void ) {
     s32 i;
-    sceneObject_t *obj;
 
     Menu_SetItem( D_80120430_gscode, 10, D_80120644_gscode[D_80120656_gscode], MENU_NONE, MENU_NONE, MENU_NONE );
     for ( i = 0; i < 8; i++ ) {
@@ -207,6 +203,3 @@ s32 GS_CharacterMenu( void ) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gscode/61640", GS_CharacterMenu);
-#endif

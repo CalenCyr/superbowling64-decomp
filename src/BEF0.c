@@ -145,7 +145,9 @@ Cache_Release
 Drops a reference to file index; frees it with the last one.
 ================
 */
-void Cache_Release( s16 index ) {
+void Cache_Release( index )
+s16 index;
+{
     if ( --cache_files[index].refCount == 0 ) {
         Mem_Free( cache_files[index].data );
     }

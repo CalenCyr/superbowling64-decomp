@@ -151,7 +151,7 @@ void Cache_Clear( void );
 void Cache_LoadFile( s16 index );
 void *Cache_GetFile( s16 index, s16 type );
 void Cache_ReleaseData( void *data );
-void Cache_Release( s16 index );
+void Cache_Release();                       /* K&R definition: callers pass the index unconverted */
 void Cache_FreeBelow( s16 count );
 
 #endif
