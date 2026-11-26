@@ -264,6 +264,8 @@ from a's path over the sum of the radii.
 // else matches, including $f20/$f22, which need along reused as the push and t as the clamped distance (with
 // separate push and dist locals they land in caller-saved registers instead). Also tried: the inline's length
 // through GA_VecLength (no change).
+// Permuter clue: it reaches exact only by giving GA_VecNormalize an `unsigned int` return (the length converted
+// and discarded), which breaks GA_VecDirection's f32 result; not a source change.
 f32 GA_SpotContact( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     f32 along;
     f32 speedSq;

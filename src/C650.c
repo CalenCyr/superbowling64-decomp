@@ -49,6 +49,7 @@ void Scene_ClearDrawList( void ) {
 // probably read into a wider local (a u16 local alone does not do it)
 // Also checked: the empty-bucket arm last (bucket != DRAW_NONE first), key <= ...key for the head test, and the
 // search as a while loop on next != DRAW_NONE with the append after it (each further from retail)
+// Permuter (60 min): 5445 -> 4965 only through generated inline wrappers around the key and bucket expressions.
 /*
 ================
 Scene_InsertEntry

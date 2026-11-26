@@ -368,6 +368,7 @@ leaves when player 1 won (setting the bit of game_stage in save_data.unlocks), e
 // x + 0x38 with ori), and allocates the first loop's registers differently (x in s1, i in s2)
 // The zero extension fits a call with no prototype in scope; the project keeps every call prototyped, so it stays
 // parked.
+// Permuter clue (795 -> 105): 0x40 held in a separate short temporary set before the first loop; a split step only.
 void RS_DuelResults( void ) {
     u16 images[3] = { 0x874, 0x873, 0x872 };
     s16 x;
