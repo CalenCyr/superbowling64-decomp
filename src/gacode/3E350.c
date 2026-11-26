@@ -3375,6 +3375,7 @@ modes that have one), and a value of the lane's current inputFunc step.
 // Global-alloc priorities (log2(refs) * refs / live insns) here are player 0.15, &game_gfx 0.11, row 0.03, lane 0.02,
 // so retail's order needs row and lane with far more refs or shorter lives. No effect: lane u16/s16, row u32/u8,
 // row * 8 + 16, row = 16 with row * 8, lane read after row = 14, 144 * lane.
+// Permuter (20 min, target-only scoring): 110 -> 75 only through an aliasing pointer copy of pl.
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;

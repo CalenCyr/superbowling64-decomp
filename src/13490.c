@@ -355,6 +355,8 @@ player has finished the game.
 // rowY = y + 2 once before the frame test (worse).
 // Permuter (target-only scoring, 7 min): best 615 from 865 only through noise (a u16 temporary for the third
 // roll, a duplicated if/else), no source clue.
+// A further 20-minute run reached 275 only by holding -2 in a local shared with the foul test (left unset on one
+// path). No effect: roll = pins then the -1 test, pins != -1 first, rowY = y before the first Draw_Image.
 void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;
