@@ -386,7 +386,7 @@ Acmd *Synth_MixFrame( void *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p )
 s16 Synth_RampStep( f64 vol, f64 tgt, s32 count, u16 *ratel );         /* the ramp step from vol to tgt */
 s16 Synth_RampVolume( s16 vol, s32 count, s16 ratem, u16 ratel );        /* the volume count samples into a ramp */
 
-Acmd *Synth_DecodeSamples( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p );  /* decodes outCount samples to *outp */
+Acmd *Synth_DecodeSamples( void *filter, s16 *outp, s32 outCount, Acmd *p );  /* decodes outCount samples to *outp */
 Acmd *Synth_ResampleFrame( N_PVoice *pv, s16 *outp, Acmd *p );              /* resamples one frame into *outp */
 s32 Synth_ResamplerParam( N_PVoice *pv, s32 paramID, void *param );          /* the resampler's parameter handler */
 

@@ -16,19 +16,10 @@ of the first ADPCM frame already used. A loop the samples reach is decoded pass 
 pass moved to follow the last); samples past the table's end are cleared.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: registers only (frame, schedule and the loop's (s16)inp now match): retail gives outp s5, frameSam
-// s1 and nOver s3; here outp s3, frameSam s5, nOver s1 (global alloc takes nOver before op; retail op first, as
-// when op is reused for the clear offset, which R30 rules out). `s16 inp` keeps the loop's sll/sra and gives
-// retail's 0x58 frame; the clear offset as its own local gives retail's a2. Not it: the clear local's declaration
-// position (any) or block scope, clear = 0 before an if, !decoded first, clear << 1 at the use, a ?: (duplicates
-// the aClearBuffer), frameSam set before overFlow or after its clamp, no frameSam local. Permuter (30 min): only
-// a working copy of pv taken after the early return, and it does not fix these registers.
-// Earlier: with s32 inp combine folds (s16)inp to 0 in all three calls (get_last_value, inp set once).
-Acmd *Synth_DecodeSamples( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
+Acmd *Synth_DecodeSamples( void *filter, s16 *outp, s32 outCount, Acmd *p ) {
     Acmd *ptr = p;
     s32 looped;
-    s32 nSam;
+    s32 nSam;                           // RULE-EXCEPTION: R30, the samples to decode, then those of the whole frames read; retail keeps both in s1
     s32 lead;
     s32 tsam;
     s32 nframes;
@@ -37,8 +28,8 @@ Acmd *Synth_DecodeSamples( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
     s32 dmemOut;
     s32 overFlow;
     s32 nOver;
-    s32 frameSam;                       /* the samples in the whole frames */
     s32 decoded = FALSE;
+    N_PVoice *pv = (N_PVoice *)filter;  /* a filter, as Synth_MixFrame takes: retail copies it after the other initialisers */
     s16 inp;
     s32 clear;
 
@@ -84,8 +75,8 @@ Acmd *Synth_DecodeSamples( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
         op = *outp;
         while ( nSam < outCount ) {
             dmemOut = ( op + ( nframes + 1 ) * 32 + 16 ) & ~0x1F;
-            op += nSam << 1;
             outCount -= nSam;
+            op += nSam << 1;
             if ( pv->loopCount != ~0 && pv->loopCount != 0 ) {
                 pv->loopCount--;
             }
@@ -112,15 +103,15 @@ Acmd *Synth_DecodeSamples( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
         overFlow = 0;
     }
     nOver = ( overFlow / N_ADPCM_FRAME_BYTES ) << 4;
-    frameSam = nframes * 16;
-    if ( frameSam + lead < nOver ) {
-        nOver = frameSam + lead;
+    nSam = nframes * 16;
+    if ( nSam + lead < nOver ) {
+        nOver = nSam + lead;
     }
     nbytes -= overFlow;
 
     if ( nOver - ( nOver & 0xF ) < outCount ) {
         decoded = TRUE;
-        ptr = Synth_DecodeAdpcm( ptr, pv, frameSam - nOver, nbytes, *outp, inp, pv->first );
+        ptr = Synth_DecodeAdpcm( ptr, pv, nSam - nOver, nbytes, *outp, inp, pv->first );
         if ( pv->lastsam ) {
             *outp += pv->lastsam << 1;
         } else {
@@ -137,7 +128,7 @@ Acmd *Synth_DecodeSamples( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
     if ( nOver != 0 ) {
         pv->lastsam = 0;
         if ( decoded ) {
-            clear = ( lead + frameSam - nOver ) << 1;
+            clear = ( lead + nSam - nOver ) << 1;
         } else {
             clear = 0;
         }
@@ -145,9 +136,6 @@ Acmd *Synth_DecodeSamples( N_PVoice *pv, s16 *outp, s32 outCount, Acmd *p ) {
     }
     return ptr;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/1C260", Synth_DecodeSamples);
-#endif
 
 /*
 ================
