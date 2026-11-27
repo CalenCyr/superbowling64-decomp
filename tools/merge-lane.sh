@@ -23,6 +23,7 @@ make gate 2>&1 | grep -q '^GATE OK' || fail "gate red in $wt"
 step make rules
 step make rules-test
 step make rename-test
+step make n64crc-test
 if git diff main | grep -iqE 'silicon graphics|nintendo co|copyright'; then fail "SDK/copyright text in diff"; fi
 files=$(git diff --stat main | tail -1)
 
