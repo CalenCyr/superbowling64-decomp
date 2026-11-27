@@ -373,14 +373,10 @@ the scene's per-frame function, the demo's titles, the fade of game_leaveState w
 CPU time of the frame.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: the frame is 0x48 bytes, retail's 0x58 (16 bytes of locals no instruction uses); retail's lbu
-// and separate andi of game_scene before each switch need it volatile (game.h); otherwise only relocation
-// names differ (game_cursorY is retail's game_cursorX + 2). One local holds the counter, the file size and the
-// second switch's index, as retail's s2 does. An unused 16-byte local gives retail's frame (not adopted, R17);
-// the inlined Rumble_StartBoth and Game_StartPulse have no locals, so their frames add nothing.
 void Game_Thread( void *arg ) {
-    s32 i;
+    s32 i;              // RULE-EXCEPTION: R30, the frame counter, then each overlay's file size, then the scene switched on; retail keeps all three in s2
+    // R36: unused in the original: retail's frame reserves 16 bytes no instruction touches
+    u8 unused[16];
 
     Game_StartPulse();
     for ( i = 0; i < 3; i++ ) {
@@ -637,6 +633,3 @@ void Game_Thread( void *arg ) {
         osSendMesg( &sched_queue, &sched_msgGfx, OS_MESG_NOBLOCK );
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/1060", Game_Thread);
-#endif
