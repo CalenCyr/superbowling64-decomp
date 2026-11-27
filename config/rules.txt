@@ -23,3 +23,7 @@ original-asm __floatdidf
 rule-exception R17 GA_KeepOnFloor
 # 53B0 declares sched_bufferIndex without volatile (lb), apart from sched.h's volatile declaration (user ruling 2026-11-26)
 rule-exception R2 sched_bufferIndex
+
+# asm/1000 entrypoint: the boot stub is hand-written assembly: `addi` (the trapping add, which gcc never emits),
+# a .bss clear 8 bytes a step with no stack frame, then $sp set and a jump to main, outside the C calling convention
+original-asm entrypoint

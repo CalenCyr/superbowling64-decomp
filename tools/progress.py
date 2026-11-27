@@ -19,6 +19,14 @@ if args.rules:
     rules = json.load(open(args.rules))
     failing = {(f["unit"], f["function"]) for f in rules["failing"]}
     orig = {(f["unit"], f["function"]) for f in rules["functions"] if f["kind"] == "original-asm"}
+    # functions in asm-only units (no C file for tools/rules.py to read) listed as `original-asm` in config/rules.txt
+    try:
+        cfg = [ln.split("#", 1)[0].split() for ln in open("config/rules.txt")]
+        orig_names = {ln[1] for ln in cfg if len(ln) == 2 and ln[0] == "original-asm"}
+    except OSError:
+        orig_names = set()
+    orig |= {(u["name"], f["name"]) for u in r.get("units", []) for f in u.get("functions", [])
+             if u["name"].startswith("asm/") and f["name"] in orig_names}
     groups = {"all": [0, 0, []]}
     for u in r.get("units", []):
         cats = ["all"] + u.get("metadata", {}).get("progress_categories", [])
