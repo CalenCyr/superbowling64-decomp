@@ -150,6 +150,9 @@ result.
 // exact. A lane local assigned for inputFunc and again after GA_PhysicsStep (dies twice: global) fixes loop 1 but
 // moves the inputFunc load into a0 too (2 lines).
 // Equivalence: 963 random cases (1037 skipped), no difference (tools/equiv.py).
+// Trace-scored search (tools/gcc_instr/trace_search.py, 23 candidates): a lane local at turnFunc, inputFunc,
+// loop 1 and cameraFunc in all 16 combinations, loop 1 indexed or walked through lane (7 forms): the loop-1 lane
+// load stays local-alloc's (v0) unless lane is set at another site, which then takes a0 too; closest 2 lines.
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
@@ -3416,6 +3419,9 @@ modes that have one), and a value of the lane's current inputFunc step.
 // Trace: exact under GCC_ALLOC_GLOBAL_ORDER=GA_DebugText:80,79,72,85 (row, lane, player, &game_gfx): retail
 // allocates row and lane before player and &game_gfx, which their priorities here (0.03, 0.02 vs 0.15, 0.11) cannot give.
 // Equivalence: 1926 random cases (74 skipped), no difference (tools/equiv.py).
+// Trace-scored search (tools/gcc_instr/trace_search.py, 291 candidates): lane/row types and declaration order,
+// their initialisation order, three x and three y spellings, four increment spellings, an inputFunc or
+// ga_gameMode local: row stays 3 refs/90 live (pri 333), lane at most 787, player 1538; none reaches retail's order.
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;
