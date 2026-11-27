@@ -1748,3 +1748,5 @@ gs_digitImages	0x80120410	invented: image of each digit (options sound test)
 ga_spotOffset	0x8012C758	invented: offset (0, 24, 0) of a body's second spot in the body's frame (GA_PhysicsStep)
 op_glyphsLow	0x80114254	invented: unreferenced glyph string 0-15
 op_glyphsHigh	0x80114278	invented: unreferenced glyph string 16-31
+scene_rspInitDl	0x8010A2A0	invented: the display list each frame starts with after the viewport: sets the viewport, G_GEOMETRYMODE and the render state
+scene_rdpInitDl	0x8010A2C8	invented: the first display list of each frame: RDP other-mode, scissor and combine defaults

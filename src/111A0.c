@@ -46,7 +46,7 @@ height under the cursor.
 // it below its 132 differing lines at the unit's flags.
 // Idiom pass: the permuter's shared flag/counter written out (resized folded into i, one local for both: 775 -> 758 diff
 // lines, still not exact, left out as less readable); a floorGrid_t pointer for game_floorGrids[0] (1403).
-// Equivalence: 141 random cases (9 skipped), no difference (tools/equiv.py).
+// Equivalence: 924 random cases (76 skipped), no difference (tools/equiv.py).
 void GridEd_Frame( void ) {
     u8 text[40];
     s32 x, z;

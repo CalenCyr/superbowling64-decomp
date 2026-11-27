@@ -473,8 +473,8 @@ void Game_Thread( void *arg ) {
         sched_buildFrame = &sched_gfxFrames[sched_bufferIndex];
         game_gfx = sched_buildFrame->list;
         gSPSegment( game_gfx++, 0, 0 );
-        gSPDisplayList( game_gfx++, D_8010A2C8 );
-        gSPDisplayList( game_gfx++, D_8010A2A0 );
+        gSPDisplayList( game_gfx++, scene_rdpInitDl );
+        gSPDisplayList( game_gfx++, scene_rspInitDl );
         gDPSetDepthImage( game_gfx++, osVirtualToPhysical( scene_depthBuffer ) );
         gDPSetColorImage( game_gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
                           osVirtualToPhysical( sched_framebuffers[sched_drawFb] ) );

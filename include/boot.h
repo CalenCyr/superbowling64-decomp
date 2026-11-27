@@ -163,8 +163,8 @@ extern s16 game_cursorX;            /* a cursor's x, moved by the stick; 160 at 
 extern s16 game_cursorY;            /* its y; 120 at boot */
 extern u8 game_cursorSpeed;         /* row of game_cursorSpeeds the cursor moves by */
 extern u8 game_cursorLocked;        /* when set, the cursor stays */
-extern Gfx D_8010A2C8[];            /* display lists of the KNSTATICSYS file each frame starts with */
-extern Gfx D_8010A2A0[];
+extern Gfx scene_rdpInitDl[];            /* RDP defaults, then RSP defaults: the KNSTATICSYS display lists each frame starts with */
+extern Gfx scene_rspInitDl[];
 
 void Boot_Thread( void *arg );
 void Main_StartAudioTask( void );
