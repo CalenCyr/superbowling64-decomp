@@ -132,12 +132,12 @@ void Scene_AddToDrawList( void ) {
     mask = scene_viewMask;
     for ( i = 0; i < cam_count; i++ ) {
         if ( ( mask & 1 ) && cam_cameras[i]->height != 0 ) {
-            scene_drawList[scene_numDraws].unk_04 = scene_addMaterial | ( scene_addSurface << 11 ) | ( i << 14 );
-            scene_drawList[scene_numDraws].unk_06 = scene_addMesh | ( scene_addCullBack << 11 ) | ( scene_addTwoCycle << 13 ) | ( scene_addUcode << 14 );
+            scene_drawList[scene_numDraws].materialBits = scene_addMaterial | ( scene_addSurface << 11 ) | ( i << 14 );
+            scene_drawList[scene_numDraws].meshBits = scene_addMesh | ( scene_addCullBack << 11 ) | ( scene_addTwoCycle << 13 ) | ( scene_addUcode << 14 );
             if ( scene_addNoZBuffer == 0 ) {
-                scene_drawList[scene_numDraws].unk_06 |= 0x1000;
+                scene_drawList[scene_numDraws].meshBits |= 0x1000;
             }
-            scene_drawList[scene_numDraws].unk_08 = scene_addMatrix;
+            scene_drawList[scene_numDraws].matrix = scene_addMatrix;
             if ( scene_addLayer != 0 ) {
                 key = ( scene_addLayer << 15 ) | ( scene_addMaterial << 4 ) | ( scene_addUcode << 2 ) | i;
                 bucket = ( scene_addLayer << 3 ) | ( scene_addMaterial & 3 );
@@ -412,10 +412,10 @@ s32 Scene_Draw( void ) {
     scene_renderModeChanged = 1;
 
     for ( link = &scene_drawHead; *link != DRAW_NONE; link = &scene_drawList[*link].next ) {
-        mesh = cache_files[scene_drawList[*link].unk_06 & 0x7FF].data;
-        mat = cache_files[scene_drawList[*link].unk_04 & 0x7FF].data;
+        mesh = cache_files[scene_drawList[*link].meshBits & 0x7FF].data;
+        mat = cache_files[scene_drawList[*link].materialBits & 0x7FF].data;
 
-        ucode = scene_drawList[*link].unk_06 >> 14;
+        ucode = scene_drawList[*link].meshBits >> 14;
         if ( scene_ucode != ucode ) {
             scene_ucode = ucode & 3;
             scene_view = 0xFF;
@@ -439,14 +439,14 @@ s32 Scene_Draw( void ) {
             }
         }
 
-        view = scene_drawList[*link].unk_04 >> 14;
+        view = scene_drawList[*link].materialBits >> 14;
         if ( scene_view != view ) {
             scene_view = view;
             Scene_BeginView( cam_cameras[view] );
         }
 
-        if ( scene_twoCycle != ( ( scene_drawList[*link].unk_06 >> 13 ) & 1 ) ) {
-            scene_twoCycle = ( scene_drawList[*link].unk_06 >> 13 ) & 1;
+        if ( scene_twoCycle != ( ( scene_drawList[*link].meshBits >> 13 ) & 1 ) ) {
+            scene_twoCycle = ( scene_drawList[*link].meshBits >> 13 ) & 1;
             if ( scene_twoCycle == 0 ) {
                 gDPSetCycleType( game_gfx++, G_CYC_1CYCLE );
             } else {
@@ -456,25 +456,25 @@ s32 Scene_Draw( void ) {
             Scene_PickRenderModes();
             scene_combineChanged = 1;
         }
-        if ( scene_zBuffer != ( ( scene_drawList[*link].unk_06 >> 12 ) & 1 ) ) {
-            scene_zBuffer = ( scene_drawList[*link].unk_06 >> 12 ) & 1;
+        if ( scene_zBuffer != ( ( scene_drawList[*link].meshBits >> 12 ) & 1 ) ) {
+            scene_zBuffer = ( scene_drawList[*link].meshBits >> 12 ) & 1;
             scene_geometryChanged = 1;
             scene_renderModeChanged = 1;
             scene_combineChanged = 1;
             Scene_PickRenderModes();
         }
-        if ( scene_cullBack != ( ( scene_drawList[*link].unk_06 >> 11 ) & 1 ) ) {
-            scene_cullBack = ( scene_drawList[*link].unk_06 >> 11 ) & 1;
+        if ( scene_cullBack != ( ( scene_drawList[*link].meshBits >> 11 ) & 1 ) ) {
+            scene_cullBack = ( scene_drawList[*link].meshBits >> 11 ) & 1;
             scene_geometryChanged = 1;
         }
-        if ( scene_surface != ( ( scene_drawList[*link].unk_04 >> 11 ) & 7 ) ) {
-            scene_surface = ( scene_drawList[*link].unk_04 >> 11 ) & 7;
+        if ( scene_surface != ( ( scene_drawList[*link].materialBits >> 11 ) & 7 ) ) {
+            scene_surface = ( scene_drawList[*link].materialBits >> 11 ) & 7;
             scene_renderModeChanged = 1;
             Scene_PickRenderModes();
         }
 
-        if ( scene_material != ( scene_drawList[*link].unk_04 & 0x7FF ) ) {
-            scene_material = scene_drawList[*link].unk_04 & 0x7FF;
+        if ( scene_material != ( scene_drawList[*link].materialBits & 0x7FF ) ) {
+            scene_material = scene_drawList[*link].materialBits & 0x7FF;
             if ( memcmp( &scene_primColor, &mat->prim, sizeof( rgba8_t ) ) ) {
                 scene_primColor = mat->prim;
                 gDPSetPrimColor( game_gfx++, 0, 0, scene_primColor.r, scene_primColor.g, scene_primColor.b, scene_primColor.a );
@@ -708,9 +708,9 @@ s32 Scene_Draw( void ) {
             gDPSetRenderMode( game_gfx++, scene_renderMode1, scene_renderMode2 );
         }
 
-        if ( scene_modelMtx != scene_drawList[*link].unk_08 ) {
-            scene_modelMtx = scene_drawList[*link].unk_08;
-            gSPMatrix( game_gfx++, scene_drawList[*link].unk_08, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
+        if ( scene_modelMtx != scene_drawList[*link].matrix ) {
+            scene_modelMtx = scene_drawList[*link].matrix;
+            gSPMatrix( game_gfx++, scene_drawList[*link].matrix, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH );
         }
 
         gSPVertex( game_gfx++, mesh->verts, mesh->numVerts, 0 );

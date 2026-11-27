@@ -14,9 +14,9 @@
 typedef struct {
     /* 0x00 */ s16 next;            /* index of the next entry, or DRAW_NONE */
     /* 0x02 */ u16 key;             /* entries of a bucket are kept in key order */
-    /* 0x04 */ u16 unk_04;
-    /* 0x06 */ u16 unk_06;
-    /* 0x08 */ void *unk_08;
+    /* 0x04 */ u16 materialBits;
+    /* 0x06 */ u16 meshBits;
+    /* 0x08 */ void *matrix;
 } drawEntry_t;                      /* size 0xC */
 
 #define NUM_PUFFS           50
@@ -55,7 +55,7 @@ extern u8 scene_addCullBack;        /* their face culling (scene_cullBack) */
 extern u16 scene_addMesh;           /* their mesh (file index) */
 extern u8 scene_addUcode;           /* their microcode (scene_ucode) */
 extern u8 scene_addNoZBuffer;       /* 0: they use the z-buffer */
-extern void *scene_addMatrix;       /* their model matrix, drawEntry_t.unk_08 */
+extern void *scene_addMatrix;       /* their model matrix, drawEntry_t.matrix */
 extern u16 scene_addLayer;          /* nonzero: the layer of buckets they go in */
 extern u8 scene_addByMaterial;      /* nonzero: they are keyed by material, else by microcode */
 extern u8 scene_geometryChanged;    /* set: the geometry mode is set again (as when scene_fog changes) */

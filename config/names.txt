@@ -1750,3 +1750,6 @@ op_glyphsLow	0x80114254	invented: unreferenced glyph string 0-15
 op_glyphsHigh	0x80114278	invented: unreferenced glyph string 16-31
 scene_rspInitDl	0x8010A2A0	invented: the display list each frame starts with after the viewport: sets the viewport, G_GEOMETRYMODE and the render state
 scene_rdpInitDl	0x8010A2C8	invented: the first display list of each frame: RDP other-mode, scissor and combine defaults
+drawEntry_t.materialBits	ground.h	invented: material (bits 0-10), surface (11-13) and view (14+) of a draw entry (Scene_Draw)
+drawEntry_t.meshBits	ground.h	invented: mesh (bits 0-10), cull-back, z-buffer, two-cycle and microcode bits of a draw entry (Scene_Draw)
+drawEntry_t.matrix	ground.h	invented: the entry's model matrix (scene_addMatrix)
