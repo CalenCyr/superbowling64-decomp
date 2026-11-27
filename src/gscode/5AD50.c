@@ -325,22 +325,26 @@ once the setup is taken, 2 once it is backed out of, else 0.
 ================
 */
 #ifdef NON_MATCHING
-// NON_MATCHING: complete; three register choices differ: in case 0 the team searched for sits in a0 (retail
-// a1, the count copied to a0), and in case 5 the human flag and the copy loop's team sit in a0 (retail v1).
-// A u8 team fixes the copy loop but adds andi in case 0; a u8 flag adds andi to its tests.
+// NON_MATCHING: complete; one register choice differs: in case 0 the team searched for sits in a0 (retail
+// a1, the count copied to a0). team and human as s16 give case 5's registers (the human flag and the copy loop's
+// team in v1, as retail); as s32 they sit in a0. A u8 team fixes the copy loop but adds andi in case 0; a u8 flag
+// adds andi to its tests.
 // Permuter clue: holding the human flag in `j` (or `i`) instead of its own local cuts most of the case 5
 // difference, so retail's flag likely shares a pseudo with another variable; a block-scoped flag, `team`, or
 // another declaration order does not. Holding the flag in `j` and the copy loop's team in `j` too leaves only case
 // 0 (sibling functions 5EC00/605D0 matched the same way: the original reuses its counters); case 0 still differs,
 // and a `j` holding the searched team's per-player value there makes it worse.
+// Restricted permuter search (perm macros only, 40 min): declaration order, team s32/u32/s16/u16, human s32/u32/s16,
+// human == TRUE or human, i != or < the count, the search's test in six operand orders, team read before or after
+// Sound_PlaySe, i++/++i: best 105 (base 870) with team and human s16 (adopted); nothing below that.
 s32 GS_PlayerSetup( void ) {
     u8 minPlayers;
     u8 maxPlayers;
     u8 kind;
     s32 i;
     s32 j;
-    s32 team;
-    s32 human;
+    s16 team;
+    s16 human;
 
     cont_pollStatus = 1;
     Cont_FindStandard();

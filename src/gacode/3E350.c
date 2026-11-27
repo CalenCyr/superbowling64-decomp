@@ -140,6 +140,9 @@ result.
 // suggestion and nothing else is live in v0/v1 there; retail's a0 needs a direct copy of it into a0 or a busy v0/v1.
 // No effect: the first loop as an inline helper taking (body, spot, pl), (pl, spot, body) or (pl, lane); a 35-minute
 // permuter run found nothing below 15.
+// Restricted permuter search (perm macros only, 35 min): declaration order, i s32/s16/u32/u8, the stick's zeroing
+// as two stores in either order or chained, the body loop's pointers set before or in the for, increments in each
+// order or in the call: nothing at or below the base 15.
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
@@ -211,6 +214,9 @@ GA_SettleBodies.
 // i + NUM_BODIES and &spots[i] + NUM_BODIES fold it into spots[i]; lane->secondSpots[i] or a secondSpots
 // local are further off; &spots[NUM_BODIES + i] is the same; a spot cursor for loop 2 (spot, spot +
 // NUM_BODIES) is further off. The continues, the local arrays and bounceSound as s16 (lh) came from A/B.
+// Restricted permuter search (perm macros only, 40 min): declaration order, loop 1's pointer set before or in the for
+// and its increments' order, loop 2 indexed or walking second (from lane->secondSpots, spots + 11 or &spots[11]): best
+// 300 (base 430): loop 2 walking second = spots + 11 leaves only port and second swapped (s4/s3, retail s3/s4).
 /* An angle in degrees brought back within -180..180. */
 #define GA_WRAP_DEGREES( a ) ( ( a ) < -180.0f ? ( a ) + 360.0f : ( a ) >= 180.0f ? ( a ) - 360.0f : ( a ) )
 
@@ -3386,6 +3392,8 @@ modes that have one), and a value of the lane's current inputFunc step.
 // player and &game_gfx (both conflict with row). Worse: a Gfx ** local for &game_gfx, x as an s16 local, each line's
 // draw and row++ in a do-while(0). A 35-minute permuter run: 75 only through a duplicated final draw.
 // Named column/line coordinates do not fit: retail's last draw recomputes lane * 144 + 16 and (row + 2) * 8.
+// Restricted permuter search (perm macros only, 25 min): declaration order, lane u8/s32/u16/s16, row s32/u8/s16/u32,
+// the two initialisations' order, row++/++row/row += 1, the coordinates' operand orders: ties with the base 110 only.
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;

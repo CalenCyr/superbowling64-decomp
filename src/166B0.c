@@ -1643,6 +1643,9 @@ f32 Snd_Exp2( f32 x ) {
 // Not it either: tune->value = digit + tune->value, tune->raw read in the call (no value local), value = digit
 // before the second call, bank->tunes[i] in place of tune, / 100.0f. Permuter (30 min, 235 -> 200): only noise
 // (a do-while(0) around the loop body, a wave base read into value).
+// Restricted permuter search (perm macros only, 20 min): declaration order, bank initialised or assigned, i
+// s32/s16/u32, value s32/s8/u8/s16/u16, tune and value set in either order, the tune as two statements, one sum or
+// value = value + digit: nothing at or below the base 235.
 /*
 ================
 Snd_SignExtend8

@@ -262,6 +262,9 @@ from a's path over the sum of the radii.
 // through GA_VecLength (no change).
 // Permuter clue: it reaches exact only by giving GA_VecNormalize an `unsigned int` return (the length converted
 // and discarded), which breaks GA_VecDirection's f32 result; not a source change.
+// Restricted permuter search (perm macros only, 20 min): declaration order; in GA_VecNormalize the length
+// initialised or assigned, by sqrtf or GA_VecLength, the zero test either way round, the three divisions in each
+// order; the push applied per axis, interleaved or as gap += dir * along: nothing at or below the base 410.
 f32 GA_SpotContact( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     f32 along;
     f32 speedSq;
