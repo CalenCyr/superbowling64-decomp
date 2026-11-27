@@ -5,7 +5,7 @@
 
 With no FUNC, tests every function that has a `#ifdef NON_MATCHING` draft in src/. Needs a built tree (`make`), the
 toolchain, and the `unicorn`, `pyelftools` and `numpy` packages (`make equiv` installs them into the ignored
-.equiv-venv/). Functions run in parallel worker processes.
+.equiv-venv/). With -j, functions run in that many worker processes (each holds about 100 MB).
 
 For each function it emulates only the VR4300's integer and FPU instructions, one function at a time (unicorn's
 MIPS32 core; the game code is -mips3 -mgp32 -mfp32, so it uses no 64-bit registers):
@@ -38,6 +38,7 @@ skipped) or DIFFERS with the first differing case; exits 1 if any function diffe
 
 import argparse
 import collections
+import gc
 import multiprocessing
 import os
 import random
@@ -73,7 +74,7 @@ DRAFT_TEXT = 0x80C00000
 DRAFT_RODATA = 0x80D00000
 SENTINEL = 0x80FFF000           # return address of the tested call
 FRAME_SPAN = 0x10000
-MAX_INSNS = 400000
+MAX_INSNS = 150000
 MAX_REPAIRS = 40
 STUB = bytes.fromhex("03E0000800000000")
 
@@ -524,11 +525,18 @@ class Machine:
     # makes the branch target's first instruction run twice. So the function's own instructions run under a code
     # hook, which decodes each load and store before it executes, and only the block hook sees the stubs.
     def fresh(self):
-        """A new CPU per run: unicorn's translation cache does not survive rewriting 16 MB of code and data."""
+        """A new CPU per run: unicorn's translation cache does not survive rewriting 16 MB of code and data.
+        The old one's hooks are removed first: they reference this Machine, and the cycle would keep its 16 MB."""
+        old = getattr(self, "uc", None)
+        if old is not None:
+            for h in self.hooks:
+                old.hook_del(h)
+            self.uc = old = None
+            gc.collect()
         self.uc = Uc(UC_ARCH_MIPS, UC_MODE_MIPS32 + UC_MODE_BIG_ENDIAN)
         self.uc.mem_map(0, RAM_SIZE)
-        self.uc.hook_add(UC_HOOK_BLOCK, self._on_block)
-        self.uc.hook_add(UC_HOOK_CODE, self._on_code, begin=self.fn[0], end=self.fn[1] - 1)
+        self.hooks = [self.uc.hook_add(UC_HOOK_BLOCK, self._on_block),
+                      self.uc.hook_add(UC_HOOK_CODE, self._on_code, begin=self.fn[0], end=self.fn[1] - 1)]
         self.lazy = set()
         self.loads = collections.deque(maxlen=512)
         self.bad = None
@@ -940,7 +948,7 @@ def main(argv):
     ap.add_argument("funcs", nargs="*")
     ap.add_argument("--cases", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=1)
-    ap.add_argument("-j", "--jobs", type=int, default=os.cpu_count() or 1)
+    ap.add_argument("-j", "--jobs", type=int, default=1)
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args(argv)
     if not os.path.isfile(ELF_PATH):
