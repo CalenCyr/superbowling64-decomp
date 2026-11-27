@@ -24,7 +24,9 @@ step make rules
 step make rules-test
 step make rename-test
 step make n64crc-test
-if git diff main | grep -iqE 'silicon graphics|nintendo co|copyright'; then fail "SDK/copyright text in diff"; fi
+# added lines only, outside this script, and not the project's own rule about keeping copyright notices
+if git diff main -- . ':!tools/merge-lane.sh' | grep '^+' | grep -iv 'copyright notice' \
+        | grep -iqE 'silicon graphics|nintendo co|copyright'; then fail "SDK/copyright text in diff"; fi
 files=$(git diff --stat main | tail -1)
 
 cd "$main" || fail "no main repo"
