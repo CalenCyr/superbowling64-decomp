@@ -40,3 +40,7 @@ for call-crossing pseudos.
 
 Diagnostic knob (changes code, for experiments only): `GCC_ALLOC_FORCE_GLOBAL=FUNCTION:REGNO[,REGNO]` leaves those
 block-local pseudos to global-alloc, to test whether one allocator decision explains a register difference.
+`GCC_ALLOC_GLOBAL_ORDER=FUNCTION:REGNO,REGNO[,...]` refills the priority-order slots those pseudos' allocnos hold
+with the pseudos in the given order (`F:73,83` swaps two neighbours; listing a high-priority pseudo moves the others
+up to its slot), to test whether a different global-alloc priority order explains a register difference; the trace
+prints `G order forced` when it applies. Neither knob is ever part of the build.
