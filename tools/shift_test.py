@@ -10,8 +10,10 @@ Relinks the objects of a finished build twice into build/shift/ (the normal buil
 Both links keep their relocations (ld -q). The base ROM must equal build/superbowling.z64. The checks, each on the
 shifted link compared with the base:
 
-  symbols    every symbol whose base value lies after the insertion point (main's VRAM from the insertion to
-             the end of main's bss, or a ROM offset from the insertion to the end of the ROM) moves by SHIFT, and
+  symbols    every symbol whose base value lies after the insertion point (VRAM from the insertion to the end of
+             the home segment's bss and of every segment linked after it in VRAM, such as the fat, knstatic, RDP
+             FIFO and overlay segments after main; or a ROM offset from the insertion to the end of the ROM) moves
+             by SHIFT, and
              every other symbol stays (a symbol that stays is pinned to its retail address, for example by an
              absolute assignment); sizes (`*_SIZE`, `*_size`) are not checked;
   words      no 32-bit word of the code and data segments (not the binary assets) still holds a moved address (or a moved segment's ROM start or end)
@@ -153,12 +155,10 @@ def main():
     home = base.section(base.symbols[MARK][0][1])
     R = home[2] + (P - home[1])
     seg = home[0].lstrip(".")
-    vram_end = base.sym(seg + "_BSS_END") if seg + "_BSS_END" in base.symbols else home[1] + home[3]
     rom_end = len(base.rom)
     if len(shifted.rom) != rom_end + N:
         print("note: the ROM grew by 0x%X, not 0x%X (alignment)" % (len(shifted.rom) - rom_end, N))
 
-    home_secs = {home[0], home[0] + "_bss"}
     overlay = seg in OVERLAYS
 
     def relevant(section):
@@ -166,14 +166,23 @@ def main():
         part = section.lstrip(".").split("_")[0]
         return not overlay or part not in OVERLAYS or part == seg
 
-    def moved_vram(v):
-        return P <= v < vram_end
-
     # a section that is exactly one binary asset (`ld -b binary`): opaque game files, not scanned; their VRAM
     # is meaningless (they are never loaded at it)
     assets = {(vals[0][0], base.sym(name[:-6] + "_end")) for name, vals in base.symbols.items()
               if name.startswith("_binary_") and name.endswith("_start")}
     asset_secs = {s[0] for s in base.sections if (s[1], s[1] + s[3]) in assets}
+
+    # what moves in VRAM: the rest of the home segment (and its bss), and every section linked after it in VRAM
+    # (the segments that follow main's bss: fat, knstatic, the RDP FIFO and the overlay slot), up to the end of the
+    # last; for an overlay, the other overlays are not relevant (they share the slot)
+    home_secs = {home[0], home[0] + "_bss"}
+    moved_secs = home_secs | {s[0] for s in base.sections if s[1] >= 0x80000000 and s[1] > P
+                              and s[0] not in asset_secs and relevant(s[0])}
+    vram_end = max(base.sym(seg + "_BSS_END") if seg + "_BSS_END" in base.symbols else home[1] + home[3],
+                   max(s[1] + s[3] for s in base.sections if s[0] in moved_secs))
+
+    def moved_vram(v):
+        return P <= v < vram_end
 
     findings = []       # (check, name, detail)
 
@@ -199,7 +208,7 @@ def main():
             if ndx == "ABS" and overlay and moved_vram(v) and not (name.startswith(seg + "_")
                                                                    or name.endswith("_" + seg)):
                 continue
-            if ndx in home_secs or ndx == "ABS":
+            if ndx in moved_secs or ndx == "ABS":
                 moves = moved_vram(v)
             else:
                 moves = False

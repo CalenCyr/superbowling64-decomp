@@ -6,8 +6,3 @@ symbol D_57F60      # Scene_DrawPuffs
 symbol D_5F800      # Scene_DrawPuffs
 symbol D_592F0      # GridEd_Frame
 symbol D_5FC20      # GridEd_Frame
-#
-# The memory map: main's bss ends at 0x8010A080, where the fat segment is linked (a fixed VRAM in superbowling.yaml),
-# followed by knstatic and the RDP FIFO (SCHED_FIFO_START/END in boot.h, literal addresses) up to the overlay slot
-# at 0x80112350. main cannot grow until the fat and knstatic follow main's bss and the FIFO's bounds are symbols.
-overlap .main_bss/.fat

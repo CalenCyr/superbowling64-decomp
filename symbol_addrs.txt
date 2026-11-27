@@ -587,6 +587,7 @@ boot_mainStack = 0x80061440; // size:0x200
 boot_contStack = 0x80068250; // size:0x800
 boot_gameStack = 0x800E8090; // size:0x2000
 sched_gfxFrames = 0x80069410; // size:0x30010
+sched_rdpFifo = 0x8010A350; // size:0x8000 allow_addend:True
 // lane/match-main-53B0: symbols of units 53B0-13490
 str_files = 0x800A30C0; // size:0x8CA0 allow_addend:True
 cache_files = 0x800F80B0; // size:0x8000 allow_addend:True

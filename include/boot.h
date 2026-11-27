@@ -127,9 +127,12 @@ extern GfxFrame sched_gfxFrames[2];
 extern GfxFrame *sched_buildFrame;  /* the one of sched_gfxFrames the game thread builds */
 extern u64 boot_yieldBuffer[OS_YIELD_DATA_SIZE / sizeof( u64 )];  /* the graphics task's yield buffer */
 extern u64 boot_dramStack[SP_DRAM_STACK_SIZE64];  /* the graphics task's DRAM stack */
-/* the RDP's FIFO, 0x8000 bytes between the KNSTATICSYS file and the overlays (sched_gfxTask's output buffer) */
-#define SCHED_FIFO_START    ( (u64 *)0x8010A350 )
-#define SCHED_FIFO_END      ( (u64 *)0x80112350 )
+/* the RDP's FIFO (sched_gfxTask's output buffer): the rdpfifo segment, 0x8000 bytes of RAM between the
+   KNSTATICSYS file and the overlay slot (superbowling.yaml), 0x8010A350 in retail */
+#define SCHED_FIFO_LEN      ( 0x8000 / sizeof( u64 ) )
+extern u64 sched_rdpFifo[SCHED_FIFO_LEN];
+#define SCHED_FIFO_START    sched_rdpFifo
+#define SCHED_FIFO_END      ( sched_rdpFifo + SCHED_FIFO_LEN )
 /* framebuffer to show next */
 // volatile: the scheduler (1060) reads it with lbu and a separate sign extension, and reloads it right after each store
 extern volatile s8 sched_nextFb;
