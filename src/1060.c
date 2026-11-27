@@ -18,9 +18,6 @@
 #include "dbgtext.h"
 #include "overlay.h"
 
-#define HEAP_START  0x80150000
-#define HEAP_END    0x8038F7FF
-
 /* ===== Data ===== */
 
 static u8 game_loadedScene = 0xFF;      /* the scene loaded (game_scene); 0xFF at boot */
@@ -89,9 +86,9 @@ void main( void ) {
     __osInitialize_autodetect();
     D_800A2FE4 = 0;
     memset( boot_staticFile, 0, RAM_END - (u32)boot_staticFile );
-    sched_framebuffers[0] = (u16 *)0x8038F800;
-    sched_framebuffers[1] = (u16 *)0x803B5000;
-    sched_framebuffers[2] = (u16 *)0x803DA800;
+    sched_framebuffers[0] = (u16 *)SCHED_FRAMEBUFFER( 0 );
+    sched_framebuffers[1] = (u16 *)SCHED_FRAMEBUFFER( 1 );
+    sched_framebuffers[2] = (u16 *)SCHED_FRAMEBUFFER( 2 );
     Mem_Reset( (HeapBlock *)HEAP_START, (u8 *)HEAP_END );
     save_dataPtr = &save_data;
     save_data.checksum = 0;

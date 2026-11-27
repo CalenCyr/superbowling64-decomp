@@ -12,6 +12,14 @@
 #define RAM_END             0x80400000  /* end of the 4 MB of RDRAM, in KSEG0 */
 #define SCREEN_WIDTH        320         /* pixels of the framebuffers of sched_framebuffers */
 #define SCREEN_HEIGHT       240
+#define SCREEN_FB_SIZE      ( SCREEN_WIDTH * SCREEN_HEIGHT * 2 )  /* bytes of one RGBA5551 framebuffer */
+
+/* The RAM above the link: the heap from HEAP_START, then the three framebuffers filling the top of RDRAM. Plain
+   numbers, not linker symbols: main loads them as lui/ori constants. The link asserts that everything it places
+   (the largest overlay's bss) ends at or below HEAP_START (undefined_syms.txt). */
+#define HEAP_START          0x80150000
+#define SCHED_FRAMEBUFFER( i )  ( RAM_END - ( 3 - ( i ) ) * SCREEN_FB_SIZE )  /* framebuffer i of 3 */
+#define HEAP_END            ( SCHED_FRAMEBUFFER( 0 ) - 1 )  /* the heap's last byte, below the framebuffers */
 
 /* A player's record (RS_AddToRecord), kept four at a time in save_data and game_sessionRecords. Name invented. */
 typedef struct {
@@ -59,7 +67,7 @@ extern OSMesgQueue boot_dmaQueue;   /* where ROM DMAs report completion */
 
 extern u8 boot_staticFile[];        /* start of the memory main clears at boot (the KNSTATICSYS file) */
 extern u8 D_800A2FE4;
-extern u16 *sched_framebuffers[3];  /* RGBA5551 320x240 framebuffers: 0x8038F800, 0x803B5000, 0x803DA800 at boot */
+extern u16 *sched_framebuffers[3];  /* RGBA5551 320x240 framebuffers: SCHED_FRAMEBUFFER( 0-2 ) at boot */
 /* index in sched_framebuffers of the framebuffer being drawn */
 // volatile: the scheduler (1060) reloads it after its own increment, before the compare with 3
 extern volatile s32 sched_drawFb;

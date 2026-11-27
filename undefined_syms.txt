@@ -1,5 +1,15 @@
-/* Symbols outside every splat segment. */
+/* Symbols outside every splat segment, and the checks on the RAM around the link. */
 /* rspboot's bounds: the binary object's own (rspbootTextEnd has no storage of its own: it is the address of
    gspF3DEX2_Rej_fifoTextStart that follows) */
 rspbootTextStart = _binary_assets_rspboot_bin_start;
 rspbootTextEnd = _binary_assets_rspboot_bin_end;
+
+/* The 320x240 16-bit depth buffer, in the low RAM after the boot globals, up to the entry code. */
+scene_depthBuffer = 0x80000400;
+ASSERT(scene_depthBuffer + 320 * 240 * 2 <= entry_VRAM, "the depth buffer overlaps the entry code");
+
+/* The heap starts at a fixed address (HEAP_START in include/boot.h, a constant in main's code): everything the link
+   places, up to the end of the largest overlay's bss, must end below it. */
+ASSERT(MAX(MAX(MAX(gacode_VRAM_END, rscode_VRAM_END), MAX(gscode_VRAM_END, cacode_VRAM_END)),
+           MAX(MAX(pvcode_VRAM_END, mgcode_VRAM_END), opcode_VRAM_END)) <= 0x80150000,
+       "an overlay's bss runs into the heap (HEAP_START in include/boot.h)");
