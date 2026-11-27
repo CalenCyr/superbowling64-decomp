@@ -12,8 +12,8 @@ shifted link compared with the base:
 
   symbols    every symbol whose base value lies after the insertion point (VRAM from the insertion to the end of
              the home segment's bss and of every segment linked after it in VRAM, such as the fat, knstatic, RDP
-             FIFO and overlay segments after main; or a ROM offset from the insertion to the end of the ROM) moves
-             by SHIFT, and
+             FIFO and overlay segments after main; or a ROM offset from the insertion to the end of the ROM, none
+             for an insertion in a bss) moves by SHIFT, and
              every other symbol stays (a symbol that stays is pinned to its retail address, for example by an
              absolute assignment); sizes (`*_SIZE`, `*_size`) are not checked;
   words      no 32-bit word of the code and data segments (not the binary assets) still holds a moved address (or a moved segment's ROM start or end)
@@ -153,10 +153,11 @@ def main():
     # where the insertion is, in VRAM and in ROM
     P = base.sym(MARK)
     home = base.section(base.symbols[MARK][0][1])
-    R = home[2] + (P - home[1])
+    # ROM moves from the insertion on, unless it is in a bss (NOLOAD) section, which has no ROM contents
+    R = home[2] + (P - home[1]) if "CONTENTS" in home[4] else len(base.rom)
     seg = home[0].lstrip(".")
     rom_end = len(base.rom)
-    if len(shifted.rom) != rom_end + N:
+    if len(shifted.rom) != rom_end + (N if R < rom_end else 0):
         print("note: the ROM grew by 0x%X, not 0x%X (alignment)" % (len(shifted.rom) - rom_end, N))
 
     overlay = seg in OVERLAYS
@@ -214,7 +215,7 @@ def main():
                 moves = False
             if moves:
                 want = v + N
-            elif ndx == "ABS" and R <= v <= rom_end and v < 0x80000000:
+            elif ndx == "ABS" and R <= v <= rom_end and R < rom_end and v < 0x80000000:
                 want = v + N
             else:
                 want = v
