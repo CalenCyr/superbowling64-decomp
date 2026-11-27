@@ -399,6 +399,8 @@ player has finished the game.
 // Idiom pass (unit: s16 cursors stepped with +=, ternary chains): the -2 test as a static inline Score_Roll( pins, other )
 // (345 diff lines vs 56), roll s32 (87), foul/rowY/roll declaration orders (56-272), the block-1 roll by ternary or if-only
 // (56), the second roll's test as an if (284), done tested before throw (61): none below the base 56.
+// Trace: GCC_ALLOC_GLOBAL_ORDER=Score_DrawFrame:85,73,327 (rowY before frame, r327 after it) gives retail's
+// s-registers (56 -> 31 lines); left are roll in v1 (retail v0, local-alloc) and cse's rowY + 9 temporary.
 void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;

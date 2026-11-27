@@ -269,6 +269,8 @@ from a's path over the sum of the radii.
 // it below its 15 differing lines at the unit's flags.
 // Idiom pass: the unit's chained a = b = x and ?: spellings are already used; GA_VecNormalize's length test and sqrtf
 // are the only free spellings and were covered above, so no further idiom candidate.
+// Trace: the first expansion's length pseudo has no refs left: cse replaces it by the sqrt result, where retail keeps
+// the copy (mov.s $f4,$f8); a cse decision, out of reach of the allocation knobs.
 f32 GA_SpotContact( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     f32 along;
     f32 speedSq;

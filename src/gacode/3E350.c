@@ -145,6 +145,10 @@ result.
 // order or in the call: nothing at or below the base 15.
 // Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
 // it below its 3 differing lines at the unit's flags.
+// Trace (instrumented cc1): the loop-1 lane load (block-local) gets v0 from local-alloc; retail's is a global-alloc
+// allocno and takes a0 by the copy preference body passes on. GCC_ALLOC_FORCE_GLOBAL=GA_RunPlayer:178 is
+// exact. A lane local assigned for inputFunc and again after GA_PhysicsStep (dies twice: global) fixes loop 1 but
+// moves the inputFunc load into a0 too (2 lines).
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
@@ -224,6 +228,11 @@ GA_SettleBodies.
 /* An angle in degrees brought back within -180..180. */
 #define GA_WRAP_DEGREES( a ) ( ( a ) < -180.0f ? ( a ) + 360.0f : ( a ) >= 180.0f ? ( a ) - 360.0f : ( a ) )
 
+// Trace: &spots[i + NUM_BODIES] cannot be one giv (loop.c's simplify_giv_expr rejects a reg + const invariant sum),
+// so only the 352 + 32 * i offset is reduced. With for ( i = 0, second = spots + NUM_BODIES; ...; i++, second++ ),
+// second's priority 3950 ranks above port's 3891; GCC_ALLOC_GLOBAL_ORDER=GA_PhysicsStep:73,83 leaves only
+// the set-up scheduled before the hoisted -190.0f (3 lines). With &secondSpots[i] (secondSpots = spots + NUM_BODIES
+// set after loop 1) loop.c reduces a full giv into s4 as retail (5 lines), but in another place of its reduction order.
 void GA_PhysicsStep( s32 player, s32 port ) {
     gaPlayer_t *pl = &ga_players[player];
     gaLane_t *lane = pl->lane;
@@ -3402,6 +3411,8 @@ modes that have one), and a value of the lane's current inputFunc step.
 // it below its 21 differing lines at the unit's flags.
 // Idiom pass (unit: `pl = &ga_players[..]` initialised in the declaration in 56 functions): pl assigned after the
 // declarations, row = 15 literal steps, row/lane initialisation order, row before lane: all 42 diff lines, unchanged.
+// Trace: exact under GCC_ALLOC_GLOBAL_ORDER=GA_DebugText:80,79,72,85 (row, lane, player, &game_gfx): retail
+// allocates row and lane before player and &game_gfx, which their priorities here (0.03, 0.02 vs 0.15, 0.11) cannot give.
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;

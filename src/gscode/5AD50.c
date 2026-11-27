@@ -341,6 +341,9 @@ once the setup is taken, 2 once it is backed out of, else 0.
 // it below its 24 differing lines at the unit's flags.
 // Idiom pass (unit: counters reused as `j`): the player count cached in j for the case 0 search, and the searched team's
 // per-player value in j: unchanged at 99 differing non-reloc lines, or worse.
+// Trace: in case 0 loop.c copies the s16 team (a subreg) and the count for the search loop; here team takes v0 by
+// preference at the top priority and its copy a0, retail keeps team and its copy in a1 and copies the count into a0.
+// No global-alloc order of team, count, their copies and the per-player team changes it (hard conflicts decide).
 s32 GS_PlayerSetup( void ) {
     u8 minPlayers;
     u8 maxPlayers;
