@@ -867,7 +867,7 @@ name plate and, once it holds a game, its games, average, high and low scores an
 // it below its 14 differing lines at the unit's flags.
 // Idiom pass: x as an s32 parameter (338 vs 291), the plate drawn at x with rowX = x + 0x2C (344), the row step in the for
 // header (289): none closes it.
-// Equivalence: 317 random cases (183 skipped), no difference (tools/equiv.py).
+// Equivalence: 610 random cases (390 skipped), no difference (tools/equiv.py).
 void Score_DrawRecordTable( u16 count, playerRecord_t *records, u8 kind, s16 x, s32 y ) {
     s16 digits[4];
     s32 i;
