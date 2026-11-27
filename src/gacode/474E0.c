@@ -271,6 +271,7 @@ from a's path over the sum of the radii.
 // are the only free spellings and were covered above, so no further idiom candidate.
 // Trace: the first expansion's length pseudo has no refs left: cse replaces it by the sqrt result, where retail keeps
 // the copy (mov.s $f4,$f8); a cse decision, out of reach of the allocation knobs.
+// Equivalence: 2000 random cases, no difference (tools/equiv.py).
 f32 GA_SpotContact( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     f32 along;
     f32 speedSq;

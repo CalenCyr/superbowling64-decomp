@@ -69,6 +69,7 @@ void Scene_ClearDrawList( void ) {
 // Permuter (60 min): 5445 -> 4965 only through generated inline wrappers around the key and bucket expressions.
 // Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
 // it below its 187 differing lines at the unit's flags.
+// Equivalence: 1629 random cases (371 skipped), no difference (tools/equiv.py).
 /*
 ================
 Scene_InsertEntry

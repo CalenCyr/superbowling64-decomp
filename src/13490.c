@@ -401,6 +401,7 @@ player has finished the game.
 // (56), the second roll's test as an if (284), done tested before throw (61): none below the base 56.
 // Trace: GCC_ALLOC_GLOBAL_ORDER=Score_DrawFrame:85,73,327 (rowY before frame, r327 after it) gives retail's
 // s-registers (56 -> 31 lines); left are roll in v1 (retail v0, local-alloc) and cse's rowY + 9 temporary.
+// Equivalence: 1913 random cases (87 skipped), no difference (tools/equiv.py).
 void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;
@@ -866,6 +867,7 @@ name plate and, once it holds a game, its games, average, high and low scores an
 // it below its 14 differing lines at the unit's flags.
 // Idiom pass: x as an s32 parameter (338 vs 291), the plate drawn at x with rowX = x + 0x2C (344), the row step in the for
 // header (289): none closes it.
+// Equivalence: 317 random cases (183 skipped), no difference (tools/equiv.py).
 void Score_DrawRecordTable( u16 count, playerRecord_t *records, u8 kind, s16 x, s32 y ) {
     s16 digits[4];
     s32 i;

@@ -1640,6 +1640,7 @@ f32 Snd_Exp2( f32 x ) {
 // -fno-schedule-insns moves it (21 -> 19 differing lines), and it breaks 44 of the unit's matched functions.
 // Idiom pass (the unit's f32 scratch locals): an f32 `part` for both conversions gives retail's $f2 (61 -> 58 diff lines);
 // the unit's pointer-walking idiom does not fit (retail reloads bank->waves[i] at every use); the digit copy remains.
+// Equivalence: 1903 random cases (97 skipped), no difference (tools/equiv.py).
 /*
 ================
 Snd_SignExtend8

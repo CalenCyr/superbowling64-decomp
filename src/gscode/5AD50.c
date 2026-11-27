@@ -344,6 +344,7 @@ once the setup is taken, 2 once it is backed out of, else 0.
 // Trace: in case 0 loop.c copies the s16 team (a subreg) and the count for the search loop; here team takes v0 by
 // preference at the top priority and its copy a0, retail keeps team and its copy in a1 and copies the count into a0.
 // No global-alloc order of team, count, their copies and the per-player team changes it (hard conflicts decide).
+// Equivalence: 2000 random cases, no difference (tools/equiv.py).
 s32 GS_PlayerSetup( void ) {
     u8 minPlayers;
     u8 maxPlayers;

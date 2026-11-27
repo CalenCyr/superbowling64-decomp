@@ -149,6 +149,7 @@ result.
 // allocno and takes a0 by the copy preference body passes on. GCC_ALLOC_FORCE_GLOBAL=GA_RunPlayer:178 is
 // exact. A lane local assigned for inputFunc and again after GA_PhysicsStep (dies twice: global) fixes loop 1 but
 // moves the inputFunc load into a0 too (2 lines).
+// Equivalence: 963 random cases (1037 skipped), no difference (tools/equiv.py).
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
@@ -225,6 +226,7 @@ GA_SettleBodies.
 // 300 (base 430): loop 2 walking second = spots + 11 leaves only port and second swapped (s4/s3, retail s3/s4).
 // Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
 // it below its 5 differing lines at the unit's flags.
+// Equivalence: 1860 random cases (140 skipped), no difference (tools/equiv.py).
 /* An angle in degrees brought back within -180..180. */
 #define GA_WRAP_DEGREES( a ) ( ( a ) < -180.0f ? ( a ) + 360.0f : ( a ) >= 180.0f ? ( a ) - 360.0f : ( a ) )
 
@@ -3413,6 +3415,7 @@ modes that have one), and a value of the lane's current inputFunc step.
 // declarations, row = 15 literal steps, row/lane initialisation order, row before lane: all 42 diff lines, unchanged.
 // Trace: exact under GCC_ALLOC_GLOBAL_ORDER=GA_DebugText:80,79,72,85 (row, lane, player, &game_gfx): retail
 // allocates row and lane before player and &game_gfx, which their priorities here (0.03, 0.02 vs 0.15, 0.11) cannot give.
+// Equivalence: 1926 random cases (74 skipped), no difference (tools/equiv.py).
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;
