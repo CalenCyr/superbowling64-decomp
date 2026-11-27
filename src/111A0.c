@@ -44,6 +44,8 @@ height under the cursor.
 // Permuter clue (1065 -> 960): `resized` reused as the clearing and marking loops' counter instead of i (R30).
 // Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
 // it below its 132 differing lines at the unit's flags.
+// Idiom pass: the permuter's shared flag/counter written out (resized folded into i, one local for both: 775 -> 758 diff
+// lines, still not exact, left out as less readable); a floorGrid_t pointer for game_floorGrids[0] (1403).
 void GridEd_Frame( void ) {
     u8 text[40];
     s32 x, z;

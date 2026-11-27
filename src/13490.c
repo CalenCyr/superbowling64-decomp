@@ -396,6 +396,9 @@ player has finished the game.
 // or rowY = rowY + 9, the -2 tests' operand orders, foul set by its if or by ||: nothing at or below the base 865.
 // Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
 // it below its 51 differing lines at the unit's flags.
+// Idiom pass (unit: s16 cursors stepped with +=, ternary chains): the -2 test as a static inline Score_Roll( pins, other )
+// (345 diff lines vs 56), roll s32 (87), foul/rowY/roll declaration orders (56-272), the block-1 roll by ternary or if-only
+// (56), the second roll's test as an if (284), done tested before throw (61): none below the base 56.
 void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;
@@ -859,6 +862,8 @@ name plate and, once it holds a game, its games, average, high and low scores an
 // rowY += 0x1C or rowY = rowY + 0x1C: nothing at or below the base 275.
 // Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
 // it below its 14 differing lines at the unit's flags.
+// Idiom pass: x as an s32 parameter (338 vs 291), the plate drawn at x with rowX = x + 0x2C (344), the row step in the for
+// header (289): none closes it.
 void Score_DrawRecordTable( u16 count, playerRecord_t *records, u8 kind, s16 x, s32 y ) {
     s16 digits[4];
     s32 i;

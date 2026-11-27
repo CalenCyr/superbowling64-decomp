@@ -339,6 +339,8 @@ once the setup is taken, 2 once it is backed out of, else 0.
 // Sound_PlaySe, i++/++i: best 105 (base 870) with team and human s16 (adopted); nothing below that.
 // Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
 // it below its 24 differing lines at the unit's flags.
+// Idiom pass (unit: counters reused as `j`): the player count cached in j for the case 0 search, and the searched team's
+// per-player value in j: unchanged at 99 differing non-reloc lines, or worse.
 s32 GS_PlayerSetup( void ) {
     u8 minPlayers;
     u8 maxPlayers;

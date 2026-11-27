@@ -120,6 +120,8 @@ Scene_AddToDrawList
 Adds an entry to the draw list for each camera that draws, keeping its bucket in key order.
 ================
 */
+// Idiom pass (unit: chained a = b = x, small inline helpers): scene_addLayer read into a u32 or s32 local before the key
+// test (233 diff lines, unchanged), a drawEntry_t pointer for the first three stores (326).
 void Scene_AddToDrawList( void ) {
     u8 mask;
     u32 i;

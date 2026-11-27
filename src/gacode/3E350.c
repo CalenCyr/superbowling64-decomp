@@ -3400,6 +3400,8 @@ modes that have one), and a value of the lane's current inputFunc step.
 // the two initialisations' order, row++/++row/row += 1, the coordinates' operand orders: ties with the base 110 only.
 // Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
 // it below its 21 differing lines at the unit's flags.
+// Idiom pass (unit: `pl = &ga_players[..]` initialised in the declaration in 56 functions): pl assigned after the
+// declarations, row = 15 literal steps, row/lane initialisation order, row before lane: all 42 diff lines, unchanged.
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;

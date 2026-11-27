@@ -1638,6 +1638,8 @@ f32 Snd_Exp2( f32 x ) {
 // value = value + digit: nothing at or below the base 235.
 // Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): only
 // -fno-schedule-insns moves it (21 -> 19 differing lines), and it breaks 44 of the unit's matched functions.
+// Idiom pass (the unit's f32 scratch locals): an f32 `part` for both conversions gives retail's $f2 (61 -> 58 diff lines);
+// the unit's pointer-walking idiom does not fit (retail reloads bank->waves[i] at every use); the digit copy remains.
 /*
 ================
 Snd_SignExtend8
@@ -1663,6 +1665,7 @@ void Snd_RelocateWaveBank( void *data, s32 romBase ) {
     s32 i;
     s32 value;
     waveTune_t *tune;
+    f32 part;           /* one semitone term at a time; retail converts both in $f2 */
 
     bank = data;
     if ( bank->flags & WAVEBANK_RELOCATED ) {
@@ -1674,8 +1677,10 @@ void Snd_RelocateWaveBank( void *data, s32 romBase ) {
     for ( i = 0; i < bank->numWaves; i++ ) {
         tune = &bank->tunes[i];
         value = tune->raw;
-        tune->value = (f32)Snd_SignExtend8( value ) / 100.0;
-        tune->value += (f32)Snd_SignExtend8( bank->tuneDigits[i] - '0' );
+        part = Snd_SignExtend8( value );
+        tune->value = part / 100.0;
+        part = Snd_SignExtend8( bank->tuneDigits[i] - '0' );
+        tune->value += part;       // RULE-EXCEPTION: R30, part is one scratch local in the same role in sequence
         if ( bank->waves[i]->flags == 0 ) {
             if ( ( (u32)bank->waves[i]->base & 0xFF000000 ) != 0xFF000000 ) {
                 bank->waves[i]->base += romBase;

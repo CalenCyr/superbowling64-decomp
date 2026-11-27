@@ -267,6 +267,8 @@ from a's path over the sum of the radii.
 // order; the push applied per axis, interleaved or as gap += dir * along: nothing at or below the base 410.
 // Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
 // it below its 15 differing lines at the unit's flags.
+// Idiom pass: the unit's chained a = b = x and ?: spellings are already used; GA_VecNormalize's length test and sqrtf
+// are the only free spellings and were covered above, so no further idiom candidate.
 f32 GA_SpotContact( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     f32 along;
     f32 speedSq;
