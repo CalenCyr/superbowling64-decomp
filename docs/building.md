@@ -63,6 +63,7 @@ make expected   # copy the green build to expected/, the target that diffs and o
 | `make rules [UNIT=src/<unit>]` | the code-rule checker (`tools/rules.py`); exits non-zero on any [match] finding |
 | `make diff UNIT=src/<unit> FUNC=<func>` | side-by-side disassembly of one function, `build/` against `expected/` |
 | `make rules-test`, `make rename-test` | the tests of `tools/rules.py` and `tools/rename_member.py` |
+| `make assets-check`, `make assets-test` | extract the ROM's assets, pack them and compare (below); the tool's tests; opt-in |
 | `make shift-test [SHIFT=0x40] [AFTER='build/src/1060.o(.text)']` | the shiftability check (below); opt-in, not part of the gate |
 | `make clean` | delete `build/` |
 
@@ -84,6 +85,26 @@ make expected   # copy the green build to expected/, the target that diffs and o
 - **`make diff`** prints `<func>: identical (N instructions)` when the compiled function matches `expected/`,
   else the two disassemblies side by side with the differing lines marked `|`. Relocations are shown, so a call
   to the wrong function or a reference to the wrong global shows as a difference.
+
+## Assets
+
+`tools/assets.py` turns the ROM's asset files into editable files and packs them back. The extracted tree
+`assets_ext/` is ignored by git; it is derived from the retail ROM (`rom.z64`) and is never committed.
+
+```
+python3 tools/assets.py extract rom.z64      # writes assets_ext/ and its manifest.json (about 25 s)
+python3 tools/assets.py pack                 # rebuilds every FAT file into assets_ext/packed/
+python3 tools/assets.py check rom.z64        # packs in memory and compares each file with the ROM's bytes
+make assets-check                            # extract, then check; prints ASSETS OK (opt-in, not part of the gate)
+make assets-test                             # the tool's synthetic tests (LZSS, PNG, image conversion)
+```
+
+`files/` holds each BW64FAT file as it is in the ROM (overlays, `KNSTATICSYS`, the sound banks), the table itself
+and the fill after the last file. `str/NNNN.bin` is str member NNNN, decompressed; `str/NNNN.png` is a member the
+game draws as an image, as an indexed PNG of the whole padded canvas (the game draws only `width` columns of it;
+edit pixels and the palette, keep the canvas size). Pack compresses members again and rebuilds `IDX     SYS` from
+their sizes, so an edited member may change size; `pack` writes one file per FAT file to `packed/`. The packed
+files are not yet linked into the ROM: the build still takes them from `rom.z64`.
 
 ## Shiftability
 

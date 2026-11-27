@@ -175,6 +175,29 @@ the current session (`game_sessionRecords`) are not saved.
   (`FILE_TYPE2`) or a camera path (`FILE_TYPE3`). `Cache_Release` drops a reference. When `cache_hostMode` and
   `cache_hostFiles` are both set, files come from the development host as `data.NNNN` instead.
 
+### File formats
+
+Established from the loaders (`tools/assets.py` reads and writes them, and packs the ROM's bytes back exactly):
+
+- **`BW64FAT`**: the magic `BW64FAT\0`, then 16-byte entries {name pointer, ROM start, ROM end, 0} until a null
+  pointer. Pointers are RAM addresses in the table's load image; the 11-character names follow the entries. The
+  15 files are the seven overlays, `KNSTATICSYS`, `IDX     SYS`, `STR     SYS`, the two `BGM` and two `SE` sound
+  files and `BFX     SYS`; `STR     SYS` is ROM 0x767E0-0x3D60F0.
+- **`IDX     SYS`**: 2931 entries of three big-endian words (offset in `STR     SYS`, stored size,
+  decompressed size), then 12 bytes that are not an entry. Offsets are even and increase; when a member's stored
+  size is odd, one byte separates it from the next (not zero), and 4 bytes follow the last member.
+- **Compressed members**: LZSS with flag bytes read from bit 0 (1 = literal byte, 0 = match). A match is two
+  bytes: the window position's low 8 bits, then its bits 8-11 in the high nibble and the length minus 3 in the
+  low nibble (3 to 18 bytes). The window starts zero-filled with the write position at 4078. `LZ_Decompress`
+  takes a 16-bit stored size, so a compressed member is under 64 KB. 2907 of the 2931 members are compressed.
+- **Image members** (707 members, `Draw_Image`): `{type, width, height, 0}` (type 0 = CI4, 1 = CI8; big-endian
+  words), then the palette (16 or 256 RGBA5551 entries) and the pixels. `Draw_CiImage` draws the image from two
+  column strips, each a plain raster of all rows: the first as wide as the widest power of two not above the
+  padded width (width plus `width % 16` for CI4, `% 8` for CI8), the second the power of two covering the
+  remaining columns (absent when none remain). Pixels are 4 (high nibble first) or 8 bits.
+- Not established here: models, animations and camera paths (`FILE_TYPE1` to `FILE_TYPE3`, `include/filecache.h`),
+  the sound banks and sequences, and the other raw members; they are extracted as they are stored.
+
 ### The development host
 
 `src/4890.c` is a byte link to a development host through PI registers at `0x11000000`: a handshake, then
