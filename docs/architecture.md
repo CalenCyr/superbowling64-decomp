@@ -18,15 +18,20 @@ overlays and the asset files. `superbowling.yaml` is the authoritative map; in s
 | `0x3C570`-`0x6DE70` | seven code overlays (`GACODE  SYS` ... `OPCODE  SYS`) | `0x80112350`, one at a time |
 | `0x6DE70`-`0x656CD0` | asset files: `idx`, `str`, `bgmptr`, `bgmwbk`, `septr`, `sewbk`, `bfx` | `idx` and the sound tables at boot, the rest on demand |
 
-RDRAM is 4 MB (`RAM_END` 0x80400000). From the source:
+RDRAM is 4 MB (`RAM_END` 0x80400000). From the source (retail addresses; up to the overlay slot each region
+follows the one before it in the link, so they move when main grows):
 
-- `0x8010A080`: the file table (`fat_table`), then at `0x8010A250` `KNSTATICSYS` (`boot_staticFile`); `main`
-  clears memory from `boot_staticFile` to the end of RAM at boot, and `Main_Thread` then loads both files.
-- `0x8010A350`-`0x80112350`: the RDP's output FIFO (`SCHED_FIFO_START`, `SCHED_FIFO_END`).
-- `0x80112350`: the overlay slot, with each overlay's bss after its code.
-- `0x80150000`-`0x8038F7FF`: the heap (`Mem_Reset` in `main`; allocator in `src/51F0.c`, first fit, 8-byte
-  granularity, blocks cleared on allocation).
-- `0x8038F800`, `0x803B5000`, `0x803DA800`: three 320x240 RGBA5551 framebuffers (`sched_framebuffers`).
+- `0x80000400`-`0x80025C00`: the 320x240 depth buffer (`scene_depthBuffer`), up to the entry code.
+- `0x8010A080`: the file table (`fat_table`), right after main's bss, then at `0x8010A250` `KNSTATICSYS`
+  (`boot_staticFile`); `main` clears memory from `boot_staticFile` to the end of RAM at boot, and `Main_Thread`
+  then loads both files.
+- `0x8010A350`-`0x80112350`: the RDP's output FIFO (`sched_rdpFifo`, the `rdpfifo` segment; `SCHED_FIFO_START`,
+  `SCHED_FIFO_END`).
+- `0x80112350`: the overlay slot, with each overlay's bss after its code (cacode's is the largest, to `0x8013E890`).
+- `0x80150000`-`0x8038F7FF`: the heap (`HEAP_START`, `HEAP_END`; `Mem_Reset` in `main`; allocator in
+  `src/51F0.c`, first fit, 8-byte granularity, blocks cleared on allocation).
+- `0x8038F800`, `0x803B5000`, `0x803DA800`: three 320x240 RGBA5551 framebuffers filling the top of RAM
+  (`SCHED_FRAMEBUFFER( i )`, `sched_framebuffers`).
 
 ## Boot and threads
 

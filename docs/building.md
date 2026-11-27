@@ -62,9 +62,10 @@ make expected   # copy the green build to expected/, the target that diffs and o
 | `make report` | objdiff report (`report.json`), then the progress summary: matched under the rules, and bytes matched |
 | `make rules [UNIT=src/<unit>]` | the code-rule checker (`tools/rules.py`); exits non-zero on any [match] finding |
 | `make diff UNIT=src/<unit> FUNC=<func>` | side-by-side disassembly of one function, `build/` against `expected/` |
-| `make rules-test`, `make rename-test` | the tests of `tools/rules.py` and `tools/rename_member.py` |
+| `make rules-test`, `make rename-test`, `make n64crc-test` | the tests of `tools/rules.py`, `tools/rename_member.py` and `tools/n64crc.py` |
 | `make assets-check`, `make assets-test` | extract the ROM's assets, pack them and compare (below); the tool's tests; opt-in |
 | `make shift-test [SHIFT=0x40] [AFTER='build/src/1060.o(.text)']` | the shiftability check (below); opt-in, not part of the gate |
+| `make mod` | a modified ROM, `build/mod/superbowling.z64`, padded and with its checksum recomputed (below); opt-in, not part of the gate |
 | `make clean` | delete `build/` |
 
 `tools/objdiff/objdiff-cli diff -u src/<unit> <func>` gives the same comparison as `make diff` in objdiff's TUI.
@@ -114,38 +115,50 @@ relinks the objects of the finished build into `build/shift/` twice, once unchan
 ROM) and once with `SHIFT` bytes of padding after the input section `AFTER` (any `build/...o(.section)` line of
 `superbowling.ld`, e.g. an overlay unit's `.text`), keeping the relocations (`ld -q`). It then reports:
 
-- **symbol**: a symbol after the insertion point (in its segment's VRAM, or a ROM offset) that did not move by
+- **symbol**: a symbol after the insertion point (in its segment's VRAM or a segment linked after it in VRAM, or a
+  ROM offset) that did not move by
   `SHIFT`, or one before it that moved: typically an absolute assignment pinning it to its retail address;
 - **word**: a 32-bit word of a code or data segment (binary assets are not scanned) that still holds a moved
   address or a moved segment's ROM bound: a raw number where a pointer should be;
 - **lui**: a `lui` without a relocation that loads the upper half of a moved address;
 - **overlap**: sections other than the overlays that now overlap in VRAM or ROM.
 
-Known findings are listed in `config/shift_known.txt` with their reasons; the test prints `SHIFT OK` when every
-finding is listed and `SHIFT FAIL` (non-zero exit) otherwise. The build helps by linking splat's
+Known findings are listed in `config/shift_known.txt` with their reasons (none at present: a shift in main or in
+an overlay prints `SHIFT OK: nothing points at an old address`); the test prints `SHIFT OK` when every finding is
+listed and `SHIFT FAIL` (non-zero exit) otherwise. The build helps by linking splat's
 `undefined_*_auto.txt` as `PROVIDE` (an address applies only to a symbol no object defines, so C definitions move),
 by `reloc_addrs.txt` entries that bind asm references to their owning symbols (interior addresses, the overlays'
 bss ends, the BW64FAT table's ROM offsets), and by `undefined_syms.txt` naming rspboot's bounds from its object.
 
-What still blocks a shift, most important first:
+The memory map follows from the link, so main and the overlays can grow:
 
-1. **The memory map after main is fixed.** main's bss ends at 0x8010A080, where `fat` (and then `knstatic`) is linked
-   at a fixed VRAM (`superbowling.yaml`); the RDP FIFO follows as literal addresses (`SCHED_FIFO_START`/`_END` in
-   `include/boot.h`, 0x8010A350-0x80112350), then the overlay slot at 0x80112350. Any growth of main overlaps the
-   FAT (the known `overlap` finding). Fixing it needs `fat`/`knstatic` to follow main's bss and the FIFO bounds and
-   overlay slot to be linker symbols.
-2. **Other literal RAM addresses in C**: the heap (`HEAP_START`/`HEAP_END` in `src/1060.c`, 0x80150000-0x8038F7FF),
-   the three framebuffers (0x8038F800, 0x803B5000, 0x803DA800) and `scene_depthBuffer` (0x80000400). They lie
-   outside the linked image, so a shift does not move them, but nothing checks that the largest overlay's bss
-   (cacode, to 0x8013E890) stays below the heap.
-3. **Display-list constants symbolised by splat** (`D_57F60`, `D_592F0`, `D_5F800`, `D_5FC20` in
-   `Scene_DrawPuffs` and `GridEd_Frame`): correct values, not addresses; they go when those functions are matched.
-4. **`reloc_addrs.txt` lines are tied to ROM offsets** of functions still in asm: a shift does not move them (they
+- `fat` and `knstatic` follow main's bss (`follows_vram` in `superbowling.yaml`), the RDP FIFO is the `rdpfifo`
+  segment (`sched_rdpFifo`, 0x8000 bytes of RAM with no ROM contents) after them, and every overlay follows the
+  FIFO; overlays still share one slot (`exclusive_ram_id: ovl`).
+- The heap and the framebuffers are constants above the link (`HEAP_START`, `HEAP_END`, `SCHED_FRAMEBUFFER( i )` in
+  `include/boot.h`; main loads them as `lui`/`ori` constants, so they stay numbers). `undefined_syms.txt` asserts at
+  link time that every overlay's bss ends at or below `HEAP_START` (0x80150000) and that the depth buffer
+  (`scene_depthBuffer`, 0x80000400) ends below the entry code. Retail leaves 0x11770 bytes of room (cacode's bss
+  ends at 0x8013E890); a larger growth fails the link with "an overlay's bss runs into the heap", and needs
+  `HEAP_START` moved up (the heap shrinks by as much).
+- splat leaves numbers that are not addresses as numbers (`ignore:True` in `symbol_addrs.txt`, for example the
+  gSPTextureRectangle words of `Scene_DrawPuffs` and `GridEd_Frame`).
+
+What remains:
+
+1. **`reloc_addrs.txt` lines are tied to ROM offsets** of functions still in asm: a shift does not move them (they
    are applied to the retail ROM by `make split`), but a function's lines must go when it is matched in C.
-5. **ROM size and checksum.** `pad` (a binary to ROM 0x800000) keeps the ROM at 8 MB: growth makes it larger
-   unless the pad is shortened. The header's checksum (CIC-6102, over ROM 0x1000-0x101000) is retail's constant in
-   the header asm and must be recomputed for a modified ROM with an N64 checksum tool (for example `n64crc`); IPL3
-   copies only that first 1 MB, which main (0x1060-0x3C2A0) is far from filling.
+2. **IPL3 copies only the first 1 MB** (ROM 0x1000-0x101000) to `entry`'s address: main (0x1060-0x3C2A0) must stay
+   within it, which it is far from filling.
+
+### Modified ROMs
+
+`make mod` links the same objects as `make`, without the retail pad (`assets/pad.bin`: 0xFF from 0x656CD0 to
+8 MB, no data), into `build/mod/`, fills the ROM with 0xFF to 8 MB (to the next power of two if it is larger) and
+recomputes the header checksum with `tools/n64crc.py` (the CIC-6102 algorithm over ROM 0x1000-0x101000;
+`tools/n64crc.py ROM` checks one, `--fix` rewrites it). Unmodified, `make mod` gives the retail ROM. The normal
+build keeps the pad and retail's checksum constant in the header asm, so a grown ROM from `make` is larger than
+8 MB and fails the gate.
 
 ## Compiler flags
 
