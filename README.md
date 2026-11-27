@@ -28,6 +28,8 @@ This repository contains no game code, assets or ROM. You need your own copy of 
   sound, input, save data and files.
 - [Contributing](docs/contributing.md): the matching workflow, the byte gate, the code rules and the project's
   rulings, naming and provenance.
+- [Native port design](docs/porting.md): how the game uses the N64 hardware, measured, and a plan for a native
+  PC port.
 - [AGENTS.md](AGENTS.md): the full contract for matching work, including the ROM map and the toolchain evidence.
 
 ## What's known about the ROM
