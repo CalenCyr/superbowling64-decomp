@@ -337,6 +337,8 @@ once the setup is taken, 2 once it is backed out of, else 0.
 // Restricted permuter search (perm macros only, 40 min): declaration order, team s32/u32/s16/u16, human s32/u32/s16,
 // human == TRUE or human, i != or < the count, the search's test in six operand orders, team read before or after
 // Sound_PlaySe, i++/++i: best 105 (base 870) with team and human s16 (adopted); nothing below that.
+// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
+// it below its 24 differing lines at the unit's flags.
 s32 GS_PlayerSetup( void ) {
     u8 minPlayers;
     u8 maxPlayers;

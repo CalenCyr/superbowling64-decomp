@@ -143,6 +143,8 @@ result.
 // Restricted permuter search (perm macros only, 35 min): declaration order, i s32/s16/u32/u8, the stick's zeroing
 // as two stores in either order or chained, the body loop's pointers set before or in the for, increments in each
 // order or in the call: nothing at or below the base 15.
+// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
+// it below its 3 differing lines at the unit's flags.
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
@@ -217,6 +219,8 @@ GA_SettleBodies.
 // Restricted permuter search (perm macros only, 40 min): declaration order, loop 1's pointer set before or in the for
 // and its increments' order, loop 2 indexed or walking second (from lane->secondSpots, spots + 11 or &spots[11]): best
 // 300 (base 430): loop 2 walking second = spots + 11 leaves only port and second swapped (s4/s3, retail s3/s4).
+// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
+// it below its 5 differing lines at the unit's flags.
 /* An angle in degrees brought back within -180..180. */
 #define GA_WRAP_DEGREES( a ) ( ( a ) < -180.0f ? ( a ) + 360.0f : ( a ) >= 180.0f ? ( a ) - 360.0f : ( a ) )
 
@@ -3394,6 +3398,8 @@ modes that have one), and a value of the lane's current inputFunc step.
 // Named column/line coordinates do not fit: retail's last draw recomputes lane * 144 + 16 and (row + 2) * 8.
 // Restricted permuter search (perm macros only, 25 min): declaration order, lane u8/s32/u16/s16, row s32/u8/s16/u32,
 // the two initialisations' order, row++/++row/row += 1, the coordinates' operand orders: ties with the base 110 only.
+// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
+// it below its 21 differing lines at the unit's flags.
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;

@@ -1636,6 +1636,8 @@ f32 Snd_Exp2( f32 x ) {
 // Restricted permuter search (perm macros only, 20 min): declaration order, bank initialised or assigned, i
 // s32/s16/u32, value s32/s8/u8/s16/u16, tune and value set in either order, the tune as two statements, one sum or
 // value = value + digit: nothing at or below the base 235.
+// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): only
+// -fno-schedule-insns moves it (21 -> 19 differing lines), and it breaks 44 of the unit's matched functions.
 /*
 ================
 Snd_SignExtend8

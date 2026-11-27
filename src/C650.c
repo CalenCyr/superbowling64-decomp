@@ -67,6 +67,8 @@ void Scene_ClearDrawList( void ) {
 // Also checked: the empty-bucket arm last (bucket != DRAW_NONE first), key <= ...key for the head test, and the
 // search as a while loop on next != DRAW_NONE with the append after it (each further from retail)
 // Permuter (60 min): 5445 -> 4965 only through generated inline wrappers around the key and bucket expressions.
+// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
+// it below its 187 differing lines at the unit's flags.
 /*
 ================
 Scene_InsertEntry

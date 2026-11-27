@@ -42,6 +42,8 @@ height under the cursor.
 // NON_MATCHING: register choices only: `resized` and the numZ address in page SIZE, and retail keeps &cont_allHeld
 // in a register across the STEP and ORIGIN tests
 // Permuter clue (1065 -> 960): `resized` reused as the clearing and marking loops' counter instead of i (R30).
+// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
+// it below its 132 differing lines at the unit's flags.
 void GridEd_Frame( void ) {
     u8 text[40];
     s32 x, z;

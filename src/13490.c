@@ -394,6 +394,8 @@ player has finished the game.
 // or worse: rowY as u16, y as an s32 parameter (with rowY s16 or s32).
 // Restricted permuter search (perm macros only, 25 min): declaration order, pins s32/s16, foul s32/u8/s16, rowY += 9
 // or rowY = rowY + 9, the -2 tests' operand orders, foul set by its if or by ||: nothing at or below the base 865.
+// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
+// it below its 51 differing lines at the unit's flags.
 void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;
@@ -855,6 +857,8 @@ name plate and, once it holds a game, its games, average, high and low scores an
 // Restricted permuter search (perm macros only, 20 min): declaration order, i s32/s16/u16, played s32/u8/s16, rowY,
 // rowX and topY s16/s32, the name plate from rowX or x (rowX = x + 0x2C), played set before or after the plate,
 // rowY += 0x1C or rowY = rowY + 0x1C: nothing at or below the base 275.
+// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
+// it below its 14 differing lines at the unit's flags.
 void Score_DrawRecordTable( u16 count, playerRecord_t *records, u8 kind, s16 x, s32 y ) {
     s16 digits[4];
     s32 i;
