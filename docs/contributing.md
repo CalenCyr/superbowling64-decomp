@@ -48,6 +48,31 @@ Some rules of thumb that recur here: an earlier function in the same unit whose 
 probably an `inline` helper (or the unit builds at `-O3`); a field reached as `symbol + constant` through a computed
 index is a flat array, not a struct member; statement order matters even where the scheduler reorders.
 
+### Checking a draft's behaviour: `make equiv`
+
+A parked draft is what the native port compiles (see [porting.md](porting.md)), so its behaviour matters even
+though its bytes differ. `make equiv` (opt-in; needs `rom.z64`, skips without it, and puts its Python packages
+in the ignored `.equiv-venv/` on first use) runs `tools/equiv.py` over every `#ifdef NON_MATCHING` draft:
+
+```
+make equiv                                    # every draft, 2000 random cases each
+make equiv FUNCS='GA_SpotContact' CASES=5000  # chosen drafts
+make equiv-test                               # the tool's self-test (no ROM needed)
+```
+
+The tool emulates the CPU only, one function at a time (unicorn's MIPS32 core). It runs the retail function from
+`build/superbowling.elf` and the draft (the unit compiled with `-DNON_MATCHING`, relocated against the same
+symbols) from the same random state: the arguments, the bss and data, a heap of random words, and callee stubs
+that return the same values to both. It compares the calls made with their declared arguments, the memory
+written between calls, the return value and the callee-saved registers. A fault or runaway loop caused by
+random data is repaired (the loaded word becomes a pointer or a small number) and the case rerun; a case that
+still faults or runs away is skipped.
+
+It prints `EQUIVALENT (n cases, k skipped)` per function, or `DIFFERS` with the first differing case. Record
+the result as the last line of the draft's `NON_MATCHING` note (`// Equivalence: ...`). An equivalent draft is
+still parked and not counted as matched; a difference is a bug in the draft to fix. Random cases reach only the
+paths random data reaches, so the count says how much was compared, not that every path was.
+
 ## The byte gate
 
 `make gate` rebuilds from scratch and compares the whole ROM's SHA-1 with retail. It is the only proof of a

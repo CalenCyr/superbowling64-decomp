@@ -33,7 +33,7 @@ C_FILES   := $(shell find src -name '*.c' 2>/dev/null)
 BIN_FILES := $(shell find assets -name '*.bin' 2>/dev/null)
 O_FILES   := $(S_FILES:%.s=$(BUILD)/%.o) $(C_FILES:%.c=$(BUILD)/%.o) $(BIN_FILES:%.bin=$(BUILD)/%.o)
 
-.PHONY: all split gate clean expected report diff rules rules-test rename-test shift-test assets-check assets-test mod mod-test n64crc-test FORCE
+.PHONY: all split gate clean expected report diff rules rules-test rename-test shift-test assets-check assets-test mod mod-test n64crc-test equiv equiv-test FORCE
 
 OBJDIFF  := tools/objdiff/objdiff-cli
 
@@ -125,6 +125,23 @@ mod-test: all
 
 n64crc-test:
 	python3 tools/n64crc_tests/run.py
+
+# Differential test of the parked NON_MATCHING drafts against retail (tools/equiv.py; opt-in, needs rom.z64, skips
+# without it). Its packages go in the ignored .equiv-venv/, made on first use. make equiv [FUNCS='A B'] [CASES=2000]
+EQUIV_VENV := .equiv-venv
+CASES ?= 2000
+FUNCS ?=
+$(EQUIV_VENV)/.ok:
+	python3 -m venv $(EQUIV_VENV)
+	$(EQUIV_VENV)/bin/pip -q install unicorn==2.1.4 pyelftools numpy && touch $@
+
+equiv:
+	@if [ ! -f rom.z64 ]; then echo "equiv: rom.z64 missing; skipped"; exit 0; fi; \
+	$(MAKE) --no-print-directory $(EQUIV_VENV)/.ok || { echo "equiv: no $(EQUIV_VENV) (pip failed); skipped"; exit 0; }; \
+	$(MAKE) --no-print-directory all && $(EQUIV_VENV)/bin/python tools/equiv.py --cases $(CASES) $(FUNCS)
+
+equiv-test: $(EQUIV_VENV)/.ok
+	$(EQUIV_VENV)/bin/python tools/equiv_tests/run.py
 
 # Rule checker: make rules [UNIT=src/<unit>] (all src/**/*.c by default); exits non-zero on [match] findings.
 rules:

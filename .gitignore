@@ -16,5 +16,6 @@ objdiff.json
 .claude/skills/
 nonmatchings/
 .permuter-venv/
+.equiv-venv/
 assets_ext/
 tools/gcc_2.7.2_instr/
