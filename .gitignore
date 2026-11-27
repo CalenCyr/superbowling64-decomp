@@ -17,3 +17,4 @@ objdiff.json
 nonmatchings/
 .permuter-venv/
 assets_ext/
+tools/gcc_2.7.2_instr/

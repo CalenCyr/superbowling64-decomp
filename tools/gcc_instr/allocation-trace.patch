@@ -1,0 +1,538 @@
+--- a/local-alloc.c
++++ b/local-alloc.c
+@@ -65,6 +65,161 @@
+ #include "insn-config.h"
+ #include "recog.h"
+ #include "output.h"
++#include "tree.h"
++
++/* Allocation trace (instrumented build only).  When the environment
++   variable GCC_ALLOC_TRACE names a file (or is "-" for stderr), local-alloc,
++   global-alloc and reload append their decisions to it.  Tracing only
++   prints: it never changes an allocation decision.  */
++
++extern char *getenv ();
++extern char *(*decl_printable_name) ();
++extern char *main_input_filename;
++
++FILE *alloc_trace_file;
++static int alloc_trace_checked;
++static char *alloc_trace_class_names[] = REG_CLASS_NAMES;
++
++FILE *
++alloc_trace_stream ()
++{
++  if (! alloc_trace_checked)
++    {
++      char *name = getenv ("GCC_ALLOC_TRACE");
++
++      alloc_trace_checked = 1;
++      if (name != 0 && name[0] != 0)
++	alloc_trace_file = (strcmp (name, "-") == 0
++			    ? stderr : fopen (name, "a"));
++    }
++  return alloc_trace_file;
++}
++
++char *
++alloc_trace_class_name (class)
++     int class;
++{
++  return alloc_trace_class_names[class];
++}
++
++/* Print the hard registers in SET as { $2 $3 ... }.  */
++
++void
++alloc_trace_regset (file, set)
++     FILE *file;
++     HARD_REG_SET set;
++{
++  register int i;
++
++  fputs ("{", file);
++  for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
++    if (TEST_HARD_REG_BIT (set, i))
++      fprintf (file, " %s", reg_names[i]);
++  fputs (" }", file);
++}
++
++/* Print the name of hard register REGNO, or "-" for none.  */
++
++char *
++alloc_trace_reg_name (regno)
++     int regno;
++{
++  return regno >= 0 && regno < FIRST_PSEUDO_REGISTER ? reg_names[regno] : "-";
++}
++
++/* Print which user variables live in which pseudos (the DECL_RTL of each
++   parameter and of each variable in the function's block tree).  */
++
++static void
++alloc_trace_block_vars (file, block, depth)
++     FILE *file;
++     tree block;
++     int depth;
++{
++  tree decl, sub;
++
++  for (decl = BLOCK_VARS (block); decl; decl = TREE_CHAIN (decl))
++    if (TREE_CODE (decl) == VAR_DECL && DECL_NAME (decl) != 0
++	&& DECL_RTL (decl) != 0)
++      {
++	rtx x = DECL_RTL (decl);
++
++	fprintf (file, "V var %s depth=%d", IDENTIFIER_POINTER (DECL_NAME (decl)),
++		 depth);
++	if (GET_CODE (x) == REG)
++	  fprintf (file, " r%d\n", REGNO (x));
++	else if (GET_CODE (x) == MEM && GET_CODE (XEXP (x, 0)) == REG)
++	  fprintf (file, " mem(r%d)\n", REGNO (XEXP (x, 0)));
++	else
++	  fprintf (file, " %s\n", GET_RTX_NAME (GET_CODE (x)));
++      }
++  for (sub = BLOCK_SUBBLOCKS (block); sub; sub = TREE_CHAIN (sub))
++    alloc_trace_block_vars (file, sub, depth + 1);
++}
++
++/* Diagnostic knob (changes code; never for the build): GCC_ALLOC_FORCE_GLOBAL
++   = "FUNCTION:REGNO[,REGNO...]" leaves those block-local pseudos of FUNCTION
++   to global-alloc, to test whether a different allocator decision explains
++   a register difference.  */
++
++static int
++alloc_trace_forced_global (regno)
++     int regno;
++{
++  char *spec = getenv ("GCC_ALLOC_FORCE_GLOBAL");
++  char *name, *p;
++  int len;
++
++  if (spec == 0 || current_function_decl == 0)
++    return 0;
++  name = (*decl_printable_name) (current_function_decl, 2);
++  len = strlen (name);
++  if (strncmp (spec, name, len) != 0 || spec[len] != ':')
++    return 0;
++  for (p = spec + len + 1; *p; )
++    {
++      if (atoi (p) == regno)
++	return 1;
++      while (*p && *p != ',')
++	p++;
++      if (*p == ',')
++	p++;
++    }
++  return 0;
++}
++
++static void
++alloc_trace_function_header (file)
++     FILE *file;
++{
++  tree decl;
++  register int i;
++
++  fprintf (file, "\n=== %s (%s)\n",
++	   (*decl_printable_name) (current_function_decl, 2),
++	   main_input_filename);
++  for (decl = DECL_ARGUMENTS (current_function_decl); decl;
++       decl = TREE_CHAIN (decl))
++    if (DECL_NAME (decl) != 0 && DECL_RTL (decl) != 0)
++      {
++	rtx x = DECL_RTL (decl);
++
++	fprintf (file, "V parm %s", IDENTIFIER_POINTER (DECL_NAME (decl)));
++	if (GET_CODE (x) == REG)
++	  fprintf (file, " r%d\n", REGNO (x));
++	else
++	  fprintf (file, " %s\n", GET_RTX_NAME (GET_CODE (x)));
++      }
++  if (DECL_INITIAL (current_function_decl) != 0
++      && TREE_CODE (DECL_INITIAL (current_function_decl)) == BLOCK)
++    alloc_trace_block_vars (file, DECL_INITIAL (current_function_decl), 0);
++  fprintf (file, "P pseudos (regno: refs live_length calls_crossed basic_block):");
++  for (i = FIRST_PSEUDO_REGISTER; i < max_regno; i++)
++    if (reg_n_refs[i] != 0)
++      fprintf (file, " r%d:%d/%d/%d/b%d", i, reg_n_refs[i], reg_live_length[i],
++	       reg_n_calls_crossed[i], reg_basic_block[i]);
++  fprintf (file, "\n");
++}
+ 
+ /* Pseudos allocated here cannot be reallocated by global.c if the hard
+    register is used as a spill register.  So we don't allocate such pseudos
+@@ -266,6 +421,8 @@
+ static void wipe_dead_reg	PROTO((rtx, int));
+ static int find_free_reg	PROTO((enum reg_class, enum machine_mode,
+ 				       int, int, int, int, int));
++static int find_free_reg_1	PROTO((enum reg_class, enum machine_mode,
++				       int, int, int, int, int));
+ static void mark_life		PROTO((int, enum machine_mode, int));
+ static void post_mark_life	PROTO((int, enum machine_mode, int, int, int));
+ static int no_conflict_p	PROTO((rtx, rtx, rtx));
+@@ -407,6 +564,9 @@
+      registers.  */
+   update_equiv_regs ();
+ 
++  if (alloc_trace_stream ())
++    alloc_trace_function_header (alloc_trace_file);
++
+   /* This sets the maximum number of quantities we can have.  Quantity
+      numbers start at zero and we can have one for each pseudo plus the
+      number of SCRATCHes in the largest block, in the worst case.  */
+@@ -471,10 +631,16 @@
+     {
+       if (reg_basic_block[i] >= 0 && reg_n_deaths[i] == 1
+ 	  && (reg_alternate_class (i) == NO_REGS
+-	      || ! CLASS_LIKELY_SPILLED_P (reg_preferred_class (i))))
++	      || ! CLASS_LIKELY_SPILLED_P (reg_preferred_class (i)))
++	  && ! alloc_trace_forced_global (i))
+ 	reg_qty[i] = -2;
+       else
+ 	reg_qty[i] = -1;
++      if (alloc_trace_file && reg_n_refs[i] != 0 && reg_basic_block[i] >= 0
++	  && reg_qty[i] == -1)
++	fprintf (alloc_trace_file, "L r%d is block-local but left to global-alloc (%s)\n",
++		 i, alloc_trace_forced_global (i) ? "GCC_ALLOC_FORCE_GLOBAL"
++		 : reg_n_deaths[i] != 1 ? "dies more than once" : "class likely spilled");
+     }
+ 
+   /* Force loop below to initialize entire quantity array.  */
+@@ -1463,6 +1629,39 @@
+       qsort (qty_order, next_qty, sizeof (int), qty_sugg_compare_1);
+     }
+ 
++  if (alloc_trace_file && next_qty > 0)
++    {
++      fprintf (alloc_trace_file, "L block %d (insns %d..%d): %d qtys\n", b,
++	       INSN_UID (basic_block_head[b]), INSN_UID (basic_block_end[b]),
++	       next_qty);
++      for (q = 0; q < next_qty; q++)
++	{
++	  int r;
++
++	  fprintf (alloc_trace_file, "L   q%d regs=", q);
++	  for (r = qty_first_reg[q]; r >= 0; r = reg_next_in_qty[r])
++	    fprintf (alloc_trace_file, "r%d%s", r, reg_next_in_qty[r] >= 0 ? "," : "");
++	  if (qty_scratch_rtx[q])
++	    fprintf (alloc_trace_file, "scratch");
++	  fprintf (alloc_trace_file, " mode=%s class=%s alt=%s refs=%d birth=%d death=%d size=%d calls=%d pri=%d sugg=",
++		   GET_MODE_NAME (qty_mode[q]),
++		   alloc_trace_class_name ((int) qty_min_class[q]),
++		   alloc_trace_class_name ((int) qty_alternate_class[q]),
++		   qty_n_refs[q], qty_birth[q], qty_death[q], qty_size[q],
++		   qty_n_calls_crossed[q],
++		   (int) (((double) (floor_log2 (qty_n_refs[q]) * qty_n_refs[q] * qty_size[q])
++			   / (qty_death[q] - qty_birth[q])) * 10000));
++	  alloc_trace_regset (alloc_trace_file, qty_phys_sugg[q]);
++	  fprintf (alloc_trace_file, " copy_sugg=");
++	  alloc_trace_regset (alloc_trace_file, qty_phys_copy_sugg[q]);
++	  fprintf (alloc_trace_file, "\n");
++	}
++      fprintf (alloc_trace_file, "L   suggested pass order:");
++      for (i = 0; i < next_qty; i++)
++	fprintf (alloc_trace_file, " q%d", qty_order[i]);
++      fprintf (alloc_trace_file, "\n");
++    }
++
+   /* Try to put each quantity in a suggested physical register, if it has one.
+      This may cause registers to be allocated that otherwise wouldn't be, but
+      this seems acceptable in local allocation (unlike global allocation).  */
+@@ -1512,6 +1711,14 @@
+       qsort (qty_order, next_qty, sizeof (int), qty_compare_1);
+     }
+ 
++  if (alloc_trace_file && next_qty > 0)
++    {
++      fprintf (alloc_trace_file, "L   priority order:");
++      for (i = 0; i < next_qty; i++)
++	fprintf (alloc_trace_file, " q%d", qty_order[i]);
++      fprintf (alloc_trace_file, "\n");
++    }
++
+   /* Now for each qty that is not a hardware register,
+      look for a hardware register to put it in.
+      First try the register class that is cheapest for this qty,
+@@ -1809,11 +2016,17 @@
+ 	    {
+ 	      SET_HARD_REG_BIT (qty_phys_copy_sugg[reg_qty[sreg]], ureg);
+ 	      qty_phys_num_copy_sugg[reg_qty[sreg]]++;
++	      if (alloc_trace_file)
++		fprintf (alloc_trace_file, "L   sugg r%d (q%d) copy-suggests %s: set from it in insn %d\n",
++			 sreg, reg_qty[sreg], reg_names[ureg], INSN_UID (insn));
+ 	    }
+ 	  else if (! TEST_HARD_REG_BIT (qty_phys_sugg[reg_qty[sreg]], ureg))
+ 	    {
+ 	      SET_HARD_REG_BIT (qty_phys_sugg[reg_qty[sreg]], ureg);
+ 	      qty_phys_num_sugg[reg_qty[sreg]]++;
++	      if (alloc_trace_file)
++		fprintf (alloc_trace_file, "L   sugg r%d (q%d) suggests %s: set from it in insn %d\n",
++			 sreg, reg_qty[sreg], reg_names[ureg], INSN_UID (insn));
+ 	    }
+ 	}
+       return 0;
+@@ -1828,11 +2041,17 @@
+ 	{
+ 	  SET_HARD_REG_BIT (qty_phys_copy_sugg[reg_qty[ureg]], sreg);
+ 	  qty_phys_num_copy_sugg[reg_qty[ureg]]++;
++	  if (alloc_trace_file)
++	    fprintf (alloc_trace_file, "L   sugg r%d (q%d) copy-suggests %s: copied into it in insn %d\n",
++		     ureg, reg_qty[ureg], reg_names[sreg], INSN_UID (insn));
+ 	}
+       else if (! TEST_HARD_REG_BIT (qty_phys_sugg[reg_qty[ureg]], sreg))
+ 	{
+ 	  SET_HARD_REG_BIT (qty_phys_sugg[reg_qty[ureg]], sreg);
+ 	  qty_phys_num_sugg[reg_qty[ureg]]++;
++	  if (alloc_trace_file)
++	    fprintf (alloc_trace_file, "L   sugg r%d (q%d) suggests %s: copied into it in insn %d\n",
++		     ureg, reg_qty[ureg], reg_names[sreg], INSN_UID (insn));
+ 	}
+       return 0;
+     }
+@@ -1878,6 +2097,9 @@
+ 	  qty_size[sqty] = ssize;
+ 	  qty_mode[sqty] = GET_MODE (setreg);
+ 	}
++      if (alloc_trace_file)
++	fprintf (alloc_trace_file, "L   tie r%d <- r%d into q%d (r%d dies in insn %d)\n",
++		 sreg, ureg, sqty, ureg, INSN_UID (insn));
+     }
+   else
+     return 0;
+@@ -2069,11 +2291,51 @@
+    If JUST_TRY_SUGGESTED is non-zero, only try to see if the suggested
+    register is available.  If not, return -1.  */
+ 
++/* Trace wrapper: the registers live over the qty's range are recorded
++   before find_free_reg_1 marks the chosen one.  */
++
+ static int
+ find_free_reg (class, mode, qty, accept_call_clobbered, just_try_suggested,
+ 	       born_index, dead_index)
+      enum reg_class class;
+      enum machine_mode mode;
++     int qty;
++     int accept_call_clobbered;
++     int just_try_suggested;
++     int born_index, dead_index;
++{
++  HARD_REG_SET live;
++  int ins, regno;
++  int num_copy_sugg = qty_phys_num_copy_sugg[qty];
++
++  CLEAR_HARD_REG_SET (live);
++  if (alloc_trace_stream ())
++    for (ins = born_index; ins < dead_index; ins++)
++      IOR_HARD_REG_SET (live, regs_live_at[ins]);
++
++  regno = find_free_reg_1 (class, mode, qty, accept_call_clobbered,
++			   just_try_suggested, born_index, dead_index);
++
++  if (alloc_trace_file)
++    {
++      fprintf (alloc_trace_file, "L   find q%d class=%s%s%s range=%d..%d -> %s; live in range ",
++	       qty, alloc_trace_class_name ((int) class),
++	       just_try_suggested ? (num_copy_sugg ? " copy-suggested-only"
++				     : " suggested-only") : "",
++	       qty_n_calls_crossed[qty] && ! accept_call_clobbered
++	       ? " call-saved-only" : "",
++	       born_index, dead_index, alloc_trace_reg_name (regno));
++      alloc_trace_regset (alloc_trace_file, live);
++      fprintf (alloc_trace_file, "\n");
++    }
++  return regno;
++}
++
++static int
++find_free_reg_1 (class, mode, qty, accept_call_clobbered, just_try_suggested,
++	       born_index, dead_index)
++     enum reg_class class;
++     enum machine_mode mode;
+      int qty;
+      int accept_call_clobbered;
+      int just_try_suggested;
+--- a/global.c
++++ b/global.c
+@@ -29,6 +29,12 @@
+ #include "insn-config.h"
+ #include "output.h"
+ 
++/* Allocation trace (instrumented build only; see local-alloc.c).  */
++extern FILE *alloc_trace_file;
++extern char *alloc_trace_class_name ();
++extern char *alloc_trace_reg_name ();
++extern void alloc_trace_regset ();
++
+ /* This pass of the compiler performs global register allocation.
+    It assigns hard register numbers to all the pseudo registers
+    that were not handled in local_alloc.  Assignments are recorded
+@@ -550,6 +556,33 @@
+       if (file)
+ 	dump_conflicts (file);
+ 
++      if (alloc_trace_file)
++	{
++	  fprintf (alloc_trace_file, "G %d allocnos, in priority order (pri = floor_log2(refs) * refs / live * 10000 * size):\n",
++		   max_allocno);
++	  for (i = 0; i < max_allocno; i++)
++	    {
++	      int a = allocno_order[i];
++	      int j;
++
++	      fprintf (alloc_trace_file, "G   #%d a%d regs=", i, a);
++	      for (j = FIRST_PSEUDO_REGISTER; j < max_regno; j++)
++		if (reg_allocno[j] == a)
++		  fprintf (alloc_trace_file, "r%d ", j);
++	      fprintf (alloc_trace_file, "refs=%d live=%d size=%d calls=%d pri=%d class=%s%s conflicts_with=",
++		       allocno_n_refs[a], allocno_live_length[a],
++		       allocno_size[a], allocno_calls_crossed[a],
++		       (int) ((((double) (floor_log2 (allocno_n_refs[a]) * allocno_n_refs[a])
++				/ allocno_live_length[a]) * 10000 * allocno_size[a])),
++		       alloc_trace_class_name ((int) reg_preferred_class (allocno_reg[a])),
++		       reg_live_length[allocno_reg[a]] < 0 ? " (not allocated: live_length < 0)" : "");
++	      for (j = 0; j < max_allocno; j++)
++		if (j != a && (CONFLICTP (a, j) || CONFLICTP (j, a)))
++		  fprintf (alloc_trace_file, "a%d,", j);
++	      fprintf (alloc_trace_file, "\n");
++	    }
++	}
++
+       /* Try allocating them, one by one, in that order,
+ 	 except for parameters marked with reg_live_length[regno] == -2.  */
+ 
+@@ -913,6 +946,7 @@
+   register		/* Declare it register if it's a scalar.  */
+ #endif
+     HARD_REG_SET used, used1, used2;
++  char *why = "none";
+ 
+   enum reg_class class = (alt_regs_p
+ 			  ? reg_alternate_class (allocno_reg[allocno])
+@@ -951,6 +985,25 @@
+   COPY_HARD_REG_SET (used, used1);
+   IOR_COMPL_HARD_REG_SET (used, regs_used_so_far);
+   IOR_HARD_REG_SET (used, regs_someone_prefers[allocno]);
++
++  if (alloc_trace_file)
++    {
++      fprintf (alloc_trace_file, "G   find a%d (r%d) class=%s%s%s%s hard_conflicts=",
++	       allocno, allocno_reg[allocno],
++	       alloc_trace_class_name ((int) class),
++	       allocno_calls_crossed[allocno] && ! accept_call_clobbered
++	       ? " call-saved-only" : "",
++	       accept_call_clobbered ? " caller-save-retry" : "",
++	       retrying ? " retry-after-spill" : "");
++      alloc_trace_regset (alloc_trace_file, hard_reg_conflicts[allocno]);
++      fprintf (alloc_trace_file, " copy_prefs=");
++      alloc_trace_regset (alloc_trace_file, hard_reg_copy_preferences[allocno]);
++      fprintf (alloc_trace_file, " prefs=");
++      alloc_trace_regset (alloc_trace_file, hard_reg_preferences[allocno]);
++      fprintf (alloc_trace_file, " others_prefer=");
++      alloc_trace_regset (alloc_trace_file, regs_someone_prefers[allocno]);
++      fprintf (alloc_trace_file, "\n");
++    }
+   
+   best_reg = -1;
+   for (i = FIRST_PSEUDO_REGISTER, pass = 0;
+@@ -998,6 +1051,10 @@
+      First do this for those register with copy preferences, then all
+      preferred registers.  */
+ 
++  if (best_reg >= 0)
++    why = (pass == 1 ? "first free in allocation order (pass 0: a register already used, none preferred by others)"
++	   : "first free in allocation order (pass 1)");
++
+   AND_COMPL_HARD_REG_SET (hard_reg_copy_preferences[allocno], used);
+   GO_IF_HARD_REG_SUBSET (hard_reg_copy_preferences[allocno],
+ 			 reg_class_contents[(int) NO_REGS], no_copy_prefs);
+@@ -1028,6 +1085,7 @@
+ 	      if (j == lim)
+ 		{
+ 		  best_reg = i;
++		  why = "copy preference";
+ 		  goto no_prefs;
+ 		}
+ 	    }
+@@ -1064,6 +1122,7 @@
+ 	      if (j == lim)
+ 		{
+ 		  best_reg = i;
++		  why = "preference";
+ 		  break;
+ 		}
+ 	    }
+@@ -1150,12 +1209,18 @@
+ 		      }
+ 
+ 		  best_reg = regno;
++		  why = "evicted local-alloc pseudos (fewer refs per length)";
+ 		  break;
+ 		}
+ 	    }
+ 	}
+     }
+ 
++  if (alloc_trace_file)
++    fprintf (alloc_trace_file, "G     -> a%d (r%d) = %s: %s\n", allocno,
++	     allocno_reg[allocno], alloc_trace_reg_name (best_reg),
++	     best_reg >= 0 ? why : "no register");
++
+   /* Did we find a register?  */
+ 
+   if (best_reg >= 0)
+--- a/reload1.c
++++ b/reload1.c
+@@ -36,6 +36,10 @@
+ #include "output.h"
+ #include "real.h"
+ 
++/* Allocation trace (instrumented build only; see local-alloc.c).  */
++extern FILE *alloc_trace_file;
++extern char *alloc_trace_reg_name ();
++
+ /* This file contains the reload pass of the compiler, which is
+    run after register allocation has been done.  It checks that
+    each insn is valid (operands required to be in registers really
+@@ -2012,6 +2016,29 @@
+       }
+ #endif
+ 
++  if (alloc_trace_file)
++    {
++      fprintf (alloc_trace_file, "F final homes:");
++      for (i = FIRST_PSEUDO_REGISTER; i < max_regno; i++)
++	if (reg_n_refs[i] != 0)
++	  {
++	    fprintf (alloc_trace_file, " r%d=", i);
++	    if (reg_renumber[i] >= 0)
++	      fprintf (alloc_trace_file, "%s", alloc_trace_reg_name (reg_renumber[i]));
++	    else if (reg_equiv_constant[i])
++	      fprintf (alloc_trace_file, "const(rematerialised)");
++	    else if (reg_equiv_init[i] && reg_equiv_memory_loc[i])
++	      fprintf (alloc_trace_file, "equiv-mem(rematerialised)");
++	    else
++	      fprintf (alloc_trace_file, "stack");
++	  }
++      fprintf (alloc_trace_file, "\nF spill regs:");
++      for (i = 0; i < n_spills; i++)
++	fprintf (alloc_trace_file, " %s", reg_names[spill_regs[i]]);
++      fprintf (alloc_trace_file, "\n");
++      fflush (alloc_trace_file);
++    }
++
+   /* Indicate that we no longer have known memory locations or constants.  */
+   reg_equiv_constant = 0;
+   reg_equiv_memory_loc = 0;
+@@ -3497,6 +3524,11 @@
+ 	    retry_global_alloc (i, forbidden_regs);
+ 
+ 	alter_reg (i, regno);
++	if (alloc_trace_file)
++	  fprintf (alloc_trace_file, "R spill %s (needed for reloads): r%d moved to %s\n",
++		   reg_names[regno], i,
++		   reg_renumber[i] >= 0 ? alloc_trace_reg_name (reg_renumber[i])
++		   : "the stack");
+ 	if (dumpfile)
+ 	  {
+ 	    if (reg_renumber[i] == -1)
