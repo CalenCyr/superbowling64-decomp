@@ -104,8 +104,26 @@ make assets-test                             # the tool's synthetic tests (LZSS,
 and the fill after the last file. `str/NNNN.bin` is str member NNNN, decompressed; `str/NNNN.png` is a member the
 game draws as an image, as an indexed PNG of the whole padded canvas (the game draws only `width` columns of it;
 edit pixels and the palette, keep the canvas size). Pack compresses members again and rebuilds `IDX     SYS` from
-their sizes, so an edited member may change size; `pack` writes one file per FAT file to `packed/`. The packed
-files are not yet linked into the ROM: the build still takes them from `rom.z64`.
+their sizes, so an edited member may change size; `pack` writes one file per FAT file to `packed/`.
+
+### Building a ROM from edited assets
+
+```
+python3 tools/assets.py extract rom.z64 && edit assets_ext/... && python3 tools/assets.py pack
+make mod ASSETS=packed                       # build/mod/superbowling.z64
+make mod-test                                # extract, pack, link and re-extract round trip (skips without rom.z64)
+```
+
+`make mod ASSETS=packed` links `idx`, `str`, `bgmptr`, `bgmwbk`, `septr`, `sewbk` and `bfx` from `assets_ext/packed/`
+in place of `assets/*.bin` (`tools/mod_ld.py` writes the linker script). The segments' ROM bounds are linker symbols,
+so the BW64FAT entries follow the sizes, and IDX, which pack rebuilds, holds the str members' offsets. Each asset
+segment starts on a 16-byte ROM boundary (the loader's PI DMA needs an even ROM address). The ROM is then filled with
+0xFF to 8 MB and the checksum recomputed, as for plain `make mod`. Unedited, the result is the retail ROM; `make
+mod-test` checks that, then appends bytes to one str member and checks that re-extracting the modded ROM
+(`tools/assets.py extract --modded`) returns that member and every other file unchanged, and that the checksum
+verifies. Not checked, because nothing runs the game: the RAM buffers the game loads an asset into are fixed sizes
+(for example the decompressed size of a str member, the 16-bit stored length `LZ_Decompress` takes, and the sound
+banks' sizes), so a member or bank that outgrows its buffer needs the buffer's code changed too.
 
 ## Shiftability
 

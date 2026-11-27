@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """assets.py -- extract the ROM's asset files into editable files, and pack them back byte for byte.
 
-    python3 tools/assets.py extract ROM [-d assets_ext]   write the tree and its manifest.json
+    python3 tools/assets.py extract ROM [-d assets_ext]   write the tree and its manifest.json (--modded: any ROM)
     python3 tools/assets.py pack [-d assets_ext] [-o DIR]  rebuild every FAT file into DIR (default <dir>/packed)
     python3 tools/assets.py check ROM [-d assets_ext]      pack in memory; compare each file with the ROM's
 
@@ -576,6 +576,9 @@ def main(argv):
         p = sub.add_parser(name)
         p.add_argument("rom")
         p.add_argument("-d", "--dir", default="assets_ext")
+        if name == "extract":
+            p.add_argument("--modded", action="store_true",
+                           help="accept a ROM other than the retail one (a `make mod` result)")
     p = sub.add_parser("pack")
     p.add_argument("-d", "--dir", default="assets_ext")
     p.add_argument("-o", "--out")
@@ -583,7 +586,7 @@ def main(argv):
     if args.cmd in ("extract", "check"):
         with open(args.rom, "rb") as f:
             rom = f.read()
-        if hashlib.sha1(rom).hexdigest() != ROM_SHA1:
+        if hashlib.sha1(rom).hexdigest() != ROM_SHA1 and not getattr(args, "modded", False):
             print("assets: %s is not the retail ROM (SHA-1 mismatch)" % args.rom, file=sys.stderr)
             return 1
     if args.cmd == "extract":

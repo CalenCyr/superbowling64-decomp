@@ -33,7 +33,7 @@ C_FILES   := $(shell find src -name '*.c' 2>/dev/null)
 BIN_FILES := $(shell find assets -name '*.bin' 2>/dev/null)
 O_FILES   := $(S_FILES:%.s=$(BUILD)/%.o) $(C_FILES:%.c=$(BUILD)/%.o) $(BIN_FILES:%.bin=$(BUILD)/%.o)
 
-.PHONY: all split gate clean expected report diff rules rules-test rename-test shift-test assets-check assets-test mod n64crc-test FORCE
+.PHONY: all split gate clean expected report diff rules rules-test rename-test shift-test assets-check assets-test mod mod-test n64crc-test FORCE
 
 OBJDIFF  := tools/objdiff/objdiff-cli
 
@@ -105,15 +105,23 @@ shift-test: all
 # Modified ROM: link the same objects without the retail pad (assets/pad.bin, 0xFF to 8 MB) into build/mod/, fill
 # with 0xFF to 8 MB (the next power of two if larger) and recompute the CIC-6102 header checksum
 # (tools/n64crc.py). Opt-in; the normal build and the gate are untouched. Unmodified, it equals the retail ROM.
-MOD     := $(BUILD)/mod
+# make mod ASSETS=packed takes the asset segments from assets_ext/packed/ (tools/assets.py pack) instead of assets/:
+# the ROM layout follows their sizes (tools/mod_ld.py); `make mod-test` checks an extract/pack/mod round trip.
+ASSETS ?=
+PACKED ?= assets_ext/packed
+MOD     ?= $(BUILD)/mod
 MOD_ROM := $(MOD)/$(BASENAME).z64
 mod: $(O_FILES) $(LIBULTRA) $(LD_SCRIPT) $(AUTO_SYMS)
 	@mkdir -p $(MOD)
-	grep -v '^ *$(BUILD)/assets/pad\.o(' $(LD_SCRIPT) > $(MOD)/$(BASENAME).ld
+	python3 tools/mod_ld.py $(LD_SCRIPT) $(MOD)/$(BASENAME).ld --ld "$(LD)" $(if $(filter packed,$(ASSETS)),--packed $(PACKED) --objdir $(MOD)/assets)
 	$(LD) -T $(MOD)/$(BASENAME).ld -T undefined_syms.txt $(AUTO_SYMS:%=-T %) \
 		--no-check-sections -Map $(MOD)/$(BASENAME).map -o $(MOD)/$(BASENAME).elf $(LIBULTRA)
 	$(OBJCOPY) -O binary $(MOD)/$(BASENAME).elf $(MOD_ROM)
 	python3 tools/n64crc.py --fix --pad 0x800000 $(MOD_ROM)
+
+# The opt-in round trip (needs rom.z64; skips without it): extract, pack, make mod ASSETS=packed, edit, repeat.
+mod-test: all
+	python3 tools/mod_test.py
 
 n64crc-test:
 	python3 tools/n64crc_tests/run.py
