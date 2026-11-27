@@ -1589,3 +1589,9 @@ gs_onOffImages = 0x8012040C; // segment:gscode
 gs_digitImages = 0x80120410; // segment:gscode
 boot_yieldBuffer = 0x800E5800; // size:0xC00
 boot_dramStack = 0x800F7C90; // size:0x400
+// Not addresses: display-list words (the G_RDPHALF_1/_2 words of a gSPTextureRectangle: texture coordinates and
+// steps) in Scene_DrawPuffs and GridEd_Frame; ignore keeps splat from symbolising them as ROM offsets
+D_57F60 = 0x57F60; // ignore:True
+D_5F800 = 0x5F800; // ignore:True
+D_592F0 = 0x592F0; // ignore:True
+D_5FC20 = 0x5FC20; // ignore:True

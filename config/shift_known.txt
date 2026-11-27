@@ -1,8 +1,2 @@
 # Known findings of tools/shift_test.py (make shift-test): `<check> <name>`, then why it stays.
-#
-# Not addresses: splat symbolised display-list constants (gSPTextureRectangle's texture coordinates) in functions
-# still in asm, and their values happen to lie in the ROM's range. They go when the functions are matched in C.
-symbol D_57F60      # Scene_DrawPuffs
-symbol D_5F800      # Scene_DrawPuffs
-symbol D_592F0      # GridEd_Frame
-symbol D_5FC20      # GridEd_Frame
+# None at present: every finding is a new blocker to fix.
