@@ -519,6 +519,7 @@ class Machine:
                 self.base[a - 0x80000000:a - 0x80000000 + 8] = STUB
                 self.entries[a] = 1
         self.entry_list = sorted(self.entries)
+        self.forbid = []
 
     # --- hooks
     # Unicorn's memory hooks (read, write, unmapped) corrupt MIPS delay slots: an access hooked in a delay slot
@@ -577,6 +578,7 @@ class Machine:
             for reg, v in self.pending:
                 uc.reg_write(reg, v)
             self.pending = None
+        self.pc = addr
         ins = self.insns[(addr - self.fn[0]) >> 2]
         op = ins >> 26
         n = MEM_SIZES.get(op)
@@ -642,7 +644,11 @@ class Machine:
         if a == "jump":
             for addr, size, v in reversed(self.loads):
                 if size == 4 and v == b and addr not in self.repairs:
-                    return addr, 4, self.rgen.choice(self.entry_list)
+                    # Not an entry inside the tested code: the retail run would execute it there, where the
+                    # draft run has a stub.
+                    choices = [e for e in self.entry_list
+                               if not any(lo <= e < hi for lo, hi in self.forbid)]
+                    return addr, 4, self.rgen.choice(choices)
             return None
         for addr, size, v in reversed(self.loads):
             if size == 4 and v == b and addr not in self.repairs:
@@ -757,6 +763,7 @@ class Machine:
         self.seg, self.calls = {}, []
         self.fault, self.done = None, False
         self.pending = None
+        self.pc = addr
         self.retgen = lambda i: random.Random((case << 20) ^ i)
         r = random.Random(case * 7919 + 1)
         for i in range(1, 32):
@@ -790,7 +797,7 @@ class Machine:
         try:
             uc.emu_start(addr, SENTINEL, count=MAX_INSNS)
         except UcError as e:
-            self.fault = self.fault or str(e)
+            self.fault = self.fault or "%s after 0x%08X" % (e, self.pc)
         if not self.fault and uc.reg_read(M.UC_MIPS_REG_PC) == SENTINEL:
             self.done = True
         if self.store and self.done:
@@ -897,6 +904,7 @@ def test_function(img, name, unit, cases, seed, verbose):
 def compare(m, retail, draft, sig, sigs, cases, seed, verbose):
     """Run CASES random cases of both versions; returns (ok count, skipped, first difference or None)."""
     ok = skipped = 0
+    m.forbid = [(retail[1], retail[1] + len(retail[0])), (draft[1], draft[1] + len(draft[0]))]
     for i in range(cases):
         case = seed * 1000003 + i
         world = make_world(m, case, i % 4)
@@ -967,10 +975,14 @@ def main(argv):
         return 2
     jobs = [(name, unit, args.cases, args.seed, args.verbose) for name, unit in drafts]
     status = 0
-    with multiprocessing.Pool(min(args.jobs, len(jobs))) as pool:
-        for line, bad in pool.imap(test_one, jobs):
-            print(line, flush=True)
-            status |= bad
+    if args.jobs <= 1:
+        results = map(test_one, jobs)
+    else:
+        pool = multiprocessing.Pool(min(args.jobs, len(jobs)))
+        results = pool.imap(test_one, jobs)
+    for line, bad in results:
+        print(line, flush=True)
+        status |= bad
     return status
 
 
