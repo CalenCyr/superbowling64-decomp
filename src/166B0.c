@@ -1286,13 +1286,6 @@ Sends the volume (track volume * envelope * velocity * volume scale, then the gr
 fade) and the pan (pan * pan scale) of voice index, each only when it changed.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
-// change the register allocation, and a reused local is not counted as a match. With separate volume and pan
-// locals the volume lives in v1 (retail a0) and the pan goes straight to a1 (retail computes it in a0 and copies):
-// retail's one register spans both sends, so it conflicts with v1 and a1. Also checked: s32/u32/u8/u16/s16 locals,
-// inline helpers computing each value, inline send helpers taking it; no change. The permuter (score 0 states)
-// only rediscovered the reused local.
 void Snd_UpdateVolumePan( sndChannel_t *chan, s32 index ) {
     // RULE-EXCEPTION: R30, the volume and the pan share one local; separate locals change the register
     // allocation.
@@ -1317,9 +1310,6 @@ void Snd_UpdateVolumePan( sndChannel_t *chan, s32 index ) {
         n_alSynSetPan( &snd_voices[index], value );
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/166B0", Snd_UpdateVolumePan);
-#endif
 
 /*
 ================

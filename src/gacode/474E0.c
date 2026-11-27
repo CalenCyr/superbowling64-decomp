@@ -1045,9 +1045,6 @@ GA_ShuffleOrder
 Fills order with first, first + 1, ... (count values) and shuffles it.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
-// change the register allocation, and a reused local is not counted as a match
 void GA_ShuffleOrder( u8 *order, u8 count, u8 first ) {
     s32 i;
     s32 j;          // RULE-EXCEPTION: R30, one local serves as the next value, then as the slot to swap with
@@ -1064,9 +1061,6 @@ void GA_ShuffleOrder( u8 *order, u8 count, u8 first ) {
         order[j] = swap;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_ShuffleOrder);
-#endif
 
 /*
 ================

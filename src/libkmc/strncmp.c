@@ -12,9 +12,6 @@ bytes. A differing word is compared down to its first terminator, if it has one,
 masked words; like memcmp's, that difference can wrap and give the wrong sign.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
-// change the register allocation, and a reused local is not counted as a match
 int strncmp( const char *s1, const char *s2, size_t n ) {
     const u8 *p1;
     const u8 *p2;
@@ -73,6 +70,3 @@ int strncmp( const char *s1, const char *s2, size_t n ) {
     n &= 3;
     goto bytes;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/libkmc/strncmp", strncmp);
-#endif

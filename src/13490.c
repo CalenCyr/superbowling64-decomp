@@ -93,14 +93,6 @@ opening the walls between cells in a random order whenever the two cells are not
 on the left of the first row, the exit on the right of the last.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with locals doing two jobs (marked R30 below): retail keeps the
-// inner counter j, the first cell of a wall and the last loop's i - (width - 1) * height in one register (a1), and
-// the last loop's row in next's; that long life is what drops j below the inner loops' pointers and bounds in
-// allocation order. With separate cell/row locals the inner loops swap a0/a1 (36 lines); j alone as the last
-// loop's counter, or a fresh local for its offset, fixes only some loops (row in wall instead of next also works).
-// Also checked: declaration order, a stride local, wall as the best-wall counter, bestWall = 0 first,
-// weight[j] > best, from == set[j] (no effect or worse).
 void Maze_Build( u32 width, u32 height, u8 *maze ) {
     s32 i;
     // RULE-EXCEPTION: R30, j is also the first cell of a wall and the last loop's offset of a wall within the
@@ -199,9 +191,6 @@ void Maze_Build( u32 width, u32 height, u8 *maze ) {
     maze[( width * 2 - 1 ) * ( height * 2 + 1 ) + height * 2] = 0;
     Mem_Free( work );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/13490", Maze_Build);
-#endif
 
 /*
 ================

@@ -212,9 +212,6 @@ static u16 gs_creditsPos;       /* next command of the credits script */
  * One frame of the options screen: its settings, the sound test, the records page and the credits, which the
  * script gs_creditsScript drives. Returns 1 when the screen slid out, 2 when it was backed out of, else 0.
  */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with the sound test's saved setting held in the loop counter i
-// (marked R30 below); with a separate local the s0/s1 order flips, and a reused counter is not counted as a match
 s32 GS_Options( void ) {
     s32 i;
     s16 x;
@@ -512,6 +509,3 @@ s32 GS_Options( void ) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gscode/605D0", GS_Options);
-#endif

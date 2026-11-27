@@ -390,9 +390,6 @@ Writes the last digits decimal digits of value to glyphs as glyph indices, witho
 zero for 0), and ends the string.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with one local doing two jobs (marked R30 below); separate locals
-// change the register allocation, and a reused local is not counted as a match
 void Txt_NumberToGlyphs( u16 *glyphs, s32 value, s32 digits ) {
     s32 i;
     s32 div;
@@ -417,6 +414,3 @@ void Txt_NumberToGlyphs( u16 *glyphs, s32 value, s32 digits ) {
     }
     glyphs[i] = GLYPH_END;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/3D50", Txt_NumberToGlyphs);
-#endif

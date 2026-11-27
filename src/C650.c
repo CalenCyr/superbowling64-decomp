@@ -832,9 +832,6 @@ Ages the puffs, then draws the live ones: by kind, its texture, and for each cam
 turned to face that camera in the kind's colour and the puff's alpha.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with `kind` doubling as the "a puff is live" flag (marked R30
-// below); with a separate flag local it lands in $t1 instead of retail's $s2, and a reused variable is not counted
 void Scene_DrawPuffs( void ) {
     u32 count[2];
     u32 i;
@@ -911,6 +908,3 @@ void Scene_DrawPuffs( void ) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/C650", Scene_DrawPuffs);
-#endif

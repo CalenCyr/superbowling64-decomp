@@ -189,9 +189,6 @@ back), while the characters' models and their three figure bars are drawn; the m
 Returns 1 once every team is done, 2 when backed out, else 0.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: byte-exact (gate green) only with the character cursor held in the loop counter j (marked R30
-// below); with one local per meaning the s0/s1 order flips, and a reused counter is not counted as a match
 s32 GS_TeamSelect( void ) {
     u8 slots[2][4];         /* per team: its players in turn order; 0xFF: none */
     u8 shown[4];            /* per player: has taken, or is taking, a character */
@@ -672,6 +669,3 @@ s32 GS_TeamSelect( void ) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gscode/5EC00", GS_TeamSelect);
-#endif
