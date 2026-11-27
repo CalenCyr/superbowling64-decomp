@@ -44,3 +44,13 @@ block-local pseudos to global-alloc, to test whether one allocator decision expl
 with the pseudos in the given order (`F:73,83` swaps two neighbours; listing a high-priority pseudo moves the others
 up to its slot), to test whether a different global-alloc priority order explains a register difference; the trace
 prints `G order forced` when it applies. Neither knob is ever part of the build.
+
+## Trace-scored search
+
+`trace_search.py <permdir> <func> [--source FILE]` takes a `tools/permute.sh` import (`base.c`, `target.o`) and
+compiles every expansion of the source's text perm macros (`PERM_GENERAL`, `PERM_ONCE`, `PERM_VAR`) once with the
+instrumented compiler, which gives the object and the trace together. Per candidate it prints the differing
+instruction count against `target.o` and each user variable's pseudo with its allocator (`L b<n>`: local-alloc,
+`G#<rank> pri=<p> refs/live`: global-alloc) and final register; `--pseudos` adds unnamed pseudos, `--show-diff`
+the differing lines, `--only N` one candidate, `--best N` hides candidates above a count. The knobs are cleared
+unless `--keep-knobs` (to check the scorer: `GCC_ALLOC_GLOBAL_ORDER=GA_DebugText:80,79,72,85` gives 0).
