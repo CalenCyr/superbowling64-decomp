@@ -33,7 +33,7 @@ C_FILES   := $(shell find src -name '*.c' 2>/dev/null)
 BIN_FILES := $(shell find assets -name '*.bin' 2>/dev/null)
 O_FILES   := $(S_FILES:%.s=$(BUILD)/%.o) $(C_FILES:%.c=$(BUILD)/%.o) $(BIN_FILES:%.bin=$(BUILD)/%.o)
 
-.PHONY: all split gate clean expected report diff rules rules-test rename-test shift-test FORCE
+.PHONY: all split gate clean expected report diff rules rules-test rename-test shift-test assets-check assets-test FORCE
 
 OBJDIFF  := tools/objdiff/objdiff-cli
 
@@ -112,6 +112,14 @@ rules-test:
 # Struct member rename, driven by the compiler's errors: python3 tools/rename_member.py TYPE OLD NEW [--note ...]
 rename-test:
 	python3 tools/rename_member_tests/run.py
+
+# Assets (opt-in, not part of `make` or `make gate`): extract the ROM's files to assets_ext/, pack them back, compare
+assets-check:
+	python3 tools/assets.py extract rom.z64 -d assets_ext
+	python3 tools/assets.py check rom.z64 -d assets_ext
+
+assets-test:
+	python3 tools/assets_tests/run.py
 
 # make diff UNIT=src/166B0 FUNC=func_8003C0B0  (text diff; `$(OBJDIFF) diff -u <unit> <func>` for the TUI)
 diff: all
