@@ -253,27 +253,13 @@ along vel by what the spheres overlap, to b's centre; returns 1 minus the closes
 from a's path over the sum of the radii.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: register allocation in the two expansions of GA_VecNormalize only: retail copies the
-// first one's length into $f4 before the zero test and divides by $f4, and in the second takes sqrt.s into $f0
-// and copies it to $f2 after the sqrtf fallback joins; this draft uses the sqrt register directly. Everything
-// else matches, including $f20/$f22, which need along reused as the push and t as the clamped distance (with
-// separate push and dist locals they land in caller-saved registers instead). Also tried: the inline's length
-// through GA_VecLength (no change).
-// Permuter clue: it reaches exact only by giving GA_VecNormalize an `unsigned int` return (the length converted
-// and discarded), which breaks GA_VecDirection's f32 result; not a source change.
-// Restricted permuter search (perm macros only, 20 min): declaration order; in GA_VecNormalize the length
-// initialised or assigned, by sqrtf or GA_VecLength, the zero test either way round, the three divisions in each
-// order; the push applied per axis, interleaved or as gap += dir * along: nothing at or below the base 410.
-// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
-// it below its 15 differing lines at the unit's flags.
-// Idiom pass: the unit's chained a = b = x and ?: spellings are already used; GA_VecNormalize's length test and sqrtf
-// are the only free spellings and were covered above, so no further idiom candidate.
-// Trace: the first expansion's length pseudo has no refs left: cse replaces it by the sqrt result, where retail keeps
-// the copy (mov.s $f4,$f8); a cse decision, out of reach of the allocation knobs.
-// Equivalence: 2000 random cases, no difference (tools/equiv.py).
 f32 GA_SpotContact( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     f32 along;
+    // RULE-EXCEPTION: R30, retail's $f20/$f22 need along reused as the push and t as the clamped distance (separate
+    // locals land in caller-saved registers)
+    // R36: the original stores both GA_VecNormalize lengths into speedSq, which nothing reads afterwards: retail
+    // keeps each length in its own register after sqrtf's fallback joins (mov.s), which only a stored result
+    // produces (an ignored call's result is dropped at integration, as GA_VecCrossNormal's is in GA_FloorHeight)
     f32 speedSq;
     f32 t;
     vec3_t dir;
@@ -293,19 +279,16 @@ f32 GA_SpotContact( vec3_t vel, gaSpot_t *a, gaSpot_t *b, vec3_t normal ) {
     t = GA_VecLength( gap );
     t = t < 0.0 ? 0.0f : a->radius + b->radius < t ? a->radius + b->radius : t;
     along = a->radius + b->radius - t * 0.85;
-    GA_VecNormalize( dir, vel );
+    speedSq = GA_VecNormalize( dir, vel );
     dir[0] *= along;
     dir[1] *= along;
     dir[2] *= along;
     gap[0] += dir[0];
     gap[1] += dir[1];
     gap[2] += dir[2];
-    GA_VecNormalize( normal, gap );
+    speedSq = GA_VecNormalize( normal, gap );
     return 1.0 - t / ( a->radius + b->radius );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/474E0", GA_SpotContact);
-#endif
 
 /*
 ================
