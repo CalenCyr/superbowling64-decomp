@@ -324,27 +324,6 @@ name entry of a new team, and the prompts to clear a team's record and to insert
 once the setup is taken, 2 once it is backed out of, else 0.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: complete; one register choice differs: in case 0 the team searched for sits in a0 (retail
-// a1, the count copied to a0). team and human as s16 give case 5's registers (the human flag and the copy loop's
-// team in v1, as retail); as s32 they sit in a0. A u8 team fixes the copy loop but adds andi in case 0; a u8 flag
-// adds andi to its tests.
-// Permuter clue: holding the human flag in `j` (or `i`) instead of its own local cuts most of the case 5
-// difference, so retail's flag likely shares a pseudo with another variable; a block-scoped flag, `team`, or
-// another declaration order does not. Holding the flag in `j` and the copy loop's team in `j` too leaves only case
-// 0 (sibling functions 5EC00/605D0 matched the same way: the original reuses its counters); case 0 still differs,
-// and a `j` holding the searched team's per-player value there makes it worse.
-// Restricted permuter search (perm macros only, 40 min): declaration order, team s32/u32/s16/u16, human s32/u32/s16,
-// human == TRUE or human, i != or < the count, the search's test in six operand orders, team read before or after
-// Sound_PlaySe, i++/++i: best 105 (base 870) with team and human s16 (adopted); nothing below that.
-// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
-// it below its 24 differing lines at the unit's flags.
-// Idiom pass (unit: counters reused as `j`): the player count cached in j for the case 0 search, and the searched team's
-// per-player value in j: unchanged at 99 differing non-reloc lines, or worse.
-// Trace: in case 0 loop.c copies the s16 team (a subreg) and the count for the search loop; here team takes v0 by
-// preference at the top priority and its copy a0, retail keeps team and its copy in a1 and copies the count into a0.
-// No global-alloc order of team, count, their copies and the per-player team changes it (hard conflicts decide).
-// Equivalence: 2000 random cases, no difference (tools/equiv.py).
 s32 GS_PlayerSetup( void ) {
     u8 minPlayers;
     u8 maxPlayers;
@@ -529,10 +508,19 @@ s32 GS_PlayerSetup( void ) {
                     }
                 }
                 if ( ( cont_allDpadRepeat & R_JPAD ) && game_numPlayers < 4 ) {
+                    s32 addedTeam;
+
                     Sound_PlaySe( SE_CURSOR, SE_NO_REUSE );
-                    team = ( game_players[game_numPlayers] >> 4 ) & 7;
+                    /* the added player keeps his team unless another player already has it */
+                    addedTeam = ( game_players[game_numPlayers] >> 4 ) & 7;
                     for ( i = 0; i < game_numPlayers; i++ ) {
-                        if ( ( ( game_players[i] >> 4 ) & 7 ) != 0 && ( ( game_players[i] >> 4 ) & 7 ) == team ) {
+                        // RULE-EXCEPTION: R30, j holds each player's team here: a local of its own takes v0, retail
+                        // keeps it in j's register
+                        j = ( game_players[i] >> 4 ) & 7;
+                        if ( j == 0 ) {
+                            continue;
+                        }
+                        if ( j == addedTeam ) {
                             break;
                         }
                     }
@@ -1087,6 +1075,3 @@ s32 GS_PlayerSetup( void ) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gscode/5AD50", GS_PlayerSetup);
-#endif
