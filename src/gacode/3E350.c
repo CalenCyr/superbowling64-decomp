@@ -3404,33 +3404,8 @@ Debug text for the player: the stage's slide, the animation frame, speed and spi
 modes that have one), and a value of the lane's current inputFunc step.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: register allocation only; retail gives row s2, lane s3, player s4 and &game_gfx s5 (here
-// player s2, &game_gfx s3, row s4, lane s5); instructions, constants, relocations and schedule are the same
-// (the line counter stepped per line puts the TABLE row's increment after its sprintf, as retail). Tried: row
-// as u8/s16, lane as s32, the two locals' declaration order
-// Global-alloc priorities (log2(refs) * refs / live insns) here are player 0.15, &game_gfx 0.11, row 0.03, lane 0.02,
-// so retail's order needs row and lane with far more refs or shorter lives. No effect: lane u16/s16, row u32/u8,
-// row * 8 + 16, row = 16 with row * 8, lane read after row = 14, 144 * lane.
-// Permuter (20 min, target-only scoring): 110 -> 75 only through an aliasing pointer copy of pl.
-// Pass 0 of global-alloc prefers registers already used: retail's order also follows if player and &game_gfx
-// conflict with s2/s3 held by block-local pseudos that row and lane do not overlap; no such pseudo found yet.
-// -dg allocation order here: x/pl first, then player, &game_gfx, row, lane; retail needs row and lane ahead of
-// player and &game_gfx (both conflict with row). Worse: a Gfx ** local for &game_gfx, x as an s16 local, each line's
-// draw and row++ in a do-while(0). A 35-minute permuter run: 75 only through a duplicated final draw.
-// Named column/line coordinates do not fit: retail's last draw recomputes lane * 144 + 16 and (row + 2) * 8.
-// Restricted permuter search (perm macros only, 25 min): declaration order, lane u8/s32/u16/s16, row s32/u8/s16/u32,
-// the two initialisations' order, row++/++row/row += 1, the coordinates' operand orders: ties with the base 110 only.
-// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
-// it below its 21 differing lines at the unit's flags.
-// Idiom pass (unit: `pl = &ga_players[..]` initialised in the declaration in 56 functions): pl assigned after the
-// declarations, row = 15 literal steps, row/lane initialisation order, row before lane: all 42 diff lines, unchanged.
-// Trace: exact under GCC_ALLOC_GLOBAL_ORDER=GA_DebugText:80,79,72,85 (row, lane, player, &game_gfx): retail
-// allocates row and lane before player and &game_gfx, which their priorities here (0.03, 0.02 vs 0.15, 0.11) cannot give.
-// Equivalence: 1926 random cases (74 skipped), no difference (tools/equiv.py).
-// Trace-scored search (tools/gcc_instr/trace_search.py, 291 candidates): lane/row types and declaration order,
-// their initialisation order, three x and three y spellings, four increment spellings, an inputFunc or
-// ga_gameMode local: row stays 3 refs/90 live (pri 333), lane at most 787, player 1538; none reaches retail's order.
+// Each step's branch draws its own line: gcc's cross-jumping (after reload) merges the identical draws into one
+// tail, and their uses of row and lane before that give those two the first call-saved registers.
 void GA_DebugText( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     u8 lane;
@@ -3456,29 +3431,28 @@ void GA_DebugText( s32 player ) {
     }
     if ( pl->lane->inputFunc == GA_InputAim ) {
         sprintf( text, "ATX[%6.2f]", pl->character.aim[0] );
+        Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
     } else if ( pl->lane->inputFunc == GA_InputStance ) {
         sprintf( text, "STX[%6.2f]", pl->character.stance[0] );
+        Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
     } else if ( pl->lane->inputFunc == GA_InputSetThrow ) {
-        if ( pl->port < 0 ) {
-            return;
+        if ( pl->port >= 0 ) {
+            GA_PickAimPin( target, pl->lane->bodies, pl->lane->spots, pl->character.reverseSpin );
+            sprintf( text, "TECH RO[%6.2f]",
+                GA_AimSpin( target, pl->character.direction, pl->character.stance[0], pl->character.speed ) );
+            Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
         }
-        GA_PickAimPin( target, pl->lane->bodies, pl->lane->spots, pl->character.reverseSpin );
-        sprintf( text, "TECH RO[%6.2f]",
-            GA_AimSpin( target, pl->character.direction, pl->character.stance[0], pl->character.speed ) );
     } else if ( pl->lane->inputFunc == GA_InputApproach || pl->lane->inputFunc == GA_InputSwing
         || pl->lane->inputFunc == GA_InputRelease ) {
         sprintf( text, "FR SIN[%8.4f]", sinf( pl->character.timingAngle ) );
+        Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
     } else if ( pl->lane->inputFunc == GA_InputRoll || pl->lane->inputFunc == GA_InputGutter ) {
         sprintf( text, "NOW Z[%8.4f]", pl->lane->spots[0].pos[2] );
+        Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
     } else if ( pl->lane->inputFunc == GA_InputReaction || pl->lane->inputFunc == GA_InputNextTurn ) {
         return;
     } else if ( pl->lane->inputFunc == GA_InputParkedRestart || pl->lane->inputFunc == GA_InputParked ) {
         sprintf( text, " WAIT... " );
-    } else {
-        return;
+        Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
     }
-    Txt_DrawString( &game_gfx, lane * 144 + 16, ( row + 2 ) * 8, text );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", GA_DebugText);
-#endif
