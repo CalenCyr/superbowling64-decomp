@@ -167,6 +167,14 @@ result.
 // pointers with both init orders (3 at best). gcc 2.7.2 facts checked: flow starts a block at every CODE_LABEL,
 // jump deletes unreferenced labels (user labels become notes), thread_jumps' redirect deletes orphaned ones, so a
 // boundary must come from a jump removed after flow (combine or jump2); combine does adjust reg_n_deaths.
+// Type widths (trace-scored): i and a separate loop-2 counter in every pair of s32/s16/u16/u8/u32 (s32/s32: 3;
+// all others 4-45), port reused as the counter (3; for both loops 37), port s8/s16, input s8/s16, result s16
+// (5-38), void * pointers, a (u8) index, an unsigned bound (4), &spots[0]/&bodies[0]: none makes the loop-1 load
+// global. Its block (after the inputFunc join label) holds three local qtys, all v0; combine finds no pair with it
+// (the load can't fold into the add or, with r178 still used, into the copy). Other death sources checked in the
+// source: optimize_reg_copy_2 needs a copy back into the lane pseudo; flow's REG_UNUSED needs a dead set kept by a
+// side effect; flow's unreachable-loop deletion (the only label left behind without a jump) needs a dead loop
+// between the load and the copy, and that also breaks cse of the body load (5).
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
