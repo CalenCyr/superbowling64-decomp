@@ -58,38 +58,17 @@ void Scene_ClearDrawList( void ) {
     memset( scene_bucketHeads, 0xFF, sizeof( scene_bucketHeads ) );
 }
 
-#ifdef NON_MATCHING
-// NON_MATCHING: block order now matches retail (empty arm, append arm, head test, head insert, search loop,
-// insert); what differs is register allocation. Retail keeps the key and the helper's u16 key parameter in one register
-// (a3), and scene_numDraws' HImode value and its sign-extended index in one (v1). Here integrate.c copies the
-// argument (subreg, then a user-variable copy) and global-alloc gives the parameter its own register, and the HI load
-// gets a second pseudo, so the loop needs one more register and every hoisted address moves up by one (t3-t9 for
-// t2-t8). 100 differing lines with relocations compared by address (45 that are not register names: the two copies,
-// the append arm's store schedule, and the shifted branch targets).
-// Block order: the for (;;) whose first test is the key test with its insert and break is the loop exit test that
-// expand_end_loop rotates to the loop end and duplicate_loop_exit_test copies before the loop (retail's head test and
-// head insert, with a fresh pseudo for entry, so it is not cross-jumped); the append arm before the head test comes
-// with this loop shape (checked by compiling). The reload of scene_numDraws after *link = ... (and not after scene_bucketHeads[...] = ...)
-// shows the head insert stores through link. Hoisting scene_bucketHeads needs the empty test and arm written through
-// the array. The layer local with a u16 bucket gives retail's andi on scene_addLayer (the bucket shift is narrowed to
-// HImode and takes the unmasked load). The keys written as bits | (ucode << 2) | i keep retail's or order (the previous
-// draft's (ucode << 2) | (i | 0x20) was reassociated).
-// Ruled out: head test and walk on entry/next with the append inside the loop (the previous draft: the append stays in
-// the loop), while (key < ...) with returns (one insert, not two), key read back from the entry in the helper (the
-// loop reloads it), u16 key (the arms narrow to HImode and 0x18000 loses its bit), s16 key (signed compare),
-// parameter order, a local n for scene_numDraws, chained bucket head/tail stores.
-// Permuter (60 min, previous draft): 5445 -> 4965 only through generated inline wrappers.
-// Equivalence: 251 random cases, no difference (49 skipped), tools/equiv.py.
 /*
 ================
 Scene_InsertEntry
 
-Adds entry scene_numDraws of the draw list to bucket, after the entries of a lower key.
+Adds entry scene_numDraws of the draw list to bucket, after the entries of a lower key. The key is stored and
+compared in 16 bits: the bit 0x10000 of the caller's keys is dropped.
 ================
 */
-static inline void Scene_InsertEntry( u16 key, u16 bucket ) {
+static inline void Scene_InsertEntry( u32 key, u16 bucket ) {
     s16 *link;
-    u16 entry;
+    u32 entry;
 
     scene_drawList[scene_numDraws].key = key;
     if ( scene_bucketHeads[bucket] == DRAW_NONE ) {
@@ -99,8 +78,8 @@ static inline void Scene_InsertEntry( u16 key, u16 bucket ) {
     } else {
         link = &scene_bucketHeads[bucket];
         for ( ;; ) {
-            entry = *link;
-            if ( scene_drawList[entry].key >= key ) {
+            entry = (u16)*link;     /* the links are s16 for DRAW_NONE; an entry is an unsigned index */
+            if ( scene_drawList[entry].key >= (u16)key ) {
                 *link = scene_numDraws;
                 scene_drawList[scene_numDraws].next = entry;
                 break;
@@ -167,9 +146,6 @@ void Scene_AddToDrawList( void ) {
         mask >>= 1;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/C650", Scene_AddToDrawList);
-#endif
 
 /*
 ================
