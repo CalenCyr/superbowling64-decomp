@@ -59,17 +59,27 @@ void Scene_ClearDrawList( void ) {
 }
 
 #ifdef NON_MATCHING
-// NON_MATCHING: the inline helper and its s16 *link store reproduce retail's frame (0x18) and its per-iteration
-// reloads; still differs in the insertion's block order (retail places the append arm before the search loop and
-// takes &scene_drawList[entry] in a register for the insert) and in the key expressions' schedule; retail also re-masks
-// scene_addLayer (lhu, then andi 0xffff) for the test and the key but shifts the unmasked value for the bucket, so it is
-// probably read into a wider local (a u16 local alone does not do it)
-// Also checked: the empty-bucket arm last (bucket != DRAW_NONE first), key <= ...key for the head test, and the
-// search as a while loop on next != DRAW_NONE with the append after it (each further from retail)
-// Permuter (60 min): 5445 -> 4965 only through generated inline wrappers around the key and bucket expressions.
-// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
-// it below its 187 differing lines at the unit's flags.
-// Equivalence: 1629 random cases (371 skipped), no difference (tools/equiv.py).
+// NON_MATCHING: block order now matches retail (empty arm, append arm, head test, head insert, search loop,
+// insert); what differs is register allocation. Retail keeps the key and the helper's u16 key parameter in one register
+// (a3), and scene_numDraws' HImode value and its sign-extended index in one (v1). Here integrate.c copies the
+// argument (subreg, then a user-variable copy) and global-alloc gives the parameter its own register, and the HI load
+// gets a second pseudo, so the loop needs one more register and every hoisted address moves up by one (t3-t9 for
+// t2-t8). 100 differing lines with relocations compared by address (45 that are not register names: the two copies,
+// the append arm's store schedule, and the shifted branch targets).
+// Block order: the for (;;) whose first test is the key test with its insert and break is the loop exit test that
+// expand_end_loop rotates to the loop end and duplicate_loop_exit_test copies before the loop (retail's head test and
+// head insert, with a fresh pseudo for entry, so it is not cross-jumped); the append arm before the head test comes
+// with this loop shape (checked by compiling). The reload of scene_numDraws after *link = ... (and not after scene_bucketHeads[...] = ...)
+// shows the head insert stores through link. Hoisting scene_bucketHeads needs the empty test and arm written through
+// the array. The layer local with a u16 bucket gives retail's andi on scene_addLayer (the bucket shift is narrowed to
+// HImode and takes the unmasked load). The keys written as bits | (ucode << 2) | i keep retail's or order (the previous
+// draft's (ucode << 2) | (i | 0x20) was reassociated).
+// Ruled out: head test and walk on entry/next with the append inside the loop (the previous draft: the append stays in
+// the loop), while (key < ...) with returns (one insert, not two), key read back from the entry in the helper (the
+// loop reloads it), u16 key (the arms narrow to HImode and 0x18000 loses its bit), s16 key (signed compare),
+// parameter order, a local n for scene_numDraws, chained bucket head/tail stores.
+// Permuter (60 min, previous draft): 5445 -> 4965 only through generated inline wrappers.
+// Equivalence: checked by reasoning only for this draft (the previous draft passed 1629 random cases, tools/equiv.py).
 /*
 ================
 Scene_InsertEntry
@@ -80,7 +90,6 @@ Adds entry scene_numDraws of the draw list to bucket, after the entries of a low
 static inline void Scene_InsertEntry( u16 key, u16 bucket ) {
     s16 *link;
     u16 entry;
-    u16 next;
 
     scene_drawList[scene_numDraws].key = key;
     if ( scene_bucketHeads[bucket] == DRAW_NONE ) {
@@ -88,27 +97,21 @@ static inline void Scene_InsertEntry( u16 key, u16 bucket ) {
         scene_bucketTails[bucket] = scene_numDraws;
         scene_drawList[scene_numDraws].next = DRAW_NONE;
     } else {
-        entry = scene_bucketHeads[bucket];
-        if ( scene_drawList[entry].key >= key ) {
-            scene_bucketHeads[bucket] = scene_numDraws;
-            scene_drawList[scene_numDraws].next = entry;
-        } else {
-            for ( ;; ) {
-                if ( scene_drawList[entry].next == DRAW_NONE ) {
-                    scene_drawList[entry].next = scene_numDraws;
-                    scene_drawList[scene_numDraws].next = DRAW_NONE;
-                    scene_bucketTails[bucket] = scene_numDraws;
-                    break;
-                }
-                link = &scene_drawList[entry].next;
-                next = *link;
-                if ( scene_drawList[next].key >= key ) {
-                    *link = scene_numDraws;
-                    scene_drawList[scene_numDraws].next = next;
-                    break;
-                }
-                entry = next;
+        link = &scene_bucketHeads[bucket];
+        for ( ;; ) {
+            entry = *link;
+            if ( scene_drawList[entry].key >= key ) {
+                *link = scene_numDraws;
+                scene_drawList[scene_numDraws].next = entry;
+                break;
             }
+            if ( scene_drawList[entry].next == DRAW_NONE ) {
+                scene_drawList[entry].next = scene_numDraws;
+                scene_drawList[scene_numDraws].next = DRAW_NONE;
+                scene_bucketTails[bucket] = scene_numDraws;
+                break;
+            }
+            link = &scene_drawList[entry].next;
         }
     }
     scene_numDraws++;
@@ -121,13 +124,13 @@ Scene_AddToDrawList
 Adds an entry to the draw list for each camera that draws, keeping its bucket in key order.
 ================
 */
-// Idiom pass (unit: chained a = b = x, small inline helpers): scene_addLayer read into a u32 or s32 local before the key
-// test (233 diff lines, unchanged), a drawEntry_t pointer for the first three stores (326).
+// Idiom pass (unit: chained a = b = x, small inline helpers): a drawEntry_t pointer for the first three stores (further).
 void Scene_AddToDrawList( void ) {
     u8 mask;
     u32 i;
     u32 key;
-    u32 bucket;
+    u16 bucket;
+    u16 layer;
 
     mask = scene_viewMask;
     for ( i = 0; i < cam_count; i++ ) {
@@ -138,23 +141,24 @@ void Scene_AddToDrawList( void ) {
                 scene_drawList[scene_numDraws].meshBits |= 0x1000;
             }
             scene_drawList[scene_numDraws].matrix = scene_addMatrix;
-            if ( scene_addLayer != 0 ) {
-                key = ( scene_addLayer << 15 ) | ( scene_addMaterial << 4 ) | ( scene_addUcode << 2 ) | i;
-                bucket = ( scene_addLayer << 3 ) | ( scene_addMaterial & 3 );
+            layer = scene_addLayer;
+            if ( layer != 0 ) {
+                key = ( layer << 15 ) | ( scene_addMaterial << 4 ) | ( scene_addUcode << 2 ) | i;
+                bucket = ( layer << 3 ) | ( scene_addMaterial & 3 );
             } else if ( scene_addSurface >= 3 ) {
                 if ( scene_addByMaterial != 0 ) {
-                    key = ( scene_addMaterial << 4 ) | ( ( scene_addUcode << 2 ) | 0x8000 ) | i;
+                    key = 0x8000 | ( scene_addMaterial << 4 ) | ( scene_addUcode << 2 ) | i;
                     bucket = ( scene_addMaterial & 0x7F ) | 0x80;
                 } else {
-                    key = ( scene_addUcode << 2 ) | ( i | 0x20 );
+                    key = 0x20 | ( scene_addUcode << 2 ) | i;
                     bucket = key << 3;
                 }
             } else {
                 if ( scene_addByMaterial != 0 ) {
-                    key = ( scene_addMaterial << 4 ) | ( ( scene_addUcode << 2 ) | 0x18000 ) | i;
+                    key = 0x18000 | ( scene_addMaterial << 4 ) | ( scene_addUcode << 2 ) | i;
                     bucket = ( scene_addMaterial & 0x7F ) | 0x180;
                 } else {
-                    key = ( scene_addUcode << 2 ) | ( i | 0x40 );
+                    key = 0x40 | ( scene_addUcode << 2 ) | i;
                     bucket = key << 3;
                 }
             }
