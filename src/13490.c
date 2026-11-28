@@ -852,36 +852,21 @@ Draws the table of count records of the given kind at (x, y): its column heads, 
 name plate and, once it holds a game, its games, average, high and low scores and its three percentages.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: prologue, frame (0xA0), calls, CFG and constants match (Score_DrawNumberBox takes s32 numbers:
-// retail passes the lhu field and the truncated float as they are); rowX as s32 gives retail's spill of x (sh to
-// sp+0x2E, lhu each row). Left: retail draws the name plate from the reloaded x itself and forms rowX = x + 0x2C
-// without sign-extending x first, where this draft sign-extends x into rowX (sll/sra) and adds 0x2C to it.
-// Tried with s32 rowX: the plate at x (worse), rowX = x + 0x2C after it (loop hoists rowX, worse), the inline
-// Menu_DrawSmallNamePlate (no change). Earlier, with s16 rowX: rowY/played as s16/s32/u8, x and rowX as u16,
-// the plate at x with rowX = x + 0x2C (each keeps x in s5, frame 0x98).
-// Restricted permuter search (perm macros only, 20 min): declaration order, i s32/s16/u16, played s32/u8/s16, rowY,
-// rowX and topY s16/s32, the name plate from rowX or x (rowX = x + 0x2C), played set before or after the plate,
-// rowY += 0x1C or rowY = rowY + 0x1C: nothing at or below the base 275.
-// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
-// it below its 14 differing lines at the unit's flags.
-// Idiom pass: x as an s32 parameter (338 vs 291), the plate drawn at x with rowX = x + 0x2C (344), the row step in the for
-// header (289): none closes it.
-// Equivalence: 610 random cases (390 skipped), no difference (tools/equiv.py).
 void Score_DrawRecordTable( u16 count, playerRecord_t *records, u8 kind, s16 x, s32 y ) {
     s16 digits[4];
     s32 i;
     s32 played;
     s16 rowY;
-    s32 rowX;
+    s16 rowX;      /* the plate's x, then the first column's */
     s16 topY;      /* of the upper number */
 
-    Draw_Image( 0x9E1, x + 0x2C, y );
-    Draw_Image( 0xA15, x + 0x52, y );
-    Draw_Image( 0xA11, x + 0x78, y );
-    Draw_Image( 0x9E2, x + 0x9E, y );
-    Draw_Image( 0x9E4, x + 0xC4, y );
-    Draw_Image( 0x9E3, x + 0xEA, y );
+    rowX = x + 0x2C;
+    Draw_Image( 0x9E1, rowX, y );
+    Draw_Image( 0xA15, rowX + 0x26, y );
+    Draw_Image( 0xA11, rowX + 0x4C, y );
+    Draw_Image( 0x9E2, rowX + 0x72, y );
+    Draw_Image( 0x9E4, rowX + 0x98, y );
+    Draw_Image( 0x9E3, rowX + 0xBE, y );
     rowY = y + 16;
     for ( i = 0; i < count; i++ ) {
         played = records[i].games != 0;
@@ -925,9 +910,6 @@ void Score_DrawRecordTable( u16 count, playerRecord_t *records, u8 kind, s16 x, 
         rowY += 0x1C;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/13490", Score_DrawRecordTable);
-#endif
 
 /*
 ================
