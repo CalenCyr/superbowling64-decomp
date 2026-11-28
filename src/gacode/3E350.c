@@ -215,6 +215,9 @@ s32 GA_RunPlayer( s32 player ) {
 INCLUDE_ASM("asm/nonmatchings/gacode/3E350", GA_RunPlayer);
 #endif
 
+/* An angle in degrees brought back within -180..180. */
+#define GA_WRAP_DEGREES( a ) ( ( a ) < -180.0f ? ( a ) + 360.0f : ( a ) >= 180.0f ? ( a ) - 360.0f : ( a ) )
+
 /*
 ================
 GA_PhysicsStep
@@ -225,28 +228,6 @@ the sounds and rumbling the port for the ball's hits, and finally GA_CollideLane
 GA_SettleBodies.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: one register only: loop 2's &spots[i + NUM_BODIES] is reduced to 352 + 32 * i and added to
-// spots at the call, where retail walks a full pointer from spots + 0x160 (in s4, stepped after i). A second
-// pointer local walked by loop 2 (for ( i = 0, p = spots + NUM_BODIES; ...; i++, p++ )) leaves only its set-up
-// placed before the hoisted -190.0f; reusing loop 1's second for it swaps port and second (s3/s4); spots +
-// i + NUM_BODIES and &spots[i] + NUM_BODIES fold it into spots[i]; lane->secondSpots[i] or a secondSpots
-// local are further off; &spots[NUM_BODIES + i] is the same; a spot cursor for loop 2 (spot, spot +
-// NUM_BODIES) is further off. The continues, the local arrays and bounceSound as s16 (lh) came from A/B.
-// Restricted permuter search (perm macros only, 40 min): declaration order, loop 1's pointer set before or in the for
-// and its increments' order, loop 2 indexed or walking second (from lane->secondSpots, spots + 11 or &spots[11]): best
-// 300 (base 430): loop 2 walking second = spots + 11 leaves only port and second swapped (s4/s3, retail s3/s4).
-// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
-// it below its 5 differing lines at the unit's flags.
-// Equivalence: 1860 random cases (140 skipped), no difference (tools/equiv.py).
-/* An angle in degrees brought back within -180..180. */
-#define GA_WRAP_DEGREES( a ) ( ( a ) < -180.0f ? ( a ) + 360.0f : ( a ) >= 180.0f ? ( a ) - 360.0f : ( a ) )
-
-// Trace: &spots[i + NUM_BODIES] cannot be one giv (loop.c's simplify_giv_expr rejects a reg + const invariant sum),
-// so only the 352 + 32 * i offset is reduced. With for ( i = 0, second = spots + NUM_BODIES; ...; i++, second++ ),
-// second's priority 3950 ranks above port's 3891; GCC_ALLOC_GLOBAL_ORDER=GA_PhysicsStep:73,83 leaves only
-// the set-up scheduled before the hoisted -190.0f (3 lines). With &secondSpots[i] (secondSpots = spots + NUM_BODIES
-// set after loop 1) loop.c reduces a full giv into s4 as retail (5 lines), but in another place of its reduction order.
 void GA_PhysicsStep( s32 player, s32 port ) {
     gaPlayer_t *pl = &ga_players[player];
     gaLane_t *lane = pl->lane;
@@ -255,6 +236,7 @@ void GA_PhysicsStep( s32 player, s32 port ) {
     gaSpot_t *second;
     s32 hit;
     s32 i;
+    s32 j; /* body i's second sphere: spots[j] runs on into secondSpots (as in GA_CollideLane) */
 
     second = lane->secondSpots;
     for ( i = 0; i < NUM_BODIES; i++, second++ ) {
@@ -277,12 +259,11 @@ void GA_PhysicsStep( s32 player, s32 port ) {
         }
         GA_TransformPoint( second->pos, ga_spotOffset, lane->bodies[i].rot, spots[i].pos );
     }
-    for ( i = 0; i < NUM_BODIES; i++ ) {
+    for ( i = 0, j = NUM_BODIES; i < NUM_BODIES; i++, j++ ) {
         if ( lane->bodies[i].standState == 0 ) {
             continue;
         }
-        /* spots[i + NUM_BODIES] is secondSpots[i], which follows spots in the lane (as in GA_CollideLane) */
-        hit = GA_KeepOnFloor( &motion[i], &spots[i], &spots[i + NUM_BODIES], 180.0f, ga_stage->floorHeight );
+        hit = GA_KeepOnFloor( &motion[i], &spots[i], &spots[j], 180.0f, ga_stage->floorHeight );
         if ( lane->bodies[i].kind != 0 ) {
             continue;
         }
@@ -315,9 +296,6 @@ void GA_PhysicsStep( s32 player, s32 port ) {
     }
     GA_SettleBodies( lane->bodies, motion, spots );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/gacode/3E350", GA_PhysicsStep);
-#endif
 
 /*
 ================
