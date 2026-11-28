@@ -13,8 +13,8 @@ This repository contains no game code, assets or ROM. You need your own copy of 
 
 | | matched under the rules | bytes matched |
 |---|---|---|
-| all code | 897 / 905 functions | 313,852 / 335,856 bytes (93.5%) |
-| game | 568 / 576 functions | 238,736 / 260,740 bytes (91.6%) |
+| all code | 898 / 905 functions | 315,176 / 335,856 bytes (93.8%) |
+| game | 569 / 576 functions | 240,060 / 260,740 bytes (92.1%) |
 | libultra | 329 / 329 functions | 75,116 / 75,116 bytes (100%) |
 
 "Matched under the rules" counts functions whose bytes match *and* whose source passes the project's code rules
