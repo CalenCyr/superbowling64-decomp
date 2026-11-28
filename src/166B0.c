@@ -1641,6 +1641,17 @@ f32 Snd_Exp2( f32 x ) {
 // Idiom pass (the unit's f32 scratch locals): an f32 `part` for both conversions gives retail's $f2 (61 -> 58 diff lines);
 // the unit's pointer-walking idiom does not fit (retail reloads bank->waves[i] at every use); the digit copy remains.
 // Equivalence: 1903 random cases (97 skipped), no difference (tools/equiv.py).
+// Forced decision (scratch cse knobs on the instrumented cc1, with the digit through a nested inline returning
+// c - '0', which makes integrate copy the temporary into the user-variable parameter x): retail's RTL is t = digit - 48,
+// x = t, the sign test on t, both masks on x. Forcing that in cse (test on t, masks kept on x, no swap of the copy
+// in cse2) gives retail's copy, t in v0 and x in v1, and leaves 11 lines: the test reads v1 (local-alloc's
+// optimize_reg_copy_1 moves it onto x), the tune->value reload is scheduled before the conversion, the wave pointer is
+// in v1. Naturally cse makes x canonical (it lives past the block) and swaps the copy, and optimize_reg_copy_1 moves
+// the test onto x and ties the two; retail's copy and test on t survive only if something between the copy
+// and the test sets t or x or ends the scan (a jump, a label, a loop note). Not it: the helper as early return, if/else
+// returns, reversed or OR/XOR forms; the digit through Snd_Digit/Snd_TuneDigit (s32/u8/u32, by pointer) with
+// parameter types u8..s32; the assigning helper in the second call only, or with tune->raw passed (it loses the reload
+// and the giv); tune->value += Snd_SignExtend8( ... ) without part.
 /*
 ================
 Snd_SignExtend8
