@@ -368,6 +368,24 @@ void Score_DrawHeaders( u8 tenth, s16 x, s16 y ) {
 
 /*
 ================
+Score_FrameTotal
+
+Returns the player's score at frame with the player's plate number added, or the frame's score as it is while
+it is negative (not yet scored).
+================
+*/
+static inline s32 Score_FrameTotal( s32 player, u8 frame ) {
+    s32 score;
+
+    score = game_frameScores[player][frame];
+    if ( score < 0 ) {
+        return score;
+    }
+    return score + score_plateNumbers[player];
+}
+
+/*
+================
 Score_DrawFrame
 
 Draws the player's frame of the scoreboard at (x, y), last being the frame in play and throw its throw: the
@@ -375,33 +393,6 @@ frame's box, the image of each roll played, and the frame's score; done is game_
 player has finished the game.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: calls, CFG, constants and stack match; registers differ: retail gives rowY s4 (frame s5, done s6)
-// and roll v0 (so its bne delay slots are not likely-branches). Tried: rowY as s32 (worse), y itself as the cursor
-// (same), roll by ternary/if (block 1 needs the if), foul as an s32 local (needed for retail's andi),
-// rowY = y + 2 once before the frame test (worse).
-// Permuter (target-only scoring, 7 min): best 615 from 865 only through noise (a u16 temporary for the third
-// roll, a duplicated if/else), no source clue.
-// A further 20-minute run reached 275 only by holding -2 in a local shared with the foul test (left unset on one
-// path). No effect: roll = pins then the -1 test, pins != -1 first, rowY = y before the first Draw_Image.
-// Dumps (-dl/-dg): rowY (9 refs over 246 insns) loses to frame (10 over 238) and to the rowY + 9 temporary, which cse
-// substitutes for rowY at its one later use, so the temporary takes a2; retail's in-place s4 += 9 follows if rowY is
-// allocated first. No effect or worse: rowY declared in each branch (worse), rowY += 9 just before the call (worse).
-// Also worse: rowY + 9 written at the Score_DrawNumber calls, y itself stepped with y += 2, rowY = y with + 2 at
-// each use; rowY = y then rowY += 2 is the same. A 35-minute permuter run: 385 only through throw++/throw-- (noise).
-// Dumps (-ds): cse rewrites the call argument's sign extension of rowY to the rowY + 9 temporary, so flow deletes
-// rowY's set; with the set kept, combine would add in place and rowY's extra refs would rank it above frame. No effect
-// or worse: rowY as u16, y as an s32 parameter (with rowY s16 or s32).
-// Restricted permuter search (perm macros only, 25 min): declaration order, pins s32/s16, foul s32/u8/s16, rowY += 9
-// or rowY = rowY + 9, the -2 tests' operand orders, foul set by its if or by ||: nothing at or below the base 865.
-// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
-// it below its 51 differing lines at the unit's flags.
-// Idiom pass (unit: s16 cursors stepped with +=, ternary chains): the -2 test as a static inline Score_Roll( pins, other )
-// (345 diff lines vs 56), roll s32 (87), foul/rowY/roll declaration orders (56-272), the block-1 roll by ternary or if-only
-// (56), the second roll's test as an if (284), done tested before throw (61): none below the base 56.
-// Trace: GCC_ALLOC_GLOBAL_ORDER=Score_DrawFrame:85,73,327 (rowY before frame, r327 after it) gives retail's
-// s-registers (56 -> 31 lines); left are roll in v1 (retail v0, local-alloc) and cse's rowY + 9 temporary.
-// Equivalence: 1913 random cases (87 skipped), no difference (tools/equiv.py).
 void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s16 y ) {
     s16 rowY;
     s32 pins;
@@ -415,12 +406,7 @@ void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s
             if ( ( game_frameFlags[player][9] & 1 ) && ( game_frameFlags[player][9] & 0x10 ) ) {
                 Draw_Image( 0x85F, x - 1, y );
             }
-            pins = game_firstRolls[player][frame];
-            if ( pins == -1 ) {
-                roll = -2;
-            } else {
-                roll = pins;
-            }
+            roll = game_firstRolls[player][frame] == -1 ? -2 : game_firstRolls[player][frame];
             Menu_DrawImage( Score_RollImage( roll, FALSE ), x + 1, rowY );
         }
         if ( last == 9 && ( throw >= 2 || done ) ) {
@@ -446,11 +432,7 @@ void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s
                 Menu_DrawImage( Score_RollImage( roll, foul ), x + 21, rowY );
             }
             rowY += 9;
-            pins = game_frameScores[player][frame];
-            if ( pins >= 0 ) {
-                pins += score_plateNumbers[player];
-            }
-            Score_DrawNumber( pins, x + 5, rowY );
+            Score_DrawNumber( Score_FrameTotal( player, frame ), x + 5, rowY );
         }
     } else {
         Draw_Image( 0x87E, x, y );
@@ -461,20 +443,13 @@ void Score_DrawFrame( s32 player, u8 frame, u8 last, u8 throw, u8 done, s16 x, s
             }
             Menu_DrawImage( Score_RollImage( game_firstRolls[player][frame], FALSE ), x + 1, rowY );
         }
-        if ( frame < last ) {
+        if ( last > frame ) {
             Menu_DrawImage( Score_RollImage( game_secondRolls[player][frame], TRUE ), x + 11, rowY );
             rowY += 9;
-            pins = game_frameScores[player][frame];
-            if ( pins >= 0 ) {
-                pins += score_plateNumbers[player];
-            }
-            Score_DrawNumber( pins, x, rowY );
+            Score_DrawNumber( Score_FrameTotal( player, frame ), x, rowY );
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/13490", Score_DrawFrame);
-#endif
 
 /*
 ================
