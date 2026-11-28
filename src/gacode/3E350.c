@@ -153,6 +153,15 @@ result.
 // Trace-scored search (tools/gcc_instr/trace_search.py, 23 candidates): a lane local at turnFunc, inputFunc,
 // loop 1 and cameraFunc in all 16 combinations, loop 1 indexed or walked through lane (7 forms): the loop-1 lane
 // load stays local-alloc's (v0) unless lane is set at another site, which then takes a0 too; closest 2 lines.
+// What makes a pseudo global (gcc 2.7.2 local-alloc.c local_alloc, flow.c): reg_basic_block < 0, i.e. it is
+// referenced in two blocks, live at the end of a block (any CODE_LABEL or insn after a jump starts one), live
+// at the function's start or live across a setjmp; or reg_n_deaths != 1 (REG_DEAD and REG_UNUSED notes, as
+// combine and update_equiv_regs' optimize_reg_copy_2 leave them); or its class has one register. Calls don't
+// count. Forcing loop 2's lane load global as well gives it a0 too, so retail's construct is loop 1's only.
+// Retail's final code has no label, jump or second set between the load and the copy into body, so the source
+// needs a block boundary there that disappears after flow, or a second death. Ruled out: separate pointers
+// for each loop, loop 1 in its own block with block-scoped pointers, a while loop, a lane local reset before
+// each loop (loop 1 exact, loop 2's load then a0: 3 lines), indexed &lane->bodies[i] with a lane local (50-65).
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
