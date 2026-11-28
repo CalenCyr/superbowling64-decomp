@@ -38,20 +38,10 @@ cursor flashing, then runs the page gridEd_page (R with up or down picks it) and
 height under the cursor.
 ================
 */
-#ifdef NON_MATCHING
-// NON_MATCHING: register choices only: `resized` and the numZ address in page SIZE, and retail keeps &cont_allHeld
-// in a register across the STEP and ORIGIN tests
-// Permuter clue (1065 -> 960): `resized` reused as the clearing and marking loops' counter instead of i (R30).
-// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): none moves
-// it below its 132 differing lines at the unit's flags.
-// Idiom pass: the permuter's shared flag/counter written out (resized folded into i, one local for both: 775 -> 758 diff
-// lines, still not exact, left out as less readable); a floorGrid_t pointer for game_floorGrids[0] (1403).
-// Equivalence: 924 random cases (76 skipped), no difference (tools/equiv.py).
 void GridEd_Frame( void ) {
     u8 text[40];
     s32 x, z;
-    s32 i;
-    s32 resized;
+    s32 i;      // RULE-EXCEPTION: R30, page SIZE's flag "resized" is i too: retail gives the flag the counter's register and priority (v1)
 
     if ( gridEd_vtx == NULL ) {
         gridEd_page = GRIDEDIT_EXIT;
@@ -145,31 +135,31 @@ void GridEd_Frame( void ) {
 
         case GRIDEDIT_SIZE:
             Txt_DrawString( &game_gfx, 32, 20, "MTX FORM" );
-            resized = FALSE;
+            i = FALSE;
             if ( ( cont_allPressed & U_JPAD ) && !( cont_allHeld & R_TRIG ) && game_floorGrids[0].numZ != 0 ) {
                 game_floorGrids[0].numZ--;
-                resized = TRUE;
+                i = TRUE;
             }
             if ( ( cont_allPressed & D_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 if ( ( game_floorGrids[0].numZ + 1 ) * game_floorGrids[0].numX < GRIDEDIT_POINTS ) {
                     game_floorGrids[0].numZ++;
                 }
-                resized = TRUE;
+                i = TRUE;
             }
             if ( ( cont_allPressed & L_JPAD ) && !( cont_allHeld & R_TRIG ) && game_floorGrids[0].numX > 2 ) {
                 game_floorGrids[0].numX -= 2;
                 if ( !( game_floorGrids[0].numX & 1 ) ) {
                     game_floorGrids[0].numX++;
                 }
-                resized = TRUE;
+                i = TRUE;
             }
             if ( ( cont_allPressed & R_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 if ( ( game_floorGrids[0].numX + 2 ) * game_floorGrids[0].numZ < GRIDEDIT_POINTS ) {
                     game_floorGrids[0].numX += 2;
                 }
-                resized = TRUE;
+                i = TRUE;
             }
-            if ( resized ) {
+            if ( i ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                     game_floorGrids[0].heights[i] = 0;
                 }
@@ -180,16 +170,17 @@ void GridEd_Frame( void ) {
 
         case GRIDEDIT_STEP:
             Txt_DrawString( &game_gfx, 32, 20, "MTX WH" );
-            if ( ( cont_allHeld & ( U_JPAD | R_TRIG ) ) == U_JPAD && game_floorGrids[0].stepZ != 0 ) {
+            // gcc folds each pair of tests into one masked compare through a register holding &cont_allHeld
+            if ( ( cont_allHeld & U_JPAD ) && !( cont_allHeld & R_TRIG ) && game_floorGrids[0].stepZ != 0 ) {
                 game_floorGrids[0].stepZ--;
             }
-            if ( ( cont_allHeld & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
+            if ( ( cont_allHeld & D_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 game_floorGrids[0].stepZ++;
             }
-            if ( ( cont_allHeld & ( L_JPAD | R_TRIG ) ) == L_JPAD && game_floorGrids[0].stepX != 0 ) {
+            if ( ( cont_allHeld & L_JPAD ) && !( cont_allHeld & R_TRIG ) && game_floorGrids[0].stepX != 0 ) {
                 game_floorGrids[0].stepX--;
             }
-            if ( ( cont_allHeld & ( R_JPAD | R_TRIG ) ) == R_JPAD ) {
+            if ( ( cont_allHeld & R_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 game_floorGrids[0].stepX++;
             }
             sprintf( text, "WH=(%d,%d)", game_floorGrids[0].stepX, game_floorGrids[0].stepZ );
@@ -198,16 +189,16 @@ void GridEd_Frame( void ) {
 
         case GRIDEDIT_ORIGIN:
             Txt_DrawString( &game_gfx, 32, 20, "MTX OFS" );
-            if ( ( cont_allHeld & ( U_JPAD | R_TRIG ) ) == U_JPAD ) {
+            if ( ( cont_allHeld & U_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 game_floorGrids[0].originZ--;
             }
-            if ( ( cont_allHeld & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
+            if ( ( cont_allHeld & D_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 game_floorGrids[0].originZ++;
             }
-            if ( ( cont_allHeld & ( L_JPAD | R_TRIG ) ) == L_JPAD ) {
+            if ( ( cont_allHeld & L_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 game_floorGrids[0].originX--;
             }
-            if ( ( cont_allHeld & ( R_JPAD | R_TRIG ) ) == R_JPAD ) {
+            if ( ( cont_allHeld & R_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 game_floorGrids[0].originX++;
             }
             sprintf( text, "OFS=(%d,%d)", game_floorGrids[0].originX, game_floorGrids[0].originZ );
@@ -275,14 +266,14 @@ void GridEd_Frame( void ) {
 
         case GRIDEDIT_HEIGHT:
             Txt_DrawString( &game_gfx, 32, 20, "VTX Y" );
-            if ( ( cont_allHeld & ( U_JPAD | R_TRIG ) ) == U_JPAD ) {
+            if ( ( cont_allHeld & U_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                     if ( gridEd_marked[i] ) {
                         game_floorGrids[0].heights[i]++;
                     }
                 }
             }
-            if ( ( cont_allHeld & ( D_JPAD | R_TRIG ) ) == D_JPAD ) {
+            if ( ( cont_allHeld & D_JPAD ) && !( cont_allHeld & R_TRIG ) ) {
                 for ( i = 0; i < GRIDEDIT_POINTS; i++ ) {
                     if ( gridEd_marked[i] ) {
                         game_floorGrids[0].heights[i]--;
@@ -303,6 +294,3 @@ void GridEd_Frame( void ) {
              game_floorGrids[0].heights[gridEd_cursorX + gridEd_cursorZ * game_floorGrids[0].numX] );
     Txt_DrawString( &game_gfx, 120, 20, text );
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/111A0", GridEd_Frame);
-#endif
