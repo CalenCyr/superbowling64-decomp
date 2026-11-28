@@ -162,6 +162,11 @@ result.
 // needs a block boundary there that disappears after flow, or a second death. Ruled out: separate pointers
 // for each loop, loop 1 in its own block with block-scoped pointers, a while loop, a lane local reset before
 // each loop (loop 1 exact, loop 2's load then a0: 3 lines), indexed &lane->bodies[i] with a lane local (50-65).
+// Trace-scored again: a lane local with the pointers set inside loop 1 from &lane->spots[i]/&lane->bodies[i] (lane
+// stays live in an s-register: 57-59), i <= 10 / 11 > i / &spots[0] spellings (3), every mix of indexed and stepped
+// pointers with both init orders (3 at best). gcc 2.7.2 facts checked: flow starts a block at every CODE_LABEL,
+// jump deletes unreferenced labels (user labels become notes), thread_jumps' redirect deletes orphaned ones, so a
+// boundary must come from a jump removed after flow (combine or jump2); combine does adjust reg_n_deaths.
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
