@@ -1620,49 +1620,6 @@ f32 Snd_Exp2( f32 x ) {
     return 1.0 / SND_EXP2_SERIES( x, x2 );
 }
 
-#ifdef NON_MATCHING
-// NON_MATCHING: registers: the sign extension as an inline helper gives retail's 0x30 frame and its reload of tune->value,
-// and the flag test gives its prologue; retail still copies the digit before the sign test, converts the first tune in
-// $f2 and reads the wave pointer into a0 (into v1 here). Also checked: Snd_SignExtend8 parameter types u8/s8/u16/s16/u32
-// and f32/s16 returns; a Snd_SetTune( tune, digit ) inline (its argument is evaluated before the first conversion,
-// retail evaluates the digit after it). Retail's copy lands the digit in the register that held tune->raw.
-// An inline that assigns its parameter (x &= 0xFF; if ( x & 0x80 ) x -= 0x100;) gives retail's length and the
-// copy, but in both calls (retail copies only the digit); not it either: a nested Snd_Digit inline, (u8)/(s8)
-// casts on the digit, -'0' + digit, a digit local before or after the first conversion, the add's operands swapped.
-// Not it either: an inline assigning x in SEXT8's order (if/else), x = SEXT8( x ), a local copy of x in the inline.
-// Not it either: tune->value = digit + tune->value, tune->raw read in the call (no value local), value = digit
-// before the second call, bank->tunes[i] in place of tune, / 100.0f. Permuter (30 min, 235 -> 200): only noise
-// (a do-while(0) around the loop body, a wave base read into value).
-// Restricted permuter search (perm macros only, 20 min): declaration order, bank initialised or assigned, i
-// s32/s16/u32, value s32/s8/u8/s16/u16, tune and value set in either order, the tune as two statements, one sum or
-// value = value + digit: nothing at or below the base 235.
-// Flags (scratch compiles, -O1, -O3, -fno-inline-functions, 18 -f/-fno- options and their pairs): only
-// -fno-schedule-insns moves it (21 -> 19 differing lines), and it breaks 44 of the unit's matched functions.
-// Idiom pass (the unit's f32 scratch locals): an f32 `part` for both conversions gives retail's $f2 (61 -> 58 diff lines);
-// the unit's pointer-walking idiom does not fit (retail reloads bank->waves[i] at every use); the digit copy remains.
-// Equivalence: 1903 random cases (97 skipped), no difference (tools/equiv.py).
-// Forced decision (scratch cse knobs on the instrumented cc1, with the digit through a nested inline returning
-// c - '0', which makes integrate copy the temporary into the user-variable parameter x): retail's RTL is t = digit - 48,
-// x = t, the sign test on t, both masks on x. Forcing that in cse (test on t, masks kept on x, no swap of the copy
-// in cse2) gives retail's copy, t in v0 and x in v1, and leaves 11 lines: the test reads v1 (local-alloc's
-// optimize_reg_copy_1 moves it onto x), the tune->value reload is scheduled before the conversion, the wave pointer is
-// in v1. Naturally cse makes x canonical (it lives past the block) and swaps the copy, and optimize_reg_copy_1 moves
-// the test onto x and ties the two; retail's copy and test on t survive only if something between the copy
-// and the test sets t or x or ends the scan (a jump, a label, a loop note). Not it: the helper as early return, if/else
-// returns, reversed or OR/XOR forms; the digit through Snd_Digit/Snd_TuneDigit (s32/u8/u32, by pointer) with
-// parameter types u8..s32; the assigning helper in the second call only, or with tune->raw passed (it loses the reload
-// and the giv); tune->value += Snd_SignExtend8( ... ) without part.
-/*
-================
-Snd_SignExtend8
-
-Returns the low byte of x as a signed number.
-================
-*/
-static inline s32 Snd_SignExtend8( s32 x ) {
-    return SEXT8( x );
-}
-
 /*
 ================
 Snd_RelocateWaveBank
@@ -1675,9 +1632,10 @@ is 0xFF, and the loop and ADPCM book by the bank's address. Writes back the data
 void Snd_RelocateWaveBank( void *data, s32 romBase ) {
     waveBank_t *bank;
     s32 i;
-    s32 value;
+    u8 byte;            /* the signed byte being converted: the tune's hundredths, then its digit */
     waveTune_t *tune;
-    f32 part;           /* one semitone term at a time; retail converts both in $f2 */
+    f32 part;           /* one semitone term at a time */
+    u8 *base;
 
     bank = data;
     if ( bank->flags & WAVEBANK_RELOCATED ) {
@@ -1688,14 +1646,17 @@ void Snd_RelocateWaveBank( void *data, s32 romBase ) {
     Snd_RelocateTable( (s32 *)bank->waves, bank, bank->numWaves );
     for ( i = 0; i < bank->numWaves; i++ ) {
         tune = &bank->tunes[i];
-        value = tune->raw;
-        part = Snd_SignExtend8( value );
+        byte = tune->raw;
+        part = SEXT8( byte );
         tune->value = part / 100.0;
-        part = Snd_SignExtend8( bank->tuneDigits[i] - '0' );
-        tune->value += part;       // RULE-EXCEPTION: R30, part is one scratch local in the same role in sequence
+        byte = bank->tuneDigits[i] - '0';  // RULE-EXCEPTION: R30, byte and part are reused for the digit; separate locals change the registers
+        part = SEXT8( byte );
+        tune->value += part;
         if ( bank->waves[i]->flags == 0 ) {
-            if ( ( (u32)bank->waves[i]->base & 0xFF000000 ) != 0xFF000000 ) {
-                bank->waves[i]->base += romBase;
+            base = bank->waves[i]->base;
+            if ( ( (u32)base & 0xFF000000 ) != 0xFF000000 ) {
+                base += romBase;
+                bank->waves[i]->base = base;
             }
             bank->waves[i]->flags = 1;
             if ( bank->waves[i]->waveInfo.adpcmWave.loop != NULL ) {
@@ -1710,9 +1671,6 @@ void Snd_RelocateWaveBank( void *data, s32 romBase ) {
     }
     osWritebackDCacheAll();
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/166B0", Snd_RelocateWaveBank);
-#endif
 
 /*
 ================
