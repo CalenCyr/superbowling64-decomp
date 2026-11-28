@@ -175,6 +175,9 @@ result.
 // source: optimize_reg_copy_2 needs a copy back into the lane pseudo; flow's REG_UNUSED needs a dead set kept by a
 // side effect; flow's unreachable-loop deletion (the only label left behind without a jump) needs a dead loop
 // between the load and the copy, and that also breaks cse of the body load (5).
+// No sibling: GA_PlaceBody has this one caller and no other code walks a lane's spots/bodies with two pointers.
+// The game's own loop style, `for ( i = 0, spot = ..., body = ...; ...; i++, spot++, body++ )`, in every init
+// and increment order: 9-57. -g/-ggdb/-gstabs: the load stays in v0 (and -g adds nops retail lacks).
 s32 GA_RunPlayer( s32 player ) {
     gaPlayer_t *pl = &ga_players[player];
     s32 port;
